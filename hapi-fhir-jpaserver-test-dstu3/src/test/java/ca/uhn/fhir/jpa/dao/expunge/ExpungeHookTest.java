@@ -1,13 +1,16 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.dstu3.model.Meta;
@@ -18,12 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Autowired
@@ -32,17 +33,15 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	private ExpungeService myExpungeService;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	PointcutLatch myEverythingLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING);
 	PointcutLatch myExpungeResourceLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE);
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, myEverythingLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myExpungeResourceLatch);
 	}
@@ -51,9 +50,9 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	public void after() {
 		assertTrue(myInterceptorService.unregisterInterceptor(myEverythingLatch));
 		assertTrue(myInterceptorService.unregisterInterceptor(myExpungeResourceLatch));
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 	}
 
 	@Test
@@ -88,7 +87,10 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		options.setExpungeEverything(true);
 		options.setExpungeDeletedResources(true);
 		options.setExpungeOldVersions(true);
+		// TODO KHS shouldn't this be 1?  Investigate why is it 2?
+		myExpungeResourceLatch.setExpectedCount(2);
 		myPatientDao.expunge(id.toUnqualifiedVersionless(), options, mySrd);
+		myExpungeResourceLatch.awaitExpected();
 		assertPatientGone(id);
 
 		// Create it a second time.
@@ -109,9 +111,9 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	private void assertPatientGone(IIdType theId) {
 		try {
 			myPatientDao.read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("is not known"));
+			assertThat(e.getMessage()).contains("is not known");
 		}
 	}
 
@@ -125,7 +127,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		options.setExpungeDeletedResources(true);
 
 		myExpungeResourceLatch.setExpectedCount(2);
-		myExpungeService.expunge("Patient", new ResourcePersistentId(expungeId.getIdPartAsLong()), options, null);
+		myExpungeService.expunge("Patient", JpaPid.fromId(expungeId.getIdPartAsLong()), options, null);
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
 
 		IIdType hookId = hookParams.get(IIdType.class);

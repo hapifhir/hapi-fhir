@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4633
+title: "JPS server _sort expressions can now include a single chained search expression, such
+   as a search for `Encounter?_sort=patient.name`."

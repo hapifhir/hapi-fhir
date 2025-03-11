@@ -1,15 +1,35 @@
+/*-
+ * #%L
+ * HAPI FHIR Server - SQL Migration
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.util.VersionEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
@@ -21,8 +41,15 @@ public class HapiMigrationEntity {
 	public static final int TYPE_MAX_SIZE = 20;
 	public static final int SCRIPT_MAX_SIZE = 1000;
 	public static final int INSTALLED_BY_MAX_SIZE = 100;
+	public static final int RESULT_MAX_SIZE = 100;
+	public static final int CREATE_TABLE_PID = -1;
+	public static final String INITIAL_RECORD_DESCRIPTION = "<< HAPI FHIR Schema History table created >>";
+	public static final String INITIAL_RECORD_SCRIPT = "HAPI FHIR";
+
 	@Id
-	@SequenceGenerator(name = "SEQ_FLY_HFJ_MIGRATION", sequenceName = "SEQ_FLY_HFJ_MIGRATION")
+	@GenericGenerator(
+			name = "SEQ_FLY_HFJ_MIGRATION",
+			strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_FLY_HFJ_MIGRATION")
 	@Column(name = "INSTALLED_RANK")
 	private Integer myPid;
@@ -53,6 +80,22 @@ public class HapiMigrationEntity {
 
 	@Column(name = "SUCCESS")
 	private Boolean mySuccess;
+
+	@Column(name = "RESULT", length = RESULT_MAX_SIZE)
+	private String myResult;
+
+	public static HapiMigrationEntity tableCreatedRecord() {
+		HapiMigrationEntity retVal = new HapiMigrationEntity();
+		retVal.setPid(CREATE_TABLE_PID);
+		retVal.setDescription(INITIAL_RECORD_DESCRIPTION);
+		retVal.setType("TABLE");
+		retVal.setScript(INITIAL_RECORD_SCRIPT);
+		retVal.setInstalledBy(VersionEnum.latestVersion().name());
+		retVal.setInstalledOn(new Date());
+		retVal.setExecutionTime(0);
+		retVal.setSuccess(true);
+		return retVal;
+	}
 
 	public Integer getPid() {
 		return myPid;
@@ -156,6 +199,7 @@ public class HapiMigrationEntity {
 			entity.setInstalledOn(rs.getDate(8));
 			entity.setExecutionTime(rs.getInt(9));
 			entity.setSuccess(rs.getBoolean(10));
+			entity.setResult(rs.getString(11));
 			return entity;
 		};
 	}
@@ -173,9 +217,22 @@ public class HapiMigrationEntity {
 				ps.setInt(6, getChecksum());
 			}
 			ps.setString(7, getInstalledBy());
-			ps.setDate(8, getInstalledOn() != null ? new java.sql.Date(getInstalledOn().getTime()) : null);
+			ps.setDate(
+					8,
+					getInstalledOn() != null
+							? new java.sql.Date(getInstalledOn().getTime())
+							: null);
 			ps.setInt(9, getExecutionTime());
 			ps.setBoolean(10, getSuccess());
+			ps.setString(11, getResult());
 		};
+	}
+
+	public String getResult() {
+		return myResult;
+	}
+
+	public void setResult(String theResult) {
+		myResult = theResult;
 	}
 }

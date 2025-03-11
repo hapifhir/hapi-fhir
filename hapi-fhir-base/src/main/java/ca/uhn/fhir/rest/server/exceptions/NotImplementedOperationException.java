@@ -1,15 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +17,16 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider currently lacks the
  * ability to fullfill the request.
- * 
+ *
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
@@ -46,7 +44,7 @@ public class NotImplementedOperationException extends BaseServerResponseExceptio
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 * @param theOperationOutcome
@@ -55,5 +53,4 @@ public class NotImplementedOperationException extends BaseServerResponseExceptio
 	public NotImplementedOperationException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 }

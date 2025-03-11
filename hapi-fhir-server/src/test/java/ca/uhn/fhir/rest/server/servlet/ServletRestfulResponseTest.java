@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.servlet;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +46,7 @@ public class ServletRestfulResponseTest {
 		response.addHeader("Authorization", "Bearer");
 		response.addHeader("Cache-Control", "no-cache, no-store");
 
-		response.getResponseWriter(200, "Status", "text/plain", "UTF-8", false);
+		response.getResponseWriter(200, "text/plain", "UTF-8", false);
 
 		final InOrder orderVerifier = Mockito.inOrder(servletResponse);
 		orderVerifier.verify(servletResponse).setHeader(eq("Authorization"), eq("Basic"));

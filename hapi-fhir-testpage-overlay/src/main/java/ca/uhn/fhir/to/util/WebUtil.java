@@ -1,5 +1,3 @@
-package ca.uhn.fhir.to.util;
-
 /*
  * #%L
  * Smile CDR - CDR
@@ -9,9 +7,10 @@ package ca.uhn.fhir.to.util;
  * All rights reserved.
  * #L%
  */
+package ca.uhn.fhir.to.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
@@ -21,7 +20,7 @@ import java.util.Properties;
 
 public class WebUtil {
 	public static final String BOOTSTRAP_ID = "bootstrap";
-	public static final String BOOTSTRAP_PKG = "org.webjars.npm";
+	public static final String BOOTSTRAP_PKG = "org.webjars";
 	public static final String JQUERY_ID = "jquery";
 	public static final String JQUERY_PKG = "org.webjars.bower";
 
@@ -41,8 +40,15 @@ public class WebUtil {
 		addWebjarWithVersion(theRegistry, name, version);
 	}
 
-	public static ResourceHandlerRegistration addWebjarWithVersion(ResourceHandlerRegistry theRegistry, String name, String version) {
-		return theRegistry.addResourceHandler("/resources/" + name + "/**").addResourceLocations("classpath:/META-INF/resources/webjars/" + name + "/" + version + "/");
+	public static ResourceHandlerRegistration addWebjarWithVersion(
+			ResourceHandlerRegistry theRegistry, String name, String version) {
+		return theRegistry
+				.addResourceHandler("/resources/" + name + "/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/" + name + "/" + version + "/");
+	}
+
+	public static void webJarAddAceBuilds(ResourceHandlerRegistry theRegistry) {
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "ace-builds");
 	}
 
 	public static void webJarAddAwesomeCheckbox(ResourceHandlerRegistry theRegistry) {
@@ -78,7 +84,6 @@ public class WebUtil {
 	}
 
 	public static void webJarAddPopperJs(ResourceHandlerRegistry theRegistry) {
-		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "popper.js");
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars", "popper.js");
 	}
-
 }

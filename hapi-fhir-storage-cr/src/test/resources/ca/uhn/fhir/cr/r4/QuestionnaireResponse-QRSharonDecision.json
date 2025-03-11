@@ -1,0 +1,104 @@
+{
+	"resourceType": "QuestionnaireResponse",
+	"id": "QRSharonDecision",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2021-12-28T18:10:32.808+00:00",
+		"source": "#R7Wf0emvrt2bSkbQ",
+		"profile": [
+			"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire|2.7",
+			"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablequestionnaire"
+		],
+		"tag": [
+			{
+				"code": "lformsVersion: 25.1.3"
+			}
+		]
+	},
+	"questionnaire": "http://fhir.org/guide/cqf/cds4cpm",
+	"status": "completed",
+	"subject": {
+		"reference": "Patient/sharondecision",
+		"display": "Sharon Decision"
+	},
+	"authored": "2021-12-28T11:10:32-07:00",
+	"item": [
+		{
+			"linkId": "1",
+			"text": "My Pain Location: Weâ€™d like to ask you a few questions about your pain and how it is affecting your life. Please describe the location(s) of any pain you have had in the past 7 days. Please select only one pain type per location.",
+			"item": [
+				{
+					"linkId": "1.1",
+					"text": "Head: What type of HEAD pain?",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://snomed.info/sct",
+								"code": "55145008",
+								"display": "Stabbing"
+							}
+						}
+					]
+				},
+				{
+					"linkId": "1.6",
+					"text": "Lower Back: What type of LOWER BACK pain?",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://snomed.info/sct",
+								"code": "162506004",
+								"display": "Prickling"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"linkId": "2",
+			"text": "My Pain Intensity: Thinking about your overall pain, in the past 7 days, please respond to the questions below:",
+			"item": [
+				{
+					"linkId": "2.1",
+					"text": "How intense was your pain at its worst?",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://loinc.org",
+								"code": "LA6750-9",
+								"display": "Severe"
+							}
+						}
+					]
+				},
+				{
+					"linkId": "2.2",
+					"text": "How intense was your average pain?",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://loinc.org",
+								"code": "LA6750-9",
+								"display": "Severe"
+							}
+						}
+					]
+				},
+				{
+					"linkId": "2.3",
+					"text": "What is your level of pain right now?",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://loinc.org",
+								"code": "LA6750-9",
+								"display": "Severe"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

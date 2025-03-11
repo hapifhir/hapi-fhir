@@ -1,0 +1,161 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "ActivityDefinition/SendMessageActivity",
+      "resource": {
+        "resourceType": "ActivityDefinition",
+        "id": "SendMessageActivity",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-communicationactivity"
+          ]
+        },
+        "kind": "CommunicationRequest",
+        "profile": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-communicationrequest",
+        "intent": "proposal",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+            "valueCode": "publishable"
+          },
+          {
+            "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+            "valueCode": "structured"
+          }
+        ],
+        "url": "http://example.org/ActivityDefinition/SendMessageActivity",
+        "name": "SendMessageActivity",
+        "title": "ActivityDefinition SendMessageActivity",
+        "status": "draft",
+        "experimental": true,
+        "publisher": "Example",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "code": "001",
+                "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+                "display": "World"
+              }
+            ]
+          }
+        ],
+        "version": "0.1.0",
+        "description": "Example Activity Definition for a recommendation to send a message",
+        "code": {
+          "coding": [
+            {
+              "code": "send-message",
+              "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type",
+              "display": "Send a message"
+            }
+          ]
+        },
+        "doNotPerform": false,
+        "dynamicValue": [
+          {
+            "path": "payload[0].contentString",
+            "expression": {
+              "language": "text/fhirpath",
+              "expression": "'Greeting: Hello! ' + %subject.name.given.first() + ' Message: Example Activity Definition for a recommendation to send a message Practitioner: ' + %practitioner.name.given.first()"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ActivityDefinition/SendMessageActivity"
+      }
+    },
+    {
+      "fullUrl": "PlanDefinition/DischargeInstructionsPlan",
+      "resource": {
+        "resourceType": "PlanDefinition",
+        "id": "DischargeInstructionsPlan",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computableplandefinition"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+            "valueCode": "publishable"
+          },
+          {
+            "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+            "valueCode": "structured"
+          }
+        ],
+        "url": "http://example.org/PlanDefinition/DischargeInstructionsPlan",
+        "name": "DischargeInstructionsPlan",
+        "title": "PlanDefinition DischargeInstructionsPlan",
+        "status": "draft",
+        "experimental": true,
+        "publisher": "Example",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "code": "001",
+                "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+                "display": "World"
+              }
+            ]
+          }
+        ],
+        "version": "0.1.0",
+        "description": "Provide patient discharge instructions",
+        "type": {
+          "coding": [
+            {
+              "code": "clinical-protocol",
+              "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+              "display": "Clinical Protocol"
+            }
+          ]
+        },
+        "action": [
+          {
+            "title": "Send message with discharge instructions",
+            "code": [
+              {
+                "coding": [
+                  {
+                    "code": "provide-counseling",
+                    "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-common-process",
+                    "display": "Provide Counseling"
+                  }
+                ]
+              }
+            ],
+            "type": {
+              "coding": [
+                {
+                  "code": "create",
+                  "system": "http://terminology.hl7.org/CodeSystem/action-type"
+                }
+              ]
+            },
+            "dynamicValue": [
+              {
+                "path": "payload[0].contentString",
+                "expression": {
+                  "language": "text/fhirpath",
+                  "expression": "'Provide patient discharge instructions for ' + %subject.name.given.first()"
+                }
+              }
+            ],
+            "definitionCanonical": "http://example.org/ActivityDefinition/SendMessageActivity"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "PlanDefinition/DischargeInstructionsPlan"
+      }
+    }
+  ]
+}

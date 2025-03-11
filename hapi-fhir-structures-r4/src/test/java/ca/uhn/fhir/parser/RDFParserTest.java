@@ -22,29 +22,36 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.test.BaseTest;
-import fr.inria.lille.shexjava.GlobalFactory;
-import fr.inria.lille.shexjava.schema.Label;
-import fr.inria.lille.shexjava.schema.ShexSchema;
-import fr.inria.lille.shexjava.schema.parsing.GenParser;
-import fr.inria.lille.shexjava.validation.RecursiveValidation;
-import fr.inria.lille.shexjava.validation.ValidationAlgorithm;
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.RDFTerm;
-import org.apache.commons.rdf.rdf4j.RDF4J;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
+
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.Lang;
+
+import org.apache.jena.shex.Shex;
+import org.apache.jena.shex.ShexReport;
+import org.apache.jena.shex.ShexSchema;
+import org.apache.jena.shex.ShexValidator;
+import org.apache.jena.shex.ShapeMap;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
-import org.junit.jupiter.api.AfterAll;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,12 +59,13 @@ import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RDFParserTest extends BaseTest {
 
@@ -66,12 +74,12 @@ public class RDFParserTest extends BaseTest {
 	public static final String FHIR_SHAPE_PREFIX = "http://hl7.org/fhir/shape/";
 	private static final FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RDFParserTest.class);
-	private static ShexSchema fhirSchema = null;
+	private static ShexSchema fhirShexSchema = null;
 
 	@BeforeAll
 	static void parseShExSchema() throws Exception {
 		Path schemaFile = Paths.get("target", "test-classes", "rdf-validation", "fhir-r4.shex");
-		fhirSchema = GenParser.parseSchema(schemaFile, Collections.emptyList());
+		fhirShexSchema = Shex.readSchema(schemaFile.toUri().toString());
 	}
 
 	/**
@@ -88,6 +96,7 @@ public class RDFParserTest extends BaseTest {
 	 */
 	@ParameterizedTest
 	@MethodSource("getInputFiles")
+	@Execution(ExecutionMode.CONCURRENT)
 	public void testRDFRoundTrip(String referenceFilePath) throws IOException {
 		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/")+1);
 		IBaseResource referenceResource = parseJson(new FileInputStream(referenceFilePath));
@@ -110,7 +119,7 @@ public class RDFParserTest extends BaseTest {
 					+ "\nttl: " + turtleString
 					+ "\nexp: " + referenceJson);
 			else
-				assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
+				assertThat(viaTurtleJson).as(failMessage + "\nttl: " + turtleString).isEqualTo(referenceJson);
 		}
 	}
 
@@ -162,55 +171,66 @@ public class RDFParserTest extends BaseTest {
 
 	public void validateRdf(String rdfContent, String referenceFileName, IBaseResource referenceResource) throws IOException {
 		String baseIRI = "http://a.example/shex/";
-		RDF4J factory = new RDF4J();
-		GlobalFactory.RDFFactory = factory; //set the global factory used in shexjava
-		Model data = Rio.parse(new StringReader(rdfContent), baseIRI, RDFFormat.TURTLE);
-		FixedShapeMapEntry fixedMapEntry = new FixedShapeMapEntry(factory, data, referenceResource.fhirType(), baseIRI);
-		Graph dataGraph = factory.asGraph(data); // create the graph
-		ValidationAlgorithm validation = new RecursiveValidation(fhirSchema, dataGraph);
-		validation.validate(fixedMapEntry.node, fixedMapEntry.shape);
-		boolean result = validation.getTyping().isConformant(fixedMapEntry.node, fixedMapEntry.shape);
-		assertTrue(result,
-			   referenceFileName + ": failed to validate " + fixedMapEntry
-			   + "\n" + referenceFileName
-			   + "\n" + rdfContent
-			   );
+		Model model = ModelFactory.createDefaultModel();
+		RDFDataMgr.read(model, new StringReader(rdfContent), baseIRI, Lang.TURTLE);
+		Graph modelAsGraph = model.getGraph();
+		FixedShapeMapEntry fixedMapEntry = new FixedShapeMapEntry(model, referenceResource.fhirType());
+		ShexReport report = ShexValidator.get().validate(modelAsGraph, fhirShexSchema, fixedMapEntry.getShapeMap());
+		boolean result = report.conforms();
+		assertThat(result).as(referenceFileName + ": failed to validate " + fixedMapEntry
+			+ "\n" + referenceFileName
+			+ "\n" + rdfContent).isTrue();
 	}
 
-	// Shape Expressions functions
-	class FixedShapeMapEntry {
-		RDFTerm node;
-		Label shape;
+	static class FixedShapeMapEntry {
+		private Node focusNode = null;
+		private final Node shapeRefNode;
+		private final ShapeMap shapeMap;
 
-		FixedShapeMapEntry(RDF4J factory, Model data, String resourceType, String baseIRI) {
-			String rootSubjectIri = null;
-			// StmtIterator i = data.listStatements();
-			for (org.eclipse.rdf4j.model.Resource resourceStream : data.subjects()) {
-//				if (resourceStream instanceof SimpleIRI) {
-					Model filteredModel = data.filter(resourceStream, factory.getValueFactory().createIRI(NODE_ROLE_IRI), factory.getValueFactory().createIRI(TREE_ROOT_IRI), (org.eclipse.rdf4j.model.Resource)null);
-					if (filteredModel != null && filteredModel.subjects().size() == 1) {
-						Optional<org.eclipse.rdf4j.model.Resource> rootResource = filteredModel.subjects().stream().findFirst();
-						if (rootResource.isPresent()) {
-							rootSubjectIri = rootResource.get().stringValue();
-							break;
-						}
+		FixedShapeMapEntry(Model model, String resourceType) {
 
-					}
-//				}
+			// Identify the main subject (root node) of the RDF model;
+			for (org.apache.jena.rdf.model.Resource resource : model.listSubjects().toList()) {
+				if (model.contains(resource, model.createProperty(NODE_ROLE_IRI), model.createResource(TREE_ROOT_IRI))) {
+					focusNode = resource.asNode();
+					break;
+				}
 			}
 
-			// choose focus node and shapelabel
-			this.node = rootSubjectIri.indexOf(":") == -1
-				? factory.createBlankNode(rootSubjectIri)
-			 	: factory.createIRI(rootSubjectIri);
-			Label shapeLabel = new Label(factory.createIRI(FHIR_SHAPE_PREFIX + resourceType));
-//			this.node = focusNode;
-			this.shape = shapeLabel;
+			this.shapeRefNode = NodeFactory.createURI(FHIR_SHAPE_PREFIX + resourceType);
+
+			this.shapeMap = ShapeMap.newBuilder().add(this.focusNode, this.shapeRefNode).build();
+		}
+
+		public ShapeMap getShapeMap() {
+			return shapeMap;
 		}
 
 		public String toString() {
-			return "<" + node.toString() + ">@" + shape.toPrettyString();
+			return "<" + focusNode.toString() + ">@" + shapeRefNode.toString();
 		}
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("contained ");
+		assertThat(output).doesNotContain("id ");
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output).doesNotContain("contained ");
+		assertThat(output).doesNotContain("id ");
 	}
 
 }

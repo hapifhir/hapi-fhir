@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,14 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.IJobInstance;
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
+import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -32,11 +32,16 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JobInstance extends JobInstanceStartRequest implements IModelJson, IJobInstance {
+public class JobInstance implements IModelJson, IJobInstance {
+
+	@JsonProperty(value = "jobDefinitionId")
+	private String myJobDefinitionId;
+
+	@JsonProperty(value = "parameters")
+	private String myParameters;
 
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
@@ -73,6 +78,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
 
+	@JsonProperty(value = "updateTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myUpdateTime;
+
 	@JsonProperty(value = "combinedRecordsProcessed")
 	private Integer myCombinedRecordsProcessed;
 
@@ -87,20 +97,30 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 
 	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
 	private double myProgress;
+
 	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_ONLY)
 	private String myCurrentGatedStepId;
+
 	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myErrorMessage;
+
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
+
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
 
-	@JsonIgnore
-	private JobDefinition<?> myJobDefinition;
+	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessages;
+
+	@JsonProperty(value = "triggeringUsername", access = JsonProperty.Access.READ_ONLY)
+	private String myTriggeringUsername;
+
+	@JsonProperty(value = "triggeringClientId", access = JsonProperty.Access.READ_ONLY)
+	private String myTriggeringClientId;
 
 	/**
 	 * Constructor
@@ -113,13 +133,15 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 * Copy constructor
 	 */
 	public JobInstance(JobInstance theJobInstance) {
-		super(theJobInstance);
+		setJobDefinitionId(theJobInstance.getJobDefinitionId());
+		setParameters(theJobInstance.getParameters());
 		setCancelled(theJobInstance.isCancelled());
 		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
 		setCreateTime(theJobInstance.getCreateTime());
 		setEndTime(theJobInstance.getEndTime());
+		setUpdateTime(theJobInstance.getUpdateTime());
 		setErrorCount(theJobInstance.getErrorCount());
 		setErrorMessage(theJobInstance.getErrorMessage());
 		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
@@ -132,7 +154,44 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
-		myJobDefinition = theJobInstance.getJobDefinition();
+		setWarningMessages(theJobInstance.getWarningMessages());
+		setTriggeringUsername(theJobInstance.getTriggeringUsername());
+		setTriggeringClientId(theJobInstance.getTriggeringClientId());
+	}
+
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
+	}
+
+	public void setJobDefinitionId(String theJobDefinitionId) {
+		myJobDefinitionId = theJobDefinitionId;
+	}
+
+	public String getParameters() {
+		return myParameters;
+	}
+
+	public void setParameters(String theParameters) {
+		myParameters = theParameters;
+	}
+
+	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		if (myParameters == null) {
+			return null;
+		}
+		return JsonUtil.deserialize(myParameters, theType);
+	}
+
+	public void setParameters(IModelJson theParameters) {
+		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
+	}
+
+	public void setUpdateTime(Date theUpdateTime) {
+		myUpdateTime = theUpdateTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
@@ -292,16 +351,18 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return this;
 	}
 
-
-	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
-		myJobDefinition = theJobDefinition;
-		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
-		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
+	public String getWarningMessages() {
+		return myWarningMessages;
 	}
 
-	@Override
-	public JobDefinition<?> getJobDefinition() {
-		return myJobDefinition;
+	public JobInstance setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
+		return this;
+	}
+
+	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
+		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
+		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
 	}
 
 	@Override
@@ -322,38 +383,78 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		myReport = theReport;
 	}
 
+	public String getTriggeringUsername() {
+		return myTriggeringUsername;
+	}
+
+	public JobInstance setTriggeringUsername(String theTriggeringUsername) {
+		myTriggeringUsername = theTriggeringUsername;
+		return this;
+	}
+
+	public String getTriggeringClientId() {
+		return myTriggeringClientId;
+	}
+
+	public JobInstance setTriggeringClientId(String theTriggeringClientId) {
+		myTriggeringClientId = theTriggeringClientId;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
-			.append("instanceId", myInstanceId)
-			.append("status", myStatus)
-			.append("createTime", myCreateTime)
-			.append("startTime", myStartTime)
-			.append("endTime", myEndTime)
-			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
-			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
-			.append("totalElapsedMillis", myTotalElapsedMillis)
-			.append("workChunksPurged", myWorkChunksPurged)
-			.append("progress", myProgress)
-			.append("errorMessage", myErrorMessage)
-			.append("errorCount", myErrorCount)
-			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("record", myReport)
-			.toString();
+				.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
+				.append("instanceId", myInstanceId)
+				.append("status", myStatus)
+				.append("myCancelled", myCancelled)
+				.append("createTime", myCreateTime)
+				.append("startTime", myStartTime)
+				.append("endTime", myEndTime)
+				.append("updateTime", myUpdateTime)
+				.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+				.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+				.append("totalElapsedMillis", myTotalElapsedMillis)
+				.append("workChunksPurged", myWorkChunksPurged)
+				.append("progress", myProgress)
+				.append("errorMessage", myErrorMessage)
+				.append("errorCount", myErrorCount)
+				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+				.append("report", myReport)
+				.append("warningMessages", myWarningMessages)
+				.append("triggeringUsername", myTriggeringUsername)
+				.append("triggeringClientId", myTriggeringClientId)
+				.toString();
 	}
 
 	/**
-	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
+	 * Returns true if the job instance is in:
+	 * {@link StatusEnum#IN_PROGRESS}
+	 * {@link StatusEnum#FINALIZE}
+	 * and is not cancelled
 	 */
 	public boolean isRunning() {
-		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+		if (isCancelled()) {
+			return false;
+		}
+
+		switch (getStatus()) {
+			case IN_PROGRESS:
+			case ERRORED:
+			case FINALIZE:
+				return true;
+			case COMPLETED:
+			case QUEUED:
+			case FAILED:
+			case CANCELLED:
+			default:
+				Logs.getBatchTroubleshootingLog().debug("Status {} is considered \"not running\"", myStatus);
+		}
+		return false;
 	}
 
 	public boolean isFinished() {
-		return myStatus == StatusEnum.COMPLETED ||
-			myStatus == StatusEnum.FAILED ||
-			myStatus == StatusEnum.CANCELLED;
+		return myStatus == StatusEnum.COMPLETED || myStatus == StatusEnum.FAILED || myStatus == StatusEnum.CANCELLED;
 	}
 
 	public boolean hasGatedStep() {
@@ -361,7 +462,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	public boolean isPendingCancellationRequest() {
-		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+		return myCancelled && myStatus.isCancellable();
 	}
 
 	/**

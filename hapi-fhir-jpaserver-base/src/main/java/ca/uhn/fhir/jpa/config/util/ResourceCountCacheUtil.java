@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -26,6 +25,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 public final class ResourceCountCacheUtil {
 	private ResourceCountCacheUtil() {}
+
 	public static ResourceCountCache newResourceCountCache(IFhirSystemDao<?, ?> theSystemDao) {
 		ResourceCountCache retVal = new ResourceCountCache(() -> theSystemDao.getResourceCounts());
 		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);

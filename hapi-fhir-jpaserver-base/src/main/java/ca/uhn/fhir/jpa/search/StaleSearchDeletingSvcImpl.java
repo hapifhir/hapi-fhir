@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,23 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 
@@ -42,27 +45,35 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 // it in BaseConfig. This is so that we can override the definition
 // in Smile.
 //
-public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
+public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
+
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
+		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), getDeadline());
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	/**
+	 * Calculate a deadline to finish before the next scheduled run.
+	 */
+	protected Instant getDeadline() {
+		return Instant.ofEpochMilli(DatabaseSearchCacheSvcImpl.now())
+				// target a 90% duty-cycle to avoid confusing quartz
+				.plus((long) (SEARCH_CLEANUP_JOB_INTERVAL_MILLIS * 0.90), ChronoUnit.MILLIS);
+	}
+
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
+		theSchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
@@ -78,7 +89,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
-		if (!myDaoConfig.isSchedulingDisabled() && myDaoConfig.isEnableTaskStaleSearchCleanup()) {
+		if (!myStorageSettings.isSchedulingDisabled() && myStorageSettings.isEnableTaskStaleSearchCleanup()) {
 			pollForStaleSearchesAndDeleteThem();
 		}
 	}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -15,8 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourceProviderDstu3Test {
 
@@ -33,7 +34,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithDisplayLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -48,15 +49,15 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
+
 		assertEquals("display", respParam.getParameter().get(0).getName());
 		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
+
 		assertEquals("abstract", respParam.getParameter().get(1).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
 
 		//-- designationList
-		assertEquals(2, designationList.size());
+		assertThat(designationList).hasSize(2);
 		
 		// 1. de-AT:Systolic blood pressure 12 hour minimum
 		ParametersParameterComponent designation = designationList.get(0);
@@ -77,7 +78,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithNonExistLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -92,15 +93,15 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
+
 		assertEquals("display", respParam.getParameter().get(0).getName());
 		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
+
 		assertEquals("abstract", respParam.getParameter().get(1).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
 
 		//-- designationList
-		assertEquals(1, designationList.size());
+		assertThat(designationList).hasSize(1);
 		
 		// 1. Systolic blood pressure 12 hour minimum (no language)
 		ParametersParameterComponent designation = designationList.get(0);
@@ -113,7 +114,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithoutDisplayLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -127,15 +128,15 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		
 		List<ParametersParameterComponent> parameterList = respParam.getParameter();
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
-		
+
 		assertEquals("display", respParam.getParameter().get(0).getName());
 		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		
+
 		assertEquals("abstract", respParam.getParameter().get(1).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(1).getValue()).getValue());
 
 		//-- designationList
-		assertEquals(3, designationList.size());
+		assertThat(designationList).hasSize(3);
 		
 		// 1. fr-FR:Systolic blood pressure 12 hour minimum
 		ParametersParameterComponent designation = designationList.get(0);

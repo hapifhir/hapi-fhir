@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,11 @@ package ca.uhn.fhir.jpa.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.validation;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.thymeleaf.util.Validate;
-
-import javax.annotation.Nonnull;
 
 public class ValidationSettings {
 
@@ -54,8 +52,10 @@ public class ValidationSettings {
 	 *
 	 * @since 5.1.0
 	 */
-	public void setLocalReferenceValidationDefaultPolicy(@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
-		Validate.notNull(theLocalReferenceValidationDefaultPolicy, "theLocalReferenceValidationDefaultPolicy must not be null");
+	public void setLocalReferenceValidationDefaultPolicy(
+			@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
+		Validate.notNull(
+				theLocalReferenceValidationDefaultPolicy, "theLocalReferenceValidationDefaultPolicy must not be null");
 		myLocalReferenceValidationDefaultPolicy = theLocalReferenceValidationDefaultPolicy;
 	}
 }

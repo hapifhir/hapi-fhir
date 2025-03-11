@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -48,7 +47,9 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 	abstract T newInstance();
 
 	@Override
-	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters) throws InvalidRequestException {
+	public void setValuesAsQueryTokens(
+			FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
+			throws InvalidRequestException {
 		myValues.clear();
 		for (QualifiedParamList nextParam : theParameters) {
 			T nextList = newInstance();

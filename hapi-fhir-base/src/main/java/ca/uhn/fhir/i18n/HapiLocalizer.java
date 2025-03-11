@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.i18n;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -20,28 +39,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-
-
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 /**
  * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
  */
@@ -49,6 +46,7 @@ public class HapiLocalizer {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
 	private static boolean ourFailOnMissingMessage;
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
@@ -149,19 +147,18 @@ public class HapiLocalizer {
 	MessageFormat newMessageFormat(String theFormatString) {
 		StringBuilder pattern = new StringBuilder(theFormatString.trim());
 
-
-		for (int i = 0; i < (pattern.length()-1); i++) {
+		for (int i = 0; i < (pattern.length() - 1); i++) {
 			if (pattern.charAt(i) == '{') {
-				char nextChar = pattern.charAt(i+1);
+				char nextChar = pattern.charAt(i + 1);
 				if (nextChar >= '0' && nextChar <= '9') {
 					continue;
 				}
 
-				pattern.replace(i, i+1, "'{'");
+				pattern.replace(i, i + 1, "'{'");
 				int closeBraceIndex = pattern.indexOf("}", i);
 				if (closeBraceIndex > 0) {
 					i = closeBraceIndex;
-					pattern.replace(i, i+1, "'}'");
+					pattern.replace(i, i + 1, "'}'");
 				}
 			}
 		}
@@ -176,11 +173,11 @@ public class HapiLocalizer {
 		}
 	}
 
-    public Locale getLocale() {
+	public Locale getLocale() {
 		return myLocale;
-    }
+	}
 
-    /**
+	/**
 	 * This <b>global setting</b> causes the localizer to fail if any attempts
 	 * are made to retrieve a key that does not exist. This method is primarily for
 	 * unit tests.
@@ -192,5 +189,4 @@ public class HapiLocalizer {
 	public static String toKey(Class<?> theType, String theKey) {
 		return theType.getName() + '.' + theKey;
 	}
-
 }

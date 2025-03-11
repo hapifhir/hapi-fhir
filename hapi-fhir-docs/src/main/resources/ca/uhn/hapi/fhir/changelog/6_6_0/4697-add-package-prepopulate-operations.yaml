@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4697
+title: "Added R4 support for Questionnaire/$prepopulate, Questionnaire/$package and PlanDefinition/$package operations. These are operations are intended to support extended DaVinci DTR and SDC uses cases."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.step;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.step;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -26,46 +25,59 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
+import org.thymeleaf.util.StringUtils;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
+import java.util.List;
 
-import static ca.uhn.fhir.batch2.config.Batch2Constants.BATCH_START_DATE;
+import static ca.uhn.fhir.batch2.util.Batch2Utils.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters> implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
+public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
+		implements IFirstJobStepWorker<PT, ChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ChunkRangeJson> theDataSink)
+			throws JobExecutionFailedException {
 		PT params = theStepExecutionDetails.getParameters();
 
 		Date start = BATCH_START_DATE;
 		Date end = new Date();
 
-		if (params.getPartitionedUrls().isEmpty()) {
-			ourLog.info("Searching for All Resources from {} to {}", start, end);
-			PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
-			nextRange.setStart(start);
-			nextRange.setEnd(end);
-			theDataSink.accept(nextRange);
-		} else {
-			for (PartitionedUrl nextPartitionedUrl : params.getPartitionedUrls()) {
-				ourLog.info("Searching for [{}]] from {} to {}", nextPartitionedUrl, start, end);
-				PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
-				nextRange.setPartitionedUrl(nextPartitionedUrl);
-				nextRange.setStart(start);
-				nextRange.setEnd(end);
-				theDataSink.accept(nextRange);
-			}
+		List<PartitionedUrl> partitionedUrls = params.getPartitionedUrls();
+
+		if (!partitionedUrls.isEmpty()) {
+			partitionedUrls.forEach(partitionedUrl -> {
+				ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end)
+						.setUrl(partitionedUrl.getUrl())
+						.setPartitionId(partitionedUrl.getRequestPartitionId());
+				sendChunk(chunkRangeJson, theDataSink);
+			});
+			return RunOutcome.SUCCESS;
 		}
 
+		ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end);
+		sendChunk(chunkRangeJson, theDataSink);
 		return RunOutcome.SUCCESS;
 	}
 
+	private void sendChunk(ChunkRangeJson theData, IJobDataSink<ChunkRangeJson> theDataSink) {
+		String url = theData.getUrl();
+		ourLog.trace(
+				"Creating chunks for [{}] from {} to {} for partition {}",
+				!StringUtils.isEmpty(url) ? url : "everything",
+				theData.getStart(),
+				theData.getEnd(),
+				theData.getPartitionId());
+		theDataSink.accept(theData);
+	}
 }

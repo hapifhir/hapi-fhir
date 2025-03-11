@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.pid;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.api.pid;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +31,12 @@ import java.util.List;
 /**
  * An empty resource pid list
  */
-public class EmptyResourcePidList implements IResourcePidList {
+public class EmptyResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return null;
+	}
+
 	@Override
 	public Date getLastDate() {
 		return null;
@@ -50,16 +55,22 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-		throw new ArrayIndexOutOfBoundsException(Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
+		throw new ArrayIndexOutOfBoundsException(
+				Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
 	}
 
 	@Override
-	public List<ResourcePersistentId> getIds() {
+	public List<T> getIds() {
 		return Collections.emptyList();
 	}
 
 	@Override
 	public boolean isEmpty() {
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "[empty]";
 	}
 }

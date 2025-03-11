@@ -1,18 +1,19 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
@@ -27,9 +28,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HapiWorkerContextTest extends BaseTest {
+public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 	FhirContext myCtx = FhirContext.forR4();
 
 	@Test
@@ -57,22 +59,23 @@ public class HapiWorkerContextTest extends BaseTest {
 		// Built-in Codes
 
 		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
-		ValidationOptions options = new ValidationOptions().guessSystem();
+		ValidationOptions options = new ValidationOptions(FhirPublication.fromCode(
+			workerCtx.getVersion().toString())).withGuessSystem();
 		outcome = workerCtx.validateCode(options, "active", vs);
-		assertEquals(true, outcome.isOk(), outcome.getMessage());
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(true);
 
 		outcome = workerCtx.validateCode(options, "active2", vs);
-		assertEquals(false, outcome.isOk(), outcome.getMessage());
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(false);
 		assertEquals("Unknown code[active2] in system[(none)]", outcome.getMessage());
 
 		// PrePopulated codes
 
 		vs.setUrl("http://hl7.org/fhir/us/core/ValueSet/birthsex");
 		outcome = workerCtx.validateCode(options, "F", vs);
-		assertEquals(true, outcome.isOk(), outcome.getMessage());
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(true);
 
 		outcome = workerCtx.validateCode(options, "F2", vs);
-		assertEquals(false, outcome.isOk(), outcome.getMessage());
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(false);
 		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
 
 	}

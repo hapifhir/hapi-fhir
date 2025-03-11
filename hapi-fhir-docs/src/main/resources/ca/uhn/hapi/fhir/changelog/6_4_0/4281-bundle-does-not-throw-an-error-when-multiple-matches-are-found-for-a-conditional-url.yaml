@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4281
+title: "Previously, when creating a bundle, if multiple resources matched the conditional URL provided 
+         in the request, it would process the request using the last resource found as a match. 
+         An error is now thrown when multiple resources are found"

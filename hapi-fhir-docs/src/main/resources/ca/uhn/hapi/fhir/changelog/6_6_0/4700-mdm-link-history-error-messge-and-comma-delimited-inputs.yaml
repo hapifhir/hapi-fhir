@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4700
+title: "When querying $mdm-link-history with no inputs, the error message is mislaeading.  Also, $mdm-link-history cannot handle comma-delimited inputs.
+        Both issues are now fixed."

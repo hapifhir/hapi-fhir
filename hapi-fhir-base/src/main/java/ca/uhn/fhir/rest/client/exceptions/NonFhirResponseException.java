@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.exceptions;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.exceptions;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.exceptions;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -47,7 +46,8 @@ public class NonFhirResponseException extends BaseServerResponseException {
 		super(theStatusCode, theMessage);
 	}
 
-	public static NonFhirResponseException newInstance(int theStatusCode, String theContentType, InputStream theInputStream) {
+	public static NonFhirResponseException newInstance(
+			int theStatusCode, String theContentType, InputStream theInputStream) {
 		return newInstance(theStatusCode, theContentType, new InputStreamReader(theInputStream, Charsets.UTF_8));
 	}
 
@@ -69,13 +69,15 @@ public class NonFhirResponseException extends BaseServerResponseException {
 		if (isBlank(theContentType)) {
 			retVal = new NonFhirResponseException(theStatusCode, "Response contains no Content-Type");
 		} else if (theContentType.contains("text")) {
-			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "' : " + responseBody);
+			retVal = new NonFhirResponseException(
+					theStatusCode,
+					"Response contains non FHIR Content-Type '" + theContentType + "' : " + responseBody);
 		} else {
-			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "'");
+			retVal = new NonFhirResponseException(
+					theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "'");
 		}
 
 		retVal.setResponseBody(responseBody);
 		return retVal;
 	}
-
 }

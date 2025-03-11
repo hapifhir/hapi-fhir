@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4758
+title: "When performing FHIR resource searches, the resource ID fetch size has been reduced. This 
+   should improve the memory impact of performing searches which return very large numbers of resources."

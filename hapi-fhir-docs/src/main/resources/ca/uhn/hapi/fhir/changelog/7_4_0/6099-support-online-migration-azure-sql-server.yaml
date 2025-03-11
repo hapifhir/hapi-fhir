@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 6099
+backport: 7.0.3,7.2.2
+title: "Database migrations that add or drop an index no longer lock tables when running on Azure Sql Server."

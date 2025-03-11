@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,8 +35,8 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemVersionedTest.class);
-	private long parentChildCs1Id;
-	private long parentChildCs2Id;
+	private JpaPid parentChildCs1Id;
+	private JpaPid parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional
@@ -89,11 +91,11 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 
 	@Test
 	public void testLookupOnExternalCodeMultiVersion() {
-		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
-		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
+		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
+		ResourceProviderDstu3ValueSetVersionedTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
 
 		// First test with no version specified (should return from last version created)
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -114,7 +116,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -136,7 +138,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version 1 specified.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -158,7 +160,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -181,7 +183,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version 2 specified.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -203,7 +205,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -229,7 +231,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
 		// First test with no version specified (should return from last version created)
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -250,7 +252,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version 1 specified.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -272,7 +274,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version 2 specified
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -297,7 +299,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistentVersion() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -305,7 +307,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 				.andParameter("system", new UriType("http://acme.org"))
 				.andParameter("version", new StringType("3"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Lookup failed as expected");
 		}
@@ -314,7 +316,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testLookupOperationByCoding() {
 		// First test with no version specified (should return from last version created)
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -327,14 +329,14 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version set to 1
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -347,14 +349,14 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// Test with version set to 2
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -367,7 +369,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -378,7 +380,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
 		// First test with no version specified (should return the one and only version defined).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -397,7 +399,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("No", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 
 		// Repeat with version specified.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -420,7 +422,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodes_Subsumes() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -432,12 +434,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -450,12 +452,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -468,7 +470,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -477,7 +479,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodes_Subsumedby() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -489,12 +491,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -507,12 +509,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -525,7 +527,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -533,7 +535,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodes_Disjoint() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -545,12 +547,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -563,12 +565,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -581,7 +583,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -590,14 +592,14 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodings_MismatchedCsVersions() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named(JpaConstants.OPERATION_SUBSUMES)
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA").setVersion("1"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(904) + "Unable to test subsumption across different code system versions", e.getMessage());
 		}
@@ -607,7 +609,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodings_Subsumes() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -618,12 +620,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -634,12 +636,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -650,7 +652,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumes", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -660,7 +662,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodings_Subsumedby() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -671,12 +673,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -687,12 +689,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		 resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2.
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -703,7 +705,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("subsumed-by", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -712,7 +714,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testSubsumesOnCodings_Disjoint() {
 		// First test with no version specified (should return result for last version created).
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -723,12 +725,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 1
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -739,12 +741,12 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
 		// Test with version set to 2
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
@@ -755,7 +757,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals("not-subsumed", ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -764,11 +766,11 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@Test
 	public void testUpdateCodeSystemById() throws IOException {
 
-		CodeSystem initialCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		HttpPut putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs1Id);
+		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs1Id);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {
@@ -777,14 +779,14 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			IOUtils.closeQuietly(resp);
 		}
 
-		CodeSystem updatedCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
 
-		initialCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs2Id);
+		putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs2Id);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
@@ -793,7 +795,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			IOUtils.closeQuietly(resp);
 		}
 
-		updatedCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
 	}
 

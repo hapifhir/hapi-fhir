@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs.customtype;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs.customtype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs.customtype;
 
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -29,7 +28,7 @@ import org.hl7.fhir.dstu3.model.BackboneElement;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.StringType;
 
-//START SNIPPET: resource
+// START SNIPPET: resource
 @ResourceDef(name = "Patient")
 public class CustomCompositeExtension extends Patient {
 
@@ -39,7 +38,7 @@ public class CustomCompositeExtension extends Patient {
 	 * A custom extension
 	 */
 	@Child(name = "foo")
-	@Extension(url="http://acme.org/fooParent", definedLocally = false, isModifier = false)
+	@Extension(url = "http://acme.org/fooParent", definedLocally = false, isModifier = false)
 	protected FooParentExtension fooParentExtension;
 
 	public FooParentExtension getFooParentExtension() {
@@ -96,8 +95,6 @@ public class CustomCompositeExtension extends Patient {
 		public void setChildB(StringType theChildB) {
 			myChildB = theChildB;
 		}
-
 	}
-
 }
-//END SNIPPET: resource
+// END SNIPPET: resource

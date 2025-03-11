@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -21,11 +20,9 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SearchParameterMapTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -82,12 +79,12 @@ class SearchParameterMapTest {
 		map.add("code", qualifiedTokenParam);
 		map.add("code", unqualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.get("code");
-		assertThat(unqualifiedAnds, hasSize(1));
+		assertThat(unqualifiedAnds).hasSize(1);
 
 
 	}
@@ -105,12 +102,12 @@ class SearchParameterMapTest {
 		map.add("code", unqualifiedTokenParam);
 		map.add("code", qualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", (String) null);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> qualifiedAnds = map.get("code");
-		assertThat(qualifiedAnds, hasSize(1));
+		assertThat(qualifiedAnds).hasSize(1);
 	}
 
 	@Test
@@ -123,12 +120,12 @@ class SearchParameterMapTest {
 
 		map.add("code", qualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
-		assertThat(andList, hasSize(1));
+		assertThat(andList).hasSize(1);
 		List<IQueryParameterType> orList = andList.get(0);
-		assertThat(orList, hasSize(2));
+		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.remove("code");
-		assertThat(unqualifiedAnds, is(nullValue()));
+		assertNull(unqualifiedAnds);
 	}
 
 	@Test
@@ -158,31 +155,29 @@ class SearchParameterMapTest {
 		SearchParameterMap copy = orig.clone();
 
 		// verify that they are not the same
-		Assertions.assertNotEquals(orig, copy);
+		assertThat(copy).isNotEqualTo(orig);
 
 		// ... but that they are equal
-		Assertions.assertEquals(orig.toNormalizedQueryString(null),
-			copy.toNormalizedQueryString(null));
-		Assertions.assertEquals(orig.getOffset(), copy.getOffset());
-		Assertions.assertEquals(orig.getLoadSynchronousUpTo(), copy.getLoadSynchronousUpTo());
-		Assertions.assertEquals(orig.isLoadSynchronous(), copy.isLoadSynchronous());
-		Assertions.assertEquals(orig.getNearDistanceParam(), copy.getNearDistanceParam());
-		Assertions.assertEquals(orig.getCount(), copy.getCount());
-		Assertions.assertEquals(orig.getLastNMax(), copy.getLastNMax());
-		Assertions.assertEquals(orig.isLastN(), copy.isLastN());
-		Assertions.assertEquals(orig.isDeleteExpunge(), copy.isDeleteExpunge());
-		Assertions.assertEquals(orig.getIncludes(), copy.getIncludes());
-		Assertions.assertEquals(orig.getSearchTotalMode(), copy.getSearchTotalMode());
-		Assertions.assertEquals(orig.getLastUpdated(), copy.getLastUpdated());
-		Assertions.assertEquals(orig.getSearchContainedMode(), copy.getSearchContainedMode());
-		Assertions.assertEquals(orig.getEverythingMode(), copy.getEverythingMode());
-		Assertions.assertEquals(orig.getSort(), copy.getSort());
-		Assertions.assertEquals(orig.get("something"), copy.get("something"));
+		assertEquals(orig.toNormalizedQueryString(null), copy.toNormalizedQueryString(null));
+		assertEquals(orig.getOffset(), copy.getOffset());
+		assertEquals(orig.getLoadSynchronousUpTo(), copy.getLoadSynchronousUpTo());
+		assertEquals(orig.isLoadSynchronous(), copy.isLoadSynchronous());
+		assertEquals(orig.getNearDistanceParam(), copy.getNearDistanceParam());
+		assertEquals(orig.getCount(), copy.getCount());
+		assertEquals(orig.getLastNMax(), copy.getLastNMax());
+		assertEquals(orig.isLastN(), copy.isLastN());
+		assertEquals(orig.isDeleteExpunge(), copy.isDeleteExpunge());
+		assertEquals(orig.getIncludes(), copy.getIncludes());
+		assertEquals(orig.getSearchTotalMode(), copy.getSearchTotalMode());
+		assertEquals(orig.getLastUpdated(), copy.getLastUpdated());
+		assertEquals(orig.getSearchContainedMode(), copy.getSearchContainedMode());
+		assertEquals(orig.getEverythingMode(), copy.getEverythingMode());
+		assertEquals(orig.getSort(), copy.getSort());
+		assertEquals(orig.get("something"), copy.get("something"));
 
 		// verify changing one does not change the other
 		orig.setOffset(100);
-		Assertions.assertNotEquals(orig.toNormalizedQueryString(null),
-			copy.toNormalizedQueryString(null));
+		assertThat(copy.toNormalizedQueryString(null)).isNotEqualTo(orig.toNormalizedQueryString(null));
 	}
 
 	@Test
@@ -197,16 +192,14 @@ class SearchParameterMapTest {
 		SearchParameterMap clone = orig.clone();
 
 		// verify
-		Assertions.assertEquals(orig.size(), clone.size());
-		Assertions.assertEquals(orig.get("string"), clone.get("string"));
-		Assertions.assertEquals(orig.get("datetime"), clone.get("datetime"));
-		Assertions.assertEquals(orig.get("int"), clone.get("int"));
+		assertEquals(orig.size(), clone.size());
+		assertEquals(orig.get("string"), clone.get("string"));
+		assertEquals(orig.get("datetime"), clone.get("datetime"));
+		assertEquals(orig.get("int"), clone.get("int"));
 	}
-
 
 	@Test
 	public void testCompareParameters() {
-
 		// Missing
 		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
 		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));

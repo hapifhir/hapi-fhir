@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4838
+title: "When performing a resource reindex on a deleted resource, any search index rows will now
+  be deleted. Deleting a resource should generally not leave any such rows behind, but they can
+  be left if the resource is manually deleted using SQL directly against the database and in this
+  case the reindex job will now clean up these unwanted rows."

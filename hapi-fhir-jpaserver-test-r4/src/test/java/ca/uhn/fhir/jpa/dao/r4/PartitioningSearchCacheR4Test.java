@@ -1,20 +1,30 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
@@ -28,21 +38,24 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		IIdType patientId12 = createPatient(withPartition(1), withActiveFalse());
 		IIdType patientId21 = createPatient(withPartition(2), withActiveTrue());
 		IIdType patientId22 = createPatient(withPartition(2), withActiveFalse());
+		logAllResources();
 
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
-			assertEquals(2, outcome.sizeOrThrowNpe());
+			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "))) +
+				"\n\nActual IDs: " + toUnqualifiedVersionlessIdValues(outcome) +
+				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12);
 		}
 
 		// Try from a different partition
@@ -55,11 +68,11 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
 		}
 
 		// Try from the first partition, should be a cache hit this time
@@ -72,11 +85,11 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId21, patientId22);
 		}
 
 	}
@@ -99,11 +112,11 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);
 		}
 
 		// Try from a different partition
@@ -116,11 +129,11 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientId21, patientId22));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientId21, patientId22);
 		}
 
 		// Try from the first partition, should be a cache hit this time
@@ -133,11 +146,11 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
 
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
-			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
+			assertThat(ids).containsExactlyInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2);
 		}
 
 	}

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.ObjectUtils;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass
@@ -58,4 +57,15 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 
 	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
 
+	/**
+	 * This is called when reindexing a resource on the previously existing index rows. This method
+	 * should set zero/0 values for the hashes, in order to avoid any calculating hashes on existing
+	 * rows failing. This is important only in cases where hashes are not present on the existing rows,
+	 * which would only be the case if new hash columns have been added.
+	 */
+	public void setPlaceholderHashesIfMissing() {
+		// nothing by default
+	}
+
+	public abstract void setResourceId(Long theId);
 }

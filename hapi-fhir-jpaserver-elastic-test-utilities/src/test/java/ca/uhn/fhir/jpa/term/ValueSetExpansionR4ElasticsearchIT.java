@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -15,28 +16,25 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -54,12 +52,10 @@ import java.util.Date;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -71,23 +67,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 @RequiresDocker
-public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
+public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest implements IValueSetExpansionIT {
 
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -109,7 +103,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
-
 	@BeforeEach
 	public void beforeEach() {
 		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
@@ -118,12 +111,47 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
+		return myTerminologyDeferredStorageSvc;
+	}
+
+	@Override
+	public ITermReadSvc getTerminologyReadSvc() {
+		return myTermSvc;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public IFhirResourceDaoValueSet<ValueSet> getValueSetDao() {
+		return myValueSetDao;
+	}
+
+	@Override
+	public JpaStorageSettings getJpaStorageSettings() {
+		return myStorageSettings;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	void createCodeSystem() {
@@ -134,7 +162,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -174,7 +202,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -191,24 +219,23 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 
 		// Codes available exceeds the max
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			fail("");		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 
 		// Increase the max so it won't exceed
-		myDaoConfig.setMaximumExpansionSize(150);
+		myStorageSettings.setMaximumExpansionSize(150);
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 	}
 
@@ -237,7 +264,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
@@ -245,22 +272,23 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		// need to be more than elastic [index.max_result_window] index level setting (default = 10_000)
 		addTermConcepts(codeSystemVersion, 11_000);
 
-		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts( codeSystemVersion.getCodeSystemVersionId() );
+		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until( myTerminologyDeferredStorageSvc::isStorageQueueEmpty );
+		await().atMost(20, SECONDS).until(() -> {
+			myTerminologyDeferredStorageSvc.saveDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertEquals(1, page.getContent().size());
+		assertThat(page.getContent()).hasSize(1);
 	}
-
 
 
 	private ValueSet getValueSetWithAllCodeSystemConcepts(String theCodeSystemVersionId) {
@@ -288,7 +316,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/3992
 	 */
 	@Test
-	@Disabled("until bug gets fixed")
 	public void testExpandValueSetWithMoreThanElasticDefaultNestedObjectCount() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
@@ -296,14 +323,19 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
 
 		TermConcept tc = new TermConcept(codeSystemVersion, "test-code-1");
-		// need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
-		addTerConceptProperties(tc, 10_100);
+
+//		 need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
+//		 however, the new mapping (not nested, multivalued) groups properties by key, and there can't be more than 1000
+//		 properties (keys), so we test here with a number of properties > 10_000 but grouped in max 200 property keys
+//		 (current loinc version (2.73) has 82 property keys maximum in a TermConcept)
+		addTermConceptProperties(tc, 10_100, 200);
+
 		codeSystemVersion.getConcepts().add(tc);
 
 		ValueSet valueSet = new ValueSet();
@@ -316,26 +348,26 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		valueSet.setDescription("A value set that includes all LOINC codes");
 		valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		assertDoesNotThrow( () -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-				new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList() ));
+		assertDoesNotThrow(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
+			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList()));
 
 	}
 
-	private void addTerConceptProperties(TermConcept theTermConcept, int theCount) {
-		for (int i = 0; i < theCount; i++) {
-			String suff = String.format("%05d", i);
-			theTermConcept.addPropertyString("prop-" + suff, "value-" + suff);
+	private void addTermConceptProperties(TermConcept theTermConcept, int thePropertiesCount, int thePropertyKeysCount) {
+		int valuesPerPropKey = thePropertiesCount / thePropertyKeysCount;
+
+		int propsCreated = 0;
+		while (propsCreated < thePropertiesCount) {
+
+			int propKeysCreated = 0;
+			while (propKeysCreated < thePropertyKeysCount && propsCreated < thePropertiesCount) {
+				String propKey = String.format("%05d", propKeysCreated);
+				String propSeq = String.format("%05d", propsCreated);
+				theTermConcept.addPropertyString("prop-key-" + propKey, "value-" + propSeq);
+
+				propKeysCreated++;
+				propsCreated++;
+			}
 		}
-	}
-
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
 	}
 }

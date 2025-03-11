@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4153
+title: "Extend $member-match to store Consent resource when there is a matching patient."

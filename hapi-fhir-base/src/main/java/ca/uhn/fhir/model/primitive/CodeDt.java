@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.primitive;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,16 @@ package ca.uhn.fhir.model.primitive;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
-@DatatypeDef(name = "code", profileOf=StringDt.class)
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+@DatatypeDef(name = "code", profileOf = StringDt.class)
 public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> {
 
 	/**
@@ -66,5 +66,4 @@ public class CodeDt extends BasePrimitive<String> implements Comparable<CodeDt> 
 	protected String encode(String theValue) {
 		return theValue;
 	}
-
 }

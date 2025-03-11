@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.graphql;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.graphql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.graphql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -32,17 +31,27 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonSerializer;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.scalar.GraphqlStringCoercing;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.TypeResolver;
+import graphql.schema.TypeResolverProxy;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.TypeRuntimeWiring;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -55,8 +64,6 @@ import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -73,22 +80,37 @@ import static ca.uhn.fhir.util.MessageSupplier.msg;
 public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
-	private final GraphQLSchemaGenerator myGenerator;
+	private final Supplier<GraphQLSchemaGenerator> myGenerator;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
 	private final IDaoRegistry myDaoRegistry;
+	private final Gson myGson;
 
 	/**
 	 * Constructor
 	 */
-	public GraphQLProviderWithIntrospection(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices theIGraphQLStorageServices, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+	public GraphQLProviderWithIntrospection(
+			FhirContext theFhirContext,
+			IValidationSupport theValidationSupport,
+			IGraphQLStorageServices theIGraphQLStorageServices,
+			ISearchParamRegistry theSearchParamRegistry,
+			IDaoRegistry theDaoRegistry) {
 		super(theFhirContext, theValidationSupport, theIGraphQLStorageServices);
 
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
-		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
+
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)
+				(src, typeOfSrc, context) -> new JsonArray());
+		myGson = gsonBuilder.create();
+
+		// Lazy-load this because it's expensive, but more importantly because it makes a bunch of
+		// calls for StructureDefinitions and other such things during startup so we want to be sure
+		// that everything else is initialized first
+		myGenerator = Suppliers.memoize(() -> new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion()));
 	}
 
 	@Override
@@ -97,14 +119,21 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 	}
 
 	@Override
-	public String processGraphQlPostRequest(ServletRequestDetails theServletRequestDetails, RequestDetails theRequestDetails, IIdType theId, String theQueryBody) {
+	public String processGraphQlPostRequest(
+			ServletRequestDetails theServletRequestDetails,
+			RequestDetails theRequestDetails,
+			IIdType theId,
+			String theQueryBody) {
 		if (theQueryBody.contains("__schema")) {
 			EnumSet<GraphQLSchemaGenerator.FHIROperationType> operations;
 			if (theId != null) {
-				throw new InvalidRequestException(Msg.code(2035) + "GraphQL introspection not supported at instance level. Please try at server- or instance- level.");
+				throw new InvalidRequestException(
+						Msg.code(2035)
+								+ "GraphQL introspection not supported at instance level. Please try at server- or instance- level.");
 			}
 
-			operations = EnumSet.of(GraphQLSchemaGenerator.FHIROperationType.READ, GraphQLSchemaGenerator.FHIROperationType.SEARCH);
+			operations = EnumSet.of(
+					GraphQLSchemaGenerator.FHIROperationType.READ, GraphQLSchemaGenerator.FHIROperationType.SEARCH);
 
 			Collection<String> resourceTypes;
 			if (theRequestDetails.getResourceName() != null) {
@@ -116,10 +145,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 						resourceTypes.add(next);
 					}
 				}
-				resourceTypes = resourceTypes
-					.stream()
-					.sorted()
-					.collect(Collectors.toList());
+				resourceTypes = resourceTypes.stream().sorted().collect(Collectors.toList());
 			}
 
 			return generateSchema(theQueryBody, resourceTypes, operations);
@@ -128,45 +154,52 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		}
 	}
 
-	private String generateSchema(String theQueryBody, Collection<String> theResourceTypes, EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
+	private String generateSchema(
+			String theQueryBody,
+			Collection<String> theResourceTypes,
+			EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
+
+		GraphQLSchemaGenerator generator = myGenerator.get();
 
 		final StringBuilder schemaBuilder = new StringBuilder();
 		try (Writer writer = new StringBuilderWriter(schemaBuilder)) {
+
 			// Generate FHIR base types schemas
-			myGenerator.generateTypes(writer, theOperations);
+			generator.generateTypes(writer, theOperations);
 
 			// Fix up a few things that are missing from the generated schema
-			writer
-				.append("\ntype Resource {")
-				.append("\n  id: [token]" + "\n}")
-				.append("\n");
-			writer
-				.append("\ninput ResourceInput {")
-				.append("\n  id: [token]" + "\n}")
-				.append("\n");
+			writer.append("\ninterface Element {")
+					.append("\n  id: ID")
+					.append("\n}")
+					.append("\n");
 
 			// Generate schemas for the resource types
 			for (String nextResourceType : theResourceTypes) {
 				StructureDefinition sd = fetchStructureDefinition(nextResourceType);
-				List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry.getActiveSearchParams(nextResourceType).values());
-				myGenerator.generateResource(writer, sd, parameters, theOperations);
+				List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry
+						.getActiveSearchParams(
+								nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+						.values());
+				generator.generateResource(writer, sd, parameters, theOperations);
 			}
 
 			// Generate queries
 			writer.append("\ntype Query {");
 			for (String nextResourceType : theResourceTypes) {
 				if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.READ)) {
-					writer
-						.append("\n  ")
-						.append(nextResourceType)
-						.append("(id: String): ")
-						.append(nextResourceType)
-						.append("\n");
+					writer.append("\n  ")
+							.append(nextResourceType)
+							.append("(id: String): ")
+							.append(nextResourceType)
+							.append("\n");
 				}
 				if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.SEARCH)) {
-					List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry.getActiveSearchParams(nextResourceType).values());
-					myGenerator.generateListAccessQuery(writer, parameters, nextResourceType);
-					myGenerator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
+					List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry
+							.getActiveSearchParams(
+									nextResourceType, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
+							.values());
+					generator.generateListAccessQuery(writer, parameters, nextResourceType);
+					generator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
 				}
 			}
 			writer.append("\n}");
@@ -192,7 +225,18 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 				// Skip GraphQL built-in types
 				continue;
 			}
-			runtimeWiringBuilder.scalar(new GraphQLScalarType.Builder().name(next).coercing(new GraphqlStringCoercing()).build());
+			runtimeWiringBuilder.scalar(new GraphQLScalarType.Builder()
+					.name(next)
+					.coercing(new GraphqlStringCoercing())
+					.build());
+		}
+
+		for (InterfaceTypeDefinition next : typeDefinitionRegistry.getTypes(InterfaceTypeDefinition.class)) {
+			TypeResolver resolver = new TypeResolverProxy();
+			TypeRuntimeWiring wiring = TypeRuntimeWiring.newTypeWiring(next.getName())
+					.typeResolver(resolver)
+					.build();
+			runtimeWiringBuilder.type(wiring);
 		}
 
 		RuntimeWiring runtimeWiring = runtimeWiringBuilder.build();
@@ -202,9 +246,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		ExecutionResult executionResult = build.execute(theQueryBody);
 
 		Map<String, Object> data = executionResult.toSpecification();
-		Gson gson = new GsonBuilder().create();
-		return gson.toJson(data);
-
+		return myGson.toJson(data);
 	}
 
 	@Nonnull
@@ -261,9 +303,9 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	@Nonnull
 	private StructureDefinition fetchStructureDefinition(String resourceName) {
-		StructureDefinition retVal = myContext.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + resourceName);
+		StructureDefinition retVal = myContext.fetchResource(
+				StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + resourceName);
 		Validate.notNull(retVal);
 		return retVal;
 	}
-
 }

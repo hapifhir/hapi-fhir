@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -44,11 +43,16 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	private final String myUrlPath;
 	private final UrlSourceEnum myUrlSource;
 
-	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, String... theUrlFragments) {
+	public HttpGetClientInvocation(
+			FhirContext theContext, Map<String, List<String>> theParameters, String... theUrlFragments) {
 		this(theContext, theParameters, UrlSourceEnum.GENERATED, theUrlFragments);
 	}
 
-	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, UrlSourceEnum theUrlSource, String... theUrlFragments) {
+	public HttpGetClientInvocation(
+			FhirContext theContext,
+			Map<String, List<String>> theParameters,
+			UrlSourceEnum theUrlSource,
+			String... theUrlFragments) {
 		super(theContext);
 		myParameters = theParameters;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
@@ -61,7 +65,6 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 		myUrlPath = theUrlPath;
 		myUrlSource = UrlSourceEnum.GENERATED;
 	}
-
 
 	private boolean addQueryParameter(StringBuilder b, boolean first, String nextKey, String nextValue) {
 		boolean retVal = first;
@@ -79,7 +82,11 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	@Override
-	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
+	public IHttpRequest asHttpRequest(
+			String theUrlBase,
+			Map<String, List<String>> theExtraParams,
+			EncodingEnum theEncoding,
+			Boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 
 		if (!myUrlPath.contains("://")) {
@@ -116,5 +123,4 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	public String getUrlPath() {
 		return myUrlPath;
 	}
-
 }

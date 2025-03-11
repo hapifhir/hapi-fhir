@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5603
+jira: SMILE-8000
+title: "Previously, the semantics of `is-a` were incorrect in Valueset Expansion. The implementation previously used the behaviour of `descendent-of`, which means that `A is-a A` was not being considered as true. This has been corrected. In addition, 
+`descendent-of` is now supported, which compares for strict descendency, and does not include itself. Thanks to Ole Hedegaard (@ohetrifork) for the fix."

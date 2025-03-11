@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -48,21 +53,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NonUniqueResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NonUniqueResultException;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -77,11 +79,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ITermReadSvcTest {
 
-	private final ITermReadSvc testedClass = new TermReadSvcR4();
+	private final ITermReadSvc testedClass = new TermReadSvcImpl();
 
-	@Mock private ITermValueSetDao myTermValueSetDao;
-	@Mock private DaoRegistry myDaoRegistry;
-	@Mock private IFhirResourceDao<CodeSystem> myFhirResourceDao;
+	@Mock
+	private ITermValueSetDao myTermValueSetDao;
+	@Mock
+	private DaoRegistry myDaoRegistry;
+	@Mock
+	private IFhirResourceDao<CodeSystem> myFhirResourceDao;
+	@Mock
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 
 	@Nested
@@ -90,6 +97,7 @@ class ITermReadSvcTest {
 		@BeforeEach
 		public void setup() {
 			ReflectionTestUtils.setField(testedClass, "myTermValueSetDao", myTermValueSetDao);
+			ReflectionTestUtils.setField(testedClass, "myJpaStorageResourceParser", myJpaStorageResourceParser);
 		}
 
 		@Test
@@ -136,7 +144,7 @@ class ITermReadSvcTest {
 		@Test
 		void startsWithGenericPlusSlashPlusIdReturnsValid() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
-			assertTrue(vsIdOpt.isPresent());
+			assertThat(vsIdOpt).isPresent();
 		}
 
 	}
@@ -200,20 +208,24 @@ class ITermReadSvcTest {
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private EntityManager myEntityManager;
 
-		@Mock private ResourceTable resource1;
-		@Mock private ResourceTable resource2;
-		@Mock private IBaseResource myCodeSystemResource;
+		@Mock
+		private ResourceTable resource1;
+		@Mock
+		private ResourceTable resource2;
+		@Mock
+		private IBaseResource myCodeSystemResource;
 
 
 		@BeforeEach
 		public void setup() {
 			ReflectionTestUtils.setField(testedClass, "myEntityManager", myEntityManager);
+			ReflectionTestUtils.setField(testedClass, "myJpaStorageResourceParser", myJpaStorageResourceParser);
 		}
 
 
 		@Test
 		void getNoneReturnsOptionalEmpty() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
@@ -222,30 +234,30 @@ class ITermReadSvcTest {
 
 		@Test
 		void getMultipleThrows() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1, resource2));
 
 			NonUniqueResultException thrown = assertThrows(
 				NonUniqueResultException.class,
 				() -> testedClass.readCodeSystemByForcedId("a-cs-id"));
 
-			assertTrue(thrown.getMessage().contains("More than one CodeSystem is pointed by forcedId:"));
+			assertThat(thrown.getMessage()).contains("More than one CodeSystem is pointed by forcedId:");
 		}
 
 		@Test
 		void getOneConvertToResource() {
 			ReflectionTestUtils.setField(testedClass, "myDaoRegistry", myDaoRegistry);
 
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1));
 			when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myFhirResourceDao);
-			when(myFhirResourceDao.toResource(resource1, false)).thenReturn(myCodeSystemResource);
+			when(myJpaStorageResourceParser.toResource(resource1, false)).thenReturn(myCodeSystemResource);
 
 
 			testedClass.readCodeSystemByForcedId("a-cs-id");
 
 
-			verify(myFhirResourceDao, times(1)).toResource(any(), eq(false));
+			verify(myJpaStorageResourceParser, times(1)).toResource(any(), eq(false));
 		}
 
 	}
@@ -260,9 +272,12 @@ class ITermReadSvcTest {
 		public static final String CODE_4 = "code-4";
 		public static final String CODE_5 = "code-5";
 
-		@Mock TermConcept termConceptCode1;
-		@Mock TermConcept termConceptCode3;
-		@Mock TermConcept termConceptCode4;
+		@Mock
+		TermConcept termConceptCode1;
+		@Mock
+		TermConcept termConceptCode3;
+		@Mock
+		TermConcept termConceptCode4;
 
 		@Test
 		public void morePropertiesThanValues() {
@@ -276,12 +291,12 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertNotNull(msg);
-			assertTrue(msg.contains("No TermConcept(s) were found"));
+			assertThat(msg).contains("No TermConcept(s) were found");
 			assertFalse(msg.contains(CODE_1));
-			assertTrue(msg.contains(CODE_2));
+			assertThat(msg).contains(CODE_2);
 			assertFalse(msg.contains(CODE_3));
 			assertFalse(msg.contains(CODE_4));
-			assertTrue(msg.contains(CODE_5));
+			assertThat(msg).contains(CODE_5);
 		}
 
 		@Test
@@ -297,26 +312,31 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertNotNull(msg);
-			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
+			assertThat(msg).contains("More TermConcepts were found than indicated codes");
 			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
-			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
+			assertThat(msg).contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]");
 		}
 	}
 
 
 	@Nested
 	public class TestReindexTerminology {
-		@Mock private SearchSession mySearchSession;
+		@Mock
+		private SearchSession mySearchSession;
 
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private MassIndexer myMassIndexer;
 
-		@Mock private IFulltextSearchSvc myFulltextSearchSvc;
-		@Mock private ITermDeferredStorageSvc myDeferredStorageSvc;
-		@Mock private HibernatePropertiesProvider myHibernatePropertiesProvider;
+		@Mock
+		private IFulltextSearchSvc myFulltextSearchSvc;
+		@Mock
+		private ITermDeferredStorageSvc myDeferredStorageSvc;
+		@Mock
+		private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 		@InjectMocks
-		@Spy private BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+		@Spy
+		private TermReadSvcImpl myTermReadSvc = (TermReadSvcImpl) spy(testedClass);
 
 
 		@Test
@@ -334,7 +354,7 @@ class ITermReadSvcTest {
 		public class TestCalculateObjectLoadingThreadNumber {
 
 			private final BasicDataSource myBasicDataSource = new BasicDataSource();
-			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource) ;
+			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource);
 
 			@BeforeEach
 			void setUp() {
@@ -373,7 +393,8 @@ class ITermReadSvcTest {
 		@Nested
 		public class TestCalculateObjectLoadingThreadNumberDefault {
 
-			@Mock private DataSource myDataSource = new BasicDataSource();
+			@Mock
+			private DataSource myDataSource = new BasicDataSource();
 
 			@BeforeEach
 			void setUp() {

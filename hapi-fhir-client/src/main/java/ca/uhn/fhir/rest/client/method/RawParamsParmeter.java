@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,18 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RawParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class RawParamsParmeter implements IParameter {
 
@@ -37,14 +37,23 @@ public class RawParamsParmeter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
+	public void translateClientArgumentIntoQueryArgument(
+			FhirContext theContext,
+			Object theSourceClientArgument,
+			Map<String, List<String>> theTargetQueryArguments,
+			IBaseResource theTargetResource)
 			throws InternalErrorException {
 		// not supported on client for now
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		Validate.isTrue(theParameterType.equals(Map.class), "Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
+		Validate.isTrue(
+				theParameterType.equals(Map.class),
+				"Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
 	}
-
 }

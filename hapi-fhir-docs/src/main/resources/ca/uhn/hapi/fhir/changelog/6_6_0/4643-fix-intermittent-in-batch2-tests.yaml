@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4643
+title: "There was a transaction boundary issue in the Batch2 storage layer which resulted in the
+   framework needing more open database connections than necessary. This has been corrected."

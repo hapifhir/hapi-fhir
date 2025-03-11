@@ -6,7 +6,6 @@ import java.util.Set;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.google.common.collect.Sets;
-import org.hamcrest.core.IsNot;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -20,10 +19,8 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_R4;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
 import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -93,11 +90,11 @@ public class R4XmlParserTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID"));
+		assertThat(encoded).contains("http://FOO"));
+		assertThat(encoded).contains("PATIENTID"));
+		assertThat(encoded).contains("http://BAR"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -123,7 +120,7 @@ public class R4XmlParserTest {
 		assertThat(encoded, IsNot.not(containsString("http://FOO")));
 		assertThat(encoded, IsNot.not(containsString("PATIENTID")));
 		assertThat(encoded, IsNot.not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -161,8 +158,8 @@ public class R4XmlParserTest {
 		Patient parsed = xmlParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight"));
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight"));
 
 	}
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,21 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.List;
-import java.util.Map;
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
 public interface IClientResponseHandler<T> {
 
-	T invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
-
+	T invokeClient(
+			String theResponseMimeType,
+			InputStream theResponseInputStream,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders)
+			throws IOException, BaseServerResponseException;
 }

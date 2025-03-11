@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,17 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBase;
+public class RuntimePrimitiveDatatypeNarrativeDefinition extends BaseRuntimeElementDefinition<XhtmlDt> {
 
-import ca.uhn.fhir.model.primitive.XhtmlDt;
-
-public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeElementDefinition<XhtmlDt> {
-
-	public RuntimePrimitiveDatatypeNarrativeDefinition(String theName, Class<XhtmlDt> theImplementingClass, boolean theStandardType) {
+	public RuntimePrimitiveDatatypeNarrativeDefinition(
+			String theName, Class<XhtmlDt> theImplementingClass, boolean theStandardType) {
 		super(theName, theImplementingClass, theStandardType);
 	}
 
@@ -38,8 +37,9 @@ public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeEle
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		// nothing
 	}
-
 }

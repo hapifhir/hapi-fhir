@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -35,36 +34,33 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class HttpProxy {
 
-   public static void main(String[] args) {
-      /*
-       * This is out of date - Just keeping
-       * it in case it's helpful...
-       */
-      final String authUser = "username"; 
-      final String authPassword = "password"; 
-      CredentialsProvider credsProvider = new BasicCredentialsProvider();
-      credsProvider.setCredentials(new AuthScope("10.10.10.10", 8080),
-            new UsernamePasswordCredentials(authUser, authPassword)); 
+	public static void main(String[] args) {
+		/*
+		 * This is out of date - Just keeping
+		 * it in case it's helpful...
+		 */
+		final String authUser = "username";
+		final String authPassword = "password";
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		credsProvider.setCredentials(
+				new AuthScope("10.10.10.10", 8080), new UsernamePasswordCredentials(authUser, authPassword));
 
-      HttpHost myProxy = new HttpHost("10.10.10.10", 8080);
-      
-      
-      HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-      clientBuilder
-         .setProxy(myProxy)
-         .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
-         .setDefaultCredentialsProvider(credsProvider) 
-         .disableCookieManagement(); 
-      CloseableHttpClient httpClient = clientBuilder.build();
-      
-      FhirContext ctx = FhirContext.forDstu2(); 
-      String serverBase = "http://spark.furore.com/fhir/"; 
-      ctx.getRestfulClientFactory().setHttpClient(httpClient); 
-      IGenericClient client = ctx.newRestfulGenericClient(serverBase); 
+		HttpHost myProxy = new HttpHost("10.10.10.10", 8080);
 
-      IdType id = new IdType("Patient", "123");
-      Patient patient = client.read().resource(Patient.class).withId(id).execute();
-      
-   }
-   
+		HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+		clientBuilder
+				.setProxy(myProxy)
+				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
+				.setDefaultCredentialsProvider(credsProvider)
+				.disableCookieManagement();
+		CloseableHttpClient httpClient = clientBuilder.build();
+
+		FhirContext ctx = FhirContext.forDstu2();
+		String serverBase = "http://spark.furore.com/fhir/";
+		ctx.getRestfulClientFactory().setHttpClient(httpClient);
+		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+
+		IdType id = new IdType("Patient", "123");
+		Patient patient = client.read().resource(Patient.class).withId(id).execute();
+	}
 }

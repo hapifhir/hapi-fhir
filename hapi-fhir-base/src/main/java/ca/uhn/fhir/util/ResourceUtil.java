@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,24 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.io.IOException;
+
 public class ResourceUtil {
+
+	private static final String ENCODING = "ENCODING_TYPE";
+	private static final String RAW_ = "RAW_%s";
+
+	private ResourceUtil() {}
 
 	/**
 	 * This method removes the narrative from the resource, or if the resource is a bundle, removes the narrative from
@@ -47,5 +55,28 @@ public class ResourceUtil {
 		if (textElement != null) {
 			textElement.getMutator().setValue(theInput, null);
 		}
+	}
+
+	public static void addRawDataToResource(
+			@Nonnull IBaseResource theResource, @Nonnull EncodingEnum theEncodingType, String theSerializedData)
+			throws IOException {
+		theResource.setUserData(getRawUserDataKey(theEncodingType), theSerializedData);
+		theResource.setUserData(ENCODING, theEncodingType);
+	}
+
+	public static EncodingEnum getEncodingTypeFromUserData(@Nonnull IBaseResource theResource) {
+		return (EncodingEnum) theResource.getUserData(ENCODING);
+	}
+
+	public static String getRawStringFromResourceOrNull(@Nonnull IBaseResource theResource) {
+		EncodingEnum type = (EncodingEnum) theResource.getUserData(ENCODING);
+		if (type != null) {
+			return (String) theResource.getUserData(getRawUserDataKey(type));
+		}
+		return null;
+	}
+
+	private static String getRawUserDataKey(EncodingEnum theEncodingEnum) {
+		return String.format(RAW_, theEncodingEnum.name());
 	}
 }

@@ -33,8 +33,8 @@ One important caveat is that chaining is currently not supported when using this
 ## Enabling MDM Expansion
 
 On top of needing to instantiate an MDM module, you must enable this feature in
-the [DaoConfig](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html) bean, using
-the [Allow MDM Expansion](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setAllowMdmExpansion(boolean))
+the [StorageSettings](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html) bean, using
+the [Allow MDM Expansion](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setAllowMdmExpansion(boolean))
 property.
 
 <div class="helpWarningCalloutBox">

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.interceptor.ex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.interceptor.ex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.ex;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -26,8 +25,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
 
 // This class is replicated in PartitionExamples.java -- Keep it up to date there too!!
@@ -38,16 +37,14 @@ public class PartitionInterceptorReadPartitionsBasedOnScopes {
 	public RequestPartitionId readPartition(ServletRequestDetails theRequest) {
 
 		HttpServletRequest servletRequest = theRequest.getServletRequest();
-		Set<String> approvedScopes = (Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
+		Set<String> approvedScopes =
+				(Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
 
-		String partition = approvedScopes
-			.stream()
-			.filter(t->t.startsWith("partition-"))
-			.map(t->t.substring("partition-".length()))
-			.findFirst()
-			.orElseThrow(()->new InvalidRequestException("No partition scopes found in request"));
+		String partition = approvedScopes.stream()
+				.filter(t -> t.startsWith("partition-"))
+				.map(t -> t.substring("partition-".length()))
+				.findFirst()
+				.orElseThrow(() -> new InvalidRequestException("No partition scopes found in request"));
 		return RequestPartitionId.fromPartitionName(partition);
-
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.chunk;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,18 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.chunk;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 
 public class ChunkRangeJson implements IModelJson {
@@ -43,14 +44,27 @@ public class ChunkRangeJson implements IModelJson {
 	@Nonnull
 	private Date myEnd;
 
+	@Nullable
+	@JsonProperty("url")
+	private String myUrl;
+
+	@JsonProperty("resourceType")
+	private String myResourceType;
+
+	@Nullable
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
+
+	public ChunkRangeJson() {}
+
+	public ChunkRangeJson(@Nonnull Date theStart, @Nonnull Date theEnd) {
+		this.myStart = theStart;
+		this.myEnd = theEnd;
+	}
+
 	@Nonnull
 	public Date getStart() {
 		return myStart;
-	}
-
-	public ChunkRangeJson setStart(@Nonnull Date theStart) {
-		myStart = theStart;
-		return this;
 	}
 
 	@Nonnull
@@ -58,8 +72,33 @@ public class ChunkRangeJson implements IModelJson {
 		return myEnd;
 	}
 
-	public ChunkRangeJson setEnd(@Nonnull Date theEnd) {
-		myEnd = theEnd;
+	@Nullable
+	public String getUrl() {
+		return myUrl;
+	}
+
+	public ChunkRangeJson setUrl(@Nullable String theUrl) {
+		myUrl = theUrl;
+		return this;
+	}
+
+	@Nonnull
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public ChunkRangeJson setResourceType(@Nullable String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
+
+	@Nullable
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public ChunkRangeJson setPartitionId(@Nullable RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 		return this;
 	}
 }

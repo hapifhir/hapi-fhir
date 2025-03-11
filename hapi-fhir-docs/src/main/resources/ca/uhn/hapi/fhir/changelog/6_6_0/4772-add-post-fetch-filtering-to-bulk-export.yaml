@@ -1,0 +1,9 @@
+---
+type: add
+issue: 4772
+title: "A new optional parameter called `_typePostFetchFilterUrl` has been added to the 
+   Bulk Export `$export` 
+   operation parameters. This parameter allows filters to be specified that will be applied
+   in-memory to the resources after they have been initially fetched by the database. This can
+   be used to allow complex filters which only remove small numbers of resources to be
+   efficiently applied against large datasets."

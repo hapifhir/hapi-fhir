@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.apache;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -109,7 +108,9 @@ public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 			HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
 			if (entity.isRepeatable()) {
 				final Header contentTypeHeader = myRequest.getFirstHeader("Content-Type");
-				Charset charset = contentTypeHeader == null ? null : ContentType.parse(contentTypeHeader.getValue()).getCharset();
+				Charset charset = contentTypeHeader == null
+						? null
+						: ContentType.parse(contentTypeHeader.getValue()).getCharset();
 				return IOUtils.toString(entity.getContent(), charset);
 			}
 		}
@@ -130,5 +131,4 @@ public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 	public String toString() {
 		return myRequest.toString();
 	}
-
 }

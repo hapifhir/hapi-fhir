@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -14,6 +14,7 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -27,21 +28,22 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setAllowExternalReferences(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
 	@Test
@@ -51,9 +53,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Observation.subject: minimum required = 1, but only found 0"));
-		assertThat(ooString, containsString("Observation.encounter: max allowed = 0, but found 1"));
-		assertThat(ooString, containsString("Observation.device: minimum required = 1, but only found 0"));
+		assertThat(ooString).contains("Observation.subject: minimum required = 1, but only found 0");
+		assertThat(ooString).contains("Observation.encounter: max allowed = 0, but found 1");
+		assertThat(ooString).contains("Observation.device: minimum required = 1, but only found 0");
 	}
 
 	@Test
@@ -63,9 +65,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Observation.subject: minimum required = 1, but only found 0"));
-		assertThat(ooString, containsString("Observation.encounter: max allowed = 0, but found 1"));
-		assertThat(ooString, containsString("Observation.device: minimum required = 1, but only found 0"));
+		assertThat(ooString).contains("Observation.subject: minimum required = 1, but only found 0");
+		assertThat(ooString).contains("Observation.encounter: max allowed = 0, but found 1");
+		assertThat(ooString).contains("Observation.device: minimum required = 1, but only found 0");
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
@@ -96,25 +98,19 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		String encoded;
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
-		case JSON:
-			encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-			ourLog.info(encoded);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
-		case XML:
-			encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
+			case JSON:
+				encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+				ourLog.info(encoded);
+				MethodOutcome result = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+				OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+				assertHasErrors(oo);
+				return oo;
+			case XML:
+				encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
+				result = myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
+				oo = (OperationOutcome) result.getOperationOutcome();
+				assertHasErrors(oo);
+				return oo;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -127,7 +123,6 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		Observation input = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
 		ResourceMetadataKeyEnum.PROFILES.put(input, Collections.singletonList(new IdDt(profileUri)));
-
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatusEnum.FINAL);
@@ -136,15 +131,12 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 		ourLog.info(encoded);
-		try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
-		}
-
+		MethodOutcome result = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+		assertHasErrors(oo);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info(ooString);
+		assertThat(ooString).contains("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it could not be found");
 	}
 
 	@Test
@@ -157,9 +149,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("ID must not be populated"));
+			assertThat(e.getMessage()).contains("ID must not be populated");
 		}
 
 		pat.setId("");
@@ -180,9 +172,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("ID must be populated"));
+			assertThat(e.getMessage()).contains("ID must be populated");
 		}
 
 	}
@@ -208,9 +200,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("ID must be populated"));
+			assertThat(e.getMessage()).contains("ID must be populated");
 		}
 
 	}
@@ -231,14 +223,14 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		OperationOutcome outcome = null;
 		try {
 			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 		}
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Unable to delete Organization"));
+		assertThat(ooString).contains("Unable to delete Organization");
 
 		pat.setId(patId);
 		pat.getManagingOrganization().setReference("");
@@ -247,7 +239,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		outcome = (OperationOutcome) myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd).getOperationOutcome();
 		ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Ok to delete"));
+		assertThat(ooString).contains("Ok to delete");
 
 	}
 

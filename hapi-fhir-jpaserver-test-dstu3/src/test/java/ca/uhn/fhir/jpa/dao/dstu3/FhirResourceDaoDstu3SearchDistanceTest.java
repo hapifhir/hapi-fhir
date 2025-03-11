@@ -1,23 +1,21 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
@@ -26,7 +24,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
@@ -44,7 +42,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
+		assertThat(ids).containsExactly(locId);
 	}
 
 	@Test
@@ -64,9 +62,13 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-		assertThat(ids, contains(locId));
+		assertThat(ids).containsExactly(locId);
 	}
 
+
+	@Test
+	public void testNearSearchChained() {
+	}
 	@Test
 	public void testNearSearchApproximate() {
 		Location loc = new Location();
@@ -85,7 +87,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids, contains(locId));
+			assertThat(ids).containsExactly(locId);
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
@@ -97,7 +99,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size(), is(0));
+			assertThat(ids).isEmpty();
 		}
 
 	}
@@ -116,8 +118,8 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		map.setLoadSynchronous(true);
 		try {
 			myLocationDao.search(map);
-			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
+			fail("");
+		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
 		}
 	}
@@ -129,8 +131,8 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		map.setLoadSynchronous(true);
 		try {
 			myLocationDao.search(map);
-			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
+			fail("");
+		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
 		}
 	}

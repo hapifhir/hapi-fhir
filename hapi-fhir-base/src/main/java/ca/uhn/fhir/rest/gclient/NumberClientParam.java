@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +17,14 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
  * Token parameter type for use in fluent client interfaces
  */
-public class NumberClientParam extends BaseClientParam  implements IParam {
+public class NumberClientParam extends BaseClientParam implements IParam {
 
 	private final String myParamName;
 
@@ -70,7 +69,8 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(
+						getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
@@ -98,7 +98,8 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(
+						getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
@@ -125,7 +126,7 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 	public interface IMatches<T> {
 		/**
 		 * Creates a search criterion that matches against the given number
-		 * 
+		 *
 		 * @param theNumber
 		 *            The number
 		 * @return A criterion
@@ -134,12 +135,11 @@ public class NumberClientParam extends BaseClientParam  implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given number
-		 * 
+		 *
 		 * @param theNumber
 		 *            The number
 		 * @return A criterion
 		 */
 		T number(String theNumber);
 	}
-
 }

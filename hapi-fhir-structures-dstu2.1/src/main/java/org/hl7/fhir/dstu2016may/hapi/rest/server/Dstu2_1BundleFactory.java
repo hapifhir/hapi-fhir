@@ -1,5 +1,3 @@
-package org.hl7.fhir.dstu2016may.hapi.rest.server;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -19,16 +17,20 @@ package org.hl7.fhir.dstu2016may.hapi.rest.server;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.dstu2016may.hapi.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu2016may.model.Bundle;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleLinkComponent;
@@ -41,7 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -62,7 +64,12 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
+	public void addResourcesToBundle(
+			List<IBaseResource> theResult,
+			BundleTypeEnum theBundleType,
+			String theServerBase,
+			BundleInclusionRule theBundleInclusionRule,
+			Set<Include> theIncludes) {
 		ensureBundle();
 
 		List<IAnyResource> includedResources = new ArrayList<IAnyResource>();
@@ -91,11 +98,13 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+					if (theBundleInclusionRule != null
+							&& !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
 						continue;
 					}
 
-					IAnyResource nextRes = (IAnyResource) nextRefInfo.getResourceReference().getResource();
+					IAnyResource nextRes =
+							(IAnyResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getIdElement().hasIdPart()) {
 							if (containedIds.contains(nextRes.getIdElement().getValue())) {
@@ -113,7 +122,6 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 								addedResourceIds.add(id);
 								addedResourcesThisPass.add(nextRes);
 							}
-
 						}
 					}
 				}
@@ -123,7 +131,8 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<ResourceReferenceInfo>();
 				for (IAnyResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
+					List<ResourceReferenceInfo> newReferences =
+							myContext.newTerser().getAllResourceReferences(iResource);
 					references.addAll(newReferences);
 				}
 			} while (references.isEmpty() == false);
@@ -131,17 +140,23 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
 			Resource nextAsResource = (Resource) next;
 			IIdType id = populateBundleEntryFullUrl(next, entry);
-			String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
+			BundleEntryTransactionMethodEnum httpVerb =
+					ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
 			if (httpVerb != null) {
-				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
+				entry.getRequest().getMethodElement().setValueAsString(httpVerb.name());
 				if (id != null) {
 					entry.getRequest().setUrl(id.getValue());
 				}
 			}
 
-			String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
+			// Populate Bundle.entry.search
+			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
-				entry.getSearch().getModeElement().setValueAsString(searchMode);
+				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
+			}
+			BigDecimal searchScore = ResourceMetadataKeyEnum.ENTRY_SEARCH_SCORE.get(nextAsResource);
+			if (searchScore != null) {
+				entry.getSearch().getScoreElement().setValue(searchScore);
 			}
 		}
 
@@ -153,12 +168,14 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
 			populateBundleEntryFullUrl(next, entry);
 		}
-
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
-													  IPrimitiveType<Date> theLastUpdated) {
+	public void addRootPropertiesToBundle(
+			String theId,
+			@Nonnull BundleLinks theBundleLinks,
+			Integer theTotalResults,
+			IPrimitiveType<Date> theLastUpdated) {
 		ensureBundle();
 
 		myBase = theBundleLinks.serverBase;
@@ -251,7 +268,8 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 				IdType id = new IdType(next.getResponse().getLocation());
 				String resourceType = id.getResourceType();
 				if (isNotBlank(resourceType)) {
-					IAnyResource res = (IAnyResource) myContext.getResourceDefinition(resourceType).newInstance();
+					IAnyResource res = (IAnyResource)
+							myContext.getResourceDefinition(resourceType).newInstance();
 					res.setId(id);
 					retVal.add(res);
 				}
@@ -259,5 +277,4 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 		}
 		return retVal;
 	}
-
 }

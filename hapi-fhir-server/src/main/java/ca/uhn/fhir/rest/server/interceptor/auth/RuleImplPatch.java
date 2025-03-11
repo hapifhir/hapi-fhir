@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -28,6 +27,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
+/**
+ * @deprecated Users should be instead be granted more granular write permissions that cover PATCH operations.
+ * @since 7.2.0
+ */
+@Deprecated
 class RuleImplPatch extends BaseRule {
 	private boolean myAllRequests;
 
@@ -36,12 +40,26 @@ class RuleImplPatch extends BaseRule {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+	public AuthorizationInterceptor.Verdict applyRule(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Set<AuthorizationFlagsEnum> theFlags,
+			Pointcut thePointcut) {
 
 		if (myAllRequests) {
 			if (theOperation == RestOperationTypeEnum.PATCH) {
 				if (theInputResource == null && theOutputResource == null) {
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+					return newVerdict(
+							theOperation,
+							theRequestDetails,
+							theInputResource,
+							theInputResourceId,
+							theOutputResource,
+							theRuleApplier);
 				}
 			}
 		}

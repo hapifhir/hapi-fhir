@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4697
+title: "Added DSTU3 and R4 support for the DaVinci Structured Data Capture (SDC) operations Questionnaire/$populate operation and QuestionnaireResponse/$extract.
+These operations are used in data capture and exchange use cases, and are used by downstream specifications such as DaVinci Documentation Templates and Rules (DTR) for prior authorization."

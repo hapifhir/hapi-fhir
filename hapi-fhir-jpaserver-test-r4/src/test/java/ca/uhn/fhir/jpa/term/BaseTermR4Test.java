@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -17,26 +17,28 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 
 public abstract class BaseTermR4Test extends BaseJpaR4Test {
 
 	IIdType myExtensionalCsId;
 	IIdType myExtensionalVsId;
-	Long myExtensionalCsIdOnResourceTable;
-	Long myExtensionalVsIdOnResourceTable;
+	JpaPid myExtensionalCsIdOnResourceTable;
+	JpaPid myExtensionalVsIdOnResourceTable;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setAllowExternalReferences(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
 	IIdType createCodeSystem() {
@@ -88,7 +90,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			TermConcept parentB = new TermConcept(cs, "ParentB");
 			cs.getConcepts().add(parentB);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 			return id;
 		});
@@ -143,7 +145,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
+		myExtensionalCsIdOnResourceTable = (JpaPid) myCodeSystemDao.readEntity(myExtensionalCsId, null).getPersistentId();
 	}
 
 	void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
@@ -180,7 +182,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myExtensionalVsIdOnResourceTable = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId();
 	}
 
 }

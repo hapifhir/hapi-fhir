@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.imprt.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,50 +17,51 @@ package ca.uhn.fhir.jpa.bulk.imprt.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.imprt.api;
 
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 
 public interface IBulkDataImportSvc {
 
-        class JobInfo {
-                private BulkImportJobStatusEnum myStatus;
-                private Date myStatusTime;
-                private String myStatusMessage;
+	class JobInfo {
+		private BulkImportJobStatusEnum myStatus;
+		private Date myStatusTime;
+		private String myStatusMessage;
 
-                public Date getStatusTime() {
-                        return myStatusTime;
-                }
+		public Date getStatusTime() {
+			return myStatusTime;
+		}
 
-                public JobInfo setStatusTime(Date theStatusTime) {
-                        myStatusTime = theStatusTime;
-                        return this;
-                }
+		public JobInfo setStatusTime(Date theStatusTime) {
+			myStatusTime = theStatusTime;
+			return this;
+		}
 
-                public BulkImportJobStatusEnum getStatus() {
-                        return myStatus;
-                }
+		public BulkImportJobStatusEnum getStatus() {
+			return myStatus;
+		}
 
-                public JobInfo setStatus(BulkImportJobStatusEnum theStatus) {
-                        myStatus = theStatus;
-                        return this;
-                }
+		public JobInfo setStatus(BulkImportJobStatusEnum theStatus) {
+			myStatus = theStatus;
+			return this;
+		}
 
-                public String getStatusMessage() {
-                        return myStatusMessage;
-                }
+		public String getStatusMessage() {
+			return myStatusMessage;
+		}
 
-                public JobInfo setStatusMessage(String theStatusMessage) {
-                        myStatusMessage = theStatusMessage;
-                        return this;
-                }
-        }
+		public JobInfo setStatusMessage(String theStatusMessage) {
+			myStatusMessage = theStatusMessage;
+			return this;
+		}
+	}
 
 	/**
 	 * Create a new job in {@link ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum#STAGING STAGING} state (meaning it won't yet be worked on and can be added to)
@@ -104,10 +103,10 @@ public interface IBulkDataImportSvc {
 	 */
 	void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus, String theStatusMessage);
 
-        /**
-         * Gets the job status for the given job.
-         */
-        JobInfo getJobStatus(String theJobId);
+	/**
+	 * Gets the job status for the given job.
+	 */
+	JobInfo getJobStatus(String theJobId);
 
 	/**
 	 * Gets the number of files available for a given Job ID

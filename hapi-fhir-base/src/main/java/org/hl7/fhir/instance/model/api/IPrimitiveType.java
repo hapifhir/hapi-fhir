@@ -1,11 +1,8 @@
-package org.hl7.fhir.instance.model.api;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +17,9 @@ package org.hl7.fhir.instance.model.api;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
 
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface IPrimitiveType<T> extends IBaseDatatype {
 
@@ -43,5 +40,4 @@ public interface IPrimitiveType<T> extends IBaseDatatype {
 	static <T> T toValueOrNull(@Nullable IPrimitiveType<T> thePrimitiveType) {
 		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
 	}
-
 }

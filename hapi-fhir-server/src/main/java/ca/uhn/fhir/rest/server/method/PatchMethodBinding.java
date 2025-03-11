@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +17,26 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IIdType;
+package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * Base class for an operation that has a resource type but not a resource body in the
@@ -52,9 +49,17 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	private int myResourceParamIndex;
 
 	public PatchMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Patch.class, theMethod.getAnnotation(Patch.class).type());
+		super(
+				theMethod,
+				theContext,
+				theProvider,
+				Patch.class,
+				theMethod.getAnnotation(Patch.class).type(),
+				theMethod.getAnnotation(Patch.class).typeName());
 
-		for (ListIterator<Class<?>> iter = Arrays.asList(theMethod.getParameterTypes()).listIterator(); iter.hasNext();) {
+		for (ListIterator<Class<?>> iter =
+						Arrays.asList(theMethod.getParameterTypes()).listIterator();
+				iter.hasNext(); ) {
 			int nextIndex = iter.nextIndex();
 			Class<?> next = iter.next();
 			if (next.equals(PatchTypeEnum.class)) {
@@ -68,10 +73,12 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		}
 
 		if (myPatchTypeParameterIndex == -1) {
-			throw new ConfigurationException(Msg.code(370) + "Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(370) + "Method has no parameter of type "
+					+ PatchTypeEnum.class.getName() + " - " + theMethod.toString());
 		}
 		if (myResourceParamIndex == -1) {
-			throw new ConfigurationException(Msg.code(371) + "Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(371) + "Method has no parameter with @"
+					+ ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
 		}
 	}
 
@@ -100,8 +107,6 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		return Collections.singleton(RequestTypeEnum.PATCH);
 	}
 
-
-
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		IIdType id = theRequest.getId();
@@ -113,6 +118,4 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	protected String getMatchingOperation() {
 		return null;
 	}
-
-
 }

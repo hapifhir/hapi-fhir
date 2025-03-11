@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,10 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
-
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType<T> {
 
@@ -34,7 +32,7 @@ public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType<T> {
 
 	@Override
 	T getValue();
-	
+
 	@Override
 	IPrimitiveType<T> setValue(T theValue) throws DataFormatException;
 }

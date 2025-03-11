@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.i18n.Msg;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,18 +45,25 @@ public class AdditionalCompartmentSearchParameters {
 	public void addSearchParameters(@Nonnull String... theQualifiedSearchParameters) {
 		Arrays.stream(theQualifiedSearchParameters).forEach(code -> {
 			if (code == null || !code.contains(":")) {
-				throw new IllegalArgumentException(Msg.code(341) + code + " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
+				throw new IllegalArgumentException(
+						Msg.code(341) + code
+								+ " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
 			}
 			String[] split = code.split(":");
 			if (split.length != 2) {
-				throw new IllegalArgumentException(Msg.code(342) + code + " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
+				throw new IllegalArgumentException(
+						Msg.code(342) + code
+								+ " is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'");
 			} else {
-				myResourceTypeToParameterCodeMap.computeIfAbsent(split[0].toLowerCase(), (key) -> new HashSet<>()).add(split[1].toLowerCase());
+				myResourceTypeToParameterCodeMap
+						.computeIfAbsent(split[0].toLowerCase(), (key) -> new HashSet<>())
+						.add(split[1].toLowerCase());
 			}
 		});
 	}
 
 	public Set<String> getSearchParamNamesForResourceType(@Nonnull String theResourceType) {
-		return myResourceTypeToParameterCodeMap.computeIfAbsent(theResourceType.toLowerCase(), (key) -> new HashSet<>());
+		return myResourceTypeToParameterCodeMap.computeIfAbsent(
+				theResourceType.toLowerCase(), (key) -> new HashSet<>());
 	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -39,7 +38,7 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		
+
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -49,15 +48,12 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 		if (isBlank(consumerName)) {
 			return;
 		}
-		
+
 		TermConcept loincCode = myCode2Concept.get(loincNumber);
 		if (loincCode == null) {
 			return;
 		}
-			
-		loincCode.addDesignation()
-		    .setUseDisplay("ConsumerName")
-		    .setValue(consumerName);
-	}
 
+		loincCode.addDesignation().setUseDisplay("ConsumerName").setValue(consumerName);
+	}
 }

@@ -2,7 +2,7 @@
 	<id value="extensional-case-2" />
 	<text>
 		<status value="generated" />
-		<div xmlns="http://www.w3.org/1999/xhtml">A selection of codes from http://loinc.org</div>
+		<div xmlns="http://www.w3.org/1999/xhtml">A selection of codes from http://acme.org</div>
 	</text>
 	<url value="http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"/>
 	<identifier>
@@ -21,7 +21,7 @@
 	<status value="draft" />
 	<experimental value="true" />
 	<codeSystem>
-		<system value="http://loinc.org" />
+		<system value="http://acme.org" />
 		<concept>
 			<code value="8450-9" />
 			<display value="Systolic blood pressure--expiration" />
@@ -33,7 +33,7 @@
 	</codeSystem>
 	<compose>
 		<include>
-			<system value="http://loinc.org" />
+			<system value="http://acme.org" />
 			<concept>
 				<code value="11378-7" />
 				<display value="Systolic blood pressure at First encounter" />

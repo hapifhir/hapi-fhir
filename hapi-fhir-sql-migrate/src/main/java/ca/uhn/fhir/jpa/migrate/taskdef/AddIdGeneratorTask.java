@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -66,7 +65,6 @@ public class AddIdGeneratorTask extends BaseTask {
 
 					String initSql = "insert into " + myGeneratorName + " values ( 1 )";
 					executeSql(myGeneratorName, initSql);
-
 				}
 				break;
 			case DERBY_EMBEDDED:
@@ -88,9 +86,7 @@ public class AddIdGeneratorTask extends BaseTask {
 		}
 
 		if (isNotBlank(sql)) {
-			Set<String> sequenceNames =
-				JdbcUtils.getSequenceNames(getConnectionProperties())
-					.stream()
+			Set<String> sequenceNames = JdbcUtils.getSequenceNames(getConnectionProperties()).stream()
 					.map(String::toLowerCase)
 					.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
@@ -101,7 +97,6 @@ public class AddIdGeneratorTask extends BaseTask {
 
 			executeSql(myGeneratorName, sql);
 		}
-
 	}
 
 	@Override

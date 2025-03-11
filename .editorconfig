@@ -3,35 +3,40 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
-tab_width = 3
-indent_size = 3
+indent_style = space
+tab_width = 4
+indent_size = 4
 charset = utf-8
 
+[*.html]
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
 [*.xml]
-charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 [*.json]
-charset = utf-8
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
+[*.js]
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 [*.vm]
-charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 
 [*.java]
-charset = utf-8
 indent_style = tab
-tab_width = 3
-indent_size = 3
-continuation_indent_size=3
+ij_continuation_indent_size = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
@@ -99,7 +104,7 @@ ij_java_doc_align_param_comments = true
 ij_java_doc_do_not_wrap_if_one_line = false
 ij_java_doc_enable_formatting = true
 ij_java_doc_enable_leading_asterisks = true
-ij_java_doc_indent_on_continuation = false
+ij_java_doc_indent_on_continuation = true
 ij_java_doc_keep_empty_lines = true
 ij_java_doc_keep_empty_parameter_tag = true
 ij_java_doc_keep_empty_return_tag = true

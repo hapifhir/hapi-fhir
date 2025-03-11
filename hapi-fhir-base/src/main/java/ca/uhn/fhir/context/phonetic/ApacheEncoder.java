@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context.phonetic;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context.phonetic;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.phonetic;
 
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.StringEncoder;
@@ -47,7 +46,8 @@ public class ApacheEncoder implements IPhoneticEncoder {
 	@Override
 	public String encode(String theString) {
 		try {
-			// If the string contains a space, encode alpha parts separately so, for example, numbers are preserved in address lines.
+			// If the string contains a space, encode alpha parts separately so, for example, numbers are preserved in
+			// address lines.
 			if (theString.contains(" ")) {
 				return encodeStringWithSpaces(theString);
 			}

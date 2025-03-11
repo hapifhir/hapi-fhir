@@ -1,0 +1,4 @@
+---
+type: change
+jira: SMILE-9161
+title: "Contained resources which arrive without assigned IDs are now assigned GUIDs, as opposed to monotonically increasing numeric IDs. This avoids a whole class of issues related to processing order and collisions."

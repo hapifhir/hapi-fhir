@@ -1,0 +1,8 @@
+---
+type: add
+issue: 4758
+title: "The $reindex operation now supports several new optional parameters. 'optimizeStorage' can
+   be used to migrate data to/from inline storage mode, and `optimisticLock` can be used to
+   control whether to guard against concurrent data modification during reindexing. 
+   `reindexSearchParameters` can be used to contron whether search parameters are
+   reindexed."

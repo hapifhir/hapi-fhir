@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5220
+title: "Fixed a race condition in RestfulClientFactory that could cause validateInitialized() to deadlock.
+Fixed a race condition in FhirContext initialization that could produce a 'this.myNameToResourceType is null' NPE.
+Fixed a shutdown hook memory leak in BaseApp that happened when the command threw an exception;
+this memory leak only affects code that calls App.main repeatedly which is probably only in test code."

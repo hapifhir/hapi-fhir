@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5336
+jira: SMILE-7406
+title: "Previously, on PostgreSQL, the $mdm-link-history operation would fail if all ids provided to a parameter are 
+unknown, and the error will persist for all subsequent requests. This is now fixed."

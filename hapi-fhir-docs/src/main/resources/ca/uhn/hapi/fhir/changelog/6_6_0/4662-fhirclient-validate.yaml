@@ -1,0 +1,6 @@
+---
+type: change
+issue: 4662
+title: "The Resource $validate operation no longer returns Precondition Failed 412 when a resource fails validation.  
+It now returns 200 irrespective of the validation outcome as required by the 
+ [FHIR Spec for the Resource $validate operation](https://www.hl7.org/fhir/R4/resource-operation-validate.html)."

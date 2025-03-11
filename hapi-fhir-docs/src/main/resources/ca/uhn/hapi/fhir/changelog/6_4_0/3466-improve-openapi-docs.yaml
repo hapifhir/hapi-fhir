@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 3466
+title: "Several issues with the OpenAPI generator have been fixed:
+   * FHIR Operations will always include a POST invocation option
+   * Non-primitive parameters will be excluded from GET invocations
+   * For an idempotent (affectsState=false) endpoint with at least one required non-primitive parameter, only support POST
+   * Also include `_search` endpoints for the Search operation
+   Thanks to Michael Lawley for the pull request!"

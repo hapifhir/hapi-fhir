@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4438
+title: "The Thymeleaf narrative generator can now declare template fragments in separate files
+   so that they can be reused across multiple templates."

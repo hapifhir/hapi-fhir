@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5033
+title: "
+      Updated the query that is supposed to help detect foreign key constraints
+      that also do not have indexes to be a) simpler (smaller) and b) find more results.
+      Added an additional entry to the whitelist as a result.
+"

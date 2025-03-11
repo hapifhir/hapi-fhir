@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.importpull;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.importpull;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.importpull;
 
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
@@ -46,32 +45,28 @@ public class BulkImportPullConfig {
 
 	@Bean
 	public JobDefinition bulkImportPullJobDefinition() {
-		return JobDefinition
-			.newBuilder()
-			.setJobDefinitionId(BULK_IMPORT_JOB_NAME)
-			.setJobDescription("Performs bulk import pull job")
-			.setJobDefinitionVersion(1)
-			.gatedExecution()
-			.setParametersType(Batch2BulkImportPullJobParameters.class)
-			.setParametersValidator(importParameterValidator())
-			.addFirstStep(
-				"FetchPartitionedFilesStep",
-				"Reads an import file and extracts the resources",
-				BulkImportFilePartitionResult.class,
-				fetchPartitionedFilesStep()
-			)
-			.addIntermediateStep(
-				"ReadInResourcesFromFileStep",
-				"Reads the import file to get the serialized bundles",
-				BulkImportRecord.class,
-				readInResourcesFromFileStep()
-			)
-			.addLastStep(
-				"WriteBundleForImportStep",
-				"Parses the bundle from previous step and writes it to the dv",
-				writeBundleForImportStep()
-			)
-			.build();
+		return JobDefinition.newBuilder()
+				.setJobDefinitionId(BULK_IMPORT_JOB_NAME)
+				.setJobDescription("Performs bulk import pull job")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(Batch2BulkImportPullJobParameters.class)
+				.setParametersValidator(importParameterValidator())
+				.addFirstStep(
+						"FetchPartitionedFilesStep",
+						"Reads an import file and extracts the resources",
+						BulkImportFilePartitionResult.class,
+						fetchPartitionedFilesStep())
+				.addIntermediateStep(
+						"ReadInResourcesFromFileStep",
+						"Reads the import file to get the serialized bundles",
+						BulkImportRecord.class,
+						readInResourcesFromFileStep())
+				.addLastStep(
+						"WriteBundleForImportStep",
+						"Parses the bundle from previous step and writes it to the dv",
+						writeBundleForImportStep())
+				.build();
 	}
 
 	@Bean

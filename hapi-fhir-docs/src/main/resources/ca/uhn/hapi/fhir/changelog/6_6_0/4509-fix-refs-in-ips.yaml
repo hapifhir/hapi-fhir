@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4509
+title: "References to the patient/subject in IPS documents generated using the $summary
+  operation were not replaced with the bundle-local UUID assigned to the patient. Also,
+  some dangling references were left in the generated bundle. This has been corrected."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.mail;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.mail;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.mail;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -32,8 +31,7 @@ public class MailConfig {
 	private String mySmtpPassword;
 	private boolean mySmtpUseStartTLS;
 
-	public MailConfig() {
-	}
+	public MailConfig() {}
 
 	public String getSmtpHostname() {
 		return mySmtpHostname;

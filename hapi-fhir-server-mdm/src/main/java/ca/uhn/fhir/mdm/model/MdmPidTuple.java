@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.model;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,44 +17,86 @@ package ca.uhn.fhir.mdm.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.model;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nullable;
 
-public class MdmPidTuple {
-	private ResourcePersistentId myGoldenPid;
-	private ResourcePersistentId mySourcePid;
+import java.util.Objects;
+import java.util.StringJoiner;
 
-	public ResourcePersistentId getGoldenPid(){
+public class MdmPidTuple<T extends IResourcePersistentId> {
+	private final T myGoldenPid;
+
+	@Nullable
+	private final Integer myGoldenPartitionId;
+
+	private final T mySourcePid;
+
+	@Nullable
+	private final Integer mySourcePartitionId;
+
+	private MdmPidTuple(
+			T theGoldenPid,
+			@Nullable Integer theGoldenPartitionId,
+			T theSourcePid,
+			@Nullable Integer theSourcePartitionId) {
+		myGoldenPid = theGoldenPid;
+		mySourcePid = theSourcePid;
+		myGoldenPartitionId = theGoldenPartitionId;
+		mySourcePartitionId = theSourcePartitionId;
+	}
+
+	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSource(P theGoldenPid, P theSourcePid) {
+		return new MdmPidTuple<>(theGoldenPid, null, theSourcePid, null);
+	}
+
+	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSourceAndPartitionIds(
+			P theGoldenPid, Integer theGoldenPartitionId, P theSourcePid, Integer theSourcePartitionId) {
+		return new MdmPidTuple<>(theGoldenPid, theGoldenPartitionId, theSourcePid, theSourcePartitionId);
+	}
+
+	public T getGoldenPid() {
 		return myGoldenPid;
 	}
 
-	public MdmPidTuple setGoldenPid(ResourcePersistentId theGoldenPid) {
-		myGoldenPid = theGoldenPid;
-		return this;
+	@Nullable
+	public Integer getGoldenPartitionId() {
+		return myGoldenPartitionId;
 	}
 
-	public MdmPidTuple setSourcePid(ResourcePersistentId theSourcePid) {
-		mySourcePid = theSourcePid;
-		return this;
-	}
-
-	public ResourcePersistentId getSourcePid(){
+	public T getSourcePid() {
 		return mySourcePid;
 	}
 
-	public Long getGoldenPidAsLong() {
-		return myGoldenPid.getIdAsLong();
+	@Nullable
+	public Integer getSourcePartitionId() {
+		return mySourcePartitionId;
 	}
 
-	public Long getSourcePidAsLong() {
-		return mySourcePid.getIdAsLong();
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		MdmPidTuple<?> that = (MdmPidTuple<?>) o;
+		return Objects.equals(myGoldenPid, that.myGoldenPid)
+				&& Objects.equals(myGoldenPartitionId, that.myGoldenPartitionId)
+				&& Objects.equals(mySourcePid, that.mySourcePid)
+				&& Objects.equals(mySourcePartitionId, that.mySourcePartitionId);
 	}
 
-	public String getGoldenPidAsString() {
-		return (String) myGoldenPid.getId();
+	@Override
+	public int hashCode() {
+		return Objects.hash(myGoldenPid, myGoldenPartitionId, mySourcePid, mySourcePartitionId);
 	}
 
-	public String getSourcePidAsString() {
-		return (String) mySourcePid.getId();
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", MdmPidTuple.class.getSimpleName() + "[", "]")
+				.add("myGoldenPid=" + myGoldenPid)
+				.add("myGoldenPartitionId=" + myGoldenPartitionId)
+				.add("mySourcePid=" + mySourcePid)
+				.add("mySourcePartitionId=" + mySourcePartitionId)
+				.toString();
 	}
 }

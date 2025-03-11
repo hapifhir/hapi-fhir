@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.interceptor.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,18 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,7 +52,9 @@ class RuleDisallowProfile extends BaseTypedRule {
 			String nextUrl = next.getValueAsString();
 			String nextUrlNormalized = UrlUtil.normalizeCanonicalUrlForComparison(nextUrl);
 			if (myProfileUrls.contains(nextUrlNormalized)) {
-				String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "illegalProfile", getResourceType(), nextUrl);
+				String msg = getFhirContext()
+						.getLocalizer()
+						.getMessage(RuleRequireProfileDeclaration.class, "illegalProfile", getResourceType(), nextUrl);
 				return RuleEvaluation.forFailure(this, msg);
 			}
 		}
@@ -64,10 +65,8 @@ class RuleDisallowProfile extends BaseTypedRule {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resourceType", getResourceType())
-			.append("profiles", myProfileUrls)
-			.toString();
+				.append("resourceType", getResourceType())
+				.append("profiles", myProfileUrls)
+				.toString();
 	}
-
-
 }

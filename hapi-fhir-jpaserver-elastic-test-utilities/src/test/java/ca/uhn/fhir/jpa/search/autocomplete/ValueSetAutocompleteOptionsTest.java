@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -15,12 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("ValueSetAutocompleteOptions validation and parsing")
@@ -36,10 +34,10 @@ class ValueSetAutocompleteOptionsTest {
 	private IPrimitiveType<String> myUrl;
 	private ValueSet myValueSet;
 	private ValueSetAutocompleteOptions myOptionsResult;
-	final private DaoConfig myDaoConfig = new DaoConfig();
+	final private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	{
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@Test
@@ -48,9 +46,9 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), is(nullValue()));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
+		assertNotNull(myOptionsResult);
+		assertNull(myOptionsResult.getResourceType());
+		assertEquals("code", myOptionsResult.getSearchParamCode());
 	}
 
 	@Test
@@ -59,10 +57,10 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), equalTo("Observation"));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
-		assertThat(myOptionsResult.getSearchParamModifier(), is(nullValue()));
+		assertNotNull(myOptionsResult);
+		assertEquals("Observation", myOptionsResult.getResourceType());
+		assertEquals("code", myOptionsResult.getSearchParamCode());
+		assertNull(myOptionsResult.getSearchParamModifier());
 	}
 
 	@Test
@@ -71,10 +69,10 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getResourceType(), equalTo("Observation"));
-		assertThat(myOptionsResult.getSearchParamCode(), equalTo("code"));
-		assertThat(myOptionsResult.getSearchParamModifier(), equalTo("text"));
+		assertNotNull(myOptionsResult);
+		assertEquals("Observation", myOptionsResult.getResourceType());
+		assertEquals("code", myOptionsResult.getSearchParamCode());
+		assertEquals("text", myOptionsResult.getSearchParamModifier());
 	}
 
 	@Test
@@ -84,8 +82,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getFilter(), equalTo("blood"));
+		assertNotNull(myOptionsResult);
+		assertEquals("blood", myOptionsResult.getFilter());
 	}
 
 	@Test
@@ -95,8 +93,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getFilter(), equalTo(""));
+		assertNotNull(myOptionsResult);
+		assertEquals("", myOptionsResult.getFilter());
 	}
 
 	@Test
@@ -105,7 +103,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult.getCount(), is(equalTo(Optional.empty())));
+		assertEquals(Optional.empty(), myOptionsResult.getCount());
 	}
 
 	@Test
@@ -115,8 +113,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult, is(not(nullValue())));
-		assertThat(myOptionsResult.getCount(), equalTo(Optional.of(50)));
+		assertNotNull(myOptionsResult);
+		assertEquals(Optional.of(50), myOptionsResult.getCount());
 	}
 
 	@Nested
@@ -170,7 +168,7 @@ class ValueSetAutocompleteOptionsTest {
 		@Test
 		public void whenAdvancedIndexingOff() {
 		    // given
-			myDaoConfig.setAdvancedHSearchIndexing(false);
+			myStorageSettings.setAdvancedHSearchIndexing(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
@@ -178,13 +176,13 @@ class ValueSetAutocompleteOptionsTest {
 
 		private void assertParseThrowsInvalidRequestWithErrorCode(int theErrorCode) {
 			InvalidRequestException e = assertThrows(InvalidRequestException.class, ValueSetAutocompleteOptionsTest.this::parseOptions);
-			assertThat(e.getMessage(), startsWith(Msg.code(theErrorCode)));
+			assertThat(e.getMessage()).startsWith(Msg.code(theErrorCode));
 		}
 
 	}
 
 	void parseOptions() {
-		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, myContext, myFilter, myCount, myId, myUrl, myValueSet);
+		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myStorageSettings, myContext, myFilter, myCount, myId, myUrl, myValueSet);
 	}
 
 }

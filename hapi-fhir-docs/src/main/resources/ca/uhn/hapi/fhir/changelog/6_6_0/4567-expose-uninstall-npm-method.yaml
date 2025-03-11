@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4567
+title: "The IPackageInstallerSvc interface for managing NPM packages now exposes an
+   uninstall method. Thanks to Jens Kristian Villadsen for the pull request!"

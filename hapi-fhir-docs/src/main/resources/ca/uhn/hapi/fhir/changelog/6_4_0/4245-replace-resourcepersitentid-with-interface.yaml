@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4244
+title: "Replace usages of ResourcePersistentId with an interface IResourcePersistentId and parameterize specific
+implementations of it in classes that rely on a specific implementation."

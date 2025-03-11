@@ -1,50 +1,54 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <div th:fragment="left" class="col-sm-3 col-md-3 sidebar">
 
 	<h4>Options</h4>
 
+	<!-- Encoding -->
 	<label class="navBarButtonLabel">Encoding</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="encodingBtnGroup">
-		<label class="btn btn-info active">
-			<input type="radio" name="encoding" id="encode-default" value="" />(default)
-		</label> 
-		<label class="btn btn-info">
-			<input type="radio" name="encoding" id="encode-xml" value="xml" />XML
-		</label>
-		<label class="btn btn-info">
-			<input type="radio" name="encoding" id="encode-json" value="json" />JSON
-		</label>
+	<div class="btn-group" id="encodingBtnGroup" role="group">
+		<input type="radio" class="btn-check" name="encoding" id="encode-default" value="" />
+		<label class="btn btn-outline-info" for="encode-default">(default)</label>
+
+		<input type="radio" class="btn-check" name="encoding" id="encode-xml" value="xml" />
+		<label class="btn btn-outline-info" for="encode-xml">XML</label>
+
+		<input type="radio" class="btn-check" name="encoding" id="encode-json" value="json" />
+		<label class="btn btn-outline-info" for="encode-json">JSON</label>
 	</div>
 
+	<!-- Pretty -->
 	<br /> <label class="navBarButtonLabel">Pretty</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="prettyBtnGroup" style="margin-top: 5px;">
-		<label class="btn btn-info active"> <input
-			type="radio" name="pretty" id="pretty-default" value="" />(default)
-		</label> <label class="btn btn-info"> <input
-			type="radio" name="pretty" id="pretty-true" value="true" />On
-		</label> <label class="btn btn-info"> <input
-			type="radio" name="pretty" id="pretty-false" value="false" />Off
-		</label>
+	<div role="group" class="btn-group" id="prettyBtnGroup" style="margin-top: 5px;">
+		<input type="radio" class="btn-check" name="pretty" id="pretty-default" value="" />
+		<label class="btn btn-outline-info" for="pretty-default">(default)</label>
+
+		<input type="radio" class="btn-check" name="pretty" id="pretty-true" value="true" />
+		<label class="btn btn-outline-info" for="pretty-true">On</label>
+
+		<input
+			type="radio" class="btn-check" name="pretty" id="pretty-false" value="false" />
+		<label class="btn btn-outline-info" for="pretty-false"> Off</label>
 	</div>
 
+	<!-- Summary -->
 	<br /> <label class="navBarButtonLabel">Summary</label>
-	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="summaryBtnGroup" style="margin-top: 5px;">
-		<label class="btn btn-info active">
-			<input type="radio" name="_summary" id="summary-default" value="" />(none)
-		</label> 
-		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-true" value="true" />true
-		</label> 
-		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-text" value="text" />text
-		</label>
-		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-data" value="data" />data
-		</label>
-		<label class="btn btn-info">
-			<input type="radio" name="_summary" id="summary-count" value="count" />count
-		</label>
+	<div role="group" class="btn-group" id="summaryBtnGroup" style="margin-top: 5px;">
+		<input type="radio" class="btn-check" name="_summary" id="summary-default" value="" />
+		<label class="btn btn-outline-info" for="summary-default">(none)</label>
+
+		<input type="radio" class="btn-check" name="_summary" id="summary-true" value="true" />
+		<label class="btn btn-outline-info" for="summary-true">true</label>
+
+		<input type="radio" class="btn-check" name="_summary" id="summary-text" value="text" />
+		<label class="btn btn-outline-info" for="summary-text">text</label>
+
+		<input type="radio" class="btn-check" name="_summary" id="summary-data" value="data" />
+		<label class="btn btn-outline-info" for="summary-data">data</label>
+
+		<input type="radio" class="btn-check" name="_summary" id="summary-count" value="count" />
+		<label class="btn btn-outline-info" for="summary-count">count</label>
 	</div>
 
 	<script type="text/javascript" th:inline="javascript">
@@ -54,14 +58,14 @@
 		// Encoding buttons are wider, so set the shorter group to the same width
 		// so that they wrap at the same time if the page is narrow
 		$('#prettyBtnGroup').width($('#encodingBtnGroup').width());
-		
+
 		var encoding = [[${encoding}]];
 		if (encoding == 'xml') {
 				$('#encode-xml').trigger("click");
 		} else if (encoding == 'json') {
 				$('#encode-json').trigger("click");
 		}
-			
+
 		var pretty = [[${pretty}]];
 		if (pretty){
 				$('#pretty-true').trigger("click");
@@ -82,15 +86,31 @@
             $('#summary-default').trigger("click");
       }
 
-		if ([[${!#strings.isEmpty(resultBody)}]]) {
+
+		const hasResultBody = [[${!#strings.isEmpty(resultBody)}]];
+		if (hasResultBody) {
 			// When we're displaying a result page, the options buttons should
 			// actually apply their values to the current search/action
-			$('#encode-default').change( function(){ location.href=updateURLParameter(location.href, 'encoding', '') });
-			$('#encode-xml').change( function(){ location.href=updateURLParameter(location.href, 'encoding', 'xml') });
-			$('#encode-json').change( function(){ location.href=updateURLParameter(location.href, 'encoding', 'json') });
-			$('#pretty-default').change( function(){ location.href=updateURLParameter(location.href, 'pretty', '') });
-			$('#pretty-true').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'true') });
-			$('#pretty-false').change( function(){ location.href=updateURLParameter(location.href, 'pretty', 'false') });
+			$('#encode-default').change(function(){
+				if (hasResultBody)
+					location.href=updateURLParameter(location.href, 'encoding', '');
+			});
+			$('#encode-xml').change(function(){
+				location.href=updateURLParameter(location.href, 'encoding', 'xml');
+			});
+			$('#encode-json').change(function(){
+				location.href=updateURLParameter(location.href, 'encoding', 'json');
+			});
+
+			$('#pretty-default').change(function(){
+				location.href=updateURLParameter(location.href, 'pretty', '');
+			});
+			$('#pretty-true').change(function(){
+				location.href=updateURLParameter(location.href, 'pretty', 'true');
+			});
+			$('#pretty-false').change(function(){
+				location.href=updateURLParameter(location.href, 'pretty', 'false');
+			});
 		}
 		
 	});
@@ -106,25 +126,30 @@
 
 	<h4>Server</h4>
 
-	<ul class="nav nav-sidebar">
-		<li th:class="(${notHome} == null and ${resourceName} != null and ${resourceName.empty}) ? 'active' : ''">
-			<a href="#" onclick="doAction(this, 'home', null);">Server Home/Actions</a>
+	<ul class="nav flex-column nav-pills">
+		<li class="nav-item">
+			<a href="#" onclick="doAction(this, 'home', null);" class="nav-link" th:classappend="${page} == 'home' ? 'active' : ''">Server Home/Actions</a>
 		</li>
+      <li th:if="${supportsHfql}" class="nav-item">
+         <a href="#" id="leftHfql" onclick="doAction(this, 'hfql', null);" class="nav-link" th:classappend="${page} == 'hfql' ? 'active' : ''">HFQL / SQL</a>
+      </li>
 	</ul>
 
 	<h4>Resources</h4>
 	
-	<ul class="nav nav-sidebar" th:unless="${conf.rest.empty}">
+	<ul class="nav flex-column nav-pills" th:unless="${conf.rest.empty}">
 		<th:block th:each="resource, resIterStat : ${conf.rest[0].resource}">
-			<li th:class="${resourceName} == ${resource.typeElement.valueAsString} ? 'active' : ''">
+			<li class="nav-item">
 
 				<a
                th:id="'leftResource' + ${resource.typeElement.valueAsString}"
                href="#"
                th:data1="${resource.typeElement.valueAsString}"
+					class="nav-link"
+					th:classappend="${resourceName} == ${resource.typeElement.valueAsString} ? 'active' : ''"
                onclick="doAction(this, 'resource', this.getAttribute('data1'));">
 					<th:block th:text="${resource.typeElement.valueAsString}" >Patient</th:block>
-					<span class="badge badge-secondary" th:if="${resourceCounts[resource.typeElement.valueAsString]} != null" th:text="${resourceCounts[resource.typeElement.valueAsString]}"/>
+					<span class="badge text-bg-secondary" th:if="${resourceCounts[resource.typeElement.valueAsString]} != null" th:text="${resourceCounts[resource.typeElement.valueAsString]}"/>
 				</a>
 			</li>
 		</th:block>

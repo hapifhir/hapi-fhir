@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.util;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -50,64 +49,58 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public enum JpaParamUtil {
-
 	;
 
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
-																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+	public static IQueryParameterAnd<?> parseQueryParams(
+			FhirContext theContext,
+			RestSearchParameterTypeEnum paramType,
+			String theUnqualifiedParamName,
+			List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder;
 		switch (paramType) {
 			case COMPOSITE:
 				throw new UnsupportedOperationException(Msg.code(496));
 			case DATE:
-				binder = new QueryParameterAndBinder(DateAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.emptyList());
 				break;
 			case NUMBER:
-				binder = new QueryParameterAndBinder(NumberAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.emptyList());
 				break;
 			case QUANTITY:
-				binder = new QueryParameterAndBinder(QuantityAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.emptyList());
 				break;
 			case REFERENCE:
-				binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.emptyList());
 				break;
 			case STRING:
-				binder = new QueryParameterAndBinder(StringAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.emptyList());
 				break;
 			case TOKEN:
-				binder = new QueryParameterAndBinder(TokenAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.emptyList());
 				break;
 			case URI:
-				binder = new QueryParameterAndBinder(UriAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(UriAndListParam.class, Collections.emptyList());
 				break;
 			case HAS:
-				binder = new QueryParameterAndBinder(HasAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(HasAndListParam.class, Collections.emptyList());
 				break;
 			case SPECIAL:
-				binder = new QueryParameterAndBinder(SpecialAndListParam.class,
-					Collections.emptyList());
+				binder = new QueryParameterAndBinder(SpecialAndListParam.class, Collections.emptyList());
 				break;
 			default:
-				throw new IllegalArgumentException(Msg.code(497) + "Parameter '" + theUnqualifiedParamName + "' has type " + paramType + " which is currently not supported.");
+				throw new IllegalArgumentException(Msg.code(497) + "Parameter '" + theUnqualifiedParamName
+						+ "' has type " + paramType + " which is currently not supported.");
 		}
 
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
@@ -116,8 +109,12 @@ public enum JpaParamUtil {
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(ISearchParamRegistry theSearchParamRegistry, FhirContext theContext, RuntimeSearchParam theParamDef,
-																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+	public static IQueryParameterAnd<?> parseQueryParams(
+			ISearchParamRegistry theSearchParamRegistry,
+			FhirContext theContext,
+			RuntimeSearchParam theParamDef,
+			String theUnqualifiedParamName,
+			List<QualifiedParamList> theParameters) {
 
 		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 
@@ -127,8 +124,8 @@ public enum JpaParamUtil {
 
 			if (compositeList.size() != 2) {
 				throw new ConfigurationException(Msg.code(498) + "Search parameter of type " + theUnqualifiedParamName
-					+ " must have 2 composite types declared in parameter annotation, found "
-					+ compositeList.size());
+						+ " must have 2 composite types declared in parameter annotation, found "
+						+ compositeList.size());
 			}
 
 			RuntimeSearchParam left = compositeList.get(0);
@@ -136,8 +133,8 @@ public enum JpaParamUtil {
 
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			CompositeAndListParam<IQueryParameterType, IQueryParameterType> cp = new CompositeAndListParam(
-				getCompositeBindingClass(left.getParamType(), left.getName()),
-				getCompositeBindingClass(right.getParamType(), right.getName()));
+					getCompositeBindingClass(left.getParamType(), left.getName()),
+					getCompositeBindingClass(right.getParamType(), right.getName()));
 
 			cp.setValuesAsQueryTokens(theContext, theUnqualifiedParamName, theParameters);
 
@@ -147,22 +144,26 @@ public enum JpaParamUtil {
 		}
 	}
 
-	public static List<RuntimeSearchParam> resolveComponentParameters(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
-		List<RuntimeSearchParam> compositeList = resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
+	public static List<RuntimeSearchParam> resolveComponentParameters(
+			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
+		List<RuntimeSearchParam> compositeList =
+				resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
 
-		// wipmb why is this sorted?  Is the param order flipped too during query-time?
+		// todo mb why is this sorted?  Is the param order flipped too during query-time?
 		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
 
 		return compositeList;
 	}
 
 	@Nonnull
-	public static List<RuntimeSearchParam> resolveCompositeComponentsDeclaredOrder(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
+	public static List<RuntimeSearchParam> resolveCompositeComponentsDeclaredOrder(
+			ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
 		List<RuntimeSearchParam> compositeList = new ArrayList<>();
 		List<RuntimeSearchParam.Component> components = theParamDef.getComponents();
 		for (RuntimeSearchParam.Component next : components) {
 			String url = next.getReference();
-			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(url);
+			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(
+					url, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}
@@ -171,8 +172,8 @@ public enum JpaParamUtil {
 		return compositeList;
 	}
 
-	private static Class<?> getCompositeBindingClass(RestSearchParameterTypeEnum paramType,
-																	 String theUnqualifiedParamName) {
+	private static Class<?> getCompositeBindingClass(
+			RestSearchParameterTypeEnum paramType, String theUnqualifiedParamName) {
 
 		switch (paramType) {
 			case DATE:
@@ -196,8 +197,8 @@ public enum JpaParamUtil {
 
 			case COMPOSITE:
 			default:
-				throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName + "' has type " + paramType
-					+ " which is currently not supported.");
+				throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName
+						+ "' has type " + paramType + " which is currently not supported.");
 		}
 	}
 }

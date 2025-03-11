@@ -1,0 +1,4098 @@
+{
+	"resourceType": "Bundle",
+	"id": "EXM124-7.0.000-bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.114222.4.11.836",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.114222.4.11.836"
+					}
+				],
+				"version": "20121025",
+				"name": "Race",
+				"title": "Race",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+							"version": "1.2",
+							"concept": [
+								{
+									"code": "1002-5",
+									"display": "American Indian or Alaska Native"
+								},
+								{
+									"code": "2028-9",
+									"display": "Asian"
+								},
+								{
+									"code": "2054-5",
+									"display": "Black or African American"
+								},
+								{
+									"code": "2076-8",
+									"display": "Native Hawaiian or Other Pacific Islander"
+								},
+								{
+									"code": "2106-3",
+									"display": "White"
+								},
+								{
+									"code": "2131-1",
+									"display": "Other Race"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.114222.4.11.836"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.114222.4.11.837",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.114222.4.11.837"
+					}
+				],
+				"version": "20121025",
+				"name": "Ethnicity",
+				"title": "Ethnicity",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+							"version": "1.2",
+							"concept": [
+								{
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								},
+								{
+									"code": "2186-5",
+									"display": "Not Hispanic or Latino"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.114222.4.11.837"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.101.12.1016",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.101.12.1016"
+					}
+				],
+				"version": "20180310",
+				"name": "HomeHealthcareServices",
+				"title": "Home Healthcare Services",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "99341",
+									"display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; and Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99342",
+									"display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; and Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99343",
+									"display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99344",
+									"display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99345",
+									"display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is unstable or has developed a significant new problem requiring immediate physician attention. Typically, 75 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99347",
+									"display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused interval history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99348",
+									"display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused interval history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99349",
+									"display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed interval history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99350",
+									"display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive interval history; A comprehensive examination; Medical decision making of moderate to high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. The patient may be unstable or may have developed a significant new problem requiring immediate physician attention. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+								}
+							]
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2018-03",
+							"concept": [
+								{
+									"code": "185460008",
+									"display": "Home visit request by patient (procedure)"
+								},
+								{
+									"code": "185462000",
+									"display": "Home visit request by relative (procedure)"
+								},
+								{
+									"code": "185466002",
+									"display": "Home visit for urgent condition (procedure)"
+								},
+								{
+									"code": "185467006",
+									"display": "Home visit for acute condition (procedure)"
+								},
+								{
+									"code": "185468001",
+									"display": "Home visit for chronic condition (procedure)"
+								},
+								{
+									"code": "185470005",
+									"display": "Home visit elderly assessment (procedure)"
+								},
+								{
+									"code": "225929007",
+									"display": "Joint home visit (procedure)"
+								},
+								{
+									"code": "315205008",
+									"display": "Bank holiday home visit (procedure)"
+								},
+								{
+									"code": "439708006",
+									"display": "Home visit (procedure)"
+								},
+								{
+									"code": "698704008",
+									"display": "Home visit for rheumatology service (procedure)"
+								},
+								{
+									"code": "704126008",
+									"display": "Home visit for anticoagulant drug monitoring (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "denom-EXM124-2",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
+				},
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://www.ama-assn.org/go/cpt",
+								"code": "99201",
+								"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/denom-EXM124"
+				},
+				"period": {
+					"start": "2019-01-01T01:00:00.0",
+					"end": "2019-01-02T01:00:00.0"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Encounter/denom-EXM124-2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "Hospice-2.0.000",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/dbcg/connectathon/Library/Hospice",
+				"version": "2.0.000",
+				"name": "Hospice",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://fhir.org/guides/dbcg/connectathon/Library/MATGlobalCommonFunctions|5.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://snomed.info/sct/731000124108|http://snomed.info/sct/731000124108/version/201709"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+					}
+				],
+				"parameter": [
+					{
+						"name": "Measurement Period",
+						"use": "in",
+						"min": 0,
+						"max": "1",
+						"type": "Period"
+					},
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "Has Hospice",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+							}
+						]
+					},
+					{
+						"type": "ServiceRequest",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+							}
+						]
+					},
+					{
+						"type": "Procedure",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Procedure"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBIb3NwaWNlIHZlcnNpb24gJzIuMC4wMDAnDQoNCi8qDQpUaGlzIGV4YW1wbGUgaXMgYSB3b3JrIGluIHByb2dyZXNzIGFuZCBzaG91bGQgbm90IGJlIGNvbnNpZGVyZWQgYSBmaW5hbCBzcGVjaWZpY2F0aW9uDQpvciByZWNvbW1lbmRhdGlvbiBmb3IgZ3VpZGFuY2UuIFRoaXMgZXhhbXBsZSB3aWxsIGhlbHAgZ3VpZGUgYW5kIGRpcmVjdCB0aGUgcHJvY2Vzcw0Kb2YgZmluZGluZyBjb252ZW50aW9ucyBhbmQgdXNhZ2UgcGF0dGVybnMgdGhhdCBtZWV0IHRoZSBuZWVkcyBvZiB0aGUgdmFyaW91cyBzdGFrZWhvbGRlcnMNCmluIHRoZSBtZWFzdXJlIGRldmVsb3BtZW50IGNvbW11bml0eS4NCiovDQoNCi8qDQpAdXBkYXRlOiBAQEJUUiAyMDIwLTAzLTMxIC0+DQpJbmNyZW1lbnRlZCB2ZXJzaW9uIHRvIDIuMC4wMDANClVwZGF0ZWQgRkhJUiB2ZXJzaW9uIHRvIDQuMC4xDQpAQEANCiovDQoNCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgTUFUR2xvYmFsQ29tbW9uRnVuY3Rpb25zIHZlcnNpb24gJzUuMC4wMDAnIGNhbGxlZCBHbG9iYWwNCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnIGNhbGxlZCBGSElSSGVscGVycw0KDQpjb2Rlc3lzdGVtICJTTk9NRURDVDoyMDE3LTA5IjogJ2h0dHA6Ly9zbm9tZWQuaW5mby9zY3QvNzMxMDAwMTI0MTA4JyB2ZXJzaW9uICdodHRwOi8vc25vbWVkLmluZm8vc2N0LzczMTAwMDEyNDEwOC92ZXJzaW9uLzIwMTcwOScNCg0KdmFsdWVzZXQgIkVuY291bnRlciBJbnBhdGllbnQiOiAnaHR0cDovL2N0cy5ubG0ubmloLmdvdi9maGlyL1ZhbHVlU2V0LzIuMTYuODQwLjEuMTEzODgzLjMuNjY2LjUuMzA3Jw0KdmFsdWVzZXQgIkhvc3BpY2UgY2FyZSBhbWJ1bGF0b3J5IjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzc2Mi4xLjQuMTEwOC4xNScNCg0KY29kZSAiRGlzY2hhcmdlIHRvIGhlYWx0aGNhcmUgZmFjaWxpdHkgZm9yIGhvc3BpY2UgY2FyZSAocHJvY2VkdXJlKSI6ICc0MjgzNzEwMDAxMjQxMDAnIGZyb20gIlNOT01FRENUOjIwMTctMDkiIGRpc3BsYXkgJ0Rpc2NoYXJnZSB0byBoZWFsdGhjYXJlIGZhY2lsaXR5IGZvciBob3NwaWNlIGNhcmUgKHByb2NlZHVyZSknDQpjb2RlICJEaXNjaGFyZ2UgdG8gaG9tZSBmb3IgaG9zcGljZSBjYXJlIChwcm9jZWR1cmUpIjogJzQyODM2MTAwMDEyNDEwNycgZnJvbSAiU05PTUVEQ1Q6MjAxNy0wOSIgZGlzcGxheSAnRGlzY2hhcmdlIHRvIGhvbWUgZm9yIGhvc3BpY2UgY2FyZSAocHJvY2VkdXJlKScNCg0KcGFyYW1ldGVyICJNZWFzdXJlbWVudCBQZXJpb2QiIEludGVydmFsPERhdGVUaW1lPg0KICBkZWZhdWx0IEludGVydmFsW0AyMDE5LTAxLTAxVDAwOjAwOjAwLjAsIEAyMDIwLTAxLTAxVDAwOjAwOjAwLjApDQoNCmNvbnRleHQgUGF0aWVudA0KDQpkZWZpbmUgIkhhcyBIb3NwaWNlIjoNCglleGlzdHMgKA0KICAgIFtFbmNvdW50ZXI6ICJFbmNvdW50ZXIgSW5wYXRpZW50Il0gRGlzY2hhcmdlSG9zcGljZQ0KCQkJd2hlcmUgRGlzY2hhcmdlSG9zcGljZS5zdGF0dXMgPSAnZmluaXNoZWQnDQoJCSAgICBhbmQgKA0KCSAgICAgICAgRGlzY2hhcmdlSG9zcGljZS5ob3NwaXRhbGl6YXRpb24uZGlzY2hhcmdlRGlzcG9zaXRpb24gfiAiRGlzY2hhcmdlIHRvIGhvbWUgZm9yIGhvc3BpY2UgY2FyZSAocHJvY2VkdXJlKSINCgkJCQkgICAgb3IgRGlzY2hhcmdlSG9zcGljZS5ob3NwaXRhbGl6YXRpb24uZGlzY2hhcmdlRGlzcG9zaXRpb24gfiAiRGlzY2hhcmdlIHRvIGhlYWx0aGNhcmUgZmFjaWxpdHkgZm9yIGhvc3BpY2UgY2FyZSAocHJvY2VkdXJlKSINCgkgICAgCSkNCgkJCQlhbmQgRGlzY2hhcmdlSG9zcGljZS5wZXJpb2QgZW5kcyBkdXJpbmcgIk1lYXN1cmVtZW50IFBlcmlvZCINCgkpDQogICAgb3IgZXhpc3RzICgNCiAgICAgIFtTZXJ2aWNlUmVxdWVzdDogIkhvc3BpY2UgY2FyZSBhbWJ1bGF0b3J5Il0gSG9zcGljZU9yZGVyDQogICAgICAgIHdoZXJlIEhvc3BpY2VPcmRlci5pbnRlbnQgPSAnb3JkZXInDQogICAgICAgICAgICBhbmQgSG9zcGljZU9yZGVyLmF1dGhvcmVkT24gaW4gIk1lYXN1cmVtZW50IFBlcmlvZCINCiAgICApDQogICAgb3IgZXhpc3RzICgNCiAgICAgIFtQcm9jZWR1cmU6ICJIb3NwaWNlIGNhcmUgYW1idWxhdG9yeSJdIEhvc3BpY2VQZXJmb3JtZWQNCiAgICAgICAgd2hlcmUgSG9zcGljZVBlcmZvcm1lZC5zdGF0dXMgPSAnY29tcGxldGVkJw0KICAgICAgICAgIGFuZCBHbG9iYWwuIk5vcm1hbGl6ZSBJbnRlcnZhbCIoSG9zcGljZVBlcmZvcm1lZC5wZXJmb3JtZWQpIG92ZXJsYXBzICJNZWFzdXJlbWVudCBQZXJpb2QiDQogICAgKQ0K"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/library-Hospice-2.0.000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "denom-EXM124-3",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/observation"
+					]
+				},
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "10524-7",
+							"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/denom-EXM124"
+				},
+				"effectiveDateTime": "2019-11-01T00:00:00"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/denom-EXM124-3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.198.12.1014",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.198.12.1014"
+					}
+				],
+				"version": "20170504",
+				"name": "HysterectomywithNoResidualCervix",
+				"title": "Hysterectomy with No Residual Cervix",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "1998",
+							"concept": [
+								{
+									"code": "56308",
+									"display": "Laparoscopy, surgical; with vaginal hysterectomy with or without removal of tube(s), with or without removal of ovary(s) (laparoscopic assisted vaginal hysterectomy)"
+								}
+							]
+						},
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "51925",
+									"display": "Closure of vesicouterine fistula; with hysterectomy"
+								},
+								{
+									"code": "57540",
+									"display": "Excision of cervical stump, abdominal approach"
+								},
+								{
+									"code": "57545",
+									"display": "Excision of cervical stump, abdominal approach; with pelvic floor repair"
+								},
+								{
+									"code": "57550",
+									"display": "Excision of cervical stump, vaginal approach"
+								},
+								{
+									"code": "57555",
+									"display": "Excision of cervical stump, vaginal approach; with anterior and/or posterior repair"
+								},
+								{
+									"code": "57556",
+									"display": "Excision of cervical stump, vaginal approach; with repair of enterocele"
+								},
+								{
+									"code": "58150",
+									"display": "Total abdominal hysterectomy (corpus and cervix), with or without removal of tube(s), with or without removal of ovary(s)"
+								},
+								{
+									"code": "58152",
+									"display": "Total abdominal hysterectomy (corpus and cervix), with or without removal of tube(s), with or without removal of ovary(s); with colpo-urethrocystopexy (eg, Marshall-Marchetti-Krantz, Burch)"
+								},
+								{
+									"code": "58200",
+									"display": "Total abdominal hysterectomy, including partial vaginectomy, with para-aortic and pelvic lymph node sampling, with or without removal of tube(s), with or without removal of ovary(s)"
+								},
+								{
+									"code": "58210",
+									"display": "Radical abdominal hysterectomy, with bilateral total pelvic lymphadenectomy and para-aortic lymph node sampling (biopsy), with or without removal of tube(s), with or without removal of ovary(s)"
+								},
+								{
+									"code": "58240",
+									"display": "Pelvic exenteration for gynecologic malignancy, with total abdominal hysterectomy or cervicectomy, with or without removal of tube(s), with or without removal of ovary(s), with removal of bladder and ureteral transplantations, and/or abdominoperineal resection of rectum and colon and colostomy, or any combination thereof"
+								},
+								{
+									"code": "58260",
+									"display": "Vaginal hysterectomy, for uterus 250 g or less"
+								},
+								{
+									"code": "58262",
+									"display": "Vaginal hysterectomy, for uterus 250 g or less; with removal of tube(s), and/or ovary(s)"
+								},
+								{
+									"code": "58263",
+									"display": "Vaginal hysterectomy, for uterus 250 g or less; with removal of tube(s), and/or ovary(s), with repair of enterocele"
+								},
+								{
+									"code": "58267",
+									"display": "Vaginal hysterectomy, for uterus 250 g or less; with colpo-urethrocystopexy (Marshall-Marchetti-Krantz type, Pereyra type) with or without endoscopic control"
+								},
+								{
+									"code": "58270",
+									"display": "Vaginal hysterectomy, for uterus 250 g or less; with repair of enterocele"
+								},
+								{
+									"code": "58275",
+									"display": "Vaginal hysterectomy, with total or partial vaginectomy"
+								},
+								{
+									"code": "58280",
+									"display": "Vaginal hysterectomy, with total or partial vaginectomy; with repair of enterocele"
+								},
+								{
+									"code": "58285",
+									"display": "Vaginal hysterectomy, radical (Schauta type operation)"
+								},
+								{
+									"code": "58290",
+									"display": "Vaginal hysterectomy, for uterus greater than 250 g"
+								},
+								{
+									"code": "58291",
+									"display": "Vaginal hysterectomy, for uterus greater than 250 g; with removal of tube(s) and/or ovary(s)"
+								},
+								{
+									"code": "58292",
+									"display": "Vaginal hysterectomy, for uterus greater than 250 g; with removal of tube(s) and/or ovary(s), with repair of enterocele"
+								},
+								{
+									"code": "58293",
+									"display": "Vaginal hysterectomy, for uterus greater than 250 g; with colpo-urethrocystopexy (Marshall-Marchetti-Krantz type, Pereyra type) with or without endoscopic control"
+								},
+								{
+									"code": "58294",
+									"display": "Vaginal hysterectomy, for uterus greater than 250 g; with repair of enterocele"
+								},
+								{
+									"code": "58548",
+									"display": "Laparoscopy, surgical, with radical hysterectomy, with bilateral total pelvic lymphadenectomy and para-aortic lymph node sampling (biopsy), with removal of tube(s) and ovary(s), if performed"
+								},
+								{
+									"code": "58550",
+									"display": "Laparoscopy, surgical, with vaginal hysterectomy, for uterus 250 g or less"
+								},
+								{
+									"code": "58552",
+									"display": "Laparoscopy, surgical, with vaginal hysterectomy, for uterus 250 g or less; with removal of tube(s) and/or ovary(s)"
+								},
+								{
+									"code": "58553",
+									"display": "Laparoscopy, surgical, with vaginal hysterectomy, for uterus greater than 250 g"
+								},
+								{
+									"code": "58554",
+									"display": "Laparoscopy, surgical, with vaginal hysterectomy, for uterus greater than 250 g; with removal of tube(s) and/or ovary(s)"
+								},
+								{
+									"code": "58570",
+									"display": "Laparoscopy, surgical, with total hysterectomy, for uterus 250 g or less"
+								},
+								{
+									"code": "58571",
+									"display": "Laparoscopy, surgical, with total hysterectomy, for uterus 250 g or less; with removal of tube(s) and/or ovary(s)"
+								},
+								{
+									"code": "58572",
+									"display": "Laparoscopy, surgical, with total hysterectomy, for uterus greater than 250 g"
+								},
+								{
+									"code": "58573",
+									"display": "Laparoscopy, surgical, with total hysterectomy, for uterus greater than 250 g; with removal of tube(s) and/or ovary(s)"
+								},
+								{
+									"code": "58951",
+									"display": "Resection (initial) of ovarian, tubal or primary peritoneal malignancy with bilateral salpingo-oophorectomy and omentectomy; with total abdominal hysterectomy, pelvic and limited para-aortic lymphadenectomy"
+								},
+								{
+									"code": "58953",
+									"display": "Bilateral salpingo-oophorectomy with omentectomy, total abdominal hysterectomy and radical dissection for debulking"
+								},
+								{
+									"code": "58954",
+									"display": "Bilateral salpingo-oophorectomy with omentectomy, total abdominal hysterectomy and radical dissection for debulking; with pelvic lymphadenectomy and limited para-aortic lymphadenectomy"
+								},
+								{
+									"code": "58956",
+									"display": "Bilateral salpingo-oophorectomy with total omentectomy, total abdominal hysterectomy for malignancy"
+								},
+								{
+									"code": "59135",
+									"display": "Surgical treatment of ectopic pregnancy; interstitial, uterine pregnancy requiring total hysterectomy"
+								}
+							]
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2017-09",
+							"concept": [
+								{
+									"code": "27950001",
+									"display": "Total hysterectomy with unilateral removal of ovary (procedure)"
+								},
+								{
+									"code": "31545000",
+									"display": "Total hysterectomy with unilateral removal of tube (procedure)"
+								},
+								{
+									"code": "59750000",
+									"display": "Total hysterectomy with unilateral removal of tube and ovary (procedure)"
+								}
+							]
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2018-03",
+							"concept": [
+								{
+									"code": "112918004",
+									"display": "Vaginal hysterectomy with colpo-urethrocystopexy, Marshall-Marchetti-Krantz type (procedure)"
+								},
+								{
+									"code": "116140006",
+									"display": "Total hysterectomy (procedure)"
+								},
+								{
+									"code": "116142003",
+									"display": "Radical hysterectomy (procedure)"
+								},
+								{
+									"code": "116143008",
+									"display": "Total abdominal hysterectomy (procedure)"
+								},
+								{
+									"code": "116144002",
+									"display": "Total abdominal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+								},
+								{
+									"code": "236888001",
+									"display": "Laparoscopic total hysterectomy (procedure)"
+								},
+								{
+									"code": "236891001",
+									"display": "Laparoscopic radical hysterectomy (procedure)"
+								},
+								{
+									"code": "24293001",
+									"display": "Excision of cervical stump by abdominal approach (procedure)"
+								},
+								{
+									"code": "265056007",
+									"display": "Vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "27185000",
+									"display": "Vaginal hysterectomy with partial colpectomy and repair of enterocele (procedure)"
+								},
+								{
+									"code": "287924009",
+									"display": "Excision of cervix stump (procedure)"
+								},
+								{
+									"code": "30160001",
+									"display": "Vaginal hysterectomy with total colpectomy and repair of enterocele (procedure)"
+								},
+								{
+									"code": "307771009",
+									"display": "Radical abdominal hysterectomy (procedure)"
+								},
+								{
+									"code": "309880009",
+									"display": "Vaginal hysterocolpectomy (procedure)"
+								},
+								{
+									"code": "35955002",
+									"display": "Radical vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "359971002",
+									"display": "Ward-Mayo operation for vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "359974005",
+									"display": "Tuffier operation for vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "359977003",
+									"display": "Mayo operation for vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "359983000",
+									"display": "Heaney operation for vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "361222003",
+									"display": "Wertheim-Meigs abdominal hysterectomy (procedure)"
+								},
+								{
+									"code": "361223008",
+									"display": "Wertheim operation (procedure)"
+								},
+								{
+									"code": "413145007",
+									"display": "Vaginal hysterectomy with conservation of ovaries (procedure)"
+								},
+								{
+									"code": "414575003",
+									"display": "Laparoscopic total abdominal hysterectomy and bilateral salpingo-oophorectomy (procedure)"
+								},
+								{
+									"code": "41566006",
+									"display": "Excision of cervical stump by vaginal approach (procedure)"
+								},
+								{
+									"code": "43791001",
+									"display": "Vaginal hysterectomy with total colpectomy (procedure)"
+								},
+								{
+									"code": "441820006",
+									"display": "Laparoscopy assisted vaginal hysterectomy with bilateral salpingo-oophorectomy (procedure)"
+								},
+								{
+									"code": "446446002",
+									"display": "Total abdominal hysterectomy and removal of vaginal cuff (procedure)"
+								},
+								{
+									"code": "446679008",
+									"display": "Total laparoscopic excision of uterus by abdominal approach (procedure)"
+								},
+								{
+									"code": "447771005",
+									"display": "Abdominal hysterectomy and excision of periuterine tissue (procedure)"
+								},
+								{
+									"code": "448539002",
+									"display": "Vaginal hysterectomy and excision of periuterine tissue (procedure)"
+								},
+								{
+									"code": "54490004",
+									"display": "Vaginal hysterectomy with repair of enterocele (procedure)"
+								},
+								{
+									"code": "63516002",
+									"display": "Vaginal hysterectomy with colpo-urethrocystopexy, Pereyra type (procedure)"
+								},
+								{
+									"code": "708877008",
+									"display": "Laparoscopic total hysterectomy using robotic assistance (procedure)"
+								},
+								{
+									"code": "708878003",
+									"display": "Laparoscopic radical hysterectomy using robotic assistance (procedure)"
+								},
+								{
+									"code": "75835007",
+									"display": "Laparoscopic-assisted vaginal hysterectomy (procedure)"
+								},
+								{
+									"code": "77902002",
+									"display": "Vaginal hysterectomy with partial colpectomy (procedure)"
+								},
+								{
+									"code": "86477000",
+									"display": "Total hysterectomy with removal of both tubes and ovaries (procedure)"
+								},
+								{
+									"code": "88144003",
+									"display": "Removal of ectopic interstitial uterine pregnancy requiring total hysterectomy (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Condition",
+				"id": "denomexcl-EXM124-2",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+							"code": "confirmed",
+							"display": "Confirmed"
+						}
+					]
+				},
+				"code": {
+					"coding": [
+						{
+							"system": "http://snomed.info/sct/731000124108",
+							"code": "37687000",
+							"display": "Congenital absence of cervix (disorder)"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/denomexcl-EXM124"
+				},
+				"onsetDateTime": "1995-01-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Condition/denomexcl-EXM124-2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "numer-EXM124",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2028-9",
+									"display": "Asian"
+								}
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "999999995"
+					}
+				],
+				"name": [
+					{
+						"family": "Brigand",
+						"given": [
+							"Melanie"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1995-01-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/numer-EXM124"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.101.12.1025",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.101.12.1025"
+					}
+				],
+				"version": "20170504",
+				"name": "PreventiveCareServices-EstablishedOfficeVisit,18andUp",
+				"title": "Preventive Care Services - Established Office Visit, 18 and Up",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "99395",
+									"display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 18-39 years"
+								},
+								{
+									"code": "99396",
+									"display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 40-64 years"
+								},
+								{
+									"code": "99397",
+									"display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 65 years and older"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "MeasureReport",
+				"id": "measurereport-numer-EXM124",
+				"contained": [
+					{
+						"resourceType": "Bundle",
+						"id": "b4fdaee7-00f9-4c88-9dc0-213df5e0fd62",
+						"type": "collection",
+						"entry": [
+							{
+								"fullUrl": "Patient/numer-EXM124",
+								"resource": {
+									"resourceType": "Patient",
+									"id": "numer-EXM124",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+										]
+									},
+									"extension": [
+										{
+											"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+											"extension": [
+												{
+													"url": "ombCategory",
+													"valueCoding": {
+														"system": "urn:oid:2.16.840.1.113883.6.238",
+														"code": "2028-9",
+														"display": "Asian"
+													}
+												}
+											]
+										},
+										{
+											"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+											"extension": [
+												{
+													"url": "ombCategory",
+													"valueCoding": {
+														"system": "urn:oid:2.16.840.1.113883.6.238",
+														"code": "2135-2",
+														"display": "Hispanic or Latino"
+													}
+												}
+											]
+										}
+									],
+									"identifier": [
+										{
+											"use": "usual",
+											"type": {
+												"coding": [
+													{
+														"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+														"code": "MR",
+														"display": "Medical Record Number"
+													}
+												]
+											},
+											"system": "http://hospital.smarthealthit.org",
+											"value": "999999995"
+										}
+									],
+									"name": [
+										{
+											"family": "Brigand",
+											"given": [
+												"Melanie"
+											]
+										}
+									],
+									"gender": "female",
+									"birthDate": "1995-01-01"
+								}
+							},
+							{
+								"fullUrl": "Observation/numer-EXM124-3",
+								"resource": {
+									"resourceType": "Observation",
+									"id": "numer-EXM124-3",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/observation"
+										]
+									},
+									"status": "final",
+									"code": {
+										"coding": [
+											{
+												"system": "http://loinc.org",
+												"code": "10524-7",
+												"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+											}
+										]
+									},
+									"subject": {
+										"reference": "Patient/numer-EXM124"
+									},
+									"effectiveDateTime": "2019-11-01T00:00:00",
+									"valueBoolean": true
+								}
+							},
+							{
+								"fullUrl": "f4fa6314-2a0b-41a5-a11f-eff40753a857",
+								"resource": {
+									"resourceType": "List",
+									"id": "f4fa6314-2a0b-41a5-a11f-eff40753a857",
+									"title": "initial-population",
+									"entry": [
+										{
+											"item": {
+												"reference": "numer-EXM124"
+											}
+										},
+										{
+											"item": {
+												"reference": "numer-EXM124-2"
+											}
+										}
+									]
+								}
+							},
+							{
+								"fullUrl": "1522b1a5-12ac-4ee8-85e7-68237fa3b2a9",
+								"resource": {
+									"resourceType": "List",
+									"id": "1522b1a5-12ac-4ee8-85e7-68237fa3b2a9",
+									"title": "denominator",
+									"entry": [
+										{
+											"item": {
+												"reference": "numer-EXM124"
+											}
+										},
+										{
+											"item": {
+												"reference": "numer-EXM124-2"
+											}
+										}
+									]
+								}
+							},
+							{
+								"fullUrl": "Encounter/numer-EXM124-2",
+								"resource": {
+									"resourceType": "Encounter",
+									"id": "numer-EXM124-2",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+										]
+									},
+									"status": "finished",
+									"class": {
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+										"code": "AMB",
+										"display": "ambulatory"
+									},
+									"type": [
+										{
+											"coding": [
+												{
+													"system": "http://www.ama-assn.org/go/cpt",
+													"code": "99201",
+													"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+												}
+											]
+										}
+									],
+									"subject": {
+										"reference": "Patient/numer-EXM124"
+									},
+									"period": {
+										"start": "2019-01-01T00:00:00.0",
+										"end": "2019-01-02T00:00:00.0"
+									}
+								}
+							},
+							{
+								"fullUrl": "f249b990-4fcc-4141-a29d-0649103821da",
+								"resource": {
+									"resourceType": "List",
+									"id": "f249b990-4fcc-4141-a29d-0649103821da",
+									"title": "numerator",
+									"entry": [
+										{
+											"item": {
+												"reference": "numer-EXM124"
+											}
+										},
+										{
+											"item": {
+												"reference": "numer-EXM124-3"
+											}
+										}
+									]
+								}
+							}
+						]
+					}
+				],
+				"status": "complete",
+				"type": "individual",
+				"measure": "Measure/measure-EXM124-7.0.000",
+				"subject": {
+					"reference": "Patient/numer-EXM124"
+				},
+				"period": {
+					"start": "2018-12-31T17:00:00-07:00",
+					"end": "2019-12-30T17:00:00-07:00"
+				},
+				"group": [
+					{
+						"id": "group-1",
+						"population": [
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "initial-population",
+											"display": "Initial Population"
+										}
+									]
+								},
+								"count": 1
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "numerator",
+											"display": "Numerator"
+										}
+									]
+								},
+								"count": 1
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator",
+											"display": "Denominator"
+										}
+									]
+								},
+								"count": 1
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator-exclusion",
+											"display": "Denominator Exclusion"
+										}
+									]
+								},
+								"count": 0
+							}
+						],
+						"measureScore": {
+							"value": 1.0
+						}
+					}
+				],
+				"evaluatedResource": [
+					{
+						"reference": "#b4fdaee7-00f9-4c88-9dc0-213df5e0fd62"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "MeasureReport/measurereport-numer-EXM124"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Measure",
+				"id": "measure-EXM124-7.0.000",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+						"valueCode": "boolean"
+					},
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM124",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+						"value": "124"
+					}
+				],
+				"version": "7.0.000",
+				"name": "EXM124",
+				"title": "Cervical Cancer Screening",
+				"status": "active",
+				"experimental": true,
+				"date": "2018-09-17",
+				"publisher": "National Committee for Quality Assurance",
+				"contact": [
+					{
+						"telecom": [
+							{
+								"system": "url",
+								"value": "http://www.ncqa.org/"
+							}
+						]
+					}
+				],
+				"description": "Percentage of women 21-64 years of age who were screened for cervical cancer using either of the following criteria: <br> *  Women age 21-64 who had cervical cytology performed every 3 years <br.*  Women age 30-64 who had cervical cytology/human papillomavirus (HPV) co-testing performed every 5 years ",
+				"useContext": [
+					{
+						"code": {
+							"code": "program"
+						},
+						"valueCodeableConcept": {
+							"text": "eligible-provider"
+						}
+					}
+				],
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "urn:iso:std:iso:3166",
+								"code": "US"
+							}
+						]
+					}
+				],
+				"purpose": "Women 23-64 years of age with a visit during the measurement period",
+				"copyright": "This Physician Performance Measure (Measure) and related data specifications were developed by the National Committee for Quality Assurance (NCQA). NCQA is not responsible for any use of the Measure. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measures or specifications. NCQA holds a copyright in the Measure. The Measure can be reproduced and distributed, without modification, for noncommercial purposes (eg, use by healthcare providers in connection with their practices) without obtaining approval from NCQA. Commercial use is defined as the sale, licensing, or distribution of the Measure for commercial gain, or incorporation of the Measure into a product or service that is sold, licensed or distributed for commercial gain. All commercial uses or requests for modification must be approved by NCQA and are subject to a license at the discretion of NCQA. (C) 2012-2017 National Committee for Quality Assurance. All Rights Reserved. Limited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. NCQA disclaims all liability for use or accuracy of any third party codes contained in the specifications. CPT(R) contained in the Measure specifications is copyright 2004-2017 American Medical Association. LOINC(R) copyright 2004-2017 Regenstrief Institute, Inc. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R] ) copyright 2004-2017 International Health Terminology Standards Development Organisation. ICD-10 copyright 2017 World Health Organization. All Rights Reserved.",
+				"approvalDate": "2016-01-01",
+				"lastReviewDate": "2016-09-01",
+				"effectivePeriod": {
+					"start": "2019-01-01",
+					"end": "2019-12-31"
+				},
+				"topic": [
+					{
+						"coding": [
+							{
+								"system": "http://loinc.org",
+								"code": "57024-2",
+								"display": "Health Quality Measure Document"
+							}
+						]
+					}
+				],
+				"relatedArtifact": [
+					{
+						"type": "citation",
+						"citation": "Howlader, N., Noone, A.M., Krapcho, M., Miller, D., Bishop, K., Altekruse, S.F., Kosary, C.L., Yu, M., Ruhl, J., Tatalovich, Z., Mariotto, A., Lewis, D.R., Chen, H.S., Feuer, E.J., and Cronin, K.A. 2016. \"SEER Cancer Statistics Review, 1975-2013.\" National Cancer Institute. (December 5, 2016) http://seer.cancer.gov/csr/1975_2013/"
+					},
+					{
+						"type": "citation",
+						"citation": "National Business Group on Health. 2011. \"Pathways to Managing Cancer in the Workplace.\" (May 8, 2012). http://www.tcyh.org/employers/downloads/Pathways_Managing_Cancer_2011.pdf"
+					},
+					{
+						"type": "citation",
+						"citation": "Feig S. 2011. Comparison of Costs and Benefits of Breast Cancer Screening with Mammography, Ultrasonagraphy, and MRI. Obstetrics and Gynecology Clinics of North America. 38(1):179-96."
+					},
+					{
+						"type": "citation",
+						"citation": "U.S. Preventive Services Task Force (USPSTF). 2016. \"Screening for Breast Cancer: U.S. Preventive Services Task Force Recommendation Statement.\" Ann Intern Med. 164(4):279-296. doi:10.7326/M15-2886."
+					},
+					{
+						"type": "depends-on",
+						"resource": "Library/library-FHIRHelpers-4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "Library/library-Hospice-2.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "Library/library-AdultOutpatientEncounters-2.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "Library/library-MATGlobalCommonFunctions-5.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "Library/library-SupplementalDataElements-2.0.0"
+					}
+				],
+				"library": [
+					"http://fhir.org/guides/dbcg/connectathon/Library/EXM124"
+				],
+				"disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND. Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+				"scoring": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/measure-scoring",
+							"code": "proportion"
+						}
+					]
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/measure-type",
+								"code": "process"
+							}
+						]
+					}
+				],
+				"rationale": "Breast cancer is one of the most common types of cancers, accounting for 15 percent of all new cancer diagnoses in the U.S. (Howlader et al, 2016). In 2013, over 3 million women were estimated to be living with breast cancer in the U.S. and it is estimated that 12 percent of women will be diagnosed with breast cancer at some point during their lifetime (Howlader et al, 2016). <br> While there are other factors that affect a woman's risk of developing breast cancer, advancing age is a primary risk factor. Breast cancer is most frequently diagnosed among women ages 55-64; the median age at diagnosis is 62 years (Howlader et al, 2016). The chance of a woman being diagnosed with breast cancer in a given year increases with age. By age 40, the chances are 1 in 235; by age 50 it becomes 1 in 54; by age 60, it is 1 in 25 (National Business Group on Health, 2011). <br> In the U.S., costs associated with a diagnosis of breast cancer range from $451 to $2,520, factoring in continued testing, multiple office visits and procedures. The total costs related to breast cancer add up to nearly $7 billion per year in the U.S., including $2 billion spent on late-stage treatment (National Business Group on Health, 2011). If breast cancer is detected through mammography screening and diagnosed in its earliest stages, treatment may be less expensive (Feig, 2011).",
+				"clinicalRecommendationStatement": "The U.S. Preventive Services Task Force (USPSTF) recommends biennial screening mammography for women aged 50-74 years (B recommendation).  <br> The decision to start screening mammography in women prior to age 50 years should be an individual one. Women who place a higher value on the potential benefit than the potential harms may choose to begin biennial screening between the ages of 40 and 49 years (C recommendation). (USPSTF, 2016) <br> The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of screening mammography in women aged 75 years or older (I statement). (USPSTF, 2016) <br> The USPSTF concludes that the current evidence is insufficient to assess the benefits and harms of digital breast tomosynthesis (DBT) as a primary screening method for breast cancer (I Statement). (USPSTF, 2016)  <br> The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of adjunctive screening for breast cancer using breast ultrasonography, magnetic resonance imaging, DBT, or other methods in women identified to have dense breasts on an otherwise negative screening mammogram (I statement). (USPSTF, 2016)",
+				"improvementNotation": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+							"code": "increase"
+						}
+					]
+				},
+				"guidance": "To ensure the measure is only looking for a cervical cytology test only after a woman turns 21 years of age, the youngest age in the initial population is 23. <br> Patient self-report for procedures as well as diagnostic studies should be recorded in 'Procedure, Performed' template or 'Diagnostic Study, Performed' template in QRDA-1. <br> Include only cytology and HPV \"co-testing\"; in co-testing, both cytology and HPV tests are performed (i.e., the samples are collected and both tests are ordered, regardless of the cytology result) on the same date of service. Do not include reflex testing. In addition, if the medical record indicates the HPV test was performed only after determining the cytology result, this is considered reflex testing and does not meet criteria for the measure.",
+				"group": [
+					{
+						"id": "group-1",
+						"population": [
+							{
+								"id": "initial-population",
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "initial-population",
+											"display": "Initial Population"
+										}
+									]
+								},
+								"criteria": {
+									"language": "text/cql",
+									"expression": "Initial Population"
+								}
+							},
+							{
+								"id": "numerator",
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "numerator",
+											"display": "Numerator"
+										}
+									]
+								},
+								"criteria": {
+									"language": "text/cql",
+									"expression": "Numerator"
+								}
+							},
+							{
+								"id": "denominator",
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator",
+											"display": "Denominator"
+										}
+									]
+								},
+								"criteria": {
+									"language": "text/cql",
+									"expression": "Denominator"
+								}
+							},
+							{
+								"id": "denominator-exclusion",
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator-exclusion",
+											"display": "Denominator Exclusion"
+										}
+									]
+								},
+								"criteria": {
+									"language": "text/cql",
+									"expression": "Denominator Exclusion"
+								}
+							}
+						]
+					}
+				],
+				"supplementalData": [
+					{
+						"id": "sde-ethnicity",
+						"code": {
+							"text": "sde-ethnicity"
+						},
+						"usage": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/measure-data-usage",
+										"code": "supplemental-data"
+									}
+								]
+							}
+						],
+						"criteria": {
+							"language": "text/cql",
+							"expression": "SDE Ethnicity"
+						}
+					},
+					{
+						"id": "sde-payer",
+						"code": {
+							"text": "sde-payer"
+						},
+						"usage": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/measure-data-usage",
+										"code": "supplemental-data"
+									}
+								]
+							}
+						],
+						"criteria": {
+							"language": "text/cql",
+							"expression": "SDE Payer"
+						}
+					},
+					{
+						"id": "sde-race",
+						"code": {
+							"text": "sde-race"
+						},
+						"usage": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/measure-data-usage",
+										"code": "supplemental-data"
+									}
+								]
+							}
+						],
+						"criteria": {
+							"language": "text/cql",
+							"expression": "SDE Race"
+						}
+					},
+					{
+						"id": "sde-sex",
+						"code": {
+							"text": "sde-sex"
+						},
+						"usage": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/measure-data-usage",
+										"code": "supplemental-data"
+									}
+								]
+							}
+						],
+						"criteria": {
+							"language": "text/cql",
+							"expression": "SDE Sex"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Measure/measure-EXM124-7.0.000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.101.12.1001",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.101.12.1001"
+					}
+				],
+				"version": "20180310",
+				"name": "OfficeVisit",
+				"title": "Office Visit",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "99201",
+									"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99202",
+									"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99203",
+									"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99204",
+									"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99205",
+									"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99212",
+									"display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99213",
+									"display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99214",
+									"display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+								},
+								{
+									"code": "99215",
+									"display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+								}
+							]
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2018-03",
+							"concept": [
+								{
+									"code": "185463005",
+									"display": "Visit out of hours (procedure)"
+								},
+								{
+									"code": "185464004",
+									"display": "Out of hours visit - not night visit (procedure)"
+								},
+								{
+									"code": "185465003",
+									"display": "Weekend visit (procedure)"
+								},
+								{
+									"code": "30346009",
+									"display": "Evaluation and management of established outpatient in office or other outpatient facility (procedure)"
+								},
+								{
+									"code": "3391000175108",
+									"display": "Office visit for pediatric care and assessment (procedure)"
+								},
+								{
+									"code": "37894004",
+									"display": "Evaluation and management of new outpatient in office or other outpatient facility (procedure)"
+								},
+								{
+									"code": "439740005",
+									"display": "Postoperative follow-up visit (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.101.12.1023",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.101.12.1023"
+					}
+				],
+				"version": "20170504",
+				"name": "PreventiveCareServices-InitialOfficeVisit,18andUp",
+				"title": "Preventive Care Services-Initial Office Visit, 18 and Up",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.ama-assn.org/go/cpt",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "99385",
+									"display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 18-39 years"
+								},
+								{
+									"code": "99386",
+									"display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 40-64 years"
+								},
+								{
+									"code": "99387",
+									"display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 65 years and older"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113762.1.4.1111.143",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+				"title": "Observation Services",
+				"status": "active",
+				"publisher": "The Joint Commission",
+				"compose": {
+					"include": [
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2019-09",
+							"concept": [
+								{
+									"code": "448851000124103",
+									"display": "Hospital admission from observation unit (procedure)"
+								},
+								{
+									"code": "448951000124107",
+									"display": "Admission to observation unit (procedure)"
+								},
+								{
+									"code": "76464004",
+									"display": "Hospital admission, for observation (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113762.1.4.1111.143"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "SupplementalDataElements-2.0.0",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/dbcg/connectathon/Library/SupplementalDataElements",
+				"version": "2.0.0",
+				"name": "SupplementalDataElements",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+					}
+				],
+				"parameter": [
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "SDE Ethnicity",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Coding"
+					},
+					{
+						"name": "SDE Payer",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Any"
+					},
+					{
+						"name": "SDE Race",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Coding"
+					},
+					{
+						"name": "SDE Sex",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Coding"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Coverage",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Coverage"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBTdXBwbGVtZW50YWxEYXRhRWxlbWVudHMgdmVyc2lvbiAnMi4wLjAnDQoNCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnIGNhbGxlZCBGSElSSGVscGVycw0KDQp2YWx1ZXNldCAiT05DIEFkbWluaXN0cmF0aXZlIFNleCI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTM3NjIuMS40LjEnDQp2YWx1ZXNldCAiUmFjZSI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTQyMjIuNC4xMS44MzYnDQp2YWx1ZXNldCAiRXRobmljaXR5IjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExNDIyMi40LjExLjgzNycNCnZhbHVlc2V0ICJQYXllciI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTQyMjIuNC4xMS4zNTkxJw0KDQpjb250ZXh0IFBhdGllbnQNCg0KZGVmaW5lICJTREUgRXRobmljaXR5IjoNCiAgKGZsYXR0ZW4gKA0KICAgIFBhdGllbnQuZXh0ZW5zaW9uIEV4dGVuc2lvbg0KICAgICAgd2hlcmUgRXh0ZW5zaW9uLnVybCA9ICdodHRwOi8vaGw3Lm9yZy9maGlyL3VzL2NvcmUvU3RydWN0dXJlRGVmaW5pdGlvbi91cy1jb3JlLWV0aG5pY2l0eScNCiAgICAgICAgcmV0dXJuIEV4dGVuc2lvbi5leHRlbnNpb24NCiAgKSkgRQ0KICAgIHdoZXJlIEUudXJsID0gJ29tYkNhdGVnb3J5Jw0KICAgICAgb3IgRS51cmwgPSAnZGV0YWlsZWQnDQogICAgcmV0dXJuIEUudmFsdWUgYXMgQ29kaW5nDQoNCmRlZmluZSAiU0RFIFBheWVyIjoNCiAgICBbQ292ZXJhZ2U6IHR5cGUgaW4gIlBheWVyIl0gUGF5ZXINCiAgICAgIHJldHVybiB7DQogICAgICAgIGNvZGU6IFBheWVyLnR5cGUsDQogICAgICAgIHBlcmlvZDogUGF5ZXIucGVyaW9kDQogICAgICB9DQoNCmRlZmluZSAiU0RFIFJhY2UiOg0KICAoZmxhdHRlbiAoDQogICAgUGF0aWVudC5leHRlbnNpb24gRXh0ZW5zaW9uDQogICAgICB3aGVyZSBFeHRlbnNpb24udXJsID0gJ2h0dHA6Ly9obDcub3JnL2ZoaXIvdXMvY29yZS9TdHJ1Y3R1cmVEZWZpbml0aW9uL3VzLWNvcmUtcmFjZScNCiAgICAgICAgcmV0dXJuIEV4dGVuc2lvbi5leHRlbnNpb24NCiAgKSkgRQ0KICAgIHdoZXJlIEUudXJsID0gJ29tYkNhdGVnb3J5Jw0KICAgICAgb3IgRS51cmwgPSAnZGV0YWlsZWQnDQogICAgcmV0dXJuIEUudmFsdWUgYXMgQ29kaW5nDQoNCmRlZmluZSAiU0RFIFNleCI6DQogIGNhc2UNCiAgICB3aGVuIFBhdGllbnQuZ2VuZGVyID0gJ21hbGUnIHRoZW4gQ29kZSB7IGNvZGU6ICdNJywgc3lzdGVtOiAnaHR0cDovL2hsNy5vcmcvZmhpci92My9BZG1pbmlzdHJhdGl2ZUdlbmRlcicsIGRpc3BsYXk6ICdNYWxlJyB9DQogICAgd2hlbiBQYXRpZW50LmdlbmRlciA9ICdmZW1hbGUnIHRoZW4gQ29kZSB7IGNvZGU6ICdGJywgc3lzdGVtOiAnaHR0cDovL2hsNy5vcmcvZmhpci92My9BZG1pbmlzdHJhdGl2ZUdlbmRlcicsIGRpc3BsYXk6ICdGZW1hbGUnIH0NCiAgICBlbHNlIG51bGwNCiAgZW5kDQo="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/library-SupplementalDataElements-2.0.0"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113762.1.4.1",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113762.1.4.1"
+					}
+				],
+				"version": "20150331",
+				"name": "ONCAdministrativeSex",
+				"title": "ONC Administrative Sex",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/v3/AdministrativeGender",
+							"version": "HL7V3.0_2017-07",
+							"concept": [
+								{
+									"code": "F",
+									"display": "Female"
+								},
+								{
+									"code": "M",
+									"display": "Male"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113762.1.4.1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "MeasureReport",
+				"id": "measurereport-denom-EXM124",
+				"contained": [
+					{
+						"resourceType": "Bundle",
+						"id": "f01dc844-6c1a-4aae-a0a0-ef0b2afd8a5d",
+						"type": "collection",
+						"entry": [
+							{
+								"fullUrl": "Patient/denom-EXM124",
+								"resource": {
+									"resourceType": "Patient",
+									"id": "denom-EXM124",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+										]
+									},
+									"extension": [
+										{
+											"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+											"extension": [
+												{
+													"url": "ombCategory",
+													"valueCoding": {
+														"system": "urn:oid:2.16.840.1.113883.6.238",
+														"code": "2028-9",
+														"display": "Asian"
+													}
+												}
+											]
+										},
+										{
+											"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+											"extension": [
+												{
+													"url": "ombCategory",
+													"valueCoding": {
+														"system": "urn:oid:2.16.840.1.113883.6.238",
+														"code": "2135-2",
+														"display": "Hispanic or Latino"
+													}
+												}
+											]
+										}
+									],
+									"identifier": [
+										{
+											"use": "usual",
+											"type": {
+												"coding": [
+													{
+														"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+														"code": "MR",
+														"display": "Medical Record Number"
+													}
+												]
+											},
+											"system": "http://hospital.smarthealthit.org",
+											"value": "999999995"
+										}
+									],
+									"name": [
+										{
+											"family": "Bertha",
+											"given": [
+												"Betty"
+											]
+										}
+									],
+									"gender": "female",
+									"birthDate": "1995-01-01"
+								}
+							},
+							{
+								"fullUrl": "Encounter/denom-EXM124-2",
+								"resource": {
+									"resourceType": "Encounter",
+									"id": "denom-EXM124-2",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+										]
+									},
+									"status": "finished",
+									"class": {
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+										"code": "AMB",
+										"display": "ambulatory"
+									},
+									"type": [
+										{
+											"coding": [
+												{
+													"system": "http://www.ama-assn.org/go/cpt",
+													"code": "99201",
+													"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+												}
+											]
+										}
+									],
+									"subject": {
+										"reference": "Patient/denom-EXM124"
+									},
+									"period": {
+										"start": "2019-01-01T01:00:00.0",
+										"end": "2019-01-02T01:00:00.0"
+									}
+								}
+							},
+							{
+								"fullUrl": "11268d3d-1f03-46ed-9781-24ae42857ae6",
+								"resource": {
+									"resourceType": "List",
+									"id": "11268d3d-1f03-46ed-9781-24ae42857ae6",
+									"title": "initial-population",
+									"entry": [
+										{
+											"item": {
+												"reference": "denom-EXM124"
+											}
+										},
+										{
+											"item": {
+												"reference": "denom-EXM124-2"
+											}
+										}
+									]
+								}
+							},
+							{
+								"fullUrl": "9f1d79ec-4186-4d1e-8b93-7744e3b8b8bf",
+								"resource": {
+									"resourceType": "List",
+									"id": "9f1d79ec-4186-4d1e-8b93-7744e3b8b8bf",
+									"title": "denominator",
+									"entry": [
+										{
+											"item": {
+												"reference": "denom-EXM124"
+											}
+										},
+										{
+											"item": {
+												"reference": "denom-EXM124-2"
+											}
+										}
+									]
+								}
+							},
+							{
+								"fullUrl": "a2e0105f-22d9-43a1-a98b-8c2107e86d8a",
+								"resource": {
+									"resourceType": "List",
+									"id": "a2e0105f-22d9-43a1-a98b-8c2107e86d8a",
+									"title": "numerator",
+									"entry": [
+										{
+											"item": {
+												"reference": "denom-EXM124-3"
+											}
+										}
+									]
+								}
+							},
+							{
+								"fullUrl": "Observation/denom-EXM124-3",
+								"resource": {
+									"resourceType": "Observation",
+									"id": "denom-EXM124-3",
+									"meta": {
+										"profile": [
+											"http://hl7.org/fhir/observation"
+										]
+									},
+									"status": "final",
+									"code": {
+										"coding": [
+											{
+												"system": "http://loinc.org",
+												"code": "10524-7",
+												"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+											}
+										]
+									},
+									"subject": {
+										"reference": "Patient/denom-EXM124"
+									},
+									"effectiveDateTime": "2019-11-01T00:00:00"
+								}
+							}
+						]
+					}
+				],
+				"status": "complete",
+				"type": "individual",
+				"measure": "Measure/measure-EXM124-7.0.000",
+				"subject": {
+					"reference": "Patient/denom-EXM124"
+				},
+				"period": {
+					"start": "2018-12-31T17:00:00-07:00",
+					"end": "2019-12-30T17:00:00-07:00"
+				},
+				"group": [
+					{
+						"id": "group-1",
+						"population": [
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "initial-population",
+											"display": "Initial Population"
+										}
+									]
+								},
+								"count": 1
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "numerator",
+											"display": "Numerator"
+										}
+									]
+								},
+								"count": 0
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator",
+											"display": "Denominator"
+										}
+									]
+								},
+								"count": 1
+							},
+							{
+								"code": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+											"code": "denominator-exclusion",
+											"display": "Denominator Exclusion"
+										}
+									]
+								},
+								"count": 0
+							}
+						],
+						"measureScore": {
+							"value": 0.0
+						}
+					}
+				],
+				"evaluatedResource": [
+					{
+						"reference": "#f01dc844-6c1a-4aae-a0a0-ef0b2afd8a5d"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "MeasureReport/measurereport-denom-EXM124"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.526.3.1240",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.526.3.1240"
+					}
+				],
+				"version": "20170504",
+				"name": "AnnualWellnessVisit",
+				"title": "Annual Wellness Visit",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+							"version": "2018",
+							"concept": [
+								{
+									"code": "G0438",
+									"display": "Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit"
+								},
+								{
+									"code": "G0439",
+									"display": "Annual wellness visit, includes a personalized prevention plan of service (pps), subsequent visit"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.526.3.1240"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.110.12.1059",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.110.12.1059"
+					}
+				],
+				"version": "20170504",
+				"name": "HPVTest",
+				"title": "HPV Test",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://loinc.org",
+							"version": "2.56",
+							"concept": [
+								{
+									"code": "75406-9",
+									"display": "Human papilloma virus 16 and 18+45 E6+E7 mRNA [Presence] in Cervix by Probe with amplification"
+								}
+							]
+						},
+						{
+							"system": "http://loinc.org",
+							"version": "2.64",
+							"concept": [
+								{
+									"code": "21440-3",
+									"display": "Human papilloma virus 16+18+31+33+35+45+51+52+56 DNA [Presence] in Cervix by Probe"
+								},
+								{
+									"code": "30167-1",
+									"display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+68 DNA [Presence] in Cervix by Probe with signal amplification"
+								},
+								{
+									"code": "38372-9",
+									"display": "Human papilloma virus 6+11+16+18+31+33+35+39+42+43+44+45+51+52+56+58+59+68 DNA [Presence] in Cervix by Probe with signal amplification"
+								},
+								{
+									"code": "59263-4",
+									"display": "Human papilloma virus 16 DNA [Presence] in Cervix by Probe with signal amplification"
+								},
+								{
+									"code": "59264-2",
+									"display": "Human papilloma virus 18 DNA [Presence] in Cervix by Probe with signal amplification"
+								},
+								{
+									"code": "59420-0",
+									"display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+66+68 DNA [Presence] in Cervix by Probe with signal amplification"
+								},
+								{
+									"code": "69002-4",
+									"display": "Human papilloma virus E6+E7 mRNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "71431-1",
+									"display": "Human papilloma virus 31+33+35+39+45+51+52+56+58+59+66+68 DNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "75694-0",
+									"display": "Human papilloma virus 18+45 E6+E7 mRNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "77379-6",
+									"display": "Human papilloma virus 16 and 18 and 31+33+35+39+45+51+52+56+58+59+66+68 DNA [Interpretation] in Cervix"
+								},
+								{
+									"code": "77399-4",
+									"display": "Human papilloma virus 16 DNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "77400-0",
+									"display": "Human papilloma virus 18 DNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "82354-2",
+									"display": "Human papilloma virus 16 and 18+45 E6+E7 mRNA [Identifier] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "82456-5",
+									"display": "Human papilloma virus 16 E6+E7 mRNA [Presence] in Cervix by NAA with probe detection"
+								},
+								{
+									"code": "82675-0",
+									"display": "Human papilloma virus 16+18+31+33+35+39+45+51+52+56+58+59+66+68 DNA [Presence] in Cervix by NAA with probe detection"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "numer-EXM124-2",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
+				},
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://www.ama-assn.org/go/cpt",
+								"code": "99201",
+								"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/numer-EXM124"
+				},
+				"period": {
+					"start": "2019-01-01T00:00:00.0",
+					"end": "2019-01-02T00:00:00.0"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Encounter/numer-EXM124-2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113762.1.4.1108.15",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113762.1.4.1108.15"
+					}
+				],
+				"version": "20170504",
+				"name": "Hospicecareambulatory",
+				"title": "Hospice care ambulatory",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2018-03",
+							"concept": [
+								{
+									"code": "385763009",
+									"display": "Hospice care (regime/therapy)"
+								},
+								{
+									"code": "385765002",
+									"display": "Hospice care management (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113762.1.4.1108.15"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.114222.4.11.3591",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.114222.4.11.3591"
+					}
+				],
+				"version": "20180718",
+				"name": "Payer",
+				"title": "Payer",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf",
+							"version": "8.0",
+							"concept": [
+								{
+									"code": "1",
+									"display": "MEDICARE"
+								},
+								{
+									"code": "11",
+									"display": "Medicare (Managed Care)"
+								},
+								{
+									"code": "111",
+									"display": "Medicare HMO"
+								},
+								{
+									"code": "112",
+									"display": "Medicare PPO"
+								},
+								{
+									"code": "113",
+									"display": "Medicare POS"
+								},
+								{
+									"code": "119",
+									"display": "Medicare Managed Care Other"
+								},
+								{
+									"code": "12",
+									"display": "Medicare (Non-managed Care)"
+								},
+								{
+									"code": "121",
+									"display": "Medicare FFS"
+								},
+								{
+									"code": "122",
+									"display": "Medicare Drug Benefit"
+								},
+								{
+									"code": "123",
+									"display": "Medicare Medical Savings Account (MSA)"
+								},
+								{
+									"code": "129",
+									"display": "Medicare Non-managed Care Other"
+								},
+								{
+									"code": "13",
+									"display": "Medicare Hospice"
+								},
+								{
+									"code": "14",
+									"display": "Dual Eligibility Medicare/Medicaid Organization"
+								},
+								{
+									"code": "19",
+									"display": "Medicare Other"
+								},
+								{
+									"code": "191",
+									"display": "Medicare Pharmacy Benefit Manager"
+								},
+								{
+									"code": "2",
+									"display": "MEDICAID"
+								},
+								{
+									"code": "21",
+									"display": "Medicaid (Managed Care)"
+								},
+								{
+									"code": "211",
+									"display": "Medicaid HMO"
+								},
+								{
+									"code": "212",
+									"display": "Medicaid PPO"
+								},
+								{
+									"code": "213",
+									"display": "Medicaid PCCM (Primary Care Case Management)"
+								},
+								{
+									"code": "219",
+									"display": "Medicaid Managed Care Other"
+								},
+								{
+									"code": "22",
+									"display": "Medicaid (Non-managed Care Plan)"
+								},
+								{
+									"code": "23",
+									"display": "Medicaid/SCHIP"
+								},
+								{
+									"code": "25",
+									"display": "Medicaid - Out of State"
+								},
+								{
+									"code": "26",
+									"display": "Medicaid -- Long Term Care"
+								},
+								{
+									"code": "29",
+									"display": "Medicaid Other"
+								},
+								{
+									"code": "291",
+									"display": "Medicaid Pharmacy Benefit Manager"
+								},
+								{
+									"code": "299",
+									"display": "Medicaid - Dental"
+								},
+								{
+									"code": "3",
+									"display": "OTHER GOVERNMENT (Federal/State/Local) (excluding Department of Corrections)"
+								},
+								{
+									"code": "31",
+									"display": "Department of Defense"
+								},
+								{
+									"code": "311",
+									"display": "TRICARE (CHAMPUS)"
+								},
+								{
+									"code": "3111",
+									"display": "TRICARE Prime--HMO"
+								},
+								{
+									"code": "3112",
+									"display": "TRICARE Extra--PPO"
+								},
+								{
+									"code": "3113",
+									"display": "TRICARE Standard - Fee For Service"
+								},
+								{
+									"code": "3114",
+									"display": "TRICARE For Life--Medicare Supplement"
+								},
+								{
+									"code": "3115",
+									"display": "TRICARE Reserve Select"
+								},
+								{
+									"code": "3116",
+									"display": "Uniformed Services Family Health Plan (USFHP) -- HMO"
+								},
+								{
+									"code": "3119",
+									"display": "Department of Defense - (other)"
+								},
+								{
+									"code": "312",
+									"display": "Military Treatment Facility"
+								},
+								{
+									"code": "3121",
+									"display": "Enrolled Prime--HMO"
+								},
+								{
+									"code": "3122",
+									"display": "Non-enrolled Space Available"
+								},
+								{
+									"code": "3123",
+									"display": "TRICARE For Life (TFL)"
+								},
+								{
+									"code": "313",
+									"display": "Dental --Stand Alone"
+								},
+								{
+									"code": "32",
+									"display": "Department of Veterans Affairs"
+								},
+								{
+									"code": "321",
+									"display": "Veteran care--Care provided to Veterans"
+								},
+								{
+									"code": "3211",
+									"display": "Direct Care--Care provided in VA facilities"
+								},
+								{
+									"code": "3212",
+									"display": "Indirect Care--Care provided outside VA facilities"
+								},
+								{
+									"code": "32121",
+									"display": "Fee Basis"
+								},
+								{
+									"code": "32122",
+									"display": "Foreign Fee/Foreign Medical Program (FMP)"
+								},
+								{
+									"code": "32123",
+									"display": "Contract Nursing Home/Community Nursing Home"
+								},
+								{
+									"code": "32124",
+									"display": "State Veterans Home"
+								},
+								{
+									"code": "32125",
+									"display": "Sharing Agreements"
+								},
+								{
+									"code": "32126",
+									"display": "Other Federal Agency"
+								},
+								{
+									"code": "32127",
+									"display": "Dental Care"
+								},
+								{
+									"code": "32128",
+									"display": "Vision Care"
+								},
+								{
+									"code": "322",
+									"display": "Non-veteran care"
+								},
+								{
+									"code": "3221",
+									"display": "Civilian Health and Medical Program for the VA (CHAMPVA)"
+								},
+								{
+									"code": "3222",
+									"display": "Spina Bifida Health Care Program (SB)"
+								},
+								{
+									"code": "3223",
+									"display": "Children of Women Vietnam Veterans (CWVV)"
+								},
+								{
+									"code": "3229",
+									"display": "Other non-veteran care"
+								},
+								{
+									"code": "33",
+									"display": "Indian Health Service or Tribe"
+								},
+								{
+									"code": "331",
+									"display": "Indian Health Service -- Regular"
+								},
+								{
+									"code": "332",
+									"display": "Indian Health Service -- Contract"
+								},
+								{
+									"code": "333",
+									"display": "Indian Health Service - Managed Care"
+								},
+								{
+									"code": "334",
+									"display": "Indian Tribe - Sponsored Coverage"
+								},
+								{
+									"code": "34",
+									"display": "HRSA Program"
+								},
+								{
+									"code": "341",
+									"display": "Title V (MCH Block Grant)"
+								},
+								{
+									"code": "342",
+									"display": "Migrant Health Program"
+								},
+								{
+									"code": "343",
+									"display": "Ryan White Act"
+								},
+								{
+									"code": "349",
+									"display": "Other"
+								},
+								{
+									"code": "35",
+									"display": "Black Lung"
+								},
+								{
+									"code": "36",
+									"display": "State Government"
+								},
+								{
+									"code": "361",
+									"display": "State SCHIP program (codes for individual states)"
+								},
+								{
+									"code": "362",
+									"display": "Specific state programs (list/ local code)"
+								},
+								{
+									"code": "369",
+									"display": "State, not otherwise specified (other state)"
+								},
+								{
+									"code": "37",
+									"display": "Local Government"
+								},
+								{
+									"code": "371",
+									"display": "Local - Managed care"
+								},
+								{
+									"code": "3711",
+									"display": "HMO"
+								},
+								{
+									"code": "3712",
+									"display": "PPO"
+								},
+								{
+									"code": "3713",
+									"display": "POS"
+								},
+								{
+									"code": "372",
+									"display": "FFS/Indemnity"
+								},
+								{
+									"code": "379",
+									"display": "Local, not otherwise specified (other local, county)"
+								},
+								{
+									"code": "38",
+									"display": "Other Government (Federal, State, Local not specified)"
+								},
+								{
+									"code": "381",
+									"display": "Federal, State, Local not specified managed care"
+								},
+								{
+									"code": "3811",
+									"display": "Federal, State, Local not specified - HMO"
+								},
+								{
+									"code": "3812",
+									"display": "Federal, State, Local not specified - PPO"
+								},
+								{
+									"code": "3813",
+									"display": "Federal, State, Local not specified - POS"
+								},
+								{
+									"code": "3819",
+									"display": "Federal, State, Local not specified - not specified managed care"
+								},
+								{
+									"code": "382",
+									"display": "Federal, State, Local not specified - FFS"
+								},
+								{
+									"code": "389",
+									"display": "Federal, State, Local not specified - Other"
+								},
+								{
+									"code": "39",
+									"display": "Other Federal"
+								},
+								{
+									"code": "391",
+									"display": "Federal Employee Health Plan - Use when known"
+								},
+								{
+									"code": "4",
+									"display": "DEPARTMENTS OF CORRECTIONS"
+								},
+								{
+									"code": "41",
+									"display": "Corrections Federal"
+								},
+								{
+									"code": "42",
+									"display": "Corrections State"
+								},
+								{
+									"code": "43",
+									"display": "Corrections Local"
+								},
+								{
+									"code": "44",
+									"display": "Corrections Unknown Level"
+								},
+								{
+									"code": "5",
+									"display": "PRIVATE HEALTH INSURANCE"
+								},
+								{
+									"code": "51",
+									"display": "Managed Care (Private)"
+								},
+								{
+									"code": "511",
+									"display": "Commercial Managed Care - HMO"
+								},
+								{
+									"code": "512",
+									"display": "Commercial Managed Care - PPO"
+								},
+								{
+									"code": "513",
+									"display": "Commercial Managed Care - POS"
+								},
+								{
+									"code": "514",
+									"display": "Exclusive Provider Organization"
+								},
+								{
+									"code": "515",
+									"display": "Gatekeeper PPO (GPPO)"
+								},
+								{
+									"code": "516",
+									"display": "Commercial Managed Care - Pharmacy Benefit Manager"
+								},
+								{
+									"code": "517",
+									"display": "Commercial Managed Care - Dental"
+								},
+								{
+									"code": "519",
+									"display": "Managed Care, Other (non HMO)"
+								},
+								{
+									"code": "52",
+									"display": "Private Health Insurance - Indemnity"
+								},
+								{
+									"code": "521",
+									"display": "Commercial Indemnity"
+								},
+								{
+									"code": "522",
+									"display": "Self-insured (ERISA) Administrative Services Only (ASO) plan"
+								},
+								{
+									"code": "523",
+									"display": "Medicare supplemental policy (as second payer)"
+								},
+								{
+									"code": "524",
+									"display": "Indemnity Insurance - Dental"
+								},
+								{
+									"code": "529",
+									"display": "Private health insurance--other commercial Indemnity"
+								},
+								{
+									"code": "53",
+									"display": "Managed Care (private) or private health insurance (indemnity), not otherwise specified"
+								},
+								{
+									"code": "54",
+									"display": "Organized Delivery System"
+								},
+								{
+									"code": "55",
+									"display": "Small Employer Purchasing Group"
+								},
+								{
+									"code": "56",
+									"display": "Specialized Stand Alone Plan"
+								},
+								{
+									"code": "561",
+									"display": "Dental"
+								},
+								{
+									"code": "562",
+									"display": "Vision"
+								},
+								{
+									"code": "59",
+									"display": "Other Private Insurance"
+								},
+								{
+									"code": "6",
+									"display": "BLUE CROSS/BLUE SHIELD"
+								},
+								{
+									"code": "61",
+									"display": "BC Managed Care"
+								},
+								{
+									"code": "611",
+									"display": "BC Managed Care -- HMO"
+								},
+								{
+									"code": "612",
+									"display": "BC Managed Care -- PPO"
+								},
+								{
+									"code": "613",
+									"display": "BC Managed Care -- POS"
+								},
+								{
+									"code": "614",
+									"display": "BC Managed Care - Dental"
+								},
+								{
+									"code": "619",
+									"display": "BC Managed Care -- Other"
+								},
+								{
+									"code": "62",
+									"display": "BC Insurance Indemnity"
+								},
+								{
+									"code": "621",
+									"display": "BC Indemnity"
+								},
+								{
+									"code": "622",
+									"display": "BC Self-insured (ERISA) Administrative Services Only (ASO)Plan"
+								},
+								{
+									"code": "623",
+									"display": "BC Medicare Supplemental Plan"
+								},
+								{
+									"code": "629",
+									"display": "BC Indemnity - Dental"
+								},
+								{
+									"code": "7",
+									"display": "MANAGED CARE, UNSPECIFIED (to be used only if one can't distinguish public from private)"
+								},
+								{
+									"code": "71",
+									"display": "HMO"
+								},
+								{
+									"code": "72",
+									"display": "PPO"
+								},
+								{
+									"code": "73",
+									"display": "POS"
+								},
+								{
+									"code": "79",
+									"display": "Other Managed Care"
+								},
+								{
+									"code": "8",
+									"display": "NO PAYMENT from an Organization/Agency/Program/Private Payer Listed"
+								},
+								{
+									"code": "81",
+									"display": "Self-pay (Includes applicants for insurance and Medicaid applicants)"
+								},
+								{
+									"code": "82",
+									"display": "No Charge"
+								},
+								{
+									"code": "821",
+									"display": "Charity"
+								},
+								{
+									"code": "822",
+									"display": "Professional Courtesy"
+								},
+								{
+									"code": "823",
+									"display": "Research/Clinical Trial"
+								},
+								{
+									"code": "83",
+									"display": "Refusal to Pay/Bad Debt"
+								},
+								{
+									"code": "84",
+									"display": "Hill Burton Free Care"
+								},
+								{
+									"code": "85",
+									"display": "Research/Donor"
+								},
+								{
+									"code": "89",
+									"display": "No Payment, Other"
+								},
+								{
+									"code": "9",
+									"display": "MISCELLANEOUS/OTHER"
+								},
+								{
+									"code": "91",
+									"display": "Foreign National"
+								},
+								{
+									"code": "92",
+									"display": "Other (Non-government)"
+								},
+								{
+									"code": "93",
+									"display": "Disability Insurance"
+								},
+								{
+									"code": "94",
+									"display": "Long-term Care Insurance"
+								},
+								{
+									"code": "95",
+									"display": "Worker's Compensation"
+								},
+								{
+									"code": "951",
+									"display": "Worker's Comp HMO"
+								},
+								{
+									"code": "953",
+									"display": "Worker's Comp Fee-for-Service"
+								},
+								{
+									"code": "954",
+									"display": "Worker's Comp Other Managed Care"
+								},
+								{
+									"code": "959",
+									"display": "Worker's Comp, Other unspecified"
+								},
+								{
+									"code": "96",
+									"display": "Auto Insurance (includes no fault)"
+								},
+								{
+									"code": "97",
+									"display": "Legal Liability / Liability Insurance"
+								},
+								{
+									"code": "98",
+									"display": "Other specified but not otherwise classifiable (includes Hospice - Unspecified plan)"
+								},
+								{
+									"code": "99",
+									"display": "No Typology Code available for payment source"
+								},
+								{
+									"code": "9999",
+									"display": "Unavailable / No Payer Specified / Blank"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.114222.4.11.3591"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "MATGlobalCommonFunctions-5.0.000",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/dbcg/connectathon/Library/MATGlobalCommonFunctions",
+				"version": "5.0.000",
+				"name": "MATGlobalCommonFunctions",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://loinc.org"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://snomed.info/sct/731000124108"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/v3/RoleCode"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/request-intent"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/medicationrequest-category"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/condition-verification"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+					}
+				],
+				"parameter": [
+					{
+						"name": "Measurement Period",
+						"use": "in",
+						"min": 0,
+						"max": "1",
+						"type": "Period"
+					},
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "Inpatient Encounter",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Encounter"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+							}
+						]
+					},
+					{
+						"type": "Condition",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Condition"
+						]
+					},
+					{
+						"type": "Condition",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Condition"
+						]
+					},
+					{
+						"type": "Location",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Location"
+						]
+					},
+					{
+						"type": "Provenance",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Provenance"
+						],
+						"codeFilter": [
+							{
+								"path": "target"
+							}
+						]
+					},
+					{
+						"type": "Medication",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Medication"
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBNQVRHbG9iYWxDb21tb25GdW5jdGlvbnMgdmVyc2lvbiAnNS4wLjAwMCcNCg0KdXNpbmcgRkhJUiB2ZXJzaW9uICc0LjAuMScNCg0KaW5jbHVkZSBGSElSSGVscGVycyB2ZXJzaW9uICc0LjAuMScgY2FsbGVkIEZISVJIZWxwZXJzDQoNCmNvZGVzeXN0ZW0gIkxPSU5DIjogJ2h0dHA6Ly9sb2luYy5vcmcnDQpjb2Rlc3lzdGVtICJTTk9NRURDVCI6ICdodHRwOi8vc25vbWVkLmluZm8vc2N0LzczMTAwMDEyNDEwOCcNCmNvZGVzeXN0ZW0gIlJvbGVDb2RlIjogJ2h0dHA6Ly9obDcub3JnL2ZoaXIvdjMvUm9sZUNvZGUnDQpjb2Rlc3lzdGVtICJEaWFnbm9zaXMgUm9sZSI6ICdodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL2RpYWdub3Npcy1yb2xlJw0KY29kZXN5c3RlbSAiUmVxdWVzdEludGVudCI6ICdodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL3JlcXVlc3QtaW50ZW50Jw0KY29kZXN5c3RlbSAiTWVkaWNhdGlvblJlcXVlc3RDYXRlZ29yeSI6ICdodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL21lZGljYXRpb25yZXF1ZXN0LWNhdGVnb3J5Jw0KY29kZXN5c3RlbSAiQ29uZGl0aW9uQ2xpbmljYWxTdGF0dXNDb2RlcyI6ICdodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL2NvbmRpdGlvbi1jbGluaWNhbCcNCmNvZGVzeXN0ZW0gIkNvbmRpdGlvblZlcmlmaWNhdGlvblN0YXR1c0NvZGVzIjogJ2h0dHA6Ly90ZXJtaW5vbG9neS5obDcub3JnL0NvZGVTeXN0ZW0vY29uZGl0aW9uLXZlcmlmaWNhdGlvbicNCmNvZGVzeXN0ZW0gIkFsbGVyZ3lJbnRvbGVyYW5jZUNsaW5pY2FsU3RhdHVzQ29kZXMiOiAnaHR0cDovL3Rlcm1pbm9sb2d5LmhsNy5vcmcvQ29kZVN5c3RlbS9hbGxlcmd5aW50b2xlcmFuY2UtY2xpbmljYWwnDQpjb2Rlc3lzdGVtICJBbGxlcmd5SW50b2xlcmFuY2VWZXJpZmljYXRpb25TdGF0dXNDb2RlcyI6ICdodHRwOi8vdGVybWlub2xvZ3kuaGw3Lm9yZy9Db2RlU3lzdGVtL2FsbGVyZ3lpbnRvbGVyYW5jZS12ZXJpZmljYXRpb24nDQoNCnZhbHVlc2V0ICJFbmNvdW50ZXIgSW5wYXRpZW50IjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzg4My4zLjY2Ni41LjMwNycNCnZhbHVlc2V0ICJFbWVyZ2VuY3kgRGVwYXJ0bWVudCBWaXNpdCI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTM4ODMuMy4xMTcuMS43LjEuMjkyJw0KdmFsdWVzZXQgIk9ic2VydmF0aW9uIFNlcnZpY2VzIjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzc2Mi4xLjQuMTExMS4xNDMnDQoNCmNvZGUgIkJpcnRoZGF0ZSI6ICcyMTExMi04JyBmcm9tICJMT0lOQyIgZGlzcGxheSAnQmlydGggZGF0ZScNCmNvZGUgIkRlYWQiOiAnNDE5MDk5MDA5JyBmcm9tICJTTk9NRURDVCIgZGlzcGxheSAnRGVhZCcNCmNvZGUgIkVSIjogJ0VSJyBmcm9tICJSb2xlQ29kZSIgZGlzcGxheSAnRW1lcmdlbmN5IHJvb20nDQpjb2RlICJJQ1UiOiAnSUNVJyBmcm9tICJSb2xlQ29kZSIgZGlzcGxheSAnSW50ZW5zaXZlIGNhcmUgdW5pdCcNCmNvZGUgIkJpbGxpbmciOiAnYmlsbGluZycgZnJvbSAiRGlhZ25vc2lzIFJvbGUiIGRpc3BsYXkgJ0JpbGxpbmcnDQoNCi8vIENvbmRpdGlvbiBDbGluaWNhbCBTdGF0dXMgQ29kZXMgLSBDb25zaWRlciB2YWx1ZSBzZXRzIGZvciB0aGVzZQ0KY29kZSAiYWN0aXZlIjogJ2FjdGl2ZScgZnJvbSAiQ29uZGl0aW9uQ2xpbmljYWxTdGF0dXNDb2RlcyINCmNvZGUgInJlY3VycmVuY2UiOiAncmVjdXJyZW5jZScgZnJvbSAiQ29uZGl0aW9uQ2xpbmljYWxTdGF0dXNDb2RlcyINCmNvZGUgInJlbGFwc2UiOiAncmVsYXBzZScgZnJvbSAiQ29uZGl0aW9uQ2xpbmljYWxTdGF0dXNDb2RlcyINCmNvZGUgImluYWN0aXZlIjogJ2luYWN0aXZlJyBmcm9tICJDb25kaXRpb25DbGluaWNhbFN0YXR1c0NvZGVzIg0KY29kZSAicmVtaXNzaW9uIjogJ3JlbWlzc2lvbicgZnJvbSAiQ29uZGl0aW9uQ2xpbmljYWxTdGF0dXNDb2RlcyINCmNvZGUgInJlc29sdmVkIjogJ3Jlc29sdmVkJyBmcm9tICJDb25kaXRpb25DbGluaWNhbFN0YXR1c0NvZGVzIg0KDQovLyBDb25kaXRpb24gVmVyaWZpY2F0aW9uIFN0YXR1cyBDb2RlcyAtIENvbnNpZGVyIHZhbHVlIHNldHMgZm9yIHRoZXNlDQpjb2RlICJ1bmNvbmZpcm1lZCI6ICd1bmNvbmZpcm1lZCcgZnJvbSBDb25kaXRpb25WZXJpZmljYXRpb25TdGF0dXNDb2Rlcw0KY29kZSAicHJvdmlzaW9uYWwiOiAncHJvdmlzaW9uYWwnIGZyb20gQ29uZGl0aW9uVmVyaWZpY2F0aW9uU3RhdHVzQ29kZXMNCmNvZGUgImRpZmZlcmVudGlhbCI6ICdkaWZmZXJlbnRpYWwnIGZyb20gQ29uZGl0aW9uVmVyaWZpY2F0aW9uU3RhdHVzQ29kZXMNCmNvZGUgImNvbmZpcm1lZCI6ICdjb25maXJtZWQnIGZyb20gQ29uZGl0aW9uVmVyaWZpY2F0aW9uU3RhdHVzQ29kZXMNCmNvZGUgInJlZnV0ZWQiOiAncmVmdXRlZCcgZnJvbSBDb25kaXRpb25WZXJpZmljYXRpb25TdGF0dXNDb2Rlcw0KY29kZSAiZW50ZXJlZC1pbi1lcnJvciI6ICdlbnRlcmVkLWluLWVycm9yJyBmcm9tIENvbmRpdGlvblZlcmlmaWNhdGlvblN0YXR1c0NvZGVzDQoNCmNvZGUgImFsbGVyZ3ktYWN0aXZlIjogJ2FjdGl2ZScgZnJvbSAiQWxsZXJneUludG9sZXJhbmNlQ2xpbmljYWxTdGF0dXNDb2RlcyINCmNvZGUgImFsbGVyZ3ktaW5hY3RpdmUiOiAnaW5hY3RpdmUnIGZyb20gIkFsbGVyZ3lJbnRvbGVyYW5jZUNsaW5pY2FsU3RhdHVzQ29kZXMiDQpjb2RlICJhbGxlcmd5LXJlc29sdmVkIjogJ3Jlc29sdmVkJyBmcm9tICJBbGxlcmd5SW50b2xlcmFuY2VDbGluaWNhbFN0YXR1c0NvZGVzIg0KDQovLyBBbGxlcmd5L0ludG9sZXJhbmNlIFZlcmlmaWNhdGlvbiBTdGF0dXMgQ29kZXMgLSBDb25zaWRlciB2YWx1ZSBzZXRzIGZvciB0aGVzZQ0KY29kZSAiYWxsZXJneS11bmNvbmZpcm1lZCI6ICd1bmNvbmZpcm1lZCcgZnJvbSBBbGxlcmd5SW50b2xlcmFuY2VWZXJpZmljYXRpb25TdGF0dXNDb2Rlcw0KY29kZSAiYWxsZXJneS1jb25maXJtZWQiOiAnY29uZmlybWVkJyBmcm9tIEFsbGVyZ3lJbnRvbGVyYW5jZVZlcmlmaWNhdGlvblN0YXR1c0NvZGVzDQpjb2RlICJhbGxlcmd5LXJlZnV0ZWQiOiAncmVmdXRlZCcgZnJvbSBBbGxlcmd5SW50b2xlcmFuY2VWZXJpZmljYXRpb25TdGF0dXNDb2Rlcw0KDQovLyBNZWRpY2F0aW9uUmVxdWVzdCBDYXRlZ29yeSBDb2Rlcw0KY29kZSAiQ29tbXVuaXR5IjogJ2NvbW11bml0eScgZnJvbSAiTWVkaWNhdGlvblJlcXVlc3RDYXRlZ29yeSIgZGlzcGxheSAnQ29tbXVuaXR5Jw0KY29kZSAiRGlzY2hhcmdlIjogJ2Rpc2NoYXJnZScgZnJvbSAiTWVkaWNhdGlvblJlcXVlc3RDYXRlZ29yeSIgZGlzcGxheSAnRGlzY2hhcmdlJw0KDQpwYXJhbWV0ZXIgIk1lYXN1cmVtZW50IFBlcmlvZCIgSW50ZXJ2YWw8RGF0ZVRpbWU+DQogIGRlZmF1bHQgSW50ZXJ2YWxbQDIwMTktMDEtMDFUMDA6MDA6MDAuMCwgQDIwMjAtMDEtMDFUMDA6MDA6MDAuMCkNCg0KY29udGV4dCBQYXRpZW50DQoNCmRlZmluZSAiSW5wYXRpZW50IEVuY291bnRlciI6DQoJW0VuY291bnRlcjogIkVuY291bnRlciBJbnBhdGllbnQiXSBFbmNvdW50ZXJJbnBhdGllbnQNCgkJd2hlcmUgRW5jb3VudGVySW5wYXRpZW50LnN0YXR1cyA9ICdmaW5pc2hlZCcNCgkJICAgIGFuZCAiTGVuZ3RoSW5EYXlzIihFbmNvdW50ZXJJbnBhdGllbnQucGVyaW9kKSA8PSAxMjANCgkJCWFuZCBFbmNvdW50ZXJJbnBhdGllbnQucGVyaW9kIGVuZHMgZHVyaW5nICJNZWFzdXJlbWVudCBQZXJpb2QiDQoNCmRlZmluZSBmdW5jdGlvbiAiVG9EYXRlIihWYWx1ZSBEYXRlVGltZSk6DQoJRGF0ZVRpbWUoeWVhciBmcm9tIFZhbHVlLCBtb250aCBmcm9tIFZhbHVlLCBkYXkgZnJvbSBWYWx1ZSwgMCwgMCwgMCwgMCwgdGltZXpvbmVvZmZzZXQgZnJvbSBWYWx1ZSkNCg0KZGVmaW5lIGZ1bmN0aW9uICJDYWxlbmRhckFnZUluRGF5c0F0IihCaXJ0aERhdGVUaW1lIERhdGVUaW1lLCBBc09mIERhdGVUaW1lKToNCglkYXlzIGJldHdlZW4gVG9EYXRlKEJpcnRoRGF0ZVRpbWUpYW5kIFRvRGF0ZShBc09mKQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkNhbGVuZGFyQWdlSW5EYXlzIihCaXJ0aERhdGVUaW1lIERhdGVUaW1lKToNCglDYWxlbmRhckFnZUluRGF5c0F0KEJpcnRoRGF0ZVRpbWUsIFRvZGF5KCkpDQoNCmRlZmluZSBmdW5jdGlvbiAiQ2FsZW5kYXJBZ2VJbk1vbnRoc0F0IihCaXJ0aERhdGVUaW1lIERhdGVUaW1lLCBBc09mIERhdGVUaW1lKToNCgltb250aHMgYmV0d2VlbiBUb0RhdGUoQmlydGhEYXRlVGltZSlhbmQgVG9EYXRlKEFzT2YpDQoNCmRlZmluZSBmdW5jdGlvbiAiQ2FsZW5kYXJBZ2VJbk1vbnRocyIoQmlydGhEYXRlVGltZSBEYXRlVGltZSk6DQoJQ2FsZW5kYXJBZ2VJbk1vbnRoc0F0KEJpcnRoRGF0ZVRpbWUsIFRvZGF5KCkpDQoNCmRlZmluZSBmdW5jdGlvbiAiQ2FsZW5kYXJBZ2VJblllYXJzQXQiKEJpcnRoRGF0ZVRpbWUgRGF0ZVRpbWUsIEFzT2YgRGF0ZVRpbWUpOg0KCXllYXJzIGJldHdlZW4gVG9EYXRlKEJpcnRoRGF0ZVRpbWUpYW5kIFRvRGF0ZShBc09mKQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkNhbGVuZGFyQWdlSW5ZZWFycyIoQmlydGhEYXRlVGltZSBEYXRlVGltZSk6DQoJQ2FsZW5kYXJBZ2VJblllYXJzQXQoQmlydGhEYXRlVGltZSwgVG9kYXkoKSkNCg0KZGVmaW5lIGZ1bmN0aW9uICJMZW5ndGhJbkRheXMiKFZhbHVlIEludGVydmFsPERhdGVUaW1lPik6DQoJZGlmZmVyZW5jZSBpbiBkYXlzIGJldHdlZW4gc3RhcnQgb2YgVmFsdWUgYW5kIGVuZCBvZiBWYWx1ZQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkVEIFZpc2l0IihUaGVFbmNvdW50ZXIgRkhJUi5FbmNvdW50ZXIpOg0KICAgIHNpbmdsZXRvbiBmcm9tICgNCiAgICAgICAgW0VuY291bnRlcjogIkVtZXJnZW5jeSBEZXBhcnRtZW50IFZpc2l0Il0gRURWaXNpdA0KICAgICAgICAgICAgd2hlcmUgRURWaXNpdC5zdGF0dXMgPSAnZmluaXNoZWQnDQogICAgICAgICAgICAgICAgYW5kIEVEVmlzaXQucGVyaW9kIGVuZHMgMSBob3VyIG9yIGxlc3Mgb24gb3IgYmVmb3JlIHN0YXJ0IG9mIEZISVJIZWxwZXJzLlRvSW50ZXJ2YWwoVGhlRW5jb3VudGVyLnBlcmlvZCkNCiAgICApDQoNCmRlZmluZSBmdW5jdGlvbiAiSG9zcGl0YWxpemF0aW9uIihUaGVFbmNvdW50ZXIgRkhJUi5FbmNvdW50ZXIpOg0KCSggIkVEIFZpc2l0IihUaGVFbmNvdW50ZXIpICkgWA0KICAgIHJldHVybg0KICAgICAgICBpZiBYIGlzIG51bGwgdGhlbiBUaGVFbmNvdW50ZXIucGVyaW9kDQogICAgICAgIGVsc2UgSW50ZXJ2YWxbc3RhcnQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChYLnBlcmlvZCksIGVuZCBvZiBGSElSSGVscGVycy5Ub0ludGVydmFsKFRoZUVuY291bnRlci5wZXJpb2QpXQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkhvc3BpdGFsaXphdGlvbiBMb2NhdGlvbnMiKFRoZUVuY291bnRlciBGSElSLkVuY291bnRlcik6DQoJKCAiRUQgVmlzaXQiKFRoZUVuY291bnRlcikgKSBFREVuY291bnRlcg0KICAgIHJldHVybg0KICAgICAgICBpZiBFREVuY291bnRlciBpcyBudWxsIHRoZW4gVGhlRW5jb3VudGVyLmxvY2F0aW9uDQogICAgICAgIGVsc2UgZmxhdHRlbiB7IEVERW5jb3VudGVyLmxvY2F0aW9uLCBUaGVFbmNvdW50ZXIubG9jYXRpb24gfQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkhvc3BpdGFsaXphdGlvbiBMZW5ndGggb2YgU3RheSIoVGhlRW5jb3VudGVyIEZISVIuRW5jb3VudGVyKToNCglMZW5ndGhJbkRheXMoIkhvc3BpdGFsaXphdGlvbiIoVGhlRW5jb3VudGVyKSkNCg0KZGVmaW5lIGZ1bmN0aW9uICJIb3NwaXRhbCBBZG1pc3Npb24gVGltZSIoVGhlRW5jb3VudGVyIEZISVIuRW5jb3VudGVyKToNCglzdGFydCBvZiAiSG9zcGl0YWxpemF0aW9uIihUaGVFbmNvdW50ZXIpDQoNCmRlZmluZSBmdW5jdGlvbiAiSG9zcGl0YWwgRGlzY2hhcmdlIFRpbWUiKFRoZUVuY291bnRlciBGSElSLkVuY291bnRlcik6DQoJZW5kIG9mIEZISVJIZWxwZXJzLlRvSW50ZXJ2YWwoVGhlRW5jb3VudGVyLnBlcmlvZCkNCg0KZGVmaW5lIGZ1bmN0aW9uICJIb3NwaXRhbCBBcnJpdmFsIFRpbWUiKFRoZUVuY291bnRlciBGSElSLkVuY291bnRlcik6DQoJc3RhcnQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChGaXJzdCgNCgkgICAgKCAiSG9zcGl0YWxpemF0aW9uIExvY2F0aW9ucyIoVGhlRW5jb3VudGVyKSApIEhvc3BpdGFsTG9jYXRpb24NCgkJCXNvcnQgYnkgc3RhcnQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChwZXJpb2QpDQoJKS5wZXJpb2QpDQoNCmRlZmluZSBmdW5jdGlvbiAiSG9zcGl0YWxpemF0aW9uV2l0aE9ic2VydmF0aW9uIihUaGVFbmNvdW50ZXIgRkhJUi5FbmNvdW50ZXIpOg0KCVRoZUVuY291bnRlciBWaXNpdA0KCQlsZXQgT2JzVmlzaXQ6IExhc3QoW0VuY291bnRlcjogIk9ic2VydmF0aW9uIFNlcnZpY2VzIl0gTGFzdE9icw0KCQkJCXdoZXJlIExhc3RPYnMucGVyaW9kIGVuZHMgMSBob3VyIG9yIGxlc3Mgb24gb3IgYmVmb3JlIHN0YXJ0IG9mIFZpc2l0LnBlcmlvZA0KCQkJCXNvcnQgYnkgZW5kIG9mIHBlcmlvZA0KCQkJKSwNCgkJCVZpc2l0U3RhcnQ6IENvYWxlc2NlKHN0YXJ0IG9mIE9ic1Zpc2l0LnBlcmlvZCwgc3RhcnQgb2YgVmlzaXQucGVyaW9kKSwNCgkJCUVEVmlzaXQ6IExhc3QoW0VuY291bnRlcjogIkVtZXJnZW5jeSBEZXBhcnRtZW50IFZpc2l0Il0gTGFzdEVEDQoJCQkJd2hlcmUgTGFzdEVELnBlcmlvZCBlbmRzIDEgaG91ciBvciBsZXNzIG9uIG9yIGJlZm9yZSBWaXNpdFN0YXJ0DQoJCQkJc29ydCBieSBlbmQgb2YgcGVyaW9kDQoJCQkpDQoJCXJldHVybiBJbnRlcnZhbFtDb2FsZXNjZShzdGFydCBvZiBFRFZpc2l0LnBlcmlvZCwgVmlzaXRTdGFydCksIGVuZCBvZiBWaXNpdC5wZXJpb2RdDQoNCmRlZmluZSBmdW5jdGlvbiAiSG9zcGl0YWxpemF0aW9uV2l0aE9ic2VydmF0aW9uTGVuZ3Rob2ZTdGF5IihFbmNvdW50ZXIgRkhJUi5FbmNvdW50ZXIpOg0KCSJMZW5ndGhJbkRheXMiKCJIb3NwaXRhbGl6YXRpb25XaXRoT2JzZXJ2YXRpb24iKEVuY291bnRlcikpDQoNCi8vIFRPRE8gLSBmaXggdGhlc2UgKG11c3QgZmV0Y2ggTG9jYXRpb24gcmVzb3VyY2VzIGFuZCBjb21wYXJlIGlkIHRvIHJlZmVyZW5jZSkNCi8qZGVmaW5lIGZ1bmN0aW9uICJIb3NwaXRhbCBEZXBhcnR1cmUgVGltZSIoVGhlRW5jb3VudGVyIEZISVIuRW5jb3VudGVyKToNCgllbmQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChMYXN0KA0KCSAgICAoICJIb3NwaXRhbGl6YXRpb24gTG9jYXRpb25zIihUaGVFbmNvdW50ZXIpICkgSG9zcGl0YWxMb2NhdGlvbg0KCQkJc29ydCBieSBzdGFydCBvZiBGSElSSGVscGVycy5Ub0ludGVydmFsKHBlcmlvZCkNCgkpLnBlcmlvZCkNCg0KZGVmaW5lIGZ1bmN0aW9uICJFbWVyZ2VuY3kgRGVwYXJ0bWVudCBBcnJpdmFsIFRpbWUiKFRoZUVuY291bnRlciBGSElSLkVuY291bnRlcik6DQoJc3RhcnQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbCgoDQoJICAgIHNpbmdsZXRvbiBmcm9tICgNCgkgICAgICAgICggIkhvc3BpdGFsaXphdGlvbiBMb2NhdGlvbnMiKFRoZUVuY291bnRlcikgKSBIb3NwaXRhbExvY2F0aW9uDQoJCQkJd2hlcmUgSG9zcGl0YWxMb2NhdGlvbi50eXBlIH4gIkVSIg0KCQkpDQoJKS5wZXJpb2QpDQoNCmRlZmluZSBmdW5jdGlvbiAiRmlyc3QgSW5wYXRpZW50IEludGVuc2l2ZSBDYXJlIFVuaXQiKFRoZUVuY291bnRlciBGSElSLkVuY291bnRlcik6DQoJRmlyc3QoDQoJICAgICggVGhlRW5jb3VudGVyLmxvY2F0aW9uICkgSG9zcGl0YWxMb2NhdGlvbg0KCQkJd2hlcmUgSG9zcGl0YWxMb2NhdGlvbi50eXBlIH4gIklDVSINCgkJCQlhbmQgSG9zcGl0YWxMb2NhdGlvbi5wZXJpb2QgZHVyaW5nIFRoZUVuY291bnRlci5wZXJpb2QNCgkJCXNvcnQgYnkgc3RhcnQgb2YgRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChwZXJpb2QpDQoJKSovDQoNCi8qDQoqDQoqICAgIENRRk1lYXN1cmVzIENvbW1vbiBMb2dpYw0KKg0KKi8NCg0KZGVmaW5lIGZ1bmN0aW9uICJOb3JtYWxpemUgSW50ZXJ2YWwiKGNob2ljZSBDaG9pY2U8RkhJUi5kYXRlVGltZSwgRkhJUi5QZXJpb2QsIEZISVIuVGltaW5nLCBGSElSLmluc3RhbnQsIEZISVIuc3RyaW5nLCBGSElSLkFnZSwgRkhJUi5SYW5nZT4pOg0KICBjYXNlDQoJICB3aGVuIGNob2ljZSBpcyBGSElSLmRhdGVUaW1lIHRoZW4NCiAgICAJSW50ZXJ2YWxbRkhJUkhlbHBlcnMuVG9EYXRlVGltZShjaG9pY2UgYXMgRkhJUi5kYXRlVGltZSksIEZISVJIZWxwZXJzLlRvRGF0ZVRpbWUoY2hvaWNlIGFzIEZISVIuZGF0ZVRpbWUpXQ0KCQl3aGVuIGNob2ljZSBpcyBGSElSLlBlcmlvZCB0aGVuDQogIAkJRkhJUkhlbHBlcnMuVG9JbnRlcnZhbChjaG9pY2UgYXMgRkhJUi5QZXJpb2QpDQoJCXdoZW4gY2hvaWNlIGlzIEZISVIuaW5zdGFudCB0aGVuDQoJCQlJbnRlcnZhbFtGSElSSGVscGVycy5Ub0RhdGVUaW1lKGNob2ljZSBhcyBGSElSLmluc3RhbnQpLCBGSElSSGVscGVycy5Ub0RhdGVUaW1lKGNob2ljZSBhcyBGSElSLmluc3RhbnQpXQ0KCQl3aGVuIGNob2ljZSBpcyBGSElSLkFnZSB0aGVuDQoJCSAgSW50ZXJ2YWxbRkhJUkhlbHBlcnMuVG9EYXRlKFBhdGllbnQuYmlydGhEYXRlKSArIEZISVJIZWxwZXJzLlRvUXVhbnRpdHkoY2hvaWNlIGFzIEZISVIuQWdlKSwNCgkJCSAgRkhJUkhlbHBlcnMuVG9EYXRlKFBhdGllbnQuYmlydGhEYXRlKSArIEZISVJIZWxwZXJzLlRvUXVhbnRpdHkoY2hvaWNlIGFzIEZISVIuQWdlKSArIDEgeWVhcikNCgkJd2hlbiBjaG9pY2UgaXMgRkhJUi5SYW5nZSB0aGVuDQoJCSAgSW50ZXJ2YWxbRkhJUkhlbHBlcnMuVG9EYXRlKFBhdGllbnQuYmlydGhEYXRlKSArIEZISVJIZWxwZXJzLlRvUXVhbnRpdHkoKGNob2ljZSBhcyBGSElSLlJhbmdlKS5sb3cpLA0KCQkJICBGSElSSGVscGVycy5Ub0RhdGUoUGF0aWVudC5iaXJ0aERhdGUpICsgRkhJUkhlbHBlcnMuVG9RdWFudGl0eSgoY2hvaWNlIGFzIEZISVIuUmFuZ2UpLmhpZ2gpICsgMSB5ZWFyKQ0KCQl3aGVuIGNob2ljZSBpcyBGSElSLlRpbWluZyB0aGVuDQoJCSAgTWVzc2FnZShudWxsIGFzIEludGVydmFsPERhdGVUaW1lPiwgdHJ1ZSwgJzEnLCAnRXJyb3InLCAnQ2Fubm90IGNvbXB1dGUgYSBzaW5nbGUgaW50ZXJ2YWwgZnJvbSBhIFRpbWluZyB0eXBlJykNCiAgICB3aGVuIGNob2ljZSBpcyBGSElSLnN0cmluZyB0aGVuDQogICAgICBNZXNzYWdlKG51bGwgYXMgSW50ZXJ2YWw8RGF0ZVRpbWU+LCB0cnVlLCAnMScsICdFcnJvcicsICdDYW5ub3QgY29tcHV0ZSBhbiBpbnRlcnZhbCBmcm9tIGEgU3RyaW5nIHZhbHVlJykNCgkJZWxzZQ0KCQkJbnVsbCBhcyBJbnRlcnZhbDxEYXRlVGltZT4NCgllbmQNCg0KZGVmaW5lIGZ1bmN0aW9uICJOb3JtYWxpemUgQWJhdGVtZW50Iihjb25kaXRpb24gQ29uZGl0aW9uKToNCglpZiBjb25kaXRpb24uYWJhdGVtZW50IGlzIEZISVIuZGF0ZVRpbWUgdGhlbg0KCSAgSW50ZXJ2YWxbRkhJUkhlbHBlcnMuVG9EYXRlVGltZShjb25kaXRpb24uYWJhdGVtZW50IGFzIEZISVIuZGF0ZVRpbWUpLCBGSElSSGVscGVycy5Ub0RhdGVUaW1lKGNvbmRpdGlvbi5hYmF0ZW1lbnQgYXMgRkhJUi5kYXRlVGltZSldDQoJZWxzZSBpZiBjb25kaXRpb24uYWJhdGVtZW50IGlzIEZISVIuUGVyaW9kIHRoZW4NCgkgIEZISVJIZWxwZXJzLlRvSW50ZXJ2YWwoY29uZGl0aW9uLmFiYXRlbWVudCBhcyBGSElSLlBlcmlvZCkNCgllbHNlIGlmIGNvbmRpdGlvbi5hYmF0ZW1lbnQgaXMgRkhJUi5zdHJpbmcgdGhlbg0KICAgIE1lc3NhZ2UobnVsbCBhcyBJbnRlcnZhbDxEYXRlVGltZT4sIHRydWUsICcxJywgJ0Vycm9yJywgJ0Nhbm5vdCBjb21wdXRlIGFuIGludGVydmFsIGZyb20gYSBTdHJpbmcgdmFsdWUnKQ0KCWVsc2UgaWYgY29uZGl0aW9uLmFiYXRlbWVudCBpcyBGSElSLkFnZSB0aGVuDQoJCUludGVydmFsW0ZISVJIZWxwZXJzLlRvRGF0ZShQYXRpZW50LmJpcnRoRGF0ZSkgKyBGSElSSGVscGVycy5Ub1F1YW50aXR5KGNvbmRpdGlvbi5hYmF0ZW1lbnQgYXMgRkhJUi5BZ2UpLA0KCQkJRkhJUkhlbHBlcnMuVG9EYXRlKFBhdGllbnQuYmlydGhEYXRlKSArIEZISVJIZWxwZXJzLlRvUXVhbnRpdHkoY29uZGl0aW9uLmFiYXRlbWVudCBhcyBGSElSLkFnZSkgKyAxIHllYXIpDQoJZWxzZSBpZiBjb25kaXRpb24uYWJhdGVtZW50IGlzIEZISVIuUmFuZ2UgdGhlbg0KCSAgSW50ZXJ2YWxbRkhJUkhlbHBlcnMuVG9EYXRlKFBhdGllbnQuYmlydGhEYXRlKSArIEZISVJIZWxwZXJzLlRvUXVhbnRpdHkoKGNvbmRpdGlvbi5hYmF0ZW1lbnQgYXMgRkhJUi5SYW5nZSkubG93KSwNCgkJICBGSElSSGVscGVycy5Ub0RhdGUoUGF0aWVudC5iaXJ0aERhdGUpICsgRkhJUkhlbHBlcnMuVG9RdWFudGl0eSgoY29uZGl0aW9uLmFiYXRlbWVudCBhcyBGSElSLlJhbmdlKS5oaWdoKSArIDEgeWVhcikNCgllbHNlIGlmIGNvbmRpdGlvbi5hYmF0ZW1lbnQgaXMgRkhJUi5ib29sZWFuIHRoZW4NCgkgIEludGVydmFsW2VuZCBvZiAiTm9ybWFsaXplIEludGVydmFsIihjb25kaXRpb24ub25zZXQpLCBjb25kaXRpb24ucmVjb3JkZWREYXRlKQ0KCWVsc2UgbnVsbA0KDQpkZWZpbmUgZnVuY3Rpb24gIlByZXZhbGVuY2UgUGVyaW9kIihjb25kaXRpb24gQ29uZGl0aW9uKToNCiAgSW50ZXJ2YWxbc3RhcnQgb2YgIk5vcm1hbGl6ZSBJbnRlcnZhbCIoY29uZGl0aW9uLm9uc2V0KSwgZW5kIG9mICJOb3JtYWxpemUgQWJhdGVtZW50Iihjb25kaXRpb24pKQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkdldElkIih1cmkgU3RyaW5nKToNCglMYXN0KFNwbGl0KHVyaSwgJy8nKSkNCg0KDQpkZWZpbmUgZnVuY3Rpb24gIkVuY291bnRlckRpYWdub3NpcyIoRW5jb3VudGVyIEVuY291bnRlcik6DQogIEVuY291bnRlci5kaWFnbm9zaXMgRA0KICAgIHJldHVybiBzaW5nbGV0b24gZnJvbSAoW0NvbmRpdGlvbl0gQyB3aGVyZSBDLmlkID0gIkdldElkIihELmNvbmRpdGlvbi5yZWZlcmVuY2UpKQ0KDQovLyBSZXR1cm5zIHRoZSBjb25kaXRpb24gdGhhdCBpcyBzcGVjaWZpZWQgYXMgdGhlIHByaW5jaXBhbCBkaWFnbm9zaXMgZm9yIHRoZSBlbmNvdW50ZXINCi8vIFRPRE86IEJUUiAyMDE5LTA3LTMwOiBTaG91bGRuJ3QgbmVlZCB0aGUgRkhJUkhlbHBlcnMgcmVmZXJlbmNlIGhlcmUsIGludmVzdGlnYXRlDQpkZWZpbmUgZnVuY3Rpb24gIlByaW5jaXBhbERpYWdub3NpcyIoRW5jb3VudGVyIEVuY291bnRlcik6DQoJKHNpbmdsZXRvbiBmcm9tIChFbmNvdW50ZXIuZGlhZ25vc2lzIEQgd2hlcmUgRkhJUkhlbHBlcnMuVG9JbnRlZ2VyKEQucmFuaykgPSAxKSkgUEQNCgkJcmV0dXJuIHNpbmdsZXRvbiBmcm9tIChbQ29uZGl0aW9uXSBDIHdoZXJlIEMuaWQgPSAiR2V0SWQiKFBELmNvbmRpdGlvbi5yZWZlcmVuY2UpKQ0KDQovLyBSZXR1cm5zIHRoZSBsb2NhdGlvbiBmb3IgdGhlIGdpdmVuIGxvY2F0aW9uIHJlZmVyZW5jZQ0KZGVmaW5lIGZ1bmN0aW9uIEdldExvY2F0aW9uKHJlZmVyZW5jZSBSZWZlcmVuY2UpOg0KICBzaW5nbGV0b24gZnJvbSAoDQogICAgW0xvY2F0aW9uXSBMIHdoZXJlIEwuaWQgPSBHZXRJZChyZWZlcmVuY2UucmVmZXJlbmNlKQ0KICApDQoNCi8qDQpOT1RFOiBFeHRlbnNpb25zIGFyZSBub3QgdGhlIHByZWZlcnJlZCBhcHByb2FjaCwgYnV0IGFyZSB1c2VkIGFzIGEgd2F5IHRvIGFjY2Vzcw0KY29udGVudCB0aGF0IGlzIGRlZmluZWQgYnkgZXh0ZW5zaW9ucyBidXQgbm90IHlldCBzdXJmYWNlZCBpbiB0aGUNCkNRTCBtb2RlbCBpbmZvLg0KKi8NCmRlZmluZSBmdW5jdGlvbiAiR2V0RXh0ZW5zaW9ucyIoZG9tYWluUmVzb3VyY2UgRG9tYWluUmVzb3VyY2UsIHVybCBTdHJpbmcpOg0KICBkb21haW5SZXNvdXJjZS5leHRlbnNpb24gRQ0KCSAgd2hlcmUgRS51cmwgPSAoJ2h0dHA6Ly9obDcub3JnL2ZoaXIvdXMvcWljb3JlL1N0cnVjdHVyZURlZmluaXRpb24vJyArIHVybCkNCgkJcmV0dXJuIEUNCg0KZGVmaW5lIGZ1bmN0aW9uICJHZXRFeHRlbnNpb24iKGRvbWFpblJlc291cmNlIERvbWFpblJlc291cmNlLCB1cmwgU3RyaW5nKToNCiAgc2luZ2xldG9uIGZyb20gIkdldEV4dGVuc2lvbnMiKGRvbWFpblJlc291cmNlLCB1cmwpDQoNCi8qDQpOT1RFOiBFeHRlbnNpb25zIGFyZSBub3QgdGhlIHByZWZlcnJlZCBhcHByb2FjaCwgYnV0IGFyZSB1c2VkIGFzIGEgd2F5IHRvIGFjY2Vzcw0KY29udGVudCB0aGF0IGlzIGRlZmluZWQgYnkgZXh0ZW5zaW9ucyBidXQgbm90IHlldCBzdXJmYWNlZCBpbiB0aGUNCkNRTCBtb2RlbCBpbmZvLg0KKi8NCmRlZmluZSBmdW5jdGlvbiAiR2V0RXh0ZW5zaW9ucyIoZWxlbWVudCBFbGVtZW50LCB1cmwgU3RyaW5nKToNCiAgZWxlbWVudC5leHRlbnNpb24gRQ0KCSAgd2hlcmUgRS51cmwgPSAodXJsKQ0KCQlyZXR1cm4gRQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkdldEV4dGVuc2lvbiIoZWxlbWVudCBFbGVtZW50LCB1cmwgU3RyaW5nKToNCiAgc2luZ2xldG9uIGZyb20gIkdldEV4dGVuc2lvbnMiKGVsZW1lbnQsIHVybCkNCg0KLyoNCk5PVEU6IEV4dGVuc2lvbnMgYXJlIG5vdCB0aGUgcHJlZmVycmVkIGFwcHJvYWNoLCBidXQgYXJlIHVzZWQgYXMgYSB3YXkgdG8gYWNjZXNzDQpjb250ZW50IHRoYXQgaXMgZGVmaW5lZCBieSBleHRlbnNpb25zIGJ1dCBub3QgeWV0IHN1cmZhY2VkIGluIHRoZQ0KQ1FMIG1vZGVsIGluZm8uDQoqLw0KZGVmaW5lIGZ1bmN0aW9uICJHZXRCYXNlRXh0ZW5zaW9ucyIoZG9tYWluUmVzb3VyY2UgRG9tYWluUmVzb3VyY2UsIHVybCBTdHJpbmcpOg0KICBkb21haW5SZXNvdXJjZS5leHRlbnNpb24gRQ0KCSAgd2hlcmUgRS51cmwgPSAoJ2h0dHA6Ly9obDcub3JnL2ZoaXIvU3RydWN0dXJlRGVmaW5pdGlvbi8nICsgdXJsKQ0KCQlyZXR1cm4gRQ0KDQpkZWZpbmUgZnVuY3Rpb24gIkdldEJhc2VFeHRlbnNpb24iKGRvbWFpblJlc291cmNlIERvbWFpblJlc291cmNlLCB1cmwgU3RyaW5nKToNCiAgc2luZ2xldG9uIGZyb20gIkdldEJhc2VFeHRlbnNpb25zIihkb21haW5SZXNvdXJjZSwgdXJsKQ0KDQovKg0KTk9URTogUHJvdmVuYW5jZSBpcyBub3QgdGhlIHByZWZlcnJlZCBhcHByb2FjaCwgdGhpcyBpcyBwcm92aWRlZCBvbmx5IGFzIGFuIGlsbHVzdHJhdGlvbg0KZm9yIHdoYXQgdXNpbmcgUHJvdmVuYW5jZSBjb3VsZCBsb29rIGxpa2UsIGFuZCBpcyBub3QgYSB0ZXN0ZWQgcGF0dGVybg0KKi8NCmRlZmluZSBmdW5jdGlvbiAiR2V0UHJvdmVuYW5jZSIocmVzb3VyY2UgUmVzb3VyY2UpOg0KICBzaW5nbGV0b24gZnJvbSAoW1Byb3ZlbmFuY2U6IHRhcmdldCBpbiByZXNvdXJjZS5pZF0pDQoNCmRlZmluZSBmdW5jdGlvbiAiR2V0TWVkaWNhdGlvbkNvZGUiKHJlcXVlc3QgTWVkaWNhdGlvblJlcXVlc3QpOg0KICBpZiByZXF1ZXN0Lm1lZGljYXRpb24gaXMgQ29kZWFibGVDb25jZXB0IHRoZW4NCgkgIHJlcXVlc3QubWVkaWNhdGlvbiBhcyBDb2RlYWJsZUNvbmNlcHQNCgllbHNlDQoJICAoc2luZ2xldG9uIGZyb20gKFtNZWRpY2F0aW9uXSBNIHdoZXJlIE0uaWQgPSBHZXRJZCgocmVxdWVzdC5tZWRpY2F0aW9uIGFzIFJlZmVyZW5jZSkucmVmZXJlbmNlKSkpLmNvZGUNCg=="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/library-MATGlobalCommonFunctions-5.0.000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "denom-EXM124",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2028-9",
+									"display": "Asian"
+								}
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "999999995"
+					}
+				],
+				"name": [
+					{
+						"family": "Bertha",
+						"given": [
+							"Betty"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1995-01-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/denom-EXM124"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.666.5.307",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.666.5.307"
+					}
+				],
+				"version": "20170504",
+				"name": "EncounterInpatient",
+				"title": "Encounter Inpatient",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2018-03",
+							"concept": [
+								{
+									"code": "183452005",
+									"display": "Emergency hospital admission (procedure)"
+								},
+								{
+									"code": "32485007",
+									"display": "Hospital admission (procedure)"
+								},
+								{
+									"code": "8715000",
+									"display": "Hospital admission, elective (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.666.5.307"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "AdultOutpatientEncounters-2.0.000",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/dbcg/connectathon/Library/AdultOutpatientEncounters",
+				"version": "2.0.000",
+				"name": "AdultOutpatientEncounters",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+					}
+				],
+				"parameter": [
+					{
+						"name": "Measurement Period",
+						"use": "in",
+						"min": 0,
+						"max": "1",
+						"type": "Period"
+					},
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "Qualifying Encounters",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Encounter"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+							}
+						]
+					},
+					{
+						"type": "Encounter",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Encounter"
+						],
+						"codeFilter": [
+							{
+								"path": "type",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBBZHVsdE91dHBhdGllbnRFbmNvdW50ZXJzIHZlcnNpb24gJzIuMC4wMDAnDQoNCi8qDQpUaGlzIGV4YW1wbGUgaXMgYSB3b3JrIGluIHByb2dyZXNzIGFuZCBzaG91bGQgbm90IGJlIGNvbnNpZGVyZWQgYSBmaW5hbCBzcGVjaWZpY2F0aW9uDQpvciByZWNvbW1lbmRhdGlvbiBmb3IgZ3VpZGFuY2UuIFRoaXMgZXhhbXBsZSB3aWxsIGhlbHAgZ3VpZGUgYW5kIGRpcmVjdCB0aGUgcHJvY2Vzcw0Kb2YgZmluZGluZyBjb252ZW50aW9ucyBhbmQgdXNhZ2UgcGF0dGVybnMgdGhhdCBtZWV0IHRoZSBuZWVkcyBvZiB0aGUgdmFyaW91cyBzdGFrZWhvbGRlcnMNCmluIHRoZSBtZWFzdXJlIGRldmVsb3BtZW50IGNvbW11bml0eS4NCiovDQoNCi8qDQpAdXBkYXRlOiBAQEJUUiAyMDIwLTAzLTMxIC0+DQpJbmNyZW1lbnRlZCB2ZXJzaW9uIHRvIDIuMC4wMDANClVwZGF0ZWQgRkhJUiB2ZXJzaW9uIHRvIDQuMC4xDQpAQEANCiovDQoNCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnIGNhbGxlZCBGSElSSGVscGVycw0KDQp2YWx1ZXNldCAiT2ZmaWNlIFZpc2l0IjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzg4My4zLjQ2NC4xMDAzLjEwMS4xMi4xMDAxJw0KdmFsdWVzZXQgIkFubnVhbCBXZWxsbmVzcyBWaXNpdCI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTM4ODMuMy41MjYuMy4xMjQwJw0KdmFsdWVzZXQgIlByZXZlbnRpdmUgQ2FyZSBTZXJ2aWNlcyAtIEVzdGFibGlzaGVkIE9mZmljZSBWaXNpdCwgMTggYW5kIFVwIjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzg4My4zLjQ2NC4xMDAzLjEwMS4xMi4xMDI1Jw0KdmFsdWVzZXQgIlByZXZlbnRpdmUgQ2FyZSBTZXJ2aWNlcy1Jbml0aWFsIE9mZmljZSBWaXNpdCwgMTggYW5kIFVwIjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzg4My4zLjQ2NC4xMDAzLjEwMS4xMi4xMDIzJw0KdmFsdWVzZXQgIkhvbWUgSGVhbHRoY2FyZSBTZXJ2aWNlcyI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTM4ODMuMy40NjQuMTAwMy4xMDEuMTIuMTAxNicNCg0KcGFyYW1ldGVyICJNZWFzdXJlbWVudCBQZXJpb2QiIEludGVydmFsPERhdGVUaW1lPg0KICBkZWZhdWx0IEludGVydmFsW0AyMDE5LTAxLTAxVDAwOjAwOjAwLjAsIEAyMDIwLTAxLTAxVDAwOjAwOjAwLjApDQoNCmNvbnRleHQgUGF0aWVudA0KDQpkZWZpbmUgIlF1YWxpZnlpbmcgRW5jb3VudGVycyI6DQoJKA0KICAgIFtFbmNvdW50ZXI6ICJPZmZpY2UgVmlzaXQiXQ0KICAJCXVuaW9uIFtFbmNvdW50ZXI6ICJBbm51YWwgV2VsbG5lc3MgVmlzaXQiXQ0KICAJCXVuaW9uIFtFbmNvdW50ZXI6ICJQcmV2ZW50aXZlIENhcmUgU2VydmljZXMgLSBFc3RhYmxpc2hlZCBPZmZpY2UgVmlzaXQsIDE4IGFuZCBVcCJdDQogIAkJdW5pb24gW0VuY291bnRlcjogIlByZXZlbnRpdmUgQ2FyZSBTZXJ2aWNlcy1Jbml0aWFsIE9mZmljZSBWaXNpdCwgMTggYW5kIFVwIl0NCiAgCQl1bmlvbiBbRW5jb3VudGVyOiAiSG9tZSBIZWFsdGhjYXJlIFNlcnZpY2VzIl0NCiAgKSBWYWxpZEVuY291bnRlcg0KCQl3aGVyZSBWYWxpZEVuY291bnRlci5wZXJpb2QgZHVyaW5nICJNZWFzdXJlbWVudCBQZXJpb2QiDQogIAkJYW5kIFZhbGlkRW5jb3VudGVyLnN0YXR1cyAgPSAnZmluaXNoZWQnDQo="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/library-AdultOutpatientEncounters-2.0.000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.464.1003.108.12.1017",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "2.16.840.1.113883.3.464.1003.108.12.1017"
+					}
+				],
+				"version": "20170504",
+				"name": "PapTest",
+				"title": "Pap Test",
+				"status": "active",
+				"publisher": "NLM",
+				"compose": {
+					"include": [
+						{
+							"system": "http://loinc.org",
+							"version": "2.64",
+							"concept": [
+								{
+									"code": "10524-7",
+									"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+								},
+								{
+									"code": "18500-9",
+									"display": "Microscopic observation [Identifier] in Cervix by Cyto stain.thin prep"
+								},
+								{
+									"code": "19762-4",
+									"display": "General categories [Interpretation] of Cervical or vaginal smear or scraping by Cyto stain"
+								},
+								{
+									"code": "19764-0",
+									"display": "Statement of adequacy [Interpretation] of Cervical or vaginal smear or scraping by Cyto stain"
+								},
+								{
+									"code": "19765-7",
+									"display": "Microscopic observation [Identifier] in Cervical or vaginal smear or scraping by Cyto stain"
+								},
+								{
+									"code": "19766-5",
+									"display": "Microscopic observation [Identifier] in Cervical or vaginal smear or scraping by Cyto stain Narrative"
+								},
+								{
+									"code": "19774-9",
+									"display": "Cytology study comment Cervical or vaginal smear or scraping Cyto stain"
+								},
+								{
+									"code": "33717-0",
+									"display": "Cytology Cervical or vaginal smear or scraping study"
+								},
+								{
+									"code": "47527-7",
+									"display": "Cytology report of Cervical or vaginal smear or scraping Cyto stain.thin prep"
+								},
+								{
+									"code": "47528-5",
+									"display": "Cytology report of Cervical or vaginal smear or scraping Cyto stain"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "denomexcl-EXM124-1",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
+				},
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB",
+					"display": "ambulatory"
+				},
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://www.ama-assn.org/go/cpt",
+								"code": "99201",
+								"display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient/denomexcl-EXM124"
+				},
+				"period": {
+					"start": "2019-01-01T01:00:00.0",
+					"end": "2019-01-02T01:00:00.0"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Encounter/denomexcl-EXM124-1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "EXM124-7.0.000",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://fhir.org/guides/dbcg/connectathon/Library/EXM124",
+				"version": "7.0.000",
+				"name": "EXM124",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/Hospice|2.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/AdultOutpatientEncounters|2.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://fhir.org/guides/dbcg/connectathon/Library/MATGlobalCommonFunctions|5.0.000"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://fhir.org/guides/dbcg/connectathon/Library/SupplementalDataElements|2.0.0"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://snomed.info/sct/731000124108|http://snomed.info/sct/731000124108/version/201709"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+					},
+					{
+						"type": "depends-on",
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+					}
+				],
+				"parameter": [
+					{
+						"name": "Measurement Period",
+						"use": "in",
+						"min": 0,
+						"max": "1",
+						"type": "Period"
+					},
+					{
+						"name": "Patient",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Patient"
+					},
+					{
+						"name": "SDE Ethnicity",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Coding"
+					},
+					{
+						"name": "SDE Payer",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Any"
+					},
+					{
+						"name": "SDE Race",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Coding"
+					},
+					{
+						"name": "SDE Sex",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "Coding"
+					},
+					{
+						"name": "Initial Population",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					},
+					{
+						"name": "Denominator",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					},
+					{
+						"name": "Absence of Cervix",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Any"
+					},
+					{
+						"name": "Denominator Exclusion",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					},
+					{
+						"name": "Cervical Cytology Within 3 Years",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Observation"
+					},
+					{
+						"name": "HPV Test Within 5 Years for Women Age 30 and Older",
+						"use": "out",
+						"min": 0,
+						"max": "*",
+						"type": "Observation"
+					},
+					{
+						"name": "Numerator",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "Procedure",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Procedure"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+							}
+						]
+					},
+					{
+						"type": "Condition",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Condition"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"code": [
+									{
+										"system": "http://snomed.info/sct/731000124108",
+										"version": "http://snomed.info/sct/731000124108/version/201709",
+										"code": "37687000",
+										"display": "Congenital absence of cervix (disorder)"
+									}
+								]
+							}
+						]
+					},
+					{
+						"type": "Observation",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Observation"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+							}
+						]
+					},
+					{
+						"type": "Observation",
+						"profile": [
+							"http://hl7.org/fhir/StructureDefinition/Observation"
+						],
+						"codeFilter": [
+							{
+								"path": "code",
+								"valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+							}
+						]
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBFWE0xMjQgdmVyc2lvbiAnNy4wLjAwMCcKCgovKgpCYXNlZCBvbiBDTVMxMjR2NyAtIENlcnZpY2FsIENhbmNlciBTY3JlZW5pbmcKKi8KCi8qClRoaXMgZXhhbXBsZSBpcyBhIHdvcmsgaW4gcHJvZ3Jlc3MgYW5kIHNob3VsZCBub3QgYmUgY29uc2lkZXJlZCBhIGZpbmFsIHNwZWNpZmljYXRpb24Kb3IgcmVjb21tZW5kYXRpb24gZm9yIGd1aWRhbmNlLiBUaGlzIGV4YW1wbGUgd2lsbCBoZWxwIGd1aWRlIGFuZCBkaXJlY3QgdGhlIHByb2Nlc3MKb2YgZmluZGluZyBjb252ZW50aW9ucyBhbmQgdXNhZ2UgcGF0dGVybnMgdGhhdCBtZWV0IHRoZSBuZWVkcyBvZiB0aGUgdmFyaW91cyBzdGFrZWhvbGRlcnMKaW4gdGhlIG1lYXN1cmUgZGV2ZWxvcG1lbnQgY29tbXVuaXR5LgoqLwoKdXNpbmcgRkhJUiB2ZXJzaW9uICc0LjAuMScKCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnIGNhbGxlZCBGSElSSGVscGVycwppbmNsdWRlIEhvc3BpY2UgdmVyc2lvbiAnMi4wLjAwMCcgY2FsbGVkIEhvc3BpY2UKaW5jbHVkZSBBZHVsdE91dHBhdGllbnRFbmNvdW50ZXJzIHZlcnNpb24gJzIuMC4wMDAnIGNhbGxlZCBBZHVsdE91dHBhdGllbnRFbmNvdW50ZXJzCmluY2x1ZGUgTUFUR2xvYmFsQ29tbW9uRnVuY3Rpb25zIHZlcnNpb24gJzUuMC4wMDAnIGNhbGxlZCBHbG9iYWwKaW5jbHVkZSBTdXBwbGVtZW50YWxEYXRhRWxlbWVudHMgdmVyc2lvbiAnMi4wLjAnIGNhbGxlZCBTREUKCmNvZGVzeXN0ZW0gIlNOT01FRENUOjIwMTctMDkiOiAnaHR0cDovL3Nub21lZC5pbmZvL3NjdC83MzEwMDAxMjQxMDgnIHZlcnNpb24gJ2h0dHA6Ly9zbm9tZWQuaW5mby9zY3QvNzMxMDAwMTI0MTA4L3ZlcnNpb24vMjAxNzA5JwoKdmFsdWVzZXQgIkh5c3RlcmVjdG9teSB3aXRoIE5vIFJlc2lkdWFsIENlcnZpeCI6ICdodHRwOi8vY3RzLm5sbS5uaWguZ292L2ZoaXIvVmFsdWVTZXQvMi4xNi44NDAuMS4xMTM4ODMuMy40NjQuMTAwMy4xOTguMTIuMTAxNCcKdmFsdWVzZXQgIlBhcCBUZXN0IjogJ2h0dHA6Ly9jdHMubmxtLm5paC5nb3YvZmhpci9WYWx1ZVNldC8yLjE2Ljg0MC4xLjExMzg4My4zLjQ2NC4xMDAzLjEwOC4xMi4xMDE3Jwp2YWx1ZXNldCAiSFBWIFRlc3QiOiAnaHR0cDovL2N0cy5ubG0ubmloLmdvdi9maGlyL1ZhbHVlU2V0LzIuMTYuODQwLjEuMTEzODgzLjMuNDY0LjEwMDMuMTEwLjEyLjEwNTknCgpjb2RlICJDb25nZW5pdGFsIGFic2VuY2Ugb2YgY2Vydml4IChkaXNvcmRlcikiOiAnMzc2ODcwMDAnIGZyb20gIlNOT01FRENUOjIwMTctMDkiIGRpc3BsYXkgJ0Nvbmdlbml0YWwgYWJzZW5jZSBvZiBjZXJ2aXggKGRpc29yZGVyKScKCnBhcmFtZXRlciAiTWVhc3VyZW1lbnQgUGVyaW9kIiBJbnRlcnZhbDxEYXRlVGltZT4KICBkZWZhdWx0IEludGVydmFsW0AyMDE5LTAxLTAxVDAwOjAwOjAwLjAsIEAyMDIwLTAxLTAxVDAwOjAwOjAwLjApCgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSAiU0RFIEV0aG5pY2l0eSI6CiAgU0RFLiJTREUgRXRobmljaXR5IgoKZGVmaW5lICJTREUgUGF5ZXIiOgogIFNERS4iU0RFIFBheWVyIgoKZGVmaW5lICJTREUgUmFjZSI6CiAgU0RFLiJTREUgUmFjZSIKCmRlZmluZSAiU0RFIFNleCI6CiAgU0RFLiJTREUgU2V4IgoKZGVmaW5lICJJbml0aWFsIFBvcHVsYXRpb24iOgoJUGF0aWVudC5nZW5kZXIgPSAnZmVtYWxlJwoJCWFuZCBHbG9iYWwuIkNhbGVuZGFyQWdlSW5ZZWFyc0F0IihGSElSSGVscGVycy5Ub0RhdGUoUGF0aWVudC5iaXJ0aERhdGUpLCBzdGFydCBvZiAiTWVhc3VyZW1lbnQgUGVyaW9kIikgaW4gSW50ZXJ2YWxbMjMsIDY0XQoJCWFuZCBleGlzdHMgQWR1bHRPdXRwYXRpZW50RW5jb3VudGVycy4iUXVhbGlmeWluZyBFbmNvdW50ZXJzIgoKZGVmaW5lICJEZW5vbWluYXRvciI6CgkiSW5pdGlhbCBQb3B1bGF0aW9uIgoKZGVmaW5lICJEZW5vbWluYXRvciBFeGNsdXNpb24iOgoJSG9zcGljZS4iSGFzIEhvc3BpY2UiCgkJb3IgZXhpc3RzICJBYnNlbmNlIG9mIENlcnZpeCIKCmRlZmluZSAiQWJzZW5jZSBvZiBDZXJ2aXgiOgogIChbUHJvY2VkdXJlOiAiSHlzdGVyZWN0b215IHdpdGggTm8gUmVzaWR1YWwgQ2Vydml4Il0gTm9DZXJ2aXhQcm9jZWR1cmUKICAgd2hlcmUgR2xvYmFsLiJOb3JtYWxpemUgSW50ZXJ2YWwiKE5vQ2Vydml4UHJvY2VkdXJlLnBlcmZvcm1lZCkgZW5kcyBvbiBvciBiZWZvcmUgZW5kIG9mICJNZWFzdXJlbWVudCBQZXJpb2QiCiAgICAgYW5kIE5vQ2Vydml4UHJvY2VkdXJlLnN0YXR1cyA9ICdjb21wbGV0ZWQnCiAgICAgKQogIHVuaW9uIFtDb25kaXRpb24gOiAiQ29uZ2VuaXRhbCBhYnNlbmNlIG9mIGNlcnZpeCAoZGlzb3JkZXIpIl0gTm9DZXJ2aXhCaXJ0aAoJCXdoZXJlIEdsb2JhbC4iTm9ybWFsaXplIEludGVydmFsIihOb0NlcnZpeEJpcnRoLm9uc2V0KSBzdGFydHMgb24gb3IgYmVmb3JlIGVuZCBvZiAiTWVhc3VyZW1lbnQgUGVyaW9kIgogIC8vICAgIGFuZCBOb0NlcnZpeEJpcnRoLmNsaW5pY2FsU3RhdHVzIH4gVG9Db25jZXB0KEdsb2JhbC4iYWN0aXZlIikgYmVjYXVzZSB0aGlzIGlzIGFuIGV4Y2x1aW9uLCBhbGwgc3RhdHVzZXMgYXJlIGFjY2VwdGFibGUKCmRlZmluZSAiTnVtZXJhdG9yIjoKCWV4aXN0cyAiQ2VydmljYWwgQ3l0b2xvZ3kgV2l0aGluIDIgWWVhcnMiCgkJb3IgZXhpc3RzICJIUFYgVGVzdCBXaXRoaW4gNSBZZWFycyBmb3IgV29tZW4gQWdlIDMwIGFuZCBPbGRlciIKCmRlZmluZSAiQ2VydmljYWwgQ3l0b2xvZ3kgV2l0aGluIDIgWWVhcnMiOgoJW09ic2VydmF0aW9uOiAiUGFwIFRlc3QiXSBDZXJ2aWNhbEN5dG9sb2d5CgkJd2hlcmUgQ2VydmljYWxDeXRvbG9neS52YWx1ZSBpcyBub3QgbnVsbAoJCQlhbmQgQ2VydmljYWxDeXRvbG9neS5zdGF0dXMgaW4geyAnZmluYWwnLCAnYW1lbmRlZCcsICdjb3JyZWN0ZWQnLCAncHJlbGltaW5hcnknIH0KCQkgIGFuZCBHbG9iYWwuIk5vcm1hbGl6ZSBJbnRlcnZhbCIoQ2VydmljYWxDeXRvbG9neS5lZmZlY3RpdmUpIGVuZHMgMiB5ZWFycyBvciBsZXNzIG9uIG9yIGJlZm9yZSBlbmQgb2YgIk1lYXN1cmVtZW50IFBlcmlvZCIKCmRlZmluZSAiSFBWIFRlc3QgV2l0aGluIDUgWWVhcnMgZm9yIFdvbWVuIEFnZSAzMCBhbmQgT2xkZXIiOgoJW09ic2VydmF0aW9uOiAiSFBWIFRlc3QiXSBIUFZUZXN0CiAgICAgIHdoZXJlIEhQVlRlc3QudmFsdWUgaXMgbm90IG51bGwKICAgICAgICBhbmQgSFBWVGVzdC5zdGF0dXMgaW4geyAnZmluYWwnLCAnYW1lbmRlZCcsICdjb3JyZWN0ZWQnLCAncHJlbGltaW5hcnknIH0KICAgICAgICBhbmQgIEdsb2JhbC4iQ2FsZW5kYXJBZ2VJblllYXJzQXQiKEZISVJIZWxwZXJzLlRvRGF0ZShQYXRpZW50LmJpcnRoRGF0ZSksIHN0YXJ0IG9mIEdsb2JhbC4iTm9ybWFsaXplIEludGVydmFsIihIUFZUZXN0LmVmZmVjdGl2ZSkpPj0gMzAKICAgICAgICBhbmQgR2xvYmFsLiJOb3JtYWxpemUgSW50ZXJ2YWwiKEhQVlRlc3QuZWZmZWN0aXZlKSBlbmRzIDUgeWVhcnMgb3IgbGVzcyBvbiBvciBiZWZvcmUgZW5kIG9mICJNZWFzdXJlbWVudCBQZXJpb2QiCg=="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/EXM124-7.0.000"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113883.3.117.1.7.1.292",
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+				"title": "Emergency Department Visit",
+				"status": "active",
+				"publisher": "The Joint Commission",
+				"compose": {
+					"include": [
+						{
+							"system": "http://snomed.info/sct",
+							"version": "2019-03",
+							"concept": [
+								{
+									"code": "4525004",
+									"display": "Emergency department patient visit (procedure)"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "FHIR-ModelInfo",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://hl7.org/fhir/Library/FHIR-ModelInfo",
+				"identifier": [
+					{
+						"use": "official",
+						"system": "http://example.org/fhir/cqi/ecqm/Library/Identifier",
+						"value": "FHIR"
+					}
+				],
+				"version": "4.0.1",
+				"name": "FHIR",
+				"title": "FHIR Model Definition",
+				"status": "active",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "model-definition"
+						}
+					]
+				},
+				"date": "2019-08-08",
+				"publisher": "Health Level 7 International - Clinical Quality Information Work Group",
+				"contact": [
+					{
+						"telecom": [
+							{
+								"system": "url",
+								"value": "http://www.hl7.org/Special/committees/cqi/index.cfm"
+							}
+						]
+					}
+				],
+				"description": "Model definition for the FHIR R4 (v4.0.1) Model",
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+								"code": "001"
+							}
+						]
+					}
+				],
+				"approvalDate": "2019-08-08",
+				"lastReviewDate": "2020-06-19",
+				"topic": [
+					{
+						"text": "FHIR"
+					}
+				],
+				"content": [
+					{
+						"contentType": "application/xml",
+						"url": "https://github.com/cqframework/clinical_quality_language/blob/master/Src/java/quick/src/main/resources/org/hl7/fhir/fhir-modelinfo-4.0.1.xml"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/FHIR-ModelInfo"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "FHIRHelpers-4.0.1",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+						"valueReference": {
+							"reference": "Device/cqf-tooling"
+						}
+					}
+				],
+				"url": "http://hl7.org/fhir/Library/FHIRHelpers",
+				"version": "4.0.1",
+				"name": "FHIRHelpers",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://hl7.org/fhir/Library/FHIR-ModelInfo|4.0.1"
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBGSElSSGVscGVycyB2ZXJzaW9uICc0LjAuMScNCg0KdXNpbmcgRkhJUiB2ZXJzaW9uICc0LjAuMScNCg0KZGVmaW5lIGZ1bmN0aW9uIFRvSW50ZXJ2YWwocGVyaW9kIEZISVIuUGVyaW9kKToNCiAgICBpZiBwZXJpb2QgaXMgbnVsbCB0aGVuDQogICAgICAgIG51bGwNCiAgICBlbHNlDQogICAgICAgIEludGVydmFsW3BlcmlvZC4ic3RhcnQiLnZhbHVlLCBwZXJpb2QuImVuZCIudmFsdWVdDQoNCmRlZmluZSBmdW5jdGlvbiBUb1F1YW50aXR5KHF1YW50aXR5IEZISVIuUXVhbnRpdHkpOg0KICAgIGlmIHF1YW50aXR5IGlzIG51bGwgdGhlbg0KICAgICAgICBudWxsDQogICAgZWxzZQ0KICAgICAgICBTeXN0ZW0uUXVhbnRpdHkgeyB2YWx1ZTogcXVhbnRpdHkudmFsdWUudmFsdWUsIHVuaXQ6IHF1YW50aXR5LnVuaXQudmFsdWUgfQ0KDQpkZWZpbmUgZnVuY3Rpb24gVG9JbnRlcnZhbChyYW5nZSBGSElSLlJhbmdlKToNCiAgICBpZiByYW5nZSBpcyBudWxsIHRoZW4NCiAgICAgICAgbnVsbA0KICAgIGVsc2UNCiAgICAgICAgSW50ZXJ2YWxbVG9RdWFudGl0eShyYW5nZS5sb3cpLCBUb1F1YW50aXR5KHJhbmdlLmhpZ2gpXQ0KDQpkZWZpbmUgZnVuY3Rpb24gVG9Db2RlKGNvZGluZyBGSElSLkNvZGluZyk6DQogICAgaWYgY29kaW5nIGlzIG51bGwgdGhlbg0KICAgICAgICBudWxsDQogICAgZWxzZQ0KICAgICAgICBTeXN0ZW0uQ29kZSB7DQogICAgICAgICAgY29kZTogY29kaW5nLmNvZGUudmFsdWUsDQogICAgICAgICAgc3lzdGVtOiBjb2Rpbmcuc3lzdGVtLnZhbHVlLA0KICAgICAgICAgIHZlcnNpb246IGNvZGluZy52ZXJzaW9uLnZhbHVlLA0KICAgICAgICAgIGRpc3BsYXk6IGNvZGluZy5kaXNwbGF5LnZhbHVlDQogICAgICAgIH0NCg0KZGVmaW5lIGZ1bmN0aW9uIFRvQ29uY2VwdChjb25jZXB0IEZISVIuQ29kZWFibGVDb25jZXB0KToNCiAgICBpZiBjb25jZXB0IGlzIG51bGwgdGhlbg0KICAgICAgICBudWxsDQogICAgZWxzZQ0KICAgICAgICBTeXN0ZW0uQ29uY2VwdCB7DQogICAgICAgICAgICBjb2RlczogY29uY2VwdC5jb2RpbmcgQyByZXR1cm4gVG9Db2RlKEMpLA0KICAgICAgICAgICAgZGlzcGxheTogY29uY2VwdC50ZXh0LnZhbHVlDQogICAgICAgIH0NCg0KDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWNjb3VudFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aW9uQ2FyZGluYWxpdHlCZWhhdmlvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aW9uQ29uZGl0aW9uS2luZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aW9uR3JvdXBpbmdCZWhhdmlvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aW9uUGFydGljaXBhbnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBY3Rpb25QcmVjaGVja0JlaGF2aW9yKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBY3Rpb25SZWxhdGlvbnNoaXBUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBY3Rpb25SZXF1aXJlZEJlaGF2aW9yKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBY3Rpb25TZWxlY3Rpb25CZWhhdmlvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aXZpdHlEZWZpbml0aW9uS2luZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWN0aXZpdHlQYXJ0aWNpcGFudFR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEFkZHJlc3NUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBZGRyZXNzVXNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBZG1pbmlzdHJhdGl2ZUdlbmRlcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWR2ZXJzZUV2ZW50QWN0dWFsaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBZ2dyZWdhdGlvbk1vZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEFsbGVyZ3lJbnRvbGVyYW5jZUNhdGVnb3J5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBbGxlcmd5SW50b2xlcmFuY2VDcml0aWNhbGl0eSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQWxsZXJneUludG9sZXJhbmNlU2V2ZXJpdHkpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEFsbGVyZ3lJbnRvbGVyYW5jZVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEFwcG9pbnRtZW50U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBc3NlcnRpb25EaXJlY3Rpb25UeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBc3NlcnRpb25PcGVyYXRvclR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEFzc2VydGlvblJlc3BvbnNlVHlwZXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEF1ZGl0RXZlbnRBY3Rpb24pOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEF1ZGl0RXZlbnRBZ2VudE5ldHdvcmtUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBBdWRpdEV2ZW50T3V0Y29tZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQmluZGluZ1N0cmVuZ3RoKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBCaW9sb2dpY2FsbHlEZXJpdmVkUHJvZHVjdENhdGVnb3J5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBCaW9sb2dpY2FsbHlEZXJpdmVkUHJvZHVjdFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQmlvbG9naWNhbGx5RGVyaXZlZFByb2R1Y3RTdG9yYWdlU2NhbGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEJ1bmRsZVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENhcGFiaWxpdHlTdGF0ZW1lbnRLaW5kKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDYXJlUGxhbkFjdGl2aXR5S2luZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2FyZVBsYW5BY3Rpdml0eVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2FyZVBsYW5JbnRlbnQpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENhcmVQbGFuU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDYXJlVGVhbVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2F0YWxvZ0VudHJ5UmVsYXRpb25UeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDaGFyZ2VJdGVtRGVmaW5pdGlvblByaWNlQ29tcG9uZW50VHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2hhcmdlSXRlbVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2xhaW1SZXNwb25zZVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ2xhaW1TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENsaW5pY2FsSW1wcmVzc2lvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29kZVNlYXJjaFN1cHBvcnQpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvZGVTeXN0ZW1Db250ZW50TW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29kZVN5c3RlbUhpZXJhcmNoeU1lYW5pbmcpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbW11bmljYXRpb25Qcmlvcml0eSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29tbXVuaWNhdGlvblJlcXVlc3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbW11bmljYXRpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbXBhcnRtZW50Q29kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29tcGFydG1lbnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb21wb3NpdGlvbkF0dGVzdGF0aW9uTW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29tcG9zaXRpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbmNlcHRNYXBFcXVpdmFsZW5jZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29uY2VwdE1hcEdyb3VwVW5tYXBwZWRNb2RlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb25kaXRpb25hbERlbGV0ZVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29uZGl0aW9uYWxSZWFkU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb25zZW50RGF0YU1lYW5pbmcpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbnNlbnRQcm92aXNpb25UeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb25zZW50U3RhdGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbnN0cmFpbnRTZXZlcml0eSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgQ29udGFjdFBvaW50U3lzdGVtKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb250YWN0UG9pbnRVc2UpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbnRyYWN0UHVibGljYXRpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvbnRyYWN0U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDb250cmlidXRvclR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIENvdmVyYWdlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBDdXJyZW5jeUNvZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIERheU9mV2Vlayk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRGF5c09mV2Vlayk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRGV0ZWN0ZWRJc3N1ZVNldmVyaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXRlY3RlZElzc3VlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXZpY2VNZXRyaWNDYWxpYnJhdGlvblN0YXRlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXZpY2VNZXRyaWNDYWxpYnJhdGlvblR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIERldmljZU1ldHJpY0NhdGVnb3J5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXZpY2VNZXRyaWNDb2xvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRGV2aWNlTWV0cmljT3BlcmF0aW9uYWxTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIERldmljZU5hbWVUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXZpY2VSZXF1ZXN0U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEZXZpY2VVc2VTdGF0ZW1lbnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIERpYWdub3N0aWNSZXBvcnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIERpc2NyaW1pbmF0b3JUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEb2N1bWVudENvbmZpZGVudGlhbGl0eSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRG9jdW1lbnRNb2RlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBEb2N1bWVudFJlZmVyZW5jZVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRG9jdW1lbnRSZWxhdGlvbnNoaXBUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbGlnaWJpbGl0eVJlcXVlc3RQdXJwb3NlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbGlnaWJpbGl0eVJlcXVlc3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEVsaWdpYmlsaXR5UmVzcG9uc2VQdXJwb3NlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbGlnaWJpbGl0eVJlc3BvbnNlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbmFibGVXaGVuQmVoYXZpb3IpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEVuY291bnRlckxvY2F0aW9uU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbmNvdW50ZXJTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEVuZHBvaW50U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFbnJvbGxtZW50UmVxdWVzdFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRW5yb2xsbWVudFJlc3BvbnNlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFcGlzb2RlT2ZDYXJlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFdmVudENhcGFiaWxpdHlNb2RlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBFdmVudFRpbWluZyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRXZpZGVuY2VWYXJpYWJsZVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEV4YW1wbGVTY2VuYXJpb0FjdG9yVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRXhwbGFuYXRpb25PZkJlbmVmaXRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEV4cG9zdXJlU3RhdGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEV4dGVuc2lvbkNvbnRleHRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBGSElSQWxsVHlwZXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEZISVJEZWZpbmVkVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRkhJUkRldmljZVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRkhJUlJlc291cmNlVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRkhJUlN1YnN0YW5jZVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgRkhJUlZlcnNpb24pOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEZhbWlseUhpc3RvcnlTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEZpbHRlck9wZXJhdG9yKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBGbGFnU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBHb2FsTGlmZWN5Y2xlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBHcmFwaENvbXBhcnRtZW50UnVsZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgR3JhcGhDb21wYXJ0bWVudFVzZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgR3JvdXBNZWFzdXJlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBHcm91cFR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEd1aWRhbmNlUmVzcG9uc2VTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEd1aWRlUGFnZUdlbmVyYXRpb24pOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEd1aWRlUGFyYW1ldGVyQ29kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgSFRUUFZlcmIpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIElkZW50aWZpZXJVc2UpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIElkZW50aXR5QXNzdXJhbmNlTGV2ZWwpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIEltYWdpbmdTdHVkeVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgSW1tdW5pemF0aW9uRXZhbHVhdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgSW1tdW5pemF0aW9uU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBJbnZvaWNlUHJpY2VDb21wb25lbnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBJbnZvaWNlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBJc3N1ZVNldmVyaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBJc3N1ZVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIExpbmtUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBMaW5rYWdlVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTGlzdE1vZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIExpc3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIExvY2F0aW9uTW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTG9jYXRpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIE1lYXN1cmVSZXBvcnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIE1lYXN1cmVSZXBvcnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBNZWRpYVN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTWVkaWNhdGlvbkFkbWluaXN0cmF0aW9uU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBNZWRpY2F0aW9uRGlzcGVuc2VTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIE1lZGljYXRpb25Lbm93bGVkZ2VTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIE1lZGljYXRpb25SZXF1ZXN0SW50ZW50KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBNZWRpY2F0aW9uUmVxdWVzdFByaW9yaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBNZWRpY2F0aW9uUmVxdWVzdFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTWVkaWNhdGlvblN0YXRlbWVudFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTWVkaWNhdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTWVzc2FnZVNpZ25pZmljYW5jZUNhdGVnb3J5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBNZXNzYWdlaGVhZGVyX1Jlc3BvbnNlX1JlcXVlc3QpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIE1pbWVUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBOYW1lVXNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBOYW1pbmdTeXN0ZW1JZGVudGlmaWVyVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTmFtaW5nU3lzdGVtVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTmFycmF0aXZlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBOb3RlVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgTnV0cml0aWlvbk9yZGVySW50ZW50KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBOdXRyaXRpb25PcmRlclN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgT2JzZXJ2YXRpb25EYXRhVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgT2JzZXJ2YXRpb25SYW5nZUNhdGVnb3J5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBPYnNlcnZhdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgT3BlcmF0aW9uS2luZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgT3BlcmF0aW9uUGFyYW1ldGVyVXNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBPcmllbnRhdGlvblR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFBhcmFtZXRlclVzZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUGFydGljaXBhbnRSZXF1aXJlZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUGFydGljaXBhbnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFBhcnRpY2lwYXRpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFBheW1lbnROb3RpY2VTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFBheW1lbnRSZWNvbmNpbGlhdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUHJvY2VkdXJlU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBQcm9wZXJ0eVJlcHJlc2VudGF0aW9uKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBQcm9wZXJ0eVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFByb3ZlbmFuY2VFbnRpdHlSb2xlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBQdWJsaWNhdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUXVhbGl0eVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFF1YW50aXR5Q29tcGFyYXRvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUXVlc3Rpb25uYWlyZUl0ZW1PcGVyYXRvcik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUXVlc3Rpb25uYWlyZUl0ZW1UeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBRdWVzdGlvbm5haXJlUmVzcG9uc2VTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlZmVyZW5jZUhhbmRsaW5nUG9saWN5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZWZlcmVuY2VWZXJzaW9uUnVsZXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlZmVycmVkRG9jdW1lbnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlbGF0ZWRBcnRpZmFjdFR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlbWl0dGFuY2VPdXRjb21lKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXBvc2l0b3J5VHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUmVxdWVzdEludGVudCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUmVxdWVzdFByaW9yaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXF1ZXN0U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXNlYXJjaEVsZW1lbnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXNlYXJjaFN0dWR5U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXNlYXJjaFN1YmplY3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlc291cmNlVHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUmVzb3VyY2VWZXJzaW9uUG9saWN5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBSZXNwb25zZVR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFJlc3RmdWxDYXBhYmlsaXR5TW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgUmlza0Fzc2Vzc21lbnRTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFNQRFhMaWNlbnNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTZWFyY2hDb21wYXJhdG9yKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTZWFyY2hFbnRyeU1vZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFNlYXJjaE1vZGlmaWVyQ29kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU2VhcmNoUGFyYW1UeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTZWN0aW9uTW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU2VxdWVuY2VUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTZXJ2aWNlUmVxdWVzdEludGVudCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU2VydmljZVJlcXVlc3RQcmlvcml0eSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU2VydmljZVJlcXVlc3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFNsaWNpbmdSdWxlcyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU2xvdFN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU29ydERpcmVjdGlvbik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3BlY2ltZW5Db250YWluZWRQcmVmZXJlbmNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTcGVjaW1lblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTdHJhbmRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTdHJ1Y3R1cmVEZWZpbml0aW9uS2luZCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3RydWN0dXJlTWFwQ29udGV4dFR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN0cnVjdHVyZU1hcEdyb3VwVHlwZU1vZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN0cnVjdHVyZU1hcElucHV0TW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3RydWN0dXJlTWFwTW9kZWxNb2RlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBTdHJ1Y3R1cmVNYXBTb3VyY2VMaXN0TW9kZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3RydWN0dXJlTWFwVGFyZ2V0TGlzdE1vZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN0cnVjdHVyZU1hcFRyYW5zZm9ybSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3Vic2NyaXB0aW9uQ2hhbm5lbFR5cGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN1YnNjcmlwdGlvblN0YXR1cyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgU3VwcGx5RGVsaXZlcnlTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN1cHBseVJlcXVlc3RTdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFN5c3RlbVJlc3RmdWxJbnRlcmFjdGlvbik6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgVGFza0ludGVudCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgVGFza1ByaW9yaXR5KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUYXNrU3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUZXN0UmVwb3J0QWN0aW9uUmVzdWx0KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUZXN0UmVwb3J0UGFydGljaXBhbnRUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUZXN0UmVwb3J0UmVzdWx0KTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUZXN0UmVwb3J0U3RhdHVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUZXN0U2NyaXB0UmVxdWVzdE1ldGhvZENvZGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFRyaWdnZXJUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBUeXBlRGVyaXZhdGlvblJ1bGUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFR5cGVSZXN0ZnVsSW50ZXJhY3Rpb24pOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFVESUVudHJ5VHlwZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgVW5pdHNPZlRpbWUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFVzZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgVmFyaWFibGVUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBWaXNpb25CYXNlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBWaXNpb25FeWVzKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBWaXNpb25TdGF0dXMpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIFhQYXRoVXNhZ2VUeXBlKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb1N0cmluZyh2YWx1ZSBiYXNlNjRCaW5hcnkpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvQm9vbGVhbih2YWx1ZSBib29sZWFuKTogdmFsdWUudmFsdWUNCmRlZmluZSBmdW5jdGlvbiBUb0RhdGUodmFsdWUgZGF0ZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9EYXRlVGltZSh2YWx1ZSBkYXRlVGltZSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9EZWNpbWFsKHZhbHVlIGRlY2ltYWwpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvRGF0ZVRpbWUodmFsdWUgaW5zdGFudCk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9JbnRlZ2VyKHZhbHVlIGludGVnZXIpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIHN0cmluZyk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9UaW1lKHZhbHVlIHRpbWUpOiB2YWx1ZS52YWx1ZQ0KZGVmaW5lIGZ1bmN0aW9uIFRvU3RyaW5nKHZhbHVlIHVyaSk6IHZhbHVlLnZhbHVlDQpkZWZpbmUgZnVuY3Rpb24gVG9TdHJpbmcodmFsdWUgeGh0bWwpOiB2YWx1ZS52YWx1ZQ=="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/library-FHIRHelpers-4.0.1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "denomexcl-EXM124",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2028-9",
+									"display": "Asian"
+								}
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "999999995"
+					}
+				],
+				"name": [
+					{
+						"family": "Bertha",
+						"given": [
+							"Betty"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1995-01-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/denomexcl-EXM124"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "numer-EXM124-3",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/observation"
+					]
+				},
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "10524-7",
+							"display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/numer-EXM124"
+				},
+				"effectiveDateTime": "2019-11-01T00:00:00",
+				"valueBoolean": true
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/numer-EXM124-3"
+			}
+		}
+	]
+}

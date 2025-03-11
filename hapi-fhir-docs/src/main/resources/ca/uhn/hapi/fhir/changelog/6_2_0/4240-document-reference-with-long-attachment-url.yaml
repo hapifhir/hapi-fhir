@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4240
+jira: SMILE-4892
+title:  "Previously, when creating a `DocumentReference` with an `Attachment` containing a URL over 254 characters
+an error was thrown. This has been corrected and now an `Attachment` URL can be up to 500 characters."

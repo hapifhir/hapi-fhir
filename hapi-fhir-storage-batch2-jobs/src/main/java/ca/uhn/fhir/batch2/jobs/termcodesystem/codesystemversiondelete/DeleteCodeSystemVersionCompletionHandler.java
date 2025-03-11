@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,15 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 
-public class DeleteCodeSystemVersionCompletionHandler implements IJobCompletionHandler<TermCodeSystemDeleteVersionJobParameters> {
+public class DeleteCodeSystemVersionCompletionHandler
+		implements IJobCompletionHandler<TermCodeSystemDeleteVersionJobParameters> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 

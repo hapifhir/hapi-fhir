@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -28,7 +27,9 @@ import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import jakarta.annotation.PreDestroy;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -44,7 +45,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,7 +85,6 @@ public class TestHSearchAddInConfig {
 			Path tempDirPath = Files.createTempDirectory(null);
 			String dirPath = tempDirPath.toString();
 
-
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
@@ -117,7 +116,6 @@ public class TestHSearchAddInConfig {
 
 	}
 
-
 	/**
 	 * Our default config - Lucene in-memory.
 	 */
@@ -136,6 +134,7 @@ public class TestHSearchAddInConfig {
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
+			luceneHeapProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, "true");
 
 			return (theProperties) -> {
 				ourLog.info("Configuring Hibernate Search - {}", luceneHeapProperties);

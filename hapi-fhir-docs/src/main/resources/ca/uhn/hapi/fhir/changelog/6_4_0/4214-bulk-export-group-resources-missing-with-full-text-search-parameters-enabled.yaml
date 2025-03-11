@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4214
+title: "Before, When exporting a group including patients referenced in observations, observations were missed from output if `Search Parameters Indexing` was enabled.
+   This is now fixed."

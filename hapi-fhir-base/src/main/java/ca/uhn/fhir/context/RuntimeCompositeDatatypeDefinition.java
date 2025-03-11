@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -31,32 +30,40 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType> implements IRuntimeDatatypeDefinition {
+public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType>
+		implements IRuntimeDatatypeDefinition {
 
 	private boolean mySpecialization;
 	private Class<? extends IBaseDatatype> myProfileOfType;
 	private BaseRuntimeElementDefinition<?> myProfileOf;
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public RuntimeCompositeDatatypeDefinition(
+			DatatypeDef theDef,
+			Class<? extends ICompositeType> theImplementingClass,
+			boolean theStandardType,
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theDef.name(), theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
-		
+
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName()
+					+ " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
 		}
-		
+
 		mySpecialization = theDef.isSpecialization();
 		myProfileOfType = theDef.profileOf();
 		if (myProfileOfType.equals(IBaseDatatype.class)) {
 			myProfileOfType = null;
 		}
-
 	}
 
 	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
-		
+
 		if (myProfileOfType != null) {
 			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 			if (myProfileOf == null) {
@@ -92,6 +99,4 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 		}
 		return false;
 	}
-
-
 }

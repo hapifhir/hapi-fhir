@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4098
+jira: SMILE-5292
+title: "Fixed issue where adding a sort parameter to a query would return an incomplete result set."

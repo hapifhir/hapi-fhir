@@ -41,7 +41,7 @@ Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.19.1:tes
 This typically means that your build is running out of memory. HAPI's unit tests execute by default in multiple threads (the thread count is determined by the number of CPU cores available) so in an environment with lots of cores but not enough RAM, you may run out. If you are getting this error, try executing the build with the following arguments:
 
 ```
-mvn -P ALLMODULES,NOPARALLEL install
+mvn -P NOPARALLEL install
 ```
 
 See [Hacking HAPI FHIR](/docs/contributing/hacking_guide.html) for more information on the build process.

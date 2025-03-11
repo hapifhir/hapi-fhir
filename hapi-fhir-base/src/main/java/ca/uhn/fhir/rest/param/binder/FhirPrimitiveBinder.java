@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param.binder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,13 @@ package ca.uhn.fhir.rest.param.binder;
  * limitations under the License.
  * #L%
  */
-
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+package ca.uhn.fhir.rest.param.binder;
 
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiveType<?>> {
-	
+
 	private Class<IPrimitiveType<?>> myType;
 
 	public FhirPrimitiveBinder(Class<IPrimitiveType<?>> theType) {
@@ -43,6 +41,4 @@ public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiv
 		instance.setValueAsString(theString);
 		return instance;
 	}
-
-
 }

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5158
+title: "Added support for Subscription matching of ':above', ':below', ':contains' and ':missing' '_source' search parameter modifiers."

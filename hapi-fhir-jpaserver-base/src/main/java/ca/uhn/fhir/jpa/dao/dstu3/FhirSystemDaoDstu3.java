@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.dstu3;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +17,21 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
+import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.persistence.TypedQuery;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-	}
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {
@@ -59,10 +50,16 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					retVal.addProfile(next.getCode());
 					break;
 				case SECURITY_LABEL:
-					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addSecurity()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 				case TAG:
-					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addTag()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 			}
 		}
@@ -71,8 +68,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	@Override
 	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+		return JpaResourceDao.throwProcessMessageNotImplemented();
 	}
-
-
 }

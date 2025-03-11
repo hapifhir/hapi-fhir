@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +17,26 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "HFJ_PARTITION", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_PART_NAME", columnNames = {"PART_NAME"})
-})
+@Table(
+		name = "HFJ_PARTITION",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_PART_NAME",
+					columnNames = {"PART_NAME"})
+		})
 public class PartitionEntity {
 
 	public static final int MAX_NAME_LENGTH = 200;
@@ -44,8 +49,10 @@ public class PartitionEntity {
 	@Id
 	@Column(name = "PART_ID", nullable = false)
 	private Integer myId;
+
 	@Column(name = "PART_NAME", length = MAX_NAME_LENGTH, nullable = false)
 	private String myName;
+
 	@Column(name = "PART_DESC", length = MAX_DESC_LENGTH, nullable = true)
 	private String myDescription;
 
@@ -77,5 +84,21 @@ public class PartitionEntity {
 
 	public RequestPartitionId toRequestPartitionId() {
 		return RequestPartitionId.fromPartitionIdAndName(getId(), getName());
+	}
+
+	/**
+	 * Build a RequestPartitionId from the ids and names in the entities.
+	 * @param thePartitions the entities to use for ids and names
+	 * @return a single RequestPartitionId covering all the entities
+	 */
+	public static RequestPartitionId buildRequestPartitionId(List<PartitionEntity> thePartitions) {
+		List<Integer> ids = new ArrayList<>(thePartitions.size());
+		List<String> names = new ArrayList<>(thePartitions.size());
+		for (PartitionEntity nextPartition : thePartitions) {
+			ids.add(nextPartition.getId());
+			names.add(nextPartition.getName());
+		}
+
+		return RequestPartitionId.forPartitionIdsAndNames(names, ids, null);
 	}
 }

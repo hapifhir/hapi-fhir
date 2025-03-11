@@ -1,12 +1,8 @@
-package ca.uhn.fhir.validation;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +17,13 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 public interface IValidationContext<T> {
 
@@ -40,10 +38,9 @@ public interface IValidationContext<T> {
 	void addValidationMessage(SingleValidationMessage theMessage);
 
 	List<SingleValidationMessage> getMessages();
-	
+
 	ValidationResult toResult();
 
 	@Nonnull
 	ValidationOptions getOptions();
-
 }

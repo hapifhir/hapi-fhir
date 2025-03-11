@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.server;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,11 @@ package ca.uhn.fhir.test.utilities.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.server;
 
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,15 +33,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private boolean myClearBetweenTests = true;
+	private boolean myInitialized = false;
 	private final List<T> myUpdates = new ArrayList<>();
 
 	/**
@@ -56,7 +56,15 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		if (myClearBetweenTests) {
+			myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		}
+	}
+
+	@Override
+	@Search(allowUnknownParams = true)
+	public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
+		return super.searchAll(theRequestDetails);
 	}
 
 	@Override
@@ -72,10 +80,14 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		if (myClearBetweenTests) {
 			clear();
 			clearCounts();
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
+		} else if (!myInitialized) {
+			myInitialized = true;
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 		}
-		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
+	@Override
 	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 		T resourceClone = getFhirContext().newTerser().clone(theResource);
 		myUpdates.add(resourceClone);
@@ -88,18 +100,18 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	public void waitForUpdateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
-		await().until(this::getCountUpdate, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountUpdate());
+		await().until(() -> this.getCountUpdate() == theCount);
 	}
 
 	public void waitForCreateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
-		await().until(this::getCountCreate, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountCreate());
+		await().until(() -> this.getCountCreate() == theCount);
 	}
 
 	public void waitForDeleteCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountDelete()));
-		await().until(this::getCountDelete, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountDelete());
+		await().until(() -> this.getCountDelete() == theCount);
 	}
 
 	public List<T> getResourceUpdates() {

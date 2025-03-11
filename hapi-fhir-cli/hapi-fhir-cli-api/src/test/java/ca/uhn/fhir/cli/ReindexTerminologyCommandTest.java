@@ -2,9 +2,15 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,12 +20,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -28,21 +32,21 @@ import static org.mockito.Mockito.spy;
 @ExtendWith(MockitoExtension.class)
 class ReindexTerminologyCommandTest {
 
+	private static final String FAILURE_MESSAGE = "FAILURE";
 	private final FhirContext myContext = FhirContext.forR4();
 
 	@Spy
 	private BaseJpaSystemProvider<?, ?> myProvider = spy(new BaseJpaSystemProvider<>() {});
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
-
-
-	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseApp.ourLog);
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@BeforeEach
@@ -53,23 +57,21 @@ class ReindexTerminologyCommandTest {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testProviderMethodInvoked(boolean theIncludeTls) {
-		System.setOut(new PrintStream(outputStreamCaptor));
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 				"-v", "r4"
 			},
 			"-t", theIncludeTls, myRestServerR4Helper
-		));
+		);
+		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(outputStreamCaptor.toString().trim(),
-			outputStreamCaptor.toString().trim(), containsString("<valueBoolean value=\"true\"/>"));
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).doesNotHaveMessage(FAILURE_MESSAGE);
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -78,16 +80,17 @@ class ReindexTerminologyCommandTest {
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
+		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				ReindexTerminologyCommand.REINDEX_TERMINOLOGY
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		);
 		try {
-			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[]{
-					ReindexTerminologyCommand.REINDEX_TERMINOLOGY
-				},
-				"-t", theIncludeTls, myRestServerR4Helper
-			));
+			App.main(args);
 			fail();
 		} catch (Error e) {
-			assertThat(e.getMessage(), containsString("Missing required option: v"));
+			assertThat(e.getMessage()).contains("Missing required option: v");
 		}
 	}
 
@@ -109,7 +112,7 @@ class ReindexTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.getMessage(), containsString("Missing required option: t"));
+			assertThat(e.getMessage()).contains("Missing required option: t");
 		}
 	}
 
@@ -117,49 +120,68 @@ class ReindexTerminologyCommandTest {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testHandleUnexpectedResponse(boolean theIncludeTls) {
-		System.setOut(new PrintStream(outputStreamCaptor));
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 				"-v", "r4"
 			},
 			"-t", theIncludeTls, myRestServerR4Helper
-		));
+		);
+		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(outputStreamCaptor.toString().trim(),
-			outputStreamCaptor.toString().trim(), containsString("<valueBoolean value=\"false\"/>"));
-		assertThat(outputStreamCaptor.toString().trim(),
-			outputStreamCaptor.toString().trim(), containsString("<valueString value=\"Internal error. " +
-				"Command result unknown. Check system logs for details\"/>"));
-
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension)
+			.hasMessage(FAILURE_MESSAGE)
+			.hasMessage("Internal error. Command result unknown. Check system logs for details");
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testHandleServiceError(boolean theIncludeTls) {
-		System.setOut(new PrintStream(outputStreamCaptor));
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, false);
 		ParametersUtil.addParameterToParametersString(myContext, retVal, "message",
 			"Freetext service is not configured. Operation didn't run.");
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+		// to keep logging verbose.
+		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
-				"-v", "r4"
+				"-v", "r4",
+				"--debug" // to keep logging verbose.
 			},
 			"-t", theIncludeTls, myRestServerR4Helper
-		));
+		);
+		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(outputStreamCaptor.toString().trim(),
-			outputStreamCaptor.toString().trim(), containsString("<valueBoolean value=\"false\"/>"));
-		assertThat(outputStreamCaptor.toString().trim(),
-			outputStreamCaptor.toString().trim(), containsString("<valueString value=\"Freetext service is not configured. Operation didn't run.\"/>"));
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension)
+			.hasMessage(FAILURE_MESSAGE)
+			.hasMessage("Freetext service is not configured. Operation didn't run.");
 	}
 
+	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {
+		App app = new App();
+		app.setStartupHook(startupHook);
+		try {
+			app.run(args);
+		} catch (CommandFailureException e) {
+			// expected
+		}
+	}
+
+	/**
+	 * The CLI resets Logback logging, so our log hook needs to run inside the app.
+	 */
+	Consumer<BaseApp> getLoggingStartupHook() {
+		return (unused) -> {
+			try {
+				myLogbackTestExtension.reRegister();
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
+		};
+	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.models;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,26 @@ package ca.uhn.fhir.jpa.term.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.models;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CodeSystemVersionPIDResult implements IModelJson {
 
+	@JsonProperty("partitionId")
+	private Integer myPartitionId;
+
 	@JsonProperty("codeSystemVersionPID")
 	private long myCodeSystemVersionPID;
+
+	public Integer getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
 	public long getCodeSystemVersionPID() {
 		return myCodeSystemVersionPID;

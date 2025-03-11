@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -60,8 +59,7 @@ public final class PhoneticEncoderUtil {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderUtil.class);
 
-	private PhoneticEncoderUtil() {
-	}
+	private PhoneticEncoderUtil() {}
 
 	/**
 	 * Creates the phonetic encoder wrapper from
@@ -83,8 +81,7 @@ public final class PhoneticEncoderUtil {
 		IPhoneticEncoder encoder = getEncoderFromString(encoderType, encoderMaxString);
 		if (encoder != null) {
 			return encoder;
-		}
-		else {
+		} else {
 			ourLog.warn("Invalid phonetic param string " + theString);
 			return null;
 		}
@@ -106,16 +103,14 @@ public final class PhoneticEncoderUtil {
 					// invalid number parse error
 				}
 
-				if (encoderMaxString == null
-						|| encoderMaxString < 0) {
+				if (encoderMaxString == null || encoderMaxString < 0) {
 					// parse error
 					ourLog.error("Invalid encoder max character length: " + num);
 					encoderType = null;
 				}
 			}
 			// else - parse error
-		}
-		else {
+		} else {
 			encoderType = theString;
 		}
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binary.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.api;
 
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -48,14 +47,12 @@ public interface IBinaryTarget {
 
 	@SuppressWarnings("unchecked")
 	default Optional<String> getAttachmentId() {
-		return getTarget()
-			.getExtension()
-			.stream()
-			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.filter(t -> t.getValue() instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(t -> t.getValue())
-			.filter(t -> isNotBlank(t))
-			.findFirst();
+		return getTarget().getExtension().stream()
+				.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> (IPrimitiveType<String>) t.getValue())
+				.map(t -> t.getValue())
+				.filter(t -> isNotBlank(t))
+				.findFirst();
 	}
 }

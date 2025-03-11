@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4881
+title: "When _Index Contained References_ is enabled in the JPA server, Bundle resources could not be
+   stored or indexed due to an incompatibility with the default Bundle search parameters. This has been
+   corrected."

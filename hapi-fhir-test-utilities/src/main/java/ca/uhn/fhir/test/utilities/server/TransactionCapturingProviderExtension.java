@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.server;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -33,17 +32,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class TransactionCapturingProviderExtension<T extends IBaseBundle> implements BeforeEachCallback, AfterEachCallback {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionCapturingProviderExtension.class);
 	private final RestfulServerExtension myRestfulServerExtension;
-	private final List<T> myInputBundles = Collections.synchronizedList(new ArrayList<>());
-	private PlainProvider myProvider;
+	private final PlainProvider myProvider = new PlainProvider();
 
 	/**
 	 * Constructor
@@ -54,26 +50,26 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myProvider = new PlainProvider();
 		myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
+		myProvider.clear();
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
-		myInputBundles.clear();
 	}
 
 	public void waitForTransactionCount(int theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(myInputBundles.size()));
-		await().until(()->myInputBundles.size(), equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(myProvider.size());
+		await().until(()->myProvider.size() == theCount);
 	}
 
 	public List<T> getTransactions() {
-		return Collections.unmodifiableList(myInputBundles);
+		return myProvider.getTransactions();
 	}
 
 	private class PlainProvider {
+		private final List<T> myInputBundles = Collections.synchronizedList(new ArrayList<>());
 
 		@Transaction
 		public T transaction(@TransactionParam T theInput) {
@@ -82,6 +78,17 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 			return theInput;
 		}
 
+		public void clear() {
+			myInputBundles.clear();
+		}
+
+		public int size() {
+			return myInputBundles.size();
+		}
+
+		public List<T> getTransactions() {
+			return Collections.unmodifiableList(myInputBundles);
+		}
 	}
 
 

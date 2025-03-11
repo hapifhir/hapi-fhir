@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5588
+title: "Added `auto-version-references-at-path` extension that allows to 
+enable auto versioning references at specified paths of resource instances."

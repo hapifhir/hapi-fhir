@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProviderDstu3Test{
 	@Autowired
@@ -39,7 +37,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(encounterSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myEncounterDao.search(searchParameterMap);
-			assertThat(search.size(), is(equalTo(0)));
+			assertEquals(0, search.size());
 		}
 		{
 			//Works without the NOT qualifier.
@@ -47,7 +45,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(resultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myObservationDao.search(searchParameterMap);
-			assertThat(search.size(), is(equalTo(1)));
+			assertEquals(1, search.size());
 		}
 
 		{
@@ -56,7 +54,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myObservationDao.search(searchParameterMap);
-			assertThat(search.size(), is(equalTo(0)));
+			assertEquals(0, search.size());
 		}
 		{
 			//Works in a chain with only value
@@ -64,7 +62,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myObservationDao.search(searchParameterMap);
-			assertThat(search.size(), is(equalTo(0)));
+			assertEquals(0, search.size());
 		}
 	}
 }

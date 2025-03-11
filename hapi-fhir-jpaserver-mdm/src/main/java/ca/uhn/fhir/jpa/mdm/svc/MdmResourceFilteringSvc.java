@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -39,8 +38,10 @@ public class MdmResourceFilteringSvc {
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
+
 	@Autowired
 	MdmSearchParamSvc myMdmSearchParamSvc;
+
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -63,17 +64,19 @@ public class MdmResourceFilteringSvc {
 		}
 
 		String resourceType = myFhirContext.getResourceType(theResource);
-		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
+		List<MdmResourceSearchParamJson> candidateSearchParams =
+				myMdmSettings.getMdmRules().getCandidateSearchParams();
 
 		if (candidateSearchParams.isEmpty()) {
 			return true;
 		}
 
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
-			.filter(csp -> myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
-			.flatMap(csp -> csp.getSearchParams().stream())
-			.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
-			.anyMatch(valueList -> !valueList.isEmpty());
+				.filter(csp ->
+						myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
+				.flatMap(csp -> csp.getSearchParams().stream())
+				.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
+				.anyMatch(valueList -> !valueList.isEmpty());
 
 		ourLog.trace("Is {} suitable for MDM processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,12 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
@@ -40,12 +38,20 @@ public interface IModelVisitor2 {
 	 * @param theElement               The element being visited
 	 * @param theContainingElementPath The elements in the path leading up to the actual element being accepted. The first element in this path will be the outer resource being visited, and the last element will be the saem object as the object passed as <code>theElement</code>
 	 */
-	boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
+	boolean acceptElement(
+			IBase theElement,
+			List<IBase> theContainingElementPath,
+			List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+			List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
 
 	/**
 	 *
 	 */
-	default boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) { return true; }
-
-
+	default boolean acceptUndeclaredExtension(
+			IBaseExtension<?, ?> theNextExt,
+			List<IBase> theContainingElementPath,
+			List<BaseRuntimeChildDefinition> theChildDefinitionPath,
+			List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+		return true;
+	}
 }

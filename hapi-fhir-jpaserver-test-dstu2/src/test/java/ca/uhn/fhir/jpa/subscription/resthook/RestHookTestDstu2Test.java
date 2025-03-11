@@ -1,8 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -24,8 +27,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
@@ -35,18 +38,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Test the rest-hook subscriptions
@@ -69,16 +70,16 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	public void afterUnregisterRestHookListener() {
 		ourLog.info("** AFTER **");
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
@@ -101,7 +102,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
 		Subscription subscription = newSubscription(criteria, payload, endpoint);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -149,7 +150,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		try {
 			createSubscription(criteria1, payload, ourListenerServerBase);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
@@ -181,12 +182,12 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
 		// Update subscription 2 to match as well
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
@@ -197,7 +198,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(3, ourUpdatedObservations);
 
 		// Delete one subscription
-		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
@@ -207,21 +208,21 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
 		observation3.setCode(codeableConcept);
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
 		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
 		observation3a.setCode(codeableConcept1);
@@ -229,7 +230,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
 		ourLog.info("Have {} updates and {} subscriptions - sending observation", ourUpdatedObservations.size(), mySubscriptionTestUtil.getActiveSubscriptionCount());
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -259,11 +260,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -272,7 +273,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -281,27 +282,27 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
 		observation3.setCode(codeableConcept);
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
 		observation3a.setCode(codeableConcept1);
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -319,10 +320,10 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		subscription.getStatusElement().setValueAsEnum(null);
 
 		try {
-			ourClient.create().resource(subscription).execute();
-			fail();
+			myClient.create().resource(subscription).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 

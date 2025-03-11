@@ -13,14 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmRulesJsonR4Test.class);
@@ -40,7 +37,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		try {
 			JsonUtil.serialize(rules);
 		} catch (NullPointerException e) {
-			assertThat(e.getMessage(), containsString("version may not be blank"));
+			assertThat(e.getMessage()).contains("version may not be blank");
 		}
 	}
 
@@ -72,8 +69,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
 		try {
 			vectorMatchResultMap.getVector("bad");
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
 		}
 	}
@@ -83,13 +79,13 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		myRules = buildOldStyleEidRules();
 
 		String eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Patient");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Practitioner");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
-		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 	}
 
 	@Override

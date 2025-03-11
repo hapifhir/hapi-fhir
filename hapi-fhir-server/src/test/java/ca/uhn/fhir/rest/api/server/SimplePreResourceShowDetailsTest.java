@@ -6,9 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 @ExtendWith(MockitoExtension.class)
 public class SimplePreResourceShowDetailsTest {
@@ -23,8 +26,7 @@ public class SimplePreResourceShowDetailsTest {
 		try {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(-1, myResource2);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid index -1 - theIndex must not be < 0", e.getMessage());
 		}
 	}
@@ -34,8 +36,7 @@ public class SimplePreResourceShowDetailsTest {
 		try {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(2, myResource2);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid index {} - theIndex must be < 2", e.getMessage());
 		}
 	}
@@ -44,6 +45,18 @@ public class SimplePreResourceShowDetailsTest {
 	public void testSetResource() {
 		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 		details.setResource(0, myResource2);
-		assertSame(myResource2, details.iterator().next());
+		assertThat(details.iterator().next()).isSameAs(myResource2);
 	}
+
+
+	@Test
+	public void testGetResources() {
+		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(List.of(myResource1, myResource2));
+		assertThat(details.getAllResources()).containsExactly(myResource1, myResource2);
+
+		details.setResource(0, null);
+
+		assertThat(details.getAllResources()).containsExactly(myResource2);
+	}
+
 }

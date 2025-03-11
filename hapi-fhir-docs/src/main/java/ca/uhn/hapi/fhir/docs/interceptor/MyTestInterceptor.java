@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -33,7 +32,8 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 public class MyTestInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-	public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+	public boolean beforeRestHookDelivery(
+			ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 
 		String header = "Authorization: Bearer 1234567";
 
@@ -41,5 +41,4 @@ public class MyTestInterceptor {
 
 		return true;
 	}
-
 }

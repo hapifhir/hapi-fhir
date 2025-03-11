@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4838
+title: "When invoking the instance level `$reindex` and `$reindex-dryrun` operations, the resulting
+   status message and any warnings are now included in the response Parameters object as well as in
+   the generated response HTML narrative."

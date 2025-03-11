@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -80,7 +79,11 @@ public class UrlTenantSelectionInterceptor {
 			serverBase = serverBase.substring(0, serverBase.length() - 1);
 		}
 
-		Validate.isTrue(requestUri.startsWith(serverBase), "Request URI %s does not start with server base %s", requestUri, serverBase);
+		Validate.isTrue(
+				requestUri.startsWith(serverBase),
+				"Request URI %s does not start with server base %s",
+				requestUri,
+				serverBase);
 
 		if (theRequest.getUrlSource() == UrlSourceEnum.EXPLICIT) {
 			return;
@@ -89,5 +92,4 @@ public class UrlTenantSelectionInterceptor {
 		String newUri = serverBase + "/" + tenantId + requestUri.substring(serverBase.length());
 		theRequest.setUri(newUri);
 	}
-
 }

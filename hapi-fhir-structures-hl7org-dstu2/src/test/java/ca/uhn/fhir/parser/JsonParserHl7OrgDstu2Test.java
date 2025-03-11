@@ -4,13 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.UuidUtils;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2.model.Address;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
@@ -57,18 +56,13 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -92,7 +86,7 @@ public class JsonParserHl7OrgDstu2Test {
 		try {
 			String tmp = "{\"resourceType\":\"Bundle\",\"entry\":[{\"fullUrl\":\"http://lalaland.org/patient/pat1\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\"patxuzos\"}}]}";
 			Bundle bundle = (Bundle) ourCtx.newJsonParser().parseResource(tmp);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
@@ -113,7 +107,7 @@ public class JsonParserHl7OrgDstu2Test {
 			String tmp = "{\"resourceType\":\"Bundle\",\"entry\":[{\"fullUrl\":\"http://lalaland.org/patient/pat1\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\"patxuzos\"}}]}";
 			ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
 			Bundle bundle = (Bundle) ourCtx.newJsonParser().parseResource(tmp);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
@@ -133,7 +127,7 @@ public class JsonParserHl7OrgDstu2Test {
 		try {
 			String tmp = "{\"resourceType\":\"Bundle\",\"entry\":[{\"fullUrl\":\"http://lalaland.org/patient/pat1\",\"resource\":{\"resourceType\":\"Patient\",\"id\":\"patxuzos\"}}]}";
 			Bundle bundle = (Bundle) ourCtx.newJsonParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
@@ -160,12 +154,12 @@ public class JsonParserHl7OrgDstu2Test {
 
     String val = parser.encodeResourceToString(patient);
     ourLog.info(val);
-    assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
+    assertThat(val).contains("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]");
 
     MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
     Enumeration<AddressUse> ref = actual.getFoo();
-    assertEquals("home", ref.getValue().toCode());
+		assertEquals("home", ref.getValue().toCode());
 
   }
 
@@ -180,12 +174,12 @@ public class JsonParserHl7OrgDstu2Test {
     String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
     ourLog.info(encoded);
 
-    assertThat(encoded, containsString("Patient"));
-    assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE));
-    assertThat(encoded, not(containsString("text")));
-    assertThat(encoded, not(containsString("THE DIV")));
-    assertThat(encoded, containsString("family"));
-    assertThat(encoded, containsString("maritalStatus"));
+		assertThat(encoded).contains("Patient");
+    assertThat(encoded).containsSubsequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
+		assertThat(encoded).doesNotContain("text");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).contains("maritalStatus");
   }
 
   @Test
@@ -228,13 +222,12 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(output);
 
     String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-    assertThat(enc,
-        org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
-            "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
-    assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],"));
-    assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
-        + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
-        + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
+    assertThat(enc).containsSubsequence("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+            "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}");
+    assertThat(enc).containsSubsequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
+		assertThat(enc).contains("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
+			+ "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
+			+ "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}");
 
     /*
      * Now parse this back
@@ -242,35 +235,35 @@ public class JsonParserHl7OrgDstu2Test {
 
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
     ext = parsed.getExtension().get(0);
-    assertEquals("http://example.com/extensions#someext", ext.getUrl());
-    assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
 
     parent = patient.getExtension().get(1);
-    assertEquals("http://example.com#parent", parent.getUrl());
-    assertNull(parent.getValue());
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
     child1 = parent.getExtension().get(0);
-    assertEquals("http://example.com#child", child1.getUrl());
-    assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
     child2 = parent.getExtension().get(1);
-    assertEquals("http://example.com#child", child2.getUrl());
-    assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
 
     modExt = parsed.getModifierExtension().get(0);
-    assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-    assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
 
     name = parsed.getName().get(0);
 
     ext2 = name.getGiven().get(0).getExtension().get(0);
-    assertEquals("http://examples.com#givenext", ext2.getUrl());
-    assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
 
     given2ext = name.getGiven().get(1).getExtension().get(0);
-    assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
-    assertNull(given2ext.getValue());
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
     Extension given2ext2 = given2ext.getExtension().get(0);
-    assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-    assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
   }
 
@@ -282,7 +275,7 @@ public class JsonParserHl7OrgDstu2Test {
     patient.setContent(new byte[] { 1, 2, 3, 4 });
 
     String val = ourCtx.newJsonParser().encodeResourceToString(patient);
-    assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 
   }
 
@@ -338,11 +331,11 @@ public class JsonParserHl7OrgDstu2Test {
 			"\"lastUpdated\": \"" + nowDt.getValueAsString() + "\"" 
 		};
 		//@formatter:off
-		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
+		assertThat(bundleString).containsSubsequence(strings);
 
 		b.getEntry().remove(2);
 		bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
-		assertThat(bundleString, not(containsString("deleted")));
+		assertThat(bundleString).doesNotContain("deleted");
 
 	}
 
@@ -362,13 +355,13 @@ public class JsonParserHl7OrgDstu2Test {
 		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
 
-		assertThat(val, StringContains.containsString("\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"label\"}]"));
+		assertThat(val).contains("\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"label\"}]");
 		b = ourCtx.newJsonParser().parseResource(Bundle.class, val);
-		assertEquals(1, b.getMeta().getTag().size());
+		assertThat(b.getMeta().getTag()).hasSize(1);
 		assertEquals("scheme", b.getMeta().getTag().get(0).getSystem());
 		assertEquals("term", b.getMeta().getTag().get(0).getCode());
 		assertEquals("label", b.getMeta().getTag().get(0).getDisplay());
-		
+
 		assertNotNull(b.getEntry().get(0).getResource());
 		Patient p = (Patient) b.getEntry().get(0).getResource();
 		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
@@ -387,11 +380,11 @@ public class JsonParserHl7OrgDstu2Test {
 		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
 
-		assertThat(val, StringContains.containsString("{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"label\"}]}}}]}"));
+		assertThat(val).contains("{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"label\"}]}}}]}");
 
 		b = ourCtx.newJsonParser().parseResource(Bundle.class, val);
-		assertEquals(1, b.getEntry().size());
-		assertEquals(1, b.getEntry().get(0).getResource().getMeta().getTag().size());
+		assertThat(b.getEntry()).hasSize(1);
+		assertThat(b.getEntry().get(0).getResource().getMeta().getTag()).hasSize(1);
 		assertEquals("scheme", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getSystem());
 		assertEquals("term", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getCode());
 		assertEquals("label", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getDisplay());
@@ -417,7 +410,10 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\"")));
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
+
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"" + organizationUuid + "\"", "\"identifier\"", "\"reference\": \"#" + organizationUuid + "\""));
 		
 		// Create a bundle with just the patient resource
 		Bundle b = new Bundle();
@@ -426,30 +422,30 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the bundle
 		encoded = jsonParser.encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\"")));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"" + organizationUuid + "\"", "\"identifier\"", "\"reference\": \"#" + organizationUuid + "\""));
 		
 		// Re-parse the bundle
 		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference());
-		
+		assertEquals("#" + organizationUuid, patient.getManagingOrganization().getReference());
+
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getIdElement().getValue());
+		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 		
 		// And re-encode a second time
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\"")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"" + organizationUuid + "\"", "\"identifier\"", "\"reference\": \"#" + organizationUuid + "\""));
+		assertThat(encoded).doesNotContainPattern("(?s)\"contained\":.*\\[.*\"contained\":");
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
 		patient.getManagingOrganization().setReference(null);
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\"")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"" + organizationUuid + "\"", "\"identifier\"", "\"reference\": \"#" + organizationUuid + "\""));
+    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
 
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
@@ -457,9 +453,9 @@ public class JsonParserHl7OrgDstu2Test {
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\"")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
-		
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\""));
+    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
+
 	}
 	
 	@Test
@@ -481,13 +477,16 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the buntdle
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\"")));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
+
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"" + organizationUuid + "\""));
+		assertThat(encoded).contains("reference\": \"#" + organizationUuid + "\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\"")));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"" + organizationUuid + "\""));
+		assertThat(encoded).contains("reference\": \"#" + organizationUuid + "\"");
 	}
 
 	@Test
@@ -502,15 +501,15 @@ public class JsonParserHl7OrgDstu2Test {
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>"));
+		assertThat(str).contains("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>");
 		String substring = "\"reference\": \"#";
-		assertThat(str, StringContains.containsString(substring));
+		assertThat(str).contains(substring);
 
 		int idx = str.indexOf(substring) + substring.length();
 		int idx2 = str.indexOf('"', idx + 1);
 		String id = str.substring(idx, idx2);
-		assertThat(str, StringContains.containsString("\"id\": \"" + id + "\""));
-		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
+		assertThat(str).contains("\"id\": \"" + id + "\"");
+		assertThat(str).doesNotContain("<?xml version='1.0'?>");
 
 	}
 
@@ -532,8 +531,8 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, (containsString("FOOBAR")));
-		assertThat(encoded, (containsString("BARFOO")));
+		assertThat(encoded).contains("FOOBAR");
+		assertThat(encoded).contains("BARFOO");
 		
 	}
 
@@ -549,7 +548,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
+		assertThat(val).contains("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]");
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -568,7 +567,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
+		assertThat(val).contains("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]");
 
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -593,10 +592,8 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
-		assertThat(encoded, (containsString("123456")));
-		assertEquals(
-				"{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"codeSystem\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}",
-				encoded);
+		assertThat(encoded).contains("123456");
+		assertEquals("{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"codeSystem\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}", encoded);
 
 	}
 
@@ -669,7 +666,7 @@ public class JsonParserHl7OrgDstu2Test {
 		valueSet.addUseContext().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
-		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		assertThat(encoded).contains("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}");
 
 	}
 	
@@ -684,12 +681,12 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
+		assertThat(val).contains("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]");
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<Extension> ext = actual.getExtension();
-		assertEquals(1, ext.size());
+		assertThat(ext).hasSize(1);
 		Reference ref = (Reference) ext.get(0).getValue();
 		assertEquals("Organization/123", ref.getReference());
 
@@ -706,8 +703,8 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list);
 		ourLog.info(enc);
-		
-		assertThat(enc, containsString("\"id\": \"1\""));
+
+		assertThat(enc).containsPattern("\"id\": \"" + UUID_PATTERN);
 		
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
@@ -723,7 +720,7 @@ public class JsonParserHl7OrgDstu2Test {
 		try {
 			p.encodeResourceToString(obs);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), StringContains.containsString("DecimalType"));
+			assertThat(e.getMessage()).contains("DecimalType");
 		}
 	}
 	
@@ -740,13 +737,13 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(str);
-		assertThat(str, StringContains.containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>"));
+		assertThat(str).contains("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">AAA</div>");
 
 		p.getText().setDivAsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
 		str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(str);
 		// Backslashes need to be escaped because they are in a JSON value
-		assertThat(str, containsString(">hello<"));
+		assertThat(str).contains(">hello<");
 
 	}	
 	
@@ -766,13 +763,13 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("contained")));
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).doesNotContain("contained");
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("contained")));
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).doesNotContain("contained");
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\"");
 	}
 	
 	
@@ -786,17 +783,17 @@ public class JsonParserHl7OrgDstu2Test {
 
 		IParser p = ourCtx.newJsonParser();
 		String str = p.encodeResourceToString(patient);
-		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
+		assertThat(str).doesNotContain("managingOrganization");
 
 		patient.setManagingOrganization(new Reference("Organization/123"));
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"reference\":\"Organization/123\"}"));
+		assertThat(str).contains("\"managingOrganization\":{\"reference\":\"Organization/123\"}");
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");
 		patient.setManagingOrganization(new Reference(org));
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"contained\":[{\"resourceType\":\"Organization\""));
+		assertThat(str).contains("\"contained\":[{\"resourceType\":\"Organization\"");
 
 	}
 
@@ -810,13 +807,13 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", 
-				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+
+		assertThat(encoded).contains("Patient");
+		assertThat(encoded).containsSubsequence("\"tag\"",
+				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\",");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -831,14 +828,14 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		
-		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", 
+
+		assertThat(encoded).contains("Patient");
+		assertThat(encoded).containsSubsequence("\"tag\"",
 				"\"system\": \"foo\",", "\"code\": \"bar\"",
-				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
-		assertThat(encoded, not(containsString("THE DIV")));
-		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\",");
+		assertThat(encoded).doesNotContain("THE DIV");
+		assertThat(encoded).contains("family");
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -851,7 +848,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
+		assertThat(val).contains("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]");
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -899,11 +896,11 @@ public class JsonParserHl7OrgDstu2Test {
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
-		assertEquals(1, parsed.getName().get(0).getExtension().size());
+		assertThat(parsed.getName().get(0).getExtension()).hasSize(1);
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
-		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
 
@@ -920,32 +917,32 @@ public class JsonParserHl7OrgDstu2Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
-		assertThat(enc, containsString(("{\n" + 
-				"    \"resourceType\":\"Patient\",\n" + 
-				"    \"name\":[\n" + 
-				"        {\n" + 
-				"            \"family\":[\n" + 
-				"                \"Shmoe\"\n" + 
-				"            ],\n" + 
-				"            \"_family\":[\n" + 
-				"                {\n" + 
-				"                    \"extension\":[\n" + 
-				"                        {\n" + 
-				"                            \"url\":\"http://examples.com#givenext\",\n" + 
-				"                            \"valueString\":\"Hello\"\n" + 
-				"                        }\n" + 
-				"                    ]\n" + 
-				"                }\n" + 
-				"            ]\n" + 
-				"        }\n" + 
-				"    ]\n" + 
-				"}").replace("\n", "").replaceAll(" +", "")));
+		assertThat(enc).contains(("{\n" +
+			"    \"resourceType\":\"Patient\",\n" +
+			"    \"name\":[\n" +
+			"        {\n" +
+			"            \"family\":[\n" +
+			"                \"Shmoe\"\n" +
+			"            ],\n" +
+			"            \"_family\":[\n" +
+			"                {\n" +
+			"                    \"extension\":[\n" +
+			"                        {\n" +
+			"                            \"url\":\"http://examples.com#givenext\",\n" +
+			"                            \"valueString\":\"Hello\"\n" +
+			"                        }\n" +
+			"                    ]\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}").replace("\n", "").replaceAll(" +", ""));
 		//@formatter:on
 
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
-    assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
+		assertThat(parsed.getName().get(0).getFamily().get(0).getExtension()).hasSize(1);
     Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
-    assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
   }
 
@@ -993,59 +990,59 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(output);
 
     String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-    //@formatter:off
-		assertThat(enc, containsString(("{" + 
-				"\"resourceType\":\"Patient\"," + 
-				"    \"extension\":[" + 
-				"        {" + 
-				"            \"url\":\"http://example.com/extensions#someext\"," + 
-				"            \"valueDateTime\":\"2011-01-02T11:13:15\"" + 
-				"        }," + 
-				"        {" + 
-				"            \"url\":\"http://example.com#parent\"," + 
-				"            \"extension\":[" + 
-				"                {" + 
-				"                    \"url\":\"http://example.com#child\"," + 
-				"                    \"valueString\":\"value1\"" + 
-				"                }," + 
-				"                {" + 
-				"                    \"url\":\"http://example.com#child\"," + 
-				"                    \"valueString\":\"value1\"" + 
-				"                }" + 
-				"            ]" + 
-				"        }" + 
-				"    ]").replace(" ", "")));
+		//@formatter:off
+		assertThat(enc).contains(("{" +
+			"\"resourceType\":\"Patient\"," +
+			"    \"extension\":[" +
+			"        {" +
+			"            \"url\":\"http://example.com/extensions#someext\"," +
+			"            \"valueDateTime\":\"2011-01-02T11:13:15\"" +
+			"        }," +
+			"        {" +
+			"            \"url\":\"http://example.com#parent\"," +
+			"            \"extension\":[" +
+			"                {" +
+			"                    \"url\":\"http://example.com#child\"," +
+			"                    \"valueString\":\"value1\"" +
+			"                }," +
+			"                {" +
+			"                    \"url\":\"http://example.com#child\"," +
+			"                    \"valueString\":\"value1\"" +
+			"                }" +
+			"            ]" +
+			"        }" +
+			"    ]").replace(" ", ""));
 		//@formatter:on
 
-    //@formatter:off
-		assertThat(enc, containsString((
-				"            \"given\":[" + 
-				"                \"Joe\"," + 
-				"                \"Shmoe\"" + 
-				"            ]," + 
-				"            \"_given\":[" + 
-				"                {" + 
-				"                    \"extension\":[" + 
-				"                        {" + 
-				"                            \"url\":\"http://examples.com#givenext\"," + 
-				"                            \"valueString\":\"given\"" + 
-				"                        }" + 
-				"                    ]" + 
-				"                }," + 
-				"                {" + 
-				"                    \"extension\":[" + 
-				"                        {" + 
-				"                            \"url\":\"http://examples.com#givenext_parent\"," + 
-				"                            \"extension\":[" + 
-				"                                {" + 
-				"                                    \"url\":\"http://examples.com#givenext_child\"," + 
-				"                                    \"valueString\":\"CHILD\"" + 
-				"                                }" + 
-				"                            ]" + 
-				"                        }" + 
-				"                    ]" + 
-				"                }" + 
-				"").replace(" ", "")));
+		//@formatter:off
+		assertThat(enc).contains((
+			"            \"given\":[" +
+				"                \"Joe\"," +
+				"                \"Shmoe\"" +
+				"            ]," +
+				"            \"_given\":[" +
+				"                {" +
+				"                    \"extension\":[" +
+				"                        {" +
+				"                            \"url\":\"http://examples.com#givenext\"," +
+				"                            \"valueString\":\"given\"" +
+				"                        }" +
+				"                    ]" +
+				"                }," +
+				"                {" +
+				"                    \"extension\":[" +
+				"                        {" +
+				"                            \"url\":\"http://examples.com#givenext_parent\"," +
+				"                            \"extension\":[" +
+				"                                {" +
+				"                                    \"url\":\"http://examples.com#givenext_child\"," +
+				"                                    \"valueString\":\"CHILD\"" +
+				"                                }" +
+				"                            ]" +
+				"                        }" +
+				"                    ]" +
+				"                }" +
+				"").replace(" ", ""));
 		//@formatter:on
   }
 
@@ -1066,23 +1063,23 @@ public class JsonParserHl7OrgDstu2Test {
     String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
     ourLog.info(str);
 
-    assertThat(str, stringContainsInOrder(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\"")));
+    assertThat(str).containsSubsequence(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\""));
 
     // Only one (outer) contained block
     int idx0 = str.indexOf("\"contained\"");
     int idx1 = str.indexOf("\"contained\"", idx0 + 1);
 
-    assertNotEquals(-1, idx0);
-    assertEquals(-1, idx1);
+		assertThat(idx0).isNotEqualTo(-1);
+		assertEquals(-1, idx1);
 
     Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
-    assertEquals("A", obs.getCode().getTextElement().getValue());
+		assertEquals("A", obs.getCode().getTextElement().getValue());
 
     Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
-    assertEquals("B", obsB.getCode().getTextElement().getValue());
+		assertEquals("B", obsB.getCode().getTextElement().getValue());
 
     Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
-    assertEquals("C", obsC.getCode().getTextElement().getValue());
+		assertEquals("C", obsC.getCode().getTextElement().getValue());
 
   }
 
@@ -1090,8 +1087,8 @@ public class JsonParserHl7OrgDstu2Test {
   public void testParseBinaryResource() {
 
     Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
-    assertEquals("foo", val.getContentType());
-    assertArrayEquals(new byte[] { 1, 2, 3, 4 }, val.getContent());
+		assertEquals("foo", val.getContentType());
+		assertThat(val.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
 
@@ -1116,9 +1113,9 @@ public class JsonParserHl7OrgDstu2Test {
     XhtmlNode div = res.getText().getDiv();
     String value = div.getValueAsString();
 
-    assertNull(value);
+		assertNull(value);
     List<XhtmlNode> childNodes = div.getChildNodes();
-    assertTrue(childNodes == null || childNodes.isEmpty());
+		assertTrue(childNodes == null || childNodes.isEmpty());
   }
 
   @Test
@@ -1126,9 +1123,9 @@ public class JsonParserHl7OrgDstu2Test {
     String bundle = "{\"resourceType\":\"Bundle\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"idsystem\"}]}}]}";
     Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 
-    assertNotNull(b.getEntry().get(0).getResource());
+		assertNotNull(b.getEntry().get(0).getResource());
     Patient p = (Patient) b.getEntry().get(0).getResource();
-    assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
+		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
   }
 
   /**
@@ -1140,7 +1137,7 @@ public class JsonParserHl7OrgDstu2Test {
     String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
     jsonString = jsonString.replace("\"reference\"", "\"resource\"");
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
-    assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
+		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
   }
 
   @Test
@@ -1151,8 +1148,8 @@ public class JsonParserHl7OrgDstu2Test {
     // ourLog.info("Reading in message: {}", msg);
     Patient res = p.parseResource(Patient.class, msg);
 
-    assertEquals(2, res.getExtension().size());
-    assertEquals(1, res.getModifierExtension().size());
+		assertThat(res.getExtension()).hasSize(2);
+		assertThat(res.getModifierExtension()).hasSize(1);
 
     String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
     ourLog.info(encoded);
@@ -1162,20 +1159,20 @@ public class JsonParserHl7OrgDstu2Test {
   @Test
   public void testSimpleResourceEncode() throws IOException {
 
-    String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
+    String xmlString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.xml");
     Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
     List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
     Extension undeclaredExtension = undeclaredExtensions.get(0);
-    assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-    ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+    ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
     IParser jsonParser = ourCtx.newJsonParser();
     String encoded = jsonParser.encodeResourceToString(obs);
     ourLog.info(encoded);
 
-    String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
+    String jsonString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.json");
 
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1187,7 +1184,7 @@ public class JsonParserHl7OrgDstu2Test {
 
     ourLog.info("Expected: {}", exp);
     ourLog.info("Actual  : {}", act);
-    assertEquals(exp, act);
+		assertEquals(exp, act);
 
   }
 
@@ -1223,26 +1220,25 @@ public class JsonParserHl7OrgDstu2Test {
 	  Patient p = ourCtx.newJsonParser().parseResource(Patient.class, input);
 	  ContactComponent contact = p.getContact().get(0);
 	  StringType family = contact.getName().getFamily().get(0);
-	  
-	  assertEquals("du", family.getValueAsString());
-	  assertEquals(1, family.getExtension().size());
+		assertEquals("du", family.getValueAsString());
+		assertThat(family.getExtension()).hasSize(1);
 	}
 	
 	
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
+		String jsonString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.json");
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		{
     ContactComponent contact = obs.getContact().get(0);
     StringType family = contact.getName().getFamily().get(0);
-    assertEquals("du", family.getValueAsString());
-    assertEquals(1, family.getExtension().size());
+			assertEquals("du", family.getValueAsString());
+			assertThat(family.getExtension()).hasSize(1);
 		}
-    
-		assertEquals(0, obs.getExtension().size());
+
+		assertThat(obs.getExtension()).isEmpty();
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
 		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
@@ -1255,7 +1251,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
+		String xmlString = ClasspathUtil.loadResource("/example-patient-general-hl7orgdstu2.xml");
 		xmlString = xmlString.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
 		ourLog.info("Expected: " + xmlString);
@@ -1278,13 +1274,13 @@ public class JsonParserHl7OrgDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		String output = parser.encodeResourceToString(fhirPat);
-		System.out.println("output: " + output);
+		ourLog.info("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(Patient.class, output);
 
 		List<Extension> extlst = fhirPat.getExtension();
-		assertEquals(1, extlst.size());
+		assertThat(extlst).hasSize(1);
 		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
@@ -1294,9 +1290,9 @@ public class JsonParserHl7OrgDstu2Test {
     QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
 
     QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
-    assertNotNull(answer);
-    assertNotNull(answer.getValueReference());
-    assertEquals("Observation/testid", answer.getValueReference().getReference());
+		assertNotNull(answer);
+		assertNotNull(answer.getValueReference());
+		assertEquals("Observation/testid", answer.getValueReference().getReference());
   }
 
   @ResourceDef(name = "Patient")

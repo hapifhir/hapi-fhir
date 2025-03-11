@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,14 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ActiveSubscription {
 
@@ -35,6 +36,7 @@ public class ActiveSubscription {
 	private boolean flagForDeletion;
 
 	private ChannelRetryConfiguration myRetryConfigurationParameters;
+	private final AtomicLong myDeliveriesCount = new AtomicLong();
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		myChannelName = theChannelName;
@@ -81,5 +83,13 @@ public class ActiveSubscription {
 
 	public ChannelRetryConfiguration getRetryConfigurationParameters() {
 		return myRetryConfigurationParameters;
+	}
+
+	public long getDeliveriesCount() {
+		return myDeliveriesCount.get();
+	}
+
+	public long incrementDeliveriesCount() {
+		return myDeliveriesCount.incrementAndGet();
 	}
 }

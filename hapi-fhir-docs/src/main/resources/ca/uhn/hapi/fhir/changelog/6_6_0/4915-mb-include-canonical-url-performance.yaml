@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 4915
+title: "Includes by canonical url now use an indexed query, and are much faster."

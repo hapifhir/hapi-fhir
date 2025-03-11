@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4481
+jira: SMILE-4961
+title: "Previously, a reindex batch job would fail when executing on deleted resources.  This issue has been fixed."

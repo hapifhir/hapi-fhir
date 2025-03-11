@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.expunge;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,57 +17,90 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
-public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+public class DeleteExpungeStep
+		implements IJobStepWorker<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeStep.class);
 	private final HapiTransactionService myHapiTransactionService;
 	private final IDeleteExpungeSvc myDeleteExpungeSvc;
+	private final IIdHelperService myIdHelperService;
 
-	public DeleteExpungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc) {
+	public DeleteExpungeStep(
+			HapiTransactionService theHapiTransactionService,
+			IDeleteExpungeSvc theDeleteExpungeSvc,
+			IIdHelperService theIdHelperService) {
 		myHapiTransactionService = theHapiTransactionService;
 		myDeleteExpungeSvc = theDeleteExpungeSvc;
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
-		return doDeleteExpunge(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
+		boolean cascade = theStepExecutionDetails.getParameters().isCascade();
+		Integer cascadeMaxRounds = theStepExecutionDetails.getParameters().getCascadeMaxRounds();
+		return doDeleteExpunge(
+				data,
+				theDataSink,
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				cascade,
+				cascadeMaxRounds);
 	}
 
 	@Nonnull
-	public RunOutcome doDeleteExpunge(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+	public RunOutcome doDeleteExpunge(
+			ResourceIdListWorkChunkJson theData,
+			IJobDataSink<VoidModel> theDataSink,
+			String theInstanceId,
+			String theChunkId,
+			boolean theCascade,
+			Integer theCascadeMaxRounds) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new DeleteExpungeJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
+		DeleteExpungeJob job = new DeleteExpungeJob(
+				theData,
+				requestDetails,
+				transactionDetails,
+				theDataSink,
+				theInstanceId,
+				theChunkId,
+				theCascade,
+				theCascadeMaxRounds);
+		myHapiTransactionService
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(theData.getRequestPartitionId())
+				.execute(job);
 
-		return new RunOutcome(data.size());
+		return new RunOutcome(job.getRecordCount());
 	}
 
 	private class DeleteExpungeJob implements TransactionCallback<Void> {
@@ -79,29 +110,55 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 		private final IJobDataSink<VoidModel> myDataSink;
 		private final String myChunkId;
 		private final String myInstanceId;
+		private final boolean myCascade;
+		private final Integer myCascadeMaxRounds;
+		private int myRecordCount;
 
-		public DeleteExpungeJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+		public DeleteExpungeJob(
+				ResourceIdListWorkChunkJson theData,
+				RequestDetails theRequestDetails,
+				TransactionDetails theTransactionDetails,
+				IJobDataSink<VoidModel> theDataSink,
+				String theInstanceId,
+				String theChunkId,
+				boolean theCascade,
+				Integer theCascadeMaxRounds) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myDataSink = theDataSink;
 			myInstanceId = theInstanceId;
 			myChunkId = theChunkId;
+			myCascade = theCascade;
+			myCascadeMaxRounds = theCascadeMaxRounds;
+		}
+
+		public int getRecordCount() {
+			return myRecordCount;
 		}
 
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			List<JpaPid> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
-			ourLog.info("Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
+			if (persistentIds.isEmpty()) {
+				ourLog.info(
+						"Starting delete expunge work chunk.  There are no resources to delete expunge - Instance[{}] Chunk[{}]",
+						myInstanceId,
+						myChunkId);
+				return null;
+			}
 
-			myDeleteExpungeSvc.deleteExpunge(persistentIds);
+			ourLog.info(
+					"Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]",
+					persistentIds.size(),
+					myInstanceId,
+					myChunkId);
+
+			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds);
 
 			return null;
 		}
 	}
-
-
-
 }

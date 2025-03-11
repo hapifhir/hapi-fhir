@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5157
+title: "Previously, the reuse functionality did not operate correctly when dealing with POST and GET requests. This fix ensures that similar POST and GET export requests will be reused."

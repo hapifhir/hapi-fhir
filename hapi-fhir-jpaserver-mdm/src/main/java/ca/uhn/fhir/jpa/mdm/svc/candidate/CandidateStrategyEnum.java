@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 public enum CandidateStrategyEnum {
 	/** Find Golden Resource candidates based on matching EID */
@@ -26,9 +25,13 @@ public enum CandidateStrategyEnum {
 	/** Find Golden Resource candidates based on a link already existing for the source resource */
 	LINK,
 	/** Find Golden Resource candidates based on other sources that match the incoming source using the MDM Matching rules */
-	SCORE;
+	SCORE,
+	/**
+	 * Find golden resource candidates that are EID, LINK, or SCORE.
+	 */
+	ANY;
 
-    public boolean isEidMatch() {
-    	return this == EID;
-    }
+	public boolean isEidMatch() {
+		return this == EID;
+	}
 }

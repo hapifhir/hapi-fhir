@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jaxrs.server;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,7 @@ package ca.uhn.fhir.jaxrs.server;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-
-import javax.interceptor.Interceptors;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+package ca.uhn.fhir.jaxrs.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -36,17 +25,28 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.PageProvider;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import jakarta.interceptor.Interceptors;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+import java.io.IOException;
 
 /**
  * Base class for a provider to provide the <code>[baseUrl]?_getpages=foo</code> request, which is a request to the
  * server to retrieve the next page of a set of paged results.
  */
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 @Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider implements IRestfulServer<JaxRsRequest> {
 
@@ -68,14 +68,14 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	 * @param ctx the {@link FhirContext} instance.
 	 */
 	protected AbstractJaxRsPageProvider(FhirContext ctx) {
-	    super(ctx);
-	    try {
-	        myBinding = new PageMethodBinding(getFhirContext(), PageProvider.class.getMethod("getPage"));
-	    } catch (Exception e) {
-	        throw new ca.uhn.fhir.context.ConfigurationException(Msg.code(1984), e);
-	    }
+		super(ctx);
+		try {
+			myBinding = new PageMethodBinding(getFhirContext(), PageProvider.class.getMethod("getPage"));
+		} catch (Exception e) {
+			throw new ca.uhn.fhir.context.ConfigurationException(Msg.code(1984), e);
+		}
 	}
-	
+
 	@Override
 	public String getBaseForRequest() {
 		try {
@@ -91,7 +91,8 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	 */
 	@GET
 	public Response getPages(@QueryParam(Constants.PARAM_PAGINGACTION) String thePageId) throws IOException {
-		JaxRsRequest theRequest = getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.GET_PAGE).build();
+		JaxRsRequest theRequest =
+				getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.GET_PAGE).build();
 		try {
 			return (Response) myBinding.invokeServer(this, theRequest);
 		} catch (JaxRsResponseException theException) {
@@ -119,5 +120,4 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	public PreferReturnEnum getDefaultPreferReturn() {
 		return PreferReturnEnum.REPRESENTATION;
 	}
-
 }

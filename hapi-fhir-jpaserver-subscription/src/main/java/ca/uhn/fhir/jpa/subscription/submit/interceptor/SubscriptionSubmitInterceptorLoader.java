@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.submit.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,47 +17,96 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.Set;
 
 public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);
 
-	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-	@Autowired
-	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private IInterceptorService myInterceptorRegistry;
+	@Nonnull
+	private IInterceptorService myInterceptorService;
+
+	@Nonnull
+	private final SubscriptionSettings mySubscriptionSettings;
+
+	@Nonnull
+	private final SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
+	@Nonnull
+	private final SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
+
+	@Nullable
+	private final SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
+
+	private boolean mySubscriptionValidatingInterceptorRegistered;
+	private boolean mySubscriptionMatcherInterceptorRegistered;
+	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
+
+	public SubscriptionSubmitInterceptorLoader(
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
+			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
+			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+		setInterceptorService(theInterceptorService);
+		mySubscriptionSettings = theSubscriptionSettings;
+		mySubscriptionMatcherInterceptor = theSubscriptionMatcherInterceptor;
+		mySubscriptionValidatingInterceptor = theSubscriptionValidatingInterceptor;
+		mySubscriptionTopicValidatingInterceptor = theSubscriptionTopicValidatingInterceptor;
+	}
 
 	@PostConstruct
 	public void start() {
-		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
+		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes =
+				mySubscriptionSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
-			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
+			ourLog.info(
+					"Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
 		} else {
-			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			if (!mySubscriptionMatcherInterceptorRegistered) {
+				ourLog.info("Registering subscription matcher interceptor");
+				myInterceptorService.registerInterceptor(mySubscriptionMatcherInterceptor);
+				mySubscriptionMatcherInterceptorRegistered = true;
+			}
 		}
 
-		myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
+		if (!mySubscriptionValidatingInterceptorRegistered) {
+			myInterceptorService.registerInterceptor(mySubscriptionValidatingInterceptor);
+			mySubscriptionValidatingInterceptorRegistered = true;
+		}
+
+		if (mySubscriptionTopicValidatingInterceptor != null && !mySubscriptionTopicValidatingInterceptorRegistered) {
+			myInterceptorService.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
+			mySubscriptionTopicValidatingInterceptorRegistered = true;
+		}
+	}
+
+	protected void setInterceptorService(IInterceptorService theInterceptorService) {
+		myInterceptorService = theInterceptorService;
+	}
+
+	protected IInterceptorService getInterceptorService() {
+		return myInterceptorService;
 	}
 
 	@VisibleForTesting
 	public void unregisterInterceptorsForUnitTest() {
-		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(mySubscriptionValidatingInterceptor);
+		myInterceptorService.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+		myInterceptorService.unregisterInterceptor(mySubscriptionValidatingInterceptor);
+		mySubscriptionValidatingInterceptorRegistered = false;
+		mySubscriptionMatcherInterceptorRegistered = false;
 	}
 }

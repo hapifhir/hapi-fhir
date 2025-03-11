@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -33,10 +34,10 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
 				<configuration>
-					<skip>true</skip>
+					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
 				</configuration>
 			</plugin>
 		</plugins>

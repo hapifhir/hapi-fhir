@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -36,7 +35,8 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType<?>> implements IRuntimeDatatypeDefinition {
+public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType<?>>
+		implements IRuntimeDatatypeDefinition {
 
 	private Class<?> myNativeType;
 	private BaseRuntimeElementDefinition<?> myProfileOf;
@@ -45,12 +45,14 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 	private List<BaseRuntimeChildDefinition> myChildren;
 	private RuntimeChildExt myRuntimeChildExt;
 
-	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
+	public RuntimePrimitiveDatatypeDefinition(
+			DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
 		super(theDef.name(), theImplementingClass, theStandardType);
 
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException(Msg.code(1689) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1689) + "Resource type @" + ResourceDef.class.getSimpleName()
+					+ " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
 		}
 
 		mySpecialization = theDef.isSpecialization();
@@ -84,7 +86,8 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 				Type rawType = superPt.getRawType();
 				if (rawType instanceof Class) {
 					Class<?> rawClass = (Class<?>) rawType;
-					if (rawClass.getName().endsWith(".BasePrimitive") || rawClass.getName().endsWith(".PrimitiveType")) {
+					if (rawClass.getName().endsWith(".BasePrimitive")
+							|| rawClass.getName().endsWith(".PrimitiveType")) {
 						Type typeVariable = superPt.getActualTypeArguments()[0];
 						if (typeVariable instanceof Class) {
 							myNativeType = (Class<?>) typeVariable;
@@ -129,7 +132,9 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		if (myProfileOfType != null) {
@@ -154,5 +159,4 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 		myChildren.add(myRuntimeChildExt);
 		myChildren = Collections.unmodifiableList(myChildren);
 	}
-
 }

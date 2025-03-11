@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,14 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +35,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Parameter type for methods annotated with {@link Patch}
  */
 public enum PatchTypeEnum {
-
 	JSON_PATCH(Constants.CT_JSON_PATCH),
 	XML_PATCH(Constants.CT_XML_PATCH),
 	FHIR_PATCH_JSON(Constants.CT_FHIR_JSON_NEW),
@@ -54,14 +52,14 @@ public enum PatchTypeEnum {
 	}
 
 	@Nonnull
-	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(FhirContext theContext, String theContentType) {
+	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(
+			FhirContext theContext, String theContentType) {
 		String contentType = defaultString(theContentType);
 		int semiColonIdx = contentType.indexOf(';');
 		if (semiColonIdx != -1) {
 			contentType = theContentType.substring(0, semiColonIdx);
 		}
 		contentType = contentType.trim();
-
 
 		Map<String, PatchTypeEnum> map = ourContentTypeToPatchType;
 		if (map == null) {
@@ -79,7 +77,9 @@ public enum PatchTypeEnum {
 				throw new InvalidRequestException(Msg.code(1964) + msg);
 			}
 
-			String msg = theContext.getLocalizer().getMessageSanitized(PatchTypeEnum.class, "invalidPatchContentType", contentType);
+			String msg = theContext
+					.getLocalizer()
+					.getMessageSanitized(PatchTypeEnum.class, "invalidPatchContentType", contentType);
 			throw new InvalidRequestException(Msg.code(1965) + msg);
 		}
 

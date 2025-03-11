@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4427
+jira: SMILE-5922
+title: "Previously, $export-poll-status requests through POST are failing with a Null Pointer exception. 
+Now, this issue has been fixed and POST $export-poll-status request should be able to proceed."

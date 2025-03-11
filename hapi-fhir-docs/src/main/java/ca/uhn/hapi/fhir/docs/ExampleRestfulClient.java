@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +17,28 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
 public class ExampleRestfulClient {
-	
-//START SNIPPET: client
-public static void main(String[] args) {
-   FhirContext ctx = FhirContext.forDstu2();
-   String serverBase = "http://foo.com/fhirServerBase";
-   
-   // Create the client
-   IRestfulClient client = ctx.newRestfulClient(IRestfulClient.class, serverBase);
-   
-   // Try the client out! This method will invoke the server
-   List<Patient> patients = client.getPatient(new StringType("SMITH"));
-   
-}
-//END SNIPPET: client
+
+	// START SNIPPET: client
+	public static void main(String[] args) {
+		FhirContext ctx = FhirContext.forDstu2();
+		String serverBase = "http://foo.com/fhirServerBase";
+
+		// Create the client
+		IRestfulClient client = ctx.newRestfulClient(IRestfulClient.class, serverBase);
+
+		// Try the client out! This method will invoke the server
+		List<Patient> patients = client.getPatient(new StringType("SMITH"));
+	}
+	// END SNIPPET: client
 
 }

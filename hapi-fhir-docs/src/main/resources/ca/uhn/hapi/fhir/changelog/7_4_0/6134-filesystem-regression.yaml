@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6134
+backport: 7.2.2
+title: "Fixed a regression in 7.2.0 which caused systems using `FILESYSTEM` binary storage mode to be unable to read metadata documents
+that had been previously stored on disk."

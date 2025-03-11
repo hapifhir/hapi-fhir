@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6061
+title: "The latest migration for HFJ_RES_SEARCH_URL introduced in [6033](https://github.com/hapifhir/hapi-fhir/issues/6033)
+        does not fully respect dry-run.
+        This has been fixed."

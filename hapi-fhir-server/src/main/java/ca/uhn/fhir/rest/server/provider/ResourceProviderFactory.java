@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,45 +17,18 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 
-public class ResourceProviderFactory {
-	private Set<IResourceProviderFactoryObserver> myObservers = Collections.synchronizedSet(new HashSet<>());
-	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
-
-	public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
-		mySuppliers.add(theSupplier);
-		myObservers.forEach(observer -> observer.update(theSupplier));
-	}
-
-	public void removeSupplier(@Nonnull Supplier<Object> theSupplier) {
-		mySuppliers.remove(theSupplier);
-		myObservers.forEach(observer -> observer.remove(theSupplier));
-	}
+/**
+ * This Factory stores FHIR Resource Provider instance suppliers that will be registered on a FHIR Endpoint later.
+ * See {@link ObservableSupplierSet}
+ */
+public class ResourceProviderFactory extends ObservableSupplierSet<IResourceProviderFactoryObserver> {
+	public ResourceProviderFactory() {}
 
 	public List<Object> createProviders() {
-		List<Object> retVal = new ArrayList<>();
-		for (Supplier<Object> next : mySuppliers) {
-			Object nextRp = next.get();
-			if (nextRp != null) {
-				retVal.add(nextRp);
-			}
-		}
-		return retVal;
-	}
-
-	public void attach(IResourceProviderFactoryObserver theObserver) {
-		myObservers.add(theObserver);
-	}
-
-	public void detach(IResourceProviderFactoryObserver theObserver) {
-		myObservers.remove(theObserver);
+		return super.getSupplierResults();
 	}
 }

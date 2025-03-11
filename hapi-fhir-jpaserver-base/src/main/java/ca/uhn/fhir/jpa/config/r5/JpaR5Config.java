@@ -1,39 +1,8 @@
-package ca.uhn.fhir.jpa.config.r5;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR5;
-import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
-import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
-import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
-import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
-import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcR5;
-import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Meta;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,22 +17,44 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.r5;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR5;
+import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
+import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Import({
-	FhirContextR5Config.class,
-	GeneratedDaoAndResourceProviderConfigR5.class,
-	SharedConfigDstu3Plus.class,
-	JpaConfig.class
-})
+@Import({FhirContextR5Config.class, GeneratedDaoAndResourceProviderConfigR5.class, JpaConfig.class})
 public class JpaR5Config {
 
 	@Bean
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
 		return new TermVersionAdapterSvcR5();
 	}
-
 
 	@Bean
 	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
@@ -72,8 +63,18 @@ public class JpaR5Config {
 
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
-        return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
+	public GraphQLProvider graphQLProvider(
+			FhirContext theFhirContext,
+			IGraphQLStorageServices theGraphqlStorageServices,
+			IValidationSupport theValidationSupport,
+			ISearchParamRegistry theSearchParamRegistry,
+			IDaoRegistry theDaoRegistry) {
+		return new GraphQLProviderWithIntrospection(
+				theFhirContext,
+				theValidationSupport,
+				theGraphqlStorageServices,
+				theSearchParamRegistry,
+				theDaoRegistry);
 	}
 
 	@Bean(name = "mySystemDaoR5")
@@ -83,21 +84,16 @@ public class JpaR5Config {
 	}
 
 	@Bean(name = "mySystemProviderR5")
-	public ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 systemProviderR5(FhirContext theFhirContext) {
-		ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 retVal = new ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5();
+	public JpaSystemProvider<Bundle, Meta> systemProviderR5(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
 		retVal.setContext(theFhirContext);
 		retVal.setDao(systemDaoR5());
 		return retVal;
 	}
 
 	@Bean
-	public ITermLoaderSvc terminologyLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+	public ITermLoaderSvc terminologyLoaderService(
+			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
-
-	@Bean
-	public ITermReadSvcR5 terminologyService() {
-		return new TermReadSvcR5();
-	}
-
 }

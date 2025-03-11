@@ -1,19 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nonnull;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +17,15 @@ import javax.annotation.Nonnull;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IRestfulClient {
 

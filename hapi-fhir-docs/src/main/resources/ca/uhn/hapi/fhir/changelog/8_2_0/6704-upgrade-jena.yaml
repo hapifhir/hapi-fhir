@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6704
+title: "The JENA library used to provide RDF/Turtle encoding and parsing services has been
+  upgraded from 4.9.0 to 5.3.0. Thanks to Dylan Krause for the contribution!"

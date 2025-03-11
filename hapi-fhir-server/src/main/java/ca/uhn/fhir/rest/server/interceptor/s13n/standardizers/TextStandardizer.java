@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,9 +62,7 @@ public class TextStandardizer implements IStandardizer {
 	}
 
 	protected Set<Integer> asSet(Character... theCharacters) {
-		return Arrays.stream(theCharacters)
-			.map(c -> (int) c)
-			.collect(Collectors.toSet());
+		return Arrays.stream(theCharacters).map(c -> (int) c).collect(Collectors.toSet());
 	}
 
 	protected TextStandardizer addTranslate(int theTranslate, char theMapping) {
@@ -93,7 +90,7 @@ public class TextStandardizer implements IStandardizer {
 		myAllowedExtendedAscii = new ArrayList<>();
 
 		// refer to https://www.ascii-code.com for the codes
-		for (int[] i : new int[][]{{192, 214}, {216, 246}, {248, 255}}) {
+		for (int[] i : new int[][] {{192, 214}, {216, 246}, {248, 255}}) {
 			addAllowedExtendedAsciiRange(i[0], i[1]);
 		}
 	}
@@ -132,11 +129,11 @@ public class TextStandardizer implements IStandardizer {
 			offset += Character.charCount(codePoint);
 
 			switch (Character.getType(codePoint)) {
-				case Character.CONTROL:     // \p{Cc}
-				case Character.FORMAT:      // \p{Cf}
+				case Character.CONTROL: // \p{Cc}
+				case Character.FORMAT: // \p{Cf}
 				case Character.PRIVATE_USE: // \p{Co}
-				case Character.SURROGATE:   // \p{Cs}
-				case Character.UNASSIGNED:  // \p{Cn}
+				case Character.SURROGATE: // \p{Cs}
+				case Character.UNASSIGNED: // \p{Cn}
 					break;
 				default:
 					if (!isNoiseCharacter(codePoint)) {
@@ -162,5 +159,4 @@ public class TextStandardizer implements IStandardizer {
 		}
 		return myNoiseCharacters.isNoise(theChar);
 	}
-
 }

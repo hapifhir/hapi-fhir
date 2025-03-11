@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -36,11 +35,11 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Date;
@@ -85,7 +84,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myResourceName = null;
 		}
-
 	}
 
 	@Override
@@ -143,9 +141,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return MethodMatchEnum.EXACT;
 	}
 
-
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(
+			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -182,18 +181,22 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
+			public List<IBaseResource> getResources(
+					int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex, theResponsePageBuilder);
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {
-					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
-						throw new InternalErrorException(Msg.code(410) + "Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
+					if (nextResource.getIdElement() == null
+							|| isBlank(nextResource.getIdElement().getIdPart())) {
+						throw new InternalErrorException(Msg.code(410) + "Server provided resource at index " + index
+								+ " with no ID set (using IResource#setId(IdDt))");
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
-						//TODO: Use of a deprecated method should be resolved.
-						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
+						// TODO: Use of a deprecated method should be resolved.
+						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
 						if (versionId == null || versionId.isEmpty()) {
-							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
+							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index "
+									+ index + " with no Version ID set (using IResource#setId(IdDt))");
 						}
 					}
 					index++;
@@ -229,5 +232,4 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		return null;
 	}
-
 }

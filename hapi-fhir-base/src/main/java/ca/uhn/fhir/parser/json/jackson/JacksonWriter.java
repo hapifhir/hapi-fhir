@@ -1,10 +1,8 @@
-package ca.uhn.fhir.parser.json.jackson;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser.json.jackson;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -41,36 +40,20 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		setWriter(theWriter);
 	}
 
-	public JacksonWriter() {
-	}
+	public JacksonWriter() {}
 
 	@Override
 	public BaseJsonLikeWriter init() {
 		if (isPrettyPrint()) {
-			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter() {
-
-				/**
-				 * Objects should serialize as
-				 * <pre>
-				 * {
-				 *    "key": "value"
-				 * }
-				 * </pre>
-				 * in order to be consistent with Gson behaviour, instead of the jackson default
-				 * <pre>
-				 * {
-				 *    "key" : "value"
-				 * }
-				 * </pre>
-				 */
-				@Override
-				public DefaultPrettyPrinter withSeparators(Separators separators) {
-					_separators = separators;
-					_objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
-					return this;
-				}
-
-			};
+			DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+					.withSeparators(new Separators(
+							Separators.DEFAULT_ROOT_VALUE_SEPARATOR,
+							':',
+							Separators.Spacing.AFTER,
+							',',
+							Separators.Spacing.NONE,
+							',',
+							Separators.Spacing.NONE));
 			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 
 			myJsonGenerator.setPrettyPrinter(prettyPrinter);

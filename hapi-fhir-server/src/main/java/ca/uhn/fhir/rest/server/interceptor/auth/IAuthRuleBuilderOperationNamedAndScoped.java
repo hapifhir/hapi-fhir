@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 public interface IAuthRuleBuilderOperationNamedAndScoped {
 
@@ -28,12 +27,16 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses();
 
 	/**
+	 * @deprecated This is a synonym for {@link #andAllowAllResponses()}, use that method instead
+	 */
+	@Deprecated(since = "7.6.0")
+	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess();
+
+	/**
 	 * Responses for this operation must be authorized by other rules. For example, if this
 	 * rule is authorizing the Patient $everything operation, there must be a separate
 	 * rule (or rules) that actually authorize the user to read the
 	 * resources being returned
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished andRequireExplicitResponseAuthorization();
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.message;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.message;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -40,6 +39,9 @@ import org.springframework.messaging.MessagingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
@@ -55,15 +57,37 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		myChannelFactory = theChannelFactory;
 	}
 
-	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
+	protected void doDelivery(
+			ResourceDeliveryMessage theSourceMessage,
+			CanonicalSubscription theSubscription,
+			IChannelProducer theChannelProducer,
+			ResourceModifiedJsonMessage theWrappedMessageToSend) {
+		String payloadId = theSourceMessage.getPayloadId();
+		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(
+					theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceModifiedJsonMessage newWrappedMessageToSend =
+					convertDeliveryMessageToResourceModifiedJsonMessage(theSourceMessage, payloadResource);
+			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
+			payloadId =
+					payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
+		}
 		theChannelProducer.send(theWrappedMessageToSend);
-		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		ourLog.debug(
+				"Delivering {} message payload {} for {}",
+				theSourceMessage.getOperationType(),
+				payloadId,
+				theSubscription
+						.getIdElement(myFhirContext)
+						.toUnqualifiedVersionless()
+						.getValue());
 	}
 
-	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg) {
-		IBaseResource thePayloadResource = theMsg.getPayload(myFhirContext);
-		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
-		payload.setMessageKey(theMsg.getMessageKeyOrNull());
+	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
+			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
+		ResourceModifiedMessage payload =
+				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		payload.setMessageKey(theMsg.getMessageKeyOrDefault());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());
 		return new ResourceModifiedJsonMessage(payload);
@@ -72,13 +96,24 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
-		ResourceModifiedJsonMessage messageWrapperToSend = convertDeliveryMessageToResourceModifiedMessage(theMessage);
+		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
+		if (payloadResource == null) {
+			Optional<ResourceModifiedMessage> inflatedMsg =
+					inflateResourceModifiedMessageFromDeliveryMessage(theMessage);
+			if (inflatedMsg.isEmpty()) {
+				return;
+			}
+			payloadResource = inflatedMsg.get().getPayload(myFhirContext);
+		}
+
+		ResourceModifiedJsonMessage messageWrapperToSend =
+				convertDeliveryMessageToResourceModifiedJsonMessage(theMessage, payloadResource);
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, subscription)
-			.add(ResourceDeliveryMessage.class, theMessage)
-			.add(ResourceModifiedJsonMessage.class, messageWrapperToSend);
+				.add(CanonicalSubscription.class, subscription)
+				.add(ResourceDeliveryMessage.class, theMessage)
+				.add(ResourceModifiedJsonMessage.class, messageWrapperToSend);
 		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY, params)) {
 			return;
 		}
@@ -90,7 +125,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		IChannelProducer channelProducer = myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
+		IChannelProducer channelProducer =
+				myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();
@@ -100,15 +136,16 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		}
 
 		if (payloadType != EncodingEnum.JSON) {
-			throw new UnsupportedOperationException(Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
+			throw new UnsupportedOperationException(
+					Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
 		doDelivery(theMessage, subscription, channelProducer, messageWrapperToSend);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_MESSAGE_DELIVERY
 		params = new HookParams()
-			.add(CanonicalSubscription.class, subscription)
-			.add(ResourceDeliveryMessage.class, theMessage);
+				.add(CanonicalSubscription.class, subscription)
+				.add(ResourceDeliveryMessage.class, theMessage);
 		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY, params)) {
 			//noinspection UnnecessaryReturnStatement
 			return;

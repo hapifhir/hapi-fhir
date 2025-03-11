@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -34,14 +33,13 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigDecimal;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
 
 public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -59,7 +57,14 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 		super(theSearchSqlBuilder, theTable);
 	}
 
-	public Condition createPredicateQuantity(QuantityParam theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, BaseQuantityPredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateQuantity(
+			QuantityParam theParam,
+			String theResourceName,
+			String theParamName,
+			CriteriaBuilder theBuilder,
+			BaseQuantityPredicateBuilder theFrom,
+			SearchFilterParser.CompareOperation theOperation,
+			RequestPartitionId theRequestPartitionId) {
 
 		String systemValue = theParam.getSystem();
 		String unitsValue = theParam.getUnits();
@@ -68,13 +73,21 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 
 		Condition hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
-			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
+			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(
+					getPartitionSettings(),
+					theRequestPartitionId,
+					theResourceName,
+					theParamName,
+					systemValue,
+					unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentitySystemUnits, generatePlaceholder(hash));
 		} else if (!isBlank(unitsValue)) {
-			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
+			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashUnits(
+					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
+			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
 			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
 		}
 
@@ -83,7 +96,8 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 			operation = QueryParameterUtils.toOperation(cmpValue);
 		}
 		operation = defaultIfNull(operation, SearchFilterParser.CompareOperation.eq);
-		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(this, operation, valueValue, myColumnValue, "invalidQuantityPrefix", myFhirContext, theParam);
+		Condition numericPredicate = NumberPredicateBuilder.createPredicateNumeric(
+				this, operation, valueValue, myColumnValue, "invalidQuantityPrefix", myFhirContext, theParam);
 
 		return ComboCondition.and(hashPredicate, numericPredicate);
 	}
@@ -91,5 +105,4 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 	public DbColumn getColumnValue() {
 		return myColumnValue;
 	}
-
 }

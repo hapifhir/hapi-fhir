@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.util.StopWatch;
@@ -46,32 +45,35 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class TermReindexingSvcImpl implements ITermReindexingSvc {
+public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
+
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+
 	private ArrayListMultimap<Long, Long> myChildToParentPidCache;
+
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
+
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
+
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
-	private ISchedulerService mySchedulerService;
+
 	@Autowired
 	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Override
 	public void processReindexing() {
-		if (myDeferredStorageSvc.isStorageQueueEmpty() == false && !ourForceSaveDeferredAlwaysForUnitTest) {
+		if (myDeferredStorageSvc.isStorageQueueEmpty(true) == false && !ourForceSaveDeferredAlwaysForUnitTest) {
 			return;
 		}
 
@@ -87,14 +89,23 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 					Collection<Long> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
 					if (parentLinks.isEmpty()) {
 						myChildToParentPidCache.put(theConceptPid, -1L);
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", 0, theConceptPid, myChildToParentPidCache.size());
+						ourLog.info(
+								"Found {} parent concepts of concept {} (cache has {})",
+								0,
+								theConceptPid,
+								myChildToParentPidCache.size());
 						return;
 					} else {
 						for (Long next : parentLinks) {
 							myChildToParentPidCache.put(theConceptPid, next);
 						}
-						int parentCount = myChildToParentPidCache.get(theConceptPid).size();
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", parentCount, theConceptPid, myChildToParentPidCache.size());
+						int parentCount =
+								myChildToParentPidCache.get(theConceptPid).size();
+						ourLog.info(
+								"Found {} parent concepts of concept {} (cache has {})",
+								parentCount,
+								theConceptPid,
+								myChildToParentPidCache.size());
 					}
 				}
 
@@ -105,14 +116,13 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 					theParentsBuilder.append(nextParent);
 					createParentsString(theParentsBuilder, nextParent);
 				}
-
 			}
-
 
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				int maxResult = 1000;
-				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
+				Page<TermConcept> concepts =
+						myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
 				if (!concepts.hasContent()) {
 					if (myChildToParentPidCache != null) {
 						ourLog.info("Clearing parent concept cache");
@@ -142,21 +152,25 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 					count++;
 				}
 
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count));
+				ourLog.info(
+						"Indexed {} / {} concepts in {}ms - Avg {}ms / resource",
+						count,
+						concepts.getContent().size(),
+						stopwatch.getMillis(),
+						stopwatch.getMillisPerOperation(count));
 			}
 		});
-
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(this.getClass().getName());
 		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
+		theSchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {
@@ -176,6 +190,4 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
-
-
 }

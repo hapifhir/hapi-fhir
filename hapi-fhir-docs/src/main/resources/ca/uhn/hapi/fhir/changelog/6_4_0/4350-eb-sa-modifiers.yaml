@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4350
+title: "Support was accidentally removed for date `sa` and `eb` modifiers in the `date` type search parameters. This has been corrected."

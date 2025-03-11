@@ -1,0 +1,10 @@
+---
+issue: 5141
+type: add
+title: "Previously, updating an existing resource (resource A) to match a resource that
+   it didn't match to before (resource B) would update only the already
+   existing links on resource A.
+   This behaviour has been changed. Now such an update will also add additional links,
+   if necessary, from resource A to resource B, including adding a POSSIBLE_DUPLICATE
+   between golden resource A and golden resource B.
+"

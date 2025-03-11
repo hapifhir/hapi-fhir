@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.data;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,21 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.SearchInclude;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
+
 public interface ISearchIncludeDao extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
-	
+
 	@Modifying
-	@Query(value="DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
-	void deleteForSearch(@Param("search") Long theSearchPid);
+	@Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid in (:search)")
+	@CanIgnoreReturnValue
+	int deleteForSearch(@Param("search") Collection<Long> theSearchPid);
 }

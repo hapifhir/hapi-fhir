@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.parameters;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.parameters;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -33,12 +32,13 @@ public class UrlPartitioner {
 	public UrlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myMatchUrlService = theMatchUrlService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-
 	}
 
 	public PartitionedUrl partitionUrl(String theUrl, RequestDetails theRequestDetails) {
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap(), null);
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap());
 		PartitionedUrl retval = new PartitionedUrl();
 		retval.setUrl(theUrl);
 		retval.setRequestPartitionId(requestPartitionId);

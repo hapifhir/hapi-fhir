@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import java.util.Set;
 
@@ -83,7 +82,6 @@ public class QualifierDetails {
 		myWholeQualifier = theWholeQualifier;
 	}
 
-	
 	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
 		QualifierDetails retVal = new QualifierDetails();
 		if (theParamName == null || theParamName.length() == 0) {
@@ -130,7 +128,4 @@ public class QualifierDetails {
 
 		return retVal;
 	}
-
-
-	
 }

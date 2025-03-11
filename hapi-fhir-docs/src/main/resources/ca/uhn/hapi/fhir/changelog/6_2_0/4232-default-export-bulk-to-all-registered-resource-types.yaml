@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4232
+title: "Previously during Bulk Export, if no  `_type` parameter was provided, an error would be thrown. This has been changed, and if the `_type` parameter is omitted, Bulk Export will default to all registered types."

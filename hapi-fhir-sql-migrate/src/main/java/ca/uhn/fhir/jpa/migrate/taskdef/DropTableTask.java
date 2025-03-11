@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -57,6 +57,10 @@ public class DropTableTask extends BaseTableTask {
 		logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
 
 		for (String next : foreignKeys) {
+			if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED && next.contains("-")) {
+				// Derby creates special internal indexes with GUID names that can't be deleted
+				continue;
+			}
 			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
 			for (@Language("SQL") String nextSql : sql) {
 				executeSql(getTableName(), nextSql);
@@ -65,14 +69,16 @@ public class DropTableTask extends BaseTableTask {
 
 		DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
 		theIndexTask
-			.setTableName(getTableName())
-			.setConnectionProperties(getConnectionProperties())
-			.setDriverType(getDriverType())
-			.setDryRun(isDryRun());
+				.setTableName(getTableName())
+				.setConnectionProperties(getConnectionProperties())
+				.setDriverType(getDriverType())
+				.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
-			theIndexTask
-				.setIndexName(nextIndex)
-				.execute();
+			if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED && nextIndex.contains("-")) {
+				// Derby creates special internal indexes with GUID names that can't be deleted
+				continue;
+			}
+			theIndexTask.setIndexName(nextIndex).execute();
 		}
 
 		logInfo(ourLog, "Dropping table: {}", getTableName());
@@ -80,8 +86,5 @@ public class DropTableTask extends BaseTableTask {
 		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
-
 	}
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.util.VersionEnum;
 
@@ -26,8 +25,10 @@ public class CalculateOrdinalDatesTask extends BaseColumnCalculatorTask {
 
 	public CalculateOrdinalDatesTask(VersionEnum theRelease, String theVersion) {
 		super(theRelease, theVersion);
-		setDescription("Calculate SP_LOW_VALUE_DATE_ORDINAL and SP_HIGH_VALUE_DATE_ORDINAL based on existing SP_VALUE_LOW and SP_VALUE_HIGH date values in Date Search Params");
-		setWhereClause("(SP_VALUE_LOW_DATE_ORDINAL IS NULL AND SP_VALUE_LOW IS NOT NULL) OR (SP_VALUE_HIGH_DATE_ORDINAL IS NULL AND SP_VALUE_HIGH IS NOT NULL)");
+		setDescription(
+				"Calculate SP_LOW_VALUE_DATE_ORDINAL and SP_HIGH_VALUE_DATE_ORDINAL based on existing SP_VALUE_LOW and SP_VALUE_HIGH date values in Date Search Params");
+		setWhereClause(
+				"(SP_VALUE_LOW_DATE_ORDINAL IS NULL AND SP_VALUE_LOW IS NOT NULL) OR (SP_VALUE_HIGH_DATE_ORDINAL IS NULL AND SP_VALUE_HIGH IS NOT NULL)");
 		setPidColumnName("SP_ID");
 	}
 

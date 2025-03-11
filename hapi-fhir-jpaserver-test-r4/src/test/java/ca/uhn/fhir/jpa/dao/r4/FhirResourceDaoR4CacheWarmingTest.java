@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
@@ -20,17 +21,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CacheWarmingTest.class);
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
+		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 
-		myDaoConfig.setWarmCacheEntries(new ArrayList<>());
+		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
 		cacheWarmingSvc.initCacheMap();
 	}
@@ -40,8 +43,8 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 	public void testInvalidCacheEntries() {
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
 
-		myDaoConfig.setWarmCacheEntries(new ArrayList<>());
-		myDaoConfig.getWarmCacheEntries().add(
+		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
+		myStorageSettings.getWarmCacheEntries().add(
 			new WarmCacheEntry()
 				.setPeriodMillis(10)
 				.setUrl("BadResource?name=smith")
@@ -53,8 +56,8 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 
-		myDaoConfig.setWarmCacheEntries(new ArrayList<>());
-		myDaoConfig.getWarmCacheEntries().add(
+		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
+		myStorageSettings.getWarmCacheEntries().add(
 			new WarmCacheEntry()
 				.setPeriodMillis(10)
 				.setUrl("foo/Patient")
@@ -71,8 +74,8 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 
 	@Test
 	public void testKeepCacheWarm() throws InterruptedException {
-		myDaoConfig.setWarmCacheEntries(new ArrayList<>());
-		myDaoConfig.getWarmCacheEntries().add(
+		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
+		myStorageSettings.getWarmCacheEntries().add(
 			new WarmCacheEntry()
 				.setPeriodMillis(10)
 				.setUrl("Patient?name=smith")

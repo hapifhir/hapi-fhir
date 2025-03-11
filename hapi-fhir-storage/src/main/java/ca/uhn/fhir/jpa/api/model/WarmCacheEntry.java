@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -47,17 +46,14 @@ public class WarmCacheEntry {
 		WarmCacheEntry that = (WarmCacheEntry) theO;
 
 		return new EqualsBuilder()
-			.append(myPeriodMillis, that.myPeriodMillis)
-			.append(myUrl, that.myUrl)
-			.isEquals();
+				.append(myPeriodMillis, that.myPeriodMillis)
+				.append(myUrl, that.myUrl)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myPeriodMillis)
-			.append(myUrl)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myPeriodMillis).append(myUrl).toHashCode();
 	}
 
 	public long getPeriodMillis() {
@@ -77,5 +73,4 @@ public class WarmCacheEntry {
 		myUrl = theUrl;
 		return this;
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,7 +33,8 @@ import java.util.stream.Collectors;
  */
 public class TitleStandardizer extends LastNameStandardizer {
 
-	private Set<String> myExceptions = new HashSet<>(Arrays.asList("EAS", "EPS", "LLC", "LLP", "of", "at", "in", "and"));
+	private Set<String> myExceptions =
+			new HashSet<>(Arrays.asList("EAS", "EPS", "LLC", "LLP", "of", "at", "in", "and"));
 	private Set<String[]> myBiGramExceptions = new HashSet<String[]>();
 
 	public TitleStandardizer() {
@@ -56,11 +56,11 @@ public class TitleStandardizer extends LastNameStandardizer {
 		theString = replaceTranslates(theString);
 
 		return Arrays.stream(theString.split("\\s+"))
-			.map(String::trim)
-			.map(this::standardizeText)
-			.filter(s -> !StringUtils.isEmpty(s))
-			.map(this::checkTitleExceptions)
-			.collect(Collectors.joining(" "));
+				.map(String::trim)
+				.map(this::standardizeText)
+				.filter(s -> !StringUtils.isEmpty(s))
+				.map(this::checkTitleExceptions)
+				.collect(Collectors.joining(" "));
 	}
 
 	private List<String> split(String theString) {
@@ -102,7 +102,7 @@ public class TitleStandardizer extends LastNameStandardizer {
 		List<String> parts = split(theToken);
 
 		String prevPart = null;
-		for(String part : parts) {
+		for (String part : parts) {
 			if (isAllText(part)) {
 				part = standardizeNameToken(part);
 			}
@@ -116,8 +116,7 @@ public class TitleStandardizer extends LastNameStandardizer {
 
 	private String checkBiGram(String thePart0, String thePart1) {
 		for (String[] biGram : myBiGramExceptions) {
-			if (biGram[0].equalsIgnoreCase(thePart0)
-				&& biGram[1].equalsIgnoreCase(thePart1)) {
+			if (biGram[0].equalsIgnoreCase(thePart0) && biGram[1].equalsIgnoreCase(thePart1)) {
 				return biGram[1];
 			}
 		}
@@ -138,9 +137,9 @@ public class TitleStandardizer extends LastNameStandardizer {
 	@Override
 	protected String standardizeNameToken(String theToken) {
 		String exception = myExceptions.stream()
-			.filter(s -> s.equalsIgnoreCase(theToken))
-			.findFirst()
-			.orElse(null);
+				.filter(s -> s.equalsIgnoreCase(theToken))
+				.findFirst()
+				.orElse(null);
 		if (exception != null) {
 			return exception;
 		}
@@ -150,8 +149,8 @@ public class TitleStandardizer extends LastNameStandardizer {
 
 	private String checkTitleExceptions(String theString) {
 		return myExceptions.stream()
-			.filter(s -> s.equalsIgnoreCase(theString))
-			.findFirst()
-			.orElse(theString);
+				.filter(s -> s.equalsIgnoreCase(theString))
+				.findFirst()
+				.orElse(theString);
 	}
 }

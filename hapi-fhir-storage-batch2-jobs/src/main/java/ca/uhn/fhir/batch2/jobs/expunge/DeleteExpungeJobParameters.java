@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.expunge;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,38 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.expunge;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters {
+public class DeleteExpungeJobParameters extends PartitionedUrlJobParameters {
+	@JsonProperty("cascade")
+	private boolean myCascade;
+
+	@JsonProperty("cascadeMaxRounds")
+	private Integer myCascadeMaxRounds;
+
+	/**
+	 * Constructor
+	 */
+	public DeleteExpungeJobParameters() {
+		super();
+	}
+
+	public Integer getCascadeMaxRounds() {
+		return myCascadeMaxRounds;
+	}
+
+	public void setCascadeMaxRounds(Integer theCascadeMaxRounds) {
+		myCascadeMaxRounds = theCascadeMaxRounds;
+	}
+
+	public boolean isCascade() {
+		return myCascade;
+	}
+
+	public void setCascade(boolean theCascade) {
+		myCascade = theCascade;
+	}
 }

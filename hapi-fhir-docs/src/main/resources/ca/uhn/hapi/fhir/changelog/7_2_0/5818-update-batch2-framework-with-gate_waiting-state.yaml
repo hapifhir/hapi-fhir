@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5818
+title: "Added another state to the Batch2 work chunk state machine: `GATE_WAITING`.
+        This work chunk state will be the initial state on creation for gated jobs.
+        Once all chunks are completed for the previous step, they will transition to `READY`.
+"

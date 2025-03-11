@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.client.interceptor;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +17,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
+package ca.uhn.fhir.rest.client.interceptor;
 
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import org.apache.commons.lang3.Validate;
+
+import java.io.IOException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the
@@ -70,12 +69,13 @@ public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 		int colonIdx = theCompleteHeader.indexOf(':');
 		if (colonIdx != -1) {
 			setHeaderName(theCompleteHeader.substring(0, colonIdx).trim());
-			setHeaderValue(theCompleteHeader.substring(colonIdx+1, theCompleteHeader.length()).trim());
+			setHeaderValue(theCompleteHeader
+					.substring(colonIdx + 1, theCompleteHeader.length())
+					.trim());
 		} else {
 			setHeaderName(theCompleteHeader.trim());
 			setHeaderValue(null);
 		}
-
 	}
 
 	public String getHeaderName() {
@@ -105,5 +105,4 @@ public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 	public void setHeaderValue(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;
 	}
-
 }

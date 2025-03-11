@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import org.hamcrest.Matchers;
 import org.hibernate.search.engine.search.sort.dsl.CompositeSortComponentsStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortMissingValueBehaviorStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortOptionsStep;
@@ -14,6 +14,9 @@ import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
 import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -21,9 +24,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,7 +64,7 @@ class HSearchSortHelperImplTest {
 
 		List<String> sortPropertyList = tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
 
-		assertThat(sortPropertyList, Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
+		assertThat(sortPropertyList).containsExactly("nsp.the-param-name.token.system", "nsp.the-param-name.token.code");
 	}
 
 	/**
@@ -69,15 +75,45 @@ class HSearchSortHelperImplTest {
 	void testGetParamType() {
 		SortSpec sortSpec = new SortSpec();
 		sortSpec.setParamName("_tag");
-		when(mockSearchParamRegistry.getActiveSearchParams("Observation")).thenReturn(mockResourceSearchParams);
+		when(mockSearchParamRegistry.getActiveSearchParams(eq("Observation"), any())).thenReturn(mockResourceSearchParams);
 		when(mockResourceSearchParams.get("the-param-name")).thenReturn(mockRuntimeSearchParam);
 		when(mockRuntimeSearchParam.getParamType()).thenReturn(RestSearchParameterTypeEnum.TOKEN);
 
 		Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType("Observation", "the-param-name");
 
-		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
+		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams(eq("Observation"), any());
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
 		assertFalse(paramType.isEmpty());
+	}
+
+	private static Stream<Arguments> provideArgumentsForGetParamType() {
+		Stream.Builder<Arguments> retVal = Stream.builder();
+		HSearchSortHelperImpl.ourSortingParamNameToParamType.forEach((theSortSpecName, theRestSearchParameterTypeEnum) ->
+		{
+			SortSpec sortSpec = new SortSpec(theSortSpecName);
+			retVal.add(Arguments.of(sortSpec, Optional.of(theRestSearchParameterTypeEnum)));
+		});
+
+		return retVal.build();
+	}
+	/**
+	 * Validates that getParamType() returns a param type when _id, _lastUpdated, _tag, _security and _source are absent from
+	 * the search param registry.
+	 */
+	@ParameterizedTest
+	@MethodSource("provideArgumentsForGetParamType")
+	void testGetParamTypeWhenParamNameIsNotInSearchParamRegistry(SortSpec sortSpec, Optional<RestSearchParameterTypeEnum> expectedSearchParamType) {
+		//Given that we have params absent from the SearchParamsRegistry
+		String resourceType = "CodeSystem";
+		String absentSearchParam = sortSpec.getParamName();
+		when(mockSearchParamRegistry.getActiveSearchParams(eq(resourceType), any())).thenReturn(mockResourceSearchParams);
+		when(mockResourceSearchParams.get(absentSearchParam)).thenReturn(null);
+
+		//Execute
+		Optional<RestSearchParameterTypeEnum> paramType = tested.getParamType(resourceType, absentSearchParam);
+
+		//Validate
+		assertThat(paramType).isEqualTo(expectedSearchParamType);
 	}
 
 	@Test

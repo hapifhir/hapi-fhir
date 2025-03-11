@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binary.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +17,33 @@ package ca.uhn.fhir.jpa.binary.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
-	public int getMaximumBinarySize() {
+	public long getMaximumBinarySize() {
 		return 0;
 	}
 
 	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
+	public boolean isValidBinaryContentId(String theNewBlobId) {
+		return true;
+	}
+
+	@Override
+	public void setMaximumBinarySize(long theMaximumBinarySize) {
 		// ignore
 	}
 
@@ -53,42 +58,48 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
+	public boolean shouldStoreBinaryContent(long theSize, IIdType theResourceId, String theContentType) {
 		return false;
 	}
 
 	@Override
-	public String newBlobId() {
+	public String newBinaryContentId() {
 		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
+	public StoredDetails storeBinaryContent(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException(Msg.code(1346));
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1347));
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
 		throw new UnsupportedOperationException(Msg.code(1348));
 	}
 
 	@Override
-	public void expungeBlob(IIdType theIdElement, String theBlobId) {
+	public void expungeBinaryContent(IIdType theIdElement, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1349));
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1350));
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException {
+	public byte[] fetchDataByteArrayFromBinary(IBaseBinary theResource) {
 		throw new UnsupportedOperationException(Msg.code(1351));
 	}
 }

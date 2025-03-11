@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5419
+title: "Previously, when `AllowAutoInflateBinaries` was enabled in `JpaStorageSettings` and bundles with multiple 
+resources were submitted, binaries were created on the disk only for the first resource entry of the bundle. 
+This has been fixed."

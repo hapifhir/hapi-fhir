@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,41 +17,87 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
+
 @Entity
-@Table(name = "HFJ_RES_PARAM_PRESENT", indexes = {
-	// We used to have a constraint named IDX_RESPARMPRESENT_SPID_RESID - Don't reuse
-	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
-	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
-})
+@Table(
+		name = "HFJ_RES_PARAM_PRESENT",
+		indexes = {
+			// We used to have a constraint named IDX_RESPARMPRESENT_SPID_RESID - Don't reuse
+			@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
+			@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
+		})
+@IdClass(IdAndPartitionId.class)
 public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_RESPARMPRESENT_ID", sequenceName = "SEQ_RESPARMPRESENT_ID")
+	@GenericGenerator(
+			name = "SEQ_RESPARMPRESENT_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESPARMPRESENT_ID")
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "SP_PRESENT", nullable = false)
 	private boolean myPresent;
+
 	@ManyToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+			},
+			foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
-	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+
+	@Column(name = "RES_ID", nullable = false, updatable = false)
 	private Long myResourcePid;
+
 	@Transient
 	private transient String myParamName;
+
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
+
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
@@ -64,6 +108,14 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		super();
 	}
 
+	/**
+	 * Constructor
+	 */
+	public SearchParamPresentEntity(String theParamName, boolean thePresent) {
+		myParamName = theParamName;
+		myPresent = thePresent;
+	}
+
 	@SuppressWarnings("unused")
 	@PrePersist
 	public void calculateHashes() {
@@ -71,11 +123,13 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			setHashPresence(calculateHashPresence(getPartitionSettings(), getPartitionId(), resourceType, paramName, present));
+			setHashPresence(
+					calculateHashPresence(getPartitionSettings(), getPartitionId(), resourceType, paramName, present));
 		}
 	}
 
 	public Long getHashPresence() {
+		Validate.notNull(myHashPresence);
 		return myHashPresence;
 	}
 
@@ -97,6 +151,8 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 
 	public void setResource(ResourceTable theResourceTable) {
 		myResource = theResourceTable;
+		myResourcePid = theResourceTable.getId().getId();
+		myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 	}
 
 	public boolean isPresent() {
@@ -105,6 +161,26 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 
 	public void setPresent(boolean thePresent) {
 		myPresent = thePresent;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		SearchParamPresentEntity that = (SearchParamPresentEntity) theO;
+
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getHashPresence(), that.getHashPresence());
+		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(getHashPresence());
+		return b.toHashCode();
 	}
 
 	@Override
@@ -130,7 +206,7 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	 * Copy all mutable values from the given source
 	 */
 	public void updateValues(SearchParamPresentEntity theSource) {
-		super.setPartitionId(theSource.getPartitionId());
+		setPartitionId(theSource.getPartitionId());
 		setResource(theSource.getResource());
 		setPartitionSettings(theSource.getPartitionSettings());
 		setHashPresence(theSource.getHashPresence());
@@ -138,14 +214,24 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		setPresent(theSource.isPresent());
 	}
 
-	public static long calculateHashPresence(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
+	public static long calculateHashPresence(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			Boolean thePresent) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashPresence(thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
+		return calculateHashPresence(
+				thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
 	}
 
-	public static long calculateHashPresence(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
+	public static long calculateHashPresence(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
 	}
-
 }

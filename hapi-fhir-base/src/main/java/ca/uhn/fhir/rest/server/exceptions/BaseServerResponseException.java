@@ -1,22 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +17,18 @@ import java.util.Map;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are subclasses of this exception type, and RESTful server methods should also only call
@@ -50,7 +48,8 @@ import java.util.Map;
  */
 public abstract class BaseServerResponseException extends RuntimeException {
 
-	private static final Map<Integer, Class<? extends BaseServerResponseException>> ourStatusCodeToExceptionType = new HashMap<Integer, Class<? extends BaseServerResponseException>>();
+	private static final Map<Integer, Class<? extends BaseServerResponseException>> ourStatusCodeToExceptionType =
+			new HashMap<Integer, Class<? extends BaseServerResponseException>>();
 	private static final long serialVersionUID = 1L;
 
 	static {
@@ -83,7 +82,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theStatusCode The HTTP status code corresponding to this problem
 	 * @param theMessage    The message
 	 */
-	public 	/**
+	public
+	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
 	BaseServerResponseException(int theStatusCode, String theMessage) {
@@ -103,7 +103,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
 		if (theMessages != null && theMessages.length > 1) {
-			myAdditionalMessages = Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
+			myAdditionalMessages =
+					Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
 		}
 	}
 
@@ -114,7 +115,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theMessage              The message
 	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(
+			int theStatusCode, String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -141,7 +143,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theCause                The underlying cause exception
 	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(
+			int theStatusCode, String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage, theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -166,7 +169,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theCause                The underlying cause exception
 	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(
+			int theStatusCode, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -307,7 +311,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public static BaseServerResponseException newInstance(int theStatusCode, String theMessage) {
 		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
 			try {
-				return ourStatusCodeToExceptionType.get(theStatusCode).getConstructor(new Class[]{String.class}).newInstance(theMessage);
+				return ourStatusCodeToExceptionType
+						.get(theStatusCode)
+						.getConstructor(new Class[] {String.class})
+						.newInstance(theMessage);
 			} catch (InstantiationException e) {
 				throw new InternalErrorException(Msg.code(1912) + e);
 			} catch (IllegalAccessException e) {
@@ -327,9 +334,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	static void registerExceptionType(int theStatusCode, Class<? extends BaseServerResponseException> theType) {
 		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
-			throw new Error(Msg.code(1918) + "Can not register " + theType + " to status code " + theStatusCode + " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
+			throw new Error(Msg.code(1918) + "Can not register " + theType + " to status code " + theStatusCode
+					+ " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
 		}
 		ourStatusCodeToExceptionType.put(theStatusCode, theType);
 	}
-
 }

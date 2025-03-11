@@ -14,7 +14,7 @@ fieldset[disabled].btn {
    border-radius: 0.5rem;
 }
 
-.badge-secondary {
+.bg-secondary {
    color: #fff;
    background-color: #98a5b0;
 }
@@ -24,6 +24,22 @@ body {
    padding-top: 50px;
    overflow-x: hidden;
    font-family: sans-serif;
+}
+
+H1 {
+   font-size: 1.3em;
+}
+H2 {
+   font-size: 1.2em;
+}
+H3 {
+   font-size: 1.1em;
+}
+H4 {
+   font-size: 1.1em;
+}
+.sidebar > H4 {
+    margin-top: 1.0em;
 }
 
 .clientCodeBox {
@@ -51,6 +67,14 @@ label {
    color: #808080;
    font-weight: 400;
    line-height: 0.8em;
+}
+
+TD.resultControlButtons {
+   font-size: 0;
+}
+
+TD.resultControlButtons BUTTON {
+   margin: 2px;
 }
 
 TD.headerBox {
@@ -153,10 +177,12 @@ DIV.navbarBreadcrumb:HOVER, A.navbarBreadcrumb:HOVER {
 }
 
 DIV.resultBodyActual {
-   /*
-   max-height: 400px;
-   overflow: scroll;
-   */
+   padding: 5px;
+}
+
+DIV.panel-title-text {
+   font-weight: bold;
+   margin: 12px;
 }
 
 PRE.resultBodyPre {
@@ -197,53 +223,11 @@ body .syntaxhighlighter .line {
 
 @media (min-width: 768px) {
    .sidebar {
-      top: 51px;
-      bottom: 0;
-      left: 0;
-      z-index: 1000;
       display: block;
-      padding: 5px;
-      overflow-x: hidden;
-      overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-      background-color: #f5f5f5;
-      border-right: 1px solid #eee;
    }
 }
 
 /* Sidebar navigation */
-.nav-sidebar {
-   margin-right: -21px; /* 20px padding + 1px border */
-   margin-bottom: 20px;
-   margin-left: -20px;
-}
-
-.nav-sidebar > li {
-   width: 100%;
-}
-
-.nav-sidebar > li > a {
-   padding-right: 20px;
-   padding-left: 20px;
-   padding-top: 5px;
-   padding-bottom: 5px;
-   display: block;
-}
-
-.nav-sidebar > .active > a {
-   color: #fff;
-   background-color: #428bca;
-   padding-top: 10px;
-   padding-bottom: 10px;
-}
-
-.nav-link.active {
-   background-color: #007bff !important;
-   border: none !important;
-   color: #FFF !important;
-   font-weight: bold;
-   border-top-left-radius: 0.5rem;
-   border-top-right-radius: 0.5rem;
-}
 
 /*
  * Main content
@@ -373,4 +357,3 @@ DIV.tab-pane DIV.container-fluid {
 DIV.top-buffer {
    margin-top: 2px;
 }
-

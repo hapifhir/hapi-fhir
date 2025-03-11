@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jaxrs.client;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jaxrs.client;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -26,10 +25,10 @@ import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.Response;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,7 +37,7 @@ import java.util.Map;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
- * {@link javax.ws.rs.client.Invocation Invocation}
+ * {@link jakarta.ws.rs.client.Invocation Invocation}
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
@@ -129,5 +128,4 @@ public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
 	public void setUri(String theUrl) {
 		throw new UnsupportedOperationException(Msg.code(606));
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -40,27 +39,23 @@ public class BundleFetcher {
 		// START SNIPPET: loadAll
 		// Create a context and a client
 		FhirContext ctx = FhirContext.forR4();
-		String serverBase = "http://hapi.fhr.org/baseR4";
+		String serverBase = "http://hapi.fhir.org/baseR4";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
 		// We'll populate this list
 		List<IBaseResource> patients = new ArrayList<>();
 
 		// We'll do a search for all Patients and extract the first page
-		Bundle bundle = client
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.NAME.matches().value("smith"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle bundle = client.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("smith"))
+				.returnBundle(Bundle.class)
+				.execute();
 		patients.addAll(BundleUtil.toListOfResources(ctx, bundle));
 
 		// Load the subsequent pages
 		while (bundle.getLink(IBaseBundle.LINK_NEXT) != null) {
-			bundle = client
-				.loadPage()
-				.next(bundle)
-				.execute();
+			bundle = client.loadPage().next(bundle).execute();
 			patients.addAll(BundleUtil.toListOfResources(ctx, bundle));
 		}
 
@@ -68,5 +63,3 @@ public class BundleFetcher {
 		// END SNIPPET: loadAll
 	}
 }
-
-

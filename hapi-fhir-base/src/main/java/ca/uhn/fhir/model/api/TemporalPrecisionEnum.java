@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,21 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.lang3.time.DateUtils;
-
 public enum TemporalPrecisionEnum {
-
 	YEAR(Calendar.YEAR) {
 		@Override
 		public Date add(Date theInput, int theAmount) {
 			return DateUtils.addYears(theInput, theAmount);
 		}
 	},
-	
+
 	MONTH(Calendar.MONTH) {
 		@Override
 		public Date add(Date theInput, int theAmount) {
@@ -51,7 +49,6 @@ public enum TemporalPrecisionEnum {
 		public Date add(Date theInput, int theAmount) {
 			return DateUtils.addMinutes(theInput, theAmount);
 		}
-		
 	},
 	SECOND(Calendar.SECOND) {
 		@Override
@@ -59,16 +56,15 @@ public enum TemporalPrecisionEnum {
 			return DateUtils.addSeconds(theInput, theAmount);
 		}
 	},
-	
+
 	MILLI(Calendar.MILLISECOND) {
 		@Override
 		public Date add(Date theInput, int theAmount) {
 			return DateUtils.addMilliseconds(theInput, theAmount);
 		}
-	}, 
-	
+	},
 	;
-	
+
 	private int myCalendarConstant;
 
 	TemporalPrecisionEnum(int theCalendarConstant) {
@@ -76,7 +72,7 @@ public enum TemporalPrecisionEnum {
 	}
 
 	public abstract Date add(Date theInput, int theAmount);
-	
+
 	public int getCalendarConstant() {
 		return myCalendarConstant;
 	}
@@ -86,12 +82,18 @@ public enum TemporalPrecisionEnum {
 	 */
 	public int stringLength() {
 		switch (this) {
-			case YEAR: return 4;
-			case MONTH: return 7;
-			case DAY: return 10;
-			case MINUTE: return 16;
-			case SECOND: return 19;
-			case MILLI: return 23;
+			case YEAR:
+				return 4;
+			case MONTH:
+				return 7;
+			case DAY:
+				return 10;
+			case MINUTE:
+				return 16;
+			case SECOND:
+				return 19;
+			case MILLI:
+				return 23;
 		}
 		return 0; // ??
 	}

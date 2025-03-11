@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jaxrs.server.util;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jaxrs.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.server.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -33,10 +32,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -66,8 +65,11 @@ public class JaxRsRequest extends RequestDetails {
 	 * @param requestType    the request type
 	 * @param restOperation  the operation type
 	 */
-	public JaxRsRequest(AbstractJaxRsProvider server, String resourceString, RequestTypeEnum requestType,
-							  RestOperationTypeEnum restOperation) {
+	public JaxRsRequest(
+			AbstractJaxRsProvider server,
+			String resourceString,
+			RequestTypeEnum requestType,
+			RestOperationTypeEnum restOperation) {
 		super(server.getInterceptorService());
 		this.myHeaders = server.getHeaders();
 		this.myResourceString = resourceString;
@@ -81,7 +83,7 @@ public class JaxRsRequest extends RequestDetails {
 	@Override
 	protected byte[] getByteStreamRequestContents() {
 		return StringUtils.defaultString(myResourceString, "")
-			.getBytes(ResourceParameter.determineRequestCharset(this));
+				.getBytes(ResourceParameter.determineRequestCharset(this));
 	}
 
 	@Override
@@ -113,6 +115,16 @@ public class JaxRsRequest extends RequestDetails {
 	public List<String> getHeaders(String name) {
 		List<String> requestHeader = myHeaders.getRequestHeader(name);
 		return requestHeader == null ? Collections.<String>emptyList() : requestHeader;
+	}
+
+	@Override
+	public void addHeader(String theName, String theValue) {
+		throw new UnsupportedOperationException(Msg.code(2499) + "Headers can not be modified in JAX-RS");
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValue) {
+		throw new UnsupportedOperationException(Msg.code(2500) + "Headers can not be modified in JAX-RS");
 	}
 
 	@Override
@@ -186,8 +198,12 @@ public class JaxRsRequest extends RequestDetails {
 		 * @param theRestOperation the rest operation
 		 * @param theRequestUrl
 		 */
-		public Builder(AbstractJaxRsProvider theServer, RequestTypeEnum theRequestType,
-							RestOperationTypeEnum theRestOperation, String theRequestUrl, String theResourceName) {
+		public Builder(
+				AbstractJaxRsProvider theServer,
+				RequestTypeEnum theRequestType,
+				RestOperationTypeEnum theRestOperation,
+				String theRequestUrl,
+				String theResourceName) {
 			this.myServer = theServer;
 			this.myRequestType = theRequestType;
 			this.myRestOperation = theRestOperation;
@@ -203,52 +219,65 @@ public class JaxRsRequest extends RequestDetails {
 		public JaxRsRequest build() {
 			JaxRsRequest result = new JaxRsRequest(myServer, myResource, myRequestType, myRestOperation);
 			if ((StringUtils.isNotBlank(myVersion) || StringUtils.isNotBlank(myCompartment))
-				&& StringUtils.isBlank(myId)) {
+					&& StringUtils.isBlank(myId)) {
 				throw new InvalidRequestException(Msg.code(601) + "Don't know how to handle request path: "
-					+ myServer.getUriInfo().getRequestUri().toASCIIString());
+						+ myServer.getUriInfo().getRequestUri().toASCIIString());
 			}
 
-			FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
+			FhirVersionEnum fhirContextVersion =
+					myServer.getFhirContext().getVersion().getVersion();
 
 			if (StringUtils.isNotBlank(myVersion)) {
 				switch (fhirContextVersion) {
 					case R4:
-						result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new org.hl7.fhir.r4.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU3:
-						result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new org.hl7.fhir.dstu3.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU2_1:
-						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU2_HL7ORG:
-						result.setId(new org.hl7.fhir.dstu2.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new org.hl7.fhir.dstu2.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU2:
-						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new ca.uhn.fhir.model.primitive.IdDt(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					default:
-						throw new ConfigurationException(Msg.code(602) + "Unsupported Fhir version: " + fhirContextVersion);
+						throw new ConfigurationException(
+								Msg.code(602) + "Unsupported Fhir version: " + fhirContextVersion);
 				}
 			} else if (StringUtils.isNotBlank(myId)) {
 				switch (fhirContextVersion) {
 					case R4:
-						result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(
+								new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU3:
-						result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(new org.hl7.fhir.dstu3.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU2_1:
-						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU2_HL7ORG:
-						result.setId(new org.hl7.fhir.dstu2.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(new org.hl7.fhir.dstu2.model.IdType(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU2:
-						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(new ca.uhn.fhir.model.primitive.IdDt(
+								myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					default:
-						throw new ConfigurationException(Msg.code(603) + "Unsupported Fhir version: " + fhirContextVersion);
+						throw new ConfigurationException(
+								Msg.code(603) + "Unsupported Fhir version: " + fhirContextVersion);
 				}
 			}
 
@@ -272,7 +301,8 @@ public class JaxRsRequest extends RequestDetails {
 							result.setId(new ca.uhn.fhir.model.primitive.IdDt(contentLocation));
 							break;
 						default:
-							throw new ConfigurationException(Msg.code(604) + "Unsupported Fhir version: " + fhirContextVersion);
+							throw new ConfigurationException(
+									Msg.code(604) + "Unsupported Fhir version: " + fhirContextVersion);
 					}
 				}
 			}

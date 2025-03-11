@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +17,32 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-//START SNIPPET: interceptor
+// START SNIPPET: interceptor
 @Interceptor
-public class RequestCounterInterceptor
-{
+public class RequestCounterInterceptor {
 
-   private int myRequestCount;
+	private int myRequestCount;
 
-   public int getRequestCount() {
-      return myRequestCount;
-   }
+	public int getRequestCount() {
+		return myRequestCount;
+	}
 
-   /**
-    * Override the incomingRequestPreProcessed method, which is called
-    * for each incoming request before any processing is done
-    */
+	/**
+	 * Override the incomingRequestPreProcessed method, which is called
+	 * for each incoming request before any processing is done
+	 */
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
-   public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
-      myRequestCount++;
-      return true;
-   }
-   
+	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
+		myRequestCount++;
+		return true;
+	}
 }
-//END SNIPPET: interceptor
+// END SNIPPET: interceptor

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.apache;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -35,6 +34,8 @@ import java.nio.charset.UnsupportedCharsetException;
 public class ResourceEntity extends StringEntity {
 
 	public ResourceEntity(FhirContext theContext, IBaseResource theResource) throws UnsupportedCharsetException {
-		super(theContext.newJsonParser().encodeResourceToString(theResource), ContentType.parse(Constants.CT_FHIR_JSON_NEW));
+		super(
+				theContext.newJsonParser().encodeResourceToString(theResource),
+				ContentType.parse(Constants.CT_FHIR_JSON_NEW));
 	}
 }

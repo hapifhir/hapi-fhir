@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,28 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
 
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 
 public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReindexTerminologyCommand.class);
+	public static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReindexTerminologyCommand.class);
 
 	static final String REINDEX_TERMINOLOGY = "reindex-terminology";
-
 
 	@Override
 	public String getCommandDescription() {
@@ -48,7 +49,6 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	public String getCommandName() {
 		return REINDEX_TERMINOLOGY;
 	}
-
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
@@ -63,49 +63,55 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		invokeOperation(client);
 	}
 
-
 	private void invokeOperation(IGenericClient theClient) {
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
-
 		ourLog.info("Beginning freetext indexing - This may take a while...");
 
 		IBaseParameters response;
+		// non-null errorMessage means failure
+		String errorMessage = null;
 		try {
 			response = theClient
-				.operation()
-				.onServer()
-				.named(REINDEX_TERMINOLOGY)
-				.withNoParameters(Parameters.class)
-				.execute();
+					.operation()
+					.onServer()
+					.named(REINDEX_TERMINOLOGY)
+					.withNoParameters(Parameters.class)
+					.execute();
 
 		} catch (BaseServerResponseException e) {
+			int statusCode = e.getStatusCode();
+			errorMessage = e.getMessage();
+
 			if (e.getOperationOutcome() != null) {
-				ourLog.error("Received the following response: {}{}", NL,
-					myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				errorMessage += " : " + e.getOperationOutcome().getFormatCommentsPre();
 			}
-			throw e;
+			throw new CommandFailureException(
+					Msg.code(2228) + "FAILURE: Received HTTP " + statusCode + ": " + errorMessage);
 		}
 
-		Optional<String> isSuccessResponse = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
-		if ( ! isSuccessResponse.isPresent() ) {
-			ParametersUtil.addParameterToParametersBoolean(myFhirCtx, response, RESP_PARAM_SUCCESS, false);
-			ParametersUtil.addParameterToParametersString(myFhirCtx, response, "message",
-				"Internal error. Command result unknown. Check system logs for details");
-			ourLog.error("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-			return;
+		Optional<String> isSuccessResponse =
+				ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
+		if (!isSuccessResponse.isPresent()) {
+			errorMessage = "Internal error. Command result unknown. Check system logs for details.";
+		} else {
+			boolean succeeded = Boolean.parseBoolean(isSuccessResponse.get());
+			if (!succeeded) {
+				errorMessage = getResponseMessage(response);
+			}
 		}
 
-		boolean succeeded = Boolean.parseBoolean( isSuccessResponse.get() );
-		if ( ! succeeded) {
-			ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
-			return;
+		if (errorMessage != null) {
+			throw new CommandFailureException(Msg.code(2229) + "FAILURE: " + errorMessage);
+		} else {
+			ourLog.info("Recreation of terminology freetext indexes complete!");
+			ourLog.info("Response:{}{}", NL, getResponseMessage(response));
 		}
-
-		ourLog.info("Recreation of terminology freetext indexes complete!");
-		ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
+	@Nonnull
+	private String getResponseMessage(IBaseParameters response) {
+		List<String> message = ParametersUtil.getNamedParameterValuesAsString(myFhirCtx, response, "message");
+		return String.join(NL, message);
+	}
 
 	public static final String NL = System.getProperty("line.separator");
-
 }

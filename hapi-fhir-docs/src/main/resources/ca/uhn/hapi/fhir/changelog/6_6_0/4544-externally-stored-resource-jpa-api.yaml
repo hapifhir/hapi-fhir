@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4544
+title: "A new API has been added to the JPA server for storing resources which
+   are actually placeholders for externally stored payloads. This API is not yet
+   used for any published use cases but will be rolled out for future uses."

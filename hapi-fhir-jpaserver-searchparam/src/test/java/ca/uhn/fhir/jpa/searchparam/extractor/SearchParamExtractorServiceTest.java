@@ -1,14 +1,20 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.MockInvoker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -36,12 +42,17 @@ public class SearchParamExtractorServiceTest {
 		searchParamSet.addWarning("help i'm a bug");
 		searchParamSet.addWarning("Spiff");
 
-		when(myJpaInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
+		AtomicInteger counter = new AtomicInteger();
 
-		SearchParamExtractorService.handleWarnings(new ServletRequestDetails(myRequestInterceptorBroadcaster), myJpaInterceptorBroadcaster, searchParamSet);
+		when(myJpaInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(true);
+		when(myJpaInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(MockInvoker.list((Consumer<HookParams>) params->counter.incrementAndGet()));
 
-		verify(myJpaInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
-		verify(myRequestInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
+		ServletRequestDetails requestDetails = new ServletRequestDetails(myRequestInterceptorBroadcaster);
+		SearchParamExtractorService.handleWarnings(requestDetails, myJpaInterceptorBroadcaster, searchParamSet);
+
+		verify(myJpaInterceptorBroadcaster, times(3)).hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING));
+		verify(myRequestInterceptorBroadcaster, times(2)).hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING));
+		assertEquals(2, counter.get());
 	}
 
 }

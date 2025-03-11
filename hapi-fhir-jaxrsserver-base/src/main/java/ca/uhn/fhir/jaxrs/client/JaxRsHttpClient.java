@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jaxrs.client;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jaxrs.client;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -30,12 +29,12 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
@@ -43,7 +42,7 @@ import java.util.Map;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
- * {@link javax.ws.rs.client.Client Client}
+ * {@link jakarta.ws.rs.client.Client Client}
  *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
@@ -56,8 +55,13 @@ public class JaxRsHttpClient implements IHttpClient {
 	private String myIfNoneExistString;
 	private RequestTypeEnum myRequestType;
 
-	public JaxRsHttpClient(Client theClient, StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString,
-								  RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public JaxRsHttpClient(
+			Client theClient,
+			StringBuilder theUrl,
+			Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString,
+			RequestTypeEnum theRequestType,
+			List<Header> theHeaders) {
 		this.myClient = theClient;
 		this.myUrl = theUrl;
 		this.myIfNoneExistParams = theIfNoneExistParams;
@@ -67,7 +71,8 @@ public class JaxRsHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
+	public IHttpRequest createByteRequest(
+			FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
 		Entity<String> entity = Entity.entity(theContents, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
 		addHeadersToRequest(retVal, theEncoding, theContext);
@@ -76,7 +81,8 @@ public class JaxRsHttpClient implements IHttpClient {
 	}
 
 	@Override
-	public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
+	public IHttpRequest createParamRequest(
+			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
 		MultivaluedMap<String, String> map = new MultivaluedHashMap<String, String>();
 		for (Map.Entry<String, List<String>> nextParam : theParams.entrySet()) {
 			List<String> value = nextParam.getValue();
@@ -113,7 +119,6 @@ public class JaxRsHttpClient implements IHttpClient {
 		}
 
 		theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "jax-rs"));
-		theHttpRequest.addHeader("Accept-Charset", "utf-8");
 
 		Builder request = theHttpRequest.getRequest();
 		request.acceptEncoding("gzip");
@@ -151,5 +156,4 @@ public class JaxRsHttpClient implements IHttpClient {
 		}
 		return b;
 	}
-
 }

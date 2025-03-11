@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -26,19 +26,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.Appointment;
-import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -55,14 +45,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -70,8 +57,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DirtiesContext
 public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithHSearchDisabledTest.class);
-	@Autowired
-	protected DaoConfig myDaoConfig;
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
@@ -81,58 +67,19 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	@Qualifier("myAllergyIntoleranceDaoR4")
-	private IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-	@Autowired
-	@Qualifier("myAppointmentDaoR4")
-	private IFhirResourceDao<Appointment> myAppointmentDao;
-	@Autowired
-	@Qualifier("myAuditEventDaoR4")
-	private IFhirResourceDao<AuditEvent> myAuditEventDao;
-	@Autowired
-	@Qualifier("myBundleDaoR4")
-	private IFhirResourceDao<Bundle> myBundleDao;
-	@Autowired
-	@Qualifier("myCarePlanDaoR4")
-	private IFhirResourceDao<CarePlan> myCarePlanDao;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, ?, ?> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
-	@Autowired
-	@Qualifier("myCompartmentDefinitionDaoR4")
-	private IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoR4")
-	private IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	@Qualifier("myConditionDaoR4")
-	private IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	@Qualifier("myDeviceDaoR4")
-	private IFhirResourceDao<Device> myDeviceDao;
-	@Autowired
-	@Qualifier("myDiagnosticReportDaoR4")
-	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-	@Autowired
-	@Qualifier("myEncounterDaoR4")
-	private IFhirResourceDao<Encounter> myEncounterDao;
-	// @PersistenceContext()
-	@Autowired
-	private EntityManager myEntityManager;
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
-	@Autowired
-	@Qualifier("myJpaValidationSupportChain")
-	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
@@ -145,7 +92,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -226,14 +173,14 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 		// Explicit expand
 		ValueSet outcome = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 
 		// Deferred expand
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		outcome = myValueSetDao.expand(id, null, mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 	}
 
@@ -296,9 +243,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
-		assertThat(ValueSetTestUtil.toCodes(outcome).toString(), ValueSetTestUtil.toCodes(outcome), contains(
-			"code5", "code4", "code3", "code2", "code1"
-		));
+		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
 
 	}
@@ -334,7 +279,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add("code", new TokenParam("http://fooVS").setModifier(TokenParamModifier.IN));
 		IBundleProvider results = myObservationDao.search(map);
 		List<IBaseResource> resultsList = results.getResources(0, 10);
-		assertEquals(1, resultsList.size());
+		assertThat(resultsList).hasSize(1);
 		assertEquals(obs1id, resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 	}
@@ -351,9 +296,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(6, expansion.getExpansion().getContains().size());
+		assertThat(expansion.getExpansion().getContains()).hasSize(6);
 
 	}
 
@@ -375,14 +320,14 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		myValueSetDao.create(vs2);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(5, expansion.getExpansion().getContains().size());
+		assertThat(expansion.getExpansion().getContains()).hasSize(5);
 
 		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
 
-		assertEquals(22, expansion2.getExpansion().getContains().size());
+		assertThat(expansion2.getExpansion().getContains()).hasSize(22);
 
 	}
 

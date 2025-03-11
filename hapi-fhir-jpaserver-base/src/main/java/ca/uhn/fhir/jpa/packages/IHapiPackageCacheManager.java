@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -45,7 +44,6 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 	PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion);
 
 	List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType);
-
 
 	class PackageContents {
 
@@ -97,5 +95,4 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 			return this;
 		}
 	}
-
 }

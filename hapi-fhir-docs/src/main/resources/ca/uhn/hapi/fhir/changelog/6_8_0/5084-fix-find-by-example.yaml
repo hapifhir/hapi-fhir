@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5084
+title: "Fixed FindCandidateByExampleSvc.findMatchGoldenResourceCandidates
+      to not return duplicate golden resource candidates.
+"

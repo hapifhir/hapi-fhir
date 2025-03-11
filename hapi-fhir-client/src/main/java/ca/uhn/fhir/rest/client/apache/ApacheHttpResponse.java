@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.apache;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +17,38 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
-import ca.uhn.fhir.i18n.Msg;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+package ca.uhn.fhir.rest.client.apache;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Http Response based on Apache. This is an adapter around the class
  * {@link org.apache.http.HttpResponse HttpResponse}
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class ApacheHttpResponse extends BaseHttpResponse implements IHttpResponse {
@@ -90,13 +99,15 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 			return new StringReader("");
 		}
 		Charset charset = null;
-		if (entity.getContentType() != null && entity.getContentType().getElements() != null
+		if (entity.getContentType() != null
+				&& entity.getContentType().getElements() != null
 				&& entity.getContentType().getElements().length > 0) {
 			ContentType ct = ContentType.get(entity);
 			charset = ct.getCharset();
 		}
 		if (charset == null) {
-			if (Constants.STATUS_HTTP_204_NO_CONTENT != myResponse.getStatusLine().getStatusCode()) {
+			if (Constants.STATUS_HTTP_204_NO_CONTENT
+					!= myResponse.getStatusLine().getStatusCode()) {
 				ourLog.debug("Response did not specify a charset, defaulting to utf-8");
 			}
 			charset = StandardCharsets.UTF_8;
@@ -114,7 +125,6 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 				List<String> list = headers.computeIfAbsent(name, k -> new ArrayList<>());
 				list.add(next.getValue());
 			}
-
 		}
 		return headers;
 	}

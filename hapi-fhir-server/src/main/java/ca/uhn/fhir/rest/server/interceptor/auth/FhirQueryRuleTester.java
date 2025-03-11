@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -47,7 +46,10 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 		// look for a matcher
 		IAuthorizationSearchParamMatcher matcher = theRuleTestRequest.ruleApplier.getSearchParamMatcher();
 		if (matcher == null) {
-			theRuleTestRequest.ruleApplier.getTroubleshootingLog().warn("No matcher provided.  Can't apply filter permission.");
+			theRuleTestRequest
+					.ruleApplier
+					.getTroubleshootingLog()
+					.warn("No matcher provided.  Can't apply filter permission.");
 			return false;
 		}
 
@@ -59,14 +61,19 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 			return true;
 		}
 
-		// we use the target type since the rule might apply to all types, a type set, or instances, and that has already been checked.
-		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters, theRuleTestRequest.resource);
+		// we use the target type since the rule might apply to all types, a type set, or instances, and that has
+		// already been checked.
+		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(
+				theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters, theRuleTestRequest.resource);
 
 		switch (mr.match) {
 			case MATCH:
 				return true;
 			case UNSUPPORTED:
-				theRuleTestRequest.ruleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.", myQueryParameters, mr.unsupportedReason);
+				theRuleTestRequest
+						.ruleApplier
+						.getTroubleshootingLog()
+						.warn("Unsupported matcher expression {}: {}.", myQueryParameters, mr.unsupportedReason);
 				// unsupported doesn't match unless this is a deny request, and we need to be safe!
 				return (theRuleTestRequest.mode == PolicyEnum.DENY);
 			case NO_MATCH:
@@ -78,7 +85,7 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("filter", myQueryParameters)
-			.toString();
+				.append("filter", myQueryParameters)
+				.toString();
 	}
 }

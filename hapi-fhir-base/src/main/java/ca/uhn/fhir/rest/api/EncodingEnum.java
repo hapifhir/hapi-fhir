@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -31,7 +30,6 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum EncodingEnum {
-
 	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_JSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
@@ -70,17 +68,16 @@ public enum EncodingEnum {
 	 */
 	public static final String RDF_PLAIN_STRING = "rdf";
 
-
 	/**
 	 * "xml"
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
 
-        /**
-         * "ndjson"
-         */
-        public static final String NDJSON_PLAIN_STRING = "ndjson";
-	
+	/**
+	 * "ndjson"
+	 */
+	public static final String NDJSON_PLAIN_STRING = "ndjson";
+
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
@@ -100,7 +97,6 @@ public enum EncodingEnum {
 			ourContentTypeToEncoding.put(next.myResourceContentTypeNonLegacy.replace('+', ' '), next);
 			ourContentTypeToEncoding.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
 			ourContentTypeToEncodingLegacy.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
-
 		}
 
 		// Add before we add the lenient ones
@@ -114,7 +110,7 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put("application/xml", XML);
 		ourContentTypeToEncoding.put("application/fhir+turtle", RDF);
 		ourContentTypeToEncoding.put("application/x-turtle", RDF);
-                ourContentTypeToEncoding.put("application/ndjson", NDJSON);
+		ourContentTypeToEncoding.put("application/ndjson", NDJSON);
 		ourContentTypeToEncoding.put("text/json", JSON);
 		ourContentTypeToEncoding.put("text/ndjson", NDJSON);
 		ourContentTypeToEncoding.put("text/xml", XML);
@@ -130,7 +126,6 @@ public enum EncodingEnum {
 		ourContentTypeToEncoding.put(Constants.FORMAT_TURTLE, RDF);
 
 		ourContentTypeToEncodingLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingLegacy);
-
 	}
 
 	private String myFormatContentType;
@@ -203,10 +198,9 @@ public enum EncodingEnum {
 		if (contentTypeSplitted == null) {
 			return null;
 		} else {
-			return ourContentTypeToEncoding.get(contentTypeSplitted );
+			return ourContentTypeToEncoding.get(contentTypeSplitted);
 		}
 	}
-
 
 	/**
 	 * Returns the encoding for a given content type, or <code>null</code> if no encoding
@@ -269,6 +263,4 @@ public enum EncodingEnum {
 			return ourContentTypeToEncodingLegacy.containsKey(contentTypeSplitted);
 		}
 	}
-
-
 }

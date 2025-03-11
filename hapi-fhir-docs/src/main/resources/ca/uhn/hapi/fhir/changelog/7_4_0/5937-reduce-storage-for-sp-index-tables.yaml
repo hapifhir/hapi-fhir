@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 5937
+title: "A new configuration option, `StorageSettings#setIndexStorageOptimized(boolean)` has been added. If enabled, 
+the server will not write data to the `SP_NAME`, `RES_TYPE`, `SP_UPDATED` columns for all `HFJ_SPIDX_xxx` tables. 
+This can help reduce the overall storage size on servers where HFJ_SPIDX tables are expected to have a large 
+amount of data."

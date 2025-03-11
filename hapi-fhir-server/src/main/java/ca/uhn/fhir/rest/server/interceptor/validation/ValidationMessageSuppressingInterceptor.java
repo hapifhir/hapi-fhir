@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.validation;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -77,11 +76,11 @@ public class ValidationMessageSuppressingInterceptor {
 		return this;
 	}
 
-
 	@Hook(Pointcut.VALIDATION_COMPLETED)
 	public ValidationResult handle(ValidationResult theResult) {
 
-		List<SingleValidationMessage> newMessages = new ArrayList<>(theResult.getMessages().size());
+		List<SingleValidationMessage> newMessages =
+				new ArrayList<>(theResult.getMessages().size());
 		for (SingleValidationMessage next : theResult.getMessages()) {
 
 			String nextMessage = next.getMessage();
@@ -104,5 +103,4 @@ public class ValidationMessageSuppressingInterceptor {
 
 		return new ValidationResult(theResult.getContext(), newMessages);
 	}
-
 }

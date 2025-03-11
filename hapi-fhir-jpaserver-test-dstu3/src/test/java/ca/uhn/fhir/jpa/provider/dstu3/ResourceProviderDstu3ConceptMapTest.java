@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -20,10 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderDstu3ConceptMapTest.class);
@@ -41,7 +42,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	public void testStoreExistingTermConceptMapAndChildren() {
 		ConceptMap conceptMap = createConceptMap();
 
-		MethodOutcome methodOutcome = ourClient
+		MethodOutcome methodOutcome = myClient
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -57,7 +58,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		ConceptMap conceptMap = createConceptMap();
 		conceptMap.getGroupFirstRep().getElementFirstRep().setCode("UPDATED_CODE");
 
-		MethodOutcome methodOutcome = ourClient
+		MethodOutcome methodOutcome = myClient
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -72,23 +73,23 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("system").setValue(new UriType(CS_URL));
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_3));
 		inParams.addParameter().setName("code").setValue(new CodeType("12345"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -98,7 +99,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -112,7 +113,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		part = getPartByName(param, "equivalence");
 		assertEquals("wider", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -140,16 +141,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -159,7 +160,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -188,16 +189,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -208,7 +209,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -238,16 +239,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v1 since v1 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -258,7 +259,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -287,16 +288,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -307,7 +308,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -335,16 +336,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -355,7 +356,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -383,16 +384,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -403,7 +404,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -430,16 +431,16 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertFalse(((BooleanType) param.getValue()).booleanValue());
@@ -462,17 +463,17 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -483,7 +484,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -492,7 +493,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -507,17 +508,17 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -528,7 +529,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -537,7 +538,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -552,17 +553,17 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -573,7 +574,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -582,7 +583,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -597,17 +598,17 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
-		Parameters respParams = ourClient
+		Parameters respParams = myClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -618,7 +619,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -627,7 +628,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	private void createConceptMap(String url, String version, String targetCode, String targetDisplay) {
@@ -647,7 +648,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap = myConceptMapDao.read(conceptMapId);
 		
-		ourLog.info("ConceptMap: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 	}
 	
 	private void createReverseConceptMap(String url, String version, String sourceCode, String sourceDisplay) {
@@ -668,7 +669,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
 		ConceptMap conceptMap1 = myConceptMapDao.read(conceptMapId);
 		
-		ourLog.info("ConceptMap : \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+		ourLog.debug("ConceptMap : \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
 	
 	}
 }

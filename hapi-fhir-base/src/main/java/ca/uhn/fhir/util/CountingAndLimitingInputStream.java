@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import com.google.common.io.CountingInputStream;
@@ -56,7 +55,6 @@ public class CountingAndLimitingInputStream extends InputStream {
 			throw new IOException(Msg.code(1807) + "Stream exceeds maximum allowable size: " + myMaxBytes);
 		}
 	}
-
 
 	/**
 	 * Wraps another input stream, counting the number of bytes read.

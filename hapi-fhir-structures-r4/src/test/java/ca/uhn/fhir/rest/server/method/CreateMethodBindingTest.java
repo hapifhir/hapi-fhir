@@ -9,9 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 @ExtendWith(MockitoExtension.class)
 public class CreateMethodBindingTest {
@@ -33,9 +33,8 @@ public class CreateMethodBindingTest {
 		Method method = MyClass.class.getMethod("create");
 		try {
 			new CreateMethodBinding(method, myCtx, new MyClass());
-			fail();
-		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), containsString("is a @Create method but it does not return class ca.uhn.fhir.rest.api.MethodOutcome"));
+			fail();		} catch (ConfigurationException e) {
+			assertThat(e.getMessage()).contains("is a @Create method but it does not return class ca.uhn.fhir.rest.api.MethodOutcome");
 		}
 	}
 

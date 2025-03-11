@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,16 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.jpa.searchparam.extractor.StringTrimmingTrimmerMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.text.StringTokenizer;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +54,6 @@ public enum SubscriptionCriteriaParser {
 		 * All types
 		 */
 		STARTYPE_EXPRESSION
-
 	}
 
 	public static class SubscriptionCriteria {
@@ -132,6 +130,4 @@ public enum SubscriptionCriteriaParser {
 
 		return null;
 	}
-
-
 }

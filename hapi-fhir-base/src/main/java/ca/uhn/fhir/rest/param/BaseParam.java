@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -39,7 +38,8 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	abstract String doGetValueAsQueryToken(FhirContext theContext);
 
-	abstract void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue);
+	abstract void doSetValueAsQueryToken(
+			FhirContext theContext, String theParamName, String theQualifier, String theValue);
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
@@ -76,7 +76,7 @@ public abstract class BaseParam implements IQueryParameterType {
 	 * If set to non-null value, indicates that this parameter has been populated
 	 * with a "[name]:missing=true" or "[name]:missing=false" value instead of a
 	 * normal value
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> for easier method chaining
 	 */
 	@Override
@@ -86,14 +86,18 @@ public abstract class BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public final void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+	public final void setValueAsQueryToken(
+			FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_MISSING.equals(theQualifier)) {
 			myMissing = "true".equals(theValue);
 			doSetValueAsQueryToken(theContext, theParamName, null, null);
 		} else {
 			if (isNotBlank(theQualifier) && theQualifier.charAt(0) == '.') {
 				if (!isSupportsChain()) {
-					String msg = theContext.getLocalizer().getMessage(BaseParam.class, "chainNotSupported", theParamName + theQualifier, theQualifier);
+					String msg = theContext
+							.getLocalizer()
+							.getMessage(
+									BaseParam.class, "chainNotSupported", theParamName + theQualifier, theQualifier);
 					throw new InvalidRequestException(Msg.code(1935) + msg);
 				}
 			}
@@ -102,5 +106,4 @@ public abstract class BaseParam implements IQueryParameterType {
 			doSetValueAsQueryToken(theContext, theParamName, theQualifier, theValue);
 		}
 	}
-
 }

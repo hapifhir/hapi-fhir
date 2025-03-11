@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -37,6 +38,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,13 +51,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class SearchR4Test {
 
@@ -77,6 +77,12 @@ public class SearchR4Test {
 		ourLastMethod = null;
 		ourIdentifiers = null;
 		myPort = myRestfulServerExtension.getPort();
+		myCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+	}
+
+	@AfterEach
+	public void after() {
+		myCtx.setNarrativeGenerator(null);
 	}
 
 	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
@@ -84,7 +90,7 @@ public class SearchR4Test {
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertNotNull(linkNext);
 
-		assertEquals(10, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(10);
 		return bundle;
 	}
 
@@ -112,7 +118,7 @@ public class SearchR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("not know how to handle GET operation[Patient] with parameters [[_getpages]]"));
+			assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 		}
 	}
 
@@ -127,7 +133,7 @@ public class SearchR4Test {
 		ourLog.info(toJson(bundle));
 		assertEquals(200, bundle.getTotal());
 		assertEquals("searchset", bundle.getType().toCode());
-		assertEquals(0, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).isEmpty();
 	}
 
 
@@ -139,39 +145,39 @@ public class SearchR4Test {
 		String linkSelf;
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=name&_elements:exclude=birthDate,active");
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=identifier,name&_elements:exclude=birthDate,active");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("\"active\"")));
+		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertThat(linkSelf, containsString("_elements=name"));
+		assertThat(linkSelf).contains("_elements=identifier%2Cname");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext).contains("_elements=identifier,name");
 
 		ourLog.info(toJson(bundle));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("\"active\"")));
+		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
-		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
+		assertThat(linkNext).contains("_elements=identifier,name");
+		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("\"active\"")));
+		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
-		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
+		assertThat(linkNext).contains("_elements=identifier,name");
+		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("\"active\"")));
+		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
-		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
+		assertThat(linkNext).contains("_elements=identifier,name");
+		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 	}
 
@@ -186,7 +192,7 @@ public class SearchR4Test {
 		// No include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest");
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -200,7 +206,7 @@ public class SearchR4Test {
 		// * include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(2);
 	}
 
 	/**
@@ -214,7 +220,7 @@ public class SearchR4Test {
 		// MedicationRequest:medication include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(2);
 
 	}
 
@@ -238,25 +244,25 @@ public class SearchR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 	}
 
@@ -269,27 +275,27 @@ public class SearchR4Test {
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=json");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), containsString("active"));
+		assertThat(toJson(bundle)).contains("active");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=json"));
+		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=json"));
+		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=json"));
+		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=json"));
+		assertThat(linkNext).contains("_format=json");
 
 	}
 
@@ -303,25 +309,25 @@ public class SearchR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
@@ -336,28 +342,28 @@ public class SearchR4Test {
 		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, not(containsString("_format")));
+		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
@@ -371,25 +377,25 @@ public class SearchR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=xml");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=xml"));
+		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=xml"));
+		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=xml"));
+		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=xml"));
+		assertThat(linkNext).contains("_format=xml");
 
 	}
 
@@ -416,7 +422,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
+			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}
 
@@ -427,7 +433,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("help im a bug"));
+			assertThat(requestId).matches("help im a bug");
 		}
 	}
 
@@ -438,7 +444,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
+			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}
 
@@ -451,9 +457,7 @@ public class SearchR4Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
-			assertEquals(
-				Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
-				oo.getIssueFirstRep().getDiagnostics());
+			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}
@@ -479,9 +483,8 @@ public class SearchR4Test {
 				.returnBundle(org.hl7.fhir.r4.model.Bundle.class)
 				.encodedJson()
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]"));
+			fail();		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).contains("Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]");
 		}
 
 	}
@@ -517,8 +520,9 @@ public class SearchR4Test {
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.getIdElement().setValue("Patient/" + i + "/_history/222");
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE.getCode());
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
 				patient.addName(new HumanName().setFamily("FAMILY"));
+				patient.addIdentifier().setSystem("http://foo").setValue("bar");
 				patient.setActive(true);
 				retVal.add(patient);
 			}
@@ -534,7 +538,6 @@ public class SearchR4Test {
 			return MedicationRequest.class;
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Search()
 		public List<IBaseResource> search(
 			@IncludeParam Set<Include> theIncludes

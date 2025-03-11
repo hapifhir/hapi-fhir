@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,7 +26,7 @@ import java.lang.annotation.Target;
 
 /**
  * On the {@link Update}, {@link Create} and {@link Delete} operation methods, this annotation
- * can be used to mark a {@link String} parameter which will be populated with the 
+ * can be used to mark a {@link String} parameter which will be populated with the
  * conditional "search" URL for the operation, if an incoming client invocation is
  * a conditional operation. For non-conditional invocations, the value will be set to
  * <code>null</code> so it is important to handle <code>null</code>.
@@ -46,8 +45,7 @@ public @interface ConditionalUrlParam {
 	 * <p>
 	 * Note that this flag is only a hint to the Conformance statement generator,
 	 * it does not actually affect how the server itself works.
-	 * </p>  
+	 * </p>
 	 */
 	boolean supportsMultiple() default false;
-	
 }

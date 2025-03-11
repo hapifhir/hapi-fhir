@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.interceptor.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -31,12 +30,12 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,7 +94,6 @@ public class RepositoryValidatingInterceptor {
 
 		String rulesDescription = "RepositoryValidatingInterceptor has rules:\n" + describeRules();
 		ourLog.info(rulesDescription);
-
 	}
 
 	/**
@@ -105,13 +103,12 @@ public class RepositoryValidatingInterceptor {
 	 */
 	@Nonnull
 	public String describeRules() {
-		return " * " + myRules
-			.values()
-			.stream()
-			.distinct()
-			.map(t -> t.toString())
-			.sorted()
-			.collect(Collectors.joining("\n * "));
+		return " * "
+				+ myRules.values().stream()
+						.distinct()
+						.map(t -> t.toString())
+						.sorted()
+						.collect(Collectors.joining("\n * "));
 	}
 
 	/**
@@ -131,7 +128,7 @@ public class RepositoryValidatingInterceptor {
 	}
 
 	private void handle(RequestDetails theRequestDetails, IBaseResource theNewResource) {
-		
+
 		Validate.notNull(myFhirContext, "No FhirContext has been set for this interceptor of type: %s", getClass());
 		if (!isPlaceholderResource(theNewResource)) {
 			String resourceType = myFhirContext.getResourceType(theNewResource);
@@ -142,7 +139,7 @@ public class RepositoryValidatingInterceptor {
 					handleFailure(outcome);
 				}
 			}
-		} 
+		}
 	}
 
 	/**
@@ -156,10 +153,10 @@ public class RepositoryValidatingInterceptor {
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
-			String firstIssue = OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
+			String firstIssue =
+					OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
 			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
 		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());
 	}
-
 }

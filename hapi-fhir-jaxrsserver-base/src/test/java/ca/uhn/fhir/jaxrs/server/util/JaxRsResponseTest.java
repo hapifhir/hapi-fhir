@@ -1,29 +1,28 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-
-import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import jakarta.ws.rs.core.Response;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JaxRsResponseTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JaxRsResponseTest.class);
+
 
 	private JaxRsResponse response;
 	private JaxRsRequest request;
@@ -48,7 +47,7 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals(contentType, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(content, result.getEntity());
+		assertThat((byte[]) result.getEntity()).containsExactly(content);
 	}
 
 	@Test
@@ -59,8 +58,8 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(null, result.getEntity());
+		assertNull(result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertNull(result.getEntity());
 	}
 
 	@Test
@@ -70,8 +69,9 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(null, result.getEntity());
+		assertThat(result.getEntity().toString()).isEqualTo("{\n" +
+			"  \"resourceType\": \"Binary\"\n" +
+			"}");
 	}
 
 	@Test
@@ -82,9 +82,9 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals("application/json+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		System.out.println(result.getEntity().toString());
-		assertTrue(result.getEntity().toString().contains("resourceType\": \"Patient"));
-		assertTrue(result.getEntity().toString().contains("15"));
+		ourLog.info(result.getEntity().toString());
+		assertThat(result.getEntity().toString()).contains("resourceType\": \"Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 
 	}
 
@@ -96,8 +96,8 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertTrue(result.getEntity().toString().contains("<Patient"));
-		assertTrue(result.getEntity().toString().contains("15"));
+		assertThat(result.getEntity().toString()).contains("<Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class JaxRsResponseTest {
 		binary.setContent(new byte[] { 1 });
 		final Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, false, false, this.request);
 
-		assertThat(result.getHeaders().get("Authorization"), Matchers.contains("Basic", "Bearer"));
-		assertThat(result.getHeaders().get("Cache-Control"), Matchers.contains("no-cache, no-store"));
+		assertThat(result.getHeaders().get("Authorization")).containsExactly("Basic", "Bearer");
+		assertThat(result.getHeaders().get("Cache-Control")).containsExactly("no-cache, no-store");
 	}
 
 	private Patient createPatient() {

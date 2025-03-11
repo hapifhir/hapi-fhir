@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.interceptor.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -39,7 +39,6 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,12 +49,13 @@ class RequireValidationRule extends BaseTypedRule {
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
-	public RequireValidationRule(FhirContext theFhirContext,
-										  String theType,
-										  IValidationSupport theValidationSupport,
-										  ValidatorResourceFetcher theValidatorResourceFetcher,
-										  ValidatorPolicyAdvisor theValidationPolicyAdvisor,
-										  IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public RequireValidationRule(
+			FhirContext theFhirContext,
+			String theType,
+			IValidationSupport theValidationSupport,
+			ValidatorResourceFetcher theValidatorResourceFetcher,
+			ValidatorPolicyAdvisor theValidationPolicyAdvisor,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theFhirContext, theType);
 
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -75,13 +75,15 @@ class RequireValidationRule extends BaseTypedRule {
 	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 
 		FhirValidator validator = getFhirContext().newValidator();
-		validator.setInterceptorBroadcaster(CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
+		validator.setInterceptorBroadcaster(
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails));
 		validator.registerValidatorModule(myValidator);
 		ValidationResult outcome = validator.validateWithResult(theResource);
 
 		for (SingleValidationMessage next : outcome.getMessages()) {
 			if (next.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()) {
-				if (myRejectOnSeverity != null && myRejectOnSeverity.ordinal() <= next.getSeverity().ordinal()) {
+				if (myRejectOnSeverity != null
+						&& myRejectOnSeverity.ordinal() <= next.getSeverity().ordinal()) {
 					return RuleEvaluation.forFailure(this, outcome.toOperationOutcome());
 				}
 			}
@@ -89,13 +91,12 @@ class RequireValidationRule extends BaseTypedRule {
 			for (TagOnSeverity nextTagOnSeverity : myTagOnSeverity) {
 				if (next.getSeverity().ordinal() >= nextTagOnSeverity.getSeverity()) {
 					theResource
-						.getMeta()
-						.addTag()
-						.setSystem(nextTagOnSeverity.getTagSystem())
-						.setCode(nextTagOnSeverity.getTagCode());
+							.getMeta()
+							.addTag()
+							.setSystem(nextTagOnSeverity.getTagSystem())
+							.setCode(nextTagOnSeverity.getTagCode());
 				}
 			}
-
 		}
 
 		ValidationResultEnrichingInterceptor.addValidationResultToRequestDetails(theRequestDetails, outcome);
@@ -124,10 +125,10 @@ class RequireValidationRule extends BaseTypedRule {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("resourceType", getResourceType())
-			.append("rejectOnSeverity", myRejectOnSeverity)
-			.append("tagOnSeverity", myTagOnSeverity)
-			.toString();
+				.append("resourceType", getResourceType())
+				.append("rejectOnSeverity", myRejectOnSeverity)
+				.append("tagOnSeverity", myTagOnSeverity)
+				.toString();
 	}
 
 	public FhirInstanceValidator getValidator() {

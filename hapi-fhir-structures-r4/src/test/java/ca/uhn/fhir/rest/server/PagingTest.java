@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,10 +33,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
  */
 public class PagingTest {
 
-	private FhirContext ourContext = FhirContext.forR4();
+	private FhirContext ourContext = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourContext);
 
@@ -91,15 +91,15 @@ public class PagingTest {
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(10, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
 
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
-			assertNotNull(linkSelf, "'self' link is not present");
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
 
 			nextLink = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
-			assertNotNull(nextLink, "'next' link is not present");
+			assertThat(nextLink).as("'next' link is not present").isNotNull();
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "10");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
@@ -108,20 +108,20 @@ public class PagingTest {
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(10, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
-			assertNotNull(linkPrev, "'previous' link is not present");
+			assertThat(linkPrev).as("'previous' link is not present").isNotNull();
 			checkParam(linkPrev, Constants.PARAM_PAGINGOFFSET, "0");
 			checkParam(linkPrev, Constants.PARAM_COUNT, "10");
 
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
-			assertNotNull(linkSelf, "'self' link is not present");
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
 			checkParam(linkSelf, Constants.PARAM_PAGINGOFFSET, "10");
 			checkParam(linkSelf, Constants.PARAM_COUNT, "10");
 
 			nextLink = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
-			assertNotNull(nextLink, "'next' link is not present");
+			assertThat(nextLink).as("'next' link is not present").isNotNull();
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "20");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
@@ -130,15 +130,15 @@ public class PagingTest {
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
-			assertNotNull(linkPrev, "'previous' link is not present");
+			assertThat(linkPrev).as("'previous' link is not present").isNotNull();
 			checkParam(linkPrev, Constants.PARAM_PAGINGOFFSET, "10");
 			checkParam(linkPrev, Constants.PARAM_COUNT, "10");
 
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
-			assertNotNull(linkSelf, "'self' link is not present");
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
 			checkParam(linkSelf, Constants.PARAM_PAGINGOFFSET, "20");
 			//			assertTrue(linkSelf.contains(Constants.PARAM_COUNT + "=1"));
 
@@ -146,13 +146,114 @@ public class PagingTest {
 		}
 	}
 
-	private void checkParam(String theUri, String theCheckedParam, String theExpectedValue) {
-		Optional<String> paramValue = URLEncodedUtils.parse(theUri, CHARSET_UTF8).stream()
+	@Test()
+	public void testLinksWhenUsingOffsetPaginationWithNoCaching() throws Exception {
+		initBundleProvider(10);
+		ourBundleProvider.setSize(30);
+		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
+
+		String nextLink;
+		String base = "http://localhost:" + myServerExtension.getPort();
+		HttpGet get = new HttpGet(base + "/Patient?_count=10");
+		String responseContent;
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertThat(bundle.getEntry()).hasSize(10);
+
+			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
+
+			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
+
+			nextLink = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
+			assertThat(nextLink).as("'next' link is not present").isNotNull();
+			checkParam(nextLink, Constants.PARAM_OFFSET, "10");
+			checkParam(nextLink, Constants.PARAM_COUNT, "10");
+		}
+		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertThat(bundle.getEntry()).hasSize(10);
+
+			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
+			assertThat(linkPrev).as("'previous' link is not present").isNotNull();
+			checkParam(linkPrev, Constants.PARAM_OFFSET, "0");
+			checkParam(linkPrev, Constants.PARAM_COUNT, "10");
+
+			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
+			checkParam(linkSelf, Constants.PARAM_OFFSET, "10");
+			checkParam(linkSelf, Constants.PARAM_COUNT, "10");
+
+			nextLink = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
+			assertThat(nextLink).as("'next' link is not present").isNotNull();
+			checkParam(nextLink, Constants.PARAM_OFFSET, "20");
+			checkParam(nextLink, Constants.PARAM_COUNT, "10");
+		}
+		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertThat(bundle.getEntry()).hasSize(10);
+
+			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
+			assertThat(linkPrev).as("'previous' link is not present").isNotNull();
+			checkParam(linkPrev, Constants.PARAM_OFFSET, "10");
+			checkParam(linkPrev, Constants.PARAM_COUNT, "10");
+
+			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
+			assertThat(linkSelf).as("'self' link is not present").isNotNull();
+			checkParam(linkSelf, Constants.PARAM_OFFSET, "20");
+			checkParam(linkSelf, Constants.PARAM_COUNT, "10");
+
+			assertNull(bundle.getLink(IBaseBundle.LINK_NEXT));
+		}
+	}
+
+	@Test()
+	public void testSendingSameRequestConsecutivelyResultsInSameResponse() throws Exception {
+		initBundleProvider(10);
+		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
+		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
+
+		when(pagingProvider.canStoreSearchResults()).thenReturn(true);
+		when(pagingProvider.getDefaultPageSize()).thenReturn(10);
+		when(pagingProvider.getMaximumPageSize()).thenReturn(50);
+		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
+		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
+
+		String nextLink;
+		String base = "http://localhost:" + myServerExtension.getPort();
+		HttpGet get = new HttpGet(base + "/Patient?_getpagesoffset=10");
+		String responseContent;
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertThat(bundle.getEntry()).isEmpty();
+		}
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertThat(bundle.getEntry()).isEmpty();
+		}
+	}
+	private void checkParam(String theUriString, String theCheckedParam, String theExpectedValue) {
+		Optional<String> paramValue = URLEncodedUtils.parse(URI.create(theUriString), CHARSET_UTF8).stream()
 			.filter(nameValuePair -> nameValuePair.getName().equals(theCheckedParam))
 			.map(NameValuePair::getValue)
 			.findAny();
-		assertTrue(paramValue.isPresent(), "No parameter '" + theCheckedParam + "' present in response");
-		assertEquals(theExpectedValue, paramValue.get());
+		assertThat(paramValue.isPresent()).as("No parameter '" + theCheckedParam + "' present in response").isTrue();
+		assertThat(paramValue).contains(theExpectedValue);
 	}
 
 

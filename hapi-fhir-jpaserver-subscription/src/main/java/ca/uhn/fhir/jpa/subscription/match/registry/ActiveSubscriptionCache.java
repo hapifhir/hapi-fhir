@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +17,43 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+/**
+ * Thread-safety: This class is thread-safe.
+ */
 class ActiveSubscriptionCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
-	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
+	private final Map<String, ActiveSubscription> myCache = new HashMap<>();
 
-	public ActiveSubscription get(String theIdPart) {
+	public synchronized ActiveSubscription get(String theIdPart) {
 		return myCache.get(theIdPart);
 	}
 
-	public Collection<ActiveSubscription> getAll() {
-		return Collections.unmodifiableCollection(myCache.values());
+	public synchronized Collection<ActiveSubscription> getAll() {
+		return Collections.unmodifiableCollection(new ArrayList<>(myCache.values()));
 	}
 
-	public int size() {
+	public synchronized int size() {
 		return myCache.size();
 	}
 
-	public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
+	public synchronized void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
 		myCache.put(theSubscriptionId, theActiveSubscription);
 	}
 
@@ -60,9 +69,10 @@ class ActiveSubscriptionCache {
 		return activeSubscription;
 	}
 
-	List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(Collection<String> theAllIds) {
+	synchronized List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(
+			Collection<String> theAllIds) {
 		List<String> retval = new ArrayList<>();
-		for (String next : new ArrayList<>(myCache.keySet())) {
+		for (String next : myCache.keySet()) {
 			ActiveSubscription activeSubscription = myCache.get(next);
 			if (theAllIds.contains(next)) {
 				// In case we got a false positive from a race condition on a previous sync, unset the flag.
@@ -77,5 +87,24 @@ class ActiveSubscriptionCache {
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * R4B and R5 only
+	 * @param theTopic
+	 * @return a list of all subscriptions that are subscribed to the given topic
+	 */
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
+		assert !isBlank(theTopic);
+		return getAll().stream()
+				.filter(as -> as.getSubscription().isTopicSubscription())
+				.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
+				.collect(Collectors.toList());
+	}
+
+	public synchronized List<ActiveSubscription> getAllNonTopicSubscriptions() {
+		return getAll().stream()
+				.filter(as -> !as.getSubscription().isTopicSubscription())
+				.collect(Collectors.toList());
 	}
 }

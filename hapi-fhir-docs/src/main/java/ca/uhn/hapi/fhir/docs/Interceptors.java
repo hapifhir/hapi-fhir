@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 public class Interceptors {
 
-
 	// START SNIPPET: sampleClass
 	@Interceptor
 	public class SimpleServerLoggingInterceptor {
@@ -44,10 +42,8 @@ public class Interceptors {
 		public void logRequests(RequestDetails theRequest) {
 			ourLog.info("Request of type {} with request ID: {}", theRequest.getOperation(), theRequest.getRequestId());
 		}
-
 	}
 	// END SNIPPET: sampleClass
-
 
 	public void registerClient() {
 
@@ -65,5 +61,4 @@ public class Interceptors {
 		// END SNIPPET: registerClient
 
 	}
-
 }

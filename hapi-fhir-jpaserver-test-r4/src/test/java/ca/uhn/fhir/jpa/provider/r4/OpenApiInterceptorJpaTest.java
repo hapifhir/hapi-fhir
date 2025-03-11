@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -10,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 
@@ -20,14 +22,14 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 	@Test
 	public void testFetchOpenApi() throws IOException {
-		ourRestServer.registerInterceptor(new OpenApiInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_format=json&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_format=json&_pretty=true");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);
@@ -35,7 +37,7 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 
-		get = new HttpGet(ourServerBase + "/api-docs");
+		get = new HttpGet(myServerBase + "/api-docs");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);

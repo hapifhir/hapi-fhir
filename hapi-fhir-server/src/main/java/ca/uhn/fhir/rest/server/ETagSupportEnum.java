@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 /**
  * RESTful server behaviour for automatically adding profile tags
- * 
+ *
  * @see RestfulServer#setETagSupport(ETagSupportEnum)
  */
 public enum ETagSupportEnum {
@@ -30,7 +29,7 @@ public enum ETagSupportEnum {
 	 * Send ETag headers
 	 */
 	ENABLED,
-	
+
 	/**
 	 * Do not send ETag headers
 	 */

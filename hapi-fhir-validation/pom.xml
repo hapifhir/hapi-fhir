@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -23,6 +24,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -67,6 +73,7 @@
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-collections4</artifactId>
 				</exclusion>
+
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -75,18 +82,20 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
-        <dependency>
+      <dependency>
             <groupId>org.fhir</groupId>
             <artifactId>ucum</artifactId>
+			  <exclusions>
+				  <exclusion>
+					  <groupId>junit</groupId>
+					  <artifactId>junit</artifactId>
+				  </exclusion>
+			  </exclusions>
         </dependency>
 
-        <dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-		</dependency>
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<!--
@@ -176,6 +185,18 @@
 			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- The validator and snapshot generators require R5 structures independent of which
 		version is being validated -->
@@ -192,6 +213,11 @@
 		</dependency>
 
 		<!-- Test Deps -->
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
@@ -215,44 +241,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
-			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
@@ -260,6 +255,16 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>io.opentelemetry.javaagent</groupId>
+			<artifactId>opentelemetry-testing-common</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry.javaagent</groupId>
+			<artifactId>opentelemetry-agent-for-testing</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<artifactId>commons-lang</artifactId>
@@ -270,23 +275,13 @@
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-xslt</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -316,6 +311,18 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 	  </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hl7.fhir.testcases</groupId>
+			<artifactId>fhir-test-cases</artifactId>
+			<scope>test</scope>
+		</dependency>
 
     </dependencies>
 
@@ -337,7 +344,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
+					<argLine>@{argLine} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -346,13 +353,6 @@
 				<configuration>
 					<!-- Don't add UHN licenses to RI structures -->
 					<skipUpdateLicense>true</skipUpdateLicense>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -395,4 +395,17 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

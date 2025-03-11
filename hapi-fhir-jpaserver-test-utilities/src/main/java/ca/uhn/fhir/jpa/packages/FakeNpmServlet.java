@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,21 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-class FakeNpmServlet extends HttpServlet {
+public class FakeNpmServlet extends HttpServlet {
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 
 	final Map<String, byte[]> responses = new HashMap<>();
@@ -57,7 +56,6 @@ class FakeNpmServlet extends HttpServlet {
 
 			resp.sendError(404);
 		}
-
 	}
 
 	public Map<String, byte[]> getResponses() {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.base.composite;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,16 @@ package ca.uhn.fhir.model.base.composite;
  * limitations under the License.
  * #L%
  */
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+package ca.uhn.fhir.model.base.composite;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.DatatypeUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
@@ -45,7 +43,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
 	/**
 	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
-	 * 
+	 *
 	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getFamilyAsSingleString() {
@@ -63,7 +61,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
 	/**
 	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
-	 * 
+	 *
 	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getGivenAsSingleString() {
@@ -81,7 +79,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
 	/**
 	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
-	 * 
+	 *
 	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getPrefixAsSingleString() {
@@ -99,7 +97,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
 	/**
 	 * Returns all repetitions of {@link #getSuffix() suffix} as a space separated string
-	 * 
+	 *
 	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getSuffixAsSingleString() {
@@ -133,8 +131,8 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	}
 
 	/**
-	 * Returns all of the components of the name (prefix, given, family, suffix) as a 
-	 * single string with a single spaced string separating each part. 
+	 * Returns all of the components of the name (prefix, given, family, suffix) as a
+	 * single string with a single spaced string separating each part.
 	 * <p>
 	 * If none of the parts are populated, returns the {@link #getTextElement() text}
 	 * element value instead.
@@ -151,5 +149,4 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		}
 		return getTextElement().getValue();
 	}
-
 }

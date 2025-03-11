@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5231
+title: "Previously, the `$mdm-link-history` operation would result in a 404 response when it was executed after a 
+`$mdm-clear`. This has now been fixed by removing link history on `$mdm-clear`."

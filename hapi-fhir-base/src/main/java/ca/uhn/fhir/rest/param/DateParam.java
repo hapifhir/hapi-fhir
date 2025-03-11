@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -41,7 +40,8 @@ import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQueryParameterType , */IQueryParameterOr<DateParam> {
+public class DateParam extends BaseParamWithPrefix<DateParam>
+		implements /*IQueryParameterType , */ IQueryParameterOr<DateParam> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -95,10 +95,9 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		setValueAsString(theDate);
 	}
 
-
 	/**
 	 * Constructor which takes a complete [qualifier]{date} string.
-	 * 
+	 *
 	 * @param theString
 	 *           The string
 	 */
@@ -117,7 +116,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		if (getPrefix() != null) {
 			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
 		}
-		
+
 		b.append(ParameterUtil.escapeWithDefault(myValue.getValueAsString()));
 
 		return b.toString();
@@ -129,15 +128,15 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 	}
 
 	public TemporalPrecisionEnum getPrecision() {
-			return myValue.getPrecision();
+		return myValue.getPrecision();
 	}
 
 	public Date getValue() {
-			return myValue.getValue();
+		return myValue.getValue();
 	}
 
 	public String getValueAsString() {
-			return myValue.getValueAsString();
+		return myValue.getValueAsString();
 	}
 
 	@Override
@@ -190,17 +189,17 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 	}
 
 	@Override
-	public void  setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
+	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters) {
 		setMissing(null);
 		setPrefix(null);
 		setValueAsString(null);
-		
+
 		if (theParameters.size() == 1) {
 			setValueAsString(theParameters.get(0));
 		} else if (theParameters.size() > 1) {
-			throw new InvalidRequestException(Msg.code(1939) + "This server does not support multi-valued dates for this parameter: " + theParameters);
+			throw new InvalidRequestException(Msg.code(1939)
+					+ "This server does not support multi-valued dates for this parameter: " + theParameters);
 		}
-		
 	}
 
 	@Override
@@ -212,8 +211,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 			return false;
 		}
 		DateParam other = (DateParam) obj;
-		return	Objects.equals(getValue(), other.getValue()) &&
-					Objects.equals(getPrefix(), other.getPrefix());
+		return Objects.equals(getValue(), other.getValue()) && Objects.equals(getPrefix(), other.getPrefix());
 	}
 
 	@Override

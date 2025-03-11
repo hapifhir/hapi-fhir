@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -29,17 +30,14 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,13 +60,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	public void before() {
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setCountSearchResultsUpTo(10000);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setCountSearchResultsUpTo(10000);
 	}
 
 	@Test
@@ -89,10 +87,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		Thread.sleep(10);
 
 		long reuseCachedSearchResultsForMillis = 500L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 		long millisBetweenReuseAndExpire = 800L;
 		long expireSearchResultsAfterMillis = 1000L;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 		long start = System.currentTimeMillis();
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start);
 
@@ -101,7 +99,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
@@ -111,7 +109,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
@@ -126,11 +124,11 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}
-		assertNotEquals(searchUuid1, searchUuid3);
+		assertThat(searchUuid3).isNotEqualTo(searchUuid1);
 
 		// Search just got used so it shouldn't be deleted
 
@@ -205,7 +203,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 		final IBundleProvider bundleProvider = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+		assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 
 		waitForSearchToSave(bundleProvider.getUuid());
 		final AtomicLong start = new AtomicLong();
@@ -222,9 +220,9 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		});
 
 		int expireSearchResultsAfterMillis = 700;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 		long reuseCachedSearchResultsForMillis = 400L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis - 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -262,10 +260,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		Thread.sleep(10);
 
 		long expireSearchResultsAfterMillis = 1000L;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 
 		long reuseCachedSearchResultsForMillis = 500L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 
 		long start = System.currentTimeMillis();
 
@@ -274,7 +272,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid1 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid1);
 		}
@@ -286,7 +284,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
@@ -302,11 +300,11 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringParam("EXPIRE"));
 			final IBundleProvider bundleProvider = myPatientDao.search(params);
-			assertThat(toUnqualifiedVersionlessIds(bundleProvider), containsInAnyOrder(pid1, pid2));
+			assertThat(toUnqualifiedVersionlessIds(bundleProvider)).containsExactlyInAnyOrder(pid1, pid2);
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}
-		assertNotEquals(searchUuid1, searchUuid3);
+		assertThat(searchUuid3).isNotEqualTo(searchUuid1);
 
 		waitForSearchToSave(searchUuid3);
 
@@ -380,10 +378,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				ca.uhn.fhir.util.TestUtil.sleepAtLeast(100);
 			}
 		}
-		assertNotNull(search, "Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds");
+		assertThat(search).as("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds").isNotNull();
 
 
-		myDaoConfig.setExpireSearchResults(false);
+		myStorageSettings.setExpireSearchResults(false);
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
@@ -397,7 +395,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		mySearchCoordinatorSvc.cancelAllActiveSearches();
 
-		myDaoConfig.setExpireSearchResults(true);
+		myStorageSettings.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {

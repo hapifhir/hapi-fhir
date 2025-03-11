@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +17,36 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
 
 /**
  * Represents an HTTP header field.
  */
 public class Header {
-	
+
 	public final String myName;
 	public final String myValue;
 
-    public Header(String myName, String myValue) {
+	public Header(String myName, String myValue) {
 		this.myName = myName;
 		this.myValue = myValue;
 	}
 
 	/**
-     * Get the name of the Header.
-     *
-     * @return the name of the Header,  never {@code null}
-     */
-    public String getName() {
-    	return myName;
-    }
+	 * Get the name of the Header.
+	 *
+	 * @return the name of the Header,  never {@code null}
+	 */
+	public String getName() {
+		return myName;
+	}
 
-    /**
-     * Get the value of the Header.
-     *
-     * @return the value of the Header,  may be {@code null}
-     */
-    public String getValue() {
-    	return myValue;
-    }
-
+	/**
+	 * Get the value of the Header.
+	 *
+	 * @return the value of the Header,  may be {@code null}
+	 */
+	public String getValue() {
+		return myValue;
+	}
 }

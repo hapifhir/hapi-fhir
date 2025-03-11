@@ -1,12 +1,8 @@
-package ca.uhn.fhir.context.api;
-
-import ca.uhn.fhir.context.FhirContext;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +17,13 @@ import ca.uhn.fhir.context.FhirContext;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.api;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * RESTful server behaviour for automatically adding profile tags when serializing resources
- * 
+ *
  * @see FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)
  */
 public enum AddProfileTagEnum {
@@ -35,7 +34,7 @@ public enum AddProfileTagEnum {
 
 	/**
 	 * Add any profile tags that returned resources appear to conform to
-	 * 
+	 *
 	 * @deprecated This mode causes even FHIR's default profiles to be exported in the
 	 * resource metadata section. This is not generally expected behaviour from other
 	 * systems and it offers no real benefit, so it will be removed at some point. This

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -51,7 +50,6 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	public UnprocessableEntityException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 
 	/**
 	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
@@ -90,5 +88,4 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	public UnprocessableEntityException(String... theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
-
 }

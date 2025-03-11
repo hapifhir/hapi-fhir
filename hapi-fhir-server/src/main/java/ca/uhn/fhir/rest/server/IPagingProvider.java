@@ -1,16 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +17,12 @@ import javax.annotation.Nullable;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public interface IPagingProvider {
 
@@ -61,7 +59,8 @@ public interface IPagingProvider {
 	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
 	 * add this parameter and not use it if needed.
 	 */
-	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
+	default IBundleProvider retrieveResultList(
+			@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;
 	}
 
@@ -71,5 +70,4 @@ public interface IPagingProvider {
 	 * @param theRequestDetails The server request being made (may be null)
 	 */
 	String storeResultList(@Nullable RequestDetails theRequestDetails, IBundleProvider theList);
-
 }

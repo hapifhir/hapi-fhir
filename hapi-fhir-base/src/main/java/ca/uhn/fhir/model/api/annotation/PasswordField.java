@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api.annotation;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,12 @@ package ca.uhn.fhir.model.api.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 
 /**
  * This annotation should be added to any {@link ca.uhn.fhir.model.api.IModelJson}
@@ -37,5 +35,4 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface PasswordField {
-}
+public @interface PasswordField {}

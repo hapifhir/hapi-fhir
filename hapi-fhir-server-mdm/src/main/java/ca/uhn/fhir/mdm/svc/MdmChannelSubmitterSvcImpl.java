@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,12 @@ package ca.uhn.fhir.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -45,16 +47,29 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private MessageChannel myMdmChannelProducer;
 
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	private IChannelFactory myChannelFactory;
+	private final IChannelFactory myChannelFactory;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED, null, (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
+				myFhirContext,
+				theResource,
+				ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED,
+				null,
+				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
 		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY)) {
+			final HookParams params =
+					new HookParams().add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY, params);
+		}
 		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
 		if (!success) {
 			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
@@ -67,9 +82,14 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 		myChannelFactory = theIChannelFactory;
 	}
 
+	protected ChannelProducerSettings getChannelProducerSettings() {
+		return new ChannelProducerSettings();
+	}
+
 	private void init() {
-		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
+		ChannelProducerSettings channelSettings = getChannelProducerSettings();
+		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(
+				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
 	private MessageChannel getMdmChannelProducer() {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.hibernate.search.mapper.pojo.bridge.RoutingBridge;
@@ -37,7 +36,11 @@ public class DeferConceptIndexingRoutingBinder implements RoutingBinder {
 
 	private class TermConceptBridge implements RoutingBridge<TermConcept> {
 		@Override
-		public void route(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void route(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				TermConcept theTermConcept,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			if (theTermConcept.getIndexStatus() == null) {
 				theDocumentRoutes.notIndexed();
 			} else {
@@ -46,7 +49,11 @@ public class DeferConceptIndexingRoutingBinder implements RoutingBinder {
 		}
 
 		@Override
-		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void previousRoutes(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				TermConcept theTermConcept,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			theDocumentRoutes.addRoute();
 		}
 	}

@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -21,31 +21,26 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -54,23 +49,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 
-	@Autowired
-	private DaoConfig myDaoConfig;
-
 	private BaseJpaResourceProvider<Observation> myObservationResourceProvider;
 
 	@BeforeEach
 	public void beforeEach() {
-		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
-		myDaoConfig.setStoreResourceInHSearchIndex(true);
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
 	}
 
 	@AfterEach
 	public void afterEach() {
-		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
-		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+		myStorageSettings.setLastNEnabled(new JpaStorageSettings().isLastNEnabled());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+		myStorageSettings.setStoreResourceInHSearchIndex(new JpaStorageSettings().isStoreResourceInHSearchIndex());
 	}
 
 
@@ -89,7 +81,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		HttpGet expandQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
+		HttpGet expandQuery = new HttpGet(myServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
 
 			// then
@@ -97,10 +89,10 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
-			assertThat(valueSet, is(not(nullValue())));
+			assertNotNull(valueSet);
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
-			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
-			assertThat(expansions, not(hasItem(valueSetExpansionMatching(blood_count))));
+			ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
+			ValueSetExpansionIterableAssert.assertThat(expansions).doesNotHaveExpansionWithCoding(blood_count);
 		}
 
 	}
@@ -117,19 +109,51 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	public static Matcher<ValueSet.ValueSetExpansionContainsComponent> valueSetExpansionMatching(IBaseCoding theTarget) {
-		return new TypeSafeDiagnosingMatcher<ValueSet.ValueSetExpansionContainsComponent>() {
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("ValueSetExpansionContainsComponent matching ").appendValue(theTarget.getSystem() + "|" + theTarget.getCode());
-			}
+	public static class ValueSetExpansionAssert extends AbstractAssert<ValueSetExpansionAssert, ValueSet.ValueSetExpansionContainsComponent> {
 
-			@Override
-			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
-				return Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
-					Objects.equals(theItem.getCode(), theTarget.getCode());
+		protected ValueSetExpansionAssert(ValueSet.ValueSetExpansionContainsComponent valueSetExpansionContainsComponent) {
+			super(valueSetExpansionContainsComponent, ValueSetExpansionAssert.class);
+		}
+	}
+
+	public static class ValueSetExpansionIterableAssert extends AbstractIterableAssert<ValueSetExpansionIterableAssert, Collection<ValueSet.ValueSetExpansionContainsComponent>, ValueSet.ValueSetExpansionContainsComponent, ValueSetExpansionAssert> {
+		protected ValueSetExpansionIterableAssert(Collection<ValueSet.ValueSetExpansionContainsComponent> actual) {
+			super(actual, ValueSetExpansionIterableAssert.class);
+		}
+
+		@Override
+		protected ValueSetExpansionAssert toAssert(ValueSet.ValueSetExpansionContainsComponent value, String description) {
+			return new ValueSetExpansionAssert(value).as(description);
+		}
+
+		public static ValueSetExpansionIterableAssert assertThat(Collection<ValueSet.ValueSetExpansionContainsComponent> actual) {
+			return new ValueSetExpansionIterableAssert(actual);
+		}
+
+		@Override
+		protected ValueSetExpansionIterableAssert newAbstractIterableAssert(Iterable<? extends ValueSet.ValueSetExpansionContainsComponent> iterable) {
+			return new ValueSetExpansionIterableAssert((Collection<ValueSet.ValueSetExpansionContainsComponent>) iterable);
+		}
+
+		public ValueSetExpansionIterableAssert hasExpansionWithCoding(IBaseCoding theCoding) {
+			String otherSystem = theCoding.getSystem();
+			String otherCode = theCoding.getCode();
+			boolean hasMatchingExpansion = actual.stream().anyMatch(item -> Objects.equals(item.getSystem(), otherSystem) && Objects.equals(item.getCode(), otherCode));
+			if (!hasMatchingExpansion) {
+				failWithMessage("Expansion list should contain an expansion with system " + otherSystem + " and code " + otherCode);
 			}
-		};
+			return this;
+		}
+
+		public ValueSetExpansionIterableAssert doesNotHaveExpansionWithCoding(IBaseCoding theCoding) {
+			String otherSystem = theCoding.getSystem();
+			String otherCode = theCoding.getCode();
+			boolean hasMatchingExpansion = actual.stream().anyMatch(expansion -> Objects.equals(expansion.getCode(), otherCode) && Objects.equals(expansion.getSystem(), otherSystem));
+			if (hasMatchingExpansion) {
+				failWithMessage("Expected not to find a matching expansion, but we found one!");
+			}
+			return this;
+		}
 	}
 
 	@Test
@@ -151,12 +175,12 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals(1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
+		assertThat(respParam.getParameter().size()).as("Expected only 1 observation for blood count code").isEqualTo(1);
 		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
 		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
 
 		assertEquals("Patient/p-123", observation.getSubject().getReference());
-		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
+		assertThat(observation.getCode().getCodingFirstRep().getDisplay()).contains("Erythrocytes");
 
 	}
 
@@ -166,7 +190,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -174,10 +198,10 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
-			assertEquals(5, bundle.getEntry().size(), "Expected 5 observation entries to match page size");
+			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+			assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
 			assertTrue(bundle.getLink("next").hasRelation());
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 		}
 	}
 
@@ -187,18 +211,18 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=0");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=0");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
-			assertEquals(0, bundle.getEntry().size(), "Expected no entries in bundle");
-			assertNull(bundle.getLink("next"), "Expected no 'next' link");
-			assertNull(bundle.getLink("prev"), "Expected no 'prev' link");
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+			assertThat(bundle.getEntry().size()).as("Expected no entries in bundle").isEqualTo(0);
+			assertThat(bundle.getLink("next")).as("Expected no 'next' link").isNull();
+			assertThat(bundle.getLink("prev")).as("Expected no 'prev' link").isNull();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 		}
 
 	}

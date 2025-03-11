@@ -1,23 +1,8 @@
-package ca.uhn.fhir.rest.api.server;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.context.ConfigurationException;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +17,21 @@ import java.util.stream.Collectors;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public interface IBundleProvider {
 
@@ -108,13 +107,38 @@ public interface IBundleProvider {
 		return null;
 	}
 
-
 	/**
 	 * Returns the instant as of which this result was created. The
 	 * result of this value is used to populate the <code>lastUpdated</code>
 	 * value on search result/history result bundles.
 	 */
 	IPrimitiveType<Date> getPublished();
+
+	/**
+	 * Load the given collection of resources by index, plus any additional resources per the
+	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
+	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
+	 * additional 20 resources which matched a client's _include specification.
+	 * </p>
+	 * <p>
+	 * Note that if this bundle provider was loaded using a
+	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(RequestDetails, String, String)}
+	 * because {@link #getNextPageId()} provided a value on the
+	 * previous page, then the indexes should be ignored and the
+	 * whole page returned.
+	 * </p>
+	 * Note that this implementation should not be used if accurate paging is required,
+	 * as page calculation depends on _include'd resource counts.
+	 * For accurate paging, use {@link IBundleProvider#getResources(int, int, ResponsePage.ResponsePageBuilder)}
+	 *
+	 * @param theFromIndex The low index (inclusive) to return
+	 * @param theToIndex   The high index (exclusive) to return
+	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
+	 */
+	@Nonnull
+	default List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		return getResources(theFromIndex, theToIndex, new ResponsePage.ResponsePageBuilder());
+	}
 
 	/**
 	 * Load the given collection of resources by index, plus any additional resources per the
@@ -129,12 +153,15 @@ public interface IBundleProvider {
 	 * whole page returned.
 	 * </p>
 	 *
-	 * @param theFromIndex The low index (inclusive) to return
-	 * @param theToIndex   The high index (exclusive) to return
+	 * @param theFromIndex           The low index (inclusive) to return
+	 * @param theToIndex             The high index (exclusive) to return
+	 * @param theResponsePageBuilder The ResponsePageBuilder. The builder will add values needed for the response page.
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
-	@Nonnull
-	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
+	default List<IBaseResource> getResources(
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+		return getResources(theFromIndex, theToIndex);
+	}
 
 	/**
 	 * Get all resources
@@ -148,7 +175,9 @@ public interface IBundleProvider {
 
 		Integer size = size();
 		if (size == null) {
-			throw new ConfigurationException(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+			throw new ConfigurationException(
+					Msg.code(464)
+							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		if (size > 0) {
 			retval.addAll(getResources(0, size));
@@ -196,7 +225,7 @@ public interface IBundleProvider {
 	Integer size();
 
 	/**
-	 * This method returns <code>true</code> if the bundle provider knows that at least
+	 * This method returns <code>false</code> if the bundle provider knows that at least
 	 * one result exists.
 	 */
 	default boolean isEmpty() {
@@ -220,6 +249,8 @@ public interface IBundleProvider {
 	 * @return the list of ids of all resources in the bundle
 	 */
 	default List<String> getAllResourceIds() {
-		return getAllResources().stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
+		return getAllResources().stream()
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
 	}
 }

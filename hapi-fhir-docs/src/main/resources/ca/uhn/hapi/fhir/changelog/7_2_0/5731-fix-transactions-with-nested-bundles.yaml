@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5731
+title: "Previously, transactions that had entries with `Bundle` requests failed with 
+`HAPI-0339: Can not handle transaction with nested resource of type Bundle`. This has 
+been fixed and now transactions are permitted that contain entries with Bundle requests 
+that have a specified url (i.e. `POST` to `/Bundle`), but are rejected if no url is specified 
+(i.e. nested transactions or batches)."

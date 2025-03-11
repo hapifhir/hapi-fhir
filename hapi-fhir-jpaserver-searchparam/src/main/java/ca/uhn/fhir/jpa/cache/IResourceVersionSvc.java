@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.cache;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,23 @@ package ca.uhn.fhir.jpa.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * This interface is used by the {@link IResourceChangeListenerCacheRefresher} to read resources matching the provided
- * search parameter map in the repository and compare them to caches stored in the {@link IResourceChangeListenerRegistry}.
+ * This interface is used by the {@literal IResourceChangeListenerCacheRefresher} to read resources matching the provided
+ * search parameter map in the repository and compare them to caches stored in the {@literal IResourceChangeListenerRegistry}.
  */
 public interface IResourceVersionSvc {
 	@Nonnull
-	ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap);
+	ResourceVersionMap getVersionMap(
+			RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap);
 
 	@Nonnull
 	default ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {

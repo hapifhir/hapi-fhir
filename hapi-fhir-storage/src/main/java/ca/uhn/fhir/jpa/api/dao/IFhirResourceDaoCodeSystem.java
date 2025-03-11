@@ -1,24 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-
-import javax.annotation.Nonnull;
-import javax.transaction.Transactional;
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +17,72 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
-public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
+
+public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
 	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest);
 
 	@Transactional
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			RequestDetails theRequestDetails);
 
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			RequestDetails theRequestDetails);
 
-	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, RequestDetails theRequestDetails);
+	@Nonnull
+	IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> thePropertyNames,
+			RequestDetails theRequestDetails);
 
-	IValidationSupport.CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
+	SubsumesResult subsumes(
+			IPrimitiveType<String> theCodeA,
+			IPrimitiveType<String> theCodeB,
+			IPrimitiveType<String> theSystem,
+			IBaseCoding theCodingA,
+			IBaseCoding theCodingB,
+			RequestDetails theRequestDetails);
+
+	@Nonnull
+	IValidationSupport.CodeValidationResult validateCode(
+			IIdType theCodeSystemId,
+			IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion,
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theDisplay,
+			IBaseCoding theCoding,
+			IBaseDatatype theCodeableConcept,
+			RequestDetails theRequestDetails);
 
 	class SubsumesResult {
 
@@ -65,13 +100,12 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 		public IBaseParameters toParameters(FhirContext theFhirContext) {
 			IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
 
-			IPrimitiveType<String> outcomeValue = (IPrimitiveType<String>) theFhirContext.getElementDefinition("code").newInstance();
+			IPrimitiveType<String> outcomeValue = (IPrimitiveType<String>)
+					theFhirContext.getElementDefinition("code").newInstance();
 			outcomeValue.setValueAsString(getOutcome().toCode());
 			ParametersUtil.addParameterToParameters(theFhirContext, retVal, "outcome", outcomeValue);
 
 			return retVal;
 		}
 	}
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -30,7 +29,11 @@ class AllowedCodeInValueSet {
 	private final String myValueSetUrl;
 	private final boolean myNegate;
 
-	public AllowedCodeInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl, boolean theNegate) {
+	public AllowedCodeInValueSet(
+			@Nonnull String theResourceName,
+			@Nonnull String theSearchParameterName,
+			@Nonnull String theValueSetUrl,
+			boolean theNegate) {
 		assert isNotBlank(theResourceName);
 		assert isNotBlank(theSearchParameterName);
 		assert isNotBlank(theValueSetUrl);

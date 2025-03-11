@@ -1,10 +1,8 @@
-package org.hl7.fhir.instance.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +17,28 @@ package org.hl7.fhir.instance.model.api;
  * limitations under the License.
  * #L%
  */
-
+package org.hl7.fhir.instance.model.api;
 
 public interface IBaseBundle extends IBaseResource {
 
 	/**
 	 * Constant for links provided in the bundle. This constant is used in the
 	 * link.type field to indicate that the given link is for
-	 * the next page of results.  
+	 * the next page of results.
 	 */
 	String LINK_NEXT = "next";
-	
+
 	/**
 	 * Constant for links provided in the bundle. This constant is used in the
 	 * link.type field to indicate that the given link is for
-	 * the previous page of results.   
+	 * the previous page of results.
 	 */
 	String LINK_PREV = "previous";
 
 	/**
 	 * Constant for links provided in the bundle. This constant is used in the
 	 * link.type field to indicate that the given link is for
-	 * this bundle.  
+	 * this bundle.
 	 */
 	String LINK_SELF = "self";
-
 }

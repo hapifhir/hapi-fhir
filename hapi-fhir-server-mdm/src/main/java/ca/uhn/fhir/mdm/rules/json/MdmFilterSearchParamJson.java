@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.json;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -32,10 +31,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MdmFilterSearchParamJson implements IModelJson {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
+
 	@JsonProperty(value = "searchParam", required = true)
 	String mySearchParam;
+
 	@JsonProperty(value = "qualifier", required = true)
 	TokenParamModifier myTokenParamModifier;
+
 	@JsonProperty(value = "fixedValue", required = true)
 	String myFixedValue;
 
@@ -57,7 +59,6 @@ public class MdmFilterSearchParamJson implements IModelJson {
 		return this;
 	}
 
-
 	public TokenParamModifier getTokenParamModifier() {
 		return myTokenParamModifier;
 	}
@@ -76,7 +77,7 @@ public class MdmFilterSearchParamJson implements IModelJson {
 		return this;
 	}
 
-    public String getTokenParamModifierAsString() {
+	public String getTokenParamModifierAsString() {
 		return myTokenParamModifier == null ? "" : myTokenParamModifier.getValue();
-    }
+	}
 }

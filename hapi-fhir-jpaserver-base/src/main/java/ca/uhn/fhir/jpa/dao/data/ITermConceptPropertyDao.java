@@ -1,16 +1,8 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +17,17 @@ import org.springframework.data.repository.query.Param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
-public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProperty, Long>, IHapiFhirJpaRepository {
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface ITermConceptPropertyDao
+		extends JpaRepository<TermConceptProperty, IdAndPartitionId>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM TermConceptProperty WHERE myCodeSystemVersion.myId = :cs_pid")
@@ -34,5 +35,4 @@ public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProper
 
 	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
-
 }

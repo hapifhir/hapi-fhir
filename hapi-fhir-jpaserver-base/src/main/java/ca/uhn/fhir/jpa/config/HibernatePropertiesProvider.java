@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +35,12 @@ public class HibernatePropertiesProvider {
 
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
 	public void setDialectForUnitTest(Dialect theDialect) {
@@ -46,26 +50,33 @@ public class HibernatePropertiesProvider {
 	public Dialect getDialect() {
 		Dialect dialect = myDialect;
 		if (dialect == null) {
-			String dialectClass = (String) myEntityManagerFactory.getJpaPropertyMap().get("hibernate.dialect");
+			String dialectClass =
+					(String) myEntityManagerFactory.getJpaPropertyMap().get("hibernate.dialect");
 			dialect = ReflectionUtil.newInstanceOrReturnNull(dialectClass, Dialect.class);
 			Validate.notNull(dialect, "Unable to create instance of class: %s", dialectClass);
 			myDialect = dialect;
 		}
+
 		return dialect;
 	}
 
-	public String getHibernateSearchBackend(){
+	public String getHibernateSearchBackend() {
 		String hibernateSearchBackend = myHibernateSearchBackend;
 		if (StringUtils.isBlank(hibernateSearchBackend)) {
-			hibernateSearchBackend = (String) myEntityManagerFactory.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
-			Validate.notNull(hibernateSearchBackend, BackendSettings.backendKey(BackendSettings.TYPE) + " property is unset!");
+			hibernateSearchBackend = (String)
+					myEntityManagerFactory.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
+			Validate.notNull(
+					hibernateSearchBackend, BackendSettings.backendKey(BackendSettings.TYPE) + " property is unset!");
 			myHibernateSearchBackend = hibernateSearchBackend;
 		}
 		return myHibernateSearchBackend;
 	}
 
-
 	public DataSource getDataSource() {
 		return myEntityManagerFactory.getDataSource();
+	}
+
+	public boolean isOracleDialect() {
+		return getDialect() instanceof org.hibernate.dialect.OracleDialect;
 	}
 }

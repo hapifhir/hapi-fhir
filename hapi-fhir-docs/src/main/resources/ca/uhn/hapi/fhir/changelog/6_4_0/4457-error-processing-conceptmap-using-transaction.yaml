@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4457
+jira: SMILE-5685
+title: "Previously, when a `ConceptMap` was created or updated using a transaction `Bundle`, the transaction failed with
+error code `HAPI-0550: could not execute statement`. This has been fixed."

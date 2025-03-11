@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -33,10 +32,13 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 
 	private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
 	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
-	@Autowired
-	DaoConfig myDaoConfig;
 
-	public CompositeInMemoryDaoSubscriptionMatcher(DaoSubscriptionMatcher theDaoSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
+	@Autowired
+	SubscriptionSettings mySubscriptionSettings;
+
+	public CompositeInMemoryDaoSubscriptionMatcher(
+			DaoSubscriptionMatcher theDaoSubscriptionMatcher,
+			InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
 		myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
 		myInMemorySubscriptionMatcher = theInMemorySubscriptionMatcher;
 	}
@@ -44,12 +46,16 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		InMemoryMatchResult result;
-		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
+		if (mySubscriptionSettings.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
 			if (result.supported()) {
 				result.setInMemory(true);
 			} else {
-				ourLog.info("Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", theSubscription.getCriteriaString(), theSubscription.getIdElementString(), result.getUnsupportedReason());
+				ourLog.info(
+						"Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher",
+						theSubscription.getCriteriaString(),
+						theSubscription.getIdElementString(),
+						result.getUnsupportedReason());
 				result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
 			}
 		} else {

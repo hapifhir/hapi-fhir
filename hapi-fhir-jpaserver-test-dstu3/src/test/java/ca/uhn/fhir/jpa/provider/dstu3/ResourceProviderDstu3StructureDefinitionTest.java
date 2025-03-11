@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourceProviderDstu3Test {
 
@@ -22,52 +23,52 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	public void testSnapshotWithResourceParameter() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
 	@Test
 	public void testSnapshotWithId() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onInstance(id)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
 	@Test
 	public void testSnapshotWithUrl() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
 			.withParameter(Parameters.class, "url", new StringType("http://hl7.org/fhir/StructureDefinition/MyPatient421"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
 	public void testSnapshotWithUrlAndId() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(new IdType("StructureDefinition/123"))
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -82,7 +83,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	@Test
 	public void testSnapshotWithInvalidUrl() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(StructureDefinition.class)
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -90,7 +91,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1152) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 }

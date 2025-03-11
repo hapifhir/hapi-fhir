@@ -1,0 +1,165 @@
+{
+	"resourceType": "Measure",
+	"id": "measure-asf",
+	"identifier": [
+		{
+			"use": "official",
+			"system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/payer-extract",
+			"value": "ASF"
+		}
+	],
+	"url": "http://hl7.org/fhir/us/cqfmeasures/Measure/measure-asf",
+	"version": "1.0.0",
+	"title": "ASF Measure",
+	"status": "active",
+	"experimental": true,
+	"description": "Unhealthy Alcohol Use Screening and Follow-up (ASF) Measure",
+	"copyright": "The HEDIS measure specifications were developed by and are owned by NCQA. The HEDIS measure specifications are not clinical guidelines and do not establish a standard of medical care. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measure specifications. These materials may not be modified by anyone other than NCQA. Anyone desiring to use or reproduce the materials without modification for a non-commercial purpose may do so without obtaining any approval from NCQA. **Any commercial use (including but not limited to vendors using the measure specifications with a product or service, including calculation of measure results) must be approved by NCQA and are subject to a license at the discretion of NCQA**.  &copy; 2019 NCQA, all rights reserved.",
+	"disclaimer": "Limited proprietary coding is contained in the measure specifications for convenience. NCQA disclaims all liability for use or accuracy of any third-party code values contained in the specifications. The American Medical Association holds a copyright to the CPT&reg; codes contained in the measure specifications.The American Hospital Association holds a copyright to the Uniform Billing Codes (“UB”) contained in the measure specifications. The UB Codes in the HEDIS specifications are included with the permission of the AHA. The UB Codes contained in the HEDIS specifications may be used by health plans and other health care delivery organizations for the purpose of calculating and reporting HEDIS measure results or using HEDIS measure results for their internal quality improvement purposes. All other uses of the UB Codes require a license from the AHA. Anyone desiring to use the UB Codes in a commercial product to generate HEDIS results, or for any other commercial use, must obtain a commercial use license directly from the AHA. To inquire about licensing, contact ub04@aha.org.",
+	"library": [
+		{
+			"reference": "Library/library-asf-logic"
+		}
+	],
+	"scoring": {
+		"coding": [
+			{
+				"code": "proportion"
+			}
+		]
+	},
+	"group": [
+		{
+			"identifier": {
+				"value": "ASF-cohort-1"
+			},
+			"population": [
+				{
+					"identifier": {
+						"value": "initial-population"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "initial-population"
+							}
+						]
+					},
+					"criteria": "Initial Population"
+				},
+				{
+					"identifier": {
+						"value": "numerator 1"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "numerator"
+							}
+						]
+					},
+					"criteria": "Numerator 1"
+				},
+				{
+					"identifier": {
+						"value": "denominator 1"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "denominator"
+							}
+						]
+					},
+					"criteria": "Denominator 1"
+				}
+			],
+			"stratifier": [
+				{
+					"identifier": {
+						"value": "stratifier 1"
+					},
+					"criteria": "Stratifier 1"
+				},
+				{
+					"identifier": {
+						"value": "stratifier 2"
+					},
+					"criteria": "Stratifier 2"
+				},
+				{
+					"identifier": {
+						"value": "stratifier 3"
+					},
+					"criteria": "Stratifier 3"
+				}
+			]
+		},
+		{
+			"identifier": {
+				"value": "ASF-cohort-2"
+			},
+			"population": [
+				{
+					"identifier": {
+						"value": "initial-population"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "initial-population"
+							}
+						]
+					},
+					"criteria": "Initial Population"
+				},
+				{
+					"identifier": {
+						"value": "numerator 2"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "numerator"
+							}
+						]
+					},
+					"criteria": "Numerator 2"
+				},
+				{
+					"identifier": {
+						"value": "denominator 2"
+					},
+					"code": {
+						"coding": [
+							{
+								"code": "denominator"
+							}
+						]
+					},
+					"criteria": "Denominator 2"
+				}
+			],
+			"stratifier": [
+				{
+					"identifier": {
+						"value": "stratifier 1"
+					},
+					"criteria": "Stratifier 1"
+				},
+				{
+					"identifier": {
+						"value": "stratifier 2"
+					},
+					"criteria": "Stratifier 2"
+				},
+				{
+					"identifier": {
+						"value": "stratifier 3"
+					},
+					"criteria": "Stratifier 3"
+				}
+			]
+		}
+	]
+}

@@ -2,25 +2,24 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
-import ca.uhn.fhir.jpa.test.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.IndexSettings;
+import co.elastic.clients.elasticsearch.indices.PutTemplateResponse;
+import co.elastic.clients.json.JsonData;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.PutIndexTemplateRequest;
-import org.elasticsearch.common.settings.Settings;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
@@ -37,7 +36,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -50,10 +49,15 @@ import java.util.concurrent.TimeUnit;
 public class ElasticsearchWithPrefixConfig {
 
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setHSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
-		return daoConfig;
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
+	}
+
+	@Bean
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setHSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
+		return storageSettings;
 	}
 
 	@Bean
@@ -66,11 +70,9 @@ public class ElasticsearchWithPrefixConfig {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
-		retVal.setJpaDialect(new HapiFhirHibernateJpaDialect(fhirContext().getLocalizer()));
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
+
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -127,14 +129,15 @@ public class ElasticsearchWithPrefixConfig {
 		//This tells elasticsearch to use our custom index naming strategy.
 		extraProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
 
-		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
-			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
-			.settings(Settings.builder().put("index.max_ngram_diff", 50));
-
 		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", host + ":" + httpPort, "", "");
-			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
-			assert acknowledgedResponse.isAcknowledged();
+			ElasticsearchClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", host + ":" + httpPort, "", "");
+			PutTemplateResponse acknowledgedResponse = elasticsearchHighLevelRestClient
+				.indices()
+				.putTemplate(b -> b
+					.name("ngram-template")
+					.indexPatterns("*resourcetable-*", "*termconcept-*")
+					.settings(new IndexSettings.Builder().maxNgramDiff(50).build()));
+			assert acknowledgedResponse.acknowledged();
 		} catch (IOException theE) {
 			theE.printStackTrace();
 			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");

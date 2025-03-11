@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4128
+title: "In the JPA server, when a resource is being updated, the response will now include any tags or
+   security labels which were not present in the request but were carried forward from the previous
+   version of the resource."

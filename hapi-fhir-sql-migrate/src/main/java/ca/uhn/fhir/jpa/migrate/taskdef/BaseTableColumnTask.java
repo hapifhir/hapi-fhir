@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +17,40 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class BaseTableColumnTask extends BaseTableTask {
 
-	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
+	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators =
+			new HashMap<>();
 	protected String myColumnName;
-	//If a concrete class decides to, they can define a custom WHERE clause for the task.
+	// If a concrete class decides to, they can define a custom WHERE clause for the task.
 	protected String myWhereClause;
 
+	private final ColumnNameCase myColumnNameCase;
+
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
-		super(theProductVersion, theSchemaVersion);
+		this(theProductVersion, theSchemaVersion, ColumnNameCase.ALL_UPPER, Collections.emptySet());
+	}
+
+	BaseTableColumnTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnDriverMappingOverrides);
+		myColumnNameCase = theColumnNameCase;
 	}
 
 	public String getColumnName() {
@@ -44,7 +58,17 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 	}
 
 	public BaseTableColumnTask setColumnName(String theColumnName) {
-		myColumnName = theColumnName.toUpperCase();
+		switch (myColumnNameCase) {
+			case ALL_UPPER:
+				myColumnName = theColumnName.toUpperCase();
+				break;
+			case ALL_LOWER:
+				myColumnName = theColumnName.toLowerCase();
+				break;
+			default:
+				throw new IllegalArgumentException(Msg.code(2448)
+						+ " Unknown ColumnNameCase was passed when setting column name case: " + myColumnNameCase);
+		}
 		return this;
 	}
 
@@ -79,7 +103,9 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 		theBuilder.append(myColumnName);
 	}
 
-	public BaseTableColumnTask addCalculator(String theColumnName, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
+	public BaseTableColumnTask addCalculator(
+			String theColumnName,
+			Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
 		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
 		myCalculators.put(theColumnName, theConsumer);
 		return this;

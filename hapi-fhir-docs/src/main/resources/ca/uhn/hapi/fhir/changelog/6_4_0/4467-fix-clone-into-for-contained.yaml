@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4467
+title: "The FhirTerser#clone method failed to clone resources when contained resources were
+   present in the source resource. This has been fixed."

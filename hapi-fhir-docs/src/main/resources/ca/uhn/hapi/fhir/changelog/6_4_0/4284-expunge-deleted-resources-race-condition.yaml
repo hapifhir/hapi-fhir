@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4284
+jira: SMILE-5196
+title: "Previously, an `ExecutionException` was thrown when `$expunge` operations were used with a small batch size 
+and a low thread count due to a race condition involving the expunge limit. This has been corrected."

@@ -4,31 +4,34 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r4.model.CodeType;
+import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,8 +40,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterValidatingInterceptorTest {
 
-	public static final String UPLIFT_URL = "https://some-url";
-	static final FhirContext ourFhirContext = FhirContext.forR4();
+	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	static String ID1 = "ID1";
 	static String ID2 = "ID2";
 	@Mock
@@ -60,7 +62,6 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
-		mySearchParamValidatingInterceptor.addUpliftExtension(UPLIFT_URL);
 
 		myExistingSearchParameter = buildSearchParameterWithId(ID1);
 
@@ -98,9 +99,51 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertTrue(e.getMessage().contains("2131"));
+			assertThat(e.getMessage()).contains("2196");
 		}
 
+	}
+	@Test
+	public void whenCreateSpWithUpliftRefchains_Bad_WrongCodeDatatype() {
+		SearchParameter sp = buildReferenceSearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new SimpleQuantity().setValue(123L));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		try {
+			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage()).contains("2284");
+		}
+
+	}
+
+	@Test
+	public void whenCreateSpWithUpliftRefchains_Bad_NoCode() {
+		SearchParameter sp = buildReferenceSearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		try {
+			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage()).contains("2283");
+		}
+
+	}
+
+	@Nonnull
+	private static SearchParameter buildReferenceSearchParameter() {
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setDescription("Modified Subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Encounter.subject");
+		sp.addBase("Encounter");
+		sp.addTarget("Patient");
+		return sp;
 	}
 
 	@Test
@@ -126,7 +169,7 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertTrue(e.getMessage().contains("2125"));
+			assertThat(e.getMessage()).contains("2125");
 		}
 	}
 
@@ -144,66 +187,16 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
-	@Test
-	public void whenUpliftSearchParameter_thenMoreGranularComparisonSucceeds() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-
-		setPersistedSearchParameters(asList(myExistingSearchParameter));
-
-		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
-
-		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
-	}
-
-	@Test
-	public void whenUpliftSearchParameter_thenMoreGranularComparisonFails() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		SearchParameter existingUpliftSp = buildSearchParameterWithUpliftExtension(ID1);
-		setPersistedSearchParameters(asList(existingUpliftSp));
-
-		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
-
-		try {
-			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertTrue(e.getMessage().contains("2125"));
-		}
-	}
-
-	@Nonnull
-	private SearchParameter buildSearchParameterWithUpliftExtension(String theID) {
-		SearchParameter newSearchParam = buildSearchParameterWithId(theID);
-
-		Extension topLevelExtension = new Extension();
-		topLevelExtension.setUrl(UPLIFT_URL);
-
-		Extension codeExtension = new Extension();
-		codeExtension.setUrl("code");
-		codeExtension.setValue(new CodeType("identifier"));
-
-		Extension elementExtension = new Extension();
-		elementExtension.setUrl("element-name");
-		elementExtension.setValue(new CodeType("patient-identifier"));
-
-		topLevelExtension.addExtension(codeExtension);
-		topLevelExtension.addExtension(elementExtension);
-		newSearchParam.addExtension(topLevelExtension);
-		return newSearchParam;
-	}
-
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
-		List<ResourcePersistentId> resourcePersistentIds = theSearchParams
+		final AtomicLong counter = new AtomicLong();
+		List<IResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
-			.map(theS -> new ResourcePersistentId(theS))
+			.map(s -> JpaPid.fromId(counter.incrementAndGet()))
 			.collect(Collectors.toList());
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
 
-	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams) {
-		when(myIFhirResourceDao.search(any(), any())).thenReturn(new SimpleBundleProvider(theSearchParams));
-	}
 
 	private SearchParameter buildSearchParameterWithId(String id) {
 		SearchParameter retVal = new SearchParameter();

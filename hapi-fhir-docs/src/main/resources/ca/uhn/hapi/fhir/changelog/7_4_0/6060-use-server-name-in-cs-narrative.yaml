@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6060
+title: "The server-generated CapabilityStatement will now use the server
+  name defined by `RestfulServer#setServerName(..)` instead of the hardcoded
+  string `HAPI FHIR`. Thanks to Renaud Subiger for the pull request!"

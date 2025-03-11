@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.cli.CommandLine;
@@ -44,14 +43,16 @@ public class ToggleSearchParametersCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		addBaseUrlOption(options);
-		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+		addRequiredOption(
+				options,
+				"u",
+				"url",
+				true,
+				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addBasicAuthOption(options);
 		return options;
 	}
 
 	@Override
-	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
-
-	}
-
+	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {}
 }

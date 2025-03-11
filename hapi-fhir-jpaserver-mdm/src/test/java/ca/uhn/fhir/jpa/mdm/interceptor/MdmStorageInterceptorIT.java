@@ -1,52 +1,74 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,8 +81,18 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+	@Autowired
+	private IMdmLinkCreateSvc myMdmCreateSvc;
+	@Autowired
+	private MdmLinkHelper myMdmLinkHelper;
+	@Autowired
+	private CascadingDeleteInterceptor myDeleteInterceptor;
 
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@Override
 	public void beforeUnregisterAllSubscriptions() {
@@ -82,7 +114,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Test
 	public void testSearchExpandingInterceptorWorks() {
 		SearchParameterMap subject = new SearchParameterMap("subject", new ReferenceParam("Patient/123").setMdmExpand(true)).setLoadSynchronous(true);
-		myObservationDao.search(subject);
+		myObservationDao.search(subject, new SystemRequestDetails());
 	}
 
 	@Test
@@ -90,8 +122,476 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
 		Patient sourcePatient = getOnlyGoldenPatient();
-		myPatientDao.delete(sourcePatient.getIdElement());
+		myPatientDao.delete(sourcePatient.getIdElement(), new SystemRequestDetails());
 		assertLinkCount(0);
+	}
+
+	/**
+	 * This helper will set-up MDM with a cascading-delete interceptor and
+	 * provide the RequestDetails to use to invoke it.
+	 * -
+	 * Deletes (using the provided RequestDetails) will cascade deletes
+	 * to referenced resources.
+	 * -
+	 * This isn't the "real" implementation of the cascading delete, though,
+	 * so some functionality (like including the cascading delete informational
+	 * diagnostics in the outcome) will not be available.
+	 */
+	private void withCascadingDeleteInterceptors(Consumer<RequestDetails> theTestMethod) {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		// we need the request details to specify it is a cascade delete
+		RequestDetails details = createDeleteCascadeRequestDetails();
+
+		try {
+			myStorageSettings.setAllowMultipleDelete(true);
+			myInterceptorService.registerInterceptor(myDeleteInterceptor);
+
+			theTestMethod.accept(details);
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+			myInterceptorService.unregisterInterceptor(myDeleteInterceptor);
+		}
+	}
+
+	@Test
+	public void deleteLastResource_withDeleteCascade_works() {
+		withCascadingDeleteInterceptors(details -> {
+			// setup
+			// create a patient with an encounter that references that patient
+			MdmHelperR4.OutcomeAndLogMessageWrapper result = null;
+			try {
+				result = myMdmHelper.createWithLatch(buildJanePatient());
+			} catch (InterruptedException e) {
+				fail(e);
+			}
+			IIdType patientId = result.getDaoMethodOutcome().getId();
+			Encounter encounter = new Encounter();
+			encounter.setSubject(
+				new Reference().setReference(patientId.getValue())
+			);
+			myEncounterDao.create(encounter, new SystemRequestDetails());
+
+			// sanity check - verify we have an mdm link
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertEquals(1, links.size());
+
+			// test
+			// delete the patient
+			DaoMethodOutcome outcome = myPatientDao.delete(patientId, details);
+			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
+			assertTrue(out.getIssue().stream()
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains("successfully deleted 1 resource(s)")));
+			assertTrue(myMdmLinkDao.findAll().isEmpty());
+
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider encounters = myEncounterDao.search(map, details);
+			assertTrue(encounters.isEmpty());
+			IBundleProvider patients = myPatientDao.search(map, details);
+			assertTrue(patients.isEmpty());
+		});
+	}
+
+	@Test
+	public void deleteResource_withPartitions_doesNotDeleteOnDifferentPartition() {
+		// setup
+		DaoMethodOutcome outcome;
+		IBundleProvider bundle;
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+
+		Patient janePartition1 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+		Patient janePartition2 = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(2));
+
+		// our partition req details
+		SystemRequestDetails partition1ReqDetails = new SystemRequestDetails();
+		partition1ReqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+		SystemRequestDetails partition2ReqDetails = new SystemRequestDetails();
+		partition2ReqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(2));
+
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+
+		// tests
+		// delete on incorrect partition
+		{
+			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition2ReqDetails);
+
+			// nothing deleted; wrong partition
+			bundle = myPatientDao.search(spMap, partition2ReqDetails);
+			assertFalse(bundle.isEmpty());
+
+			assertEquals(2, myMdmLinkDao.count());
+		}
+
+		// delete on correct partition
+		{
+			outcome = myPatientDao.delete(janePartition1.getIdElement(), partition1ReqDetails);
+
+			// deleted on correct partition, but not other partition
+			bundle = myPatientDao.search(spMap, partition1ReqDetails);
+			assertTrue(bundle.isEmpty());
+
+			// check the other partition
+			bundle = myPatientDao.search(spMap, partition2ReqDetails);
+			assertFalse(bundle.isEmpty());
+			assertEquals(janePartition2.getId(), bundle.getAllResources().get(0)
+				.getIdElement().getValueAsString());
+
+			Long mdmLinksCount = myMdmLinkDao.count();
+			assertEquals(1, mdmLinksCount);
+		}
+	}
+
+	@Test
+	public void deleteLastResource_withPartitionsEnabled_works() {
+		// setup
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+
+		Patient jane = createPatientAndUpdateLinksOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
+
+		// our partition req details
+		SystemRequestDetails reqDetails = new SystemRequestDetails();
+		reqDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(1));
+
+		// test
+		DaoMethodOutcome outcome = myPatientDao.delete(jane.getIdElement(), reqDetails);
+
+		// validate
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.setLoadSynchronous(true);
+
+		// deleted last and only match
+		Long mdmLinksCount = myMdmLinkDao.count();
+		assertEquals(0, mdmLinksCount);
+
+		// no more patients, not even golden patient, on partition
+		IBundleProvider bundle = myPatientDao.search(spMap, reqDetails);
+		assertTrue(bundle.isEmpty());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void deleteLinkedPatients_withReferenceEncountersAndCascadingDelete_deletesSuccessfully(boolean theDeleteBothPatientsFlag) {
+		withCascadingDeleteInterceptors(details -> {
+			// setup
+			MDMState<Patient, JpaPid> state = new MDMState<>();
+			String startingState = """
+				 			GP1, AUTO, MATCH, P1
+				 			GP1, AUTO, MATCH, P2
+				""";
+			state.setInputState(startingState);
+			myMdmLinkHelper.setup(state);
+
+			// link some encounters
+			for (String id : new String[]{"P1", "P2"}) {
+				Encounter enc = new Encounter();
+				enc.setSubject(new Reference("Patient/" + id));
+				myEncounterDao.create(enc, new SystemRequestDetails());
+			}
+
+			// test
+			// delete the patient
+			String url = theDeleteBothPatientsFlag ? "Patient?_id=P1,P2" : "Patient?_id=P1";
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl(url, details);
+
+			assertTrue(outcome.getOperationOutcome() instanceof OperationOutcome);
+			OperationOutcome out = (OperationOutcome) outcome.getOperationOutcome();
+			String sb = "successfully deleted " +
+				(theDeleteBothPatientsFlag ? "2" : "1") +
+				" resource(s)";
+			assertTrue(out.getIssue().stream()
+				.anyMatch(f -> f.getDiagnostics().toLowerCase().contains(sb)));
+
+			// verifications
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider encounters = myEncounterDao.search(map, details);
+
+			IBundleProvider patients = myPatientDao.search(map, details);
+
+			if (theDeleteBothPatientsFlag) {
+				// if we delete both, nothing should be left
+				assertTrue(myMdmLinkDao.findAll().isEmpty());
+				assertTrue(patients.isEmpty());
+				assertTrue(encounters.isEmpty());
+			} else {
+				// otherwise we should still have:
+				// 2 patients (GR and source)
+				// 1 Encounter (linked to the patient)
+				// 1 mdm Link
+				// validate the output state
+				state.setOutputState("GP1, AUTO, MATCH, P2");
+				myMdmLinkHelper.validateResults(state);
+				// validate the encounters
+				assertEquals(1, encounters.size());
+				Encounter returnedEncounter = (Encounter) encounters.getResources(0, 1).get(0);
+				assertEquals("Patient/P2", returnedEncounter.getSubject().getReference());
+			}
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void deleteResourcesByUrl_withMultipleDeleteCatchingSourceAndGoldenResource_deletesWithoutThrowing(boolean theIncludeOtherResources) throws InterruptedException {
+		// setup
+		boolean allowMultipleDelete = myStorageSettings.isAllowMultipleDelete();
+		myStorageSettings.setAllowMultipleDelete(true);
+
+		int linkCount = 0;
+		int resourceCount = 0;
+		myMdmHelper.createWithLatch(buildJanePatient());
+		resourceCount += 2; // patient + golden
+		linkCount++;
+
+		// add some other resources to make it more complex
+		if (theIncludeOtherResources) {
+			Date birthday = new Date();
+			Patient patient = new Patient();
+			patient.getNameFirstRep().addGiven("yui");
+			patient.setBirthDate(birthday);
+			patient.setTelecom(Collections.singletonList(new ContactPoint()
+				.setSystem(ContactPoint.ContactPointSystem.PHONE)
+				.setValue("555-567-5555")));
+			DateType dateType = new DateType(birthday);
+			patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue("ID.YUI.123");
+			dateType.setPrecision(TemporalPrecisionEnum.DAY);
+			patient.setBirthDateElement(dateType);
+			patient.setActive(true);
+			for (int i = 0; i < 2; i++) {
+				String familyName = i == 0 ? "hirasawa" : "kotegawa";
+				patient.getNameFirstRep().setFamily(familyName);
+				myMdmHelper.createWithLatch(patient);
+				resourceCount++;
+				linkCount++; // every resource creation creates 1 link
+			}
+			resourceCount++; // for the Golden Resource
+
+			// verify we have at least this many resources
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertEquals(resourceCount, provider.size());
+
+			// verify we have the links
+			assertEquals(linkCount, myMdmLinkDao.count());
+		}
+
+		try {
+			// test
+			// filter will delete everything
+			DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?_lastUpdated=ge2024-01-01", new SystemRequestDetails());
+
+			// validation
+			assertNotNull(outcome);
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			assertTrue(links.isEmpty());
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			IBundleProvider provider = myPatientDao.search(map, new SystemRequestDetails());
+			assertTrue(provider.getAllResources().isEmpty());
+		} finally {
+			myStorageSettings.setAllowMultipleDelete(allowMultipleDelete);
+		}
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_whenOnlyMatchedResourceDeleted() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertThat(resources).isEmpty();
+		assertLinkCount(0);
+
+		try {
+			myPatientDao.read(goldenPatient.getIdElement().toVersionless(), new SystemRequestDetails());
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+		}
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButPossibleMatchExists() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertThat(resources).hasSize(2);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButMultiplePossibleMatchesExist() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		logAllTokenIndexes();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		logAllTokenIndexes();
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertThat(resources).hasSize(3);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testDeleteSourceResource_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setMdmContext(getPatientUpdateLinkContext());
+		params.setGoldenResource(getOnlyGoldenPatient());
+		params.setSourceResource(paulPatientPossibleMatch);
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinkCount(6);
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertThat(resources).hasSize(3);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testDeleteSourceResource_withNoMatchLink_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setGoldenResource(getOnlyGoldenPatient());
+		params.setSourceResource(paulPatientPossibleMatch);
+		params.setMdmContext(getPatientUpdateLinkContext());
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinkCount(6);
+
+		// When
+		myPatientDao.delete(paulPatientPossibleMatch.getIdElement(), new SystemRequestDetails());
+
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertThat(resources).hasSize(3);
+
+		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Test
+	public void testGoldenResourceKept_whenAutoDeleteDisabled() throws InterruptedException {
+		// Given
+		myMdmSettings.setAutoExpungeGoldenResources(false);
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement(), new SystemRequestDetails());
+
+		// Then
+		try {
+			myPatientDao.read(goldenPatient.getIdElement().toVersionless(), new SystemRequestDetails());
+			fail();
+		} catch (ResourceGoneException e) {
+			assertLinkCount(0);
+		} finally {
+			myMdmSettings.setAutoExpungeGoldenResources(true);
+		}
+	}
+
+	private MdmTransactionContext getPatientUpdateLinkContext() {
+		MdmTransactionContext ctx = new MdmTransactionContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
+		ctx.setResourceType("Patient");
+		return ctx;
 	}
 
 	@Test
@@ -103,7 +603,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -114,7 +614,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -126,7 +626,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(medication, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -154,7 +654,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(organization, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -178,11 +678,13 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmHelper.createWithLatch(buildPaulPatient());
 
 		//TODO GGG MDM: this test is out of date, since we now are using golden record Patients
-		IBundleProvider search = myPatientDao.search(buildGoldenResourceSearchParameterMap());
-		List<IBaseResource> resources = search.getResources(0, search.size());
+		IBundleProvider search = myPatientDao.search(buildGoldenResourceSearchParameterMap(), new SystemRequestDetails());
+		Integer searchResultSize = search.size();
+		assertNotNull(searchResultSize);
+		List<IBaseResource> resources = search.getResources(0, searchResultSize);
 
 		for (IBaseResource r : resources) {
-			assertThat(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED), is(notNullValue()));
+			assertNotNull(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED));
 		}
 	}
 
@@ -212,15 +714,15 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		IMdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)).orElseThrow(() -> new IllegalStateException()));
-		Long sourcePatientPid = mdmLink.getGoldenResourcePersistenceId().getIdAsLong();
-		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
+		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)).orElseThrow(IllegalStateException::new));
+		Long sourcePatientPid = mdmLink.getGoldenResourcePersistenceId().getId();
+		Patient goldenResourcePatient = myPatientDao.readByPid(JpaPid.fromId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage()).startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM.");
 		}
 	}
 
@@ -231,10 +733,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		TransactionLogMessages mdmTransactionLogMessages = wrapper.getLogMessages();
 
 		//There is no TransactionGuid here as there is no TransactionLog in this context.
-		assertThat(mdmTransactionLogMessages.getTransactionGuid(), is(nullValue()));
+		assertNull(mdmTransactionLogMessages.getTransactionGuid());
 
 		List<String> messages = mdmTransactionLogMessages.getValues();
-		assertThat(messages.isEmpty(), is(false));
+		assertFalse(messages.isEmpty());
 	}
 
 	@Test
@@ -252,8 +754,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
-		assertThat(externalEids, hasSize(1));
-		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
+		assertThat(externalEids).hasSize(1);
+		assertEquals(externalEids.get(0).getValue(), "some_new_eid");
 	}
 
 	@Test
@@ -268,7 +770,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources")));
+			assertEquals("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources", e.getMessage());
 		}
 		setPreventEidUpdates(false);
 	}
@@ -283,7 +785,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.")));
+			assertEquals("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.", e.getMessage());
 		}
 
 		setPreventMultipleEids(false);
@@ -332,11 +834,19 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	private void setPreventEidUpdates(boolean thePrevent) {
-		((MdmSettings) myMdmSettings).setPreventEidUpdates(thePrevent);
+		myMdmSettings.setPreventEidUpdates(thePrevent);
 	}
 
 	private void setPreventMultipleEids(boolean thePrevent) {
-		((MdmSettings) myMdmSettings).setPreventMultipleEids(thePrevent);
+		myMdmSettings.setPreventMultipleEids(thePrevent);
 	}
 
+	private RequestDetails createDeleteCascadeRequestDetails() {
+		RequestDetails details = new SystemRequestDetails();
+		HashMap<String, String[]> reqParams = new HashMap<>();
+		reqParams.put(Constants.PARAMETER_CASCADE_DELETE,
+			new String[] { Constants.CASCADE_DELETE });
+		details.setParameters(reqParams);
+		return details;
+	}
 }

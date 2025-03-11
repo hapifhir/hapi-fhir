@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -16,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProviderR4Test {
 
@@ -33,8 +35,8 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertEquals(1, response.getEntry().size());
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		assertThat(response.getEntry()).hasSize(1);
 		assertEquals("dhtest7", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
@@ -49,7 +51,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -64,7 +66,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -79,7 +81,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "url", new StringType("http://example.com/fhir/StructureDefinition/patient-1a-extensions"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -108,7 +110,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1159) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 

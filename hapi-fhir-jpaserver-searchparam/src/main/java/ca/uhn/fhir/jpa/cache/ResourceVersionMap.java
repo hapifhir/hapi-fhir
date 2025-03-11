@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.cache;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -42,9 +41,10 @@ public class ResourceVersionMap {
 	private final Set<IIdType> mySourceIds = new HashSet<>();
 	// Key versionless id, value version
 	private final Map<IIdType, Long> myMap = new HashMap<>();
+
 	private ResourceVersionMap() {}
 
-	public static ResourceVersionMap fromResourceTableEntities(List<ResourceTable> theEntities) {
+	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource<?>> theEntities) {
 		ResourceVersionMap retval = new ResourceVersionMap();
 		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
 		return retval;
@@ -58,6 +58,12 @@ public class ResourceVersionMap {
 
 	public static ResourceVersionMap empty() {
 		return new ResourceVersionMap();
+	}
+
+	public static ResourceVersionMap fromIdsWithVersions(List<IIdType> theFhirIds) {
+		ResourceVersionMap retval = new ResourceVersionMap();
+		theFhirIds.forEach(retval::add);
+		return retval;
 	}
 
 	private void add(IIdType theId) {

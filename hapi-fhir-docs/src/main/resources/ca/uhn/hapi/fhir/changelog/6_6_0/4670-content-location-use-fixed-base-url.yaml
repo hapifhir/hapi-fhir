@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4670
+jira: SMILE-5587
+title: "Previously, the $export response Content-Location header would not use a fixed base URL.
+Now, the URLs that are returned will respect the `Fixed Value for Endpoint Base URL`."

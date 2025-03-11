@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
@@ -32,23 +31,20 @@ import org.hl7.fhir.r4.model.Patient;
 
 public abstract class ServerExceptionsExample implements IResourceProvider {
 
-private boolean databaseIsDown;
+	private boolean databaseIsDown;
 
-//START SNIPPET: returnOO
-@Read
-public Patient read(@IdParam IdType theId) {
-   if (databaseIsDown) {
-      OperationOutcome oo = new OperationOutcome();
-      oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("Database is down");
-      throw new InternalErrorException(Msg.code(641) + "Database is down", oo);
-   }
-   
-   Patient patient = new Patient(); // populate this
-   return patient;
+	// START SNIPPET: returnOO
+	@Read
+	public Patient read(@IdParam IdType theId) {
+		if (databaseIsDown) {
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("Database is down");
+			throw new InternalErrorException(Msg.code(641) + "Database is down", oo);
+		}
+
+		Patient patient = new Patient(); // populate this
+		return patient;
+	}
+	// END SNIPPET: returnOO
+
 }
-//END SNIPPET: returnOO
-
-
-}
-
-

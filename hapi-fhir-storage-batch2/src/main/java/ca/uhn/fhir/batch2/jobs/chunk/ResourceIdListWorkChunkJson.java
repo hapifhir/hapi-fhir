@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.chunk;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,14 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.chunk;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -34,16 +36,34 @@ import java.util.stream.Collectors;
 
 public class ResourceIdListWorkChunkJson implements IModelJson {
 
+	@JsonProperty("requestPartitionId")
+	private RequestPartitionId myRequestPartitionId;
+
 	@JsonProperty("ids")
 	private List<TypedPidJson> myTypedPids;
 
-	public ResourceIdListWorkChunkJson() {}
-
-	public ResourceIdListWorkChunkJson(Collection<TypedPidJson> theTypedPids) {
-		getTypedPids().addAll(theTypedPids);
+	/**
+	 * Constructor
+	 */
+	public ResourceIdListWorkChunkJson() {
+		super();
 	}
 
-	private List<TypedPidJson> getTypedPids() {
+	/**
+	 * Constructor
+	 */
+	public ResourceIdListWorkChunkJson(
+			Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
+		this();
+		getTypedPids().addAll(theTypedPids);
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public List<TypedPidJson> getTypedPids() {
 		if (myTypedPids == null) {
 			myTypedPids = new ArrayList<>();
 		}
@@ -53,31 +73,36 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("ids", myTypedPids)
-			.toString();
+				.append("ids", myTypedPids)
+				.append("requestPartitionId", myRequestPartitionId)
+				.toString();
 	}
 
-	public List<ResourcePersistentId> getResourcePersistentIds() {
+	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(
+			IIdHelperService<T> theIdHelperService) {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return myTypedPids
-			.stream()
-			.map(t -> new ResourcePersistentId(t.getPid()))
-			.collect(Collectors.toList());
+		return myTypedPids.stream()
+				.map(t -> {
+					T retval = theIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), t.getResourceType());
+					return retval;
+				})
+				.collect(Collectors.toList());
 	}
 
 	public int size() {
 		return getTypedPids().size();
 	}
 
-	public void addTypedPid(String theResourceType, Long thePid) {
-		getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
+	@VisibleForTesting
+	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid) {
+		getTypedPids().add(new TypedPidJson(theResourceType, null, thePid.toString()));
 	}
 
 	public String getResourceType(int index) {
 		return getTypedPids().get(index).getResourceType();
 	}
-
 }

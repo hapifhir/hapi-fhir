@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.server;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,14 @@ package ca.uhn.fhir.test.utilities.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.server;
 
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
+import org.mockito.quality.Strictness;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 public class MockServletUtil {
 
@@ -35,7 +36,7 @@ public class MockServletUtil {
 	}
 
 	public static ServletConfig createServletConfig() {
-		ServletConfig sc = mock(ServletConfig.class);
+		ServletConfig sc = mock(ServletConfig.class, withSettings().strictness(Strictness.LENIENT));
 		when(sc.getServletContext()).thenReturn(null);
 		return sc;
 	}

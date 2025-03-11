@@ -1,0 +1,7 @@
+---
+type: change
+issue: 5128
+title: "Previously, when running with mdm, the server automatically changed storage settings to enable
+ message subscriptions.  This has been changed to require the user to explicitly enable message subscriptions
+ when running with mdm.  If mdm is enabled and message subscriptions are not enabled, the server will now throw
+ an exception on startup."

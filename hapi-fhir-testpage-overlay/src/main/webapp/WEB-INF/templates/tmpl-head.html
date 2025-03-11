@@ -7,15 +7,15 @@
    <meta name="description" content=""/>
    <meta name="author" content=""/>
 
-   <script th:src="@{/resources/popper.js/dist/umd/popper.min.js}"></script>
+   <script th:src="@{/resources/popper.js/umd/popper.min.js}"></script>
 
    <!-- JQuery and Bootstrap -->
    <script th:src="@{/resources/jquery/dist/jquery.js}"></script>
-   <link rel="stylesheet" th:href="@{/resources/bootstrap/dist/css/bootstrap.css}"/>
+   <link rel="stylesheet" th:href="@{/resources/bootstrap/css/bootstrap.css}"/>
    <link rel="stylesheet" media="screen" th:href="@{/resources/font-awesome/css/fontawesome.min.css}" />
-   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-auto-replace-svg="nest"></script>
+   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-bs-toggleauto-replace-svg="nest"></script>
    <link rel="stylesheet" media="screen" th:href="@{/resources/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css}" />
-   <script th:src="@{/resources/bootstrap/dist/js/bootstrap.min.js}"></script>
+   <script th:src="@{/resources/bootstrap/js/bootstrap.min.js}" type="text/javascript"></script>
    <!--<script th:src="@{/resources/bootstrap/js/tab.js}"></script>-->
 
 
@@ -25,7 +25,7 @@
    </script>
 
    <link rel="stylesheet" media="screen" th:href="@{/resources/font-awesome/css/all.min.css}" />
-   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-auto-replace-svg="nest"></script>
+   <script th:src="@{/resources/font-awesome/js/all.min.js}" data-bs-toggleauto-replace-svg="nest"></script>
 
 
    <script th:src="@{/resources/moment/min/moment-with-locales.min.js}"></script>
@@ -34,6 +34,8 @@
    <link th:href="@{/resources/select2/css/select2.css}" rel="stylesheet"/>
    <script th:src="@{/resources/select2/js/select2.min.js}"></script>
 
+   <script th:src="@{/resources/ace-builds/src/ace.js}"></script>
+   <script th:src="@{/resources/ace-builds/src/ext-language_tools.js}"></script>
 
    <script src="js/RestfulTester.js" type="text/javascript"></script>
    <link href="css/tester.css" rel="stylesheet"/>

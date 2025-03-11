@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,66 +17,95 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
-@Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
-@Table(name = "HFJ_SPIDX_COORDS", indexes = {
-	@Index(name = "IDX_SP_COORDS_HASH", columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE"),
-	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_COORDS",
+		indexes = {
+			@Index(
+					name = "IDX_SP_COORDS_HASH_V2",
+					columnList = "HASH_IDENTITY,SP_LATITUDE,SP_LONGITUDE,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
+			@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
+		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;
 
 	private static final long serialVersionUID = 1L;
-	@Column(name = "SP_LATITUDE")
-	//@FullTextField
-	public double myLatitude;
-	@Column(name = "SP_LONGITUDE")
-	//@FullTextField
-	public double myLongitude;
+
+	@Column(name = "SP_LATITUDE", nullable = true)
+	public Double myLatitude;
+
+	@Column(name = "SP_LONGITUDE", nullable = true)
+	public Double myLongitude;
+
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
+	@GenericGenerator(name = "SEQ_SPIDX_COORDS", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"))
 	private ResourceTable myResource;
 
-	public ResourceIndexedSearchParamCoords() {
-	}
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
-	public ResourceIndexedSearchParamCoords(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+	public ResourceIndexedSearchParamCoords() {}
+
+	public ResourceIndexedSearchParamCoords(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			double theLatitude,
+			double theLongitude) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -116,8 +143,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
 		b.append(isMissing(), obj.isMissing());
@@ -133,8 +159,9 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myHashIdentity = source.myHashIdentity;
 	}
 
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -147,8 +174,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		myId = theId;
 	}
 
-
-	public double getLatitude() {
+	@Nullable
+	public Double getLatitude() {
 		return myLatitude;
 	}
 
@@ -157,7 +184,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return this;
 	}
 
-	public double getLongitude() {
+	@Nullable
+	public Double getLongitude() {
 		return myLongitude;
 	}
 
@@ -169,10 +197,10 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getParamName());
-		b.append(getResourceType());
+		b.append(getHashIdentity());
 		b.append(getLatitude());
 		b.append(getLongitude());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 

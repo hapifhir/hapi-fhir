@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3979
+title: "Previously, the MdmStorageInterceptor was needlessly logging a warning if theOldResource of an update was null.
+This is now fixed."

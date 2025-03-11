@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,11 +27,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface IdParam {
-	
+
 	/**
 	 * For {@link Operation extended operations}, any parameter with this value set to <code>true</code>
 	 * (default is false) will also be invoked if the operation is invoked against the resource type.
 	 */
 	boolean optional() default false;
-	
 }

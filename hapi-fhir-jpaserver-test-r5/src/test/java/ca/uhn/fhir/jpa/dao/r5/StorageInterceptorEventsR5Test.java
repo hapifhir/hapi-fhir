@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -19,8 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
@@ -29,7 +29,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 	}
 
 	@Test
@@ -60,9 +60,9 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search instanceof PersistedJpaBundleProvider, search.getClass().toString());
+		assertThat(search instanceof PersistedJpaBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertEquals(3, found.size());
+		assertThat(found).hasSize(3);
 		assertEquals(3, showedCounter.get());
 
 		// Delete and expunge one
@@ -73,7 +73,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertEquals(2, found.size());
+		assertThat(found).hasSize(2);
 		assertEquals(2, showedCounter.get());
 	}
 
@@ -104,9 +104,9 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search instanceof SimpleBundleProvider, search.getClass().toString());
+		assertThat(search instanceof SimpleBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertEquals(3, found.size());
+		assertThat(found).hasSize(3);
 		assertEquals(3, showedCounter.get());
 
 		// Delete and expunge one
@@ -117,14 +117,14 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertEquals(2, found.size());
+		assertThat(found).hasSize(2);
 		assertEquals(2, showedCounter.get());
 	}
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterAllInterceptors();
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
 
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -51,10 +50,9 @@ public class DeleteConflict {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("sourceId", mySourceId)
-			.append("sourcePath", mySourcePath)
-			.append("targetId", myTargetId)
-			.toString();
+				.append("sourceId", mySourceId)
+				.append("sourcePath", mySourcePath)
+				.append("targetId", myTargetId)
+				.toString();
 	}
-
 }

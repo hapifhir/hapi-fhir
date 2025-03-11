@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -32,12 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -58,7 +56,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
@@ -66,7 +64,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
@@ -75,7 +73,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		Organization org = new Organization();
 		org.setName("an org");
@@ -124,14 +122,14 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testDocumentBundleReturnedCorrect() throws IOException {
 
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 		//Ensure each entry has a URL.
 
-		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
+		assertEquals(Bundle.BundleType.DOCUMENT, bundle.getType());
 		bundle.getEntry().stream()
 				.forEach(entry -> {
-					assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
+			assertEquals(entry.getResource().getIdElement().toVersionless().toString(), entry.getFullUrl());
 				});
 		assertNull(bundle.getLink("next"));
 
@@ -141,19 +139,19 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Found IDs: {}", actual);
-		assertThat(actual, hasItem(compId));
-		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(orgId));
-		assertThat(actual, hasItem(encId));
-		assertThat(actual, hasItem(listId));
-		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
+		assertThat(actual).contains(compId);
+		assertThat(actual).contains(patId);
+		assertThat(actual).contains(orgId);
+		assertThat(actual).contains(encId);
+		assertThat(actual).contains(listId);
+		assertThat(actual).contains(myObsIds.toArray(new String[0]));
 	}
 
 	@Test
 	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 		try {
 
 			ourLog.info("Composition ID: {}", compId);
@@ -169,7 +167,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 				return null;
 			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
 
-			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+			String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
 				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
@@ -179,12 +177,12 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Returned classes: {}", returnedClasses);
 
-			assertThat(returnedClasses, hasItem("Composition"));
-			assertThat(returnedClasses, hasItem("Organization"));
+			assertThat(returnedClasses).contains("Composition");
+			assertThat(returnedClasses).contains("Organization");
 
 		} finally {
 
-			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(interceptor);
 
 		}
 	}

@@ -1,0 +1,5 @@
+---
+type: fix
+backport: 6.2.3
+title: "The $mdm-clear operation sometimes failed with a constraint error when running in a heavily
+  multithreaded environment. This has been fixed."

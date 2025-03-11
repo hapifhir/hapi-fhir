@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4227
+title: "When validating terminology as a part of resource validation or by directly calling the $validate-code 
+   operations, an incorrect caching routine sometimes caused incorrect cached results to be returned in cases
+   where display names are being validated and multiple display names were validated for the same
+   system+code combination. This has been corrected."

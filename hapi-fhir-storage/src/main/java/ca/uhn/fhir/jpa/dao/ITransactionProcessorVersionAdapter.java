@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -77,5 +76,4 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
-
 }

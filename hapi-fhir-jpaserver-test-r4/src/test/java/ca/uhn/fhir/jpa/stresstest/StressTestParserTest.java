@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Disabled("Stress Test")
 public class StressTestParserTest extends BaseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(StressTestParserTest.class);
@@ -20,7 +21,6 @@ public class StressTestParserTest extends BaseTest {
 	 * @throws IOException
 	 */
 	@Test
-	@Disabled
 	public void test() throws IOException {
 		FhirContext ctx = FhirContext.forR4Cached();
 		String input = loadResource("/org/hl7/fhir/r4/model/valueset/valuesets.xml");

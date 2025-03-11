@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -24,9 +25,7 @@ import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -112,6 +111,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -126,8 +126,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -151,31 +153,15 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -189,23 +175,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
-
 	}
-
 
 	@Test
 	public void testSearchBySourceTransactionId() {
 
 		Patient p1 = new Patient();
 		p1.setActive(true);
-		ourClient
+		myClient
 			.create()
 			.resource(p1)
 			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "11111")
@@ -213,30 +197,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
-		ourClient
+		myClient
 			.create()
 			.resource(p2)
 			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "22222")
 			.execute();
 
-		Bundle results = ourClient
+		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=%2311111")
+			.byUrl(myServerBase + "/Patient?_source=%2311111")
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 
 	}
 
 
 	@Test
 	public void testSearchByExternalReference() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("FooName");
-		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+		IIdType patientId = myClient.create().resource(patient).execute().getId();
 
 		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
 		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
@@ -247,18 +231,61 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		media.setContent(attachment);
 		media.setSubject(patientReference);
 		media.setType(Media.DigitalMediaType.AUDIO);
-		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+		IIdType mediaId = myClient.create().resource(media).execute().getId();
 
 
 		// Act
-		Bundle returnedBundle = ourClient.search()
+		Bundle returnedBundle = myClient.search()
 			.forResource(Observation.class)
 			.where(Observation.CONTEXT.hasId(patientReference.getReference()))
 			.returnBundle(Bundle.class)
 			.execute();
 
 		// Assert
-		assertEquals(0, returnedBundle.getEntry().size());
+		assertThat(returnedBundle.getEntry()).isEmpty();
+	}
+
+	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		String spCallingName = "securitySP";
+		String secCode = "secCode";
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode(spCallingName);
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		myClient.create().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		IIdType expectedPatientId = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode(secCode)));
+		IIdType dontCare = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode("L")));
+
+		Bundle searchResultBundle = myClient.search().forResource(Patient.class).where(new StringClientParam(spCallingName).matches().value(secCode)).returnBundle(Bundle.class).execute();
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(searchResultBundle);
+
+		assertThat(foundPatients).hasSize(1);
+
+		assertEquals(foundPatients.get(0), expectedPatientId.getValue());
+
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode("myGender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender|Person.gender");
+
+		MethodOutcome result= myClient.create().resource(searchParameter).execute();
+
+		assertEquals(true, result.getCreated());
+
 	}
 
 	@Test
@@ -269,7 +296,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		val.setNoExtensibleWarnings(true);
 		interceptor.addValidatorModule(val);
 
-		ourRestServer.registerInterceptor(interceptor);
+		myRestServer.registerInterceptor(interceptor);
 		try {
 			CodeableConcept codeableConcept = new CodeableConcept();
 			Coding codingCode = codeableConcept.addCoding();
@@ -279,9 +306,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Device device = new Device();
 			Identifier identifier = device.addIdentifier();
 			identifier.setType(codeableConcept); // Not valid against valueset with 'Extensible' binding strength
-			ourClient.create().resource(device).execute().getId();
+			myClient.create().resource(device).execute().getId();
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myRestServer.unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -293,11 +320,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		val.setNoBindingMsgSuppressed(true);
 		interceptor.addValidatorModule(val);
 
-		ourRestServer.registerInterceptor(interceptor);
+		myRestServer.registerInterceptor(interceptor);
 		try {
 			CodeableConcept codeableConcept = new CodeableConcept();
 			Coding codingCode = codeableConcept.addCoding();
-			codingCode.setSystem(DeviceStatus.ACTIVE.toCode());
+			codingCode.setCode(DeviceStatus.ACTIVE.toCode());
 			codingCode.setSystem(DeviceStatus.ACTIVE.getSystem());
 
 			Task task = new Task();
@@ -305,9 +332,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			task.setIntent(Task.TaskIntent.FILLERORDER);
 			task.setCode(codeableConcept); // Task.code has no source/binding
 
-			ourClient.create().resource(task).execute().getId();
+			myClient.create().resource(task).execute().getId();
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myRestServer.unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -325,23 +352,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		interceptor.addValidatorModule(val);
 
-		ourRestServer.registerInterceptor(interceptor);
+		myRestServer.registerInterceptor(interceptor);
 		try {
 			String input = IOUtils.toString(ResourceProviderDstu3Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 
-			HttpPost post = new HttpPost(ourServerBase + "/Patient/aaa");
+			HttpPost post = new HttpPost(myServerBase + "/Patient/aaa");
 			post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 			CloseableHttpResponse resp = ourHttpClient.execute(post);
 			try {
 				String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(respString);
+				ourLog.debug(respString);
 				assertEquals(400, resp.getStatusLine().getStatusCode());
 			} finally {
 				IOUtils.closeQuietly(resp);
 			}
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myRestServer.unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -351,21 +378,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(ourSearchCoordinatorSvc);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
 	private void checkParamMissing(String paramName) throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
+		HttpGet get = new HttpGet(myServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		IOUtils.closeQuietly(resp.getEntity().getContent());
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
 	private ArrayList<IBaseResource> genResourcesOfType(Bundle theRes, Class<? extends IBaseResource> theClass) {
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theRes.getEntry()) {
 			if (next.getResource() != null) {
 				if (theClass.isAssignableFrom(next.getResource().getClass())) {
@@ -381,16 +408,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void saveAndRetrieveBasicResource() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/basic-stu3.xml");
 
-		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
-		ourLog.info(respString);
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
+		String respString = myClient.transaction().withBundle(input).prettyPrint().execute();
+		ourLog.debug(respString);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respString);
 		IdType id = new IdType(bundle.getEntry().get(0).getResponse().getLocation());
 
-		Basic basic = ourClient.read().resource(Basic.class).withId(id).execute();
+		Basic basic = myClient.read().resource(Basic.class).withId(id).execute();
 		List<Extension> exts = basic.getExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
-		assertEquals(1, exts.size());
+		assertThat(exts).hasSize(1);
 	}
 
 	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
@@ -428,7 +455,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	// Y
 	@Test
 	public void testBundleCreate() throws Exception {
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		String resBody = IOUtils.toString(ResourceProviderDstu3Test.class.getResource("/document-father-dstu3.json"), StandardCharsets.UTF_8);
 		IIdType id = client.create().resource(resBody).execute().getId();
@@ -437,17 +464,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Bundle bundle = client.read().resource(Bundle.class).withId(id).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
 	public void testSearchWithIncludeAllWithNotResolvableReference() {
 		// Arrange
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(UUID.randomUUID().toString());
-		IIdType createdPatientId = ourClient.create().resource(patient).execute().getId();
+		IIdType createdPatientId = myClient.create().resource(patient).execute().getId();
 
 		RelatedArtifact relatedArtifactInternalReference = new RelatedArtifact();
 		relatedArtifactInternalReference.setDisplay(UUID.randomUUID().toString());
@@ -463,10 +490,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		planDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		planDefinition.setName(UUID.randomUUID().toString());
 		planDefinition.setRelatedArtifact(Arrays.asList(relatedArtifactInternalReference, relatedArtifactExternalReference));
-		IIdType createdPlanDefinitionId = ourClient.create().resource(planDefinition).execute().getId();
+		IIdType createdPlanDefinitionId = myClient.create().resource(planDefinition).execute().getId();
 
 		// Act
-		Bundle returnedBundle = ourClient.search()
+		Bundle returnedBundle = myClient.search()
 			.forResource(PlanDefinition.class)
 			.include(PlanDefinition.INCLUDE_ALL)
 			.where(PlanDefinition.NAME.matches().value(planDefinition.getName()))
@@ -481,15 +508,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testBundleCreateWithTypeTransaction() throws Exception {
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		String resBody = IOUtils.toString(ResourceProviderDstu3Test.class.getResource("/document-father-dstu3.json"), StandardCharsets.UTF_8);
 		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
 		try {
 			client.create().resource(resBody).execute().getId();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint."));
+			assertThat(e.getMessage()).contains("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.");
 		}
 	}
 
@@ -498,43 +525,43 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily("SMITH");
-		IIdType pid = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.getSubject().setReference(pid.getValue());
-		ourClient.create().resource(qr).execute();
+		myClient.create().resource(qr).execute();
 
 		Subscription subs = new Subscription();
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 		subs.setCriteria("Observation?");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		// Unqualified (doesn't work because QuestionnaireRespone.subject is a Refercence(Any))
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource(QuestionnaireResponse.class)
 				.where(QuestionnaireResponse.SUBJECT.hasChainedProperty(Patient.FAMILY.matches().value("SMITH")))
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1245) + "Unable to perform search for unqualified chain 'subject' as this SearchParameter does not declare any target types. Add a qualifier of the form 'subject:[ResourceType]' to perform this search.", e.getMessage());
 		}
 
 		// Qualified
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.search()
 			.forResource(QuestionnaireResponse.class)
 			.where(QuestionnaireResponse.SUBJECT.hasChainedProperty("Patient", Patient.FAMILY.matches().value("SMITH")))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 
 		// Qualified With an invalid name
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource(QuestionnaireResponse.class)
 				.where(QuestionnaireResponse.SUBJECT.hasChainedProperty("FOO", Patient.FAMILY.matches().value("SMITH")))
@@ -552,10 +579,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
 		subs.setCriteria("Observation?");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		//@formatter:off
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.search()
 			.forResource(Subscription.class)
 			.where(Subscription.TYPE.exactly().code(SubscriptionChannelType.WEBSOCKET.toCode()))
@@ -564,10 +591,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:off
 
-		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+		assertThat(toUnqualifiedVersionlessIds(resp)).containsExactly(id);
 
 		//@formatter:off
-		resp = ourClient
+		resp = myClient
 			.search()
 			.forResource(Subscription.class)
 			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelType.WEBSOCKET.getSystem(), SubscriptionChannelType.WEBSOCKET.toCode()))
@@ -576,10 +603,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:off
 
-		assertThat(toUnqualifiedVersionlessIds(resp), contains(id));
+		assertThat(toUnqualifiedVersionlessIds(resp)).containsExactly(id);
 
 		//@formatter:off
-		resp = ourClient
+		resp = myClient
 			.search()
 			.forResource(Subscription.class)
 			.where(Subscription.TYPE.exactly().systemAndCode(SubscriptionChannelType.WEBSOCKET.getSystem(), SubscriptionChannelType.WEBSOCKET.toCode()))
@@ -588,7 +615,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:off
 
-		assertThat(toUnqualifiedVersionlessIds(resp), empty());
+		assertThat(toUnqualifiedVersionlessIds(resp)).isEmpty();
 
 	}
 
@@ -600,15 +627,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName("rpdstu2_testCountParam_01");
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
+		Bundle found = myClient.search().forResource(Organization.class)
+			.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.count(10).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
-		assertEquals(10, found.getEntry().size());
+		assertThat(found.getEntry()).hasSize(10);
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		assertEquals(100, found.getTotal());
-		assertEquals(50, found.getEntry().size());
+		found = myClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(50).returnBundle(Bundle.class).execute();
+		assertThat(found.getEntry()).hasSize(50);
 
 	}
 
@@ -622,13 +651,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		binary.setContent(arr);
 		binary.setContentType("dansk");
 
-		IIdType resource = ourClient.create().resource(binary).execute().getId();
+		IIdType resource = myClient.create().resource(binary).execute().getId();
 
-		Binary fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		Binary fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("1", fromDB.getIdElement().getVersionIdPart());
 
 		arr[0] = 2;
-		HttpPut putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		HttpPut putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {
@@ -638,13 +667,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			IOUtils.closeQuietly(resp);
 		}
 
-		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
 
 		arr[0] = 3;
 		fromDB.setContent(arr);
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
-		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
@@ -654,7 +683,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			IOUtils.closeQuietly(resp);
 		}
 
-		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
 
 		// Now an update with the wrong ID in the body
@@ -662,7 +691,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		arr[0] = 4;
 		binary.setId("");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(binary);
-		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
+		putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
@@ -671,7 +700,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			IOUtils.closeQuietly(resp);
 		}
 
-		fromDB = ourClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
+		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
 
 	}
@@ -683,7 +712,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateBundle() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/bryn-bundle.json"), StandardCharsets.UTF_8);
 		Validate.notNull(input);
-		ourClient.create().resource(input).execute().getResource();
+		myClient.create().resource(input).execute().getResource();
 	}
 
 	@Test
@@ -694,7 +723,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Bundle responseBundle;
 
-		responseBundle = ourClient
+		responseBundle = myClient
 			.search()
 			.forResource(EpisodeOfCare.class)
 			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
@@ -705,19 +734,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.encodedJson()
 			.execute();
 		String bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
-		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
+		assertThat(responseBundle.getEntry().size()).as(bundleContents).isEqualTo(3);
 
 		runInTransaction(()->{
 			ourLog.info("Resources:\n * {}", myResourceTableDao
 				.findAll()
 				.stream()
-				.sorted(((o1, o2) -> (int) (o1.getId() - o2.getId())))
+				.sorted(((o1, o2) -> (int) (o1.getId().getId() - o2.getId().getId())))
 				.map(t->t.getId() + " - " + t.getIdDt().toUnqualifiedVersionless().getValue())
 				.collect(Collectors.joining("\n * ")));
 		});
 
 		// Now try the exact same search again but using the Cache-Control no-store Header
-		responseBundle = ourClient
+		responseBundle = myClient
 			.search()
 			.forResource(EpisodeOfCare.class)
 			.where(new StringClientParam("_id").matches().value("ECC19005O3"))
@@ -729,13 +758,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.encodedJson()
 			.execute();
 		bundleContents = "\n * " + responseBundle.getEntry().stream().map(t->t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.joining("\n * "));
-		assertEquals(3, responseBundle.getEntry().size(), bundleContents);
+		assertThat(responseBundle.getEntry().size()).as(bundleContents).isEqualTo(3);
 	}
 
 	private void submitBundle(String bundleName) throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream(bundleName), StandardCharsets.UTF_8);
 		Validate.notNull(input);
-		ourClient.transaction().withBundle(input).execute();
+		myClient.transaction().withBundle(input).execute();
 	}
 
 	@Test
@@ -744,13 +773,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 
-		MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+		MethodOutcome output1 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 
-		MethodOutcome output2 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
+		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
 	}
@@ -761,8 +790,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
 		interceptor.setFailOnSeverity(null);
 
-		ourRestServer.registerInterceptor(interceptor);
-		ourClient.registerInterceptor(new IClientInterceptor() {
+		myRestServer.registerInterceptor(interceptor);
+		myClient.registerInterceptor(new IClientInterceptor() {
 			@Override
 			public void interceptRequest(IHttpRequest theRequest) {
 				theRequest.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
@@ -777,22 +806,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			// Missing status, which is mandatory
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:foo").setValue("bar");
-			IBaseResource outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
+			IBaseResource outcome = myClient.create().resource(obs).execute().getOperationOutcome();
 
 			String encodedOo = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info(encodedOo);
-			assertThat(encodedOo, containsString("cvc-complex-type.2.4.b"));
-			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
+			assertThat(encodedOo).contains("cvc-complex-type.2.4.b");
+			assertThat(encodedOo).contains("Successfully created resource \\\"Observation/");
 
 			interceptor.setAddValidationResultsToResponseOperationOutcome(false);
-			outcome = ourClient.create().resource(obs).execute().getOperationOutcome();
+			outcome = myClient.create().resource(obs).execute().getOperationOutcome();
 			encodedOo = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info(encodedOo);
-			assertThat(encodedOo, not(containsString("cvc-complex-type.2.4.b")));
-			assertThat(encodedOo, containsString("Successfully created resource \\\"Observation/"));
+			assertThat(encodedOo).doesNotContain("cvc-complex-type.2.4.b");
+			assertThat(encodedOo).contains("Successfully created resource \\\"Observation/");
 
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myRestServer.unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -802,15 +831,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://urn/system");
 		cs.addConcept().setCode("code0");
-		ourClient.create().resource(cs).execute();
+		myClient.create().resource(cs).execute();
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://urn/system");
-		IIdType optId = ourClient.create().resource(options).execute().getId();
+		IIdType optId = myClient.create().resource(options).execute().getId();
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference(optId));
-		IIdType qId = ourClient.create().resource(q).execute().getId();
+		IIdType qId = myClient.create().resource(q).execute().getId();
 
 		QuestionnaireResponse qa;
 
@@ -819,7 +848,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code0"));
-		ourClient.create().resource(qa).execute();
+		myClient.create().resource(qa).execute();
 
 		// Bad code
 
@@ -827,10 +856,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
 		try {
-			ourClient.create().resource(qa).execute();
-			fail();
+			myClient.create().resource(qa).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
+			assertThat(e.getMessage()).contains("Question with linkId[link0]");
 		}
 	}
 
@@ -842,7 +871,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -850,13 +879,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
 		}
 
-		post = new HttpPost(ourServerBase + "/Patient");
+		post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
 		response = ourHttpClient.execute(post);
@@ -876,7 +905,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -885,7 +914,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -896,7 +925,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -917,7 +946,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateResourceReturnsRepresentationByDefault() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -925,9 +954,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
-			assertThat(respString, startsWith("<Patient xmlns=\"http://hl7.org/fhir\">"));
-			assertThat(respString, endsWith("</Patient>"));
+			ourLog.debug(respString);
+			assertThat(respString).startsWith("<Patient xmlns=\"http://hl7.org/fhir\">");
+			assertThat(respString).endsWith("</Patient>");
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -938,7 +967,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateResourceReturnsOperationOutcome() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -947,8 +976,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
-			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
+			ourLog.debug(respString);
+			assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -959,7 +988,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateResourceWithNumericId() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"2\"/></Patient>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/2");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/2");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -968,8 +997,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
-				oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 
 		} finally {
 			response.getEntity().getContent().close();
@@ -985,7 +1013,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().setFamily(methodName);
 		p.setId(methodName);
 
-		IIdType optId = ourClient.update().resource(p).execute().getId();
+		IIdType optId = myClient.update().resource(p).execute().getId();
 		assertEquals(methodName, optId.getIdPart());
 		assertEquals("1", optId.getVersionIdPart());
 	}
@@ -994,12 +1022,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testDeepChaining() {
 		Location l1 = new Location();
 		l1.getNameElement().setValue("testDeepChainingL1");
-		IIdType l1id = ourClient.create().resource(l1).execute().getId();
+		IIdType l1id = myClient.create().resource(l1).execute().getId();
 
 		Location l2 = new Location();
 		l2.getNameElement().setValue("testDeepChainingL2");
 		l2.getPartOf().setReferenceElement(l1id.toVersionless().toUnqualified());
-		IIdType l2id = ourClient.create().resource(l2).execute().getId();
+		IIdType l2id = myClient.create().resource(l2).execute().getId();
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
@@ -1007,10 +1035,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		EncounterLocationComponent location = e1.addLocation();
 		location.getLocation().setReferenceElement(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new Period().setStart(new Date(), TemporalPrecisionEnum.SECOND).setEnd(new Date(), TemporalPrecisionEnum.SECOND));
-		IIdType e1id = ourClient.create().resource(e1).execute().getId();
+		IIdType e1id = myClient.create().resource(e1).execute().getId();
 
 		//@formatter:off
-		Bundle res = ourClient.search()
+		Bundle res = myClient.search()
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
 			.include(Encounter.INCLUDE_LOCATION.asRecursive())
@@ -1019,8 +1047,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(3, res.getEntry().size());
-		assertEquals(1, genResourcesOfType(res, Encounter.class).size());
+		assertThat(res.getEntry()).hasSize(3);
+		assertThat(genResourcesOfType(res, Encounter.class)).hasSize(1);
 		assertEquals(e1id.toUnqualifiedVersionless(), genResourcesOfType(res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
@@ -1029,7 +1057,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testDeleteConditionalMultiple() {
 		String methodName = "testDeleteConditionalMultiple";
 
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1043,25 +1071,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		try {
 			//@formatter:off
-			ourClient
+			myClient
 				.delete()
 				.resourceConditionalByType(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().code(methodName))
 				.execute();
 			//@formatter:on
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
-			assertEquals("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
-				e.getMessage());
+			assertEquals("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE Patient with match URL \"Patient?identifier=testDeleteConditionalMultiple&_format=json\" because this search matched 2 resources", e.getMessage());
 		}
 
 		// Not deleted yet..
-		ourClient.read().resource("Patient").withId(id1).execute();
-		ourClient.read().resource("Patient").withId(id2).execute();
+		myClient.read().resource("Patient").withId(id1).execute();
+		myClient.read().resource("Patient").withId(id2).execute();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
-		MethodOutcome response = ourClient
+		MethodOutcome response = myClient
 			.delete()
 			.resourceConditionalByType(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().code(methodName))
@@ -1069,17 +1096,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String encoded = myFhirContext.newXmlParser().encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(encoded);
-		assertThat(encoded, containsString(
-			"<issue><severity value=\"information\"/><code value=\"informational\"/><diagnostics value=\"Successfully deleted 2 resource(s) in "));
+		assertThat(encoded).contains("<diagnostics value=\"Successfully deleted 2 resource(s)");
 		try {
-			ourClient.read().resource("Patient").withId(id1).execute();
-			fail();
+			myClient.read().resource("Patient").withId(id1).execute();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
-			ourClient.read().resource("Patient").withId(id2).execute();
-			fail();
+			myClient.read().resource("Patient").withId(id2).execute();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -1089,15 +1115,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testDeleteConditionalNoMatches() throws Exception {
 		String methodName = "testDeleteConditionalNoMatches";
 
-		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?identifier=" + methodName);
+		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?identifier=" + methodName);
 		CloseableHttpResponse resp = ourHttpClient.execute(delete);
 		try {
 			ourLog.info(resp.toString());
 			String response = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(response, containsString(
-				"<issue><severity value=\"warning\"/><code value=\"not-found\"/><diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Deletion failed.\"/></issue>"));
+			assertThat(response).contains("<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>");
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -1106,13 +1131,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteInvalidReference() throws IOException {
-		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient");
+		HttpDelete delete = new HttpDelete(myServerBase + "/Patient");
 		CloseableHttpResponse response = ourHttpClient.execute(delete);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("Can not perform delete, no ID provided"));
+			assertThat(responseString).contains("Can not perform delete, no ID provided");
 		} finally {
 			response.close();
 		}
@@ -1125,15 +1150,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testDeleteNormal() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		ourClient.read().resource(Patient.class).withId(id).execute();
+		myClient.read().resource(Patient.class).withId(id).execute();
 
-		ourClient.delete().resourceById(id).execute();
+		myClient.delete().resourceById(id).execute();
 
 		try {
-			ourClient.read().resource(Patient.class).withId(id).execute();
-			fail();
+			myClient.read().resource(Patient.class).withId(id).execute();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -1147,32 +1172,32 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
 		}
 
-		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
+		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Successfully deleted 1 resource(s). Took ");
 		} finally {
 			response.close();
 		}
 
-		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpGet read = new HttpGet(myServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(read);
 		try {
 			ourLog.info(response.toString());
@@ -1180,21 +1205,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Resource was deleted at"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Resource was deleted at");
 		} finally {
 			response.close();
 		}
 
 		// Delete should now have no matches
 
-		delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
+		delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Deletion failed."));
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Nothing has been deleted.");
 		} finally {
 			response.close();
 		}
@@ -1213,14 +1238,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -1232,7 +1257,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
 		try {
-			sock.connect(new InetSocketAddress("localhost", ourPort));
+			sock.connect(new InetSocketAddress("localhost", myPort));
 			sock.getOutputStream().write(("DELETE /fhir/context/Patient?identifier=http://ghh.org/patient|" + methodName + " HTTP/1.1\n").getBytes("UTF-8"));
 			sock.getOutputStream().write("Host: localhost\n".getBytes("UTF-8"));
 			sock.getOutputStream().write("\n".getBytes("UTF-8"));
@@ -1247,7 +1272,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			String resp = b.toString();
 
-			ourLog.info("Resp: {}", resp);
+			ourLog.debug("Resp: {}", resp);
 		} catch (SocketTimeoutException e) {
 			e.printStackTrace();
 		} finally {
@@ -1256,7 +1281,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Thread.sleep(1000);
 
-		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpGet read = new HttpGet(myServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(read);
 		try {
 			ourLog.info(response.toString());
@@ -1271,11 +1296,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testDeleteReturnsOperationOutcome() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		MethodOutcome resp = ourClient.delete().resourceById(id).execute();
+		MethodOutcome resp = myClient.delete().resourceById(id).execute();
 		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
-		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Successfully deleted 1 resource(s). Took");
 	}
 
 	/**
@@ -1286,7 +1311,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myFhirContext.getResourceDefinition(Practitioner.class);
 		myFhirContext.getResourceDefinition(DocumentManifest.class);
 
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		int initialSize = client.search().forResource(DocumentManifest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
@@ -1304,7 +1329,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testDocumentReferenceResources() throws Exception {
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		int initialSize = client.search().forResource(DocumentReference.class).returnBundle(Bundle.class).execute().getEntry().size();
 
@@ -1319,15 +1344,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEmptySearch() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Bundle responseBundle;
 
-		responseBundle = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		responseBundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 		assertEquals(0, responseBundle.getTotal());
 
-		responseBundle = ourClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("AAA")).returnBundle(Bundle.class).execute();
+		responseBundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("AAA")).returnBundle(Bundle.class).execute();
 		assertEquals(0, responseBundle.getTotal());
 
-		responseBundle = ourClient.search().forResource(Patient.class).where(new StringClientParam("_content").matches().value("AAA")).returnBundle(Bundle.class).execute();
+		responseBundle = myClient.search().forResource(Patient.class).where(new StringClientParam("_content").matches().value("AAA")).returnBundle(Bundle.class).execute();
 		assertEquals(0, responseBundle.getTotal());
 
 	}
@@ -1339,59 +1366,59 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
 		org1parent.setName(methodName + "1parent");
-		IIdType orgId1parent = ourClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1parent = myClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
 		org1.getPartOf().setReferenceElement(orgId1parent);
-		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1 = myClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
-		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IIdType orgId2 = ourClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReferenceElement(orgId2);
-		IIdType devId = ourClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
+		IIdType devId = myClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
 
 		Location locParent = new Location();
 		locParent.setName(methodName + "Parent");
-		IIdType locPId = ourClient.create().resource(locParent).execute().getId().toUnqualifiedVersionless();
+		IIdType locPId = myClient.create().resource(locParent).execute().getId().toUnqualifiedVersionless();
 
 		Location locChild = new Location();
 		locChild.setName(methodName);
 		locChild.getPartOf().setReferenceElement(locPId);
-		IIdType locCId = ourClient.create().resource(locChild).execute().getId().toUnqualifiedVersionless();
+		IIdType locCId = myClient.create().resource(locChild).execute().getId().toUnqualifiedVersionless();
 
 		Encounter encU = new Encounter();
 		encU.getSubject().setReferenceElement(patientId);
 		encU.addLocation().getLocation().setReferenceElement(locCId);
-		IIdType encUId = ourClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
+		IIdType encUId = myClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.getSubject().setReferenceElement(patientId);
 		enc.addLocation().getLocation().setReferenceElement(locCId);
-		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
+		IIdType encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReferenceElement(patientId);
 		obs.getDevice().setReferenceElement(devId);
 		obs.getContext().setReferenceElement(encId);
-		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		ourLog.info("IDs: EncU:" + encUId.getIdPart() + " Enc:" + encId.getIdPart() + "  " + patientId.toUnqualifiedVersionless());
 
-		Parameters output = ourClient.operation().onInstance(encId).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onInstance(encId).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-		assertThat(ids, containsInAnyOrder(patientId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId));
-		assertThat(ids, not(containsInRelativeOrder(encUId)));
+		assertThat(ids).containsExactlyInAnyOrder(patientId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId);
+		assertThat(ids).doesNotContain(encUId);
 
 		ourLog.info(ids.toString());
 	}
@@ -1403,107 +1430,107 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
 		org1parent.setName(methodName + "1parent");
-		IIdType orgId1parent = ourClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1parent = myClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
 		org1.getPartOf().setReferenceElement(orgId1parent);
-		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1 = myClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
-		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IIdType orgId2 = ourClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReferenceElement(orgId2);
-		IIdType devId = ourClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
+		IIdType devId = myClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
 
 		Location locParent = new Location();
 		locParent.setName(methodName + "Parent");
-		IIdType locPId = ourClient.create().resource(locParent).execute().getId().toUnqualifiedVersionless();
+		IIdType locPId = myClient.create().resource(locParent).execute().getId().toUnqualifiedVersionless();
 
 		Location locChild = new Location();
 		locChild.setName(methodName);
 		locChild.getPartOf().setReferenceElement(locPId);
-		IIdType locCId = ourClient.create().resource(locChild).execute().getId().toUnqualifiedVersionless();
+		IIdType locCId = myClient.create().resource(locChild).execute().getId().toUnqualifiedVersionless();
 
 		Encounter encU = new Encounter();
 		encU.addIdentifier().setValue(methodName);
-		IIdType encUId = ourClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
+		IIdType encUId = myClient.create().resource(encU).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.getSubject().setReferenceElement(patientId);
 		enc.addLocation().getLocation().setReferenceElement(locCId);
-		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
+		IIdType encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReferenceElement(patientId);
 		obs.getDevice().setReferenceElement(devId);
 		obs.getContext().setReferenceElement(encId);
-		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onType(Encounter.class).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onType(Encounter.class).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-		assertThat(ids, containsInAnyOrder(patientId, encUId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId));
+		assertThat(ids).containsExactlyInAnyOrder(patientId, encUId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId);
 
 		ourLog.info(ids.toString());
 	}
 
-	@Test
-	public void testEverythingInstanceWithContentFilter() {
-		Patient pt1 = new Patient();
-		pt1.addName().setFamily("Everything").addGiven("Arthur");
-		IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		Patient pt2 = new Patient();
-		pt2.addName().setFamily("Everything").addGiven("Arthur");
-		IIdType ptId2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
+		@Test
+		public void testEverythingInstanceWithContentFilter() {
+            myStorageSettings.setHibernateSearchIndexFullText(true);
+            
+			Patient pt1 = new Patient();
+			pt1.addName().setFamily("Everything").addGiven("Arthur");
+			IIdType ptId1 = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
-		Device dev1 = new Device();
-		dev1.setManufacturer("Some Manufacturer");
-		IIdType devId1 = myDeviceDao.create(dev1, mySrd).getId().toUnqualifiedVersionless();
+			Patient pt2 = new Patient();
+			pt2.addName().setFamily("Everything").addGiven("Arthur");
+			IIdType ptId2 = myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
-		Device dev2 = new Device();
-		dev2.setManufacturer("Some Manufacturer 2");
-		myDeviceDao.create(dev2, mySrd).getId().toUnqualifiedVersionless();
+			Device dev1 = new Device();
+			dev1.setManufacturer("Some Manufacturer");
+			IIdType devId1 = myDeviceDao.create(dev1, mySrd).getId().toUnqualifiedVersionless();
 
-		Observation obs1 = new Observation();
-		obs1.getText().setDivAsString("<div>OBSTEXT1</div>");
-		obs1.getSubject().setReferenceElement(ptId1);
-		obs1.getCode().addCoding().setCode("CODE1");
-		obs1.setValue(new StringType("obsvalue1"));
-		obs1.getDevice().setReferenceElement(devId1);
-		IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+			Device dev2 = new Device();
+			dev2.setManufacturer("Some Manufacturer 2");
+			myDeviceDao.create(dev2, mySrd).getId().toUnqualifiedVersionless();
 
-		Observation obs2 = new Observation();
-		obs2.getSubject().setReferenceElement(ptId1);
-		obs2.getCode().addCoding().setCode("CODE2");
-		obs2.setValue(new StringType("obsvalue2"));
-		IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+			// create an observation that links to Dev1 and Patient1
+			Observation obs1 = new Observation();
+			obs1.getText().setDivAsString("<div>OBSTEXT1</div>");
+			obs1.getSubject().setReferenceElement(ptId1);
+			obs1.getCode().addCoding().setCode("CODE1");
+			obs1.setValue(new StringType("obsvalue1"));
+			obs1.getDevice().setReferenceElement(devId1);
+			IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
-		Observation obs3 = new Observation();
-		obs3.getSubject().setReferenceElement(ptId2);
-		obs3.getCode().addCoding().setCode("CODE3");
-		obs3.setValue(new StringType("obsvalue3"));
-		IIdType obsId3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
+			Observation obs2 = new Observation();
+			obs2.getSubject().setReferenceElement(ptId1);
+			obs2.getCode().addCoding().setCode("CODE2");
+			obs2.setValue(new StringType("obsvalue2"));
+			IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		List<IIdType> actual;
-		StringAndListParam param;
+			Observation obs3 = new Observation();
+			obs3.getSubject().setReferenceElement(ptId2);
+			obs3.getCode().addCoding().setCode("CODE3");
+			obs3.setValue(new StringType("obsvalue3"));
+			IIdType obsId3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
 
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
+			List<IIdType> actual;
 
-		param = new StringAndListParam();
-		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
+			ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 
-		//@formatter:off
-		Parameters response = ourClient
+			//@formatter:off
+		Parameters response = myClient
 			.operation()
 			.onInstance(ptId1)
 			.named("everything")
@@ -1511,10 +1538,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		actual = toUnqualifiedVersionlessIds((Bundle) response.getParameter().get(0).getResource());
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
-
-	}
+			actual = toUnqualifiedVersionlessIds((Bundle) response.getParameter().get(0).getResource());
+			assertThat(actual).containsExactlyInAnyOrder(ptId1, obsId1, devId1);
+		}
 
 	/**
 	 * See #147"Patient"
@@ -1525,7 +1551,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IParser parser = myFhirContext.newJsonParser();
 		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/bug147-bundle-dstu3.json")));
 
-		Bundle resp = ourClient.transaction().withBundle(b).execute();
+		Bundle resp = myClient.transaction().withBundle(b).execute();
 		List<IdType> ids = new ArrayList<IdType>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			IdType toAdd = new IdType(next.getResponse().getLocation()).toUnqualifiedVersionless();
@@ -1537,7 +1563,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("Patient", patientId.getResourceType());
 
 		{
-			Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+			Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 			b = (Bundle) output.getParameter().get(0).getResource();
 
 			ids = new ArrayList<IdType>();
@@ -1549,7 +1575,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(dupes, ids.toString());
+			assertThat(dupes).as(ids.toString()).isFalse();
 		}
 
 		/*
@@ -1558,7 +1584,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		{
 			Parameters input = new Parameters();
 			input.addParameter().setName(Constants.PARAM_COUNT).setValue(new UnsignedIntType(100));
-			Parameters output = ourClient.operation().onInstance(patientId).named("everything").withParameters(input).execute();
+			Parameters output = myClient.operation().onInstance(patientId).named("everything").withParameters(input).execute();
 			b = (Bundle) output.getParameter().get(0).getResource();
 
 			ids = new ArrayList<IdType>();
@@ -1570,9 +1596,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 			ourLog.info("$everything: " + ids.toString());
 
-			assertFalse(dupes, ids.toString());
-			assertThat(ids.toString(), containsString("Condition"));
-			assertThat(ids.size(), greaterThan(10));
+			assertThat(dupes).as(ids.toString()).isFalse();
+			assertThat(ids.toString()).contains("Condition");
+			assertThat(ids.size()).isGreaterThan(10);
 		}
 	}
 
@@ -1596,11 +1622,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		ourLog.info(ids.toString());
-		assertThat(ids, containsInAnyOrder(patId, medId, moId));
+		assertThat(ids).containsExactlyInAnyOrder(patId, medId, moId);
 	}
 
 	/**
@@ -1617,14 +1643,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		c.getSubject().setReference("Patient/1");
 		b.addEntry().setResource(c).getRequest().setMethod(HTTPVerb.POST);
 
-		Bundle resp = ourClient.transaction().withBundle(b).execute();
+		Bundle resp = myClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdType patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
-		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		b = (Bundle) output.getParameter().get(0).getResource();
 
 		List<IdType> ids = new ArrayList<IdType>();
@@ -1633,8 +1659,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ids.add(toAdd);
 		}
 
-		assertThat(ids.toString(), containsString("Patient/"));
-		assertThat(ids.toString(), containsString("Condition/"));
+		assertThat(ids.toString()).contains("Patient/");
+		assertThat(ids.toString()).contains("Condition/");
 	}
 
 
@@ -1645,40 +1671,40 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
 		org1parent.setName(methodName + "1parent");
-		IIdType orgId1parent = ourClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1parent = myClient.update().resource(org1parent).execute().getId().toUnqualifiedVersionless();
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
 		org1.getPartOf().setReferenceElement(orgId1parent);
-		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId1 = myClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(orgId1);
-		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType patientId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IIdType orgId2 = ourClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
+		IIdType orgId2 = myClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReferenceElement(orgId2);
-		IIdType devId = ourClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
+		IIdType devId = myClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReferenceElement(patientId);
 		obs.getDevice().setReferenceElement(devId);
-		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+		IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.getSubject().setReferenceElement(patientId);
-		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
+		IIdType encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
+		assertThat(ids).containsExactlyInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent);
 
 		ourLog.info(ids.toString());
 	}
@@ -1689,39 +1715,39 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Organization o1 = new Organization();
 		o1.setName(methodName + "1");
-		IIdType o1Id = ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		IIdType o1Id = myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 		Organization o2 = new Organization();
 		o2.setName(methodName + "2");
-		IIdType o2Id = ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		IIdType o2Id = myClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily(methodName + "1");
 		p1.getManagingOrganization().setReferenceElement(o1Id);
-		IIdType p1Id = ourClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
+		IIdType p1Id = myClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
 		Patient p2 = new Patient();
 		p2.addName().setFamily(methodName + "2");
 		p2.getManagingOrganization().setReferenceElement(o2Id);
-		IIdType p2Id = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
+		IIdType p2Id = myClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
 		Condition c1 = new Condition();
 		c1.getSubject().setReferenceElement(p1Id);
-		IIdType c1Id = ourClient.create().resource(c1).execute().getId().toUnqualifiedVersionless();
+		IIdType c1Id = myClient.create().resource(c1).execute().getId().toUnqualifiedVersionless();
 		Condition c2 = new Condition();
 		c2.getSubject().setReferenceElement(p2Id);
-		IIdType c2Id = ourClient.create().resource(c2).execute().getId().toUnqualifiedVersionless();
+		IIdType c2Id = myClient.create().resource(c2).execute().getId().toUnqualifiedVersionless();
 
 		Condition c3 = new Condition();
 		c3.addIdentifier().setValue(methodName + "3");
-		IIdType c3Id = ourClient.create().resource(c3).execute().getId().toUnqualifiedVersionless();
+		IIdType c3Id = myClient.create().resource(c3).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
-		assertThat(ids, not(containsInRelativeOrder(c3Id)));
+		assertThat(ids).containsExactlyInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id);
+		assertThat(ids).doesNotContain(c3Id);
 	}
 
 	@Test
@@ -1741,8 +1767,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = ourClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -1750,9 +1776,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -1772,8 +1798,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -1781,9 +1807,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -1811,8 +1837,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -1820,24 +1846,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(m1Id)));
-		assertThat(ids, not(hasItem(p2Id)));
-		assertThat(ids, not(hasItem(o2Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
+		assertThat(ids).doesNotContain(p2Id);
+		assertThat(ids).doesNotContain(o2Id);
 	}
 
 	private IIdType createOrganization(String methodName, String s) {
 		Organization o1 = new Organization();
 		o1.setName(methodName + s);
-		return ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 	}
 
 	private IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
 		Patient p1 = new Patient();
 		p1.addName().setFamily(theMethodName + theIndex);
 		p1.getManagingOrganization().setReferenceElement(theOrganizationId);
-		IIdType p1Id = ourClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
+		IIdType p1Id = myClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
 		return p1Id;
 	}
 
@@ -1847,7 +1873,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		if (thePatientId != null) {
 			c.getSubject().setReferenceElement(thePatientId);
 		}
-		IIdType cId = ourClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 		return cId;
 	}
 
@@ -1857,7 +1883,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		if (thePatientId != null) {
 			m.getSubject().setReferenceElement(thePatientId);
 		}
-		IIdType mId = ourClient.create().resource(m).execute().getId().toUnqualifiedVersionless();
+		IIdType mId = myClient.create().resource(m).execute().getId().toUnqualifiedVersionless();
 		return mId;
 	}
 
@@ -1867,7 +1893,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		if (thePatientId != null) {
 			o.getSubject().setReferenceElement(thePatientId);
 		}
-		IIdType oId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
 	}
 
@@ -1877,7 +1903,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Organization org = new Organization();
 		org.setName(methodName);
-		IIdType oId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		IIdType oId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 
 		long time1 = System.currentTimeMillis();
 		Thread.sleep(10);
@@ -1885,7 +1911,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
 		p.getManagingOrganization().setReferenceElement(oId);
-		IIdType pId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType pId = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		long time2 = System.currentTimeMillis();
 		Thread.sleep(10);
@@ -1893,14 +1919,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Condition c = new Condition();
 		c.getCode().setText(methodName);
 		c.getSubject().setReferenceElement(pId);
-		IIdType cId = ourClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 
 		Thread.sleep(10);
 		long time3 = System.currentTimeMillis();
 
 		// %3E=> %3C=<
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString());
+		HttpGet get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString());
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -1909,12 +1935,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pId, cId, oId));
+			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 		} finally {
 			response.close();
 		}
 
-		get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
+		get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
 			+ new InstantType(new Date(time3)).getValueAsString());
 		response = ourHttpClient.execute(get);
 		try {
@@ -1924,7 +1950,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pId, cId, oId));
+			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 		} finally {
 			response.close();
 		}
@@ -1943,7 +1969,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(pId, cId));
+		// assertThat(ids).contains(pId, cId);
 		// } finally {
 		// response.close();
 		// }
@@ -1957,7 +1983,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		// ourLog.info(output);
 		// List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 		// ourLog.info(ids.toString());
-		// assertThat(ids, contains(cId, pId, oId));
+		// assertThat(ids).contains(cId, pId, oId);
 		// } finally {
 		// response.close();
 		// }
@@ -1974,7 +2000,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
 
-		assertEquals(53, inputBundle.getEntry().size());
+		assertThat(inputBundle.getEntry()).hasSize(53);
 
 		Set<String> allIds = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
@@ -1984,11 +2010,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertEquals(53, allIds.size());
+		assertThat(allIds).hasSize(53);
 
 		mySystemDao.transaction(mySrd, inputBundle);
 
-		Bundle responseBundle = ourClient
+		Bundle responseBundle = myClient
 			.operation()
 			.onInstance(new IdType("Patient/A161443"))
 			.named("everything")
@@ -1997,7 +2023,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnResourceType(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
 		List<String> ids = new ArrayList<String>();
 		for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
@@ -2006,7 +2032,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Collections.sort(ids);
 		ourLog.info("{} ids: {}", ids.size(), ids);
 
-		assertThat(responseBundle.getEntry().size(), lessThanOrEqualTo(25));
+		assertThat(responseBundle.getEntry().size()).isLessThanOrEqualTo(25);
 
 		TreeSet<String> idsSet = new TreeSet<String>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
@@ -2016,7 +2042,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		String nextUrl = responseBundle.getLink("next").getUrl();
-		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		responseBundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
 				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -2024,18 +2050,18 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 
 		nextUrl = responseBundle.getLink("next").getUrl();
-		responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		responseBundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
 				idsSet.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			}
 		}
 
-		assertEquals(null, responseBundle.getLink("next"));
+		assertNull(responseBundle.getLink("next"));
 
-		assertThat(idsSet, hasItem("List/A161444"));
-		assertThat(idsSet, hasItem("List/A161468"));
-		assertThat(idsSet, hasItem("List/A161500"));
+		assertThat(idsSet).contains("List/A161444");
+		assertThat(idsSet).contains("List/A161468");
+		assertThat(idsSet).contains("List/A161500");
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", idsSet.size(), idsSet);
@@ -2050,16 +2076,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingWithLargeSet2() {
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		for (int i = 1; i < 77; i++) {
 			Observation obs = new Observation();
 			obs.setId("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
 			obs.setSubject(new Reference(id));
-			ourClient.update().resource(obs).execute();
+			myClient.update().resource(obs).execute();
 		}
 
-		Bundle responseBundle = ourClient.operation().onInstance(id).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet().returnResourceType(Bundle.class)
+		Bundle responseBundle = myClient.operation().onInstance(id).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet().returnResourceType(Bundle.class)
 			.execute();
 
 		TreeSet<String> ids = new TreeSet<String>();
@@ -2074,7 +2100,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		BundleLinkComponent nextLink = responseBundle.getLink("next");
 		while (nextLink != null) {
 			String nextUrl = nextLink.getUrl();
-			responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+			responseBundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 			for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 				for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
 					ids.add(nextEntry.getResource().getIdElement().getIdPart());
@@ -2085,22 +2111,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			nextLink = responseBundle.getLink("next");
 		}
 
-		assertThat(ids, hasItem(id.getIdPart()));
+		assertThat(ids).contains(id.getIdPart());
 		for (int i = 1; i < 77; i++) {
-			assertThat(ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
+			assertThat(ids).contains("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
 		}
-		assertEquals(77, ids.size());
+		assertThat(ids).hasSize(77);
 	}
 
 	@Test
 	public void testEverythingWithOnlyPatient() {
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(300 * 1000);
 
-		Bundle response = ourClient
+		Bundle response = myClient
 			.operation()
 			.onInstance(id)
 			.named("everything")
@@ -2108,7 +2134,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnResourceType(Bundle.class)
 			.execute();
 
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 	}
 
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
@@ -2139,6 +2165,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
@@ -2152,13 +2180,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/Observation?_content=systolic&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/Observation?_content=systolic&_pretty=true");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString, containsString(id1.getIdPart()));
+			assertThat(responseString).contains(id1.getIdPart());
 		} finally {
 			response.close();
 		}
@@ -2170,19 +2198,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
-		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+		myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		myResourceCountsCache.clear();
 		myResourceCountsCache.update();
 
-		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
+		HttpGet get = new HttpGet(myServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
+			assertThat(output).contains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
 		} finally {
 			response.close();
 		}
@@ -2220,20 +2248,20 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = ourServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids, contains(pid0.getValue()));
+		assertThat(ids).containsExactly(pid0.getValue());
 	}
 
 	@Test
 	public void testHasParameterNoResults() throws Exception {
 
-		HttpGet get = new HttpGet(ourServerBase + "/AllergyIntolerance?_has=Provenance:target:userID=12345");
+		HttpGet get = new HttpGet(myServerBase + "/AllergyIntolerance?_has=Provenance:target:userID=12345");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(resp, containsString("Invalid _has parameter syntax: _has"));
+			assertThat(resp).contains("Invalid _has parameter syntax: _has");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -2265,26 +2293,26 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<String> idValues;
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1), ids.get(0)));
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1), ids.get(0));
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1));
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1));
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt2060");
-		assertThat(idValues.toString(), idValues, empty());
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt2060");
+		assertThat(idValues).as(idValues.toString()).isEmpty();
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=" + InstantDt.withCurrentTime().getYear());
-		assertThat(idValues.toString(), idValues, hasSize(10)); // 10 is the page size
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=" + InstantDt.withCurrentTime().getYear());
+		assertThat(idValues).as(idValues.toString()).hasSize(10); // 10 is the page size
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=ge" + InstantDt.withCurrentTime().getYear());
-		assertThat(idValues.toString(), idValues, hasSize(10));
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=ge" + InstantDt.withCurrentTime().getYear());
+		assertThat(idValues).as(idValues.toString()).hasSize(10);
 
-		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + InstantDt.withCurrentTime().getYear());
-		assertThat(idValues, hasSize(0));
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + (InstantDt.withCurrentTime().getYear() + 1));
+		assertThat(idValues).hasSize(0);
 	}
 
 	@Test
@@ -2293,27 +2321,27 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = ourClient.create().resource(patient).execute().getId().toVersionless();
-		ourClient.delete().resourceById(id).execute();
+		IIdType id = myClient.create().resource(patient).execute().getId().toVersionless();
+		myClient.delete().resourceById(id).execute();
 		patient.setId(id);
-		ourClient.update().resource(patient).execute();
+		myClient.update().resource(patient).execute();
 
-		Bundle history = ourClient.history().onInstance(id).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
-		assertEquals(3, history.getEntry().size());
+		Bundle history = myClient.history().onInstance(id).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
+		assertThat(history.getEntry()).hasSize(3);
 		assertEquals(id.withVersion("3").getValue(), history.getEntry().get(0).getResource().getId());
-		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
+		assertThat(((Patient) history.getEntry().get(0).getResource()).getName()).hasSize(1);
 
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
-		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
-		assertEquals(null, history.getEntry().get(1).getResource());
+		assertEquals("Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
+		assertNull(history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
-		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
+		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
 
 		try {
 			myBundleDao.validate(history, null, null, null, null, null, mySrd);
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
 	}
@@ -2329,7 +2357,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info("Input: {}", resource);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
@@ -2338,23 +2366,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
 		}
 
 		assertEquals("1", id.getVersionIdPart());
-		assertNotEquals("AAA", id.getIdPart());
+		assertThat(id.getIdPart()).isNotEqualTo("AAA");
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpGet get = new HttpGet(myServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
-			assertThat(respString, containsString("<id value=\"" + id.getIdPart() + "\"/>"));
-			assertThat(respString, containsString("<versionId value=\"1\"/>"));
+			assertThat(respString).contains("<id value=\"" + id.getIdPart() + "\"/>");
+			assertThat(respString).contains("<versionId value=\"1\"/>");
 		} finally {
 			response.close();
 		}
@@ -2371,7 +2399,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info("Input: {}", resource);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
@@ -2380,16 +2408,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
 		}
 
 		assertEquals("1", id.getVersionIdPart());
-		assertNotEquals("AAA", id.getIdPart());
+		assertThat(id.getIdPart()).isNotEqualTo("AAA");
 
-		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart() + "/_history/1");
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart() + "/_history/1");
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
@@ -2397,10 +2425,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info("Response: {}", respString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, respString);
-			assertEquals(
-				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
-					+ id.getIdPart() + "\"",
-				oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
+				+ id.getIdPart() + "\"");
 		} finally {
 			response.close();
 		}
@@ -2412,7 +2438,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testImagingStudyResources() throws Exception {
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		int initialSize = client.search().forResource(ImagingStudy.class).returnBundle(Bundle.class).execute().getEntry().size();
 
@@ -2427,25 +2453,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIncludeWithExternalReferences() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/Organization/123");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
-		Bundle b = ourClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
-		assertEquals(1, b.getEntry().size());
+		Bundle b = myClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
+		assertThat(b.getEntry()).hasSize(1);
 	}
 
 	@Test
 	public void testMetadata() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		HttpGet get = new HttpGet(myServerBase + "/metadata");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+			assertThat(resp).contains("THIS IS THE DESC");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2458,9 +2484,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		StructureDefinition p = new StructureDefinition();
 		p.setAbstract(true);
 		p.setUrl("http://example.com/foo");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.search()
 			.forResource(StructureDefinition.class)
 			.where(StructureDefinition.URL.matches().value("http://example.com/foo"))
@@ -2473,30 +2499,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testMetaOperations() {
 		String methodName = "testMetaOperations";
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
-		ourClient.setPrettyPrint(true);
+		myClient.registerInterceptor(new LoggingInterceptor(true));
+		myClient.setPrettyPrint(true);
 		IValidatorModule module = new FhirInstanceValidator(myFhirContext);
 		BaseValidatingInterceptor<String> validatingInterceptor = new RequestValidatingInterceptor().addValidatorModule(module);
-		ourRestServer.registerInterceptor(validatingInterceptor);
+		myRestServer.registerInterceptor(validatingInterceptor);
 		try {
 			Patient pt = new Patient();
 			pt.addName().setFamily(methodName);
-			IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+			IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
-			Meta meta = ourClient.meta().get(Meta.class).fromResource(id).execute();
-			assertEquals(0, meta.getTag().size());
+			Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
+			assertThat(meta.getTag()).isEmpty();
 
 			Meta inMeta = new Meta();
 			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-			meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
-			assertEquals(1, meta.getTag().size());
+			meta = myClient.meta().add().onResource(id).meta(inMeta).execute();
+			assertThat(meta.getTag()).hasSize(1);
 
 			inMeta = new Meta();
 			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
-			meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
-			assertEquals(0, meta.getTag().size());
+			meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
+			assertThat(meta.getTag()).isEmpty();
 		} finally {
-			ourRestServer.unregisterInterceptor(validatingInterceptor);
+			myRestServer.unregisterInterceptor(validatingInterceptor);
 		}
 	}
 
@@ -2504,40 +2530,39 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testMetaOperationWithNoMetaParameter() throws Exception {
 		Patient p = new Patient();
 		p.addName().setFamily("testMetaAddInvalid");
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		//@formatter:off
-		String input = "<Parameters>\n" +
-			"  <meta>\n" +
-			"    <tag>\n" +
-			"      <system value=\"http://example.org/codes/tags\"/>\n" +
-			"      <code value=\"record-lost\"/>\n" +
-			"      <display value=\"Patient File Lost\"/>\n" +
-			"    </tag>\n" +
-			"  </meta>\n" +
-			"</Parameters>";
-		//@formatter:on
+		String input = """
+			<Parameters>
+			  <meta>
+			    <tag>
+			      <system value="http://example.org/codes/tags"/>
+			      <code value="record-lost"/>
+			      <display value="Patient File Lost"/>
+			    </tag>
+			  </meta>
+			</Parameters>""";
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
 		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(output, containsString("Input contains no parameter with name 'meta'"));
+			assertThat(output).contains("Input contains no parameter with name 'meta'");
 		} finally {
 			response.close();
 		}
 
-		post = new HttpPost(ourServerBase + "/Patient/" + id.getIdPart() + "/$meta-delete");
+		post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-delete");
 		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(output, containsString("Input contains no parameter with name 'meta'"));
+			assertThat(output).contains("Input contains no parameter with name 'meta'");
 		} finally {
 			response.close();
 		}
@@ -2561,7 +2586,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
-		Bundle response = ourClient
+		Bundle response = myClient
 			.operation()
 			.onInstance(new IdType(pid))
 			.named("everything")
@@ -2570,91 +2595,96 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals(10, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertEquals("21", response.getTotalElement().getValueAsString());
 		}
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
 		// Load page 2
 
 		String nextUrl = response.getLink("next").getUrl();
-		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertEquals(10, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertEquals("21", response.getTotalElement().getValueAsString());
 		}
-		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
 		// Load page 3
 		Thread.sleep(2000);
 
 		nextUrl = response.getLink("next").getUrl();
-		response = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
+		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		assertEquals("21", response.getTotalElement().getValueAsString());
-		assertEquals(null, response.getLink("next"));
+		assertNull(response.getLink("next"));
 
 	}
 
 	@Test
 	public void testEverythingWithNoPagingProvider() {
-		ourRestServer.setPagingProvider(null);
+		IPagingProvider pagingProvider = myRestServer.getPagingProvider();
+		try {
+			myRestServer.setPagingProvider(null);
 
-		Patient p = new Patient();
-		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+			Patient p = new Patient();
+			p.setActive(true);
+			String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
-		for (int i = 0; i < 20; i++) {
-			Observation o = new Observation();
-			o.getSubject().setReference(pid);
-			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-			myObservationDao.create(o);
+			for (int i = 0; i < 20; i++) {
+				Observation o = new Observation();
+				o.getSubject().setReference(pid);
+				o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+				myObservationDao.create(o);
+			}
+
+			mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+			mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+			mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+			Bundle response = myClient
+				.operation()
+				.onInstance(new IdType(pid))
+				.named("everything")
+				.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+				.returnResourceType(Bundle.class)
+				.useHttpGet()
+				.execute();
+
+			assertThat(response.getEntry()).hasSize(10);
+			assertNull(response.getTotalElement().getValue());
+			assertNull(response.getLink("next"));
+		} finally {
+			myRestServer.setPagingProvider(pagingProvider);
 		}
-
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
-
-		Bundle response = ourClient
-			.operation()
-			.onInstance(new IdType(pid))
-			.named("everything")
-			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
-			.returnResourceType(Bundle.class)
-			.useHttpGet()
-			.execute();
-
-		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValue());
-		assertEquals(null, response.getLink("next"));
 	}
 
 	@Test
 	public void testPreserveVersionsOnAuditEvent() {
 		Organization org = new Organization();
 		org.setName("ORG");
-		IIdType orgId = ourClient.create().resource(org).execute().getId();
+		IIdType orgId = myClient.create().resource(org).execute().getId();
 		assertEquals("1", orgId.getVersionIdPart());
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.getManagingOrganization().setReference(orgId.toUnqualified().getValue());
-		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+		IIdType patientId = myClient.create().resource(patient).execute().getId();
 		assertEquals("1", patientId.getVersionIdPart());
 
 		AuditEvent ae = new org.hl7.fhir.dstu3.model.AuditEvent();
 		ae.addEntity().getReference().setReference(patientId.toUnqualified().getValue());
-		IIdType aeId = ourClient.create().resource(ae).execute().getId();
+		IIdType aeId = myClient.create().resource(ae).execute().getId();
 		assertEquals("1", aeId.getVersionIdPart());
 
-		patient = ourClient.read().resource(Patient.class).withId(patientId).execute();
+		patient = myClient.read().resource(Patient.class).withId(patientId).execute();
 		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
 		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
-		ae = ourClient.read().resource(AuditEvent.class).withId(aeId).execute();
+		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
 		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasIdPart());
 		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasVersionIdPart());
 
@@ -2665,7 +2695,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testProcedureRequestResources() {
-		IGenericClient client = ourClient;
+		IGenericClient client = myClient;
 
 		int initialSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
 
@@ -2689,20 +2719,20 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_01");
-		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+		myClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_02");
-		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+		myClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		{
-			Bundle returned = ourClient.search().forResource(Patient.class).encodedXml().returnBundle(Bundle.class).execute();
-			assertThat(returned.getEntry().size(), greaterThan(1));
+			Bundle returned = myClient.search().forResource(Patient.class).encodedXml().returnBundle(Bundle.class).execute();
+			assertThat(returned.getEntry().size()).isGreaterThan(1);
 			assertEquals(BundleType.SEARCHSET, returned.getType());
 		}
 		{
-			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().returnBundle(Bundle.class).execute();
-			assertThat(returned.getEntry().size(), greaterThan(1));
+			Bundle returned = myClient.search().forResource(Patient.class).encodedJson().returnBundle(Bundle.class).execute();
+			assertThat(returned.getEntry().size()).isGreaterThan(1);
 		}
 	}
 
@@ -2713,9 +2743,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IIdType newId = ourClient.create().resource(p1).encodedJson().execute().getId();
+		IIdType newId = myClient.create().resource(p1).encodedJson().execute().getId();
 
-		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedJson().execute();
+		Patient actual = myClient.read().resource(Patient.class).withId(newId).encodedJson().execute();
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -2726,9 +2756,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IIdType newId = ourClient.create().resource(p1).encodedXml().execute().getId();
+		IIdType newId = myClient.create().resource(p1).encodedXml().execute().getId();
 
-		Patient actual = ourClient.read().resource(Patient.class).withId(newId).encodedXml().execute();
+		Patient actual = myClient.read().resource(Patient.class).withId(newId).encodedXml().execute();
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -2741,14 +2771,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.setUrl("http://foo")
 			.setValue(new Reference("Practitioner/A"));
 
-		ourClient.update().resource(nextPatient).execute();
+		myClient.update().resource(nextPatient).execute();
 
-		Patient p = ourClient.read().resource(Patient.class).withId("B").execute();
+		Patient p = myClient.read().resource(Patient.class).withId("B").execute();
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("http://foo"));
+		assertThat(encoded).contains("http://foo");
 	}
 
 	@Test
@@ -2761,13 +2791,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		p1.getManagingOrganization().setResource(o1);
 
-		IIdType newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = myClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, new UriDt(newId.getValue()));
-		assertEquals(1, actual.getContained().size());
+		Patient actual = myClient.read(Patient.class, new UriDt(newId.getValue()));
+		assertThat(actual.getContained()).hasSize(1);
 
 		//@formatter:off
-		Bundle b = ourClient
+		Bundle b = myClient
 			.search()
 			.forResource("Patient")
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01"))
@@ -2775,7 +2805,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals(1, b.getEntry().size());
+		assertThat(b.getEntry()).hasSize(1);
 
 	}
 
@@ -2785,21 +2815,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.getText().setDivAsString("<div><td>Identifier</td><td>testSearchByResourceChain01</td></div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 
-		IdType newId = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType newId = (IdType) myClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId.getIdPart());
-		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
+		Patient actual = myClient.read(Patient.class, newId.getIdPart());
+		assertThat(actual.getText().getDiv().getValueAsString()).contains("<td>Identifier</td><td>testSearchByResourceChain01</td>");
 	}
 
 	@Test
 	public void testSearchBundleDoesntIncludeTextElement() throws Exception {
-		HttpGet read = new HttpGet(ourServerBase + "/Patient?_format=json");
+		HttpGet read = new HttpGet(myServerBase + "/Patient?_format=json");
 		CloseableHttpResponse response = ourHttpClient.execute(read);
 		try {
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(text);
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-			assertThat(text, not(containsString("\"text\",\"type\"")));
+			assertThat(text).doesNotContain("\"text\",\"type\"");
 		} finally {
 			response.close();
 		}
@@ -2814,7 +2844,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			myPatientDao.create(p, mySrd);
 		}
 
-		String uri = ourServerBase + "/Patient?name=" + UrlUtil.escapeUrlParam("Jernelöv") + "&_count=5&_pretty=true";
+		String uri = myServerBase + "/Patient?name=" + UrlUtil.escapeUrlParam("Jernelöv") + "&_count=5&_pretty=true";
 		ourLog.info("URI: {}", uri);
 		HttpGet get = new HttpGet(uri);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
@@ -2825,7 +2855,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			Bundle b = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 
-			assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
+			assertEquals("http://localhost:" + myPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v", b.getLink("self").getUrl());
 
 			Patient p = (Patient) b.getEntry().get(0).getResource();
 			assertEquals("Jernelöv", p.getName().get(0).getFamily());
@@ -2841,15 +2871,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().setFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
-		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType p1Id = (IdType) myClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
 		p2.addName().setFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
-		ourClient.create().resource(p2).execute().getId();
+		myClient.create().resource(p2).execute().getId();
 
 		//@formatter:off
-		Bundle actual = ourClient
+		Bundle actual = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01"))
@@ -2859,8 +2889,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(1, actual.getEntry().size());
-		assertEquals(ourServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
+		assertThat(actual.getEntry()).hasSize(1);
+		assertEquals(myServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		assertEquals(SearchEntryMode.MATCH, actual.getEntry().get(0).getSearch().getModeElement().getValue());
 	}
@@ -2870,10 +2900,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
-		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType p1Id = (IdType) myClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
-		Bundle actual = ourClient
+		Bundle actual = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01"))
@@ -2882,7 +2912,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
 	}
@@ -2904,34 +2934,34 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Bundle found;
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().systemAndValues(null, id1.getIdPart(), id2.getIdPart()))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1, id2);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().systemAndValues(null, Arrays.asList(id1.getIdPart(), id2.getIdPart(), "FOOOOO")))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1, id2);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().systemAndCode(null, id1.getIdPart()))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().codes(id1.getIdPart(), id2.getIdPart()))
@@ -2939,9 +2969,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIdValues(found).toString(), toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIds(found)).as(toUnqualifiedVersionlessIdValues(found).toString()).containsExactlyInAnyOrder(id1);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().codes(Arrays.asList(id1.getIdPart(), id2.getIdPart(), "FOOOOO")))
@@ -2949,25 +2979,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1));
+		assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().codes(id1.getIdPart(), id2.getIdPart(), "FOOO"))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), containsInAnyOrder(id1, id2));
+		assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1, id2);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(BaseResource.RES_ID.exactly().codes("FOOO"))
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(toUnqualifiedVersionlessIds(found), empty());
+		assertThat(toUnqualifiedVersionlessIds(found)).isEmpty();
 
 	}
 
@@ -2977,7 +3007,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName + "1");
-		IIdType pid1 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType pid1 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Thread.sleep(10);
 		long time1 = System.currentTimeMillis();
@@ -2985,9 +3015,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient p2 = new Patient();
 		p2.addName().setFamily(methodName + "2");
-		IIdType pid2 = ourClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
+		IIdType pid2 = myClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString());
+		HttpGet get = new HttpGet(myServerBase + "/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString());
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -2996,12 +3026,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pid1));
+			assertThat(ids).containsExactlyInAnyOrder(pid1);
 		} finally {
 			response.close();
 		}
 
-		get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString());
+		get = new HttpGet(myServerBase + "/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString());
 		response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -3010,7 +3040,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pid2));
+			assertThat(ids).containsExactlyInAnyOrder(pid2);
 		} finally {
 			response.close();
 		}
@@ -3021,25 +3051,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchByReferenceIds() {
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IIdType o1id = ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		IIdType o1id = myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 		Organization o2 = new Organization();
 		o2.setName("testSearchByResourceChainName02");
-		IIdType o2id = ourClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
+		IIdType o2id = myClient.create().resource(o2).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds01");
 		p1.addName().setFamily("testSearchByReferenceIdsFamily01").addGiven("testSearchByReferenceIdsGiven01");
 		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
-		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
+		IIdType p1Id = myClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByReferenceIds02");
 		p2.addName().setFamily("testSearchByReferenceIdsFamily02").addGiven("testSearchByReferenceIdsGiven02");
 		p2.setManagingOrganization(new Reference(o2id.toUnqualifiedVersionless()));
-		IIdType p2Id = ourClient.create().resource(p2).execute().getId();
+		IIdType p2Id = myClient.create().resource(p2).execute().getId();
 
 		//@formatter:off
-		Bundle actual = ourClient.search()
+		Bundle actual = myClient.search()
 			.forResource(Patient.class)
 			.where(Patient.ORGANIZATION.hasAnyOfIds(Arrays.asList(o1id.getIdPart(), o2id.getIdPart())))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
@@ -3051,7 +3081,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (BundleEntryComponent ele : actual.getEntry()) {
 			actualIds.add(ele.getResource().getIdElement().getIdPart());
 		}
-		assertEquals(expectedIds, actualIds, "Expects to retrieve the 2 patients which reference the two different organizations");
+		assertThat(actualIds).as("Expects to retrieve the 2 patients which reference the two different organizations").isEqualTo(expectedIds);
 	}
 
 	@Test
@@ -3059,30 +3089,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IdType o1id = (IdType) ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		IdType o1id = (IdType) myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().setFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new Reference(o1id.toUnqualifiedVersionless()));
-		IdType p1Id = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType p1Id = (IdType) myClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
-		Bundle actual = ourClient.search()
+		Bundle actual = myClient.search()
 			.forResource(Patient.class)
 			.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
 		//@formatter:off
-		actual = ourClient.search()
+		actual = myClient.search()
 			.forResource(Patient.class)
 			.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
 	}
@@ -3095,13 +3125,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// should be subject._id
-		HttpGet httpPost = new HttpGet(ourServerBase + "/Observation?subject.id=FOO");
+		HttpGet httpPost = new HttpGet(myServerBase + "/Observation?subject.id=FOO");
 
 		CloseableHttpResponse resp = ourHttpClient.execute(httpPost);
 		try {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
-			assertThat(respString, containsString("Invalid parameter chain: subject.id"));
+			ourLog.debug(respString);
+			assertThat(respString).contains("Invalid parameter chain: subject.id");
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -3122,14 +3152,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().setFamily(methodName).addGiven("Joe");
-			id1a = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1a = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily(methodName + "XXXX").addGiven("Joe");
-			id1b = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1b = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
 		Thread.sleep(1100);
@@ -3141,23 +3171,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily(methodName).addGiven("John");
-			id2 = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id2 = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
 		{
 			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = myClient.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients, hasItems(id1a, id1b, id2));
+			assertThat(patients).contains(id1a, id1b, id2);
 		}
 		{
 			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = myClient.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.lastUpdated(new DateRangeParam(beforeAny, null))
@@ -3165,11 +3195,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients, hasItems(id1a, id1b, id2));
+			assertThat(patients).contains(id1a, id1b, id2);
 		}
 		{
 			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = myClient.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.lastUpdated(new DateRangeParam(beforeR2, null))
@@ -3177,12 +3207,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
+			assertThat(patients).contains(id2);
+			assertThat(patients).doesNotContain(id1a,id1b);
 		}
 		{
 			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = myClient.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.lastUpdated(new DateRangeParam(beforeAny, beforeR2))
@@ -3190,12 +3220,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 		{
 			//@formatter:off
-			Bundle found = ourClient.search()
+			Bundle found = myClient.search()
 				.forResource(Patient.class)
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.lastUpdated(new DateRangeParam(null, beforeR2))
@@ -3203,8 +3233,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 	}
 
@@ -3221,13 +3251,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ma.setMedication(new Reference(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/MedicationAdministration?medication.code=04823543");
+		HttpGet get = new HttpGet(myServerBase + "/MedicationAdministration?medication.code=04823543");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString, containsString(moId.getIdPart()));
+			assertThat(responseString).contains(moId.getIdPart());
 		} finally {
 			response.close();
 		}
@@ -3255,23 +3285,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<String> linkNext = Lists.newArrayList();
 		for (int i = 0; i < 100; i++) {
-			Bundle bundle = ourClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
+			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
 			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
-			assertEquals(5, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(5);
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
 
 		int index = 0;
 		for (String nextLink : linkNext) {
 			ourLog.info("Fetching index {}", index++);
-			Bundle b = ourClient.fetchResourceFromUrl(Bundle.class, nextLink);
-			assertEquals(5, b.getEntry().size());
+			Bundle b = myClient.fetchResourceFromUrl(Bundle.class, nextLink);
+			assertThat(b.getEntry()).hasSize(5);
 		}
 	}
 
 	private void testSearchReturnsResults(String search) throws IOException {
 		int matches;
-		HttpGet get = new HttpGet(ourServerBase + search);
+		HttpGet get = new HttpGet(myServerBase + search);
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(response.getEntity().getContent());
@@ -3279,7 +3309,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 		matches = bundle.getTotal();
 
-		assertThat(matches, greaterThan(0));
+		assertThat(matches).isGreaterThan(0);
 	}
 
 	@Test
@@ -3288,7 +3318,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Thread.sleep(1);
 
 		//@formatter:off
-		Bundle found = ourClient
+		Bundle found = myClient
 			.search()
 			.forResource(Patient.class)
 			.prettyPrint()
@@ -3306,7 +3336,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
 		assertTrue(value.after(before));
-		assertTrue(value.before(after), new InstantDt(value) + " should be before " + new InstantDt(after));
+		assertThat(value.before(after)).as(new InstantDt(value) + " should be before " + new InstantDt(after)).isTrue();
 	}
 
 	@Test
@@ -3317,11 +3347,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName("HELLO");
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(1000L);
 
-		Bundle result1 = ourClient
+		Bundle result1 = myClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
@@ -3329,7 +3359,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 
-		Bundle result2 = ourClient
+		Bundle result2 = myClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
@@ -3348,11 +3378,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName("HELLO");
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 
-		Bundle result1 = ourClient
+		Bundle result1 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3362,7 +3392,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 
-		Bundle result2 = ourClient
+		Bundle result2 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3372,7 +3402,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 
-		Bundle result3 = ourClient
+		Bundle result3 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3382,8 +3412,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String uuid3 = toSearchUuidFromLinkNext(result3);
 
-		assertNotEquals(uuid1, uuid2);
-		assertNotEquals(uuid1, uuid3);
+		assertThat(uuid2).isNotEqualTo(uuid1);
+		assertThat(uuid3).isNotEqualTo(uuid1);
 	}
 
 	@Test
@@ -3394,11 +3424,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName("HELLO");
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(1000L);
 
-		Bundle result1 = ourClient
+		Bundle result1 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3415,7 +3445,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		});
 		Date created1 = search1.getCreated();
 
-		Bundle result2 = ourClient
+		Bundle result2 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3436,7 +3466,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Thread.sleep(1500);
 
-		Bundle result3 = ourClient
+		Bundle result3 = myClient
 			.search()
 			.forResource("Organization")
 			.where(Organization.NAME.matches().value("HELLO"))
@@ -3447,7 +3477,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String uuid3 = toSearchUuidFromLinkNext(result3);
 
 		assertEquals(uuid1, uuid2);
-		assertNotEquals(uuid1, uuid3);
+		assertThat(uuid3).isNotEqualTo(uuid1);
 	}
 
 	@Test
@@ -3458,11 +3488,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName("HELLO");
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(100000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(100000L);
 
-		Bundle result1 = ourClient
+		Bundle result1 = myClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
@@ -3472,7 +3502,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date created1 = search1.getCreated();
 
-		Bundle result2 = ourClient
+		Bundle result2 = myClient
 			.search()
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
@@ -3495,10 +3525,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		ourClient.create().resource(patient).execute();
+		myClient.create().resource(patient).execute();
 
 		//@formatter:off
-		Bundle response = ourClient
+		Bundle response = myClient
 			.search()
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
@@ -3508,7 +3538,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient = (Patient) response.getEntry().get(0).getResource();
 
 		//@formatter:off
-		ourClient
+		myClient
 			.meta()
 			.add()
 			.onResource(patient.getIdElement())
@@ -3517,7 +3547,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		//@formatter:on
 
 		//@formatter:off
-		response = ourClient
+		response = myClient
 			.search()
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
@@ -3525,7 +3555,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		//@formatter:on
 
 		patient = (Patient) response.getEntry().get(0).getResource();
-		assertEquals(1, patient.getMeta().getTag().size());
+		assertThat(patient.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test
@@ -3548,7 +3578,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myPatientDao.create(patient, mySrd);
 
 		//@formatter:off
-		Bundle response = ourClient
+		Bundle response = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.hasSystemWithAnyCode("urn:system"))
@@ -3556,7 +3586,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	@Test
@@ -3564,7 +3594,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.getCode().addCoding().setSystem("foo").setCode("bar");
-		ourClient.create().resource(obs).execute();
+		myClient.create().resource(obs).execute();
 
 		testSearchWithEmptyParameter("/Observation?value-quantity=");
 		testSearchWithEmptyParameter("/Observation?code=bar&value-quantity=");
@@ -3575,12 +3605,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void testSearchWithEmptyParameter(String theUrl) throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + theUrl);
+		HttpGet get = new HttpGet(myServerBase + theUrl);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 		}
 	}
 
@@ -3588,15 +3618,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchWithInclude() {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
-		IdType orgId = (IdType) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IdType orgId = (IdType) myClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
 		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
-		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+		myClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		//@formatter:off
-		Bundle found = ourClient
+		Bundle found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2", "testSearchWithInclude02"))
@@ -3606,7 +3636,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(2, found.getEntry().size());
+		assertThat(found.getEntry()).hasSize(2);
 		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
 		assertEquals(SearchEntryMode.MATCH, found.getEntry().get(0).getSearch().getMode());
 		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
@@ -3617,15 +3647,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testOffsetSearchWithInclude() {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
-		IdType orgId = (IdType) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IdType orgId = (IdType) myClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
 		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
-		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+		myClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		//@formatter:off
-		Bundle found = ourClient
+		Bundle found = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2", "testSearchWithInclude02"))
@@ -3637,7 +3667,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(2, found.getEntry().size());
+		assertThat(found.getEntry()).hasSize(2);
 		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
 		assertEquals(SearchEntryMode.MATCH, found.getEntry().get(0).getSearch().getMode());
 		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
@@ -3648,7 +3678,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchWithInvalidNumberPrefix() {
 		try {
 			//@formatter:off
-			ourClient
+			myClient
 				.search()
 				.forResource(Encounter.class)
 				.where(Encounter.LENGTH.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
@@ -3656,9 +3686,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unable to handle number prefix \"eb\" for value: eb100"));
+			assertThat(e.getMessage()).contains("Unable to handle number prefix \"eb\" for value: eb100");
 		}
 	}
 
@@ -3669,7 +3699,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myObservationDao.create(o, mySrd);
 		try {
 			//@formatter:off
-			ourClient
+			myClient
 				.search()
 				.forResource(Observation.class)
 				.where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100).andNoUnits())
@@ -3677,9 +3707,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unable to handle quantity prefix \"eb\" for value: eb100||"));
+			assertThat(e.getMessage()).contains("Unable to handle quantity prefix \"eb\" for value: eb100||");
 		}
 	}
 
@@ -3693,15 +3723,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		o2.setValue(new Quantity().setValue(new BigDecimal("-20")));
 		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		HttpGet get = new HttpGet(ourServerBase + "/Observation?value-quantity=gt-15");
+		HttpGet get = new HttpGet(myServerBase + "/Observation?value-quantity=gt-15");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
-			assertThat(ids, contains(oid1));
-			assertThat(ids, not(hasItem(oid2)));
+			assertThat(ids).containsExactly(oid1);
+			assertThat(ids).doesNotContain(oid2);
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -3731,7 +3761,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -3743,7 +3773,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -3755,7 +3785,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -3767,10 +3797,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String uri = ourServerBase + "/Observation?_sort=code-value-date";
+		String uri = myServerBase + "/Observation?_sort=code-value-date";
 		Bundle found;
 		
 		HttpGet get = new HttpGet(uri);
@@ -3779,10 +3809,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
 		
-		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertEquals(4, found.getEntry().size());
+		assertThat(found.getEntry()).hasSize(4);
 		assertEquals(oid3, list.get(0));
 		assertEquals(oid1, list.get(1));
 		assertEquals(oid4, list.get(2));
@@ -3797,13 +3827,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
-		IIdType deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
-		ourClient.delete().resourceById(deletedIdMissingTrue).execute();
+		IIdType deletedIdMissingTrue = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		myClient.delete().resourceById(deletedIdMissingTrue).execute();
 
 		org = new Organization();
 		org.setName("Help I'm a Bug");
-		IIdType deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
-		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
+		IIdType deletedIdMissingFalse = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		myClient.delete().resourceById(deletedIdMissingFalse).execute();
 
 		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
@@ -3811,20 +3841,20 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			org.setName(methodName + "_0" + i);
 			resources.add(org);
 		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
 		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
 		org.setName(methodName + "name");
-		IIdType orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+		IIdType orgNotMissing = myClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
-		IIdType orgMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+		IIdType orgMissing = myClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		{
 			//@formatter:off
-			Bundle found = ourClient
+			Bundle found = myClient
 				.search()
 				.forResource(Organization.class)
 				.where(Organization.NAME.isMissing(false))
@@ -3837,13 +3867,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			ourLog.info(methodName + ": " + list.toString());
 			ourLog.info("Wanted " + orgNotMissing + " and not " + deletedIdMissingFalse + " but got " + list.size() + ": " + list);
-			assertThat("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list, list, containsInRelativeOrder(orgNotMissing));
-			assertThat(list, not(containsInRelativeOrder(deletedIdMissingFalse)));
-			assertThat(list, not(containsInRelativeOrder(orgMissing)));
+			assertThat(list).as("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list).contains(orgNotMissing);
+			assertThat(list).doesNotContain(deletedIdMissingFalse);
+			assertThat(list).doesNotContain(orgMissing);
 		}
 
 		//@formatter:off
-		Bundle found = ourClient
+		Bundle found = myClient
 			.search()
 			.forResource(Organization.class)
 			.where(Organization.NAME.isMissing(true))
@@ -3855,9 +3885,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
-		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
-		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));
-		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
+		assertThat(list).doesNotContain(orgNotMissing);
+		assertThat(list).doesNotContain(deletedIdMissingTrue);
+		assertThat(list).as("Wanted " + orgMissing + " but found: " + list).contains(orgMissing);
 	}
 
 	@Test
@@ -3880,15 +3910,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/MedicationRequest?date:missing=false");
+		HttpGet get = new HttpGet(myServerBase + "/MedicationRequest?date:missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
-			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(hasItem(id2.getValue())));
+			assertThat(ids).containsExactly(id1.getValue());
+			assertThat(ids).doesNotContain(id2.getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -3907,7 +3937,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient/_search?_format=application/xml");
+		HttpPost httpPost = new HttpPost(myServerBase + "/Patient/_search?_format=application/xml");
 		httpPost.addHeader("Cache-Control", "no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
@@ -3931,7 +3961,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Observation obs = new Observation();
 		obs.getCode().setText("THIS_IS_THE_TEXT");
 		obs.getCode().addCoding().setSystem("SYSTEM").setCode("CODE").setDisplay("THIS_IS_THE_DISPLAY");
-		ourClient.create().resource(obs).execute();
+		myClient.create().resource(obs).execute();
 
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_TEXT");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_");
@@ -3950,89 +3980,89 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Daniel").setFamily("Adams");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Aaron").setFamily("Alexis");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Carol").setFamily("Allen");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Ruth").setFamily("Black");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Brian").setFamily("Brooks");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Susan").setFamily("Clark");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Amy").setFamily("Clark");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Anthony").setFamily("Coleman");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Steven").setFamily("Coleman");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Lisa").setFamily("Coleman");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Ruth").setFamily("Cook");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Betty").setFamily("Davis");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Joshua").setFamily("Diaz");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Brian").setFamily("Gracia");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Stephan").setFamily("Graham");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addGiven("Sarah").setFamily("Graham");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 
-		Bundle resp = ourClient
+		Bundle resp = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
@@ -4046,24 +4076,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourLog.info(StringUtils.join(names, '\n'));
 
-		assertThat(names, contains( // this matches in order only
-			"Daniel Adams",
-			"Aaron Alexis",
-			"Carol Allen",
-			"Ruth Black",
-			"Brian Brooks",
-			"Amy Clark",
-			"Susan Clark",
-			"Anthony Coleman",
-			"Lisa Coleman",
-			"Steven Coleman",
-			"Ruth Cook",
-			"Betty Davis",
-			"Joshua Diaz",
-			"Brian Gracia",
-			"Sarah Graham",
-			"Stephan Graham"));
-
+		assertThat(names).containsExactly("Daniel Adams", "Aaron Alexis", "Carol Allen", "Ruth Black", "Brian Brooks", "Amy Clark", "Susan Clark", "Anthony Coleman", "Lisa Coleman", "Steven Coleman", "Ruth Cook", "Betty Davis", "Joshua Diaz", "Brian Gracia", "Sarah Graham", "Stephan Graham");
 	}
 
 	/**
@@ -4074,28 +4087,28 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
-		IdType orgId = (IdType) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IdType orgId = (IdType) myClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		// Read back directly from the DAO
 		{
 			Organization returned = myOrganizationDao.read(orgId, mySrd);
 			String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
-			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+			assertThat(val).contains("<name value=\"測試醫院\"/>");
 		}
 		// Read back through the HTTP API
 		{
-			Organization returned = ourClient.read(Organization.class, orgId.getIdPart());
+			Organization returned = myClient.read(Organization.class, orgId.getIdPart());
 			String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
-			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+			assertThat(val).contains("<name value=\"測試醫院\"/>");
 		}
 	}
 
 	@Test
 	public void testTransaction() throws Exception {
 		String contents = ClasspathUtil.loadResource("/update.xml");
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
 		CloseableHttpResponse resp = ourHttpClient.execute(post);
 		try {
@@ -4115,10 +4128,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.setManagingOrganization(new Reference("Organization/99999999999"));
 
 		try {
-			ourClient.create().resource(p1).execute().getId();
-			fail();
+			myClient.create().resource(p1).execute().getId();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Organization/99999999999"));
+			assertThat(e.getMessage()).contains("Organization/99999999999");
 		}
 
 	}
@@ -4131,7 +4144,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(ourServerBase + "/Patient");
+		HttpPut post = new HttpPut(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -4139,8 +4152,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(),
-				containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
+			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 		} finally {
 			response.close();
 		}
@@ -4155,14 +4167,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(ourServerBase + "/Patient");
+		HttpPut post = new HttpPut(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString, containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
-			assertThat(responseString, containsString("<OperationOutcome"));
+			assertThat(responseString).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
+			assertThat(responseString).contains("<OperationOutcome");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
@@ -4181,14 +4193,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(ourServerBase + "/Patient/FOO");
+		HttpPut post = new HttpPut(myServerBase + "/Patient/FOO");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(responseString, containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
-			assertThat(responseString, containsString("<OperationOutcome"));
+			assertThat(responseString).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
+			assertThat(responseString).contains("<OperationOutcome");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
@@ -4201,7 +4213,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType p1id = (IdType) myClient.create().resource(p1).execute().getId();
 
 		// Try to update with the wrong ID in the resource body
 		p1.setId("FOO");
@@ -4210,17 +4222,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
 		ourLog.info(encoded);
 
-		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse response = ourHttpClient.execute(put);
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals(
-				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
-					+ p1id.getIdPart() + "\"",
-				oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
+				+ p1id.getIdPart() + "\"");
 		} finally {
 			response.close();
 		}
@@ -4229,7 +4239,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.setId((String) null);
 
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
-		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		put = new HttpPut(myServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		put.addHeader("Accept", Constants.CT_FHIR_JSON);
 		response = ourHttpClient.execute(put);
@@ -4245,7 +4255,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.setId(p1id.getIdPart());
 
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
-		put = new HttpPut(ourServerBase + "/Patient/" + p1id.getIdPart());
+		put = new HttpPut(myServerBase + "/Patient/" + p1id.getIdPart());
 		put.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
@@ -4262,22 +4272,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdType p1id = (IdType) ourClient.create().resource(p1).execute().getId();
+		IdType p1id = (IdType) myClient.create().resource(p1).execute().getId();
 
 		Organization p2 = new Organization();
 		p2.setId(p1id.getIdPart());
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
 		try {
-			ourClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
+			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
+			fail("");
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
 		try {
-			ourClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
+			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
+			fail("");
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
@@ -4291,14 +4301,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
+		HttpPost post = new HttpPost(myServerBase + "/Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -4306,14 +4316,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAA");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
+		HttpPut put = new HttpPut(myServerBase + "/Patient?name=" + methodName);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
 			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
-			assertNotEquals(id, newId);
+			assertThat(newId).isNotEqualTo(id);
 		} finally {
 			response.close();
 		}
@@ -4326,7 +4336,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -4335,7 +4345,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -4343,7 +4353,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		pt.addName().setFamily("FOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
+		HttpPut put = new HttpPut(myServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		IdType id2;
@@ -4351,7 +4361,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -4370,14 +4380,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -4390,7 +4400,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.setId(id.getIdPart());
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
@@ -4416,14 +4426,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
 
-		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
+		MethodOutcome outcome = myClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
 		assertEquals(true, outcome.getCreated().booleanValue());
 		IdType p1Id = (IdType) outcome.getId();
 
-		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
+		assertThat(p1Id.getValue()).contains("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history");
 
 		//@formatter:off
-		Bundle actual = ourClient
+		Bundle actual = myClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
@@ -4433,7 +4443,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(1, actual.getEntry().size());
+		assertThat(actual.getEntry()).hasSize(1);
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
 	}
@@ -4442,24 +4452,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testUpdateWithSource() {
 		Patient patient = new Patient();
 		patient.setActive(false);
-		IIdType patientid = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		IIdType patientid = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		{
-			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			Patient readPatient = (Patient) myClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).matches("#[a-zA-Z0-9]+");
 		}
 
 		patient.setId(patientid);
 		patient.setActive(true);
-		ourClient.update().resource(patient).execute();
+		myClient.update().resource(patient).execute();
 		{
-			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			Patient readPatient = (Patient) myClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).matches("#[a-zA-Z0-9]+");
 
 			readPatient.addName().setFamily("testUpdateWithSource");
-			ourClient.update().resource(readPatient).execute();
-			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			myClient.update().resource(readPatient).execute();
+			readPatient = (Patient) myClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).matches("#[a-zA-Z0-9]+");
 		}
 	}
 
@@ -4469,13 +4479,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
-		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		pt.addName().setFamily("FAM2");
 		pt.setId(id.toUnqualifiedVersionless());
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"44\"");
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(put);
@@ -4484,13 +4494,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(409, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Trying to update Patient/" + id.getIdPart() + "/_history/44 but this is not the current version"));
+			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Trying to update Patient/" + id.getIdPart() + "/_history/44 but this is not the current version");
 		} finally {
 			response.close();
 		}
 
 		// Now a good one
-		put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"1\"");
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
@@ -4513,7 +4523,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(ourServerBase + "/Patient/A2");
+		HttpPut post = new HttpPut(myServerBase + "/Patient/A2");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -4521,23 +4531,37 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals(
-				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"",
-				oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
 	}
 
 	@Test
+	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
+		// Create Patient
+		Patient patient = new Patient();
+		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Read Patient
+		patient = (Patient) myClient.read().resource("Patient").withId(patient.getIdElement()).execute();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Update Patient with no changes
+		patient = (Patient) myClient.update().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+	}
+
+	@Test
 	public void testValidateBadInputViaGet() throws IOException {
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$validate?mode=create");
+		HttpGet get = new HttpGet(myServerBase + "/Patient/$validate?mode=create");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(resp, containsString("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)"));
+			assertThat(resp).contains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -4554,14 +4578,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(resp, containsString("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)"));
+			assertThat(resp).contains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -4577,14 +4601,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, not(containsString("Resource has no id")));
+			assertThat(resp).doesNotContain("Resource has no id");
 		}
 	}
 
@@ -4602,7 +4626,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.debug(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -4627,12 +4651,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart() + "/$validate");
+		HttpGet get = new HttpGet(myServerBase + "/Patient/" + id.getIdPart() + "/$validate");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("SHALL at least contain a contact's details or a reference to an organization"));
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp).contains("SHALL at least contain a contact's details or a reference to an organization");
 		}
 	}
 
@@ -4651,7 +4675,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/A123/$validate");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/A123/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -4677,7 +4701,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		input.addParameter().setName("resource").setResource(patient);
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate?_pretty=true");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -4685,11 +4709,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
-			assertThat(resp,
-				stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
-					"</issue>"));
+			assertThat(resp).doesNotContain("Resource has no id");
+			assertThat(resp).contains("<td>No issues detected during validation</td>");
+			assertThat(resp).contains("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
+				"</issue>");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -4704,7 +4727,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -4712,11 +4735,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
-			assertThat(resp,
-				stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
-					"</issue>"));
+			assertThat(resp).doesNotContain("Resource has no id");
+			assertThat(resp).contains("<td>No issues detected during validation</td>");
+			assertThat(resp).contains("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
+				"</issue>");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -4726,30 +4748,30 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testValueSetExpandOperation() throws IOException {
 		CodeSystem cs = myFhirContext.newXmlParser().parseResource(CodeSystem.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/extensional-case-3-cs.xml")));
-		ourClient.create().resource(cs).execute();
+		myClient.create().resource(cs).execute();
 
 		ValueSet upload = myFhirContext.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/extensional-case-3-vs.xml")));
-		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
+		IIdType vsid = myClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
+		HttpGet get = new HttpGet(myServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-			assertThat(resp, containsString("<expansion>"));
-			assertThat(resp, containsString("<contains>"));
-			assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-			assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-			assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-			assertThat(resp, containsString("</contains>"));
-			assertThat(resp, containsString("<contains>"));
-			assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-			assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-			assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-			assertThat(resp, containsString("</contains>"));
-			assertThat(resp, containsString("</expansion>"));
+			assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+			assertThat(resp).contains("<expansion>");
+			assertThat(resp).contains("<contains>");
+			assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+			assertThat(resp).contains("<code value=\"8450-9\"/>");
+			assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+			assertThat(resp).contains("</contains>");
+			assertThat(resp).contains("<contains>");
+			assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+			assertThat(resp).contains("<code value=\"11378-7\"/>");
+			assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+			assertThat(resp).contains("</contains>");
+			assertThat(resp).contains("</expansion>");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -4759,16 +4781,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		 * Filter with display name
 		 */
 
-		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
+		get = new HttpGet(myServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
 		response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			//@formatter:off
-			assertThat(resp, stringContainsInOrder(
+			assertThat(resp).contains(
 				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+				"<display value=\"Systolic blood pressure at First encounter\"/>");
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -4777,9 +4799,42 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+	@Test
+	public void testDocumentReferenceWith500CharAttachmentUrl() throws IOException {
+		final DocumentReference.ReferredDocumentStatus docStatus = DocumentReference.ReferredDocumentStatus.FINAL;
+		final String longUrl = StringUtils.repeat("a", 500);
+
+		DocumentReference submittedDocumentReference = new DocumentReference();
+		submittedDocumentReference.setDocStatus(docStatus);
+
+		Attachment attachment = new Attachment();
+		attachment.setUrl(longUrl);
+		submittedDocumentReference.getContentFirstRep().setAttachment(attachment);
+
+		String json = myFhirContext.newJsonParser().encodeResourceToString(submittedDocumentReference);
+		HttpPost post = new HttpPost(myServerBase + "/DocumentReference");
+		post.setEntity(new StringEntity(json, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(HttpStatus.CREATED.value(), response.getStatusLine().getStatusCode());
+
+			DocumentReference createdDocumentReferenced = myFhirContext.newJsonParser().parseResource(DocumentReference.class, resp);
+			assertEquals(docStatus, createdDocumentReferenced.getDocStatus());
+			assertEquals(longUrl, createdDocumentReferenced.getContentFirstRep().getAttachment().getUrl());
+		}
+	}
+
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
+	private IIdType createPatientWithMeta(Meta theMeta){
+
+		Patient patient = new Patient();
+		patient.setMeta(theMeta);
+		return myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	}
 
 }

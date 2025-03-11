@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -12,15 +13,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void afterResetConfig() {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(new DaoConfig().isEnforceReferentialIntegrityOnWrite());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(new JpaStorageSettings().isEnforceReferentialIntegrityOnWrite());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 	}
 
 	@Test
@@ -30,7 +31,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 		p.setManagingOrganization(new Reference("Organization/AAA"));
 		try {
 			myPatientDao.create(p);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
@@ -39,7 +40,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@Test
 	public void testCreateUnknownReferenceAllow() throws Exception {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/AAA"));
@@ -62,7 +63,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 		try {
 			myOrganizationDao.delete(oid);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
@@ -74,7 +75,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@Test
 	public void testDeleteAllow() throws Exception {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization o = new Organization();
 		o.setName("FOO");

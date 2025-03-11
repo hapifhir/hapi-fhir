@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,15 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.List;
 
-@Transactional(propagation = Propagation.MANDATORY)
-public interface IDeleteExpungeSvc {
+public interface IDeleteExpungeSvc<T extends IResourcePersistentId<?>> {
 
-	void deleteExpunge(List<ResourcePersistentId> thePersistentIds);
+	int deleteExpunge(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds);
+
+	boolean isCascadeSupported();
 }

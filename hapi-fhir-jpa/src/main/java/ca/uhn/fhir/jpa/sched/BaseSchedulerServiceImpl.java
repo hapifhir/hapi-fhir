@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.sched;
-
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,29 @@ package ca.uhn.fhir.jpa.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ISmartLifecyclePhase;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </li>
  * </ul>
  */
-public abstract class BaseSchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
+public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
@@ -72,8 +74,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	@Autowired
 	private Environment myEnvironment;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
+
 	@Autowired
 	protected AutowiringSpringBeanJobFactory mySchedulerJobFactory;
 
@@ -132,7 +136,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		return retval;
 	}
 
-	private boolean isSchedulingDisabled() {
+	public boolean isSchedulingDisabled() {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
@@ -140,18 +144,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	protected abstract IHapiScheduler getClusteredScheduler();
 
-	/**
-	 * We defer startup of executing started tasks until we're sure we're ready for it
-	 * and the startup is completely done
-	 */
-
-	@Override
-	public int getPhase() {
-		return ISmartLifecyclePhase.SCHEDULER_1000;
-	}
-
-	@Override
+	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
+
+		// Jobs are scheduled first to avoid a race condition that occurs if jobs are scheduled
+		// after the scheduler starts for the first time. This race condition results in duplicate
+		// TRIGGER_ACCESS entries being added to the QRTZ_LOCKS table.
+		// Note - Scheduling jobs before the scheduler has started is supported by Quartz
+		// http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/CreateScheduler.html
+		scheduleJobs();
+
+		myStopping.set(false);
+
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
 			if (myLocalScheduler != null) {
@@ -166,18 +170,20 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		}
 	}
 
-	@Override
+	private void scheduleJobs() {
+		Collection<IHasScheduledJobs> values =
+				myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
+		ourLog.info("Scheduling {} jobs in {}", values.size(), myApplicationContext.getId());
+		values.forEach(t -> t.scheduleJobs(this));
+	}
+
+	@PreDestroy
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 
 		myStopping.set(true);
 		myLocalScheduler.shutdown();
 		myClusteredScheduler.shutdown();
-	}
-
-	@Override
-	public boolean isRunning() {
-		return !myStopping.get() && myLocalScheduler.isStarted() && myClusteredScheduler.isStarted();
 	}
 
 	@Override
@@ -193,6 +199,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	}
 
 	@Override
+	public void pause() {
+		myLocalScheduler.pause();
+		myClusteredScheduler.pause();
+	}
+
+	@Override
+	public void unpause() {
+		myLocalScheduler.unpause();
+		myClusteredScheduler.unpause();
+	}
+
+	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		scheduleJob("local", myLocalScheduler, theIntervalMillis, theJobDefinition);
 	}
@@ -202,7 +220,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		scheduleJob("clustered", myClusteredScheduler, theIntervalMillis, theJobDefinition);
 	}
 
-	private void scheduleJob(String theInstanceName, IHapiScheduler theScheduler, long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
+	private void scheduleJob(
+			String theInstanceName,
+			IHapiScheduler theScheduler,
+			long theIntervalMillis,
+			ScheduledJobDefinition theJobDefinition) {
 		if (isSchedulingDisabled()) {
 			return;
 		}
@@ -210,7 +232,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		assert theJobDefinition.getId() != null;
 		assert theJobDefinition.getJobClass() != null;
 
-		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
+		ourLog.info(
+				"Scheduling {} job {} with interval {}",
+				theInstanceName,
+				theJobDefinition.getId(),
+				StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}

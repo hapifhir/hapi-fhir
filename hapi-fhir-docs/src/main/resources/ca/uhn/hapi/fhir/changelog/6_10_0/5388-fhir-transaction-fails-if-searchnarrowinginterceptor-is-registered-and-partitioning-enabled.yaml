@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5388
+title: "Previously, with partitioning enabled and `UrlBaseTenantIdentificationStrategy` used, registering 
+`SearchNarrowingInterceptor` would cause to incorrect resolution of `entry.request.url` parameter during 
+transaction bundle processing. This has been fixed."

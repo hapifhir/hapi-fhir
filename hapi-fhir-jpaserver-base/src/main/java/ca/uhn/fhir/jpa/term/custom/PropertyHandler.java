@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.custom;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.custom;
 
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
@@ -56,15 +55,17 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 			String type = trim(theRecord.get(TYPE));
 
 			List<TermConceptProperty> conceptProperties = myCode2Properties.get(code);
-			if (conceptProperties == null)
-				conceptProperties = new ArrayList<>();
+			if (conceptProperties == null) conceptProperties = new ArrayList<>();
 
-			TermConceptProperty conceptProperty = TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(conceptProperty, "Concept property %s not found in file", conceptProperty);
+			TermConceptProperty conceptProperty =
+					TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
+			ValidateUtil.isNotNullOrThrowUnprocessableEntity(
+					conceptProperty, "Concept property %s not found in file", conceptProperty);
 
 			conceptProperty.setKey(key);
 			conceptProperty.setValue(value);
-			//TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum contain different types
+			// TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum
+			// contain different types
 			conceptProperty.setType(TermConceptPropertyTypeEnum.STRING);
 			conceptProperties.add(conceptProperty);
 			myCode2Properties.put(code, conceptProperties);

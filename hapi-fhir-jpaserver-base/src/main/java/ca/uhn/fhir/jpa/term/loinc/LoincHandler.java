@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,13 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
@@ -33,10 +31,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -44,16 +39,16 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincHandler implements IZipContentsHandlerCsv {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
-
-	// most coding properties are not loaded by this handler, except these
-	private static final List<String> myCodingPropertiesToLoad = List.of("AskAtOrderEntry", "AssociatedObservations");
-
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
 	private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
 
-	public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
+	public LoincHandler(
+			TermCodeSystemVersion theCodeSystemVersion,
+			Map<String, TermConcept> theCode2concept,
+			Map<String, CodeSystem.PropertyType> thePropertyNames,
+			Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
@@ -73,10 +68,7 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 			concept.setDisplay(display);
 
 			if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
-				concept
-					.addDesignation()
-					.setUseDisplay("ShortName")
-					.setValue(shortName);
+				concept.addDesignation().setUseDisplay("ShortName").setValue(shortName);
 			}
 
 			for (String nextPropertyName : myPropertyNames.keySet()) {
@@ -93,18 +85,15 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 					switch (nextPropertyType) {
 						case STRING:
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
-							ourLog.trace("Adding string property: {} to concept.code {}", nextPropertyName, concept.getCode());
+							ourLog.trace(
+									"Adding string property: {} to concept.code {}",
+									nextPropertyName,
+									concept.getCode());
 							break;
 
 						case CODING:
-							if (myCodingPropertiesToLoad.contains(nextPropertyName)) {
-								List<String> propertyCodeValues = parsePropertyCodeValues(nextPropertyValue);
-								for (String propertyCodeValue : propertyCodeValues) {
-									concept.addPropertyCoding(nextPropertyName, ITermLoaderSvc.LOINC_URI, propertyCodeValue, display);
-									ourLog.trace("Adding coding property: {} to concept.code {}", nextPropertyName, concept.getCode());
-								}
-							}
-							// rest of "Coding" property types are handled by partlink, hierarchy, RsnaPlaybook or DocumentOntology handlers
+							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy,
+							// RsnaPlaybook or DocumentOntology handlers
 							break;
 
 						case DECIMAL:
@@ -113,20 +102,14 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 						case BOOLEAN:
 						case DATETIME:
 						case NULL:
-							throw new InternalErrorException(Msg.code(915) + "Don't know how to handle LOINC property of type: " + nextPropertyType);
+							throw new InternalErrorException(Msg.code(915)
+									+ "Don't know how to handle LOINC property of type: " + nextPropertyType);
 					}
-
 				}
 			}
 
 			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 			myCode2Concept.put(code, concept);
 		}
-	}
-
-	private List<String> parsePropertyCodeValues(String theValue) {
-		return Arrays.stream( theValue.split(";") )
-			.map(String::trim)
-			.collect(Collectors.toList());
 	}
 }

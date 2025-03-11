@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.docker;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,13 @@ package ca.uhn.fhir.test.utilities.docker;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.docker;
 
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.DockerClientFactory;
 
 
@@ -32,16 +33,30 @@ import org.testcontainers.DockerClientFactory;
 public class DockerRequiredCondition implements ExecutionCondition {
 	public static final String AVAILABLE_MSG = "Docker is installed so we can run these tests!";
 	public static final String UNAVAILABLE_MSG = "It appears as though docker is not installed on the host machine!";
+	private static final Logger ourLog = LoggerFactory.getLogger(DockerRequiredCondition.class);
+	private static Boolean ourIsDockerAvailable;
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext theExtensionContext) {
-		try {
-			boolean isDockerAvailable = DockerClientFactory.instance().isDockerAvailable();
-			return isDockerAvailable
-				? ConditionEvaluationResult.enabled(AVAILABLE_MSG)
-				: ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
-		} catch (Exception e) {
-			return ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
+		boolean isDockerAvailable;
+		isDockerAvailable = isDockerAvailable();
+		return isDockerAvailable
+			? ConditionEvaluationResult.enabled(AVAILABLE_MSG)
+			: ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
+	}
+
+	public static boolean isDockerAvailable() {
+		Boolean retVal = ourIsDockerAvailable;
+		if (retVal != null) {
+			return retVal;
 		}
+		try {
+			retVal = DockerClientFactory.instance().isDockerAvailable();
+		} catch (Exception e) {
+			retVal = false;
+		}
+		ourLog.info("Docker available: {}", retVal);
+		ourIsDockerAvailable = retVal;
+		return retVal;
 	}
 }

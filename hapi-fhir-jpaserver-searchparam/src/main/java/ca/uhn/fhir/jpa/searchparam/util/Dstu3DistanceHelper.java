@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.util;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -30,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.List;
-
 
 /**
  * In DSTU3, the near-distance search parameter is separate from near.  In this utility method,
@@ -68,7 +66,8 @@ public class Dstu3DistanceHelper {
 					ReferenceParam referenceParam = (ReferenceParam) param;
 					if (Location.SP_NEAR_DISTANCE.equals(referenceParam.getChain())) {
 						if (retval != null) {
-							throw new IllegalArgumentException(Msg.code(494) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+							throw new IllegalArgumentException(Msg.code(494) + "Only one " + Location.SP_NEAR_DISTANCE
+									+ " parameter may be present");
 						} else {
 							retval = referenceParam;
 							orParamToRemove = param;
@@ -95,12 +94,13 @@ public class Dstu3DistanceHelper {
 		// No near-distance Param
 		if (sum == 0) {
 			return null;
-		// A single near-distance Param
+			// A single near-distance Param
 		} else if (sum == 1) {
 			return (QuantityParam) theParamAndList.get(0).get(0);
-		// Too many near-distance params
+			// Too many near-distance params
 		} else {
-			throw new IllegalArgumentException(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+			throw new IllegalArgumentException(
+					Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 	}
 }

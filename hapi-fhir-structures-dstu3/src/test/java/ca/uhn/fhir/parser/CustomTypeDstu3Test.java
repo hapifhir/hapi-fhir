@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -27,13 +29,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.assertj.core.api.Assertions.assertThat;
 public class CustomTypeDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -74,7 +70,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(encoded);
 		
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithTwoTypes.class, encoded);
-		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType)pt.getFoo()).getValueAsString());
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	@ResourceDef
@@ -102,7 +98,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(encoded);
 		
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithOneTypes.class, encoded);
-		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType)pt.getFoo()).getValueAsString());
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	/**
@@ -122,11 +118,11 @@ public class CustomTypeDstu3Test {
 		ourLog.info(xml);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSubsequence(
 				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 				"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
-				"</CustomResource>"));
+				"</CustomResource>");
 		//@formatter:on
 
 		CustomResource364Dstu3 parsedResource = parser.parseResource(CustomResource364Dstu3.class, xml);
@@ -149,11 +145,11 @@ public class CustomTypeDstu3Test {
 		String xml = parser.encodeResourceToString(resource);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSubsequence(
 				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 				"<baseValueString value=\"2016-05-13\"/>",
-				"</CustomResource>"));
+				"</CustomResource>");
 		//@formatter:on
 
 		CustomResource364Dstu3 parsedResource = parser.parseResource(CustomResource364Dstu3.class, xml);
@@ -170,16 +166,16 @@ public class CustomTypeDstu3Test {
 		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, input);
 
 		Patient res0 = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(0, res0.getMeta().getProfile().size());
+		assertThat(res0.getMeta().getProfile()).isEmpty();
 		List<org.hl7.fhir.dstu3.model.Extension> exts = res0.getExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
+		assertThat(exts).hasSize(1);
 		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
-		assertEquals(1, res1.getMeta().getProfile().size());
+		assertThat(res1.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
+		assertThat(exts).isEmpty();
 		assertEquals("185 cm", res1.getWeight().getValue());
 	}
 
@@ -191,11 +187,11 @@ public class CustomTypeDstu3Test {
 		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
 
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertThat(parsed.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.dstu3.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
+		assertThat(exts).isEmpty();
 
 		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
@@ -206,26 +202,26 @@ public class CustomTypeDstu3Test {
 
 		FhirContext ctx = FhirContext.forDstu3();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertThat(parsed.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.dstu3.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
+		assertThat(exts).hasSize(1);
 		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 	}
 
 	@Test
 	public void testAccessEmptyMetaLists() {
 		Patient p = new Patient();
-		assertThat(p.getMeta().getProfile(), empty());
-		assertThat(p.getMeta().getFormatCommentsPost(), empty());
-		assertThat(p.getMeta().getFormatCommentsPre(), empty());
-		assertThat(p.getMeta().getLastUpdated(), nullValue());
-		assertThat(p.getMeta().getSecurity(), empty());
-		assertThat(p.getMeta().getSecurity("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getTag(), empty());
-		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getVersionId(), nullValue());
+		assertThat(p.getMeta().getProfile()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPost()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPre()).isEmpty();
+		assertNull(p.getMeta().getLastUpdated());
+		assertThat(p.getMeta().getSecurity()).isEmpty();
+		assertNull(p.getMeta().getSecurity("foo", "bar"));
+		assertThat(p.getMeta().getTag()).isEmpty();
+		assertNull(p.getMeta().getTag("foo", "bar"));
+		assertNull(p.getMeta().getVersionId());
 
 	}
 
@@ -243,7 +239,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(out);
 
 		//@formatter:off
-		assertThat(out, stringContainsInOrder(
+		assertThat(out).contains(
 			"<meta>", 
 			"<profile value=\"http://foo/profile1\"/>", 
 			"<profile value=\"http://foo/profile2\"/>", 
@@ -265,7 +261,7 @@ public class CustomTypeDstu3Test {
 			"<system value=\"TAG_S2\"/>", 
 			"<display value=\"TAG_D2\"/>", 
 			"</tag>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 	}
@@ -294,18 +290,14 @@ public class CustomTypeDstu3Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).contains(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
+		assertThat(messageString).doesNotContainPattern("(?s)<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 
@@ -336,19 +328,15 @@ public class CustomTypeDstu3Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).contains(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
+		assertThat(messageString).doesNotContainPattern("(?s)<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 

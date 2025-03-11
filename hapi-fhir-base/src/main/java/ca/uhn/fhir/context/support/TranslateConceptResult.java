@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context.support;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context.support;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.support;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -53,14 +52,14 @@ public class TranslateConceptResult {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("system", mySystem)
-			.append("code", myCode)
-			.append("display", myDisplay)
-			.append("equivalence", myEquivalence)
-			.append("conceptMapUrl", myConceptMapUrl)
-			.append("valueSet", myValueSet)
-			.append("systemVersion", mySystemVersion)
-			.toString();
+				.append("system", mySystem)
+				.append("code", myCode)
+				.append("display", myDisplay)
+				.append("equivalence", myEquivalence)
+				.append("conceptMapUrl", myConceptMapUrl)
+				.append("valueSet", myValueSet)
+				.append("systemVersion", mySystemVersion)
+				.toString();
 	}
 
 	public String getCode() {

@@ -1,32 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.ParametersUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jboss.logging.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.TreeSet;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +17,38 @@ import java.util.TreeSet;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jboss.logging.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class BaseJpaProvider {
 	public static final String REMOTE_ADDR = "req.remoteAddr";
 	public static final String REMOTE_UA = "req.userAgent";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
+
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private FhirContext myContext;
 
@@ -55,11 +56,15 @@ public abstract class BaseJpaProvider {
 		super();
 	}
 
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
-	protected ExpungeOptions createExpungeOptions(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected ExpungeOptions createExpungeOptions(
+			IPrimitiveType<? extends Integer> theLimit,
+			IPrimitiveType<? extends Boolean> theExpungeDeletedResources,
+			IPrimitiveType<? extends Boolean> theExpungeOldVersions,
+			IPrimitiveType<? extends Boolean> theExpungeEverything) {
 		ExpungeOptions options = new ExpungeOptions();
 		if (theLimit != null && theLimit.getValue() != null) {
 			options.setLimit(theLimit.getValue());
@@ -82,16 +87,9 @@ public abstract class BaseJpaProvider {
 	protected IBaseParameters createExpungeResponse(ExpungeOutcome theOutcome) {
 		IBaseParameters parameters = ParametersUtil.newInstance(getContext());
 		String value = Integer.toString(theOutcome.getDeletedCount());
-		ParametersUtil.addParameterToParameters(getContext(), parameters, JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, "integer", value);
+		ParametersUtil.addParameterToParameters(
+				getContext(), parameters, JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, "integer", value);
 		return parameters;
-	}
-
-	/**
-	 * @param theRequest The servlet request
-	 */
-	public void endRequest(HttpServletRequest theRequest) {
-		MDC.remove(REMOTE_ADDR);
-		MDC.remove(REMOTE_UA);
 	}
 
 	public void endRequest(ServletRequestDetails theRequest) {
@@ -107,7 +105,8 @@ public abstract class BaseJpaProvider {
 	}
 
 	protected DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
-		boolean haveAt = theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
+		boolean haveAt =
+				theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
 		if (haveAt && theSince != null) {
 			String msg = getContext().getLocalizer().getMessage(BaseJpaProvider.class, "cantCombintAtAndSince");
 			throw new InvalidRequestException(Msg.code(553) + msg);
@@ -120,24 +119,34 @@ public abstract class BaseJpaProvider {
 		return new DateRangeParam(theSince, null);
 	}
 
-	public void startRequest(HttpServletRequest theRequest) {
+	/**
+	 * @param theRequest The servlet request
+	 */
+	public static void endRequest(HttpServletRequest theRequest) {
+		MDC.remove(REMOTE_ADDR);
+		MDC.remove(REMOTE_UA);
+	}
+
+	public static void startRequest(HttpServletRequest theRequest) {
 		if (theRequest == null) {
 			return;
 		}
 
-		Set<String> headerNames = new TreeSet<String>();
-		for (Enumeration<String> enums = theRequest.getHeaderNames(); enums.hasMoreElements(); ) {
-			headerNames.add(enums.nextElement());
+		if (ourLog.isDebugEnabled()) {
+			Set<String> headerNames = new TreeSet<>();
+			for (Enumeration<String> enums = theRequest.getHeaderNames(); enums.hasMoreElements(); ) {
+				headerNames.add(enums.nextElement());
+			}
+			ourLog.debug("Request headers: {}", headerNames);
 		}
-		ourLog.debug("Request headers: {}", headerNames);
 
 		Enumeration<String> forwardedFors = theRequest.getHeaders("x-forwarded-for");
 		StringBuilder b = new StringBuilder();
-		for (Enumeration<String> enums = forwardedFors; enums != null && enums.hasMoreElements(); ) {
+		for (; forwardedFors != null && forwardedFors.hasMoreElements(); ) {
 			if (b.length() > 0) {
 				b.append(" / ");
 			}
-			b.append(enums.nextElement());
+			b.append(forwardedFors.nextElement());
 		}
 
 		String forwardedFor = b.toString();
@@ -152,12 +161,9 @@ public abstract class BaseJpaProvider {
 
 		String userAgent = StringUtils.defaultString(theRequest.getHeader("user-agent"));
 		org.slf4j.MDC.put(REMOTE_UA, userAgent);
-
 	}
 
-	public void startRequest(ServletRequestDetails theRequest) {
+	public static void startRequest(ServletRequestDetails theRequest) {
 		startRequest(theRequest.getServletRequest());
 	}
-
-
 }

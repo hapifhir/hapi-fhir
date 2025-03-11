@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -27,6 +26,9 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Objects;
 
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
@@ -38,12 +40,8 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	 * This will only be set if the resource is being triggered for a specific
 	 * subscription
 	 */
-	@JsonProperty(value = "subscriptionId", required = false)
+	@JsonProperty(value = "subscriptionId")
 	private String mySubscriptionId;
-
-	@JsonProperty(value = "partitionId", required = false)
-	private RequestPartitionId myPartitionId;
-
 
 	/**
 	 * Constructor
@@ -52,21 +50,43 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		super(theIdType, theOperationType);
+		setPartitionId(RequestPartitionId.defaultPartition());
+	}
+
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
-		myPartitionId = RequestPartitionId.defaultPartition();
+		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theResource,
+			OperationTypeEnum theOperationType,
+			RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theResource, theOperationType);
+		setPartitionId(theRequestPartitionId);
+	}
+
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		myPartitionId = RequestPartitionId.defaultPartition();
+		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		myPartitionId = theRequestPartitionId;
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
 	}
-
 
 	public String getSubscriptionId() {
 		return mySubscriptionId;
@@ -76,22 +96,31 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
+	public void setPayloadToNull() {
+		myPayload = null;
 	}
-
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
-	}
-
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("subscriptionId", mySubscriptionId)
-			.append("payloadId", myPayloadId)
-			.append("partitionId", myPartitionId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("subscriptionId", mySubscriptionId)
+				.append("payloadId", myPayloadId)
+				.append("partitionId", myPartitionId)
+				.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		ResourceModifiedMessage that = (ResourceModifiedMessage) theO;
+		return Objects.equals(getSubscriptionId(), that.getSubscriptionId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getSubscriptionId());
 	}
 }

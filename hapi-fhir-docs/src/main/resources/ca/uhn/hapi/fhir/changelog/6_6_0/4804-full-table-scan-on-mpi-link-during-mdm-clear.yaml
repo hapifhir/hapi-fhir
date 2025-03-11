@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4804
+jira: SMILE-5145
+title: "Improved performance of `mdm-clear` operation by adding index and avoiding redundant deletion."

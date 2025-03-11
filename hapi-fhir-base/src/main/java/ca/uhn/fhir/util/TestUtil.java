@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -32,6 +31,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+
+	private static SleepUtil ourSleepUtil = new SleepUtil();
+
 	private static boolean ourShouldRandomizeTimezones = true;
 
 	public static void setShouldRandomizeTimezones(boolean theShouldRandomizeTimezones) {
@@ -57,7 +59,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void doRandomizeLocaleAndTimezone() {
-//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+		//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale[] availableLocales = {Locale.US};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
@@ -79,7 +81,6 @@ public class TestUtil {
 
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 	}
-
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
@@ -137,26 +138,22 @@ public class TestUtil {
 		return stripReturns(theString).replace(" ", "");
 	}
 
+	/**
+	 *
+	 * In production code, instead of this static method, it is better to use an instance of SleepUtil.
+	 * Since SleepUtil isn't using static methods, it is easier to mock for unit test and avoid unnecessary waits in
+	 * unit tests
+	 */
 	public static void sleepAtLeast(long theMillis) {
-		sleepAtLeast(theMillis, true);
+		ourSleepUtil.sleepAtLeast(theMillis);
 	}
 
-
-	@SuppressWarnings("BusyWait")
+	/**
+	 * In production code, instead of this static method, it is better to use an instance of SleepUtil.
+	 * Since SleepUtil isn't using static methods, it is easier to mock for unit test and avoid unnecessary waits in
+	 * unit tests
+	 */
 	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {
-		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() <= start + theMillis) {
-			try {
-				long timeSinceStarted = System.currentTimeMillis() - start;
-				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
-				if (theLogProgress) {
-					ourLog.info("Sleeping for {}ms", timeToSleep);
-				}
-				Thread.sleep(timeToSleep);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				ourLog.error("Interrupted", e);
-			}
-		}
+		ourSleepUtil.sleepAtLeast(theMillis, theLogProgress);
 	}
 }

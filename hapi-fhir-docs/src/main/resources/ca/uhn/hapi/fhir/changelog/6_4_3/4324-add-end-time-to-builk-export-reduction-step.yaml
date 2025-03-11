@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4324
+title: "Fix issue where end time is missing for bulk exports on completion"

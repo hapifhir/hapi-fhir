@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -33,16 +32,23 @@ public class MetadataSource {
 	 */
 	public boolean isOnlineIndexSupported(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 
+		// todo: delete this once we figure out how run Oracle try-catch as well.
 		switch (theConnectionProperties.getDriverType()) {
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
 				return true;
 			case MSSQL_2012:
+				// use a deny-list instead of allow list, so we have a better failure mode for new/unknown versions.
+				// Better to fail in dev than run with a table lock in production.
 				String mssqlEdition = getEdition(theConnectionProperties);
-				return mssqlEdition.startsWith("Enterprise");
+				return mssqlEdition == null // some weird version without an edition?
+						||
+						// these versions don't support ONLINE index creation
+						!mssqlEdition.startsWith("Standard Edition");
 			case ORACLE_12C:
 				String oracleEdition = getEdition(theConnectionProperties);
-				return oracleEdition.contains("Enterprise");
+				return oracleEdition == null // weird unknown version - try, and maybe fail.
+						|| oracleEdition.contains("Enterprise");
 			default:
 				return false;
 		}
@@ -57,9 +63,13 @@ public class MetadataSource {
 	private String getEdition(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		final String result;
 		if (theConnectionProperties.getDriverType() == DriverTypeEnum.MSSQL_2012) {
-			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT SERVERPROPERTY ('edition')", String.class);
+			result = theConnectionProperties
+					.newJdbcTemplate()
+					.queryForObject("SELECT SERVERPROPERTY ('edition')", String.class);
 		} else if (theConnectionProperties.getDriverType() == DriverTypeEnum.ORACLE_12C) {
-			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT BANNER FROM v$version WHERE banner LIKE 'Oracle%'", String.class);
+			result = theConnectionProperties
+					.newJdbcTemplate()
+					.queryForObject("SELECT BANNER FROM v$version WHERE banner LIKE 'Oracle%'", String.class);
 		} else {
 			throw new UnsupportedOperationException(Msg.code(2084) + "We only know about MSSQL editions.");
 		}

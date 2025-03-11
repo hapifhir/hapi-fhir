@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -39,6 +38,11 @@ public interface IRestfulClientFactory {
 	public static final int DEFAULT_CONNECTION_REQUEST_TIMEOUT = 10000;
 
 	/**
+	 * Default value for {@link #getConnectionTimeToLive()}
+	 */
+	public static final int DEFAULT_CONNECTION_TTL = 5000;
+
+	/**
 	 * Default value for {@link #getServerValidationModeEnum()}
 	 */
 	public static final ServerValidationModeEnum DEFAULT_SERVER_VALIDATION_MODE = ServerValidationModeEnum.ONCE;
@@ -47,17 +51,17 @@ public interface IRestfulClientFactory {
 	 * Default value for {@link #getSocketTimeout()}
 	 */
 	public static final int DEFAULT_SOCKET_TIMEOUT = 10000;
-	
+
 	/**
 	 * Default value for {@link #getPoolMaxTotal() ()}
 	 */
 	public static final int DEFAULT_POOL_MAX = 20;
-	
+
 	/**
 	 * Default value for {@link #getPoolMaxPerRoute() }
 	 */
 	public static final int DEFAULT_POOL_MAX_PER_ROUTE = DEFAULT_POOL_MAX;
-	
+
 	/**
 	 * Gets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection
 	 * pool may wait for an available connection before failing. This setting typically does not need to be adjusted.
@@ -66,7 +70,7 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	int getConnectionRequestTimeout();
-	
+
 	/**
 	 * Gets the connect timeout, in milliseconds. This is the amount of time that the initial connection attempt network
 	 * operation may block without failing.
@@ -77,6 +81,16 @@ public interface IRestfulClientFactory {
 	int getConnectTimeout();
 
 	/**
+	 * Gets the connection time to live, in milliseconds. This is the amount of time to keep connections alive for reuse.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_CONNECTION_TTL}
+	 * </p>
+	 */
+	default int getConnectionTimeToLive() {
+		return DEFAULT_CONNECTION_TTL;
+	}
+
+	/**
 	 * Returns the HTTP client instance. This method will not return null.
 	 * @param theUrl
 	 *            The complete FHIR url to which the http request will be sent
@@ -85,12 +99,17 @@ public interface IRestfulClientFactory {
 	 * @param theIfNoneExistString
 	 *            The param for header "If-None-Exist" as a string
 	 * @param theRequestType
-	 *            the type of HTTP request (GET, DELETE, ..) 
+	 *            the type of HTTP request (GET, DELETE, ..)
 	 * @param theHeaders
 	 *            the headers to be sent together with the http request
 	 * @return the HTTP client instance
 	 */
-	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
+	IHttpClient getHttpClient(
+			StringBuilder theUrl,
+			Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString,
+			RequestTypeEnum theRequestType,
+			List<Header> theHeaders);
 
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead (this method is a synonym for that method, but this method is poorly named and will be removed at some point)
@@ -99,13 +118,13 @@ public interface IRestfulClientFactory {
 	ServerValidationModeEnum getServerValidationModeEnum();
 
 	/**
-	 * Gets the server validation mode for any clients created from this factory. Server 
+	 * Gets the server validation mode for any clients created from this factory. Server
 	 * validation involves the client requesting the server's conformance statement
-	 * to determine whether the server is appropriate for the given client. 
+	 * to determine whether the server is appropriate for the given client.
 	 * <p>
 	 * The default value for this setting is defined by {@link #DEFAULT_SERVER_VALIDATION_MODE}
 	 * </p>
-	 * 
+	 *
 	 * @since 1.0
 	 */
 	ServerValidationModeEnum getServerValidationMode();
@@ -134,10 +153,10 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	int getPoolMaxPerRoute();
-	
+
 	/**
 	 * Instantiates a new client instance
-	 * 
+	 *
 	 * @param theClientType
 	 *            The client type, which is an interface type to be instantiated
 	 * @param theServerBase
@@ -150,7 +169,7 @@ public interface IRestfulClientFactory {
 
 	/**
 	 * Instantiates a new generic client instance
-	 * 
+	 *
 	 * @param theServerBase
 	 *            The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
@@ -176,9 +195,17 @@ public interface IRestfulClientFactory {
 	void setConnectTimeout(int theConnectTimeout);
 
 	/**
+	 * Sets the connection time to live, in milliseconds. This is the amount of time to keep connections alive for reuse.
+	 * <p>
+	 * The default value for this setting is defined by {@link #DEFAULT_CONNECTION_TTL}
+	 * </p>
+	 */
+	default void setConnectionTimeToLive(int theConnectionTimeToLive) {}
+
+	/**
 	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to
 	 * <code>null</code>, a new HTTP client with default settings will be created.
-	 * 
+	 *
 	 * @param theHttpClient
 	 *            An HTTP client instance to use, or <code>null</code>
 	 */
@@ -186,7 +213,7 @@ public interface IRestfulClientFactory {
 
 	/**
 	 * Sets the HTTP proxy to use for outgoing connections
-	 * 
+	 *
 	 * @param theHost
 	 *            The host (or null to disable proxying, as is the default)
 	 * @param thePort
@@ -209,17 +236,17 @@ public interface IRestfulClientFactory {
 	void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode);
 
 	/**
-	 * Sets the server validation mode for any clients created from this factory. Server 
+	 * Sets the server validation mode for any clients created from this factory. Server
 	 * validation involves the client requesting the server's conformance statement
-	 * to determine whether the server is appropriate for the given client. 
+	 * to determine whether the server is appropriate for the given client.
 	 * <p>
 	 * This check is primarily to validate that the server supports an appropriate
 	 * version of FHIR
-	 * </p> 
+	 * </p>
 	 * <p>
 	 * The default value for this setting is defined by {@link #DEFAULT_SERVER_VALIDATION_MODE}
 	 * </p>
-	 * 
+	 *
 	 * @since 1.0
 	 */
 	void setServerValidationMode(ServerValidationModeEnum theServerValidationMode);
@@ -248,12 +275,12 @@ public interface IRestfulClientFactory {
 	 * </p>
 	 */
 	void setPoolMaxPerRoute(int thePoolMaxPerRoute);
-	
+
 	void validateServerBase(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient);
 
 	/**
 	 * This method is internal to HAPI - It may change in future versions, use with caution.
-	 */	
-	void validateServerBaseIfConfiguredToDoSo(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient);
-
+	 */
+	void validateServerBaseIfConfiguredToDoSo(
+			String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient);
 }

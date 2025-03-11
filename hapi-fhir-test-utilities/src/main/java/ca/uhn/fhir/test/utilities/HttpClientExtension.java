@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,31 @@ package ca.uhn.fhir.test.utilities;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
+	private boolean myDontFollowRedirects;
+
+	public HttpClientExtension dontFollowRedirects() {
+		myDontFollowRedirects = true;
+		return this;
+	}
 
 	public CloseableHttpClient getClient() {
 		return myClient;
@@ -45,8 +54,26 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 	@Override
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
-		myClient = HttpClientBuilder
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		connectionManager.setMaxTotal(99);
+		connectionManager.setDefaultMaxPerRoute(99);
+
+		SocketConfig socketConfig = SocketConfig
+			.copy(SocketConfig.DEFAULT)
+			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
+			.build();
+		connectionManager.setDefaultSocketConfig(socketConfig);
+
+		HttpClientBuilder builder = HttpClientBuilder
 			.create()
+			.setConnectionManager(connectionManager)
+			.setMaxConnPerRoute(99);
+
+		if (myDontFollowRedirects) {
+			builder.disableRedirectHandling();
+		}
+
+		myClient = builder
 			.build();
 	}
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,75 +17,101 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-@Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
-@Table(name = "HFJ_SPIDX_URI", indexes = {
-	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"),
-	@Index(name = "IDX_SP_URI_HASH_IDENTITY", columnList = "HASH_IDENTITY,SP_URI"),
-	@Index(name = "IDX_SP_URI_HASH_URI", columnList = "HASH_URI"),
-	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"),
-	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
-})
+@Table(
+		name = "HFJ_SPIDX_URI",
+		indexes = {
+			// for queries
+			@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID"),
+			// for sorting
+			@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID"),
+			// for index create/delete
+			@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
+		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
-	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
+	 * Be careful when modifying this value
+	 * MySQL chokes on indexes with combined column length greater than 3052 bytes (768 chars)
+	 * https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
 	 */
-	public static final int MAX_LENGTH = 254;
+	public static final int MAX_LENGTH = 500;
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@FullTextField
 	public String myUri;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
+	@GenericGenerator(name = "SEQ_SPIDX_URI", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
 	@Column(name = "SP_ID")
 	private Long myId;
+
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_URI", nullable = true)
 	private Long myHashUri;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"),
-		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FKGXSREUTYMMFJUWDSWV3Y887DO"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	/**
 	 * Constructor
@@ -99,7 +123,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
+	public ResourceIndexedSearchParamUri(
+			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
@@ -117,11 +142,15 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+	@Override
 	public void clearHashes() {
 		myHashIdentity = null;
 		myHashUri = null;
 	}
-
 
 	@Override
 	public void calculateHashes() {
@@ -149,20 +178,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	private void setHashIdentity(long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashUri() {
@@ -183,7 +203,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myId = theId;
 	}
 
-
 	public String getUri() {
 		return myUri;
 	}
@@ -196,11 +215,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getUri());
 		b.append(getHashUri());
 		b.append(getHashIdentity());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -216,6 +234,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append("resourceId", getResourcePid());
 		b.append("paramName", getParamName());
 		b.append("uri", myUri);
+		b.append("hashUri", myHashUri);
+		b.append("hashIdentity", myHashIdentity);
 		return b.toString();
 	}
 
@@ -228,15 +248,24 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
+	public static long calculateHashUri(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUri) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
 	}
 
-	public static long calculateHashUri(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
+	public static long calculateHashUri(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUri) {
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
-
 
 	@Override
 	public ResourceTable getResource() {
@@ -245,7 +274,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

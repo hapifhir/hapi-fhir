@@ -5,21 +5,18 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-tinder-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<!-- <packaging>jar</packaging> -->
 
 	<name>HAPI Tinder Plugin</name>
 
 	<properties>
-		<previous_hapi_fhir_version>6.1.0</previous_hapi_fhir_version>
-		<!-- TODO KHS is this still needed?
-		<maven_version>3.1.1</maven_version>
-		-->
+		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
 	</properties>
 
 	<dependencies>
@@ -33,12 +30,27 @@
 			<artifactId>hapi-fhir-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- 
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-sql-migrate</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--
 		Because Tinder is a part of the HAPI FHIR build process (it generates
-		a bunch of the actual HAPI structure code), but also uses HAPI FHIR 
+		a bunch of the actual HAPI structure code), but also uses HAPI FHIR
 		in order to run (e.g. to load ValueSet resources), we keep the dependencies
 		for the structures
-		a version behind the main library. This is weird, but it works. 
+		a version behind the main library. This is weird, but it works.
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -65,37 +77,47 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-			<version>6.2.0-PRE12-SNAPSHOT</version>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
@@ -147,48 +169,18 @@
 		<!-- Maven -->
 		<dependency>
 			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-project</artifactId>
-			<!--
-		<exclusions>
-			<exclusion>
-				<groupId>org.codehaus.plexus</groupId>
-				<artifactId>plexus-utils</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-model</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-artifact</artifactId>
-			</exclusion>
-		</exclusions>
-		-->
+			<artifactId>maven-core</artifactId>
+		<version>3.9.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
-			<!--
-            <exclusions>
-				<exclusion>
-					<groupId>org.eclipse.sisu</groupId>
-					<artifactId>org.eclipse.sisu.plexus</artifactId>
-				</exclusion>
-			</exclusions>
-			-->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
 			<scope>provided</scope>
-			<!--
-            <exclusions>
-				<exclusion>
-					<groupId>org.apache.maven</groupId>
-					<artifactId>maven-artifact</artifactId>
-				</exclusion>
-			</exclusions>
-			-->
 		</dependency>
 
 		<!-- Ant tasks -->
@@ -212,6 +204,23 @@
 			<version>1.15</version>
 		</dependency>
 
+		<!-- Hibernate deps -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-ant</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
 
 	</dependencies>
 
@@ -239,6 +248,7 @@
 				<configuration>
 					<!-- see http://jira.codehaus.org/browse/MNG-5346 -->
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+					<goalPrefix>hapi-tinder</goalPrefix>
 				</configuration>
 
 				<executions>
@@ -251,42 +261,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-plugin-plugin
-										</artifactId>
-										<versionRange>
-											[3.2,)
-										</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 </project>

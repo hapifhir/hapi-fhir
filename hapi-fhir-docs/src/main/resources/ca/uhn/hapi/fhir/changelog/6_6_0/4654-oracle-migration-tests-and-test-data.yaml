@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4654
+title: "Adds an Oracle embedded database to the automated migration test scaffolding. Also adds an initialization schema 
+(version 5.1.0) with test data to the automated migration tests."

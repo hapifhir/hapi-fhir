@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param.binder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,14 @@ package ca.uhn.fhir.rest.param.binder;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Calendar;
+package ca.uhn.fhir.rest.param.binder;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 
+import java.util.Calendar;
+
 public final class CalendarBinder extends BaseJavaPrimitiveBinder<Calendar> {
-	public CalendarBinder() {
-	}
+	public CalendarBinder() {}
 
 	@Override
 	protected String doEncode(Calendar theString) {
@@ -37,6 +35,4 @@ public final class CalendarBinder extends BaseJavaPrimitiveBinder<Calendar> {
 	protected Calendar doParse(String theString) {
 		return new InstantDt(theString).getValueAsCalendar();
 	}
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 public enum ColumnTypeEnum {
-
 	LONG,
 	STRING,
 	DATE_ONLY,
@@ -29,7 +27,17 @@ public enum ColumnTypeEnum {
 	BOOLEAN,
 	FLOAT,
 	INT,
+	TINYINT,
 	BLOB,
 	CLOB,
-	DOUBLE;
+	DOUBLE,
+
+	/**
+	 * Unlimited length text, with a column definition containing the annotation:
+	 * <code>@Column(length=Integer.MAX_VALUE)</code>
+	 */
+	TEXT,
+	/** Long inline binary */
+	BINARY,
+	BIG_DECIMAL;
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -75,11 +74,17 @@ public class ResourceIndexedSearchParamComposite {
 	 * @param theComponentSearchParam the component SP we are extracting
 	 * @param theExtractedParams index data extracted by the sub-extractor
 	 */
-	public void addComponentIndexedSearchParams(RuntimeSearchParam theComponentSearchParam, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
-		addComponentIndexedSearchParams(theComponentSearchParam.getName(), theComponentSearchParam.getParamType(), theExtractedParams);
+	public void addComponentIndexedSearchParams(
+			RuntimeSearchParam theComponentSearchParam,
+			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+		addComponentIndexedSearchParams(
+				theComponentSearchParam.getName(), theComponentSearchParam.getParamType(), theExtractedParams);
 	}
 
-	public void addComponentIndexedSearchParams(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+	public void addComponentIndexedSearchParams(
+			String theComponentSearchParamName,
+			RestSearchParameterTypeEnum theComponentSearchParamType,
+			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
 		myComponents.add(new Component(theComponentSearchParamName, theComponentSearchParamType, theExtractedParams));
 	}
 
@@ -103,7 +108,10 @@ public class ResourceIndexedSearchParamComposite {
 		 */
 		private final ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> myParamIndexValues;
 
-		private Component(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
+		private Component(
+				String theComponentSearchParamName,
+				RestSearchParameterTypeEnum theComponentSearchParamType,
+				ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
 			mySearchParamName = theComponentSearchParamName;
 			mySearchParameterType = theComponentSearchParamType;
 			myParamIndexValues = theParamIndexValues;
@@ -126,5 +134,4 @@ public class ResourceIndexedSearchParamComposite {
 			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		}
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,21 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-import java.lang.annotation.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+package ca.uhn.fhir.rest.annotation;
 
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a> and <a
  * href="http://hl7.org/implement/standards/fhir/http.html#vread">vread</a> method.
- * 
+ *
  * <p>
  * If this method has a parameter annotated with the {@link IdParam} annotation and a parameter annotated with the {@link VersionIdParam} annotation, the method will be treated as a vread method. If
  * the method has only a parameter annotated with the {@link IdParam} annotation, it will be treated as a read operation.

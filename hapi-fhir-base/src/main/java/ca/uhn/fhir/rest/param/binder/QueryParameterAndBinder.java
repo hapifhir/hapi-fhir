@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param.binder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param.binder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param.binder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -31,21 +30,27 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import java.util.List;
 
-public final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>> implements IParamBinder<IQueryParameterAnd<?>> {
+public final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>>
+		implements IParamBinder<IQueryParameterAnd<?>> {
 
-	public QueryParameterAndBinder(Class<? extends IQueryParameterAnd<?>> theType, List<Class<? extends IQueryParameterType>> theCompositeTypes) {
+	public QueryParameterAndBinder(
+			Class<? extends IQueryParameterAnd<?>> theType,
+			List<Class<? extends IQueryParameterType>> theCompositeTypes) {
 		super(theType, theCompositeTypes);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterAnd<?> theString) throws InternalErrorException {
-		List<IQueryParameterOr<?>> retVal = (List<IQueryParameterOr<?>>) ((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
+	public List<IQueryParameterOr<?>> encode(FhirContext theContext, IQueryParameterAnd<?> theString)
+			throws InternalErrorException {
+		List<IQueryParameterOr<?>> retVal =
+				(List<IQueryParameterOr<?>>) ((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
 		return retVal;
 	}
 
 	@Override
-	public IQueryParameterAnd<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterAnd<?> parse(FhirContext theContext, String theParamName, List<QualifiedParamList> theString)
+			throws InternalErrorException, InvalidRequestException {
 		IQueryParameterAnd<?> dt;
 		try {
 			dt = newInstance();

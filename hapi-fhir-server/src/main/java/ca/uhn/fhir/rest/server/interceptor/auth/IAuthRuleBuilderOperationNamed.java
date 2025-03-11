@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,12 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Collection;
 
 public interface IAuthRuleBuilderOperationNamed {
 
@@ -45,6 +46,8 @@ public interface IAuthRuleBuilderOperationNamed {
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
 
+	IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds);
+
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type
 	 */
@@ -59,5 +62,4 @@ public interface IAuthRuleBuilderOperationNamed {
 	 * Rule applies to invocations of this operation at any level (server, type or instance)
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped atAnyLevel();
-
 }

@@ -6,56 +6,48 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionLoaderTest {
 
-	private Logger ourLogger;
-
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
-	@Mock
-	private Appender<ILoggingEvent> myAppender;
+	@RegisterExtension
+	LogbackTestExtension myLogCapture = new LogbackTestExtension(SubscriptionLoader.class);
 
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	@Mock
-	private DaoRegistry myDaoRegistery;
+	private DaoRegistry myDaoRegistry;
 
 	@Mock
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
@@ -76,18 +68,13 @@ public class SubscriptionLoaderTest {
 	@Mock
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	@Mock
+	private IFhirResourceDao mySubscriptionDao;
 	@InjectMocks
 	private SubscriptionLoader mySubscriptionLoader;
 
-	private Level myStoredLogLevel;
-
 	@BeforeEach
 	public void init() {
-		ourLogger = (Logger) LoggerFactory.getLogger(SubscriptionLoader.class);
-
-		myStoredLogLevel = ourLogger.getLevel();
-		ourLogger.addAppender(myAppender);
-
 		when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 			anyString(),
 			any(SearchParameterMap.class),
@@ -95,13 +82,9 @@ public class SubscriptionLoaderTest {
 			anyLong()
 		)).thenReturn(mySubscriptionCache);
 
-		mySubscriptionLoader.registerListener();
-	}
+		when(myDaoRegistry.getResourceDaoOrNull("Subscription")).thenReturn(mySubscriptionDao);
 
-	@AfterEach
-	public void end() {
-		ourLogger.detachAppender(myAppender);
-		ourLogger.setLevel(myStoredLogLevel);
+		mySubscriptionLoader.registerListener();
 	}
 
 	private IBundleProvider getSubscriptionList(List<IBaseResource> theReturnedResource) {
@@ -117,43 +100,32 @@ public class SubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
 		subscription.setError("THIS IS AN ERROR");
-		IFhirResourceDao<Subscription> subscriptionDao = mock(IFhirResourceDao.class);
-
-		ourLogger.setLevel(Level.ERROR);
 
 		// when
-		when(myDaoRegistery.getSubscriptionDao())
-				.thenReturn(subscriptionDao);
-		when(myDaoRegistery.isResourceTypeSupported(anyString()))
+		when(myDaoRegistry.getResourceDao("Subscription"))
+			.thenReturn(mySubscriptionDao);
+		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
 				.thenReturn(true);
-		when(subscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
-			.thenReturn(getSubscriptionList(
-				Collections.singletonList(subscription)
-			));
-		when(mySchedulerSvc.isStopping())
-				.thenReturn(false);
+		when(mySubscriptionDao.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
+			.thenReturn(List.of(subscription));
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
-				.thenReturn(false);
+			.thenReturn(false);
+
+		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
+			.thenReturn(true);
 
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
-		
+
 		// test
-		mySubscriptionLoader.syncSubscriptions();
+		mySubscriptionLoader.syncDatabaseToCache();
 
 		// verify
-		verify(subscriptionDao)
-			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
+		verify(mySubscriptionDao)
+			.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
-		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myAppender).doAppend(eventCaptor.capture());
-		String actual = "Subscription "
-			+ subscription.getIdElement().getIdPart()
-			+ " could not be activated.";
-		String msg = eventCaptor.getValue().getMessage();
-		Assertions.assertTrue(msg
-			.contains(actual),
-			String.format("Expected %s, actual %s", msg, actual));
-		Assertions.assertTrue(msg.contains(subscription.getError()));
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(
+			"Subscription " + subscription.getIdElement().getIdPart() + " could not be activated.");
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasMessage(subscription.getError());
 	}
 }

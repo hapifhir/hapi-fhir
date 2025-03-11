@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -42,6 +42,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,7 +59,7 @@ public class NonGenericClientR4Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	
-		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
+		HapiSystemProperties.enableHapiClientKeepResponses();
 
 	}
 
@@ -93,8 +94,8 @@ public class NonGenericClientR4Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		List<MyPatientWithExtensions> list = client.search();
-		
-		assertEquals(1, list.size());
+
+		assertThat(list).hasSize(1);
 		assertEquals(MyPatientWithExtensions.class, list.get(0).getClass());
 	}
 	

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -46,9 +45,9 @@ public class PartTypeAndPartName {
 		PartTypeAndPartName that = (PartTypeAndPartName) theO;
 
 		return new EqualsBuilder()
-			.append(myPartType, that.myPartType)
-			.append(myPartName, that.myPartName)
-			.isEquals();
+				.append(myPartType, that.myPartType)
+				.append(myPartName, that.myPartName)
+				.isEquals();
 	}
 
 	public String getPartName() {
@@ -61,17 +60,14 @@ public class PartTypeAndPartName {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myPartType)
-			.append(myPartName)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myPartType).append(myPartName).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("partType", myPartType)
-			.append("partName", myPartName)
-			.toString();
+				.append("partType", myPartType)
+				.append("partName", myPartName)
+				.toString();
 	}
 }

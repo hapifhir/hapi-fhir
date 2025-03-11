@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation.helpers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.PropertyModifyingHelper;
@@ -42,8 +41,9 @@ public class AddressHelper extends PropertyModifyingHelper {
 	public static final String FIELD_POSTAL = "postalCode";
 	public static final String FIELD_COUNTRY = "country";
 
-	public static final String[] FIELD_NAMES = {FIELD_TEXT, FIELD_LINE, FIELD_CITY, FIELD_DISTRICT, FIELD_STATE,
-		FIELD_POSTAL, FIELD_COUNTRY};
+	public static final String[] FIELD_NAMES = {
+		FIELD_TEXT, FIELD_LINE, FIELD_CITY, FIELD_DISTRICT, FIELD_STATE, FIELD_POSTAL, FIELD_COUNTRY
+	};
 
 	public static final String[] ADDRESS_PARTS = {FIELD_CITY, FIELD_DISTRICT, FIELD_STATE, FIELD_POSTAL};
 
@@ -93,9 +93,9 @@ public class AddressHelper extends PropertyModifyingHelper {
 
 	public String getParts() {
 		return Arrays.stream(ADDRESS_PARTS)
-			.map(this::get)
-			.filter(s -> !StringUtils.isBlank(s))
-			.collect(Collectors.joining(getDelimiter()));
+				.map(this::get)
+				.filter(s -> !StringUtils.isBlank(s))
+				.collect(Collectors.joining(getDelimiter()));
 	}
 
 	public String getLine() {
@@ -119,5 +119,4 @@ public class AddressHelper extends PropertyModifyingHelper {
 	public String toString() {
 		return getFields(FIELD_NAMES);
 	}
-
 }

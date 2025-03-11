@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,41 +17,49 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.WARNING_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = "BT2_JOB_INSTANCE", indexes = {
-	@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")
-})
+@Table(
+		name = "BT2_JOB_INSTANCE",
+		indexes = {@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")})
 public class Batch2JobInstanceEntity implements Serializable {
 
 	public static final int STATUS_MAX_LENGTH = 20;
 	public static final int TIME_REMAINING_LENGTH = 100;
 	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
 	private static final long serialVersionUID = 8187134261799095422L;
+	public static final int INITIATING_USER_NAME_MAX_LENGTH = 200;
+	public static final int INITIATING_CLIENT_ID_MAX_LENGTH = 200;
 
 	@Id
 	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
@@ -71,6 +77,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
 
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
+
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myDefinitionId;
 
@@ -79,44 +90,73 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private StatusEnum myStatus;
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
+
 	@Column(name = "FAST_TRACKING", nullable = true)
 	private Boolean myFastTracking;
+
+	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
-	@Lob
+
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
+
+	@Column(name = "PARAMS_JSON_VC", nullable = true, length = Length.LONG32)
+	private String myParamsJsonVc;
+
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
 	private Integer myCombinedRecordsProcessed;
+
 	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
 	private Double myCombinedRecordsProcessedPerSecond;
+
 	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
 	private Integer myTotalElapsedMillis;
+
 	@Column(name = "WORK_CHUNKS_PURGED", nullable = false)
 	private boolean myWorkChunksPurged;
-	@Column(name = "PROGRESS_PCT")
+
+	@Column(name = "PROGRESS_PCT", nullable = false)
 	private double myProgress;
+
 	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myErrorMessage;
-	@Column(name = "ERROR_COUNT")
+
+	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
+
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
 	private String myEstimatedTimeRemaining;
+
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
+
+	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
+	private String myWarningMessages;
+
+	@Column(name = "USER_NAME", length = INITIATING_USER_NAME_MAX_LENGTH, nullable = true)
+	private String myTriggeringUsername;
+
+	@Column(name = "CLIENT_ID", length = INITIATING_CLIENT_ID_MAX_LENGTH, nullable = true)
+	private String myTriggeringClientId;
 
 	/**
 	 * Any output from the job can be held in this column
 	 * Even serialized json
 	 */
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String myReport;
+
+	@Column(name = "REPORT_VC", nullable = true, length = Length.LONG32)
+	private String myReportVc;
 
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
@@ -190,6 +230,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEndTime = theEndTime;
 	}
 
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
+
 	public String getId() {
 		return myId;
 	}
@@ -223,6 +271,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public String getParams() {
+		if (myParamsJsonVc != null) {
+			return myParamsJsonVc;
+		}
 		if (myParamsJsonLob != null) {
 			return myParamsJsonLob;
 		}
@@ -230,13 +281,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public void setParams(String theParams) {
+		myParamsJsonVc = theParams;
 		myParamsJsonLob = null;
 		myParamsJson = null;
-		if (theParams != null && theParams.length() > PARAMS_JSON_MAX_LENGTH) {
-			myParamsJsonLob = theParams;
-		} else {
-			myParamsJson = theParams;
-		}
 	}
 
 	public boolean getWorkChunksPurged() {
@@ -272,34 +319,65 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public String getReport() {
-		return myReport;
+		return myReportVc != null ? myReportVc : myReport;
 	}
 
 	public void setReport(String theReport) {
-		myReport = theReport;
+		myReportVc = theReport;
+		myReport = null;
+	}
+
+	public String getWarningMessages() {
+		return myWarningMessages;
+	}
+
+	public void setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
+	}
+
+	public String getTriggeringUsername() {
+		return myTriggeringUsername;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringUsername(String theTriggeringUsername) {
+		myTriggeringUsername = theTriggeringUsername;
+		return this;
+	}
+
+	public String getTriggeringClientId() {
+		return myTriggeringClientId;
+	}
+
+	public Batch2JobInstanceEntity setTriggeringClientId(String theTriggeringClientId) {
+		myTriggeringClientId = theTriggeringClientId;
+		return this;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("id", myId)
-			.append("definitionId", myDefinitionId)
-			.append("definitionVersion", myDefinitionVersion)
-			.append("errorCount", myErrorCount)
-			.append("createTime", myCreateTime)
-			.append("startTime", myStartTime)
-			.append("endTime", myEndTime)
-			.append("status", myStatus)
-			.append("cancelled", myCancelled)
-			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
-			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
-			.append("totalElapsedMillis", myTotalElapsedMillis)
-			.append("workChunksPurged", myWorkChunksPurged)
-			.append("progress", myProgress)
-			.append("errorMessage", myErrorMessage)
-			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("report", myReport)
-			.toString();
+				.append("id", myId)
+				.append("definitionId", myDefinitionId)
+				.append("definitionVersion", myDefinitionVersion)
+				.append("errorCount", myErrorCount)
+				.append("createTime", myCreateTime)
+				.append("startTime", myStartTime)
+				.append("endTime", myEndTime)
+				.append("updateTime", myUpdateTime)
+				.append("status", myStatus)
+				.append("cancelled", myCancelled)
+				.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+				.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+				.append("totalElapsedMillis", myTotalElapsedMillis)
+				.append("workChunksPurged", myWorkChunksPurged)
+				.append("progress", myProgress)
+				.append("errorMessage", myErrorMessage)
+				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+				.append("report", getReport())
+				.append("warningMessages", myWarningMessages)
+				.append("initiatingUsername", myTriggeringUsername)
+				.append("initiatingclientId", myTriggeringClientId)
+				.toString();
 	}
 
 	/**

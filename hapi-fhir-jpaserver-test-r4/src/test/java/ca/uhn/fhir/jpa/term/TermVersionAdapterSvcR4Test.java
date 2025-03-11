@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.InvalidParameterException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +58,7 @@ class TermVersionAdapterSvcR4Test {
 			InvalidParameterException.class,
 			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
 
-		assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
+		assertThat(thrown.getMessage()).contains("'loinc' CodeSystem must have an 'ID' element");
 	}
 
 

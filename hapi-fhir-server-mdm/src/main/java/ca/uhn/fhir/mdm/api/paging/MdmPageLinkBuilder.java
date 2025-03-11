@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.api.paging;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.mdm.api.paging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api.paging;
 
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.springframework.data.domain.Page;
@@ -44,22 +43,31 @@ public final class MdmPageLinkBuilder {
 	 *
 	 * @return the {@link MdmPageLinkTuple}
 	 */
-	public static MdmPageLinkTuple buildMdmPageLinks(ServletRequestDetails theServletRequestDetails, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
-		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServletRequestDetails.getFhirServerBase(), theServletRequestDetails, Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
+	public static MdmPageLinkTuple buildMdmPageLinks(
+			ServletRequestDetails theServletRequestDetails,
+			Page<MdmLinkJson> theCurrentPage,
+			MdmPageRequest thePageRequest) {
+		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(
+				theServletRequestDetails.getFhirServerBase(),
+				theServletRequestDetails,
+				Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
 		return buildMdmPageLinks(urlWithoutPaging, theCurrentPage, thePageRequest);
 	}
 
-	public static MdmPageLinkTuple buildMdmPageLinks(String theUrlWithoutPaging, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
+	public static MdmPageLinkTuple buildMdmPageLinks(
+			String theUrlWithoutPaging, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
 		MdmPageLinkTuple tuple = new MdmPageLinkTuple();
-		tuple.setSelfLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
+		tuple.setSelfLink(buildLinkWithOffsetAndCount(
+				theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
 		if (theCurrentPage.hasNext()) {
-			tuple.setNextLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getNextOffset()));
+			tuple.setNextLink(buildLinkWithOffsetAndCount(
+					theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getNextOffset()));
 		}
 		if (theCurrentPage.hasPrevious()) {
-			tuple.setPreviousLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
+			tuple.setPreviousLink(buildLinkWithOffsetAndCount(
+					theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
 		}
 		return tuple;
-
 	}
 
 	public static String buildLinkWithOffsetAndCount(String theBaseUrl, int theCount, int theOffset) {

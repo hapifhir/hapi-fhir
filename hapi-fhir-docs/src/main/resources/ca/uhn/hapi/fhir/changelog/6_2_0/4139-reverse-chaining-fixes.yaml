@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4139
+title: "Two issues with reverse chaining (i.e. the `_has` search parameter) have been addressed:
+   * Searching for a reverse chain with a target search parameter of `_id` did not work correctly, e.g. `Patient?_has:Observation:subject:_id=Patient/123`
+   * Searching with a combination of a forward chain and a reverse chain did not work correctly if indexing contained resources was enabled, e.g. `Observation?subject._has:Group:member:_id=Group/123`"

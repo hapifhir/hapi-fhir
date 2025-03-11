@@ -1,15 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +17,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
-
+	Long getSubscriptionTablePidForSubscriptionResource(
+			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

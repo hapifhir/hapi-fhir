@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,16 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+
+import java.util.List;
 
 public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -34,14 +36,17 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 	 * Constructor
 	 */
 	public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMP_STRING_UNIQ"));
+		super(
+				theSearchSqlBuilder,
+				theSearchSqlBuilder.addTable(ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ));
 
 		myColumnString = getTable().addColumn("IDX_STRING");
 	}
 
-
-	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
+	public Condition createPredicateIndexString(
+			RequestPartitionId theRequestPartitionId, List<String> theIndexStrings) {
+		Condition predicate =
+				QueryParameterUtils.toEqualToOrInPredicate(myColumnString, generatePlaceholders(theIndexStrings));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

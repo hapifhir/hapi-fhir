@@ -1,13 +1,8 @@
-package ca.uhn.fhir.util.jar;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.ReflectionUtil;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +17,13 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.jar;
+
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class DependencyLogFactory {
-	
+
 	/**
 	 * Non instantiable
 	 */
@@ -32,7 +31,7 @@ public class DependencyLogFactory {
 	private DependencyLogFactory() {
 		// nothing
 	}
-	
+
 	public static IDependencyLog createJarLogger() {
 		return ReflectionUtil.newInstanceOrReturnNull("ca.uhn.fhir.util.jar.DependencyLogImpl", IDependencyLog.class);
 	}

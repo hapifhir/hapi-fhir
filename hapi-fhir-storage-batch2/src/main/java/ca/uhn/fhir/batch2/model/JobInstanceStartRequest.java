@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -57,6 +56,16 @@ public class JobInstanceStartRequest implements IModelJson {
 		setParameters(theJobInstance.getParameters());
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @since 6.8.0
+	 */
+	public JobInstanceStartRequest(String theJobDefinitionId, IModelJson theParameters) {
+		setJobDefinitionId(theJobDefinitionId);
+		setParameters(theParameters);
+	}
+
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
 	}
@@ -73,8 +82,14 @@ public class JobInstanceStartRequest implements IModelJson {
 		myParameters = theParameters;
 	}
 
+	/**
+	 * Sets the parameters for the job.
+	 * Please note that these need to be backward compatible as we do not have a way to migrate them to a different structure at the moment.
+	 * @param theParameters the parameters
+	 * @return the current instance.
+	 */
 	public JobInstanceStartRequest setParameters(IModelJson theParameters) {
-		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
+		myParameters = JsonUtil.serializeWithSensitiveData(theParameters);
 		return this;
 	}
 
@@ -89,17 +104,15 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myUseCache;
 	}
 
-
 	public void setUseCache(boolean theUseCache) {
 		myUseCache = theUseCache;
 	}
 
 	@Override
 	public String toString() {
-		return "JobInstanceStartRequest{" +
-			"myJobDefinitionId='" + myJobDefinitionId + '\'' +
-			", myParameters='" + myParameters + '\'' +
-			", myUseCache=" + myUseCache +
-			'}';
+		return "JobInstanceStartRequest{" + "myJobDefinitionId='"
+				+ myJobDefinitionId + '\'' + ", myParameters='"
+				+ myParameters + '\'' + ", myUseCache="
+				+ myUseCache + '}';
 	}
 }

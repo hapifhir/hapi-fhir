@@ -1,14 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +17,10 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Exception for use when a response is received or being sent that does not correspond to any other exception type. An HTTP status code must be provided, and will be provided to the caller in the
@@ -33,7 +31,7 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theStatusCode
 	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
 	 * @param theMessage
@@ -45,17 +43,17 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theStatusCode
 	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
 	 * @param theMessage
 	 *            The message to add to the status line
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
+	public UnclassifiedServerFailureException(
+			int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 
 	private static final long serialVersionUID = 1L;
-
 }

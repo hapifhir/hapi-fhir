@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4475
+jira: SMILE-4961
+title: "Enabling mass ingestion mode alters the resource deletion process leaving resources partially deleted. The problem has been fixed."

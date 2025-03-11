@@ -1,0 +1,8 @@
+---
+type: add
+issue: 4456
+title: "The Testpage Overlay module now supports customizable operation buttons
+   on search results. For example, you can configure each row of the search
+   results page to include a `$validate` button and a `$diff` button, or
+   choose other operations relevant to your use case. Currently only
+   operations which do not require any parameters are possible."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,25 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -86,6 +88,10 @@ public class ClasspathUtil {
 		return retVal;
 	}
 
+	public static Reader loadResourceAsReader(String theClasspath) {
+		return new InputStreamReader(loadResourceAsStream(theClasspath), StandardCharsets.UTF_8);
+	}
+
 	/**
 	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
 	 */
@@ -111,9 +117,25 @@ public class ClasspathUtil {
 		return loadResource(theClasspath, streamTransform);
 	}
 
+	/**
+	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @since 6.4.0
+	 */
+	@Nonnull
+	public static <T extends IBaseResource> T loadCompressedResource(
+			FhirContext theCtx, Class<T> theType, String theClasspath) {
+		String resource = loadCompressedResource(theClasspath);
+		return parseResource(theCtx, theType, resource);
+	}
+
 	@Nonnull
 	public static <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
 		String raw = loadResource(theClasspath);
+		return parseResource(theCtx, theType, raw);
+	}
+
+	private static <T extends IBaseResource> T parseResource(FhirContext theCtx, Class<T> theType, String raw) {
 		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);
 	}
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -30,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -47,39 +45,53 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
-	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
+	public BulkExportHelperService() {}
+
+	/**
+	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
+	 *
+	 * The input boolean theConsiderDateRange determines whether to consider the lastUpdated date in the search parameter map.
+	 */
+	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
+			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
 		spMaps = typeFilters.stream()
-			.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-			.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
-			.collect(Collectors.toList());
+				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
+				.map(filter -> buildSearchParameterMapForTypeFilter(
+						filter, theDef, theParams.getStartDate(), theParams.getEndDate()))
+				.collect(Collectors.toList());
 
 		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
-			ourLog.warn("Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .", filter);
+			ourLog.warn(
+					"Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .",
+					filter);
 		});
 
-		//None of the _typeFilters applied to the current resource type, so just make a simple one.
+		// None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			if (theConsiderDateRange) {
+				addLastUpdatedFilter(defaultMap, theParams.getStartDate(), theParams.getEndDate());
+			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
 
 		return spMaps;
 	}
 
-	private SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
+	private SearchParameterMap buildSearchParameterMapForTypeFilter(
+			String theFilter, RuntimeResourceDefinition theDef, Date theStartDate, Date theEndDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theSinceDate);
+		addLastUpdatedFilter(searchParameterMap, theStartDate, theEndDate);
 		return searchParameterMap;
 	}
 
-	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map, Date theSinceDate) {
+	void addLastUpdatedFilter(SearchParameterMap map, Date theStartDate, Date theEndDate) {
 		map.setLoadSynchronous(true);
-		if (theSinceDate != null) {
-			map.setLastUpdated(new DateRangeParam(theSinceDate, null));
+		if (theStartDate != null || theEndDate != null) {
+			map.setLastUpdated(new DateRangeParam(theStartDate, theEndDate));
 		}
 	}
 

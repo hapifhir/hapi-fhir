@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,41 +17,49 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
+import java.time.LocalDate;
 
+/**
+ * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
+ * <p>
+ * If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable} instead.
+ */
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
-
-	@Embedded
-	private PartitionablePartitionId myPartitionId;
-
-	/**
-	 * This is here to support queries only, do not set this field directly
-	 */
 	@SuppressWarnings("unused")
-	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
-	private Integer myPartitionIdValue;
+	@Id
+	@PartitionedIdProperty
+	@Column(name = PartitionablePartitionId.PARTITION_ID)
+	Integer myPartitionIdValue;
 
-	@Nullable
+	@SuppressWarnings("unused")
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, updatable = false, nullable = true)
+	private LocalDate myPartitionDateValue;
+
+	@Nonnull
 	public PartitionablePartitionId getPartitionId() {
-		return myPartitionId;
+		return PartitionablePartitionId.with(myPartitionIdValue, myPartitionDateValue);
 	}
 
 	public void setPartitionId(PartitionablePartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
+		myPartitionIdValue = thePartitionId.getPartitionId();
+		myPartitionDateValue = thePartitionId.getPartitionDate();
 	}
 
 	@Override
 	public String toString() {
-		return "BasePartitionable{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionIdValue=" + myPartitionIdValue +
-			'}';
+		return "BasePartitionable{" + "myPartitionIdValue="
+				+ myPartitionIdValue + ", myPartitionDateValue="
+				+ myPartitionDateValue + '}';
 	}
 }

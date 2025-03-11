@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -31,9 +30,9 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -49,7 +48,9 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 * X-HAPI-Request-Validation
 	 */
 	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
+
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
 	private boolean myAddValidationResultsToResponseOperationOutcome = true;
 
 	@Override
@@ -58,7 +59,9 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean incomingRequestPostProcessed(
+			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails);
 		if (encoding == null) {
 			ourLog.trace("Incoming request does not appear to be FHIR, not going to validate");
@@ -100,7 +103,8 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 * to begin with (e.g. if the client has requested
 	 * <code>Return: prefer=representation</code>)
 	 */
-	public void setAddValidationResultsToResponseOperationOutcome(boolean theAddValidationResultsToResponseOperationOutcome) {
+	public void setAddValidationResultsToResponseOperationOutcome(
+			boolean theAddValidationResultsToResponseOperationOutcome) {
 		myAddValidationResultsToResponseOperationOutcome = theAddValidationResultsToResponseOperationOutcome;
 	}
 
@@ -119,5 +123,4 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	public void setResponseHeaderName(String theResponseHeaderName) {
 		super.setResponseHeaderName(theResponseHeaderName);
 	}
-
 }

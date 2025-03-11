@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,16 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Comparator/qualifier for values used in REST params, such as {@link DateParam}, {@link NumberParam}, and
  * {@link QuantityParam}
- * 
+ *
  * @since 1.5
  */
 public enum ParamPrefixEnum {
@@ -77,22 +78,22 @@ public enum ParamPrefixEnum {
 	 *
 	 * The actual value is less than or equal to the given value.
 	 */
-	LESSTHAN_OR_EQUALS("le"), 
-	
+	LESSTHAN_OR_EQUALS("le"),
+
 	/**
 	 * Code Value: <b>ne</b>
 	 *
 	 * The actual value is not equal to the given value
 	 */
 	NOT_EQUAL("ne"),
-	
+
 	/**
 	 * Code Value: <b>sa</b>
 	 *
 	 * The range of the search value does not overlap with the range of the target value, and the range below the search value contains the range of the target value
 	 */
 	STARTS_AFTER("sa");
-	
+
 	private static final Map<String, ParamPrefixEnum> VALUE_TO_PREFIX;
 
 	static {
@@ -119,7 +120,7 @@ public enum ParamPrefixEnum {
 
 	/**
 	 * Returns the prefix associated with a given DSTU2+ value (e.g. <code>lt</code> or <code>eq</code>)
-	 * 
+	 *
 	 * @param theValue
 	 *           e.g. <code>&lt;</code> or <code>~</code>
 	 * @return The prefix, or <code>null</code> if no prefix matches the value

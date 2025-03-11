@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -22,10 +23,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ImportCsvToConceptMapCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandR4Test.class);
@@ -39,7 +42,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 	private static final String STATUS = "Active";
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	private final FhirContext myFhirContext = FhirContext.forR4();
@@ -49,7 +52,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -154,7 +157,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
@@ -163,7 +166,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
 		assertEquals(VS_URL_2, conceptMap.getTargetUriType().getValueAsString());
 
-		assertEquals(3, conceptMap.getGroup().size());
+		assertThat(conceptMap.getGroup()).hasSize(3);
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
 		assertEquals(CS_URL_1, group.getSource());
@@ -171,13 +174,13 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(CS_URL_2, group.getTarget());
 		assertEquals("Version 2t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertThat(group.getElement()).hasSize(4);
 
 		SourceElementComponent source = group.getElement().get(0);
 		assertEquals("Code 1a", source.getCode());
 		assertEquals("Display 1a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		TargetElementComponent target = source.getTarget().get(0);
 		assertEquals("Code 2a", target.getCode());
@@ -189,7 +192,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1b", source.getCode());
 		assertEquals("Display 1b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2b", target.getCode());
@@ -201,7 +204,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1c", source.getCode());
 		assertEquals("Display 1c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2c", target.getCode());
@@ -213,7 +216,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1d", source.getCode());
 		assertEquals("Display 1d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2d", target.getCode());
@@ -227,13 +230,13 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(CS_URL_3, group.getTarget());
 		assertEquals("Version 3t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertThat(group.getElement()).hasSize(4);
 
 		source = group.getElement().get(0);
 		assertEquals("Code 1a", source.getCode());
 		assertEquals("Display 1a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3a", target.getCode());
@@ -245,7 +248,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1b", source.getCode());
 		assertEquals("Display 1b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3b", target.getCode());
@@ -257,7 +260,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1c", source.getCode());
 		assertEquals("Display 1c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3c", target.getCode());
@@ -269,7 +272,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 1d", source.getCode());
 		assertEquals("Display 1d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3d", target.getCode());
@@ -283,13 +286,13 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(CS_URL_3, group.getTarget());
 		assertEquals("Version 3t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertEquals(5, group.getElement().size());
 
 		source = group.getElement().get(0);
 		assertEquals("Code 2a", source.getCode());
 		assertEquals("Display 2a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3a", target.getCode());
@@ -301,7 +304,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 2b", source.getCode());
 		assertEquals("Display 2b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3b", target.getCode());
@@ -313,7 +316,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 2c", source.getCode());
 		assertEquals("Display 2c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3c", target.getCode());
@@ -325,13 +328,26 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Code 2d", source.getCode());
 		assertEquals("Display 2d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3d", target.getCode());
 		assertEquals("Display 3d", target.getDisplay());
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
+
+		// ensure unmatched codes are handled correctly
+		source = group.getElement().get(4);
+		assertEquals("Code 2e", source.getCode());
+		assertEquals("Display 2e", source.getDisplay());
+
+		assertEquals(1, source.getTarget().size());
+
+		target = source.getTarget().get(0);
+		assertNull(target.getCode());
+		assertNull(target.getDisplay());
+		assertEquals(ConceptMapEquivalence.UNMATCHED, target.getEquivalence());
+		assertEquals("3e This is a comment.", target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -389,7 +405,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
@@ -398,7 +414,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("http://loinc.org", conceptMap.getSourceUriType().getValueAsString());
 		assertEquals("http://phenxtoolkit.org", conceptMap.getTargetUriType().getValueAsString());
 
-		assertEquals(1, conceptMap.getGroup().size());
+		assertThat(conceptMap.getGroup()).hasSize(1);
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
 		assertEquals("http://loinc.org", group.getSource());
@@ -406,13 +422,13 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("http://phenxtoolkit.org", group.getTarget());
 		assertNull(group.getTargetVersion());
 
-		assertEquals(1, group.getElement().size());
+		assertThat(group.getElement()).hasSize(1);
 
 		SourceElementComponent source = group.getElement().get(0);
 		assertEquals("65191-9", source.getCode());
 		assertEquals("During the past 30 days, about how often did you feel restless or fidgety [Kessler 6 Distress]", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		TargetElementComponent target = source.getTarget().get(0);
 		assertEquals("PX121301010300", target.getCode());
@@ -465,9 +481,8 @@ public class ImportCsvToConceptMapCommandR4Test {
 				},
 				"-t", true, myRestServerR4Helper
 			));
-			fail();
-		} catch (Error e) {
-			assertTrue(e.getMessage().contains("Missing required option: s"));
+			fail();		} catch (Error e) {
+			assertThat(e.getMessage()).contains("Missing required option: s");
 		}
 	}
 }

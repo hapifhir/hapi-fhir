@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs.customtype;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.hapi.fhir.docs.customtype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs.customtype;
 
-//START SNIPPET: datatype
+// START SNIPPET: datatype
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -31,33 +30,32 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
- * This is an example of a custom datatype. 
- * 
+ * This is an example of a custom datatype.
+ *
  * This is an STU3 example so it extends Type and implements ICompositeType. For
  * DSTU2 it would extend BaseIdentifiableElement and implement ICompositeDatatype.
  */
-@DatatypeDef(name="CustomDatatype")
+@DatatypeDef(name = "CustomDatatype")
 public class CustomDatatype extends Type implements ICompositeType {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Child(name = "date", order = 0, min = 1, max = 1)
 	private DateTimeType myDate;
 
-   @Child(name = "kittens", order = 1, min = 1, max = 1)
-   private StringType myKittens;
+	@Child(name = "kittens", order = 1, min = 1, max = 1)
+	private StringType myKittens;
 
 	public DateTimeType getDate() {
-		if (myDate == null)
-			myDate = new DateTimeType();
+		if (myDate == null) myDate = new DateTimeType();
 		return myDate;
 	}
 
-   public StringType getKittens() {
-      return myKittens;
-   }
+	public StringType getKittens() {
+		return myKittens;
+	}
 
-   @Override
+	@Override
 	public boolean isEmpty() {
 		return ElementUtil.isEmpty(myDate, myKittens);
 	}
@@ -68,9 +66,9 @@ public class CustomDatatype extends Type implements ICompositeType {
 	}
 
 	public CustomDatatype setKittens(StringType theKittens) {
-      myKittens = theKittens;
-      return this;
-   }
+		myKittens = theKittens;
+		return this;
+	}
 
 	@Override
 	protected CustomDatatype typedCopy() {
@@ -80,4 +78,4 @@ public class CustomDatatype extends Type implements ICompositeType {
 		return retVal;
 	}
 }
-//END SNIPPET: datatype
+// END SNIPPET: datatype

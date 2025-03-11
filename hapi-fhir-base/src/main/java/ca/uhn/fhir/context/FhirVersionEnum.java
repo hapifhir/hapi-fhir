@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -45,6 +44,8 @@ public enum FhirVersionEnum {
 
 	R4("org.hl7.fhir.r4.hapi.ctx.FhirR4", null, true, new R4Version()),
 
+	R4B("org.hl7.fhir.r4b.hapi.ctx.FhirR4B", null, true, new R4BVersion()),
+
 	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
 
 	// If you add new constants, add to the various methods below too!
@@ -56,7 +57,11 @@ public enum FhirVersionEnum {
 	private volatile IFhirVersion myVersionImplementation;
 	private String myFhirVersionString;
 
-	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent, boolean theIsRi, IVersionProvider theVersionExtractor) {
+	FhirVersionEnum(
+			String theVersionClass,
+			FhirVersionEnum theEquivalent,
+			boolean theIsRi,
+			IVersionProvider theVersionExtractor) {
 		myVersionClass = theVersionClass;
 		myEquivalent = theEquivalent;
 		myFhirVersionString = theVersionExtractor.provideVersion();
@@ -73,7 +78,8 @@ public enum FhirVersionEnum {
 		}
 		if (myVersionImplementation == null) {
 			try {
-				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
+				myVersionImplementation =
+						(IFhirVersion) Class.forName(myVersionClass).newInstance();
 			} catch (Exception e) {
 				throw new InternalErrorException(Msg.code(1710) + "Failed to instantiate FHIR version " + name(), e);
 			}
@@ -127,22 +133,23 @@ public enum FhirVersionEnum {
 		return myIsRi;
 	}
 
+	/**
+	 * Creates a new FhirContext for this FHIR version
+	 * @deprecated since 7.7.  Use  {@link FhirContext#forVersion(FhirVersionEnum)} instead
+	 */
+	@Deprecated(forRemoval = true, since = "7.7")
 	public FhirContext newContext() {
-		switch (this) {
-			case DSTU2:
-				return FhirContext.forDstu2();
-			case DSTU2_HL7ORG:
-				return FhirContext.forDstu2Hl7Org();
-			case DSTU2_1:
-				return FhirContext.forDstu2_1();
-			case DSTU3:
-				return FhirContext.forDstu3();
-			case R4:
-				return FhirContext.forR4();
-			case R5:
-				return FhirContext.forR5();
-		}
-		throw new IllegalStateException(Msg.code(1711) + "Unknown version: " + this); // should not happen
+		return FhirContext.forVersion(this);
+	}
+
+	/**
+	 * Creates a new FhirContext for this FHIR version, or returns a previously created one if one exists. This
+	 * method uses {@link FhirContext#forCached(FhirVersionEnum)} to return a cached instance.
+	 * @deprecated since 7.7.  Use  {@link FhirContext#forCached(FhirVersionEnum)} instead
+	 */
+	@Deprecated(forRemoval = true, since = "7.7")
+	public FhirContext newContextCached() {
+		return FhirContext.forCached(this);
 	}
 
 	private interface IVersionProvider {
@@ -169,7 +176,6 @@ public enum FhirVersionEnum {
 			default:
 				return determineVersionForType(theFhirType.getSuperclass());
 		}
-
 	}
 
 	private static class Version implements IVersionProvider {
@@ -185,7 +191,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	/**
@@ -209,7 +214,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	private static class R4Version implements IVersionProvider {
@@ -229,7 +233,25 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
+	}
 
+	private static class R4BVersion implements IVersionProvider {
+
+		private String myVersion;
+
+		R4BVersion() {
+			try {
+				Class<?> c = Class.forName("org.hl7.fhir.r4b.model.Constants");
+				myVersion = (String) c.getDeclaredField("VERSION").get(null);
+			} catch (Exception e) {
+				myVersion = "4.3.0";
+			}
+		}
+
+		@Override
+		public String provideVersion() {
+			return myVersion;
+		}
 	}
 
 	private static class R5Version implements IVersionProvider {
@@ -249,7 +271,6 @@ public enum FhirVersionEnum {
 		public String provideVersion() {
 			return myVersion;
 		}
-
 	}
 
 	/**
@@ -285,11 +306,12 @@ public enum FhirVersionEnum {
 				return FhirVersionEnum.DSTU3;
 			case "R4":
 				return FhirVersionEnum.R4;
+			case "R4B":
+				return FhirVersionEnum.R4B;
 			case "R5":
 				return FhirVersionEnum.R5;
 		}
 
 		return null;
 	}
-
 }

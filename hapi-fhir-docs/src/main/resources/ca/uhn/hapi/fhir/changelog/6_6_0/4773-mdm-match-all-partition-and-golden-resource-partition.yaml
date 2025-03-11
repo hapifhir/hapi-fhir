@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4773
+title: "Added mdm setting allowing for resources to be matched regardless of partition, also added mdm setting
+for the storage of all golden resources in a single designated partition"

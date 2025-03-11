@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 public enum VersionEnum {
 	V0_1,
@@ -103,11 +102,97 @@ public enum VersionEnum {
 	V6_1_0,
 	V6_1_1,
 	V6_1_2,
+	V6_1_3,
+	V6_1_4,
 	V6_2_0,
-	;
+	V6_2_1,
+	V6_2_2,
+	V6_2_3,
+	V6_2_4,
+	V6_2_5,
+	// Dev Build
+	V6_3_0,
+
+	V6_4_0,
+	V6_4_1,
+	V6_4_2,
+	V6_4_3,
+	V6_4_4,
+	V6_4_5,
+	V6_4_6,
+
+	V6_5_0,
+
+	V6_6_0,
+	V6_6_1,
+	V6_6_2,
+
+	V6_7_0,
+	V6_8_0,
+	V6_8_1,
+	V6_8_2,
+	V6_8_3,
+	V6_8_4,
+	V6_8_5,
+	V6_8_6,
+	V6_8_7,
+	V6_8_8,
+
+	V6_9_0,
+
+	V6_10_0,
+	V6_10_1,
+	V6_10_2,
+	V6_10_3,
+	V6_10_4,
+	V6_10_5,
+
+	V6_11_0,
+
+	V7_0_0,
+	V7_0_1,
+	V7_0_2,
+	V7_0_3,
+
+	V7_1_0,
+	V7_2_0,
+	V7_2_1,
+	V7_2_2,
+	V7_2_3,
+
+	V7_3_0,
+	V7_4_0,
+	V7_4_1,
+	V7_4_2,
+	V7_4_3,
+	V7_4_4,
+	V7_4_5,
+
+	V7_5_0,
+	V7_6_0,
+	V7_6_1,
+	V7_7_0,
+	V7_8_0,
+	V8_0_0,
+	V8_0_1,
+	V8_1_0,
+	V8_2_0;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();
 		return values[values.length - 1];
+	}
+
+	public static VersionEnum forVersion(String theVersionString) {
+		String constantName = "V" + (theVersionString.replace('.', '_'));
+		return valueOf(constantName);
+	}
+
+	public boolean isNewerThan(VersionEnum theVersionEnum) {
+		return ordinal() > theVersionEnum.ordinal();
+	}
+
+	public String getVersionedDocsSlug() {
+		return this.name().replace("V", "").replaceAll("_", ".");
 	}
 }

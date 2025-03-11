@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,17 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,7 +52,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 
 		switch (theRequestDetails.getRestOperationType()) {
-			// Don't apply to these operations
+				// Don't apply to these operations
 			case ADD_TAGS:
 			case DELETE_TAGS:
 			case GET_TAGS:
@@ -75,7 +74,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 			default:
 				return Collections.emptyList();
 
-			// Do apply to these operations
+				// Do apply to these operations
 			case HISTORY_INSTANCE:
 			case HISTORY_SYSTEM:
 			case HISTORY_TYPE:
@@ -94,5 +93,4 @@ public abstract class BaseResponseTerminologyInterceptor {
 		}
 		return resources;
 	}
-
 }

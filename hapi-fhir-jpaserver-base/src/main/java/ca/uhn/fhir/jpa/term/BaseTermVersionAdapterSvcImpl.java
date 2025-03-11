@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -26,9 +25,8 @@ import org.hl7.fhir.r4.model.CodeSystem;
 
 public abstract class BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 
-
 	protected void validateCodeSystemForStorage(CodeSystem theCodeSystemResource) {
-		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theCodeSystemResource.getUrl(), "Can not store a CodeSystem without a valid URL");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(
+				theCodeSystemResource.getUrl(), "Can not store a CodeSystem without a valid URL");
 	}
-
 }

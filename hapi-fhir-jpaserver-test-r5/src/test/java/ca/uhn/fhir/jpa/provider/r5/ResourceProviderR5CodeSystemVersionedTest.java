@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -20,15 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProviderR5Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5CodeSystemVersionedTest.class);
 
-	private long parentChildCs1Id;
-	private long parentChildCs2Id;
+	private JpaPid parentChildCs1Id;
+	private JpaPid parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional
@@ -52,7 +54,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		parentChildCs.setVersion("1");
 		parentChildCs.setName("Parent Child CodeSystem 1");
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
 		CodeSystem.ConceptDefinitionComponent parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A");
@@ -68,7 +70,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		parentChildCs.setName("Parent Child CodeSystem 2");
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
 		parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A v2");
@@ -97,7 +99,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -117,7 +119,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -137,7 +139,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -228,7 +230,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -246,7 +248,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -264,7 +266,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 

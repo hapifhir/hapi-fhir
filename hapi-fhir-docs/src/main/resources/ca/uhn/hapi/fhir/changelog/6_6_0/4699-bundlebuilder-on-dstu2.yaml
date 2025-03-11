@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4699
+title: "The BundleBuilder utility class did not work with DSTU2 bundles. This has been
+   corrected."

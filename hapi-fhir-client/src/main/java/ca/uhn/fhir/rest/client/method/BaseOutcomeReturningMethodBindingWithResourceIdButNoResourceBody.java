@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +17,31 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.*;
-//TODO Use of a deprecated method should be resolved
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.param.ParameterUtil;
+import java.lang.reflect.Method;
 
-public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody extends BaseOutcomeReturningMethodBinding {
+public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody
+		extends BaseOutcomeReturningMethodBinding {
 
 	private String myResourceName;
 	private Integer myIdParameterIndex;
 
-	public BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody(Method theMethod, FhirContext theContext, Object theProvider, Class<?> theMethodAnnotationType, Class<? extends IBaseResource> theResourceTypeFromAnnotation) {
+	public BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody(
+			Method theMethod,
+			FhirContext theContext,
+			Object theProvider,
+			Class<?> theMethodAnnotationType,
+			Class<? extends IBaseResource> theResourceTypeFromAnnotation) {
 		super(theMethod, theContext, theMethodAnnotationType, theProvider);
 
 		Class<? extends IBaseResource> resourceType = theResourceTypeFromAnnotation;
@@ -43,14 +49,19 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
 			myResourceName = def.getName();
 		} else {
-				throw new ConfigurationException(Msg.code(1474) + "Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
+			throw new ConfigurationException(
+					Msg.code(1474) + "Can not determine resource type for method '" + theMethod.getName() + "' on type "
+							+ theMethod.getDeclaringClass().getCanonicalName()
+							+ " - Did you forget to include the resourceType() value on the @"
+							+ Delete.class.getSimpleName() + " method annotation?");
 		}
 
 		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParameterIndex == null) {
-			throw new ConfigurationException(Msg.code(1475) + "Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
+			throw new ConfigurationException(Msg.code(1475) + "Method '" + theMethod.getName() + "' on type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @"
+					+ IdParam.class.getSimpleName() + " annotation");
 		}
-
 	}
 
 	@Override
@@ -61,6 +72,4 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 	protected Integer getIdParameterIndex() {
 		return myIdParameterIndex;
 	}
-
-
 }

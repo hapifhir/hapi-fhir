@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderDstu3Test.class);
@@ -26,19 +26,19 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX +"{\n" +
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAM\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
 		}
 
 	}
@@ -48,12 +48,12 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX +"{\n" +
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -66,7 +66,7 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
 		}
 
 	}
@@ -80,13 +80,13 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
-		myPatientId0 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addName()
 			.addGiven("GivenOnlyB1")
 			.addGiven("GivenOnlyB2");
-		ourClient.create().resource(p).execute();
+		myClient.create().resource(p).execute();
 	}
 
 

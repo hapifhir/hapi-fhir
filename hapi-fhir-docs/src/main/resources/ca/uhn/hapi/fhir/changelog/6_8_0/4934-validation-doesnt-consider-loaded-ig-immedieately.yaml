@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4934
+title: "Previously, installing or uninstalling an implementation guide does not refresh the validation cache. This problem has been fixed."

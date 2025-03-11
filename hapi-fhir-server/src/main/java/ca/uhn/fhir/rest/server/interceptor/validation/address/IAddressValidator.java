@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.address;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -31,22 +30,26 @@ public interface IAddressValidator {
 	/**
 	 * URL for validation results that should be placed on addresses. Extension with boolean value "true" indicates there there is an address validation error.
 	 */
-	public static final String ADDRESS_VALIDATION_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
+	public static final String ADDRESS_VALIDATION_EXTENSION_URL =
+			"http://hapifhir.org/StructureDefinition/ext-validation-address-has-error";
 
 	/**
 	 * URL for an optional address quality extensions that may be added to addresses.
 	 */
-	public static final String ADDRESS_QUALITY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
+	public static final String ADDRESS_QUALITY_EXTENSION_URL =
+			"http://hapifhir.org/StructureDefinition/ext-validation-address-quality";
 
 	/**
 	 * URL for an optional geocoding accuracy extensions that may be added to addresses.
 	 */
-	public static final String ADDRESS_GEO_ACCURACY_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-geo-accuracy";
+	public static final String ADDRESS_GEO_ACCURACY_EXTENSION_URL =
+			"http://hapifhir.org/StructureDefinition/ext-validation-address-geo-accuracy";
 
 	/**
 	 * URL for an optional address verification extensions that may be added to addresses.
 	 */
-	public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL = "http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
+	public static final String ADDRESS_VERIFICATION_CODE_EXTENSION_URL =
+			"http://hapifhir.org/StructureDefinition/ext-validation-address-verification";
 
 	/**
 	 * URL for an optional FHIR geolocation extension.
@@ -62,5 +65,4 @@ public interface IAddressValidator {
 	 * @throws AddressValidationException AddressValidationException is thrown in case validation can not be completed successfully.
 	 */
 	AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext) throws AddressValidationException;
-
 }

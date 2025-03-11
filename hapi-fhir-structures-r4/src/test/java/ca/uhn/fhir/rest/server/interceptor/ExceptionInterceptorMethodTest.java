@@ -2,35 +2,30 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,23 +36,28 @@ import static org.mockito.Mockito.when;
 
 public class ExceptionInterceptorMethodTest {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
+	
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+	
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 	
 	@BeforeEach
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
-		servlet.getInterceptorService().registerInterceptor(myInterceptor);
+		ourServer.getInterceptorService().registerInterceptor(myInterceptor);
 	}
 
 	@AfterEach
 	public void after() {
-		servlet.getInterceptorService().unregisterInterceptor(myInterceptor);
+		ourServer.getInterceptorService().unregisterInterceptor(myInterceptor);
 	}
 	
 	@Test
@@ -67,7 +67,7 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
 			assertEquals(422, status.getStatusLine().getStatusCode());
@@ -94,7 +94,7 @@ public class ExceptionInterceptorMethodTest {
 			return false;
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -106,33 +106,12 @@ public class ExceptionInterceptorMethodTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+	
 
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+	private static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<Patient> getResourceType() {

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4746
+jira: SMILE-4710
+title: "Previously, the Lenient error handler will accept invalid extension containing value and nested extensions by default.
+This will lead to errors when client further attempt to read, update or delete the resources. Now, this has been fixed and 
+a DataFormatException will be thrown instead."

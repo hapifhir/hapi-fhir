@@ -5,10 +5,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -28,8 +29,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcherR5Test.newRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,13 +51,17 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@MockBean
+	private SearchParamExtractorService mySearchParamExtractorService;
+	@MockBean
+	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	private Observation myObservation;
 	private ResourceIndexedSearchParams mySearchParams;
 
 	@BeforeEach
 	public void before() {
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("code"), any())).thenReturn(codeSearchParam);
 
 		myObservation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -71,7 +79,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		myInMemoryResourceMatcher.myApplicationContext = applicationContext;
 
 		for (int i = 0; i < 10; i++) {
-			myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+			myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
 		}
 
 		verify(applicationContext, times(1)).getBean(IValidationSupport.class);
@@ -83,7 +91,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		Tests the case where the :in qualifier can not be supported because no bean implementing IValidationSupport was registered
 	 */
 	public void testUnsupportedIn() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
 		assertFalse(result.supported());
 		assertEquals("Parameter: <code:in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
 	}
@@ -91,13 +99,13 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@Test
 	@Order(3)
 	public void testUnsupportedNotIn() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
 		assertFalse(result.supported());
 		assertEquals("Parameter: <code:not-in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
 	}
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
-		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
 		return retval;
 	}
@@ -125,8 +133,8 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		}
 
 		@Bean
-		ModelConfig modelConfig() {
-			return new ModelConfig();
+        StorageSettings storageSettings() {
+			return new StorageSettings();
 		}
 	}
 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.i18n;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.i18n;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.i18n;
 
 public final class Msg {
 	private static final String ERROR_CODE_PREFIX = "HAPI";
@@ -27,7 +26,6 @@ public final class Msg {
 	 * IMPORTANT: Please update the table in the following link after you add a new code:
 	 * https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code
 	 */
-
 	private Msg() {}
 
 	public static String code(int theCode) {

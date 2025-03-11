@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.executor;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.executor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.executor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -33,7 +32,8 @@ import org.apache.commons.lang3.Validate;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-public class InterceptorService extends BaseInterceptorService<Pointcut> implements IInterceptorService, IInterceptorBroadcaster {
+public class InterceptorService extends BaseInterceptorService<Pointcut>
+		implements IInterceptorService, IInterceptorBroadcaster {
 
 	/**
 	 * Constructor which uses a default name of "default"
@@ -48,14 +48,13 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
 	public InterceptorService(String theName) {
-		super(theName);
+		super(Pointcut.class, theName);
 	}
 
 	@Override
 	protected Optional<HookDescriptor> scanForHook(Method nextMethod) {
 		return findAnnotation(nextMethod, Hook.class).map(t -> new HookDescriptor(t.value(), t.order()));
 	}
-
 
 	@Override
 	@VisibleForTesting
@@ -65,14 +64,13 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 
 	@Override
 	public void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
-		Validate.notNull(thePointcut);
-		Validate.notNull(theInterceptor);
+		Validate.notNull(thePointcut, "thePointcut must not be null");
+		Validate.notNull(theInterceptor, "theInterceptor must not be null");
 		BaseInvoker invoker = new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder);
 		registerAnonymousInterceptor(thePointcut, theInterceptor, invoker);
 	}
 
-
-	private class AnonymousLambdaInvoker extends BaseInvoker {
+	private static class AnonymousLambdaInvoker extends BaseInvoker {
 		private final IAnonymousInterceptor myHook;
 		private final Pointcut myPointcut;
 
@@ -83,11 +81,9 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 		}
 
 		@Override
-		Object invoke(HookParams theParams) {
+		public Object invoke(HookParams theParams) {
 			myHook.invoke(myPointcut, theParams);
 			return true;
 		}
 	}
-
-
 }

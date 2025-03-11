@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Client Framework
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -64,26 +83,6 @@ import java.util.Map.Entry;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-/*
- * #%L
- * HAPI FHIR - Client Framework
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 public class MethodUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
@@ -93,8 +92,8 @@ public class MethodUtil {
 		// nothing
 	}
 
-	public static void addAcceptHeaderToRequest(EncodingEnum theEncoding, IHttpRequest theHttpRequest,
-			FhirContext theContext) {
+	public static void addAcceptHeaderToRequest(
+			EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
 		if (theEncoding == null) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
@@ -114,7 +113,6 @@ public class MethodUtil {
 				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
 			}
 		}
-
 	}
 
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
@@ -125,8 +123,8 @@ public class MethodUtil {
 		return createCreateInvocation(theResource, null, theContext);
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			FhirContext theContext) {
+	public static HttpPostClientInvocation createCreateInvocation(
+			IBaseResource theResource, String theResourceBody, FhirContext theContext) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
 
@@ -145,38 +143,48 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
+	public static HttpPostClientInvocation createCreateInvocation(
+			IBaseResource theResource,
+			String theResourceBody,
+			FhirContext theContext,
+			Map<String, List<String>> theIfNoneExistParams) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theContext);
 		retVal.setIfNoneExistParams(theIfNoneExistParams);
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody,
-			FhirContext theContext, String theIfNoneExistUrl) {
+	public static HttpPostClientInvocation createCreateInvocation(
+			IBaseResource theResource, String theResourceBody, FhirContext theContext, String theIfNoneExistUrl) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theContext);
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IIdType theId,
-			PatchTypeEnum thePatchType, String theBody) {
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext, IIdType theId, PatchTypeEnum thePatchType, String theBody) {
 		return PatchMethodBinding.createPatchInvocation(theContext, theId, thePatchType, theBody);
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType,
-			String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
-		return PatchMethodBinding.createPatchInvocation(theContext, thePatchType, theBody, theResourceType,
-				theMatchParams);
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext,
+			PatchTypeEnum thePatchType,
+			String theBody,
+			String theResourceType,
+			Map<String, List<String>> theMatchParams) {
+		return PatchMethodBinding.createPatchInvocation(
+				theContext, thePatchType, theBody, theResourceType, theMatchParams);
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrl,
-			PatchTypeEnum thePatchType, String theBody) {
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext, String theUrl, PatchTypeEnum thePatchType, String theBody) {
 		return PatchMethodBinding.createPatchInvocation(theContext, theUrl, thePatchType, theBody);
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
-			String theResourceBody, Map<String, List<String>> theMatchParams) {
+	public static HttpPutClientInvocation createUpdateInvocation(
+			FhirContext theContext,
+			IBaseResource theResource,
+			String theResourceBody,
+			Map<String, List<String>> theMatchParams) {
 		String resourceType = theContext.getResourceType(theResource);
 
 		StringBuilder b = createUrl(resourceType, theMatchParams);
@@ -191,8 +199,8 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource,
-			String theResourceBody, String theMatchUrl) {
+	public static HttpPutClientInvocation createUpdateInvocation(
+			FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPutClientInvocation(theContext, theResource, theMatchUrl);
@@ -203,8 +211,8 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody,
-																					 IIdType theId, FhirContext theContext) {
+	public static HttpPutClientInvocation createUpdateInvocation(
+			IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
 		String resourceName = theContext.getResourceType(theResource);
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
@@ -228,8 +236,8 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateHistoryRewriteInvocation(IBaseResource theResource, String theResourceBody,
-																										IIdType theId, FhirContext theContext) {
+	public static HttpPutClientInvocation createUpdateHistoryRewriteInvocation(
+			IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
 		String resourceName = theContext.getResourceType(theResource);
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
@@ -273,8 +281,11 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod,
-			Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
+	public static List<IParameter> getResourceParameters(
+			final FhirContext theContext,
+			Method theMethod,
+			Object theProvider,
+			RestOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -299,9 +310,11 @@ public class MethodUtil {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException(Msg.code(1433) + "Argument #" + paramIndex + " of Method '" + theMethod.getName()
-							+ "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
-							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+					throw new ConfigurationException(
+							Msg.code(1433) + "Argument #" + paramIndex + " of Method '" + theMethod.getName()
+									+ "' in type '"
+									+ theMethod.getDeclaringClass().getCanonicalName()
+									+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
 			}
 
@@ -340,19 +353,22 @@ public class MethodUtil {
 						if (parameterType == String.class) {
 							instantiableCollectionType = null;
 							specType = String.class;
-						} else if ((parameterType != Include.class) || innerCollectionType == null
+						} else if ((parameterType != Include.class)
+								|| innerCollectionType == null
 								|| outerCollectionType != null) {
-							throw new ConfigurationException(Msg.code(1434) + "Method '" + theMethod.getName() + "' is annotated with @"
+							throw new ConfigurationException(Msg.code(1434) + "Method '" + theMethod.getName()
+									+ "' is annotated with @"
 									+ IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
 									+ Include.class.getSimpleName() + ">");
 						} else {
-							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder
-									.getInstantiableCollectionType(innerCollectionType,
-											"Method '" + theMethod.getName() + "'");
+							instantiableCollectionType = (Class<? extends Collection<Include>>)
+									CollectionBinder.getInstantiableCollectionType(
+											innerCollectionType, "Method '" + theMethod.getName() + "'");
 							specType = parameterType;
 						}
 
-						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType,								specType);
+						param = new IncludeParameter(
+								(IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (IBaseResource.class.isAssignableFrom(parameterType)) {
 							// good
@@ -375,12 +391,12 @@ public class MethodUtil {
 						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
 						param = new SinceParameter();
-						((SinceParameter) param).setType(theContext, parameterType, innerCollectionType,
-								outerCollectionType);
+						((SinceParameter) param)
+								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof At) {
 						param = new AtParameter();
-						((AtParameter) param).setType(theContext, parameterType, innerCollectionType,
-								outerCollectionType);
+						((AtParameter) param)
+								.setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
 					} else if (nextAnnotation instanceof Offset) {
@@ -390,8 +406,8 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(theRestfulOperationTypeEnum,
-								((ConditionalUrlParam) nextAnnotation).supportsMultiple());
+						param = new ConditionalParamBinder(
+								theRestfulOperationTypeEnum, ((ConditionalUrlParam) nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
@@ -401,12 +417,13 @@ public class MethodUtil {
 									+ Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName()
 									+ " must be of type " + ValidationModeEnum.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
-								Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
+						param = new OperationParameter(
+										theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1)
+								.setConverter(new IOperationParamConverter() {
 									@Override
 									public Object outgoingClient(Object theObject) {
-										return ParametersUtil.createString(theContext,
-												((ValidationModeEnum) theObject).getCode());
+										return ParametersUtil.createString(
+												theContext, ((ValidationModeEnum) theObject).getCode());
 									}
 								});
 					} else if (nextAnnotation instanceof Validate.Profile) {
@@ -415,8 +432,9 @@ public class MethodUtil {
 									+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
 									+ " must be of type " + String.class.getName());
 						}
-						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE,
-								Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
+						param = new OperationParameter(
+										theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1)
+								.setConverter(new IOperationParamConverter() {
 
 									@Override
 									public Object outgoingClient(Object theObject) {
@@ -426,16 +444,15 @@ public class MethodUtil {
 					} else {
 						continue;
 					}
-
 				}
-
 			}
 
 			if (param == null) {
-				throw new ConfigurationException(Msg.code(1438) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
-						+ " of method '" + theMethod.getName() + "' on type '"
-						+ theMethod.getDeclaringClass().getCanonicalName()
-						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+				throw new ConfigurationException(
+						Msg.code(1438) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
+								+ " of method '" + theMethod.getName() + "' on type '"
+								+ theMethod.getDeclaringClass().getCanonicalName()
+								+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
@@ -446,8 +463,8 @@ public class MethodUtil {
 		return parameters;
 	}
 
-	public static void parseClientRequestResourceHeaders(IIdType theRequestedId, Map<String, List<String>> theHeaders,
-			IBaseResource resource) {
+	public static void parseClientRequestResourceHeaders(
+			IIdType theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
@@ -508,11 +525,14 @@ public class MethodUtil {
 				theRequestedId.applyTo(resource);
 			}
 		}
-
 	}
 
-	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode,
-			String theResponseMimeType, InputStream theResponseReader, Map<String, List<String>> theHeaders) {
+	public static MethodOutcome process2xxResponse(
+			FhirContext theContext,
+			int theResponseStatusCode,
+			String theResponseMimeType,
+			InputStream theResponseReader,
+			Map<String, List<String>> theHeaders) {
 		List<String> locationHeaders = new ArrayList<>();
 		List<String> lh = theHeaders.get(Constants.HEADER_LOCATION_LC);
 		if (lh != null) {
@@ -524,6 +544,7 @@ public class MethodUtil {
 		}
 
 		MethodOutcome retVal = new MethodOutcome();
+		retVal.setResponseStatusCode(theResponseStatusCode);
 		if (locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
 			BaseOutcomeReturningMethodBinding.parseContentLocation(theContext, retVal, locationHeader);
@@ -557,11 +578,10 @@ public class MethodUtil {
 				}
 
 			} else {
-				BaseOutcomeReturningMethodBinding.ourLog.debug("Ignoring response content of type: {}",
-						theResponseMimeType);
+				BaseOutcomeReturningMethodBinding.ourLog.debug(
+						"Ignoring response content of type: {}", theResponseMimeType);
 			}
 		}
 		return retVal;
 	}
-
 }

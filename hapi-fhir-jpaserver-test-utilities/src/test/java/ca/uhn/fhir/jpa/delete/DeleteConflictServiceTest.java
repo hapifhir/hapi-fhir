@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -50,6 +50,7 @@ public class DeleteConflictServiceTest {
 	@Test
 	public void noInterceptorTwoConflictsDoesntRetry() {
 		ResourceTable entity = new ResourceTable();
+		entity.setIdForUnitTest(22L);
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 
 		List<ResourceLink> list = new ArrayList<>();
@@ -68,8 +69,8 @@ public class DeleteConflictServiceTest {
 		}
 
 		@Bean
-		DaoConfig myDaoConfig() {
-			return new DaoConfig();
+		JpaStorageSettings storageSettings() {
+			return new JpaStorageSettings();
 		}
 
 		@Bean

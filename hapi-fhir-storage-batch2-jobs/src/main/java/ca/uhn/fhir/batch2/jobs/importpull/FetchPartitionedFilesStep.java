@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.importpull;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.importpull;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.importpull;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -30,13 +29,13 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
+public class FetchPartitionedFilesStep
+		implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
 	private static final Logger ourLog = getLogger(FetchPartitionedFilesStep.class);
 
 	private final IBulkDataImportSvc myBulkDataImportSvc;
@@ -48,9 +47,9 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink)
+			throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 
 		ourLog.info("Start FetchPartitionedFilesStep for jobID {} ", jobId);
@@ -69,7 +68,10 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 			theDataSink.accept(result);
 		}
 
-		ourLog.info("FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.", jobId, job.getFileCount());
+		ourLog.info(
+				"FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.",
+				jobId,
+				job.getFileCount());
 
 		return RunOutcome.SUCCESS;
 	}

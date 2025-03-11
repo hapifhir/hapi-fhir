@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.rest.api.Constants;
 
@@ -29,32 +28,32 @@ import java.util.Map;
  * Modifiers for {@link TokenParam}
  */
 public enum TokenParamModifier {
-	/** 
+	/**
 	 * :above
 	 */
 	ABOVE(":above"),
-	
-	/** 
+
+	/**
 	 * :above
 	 */
 	BELOW(":below"),
-	
-	/** 
+
+	/**
 	 * :in
 	 */
 	IN(":in"),
-	
-	/** 
+
+	/**
 	 * :not
 	 */
 	NOT(":not"),
-	
-	/** 
+
+	/**
 	 * :not-in
 	 */
 	NOT_IN(":not-in"),
-	
-	/** 
+
+	/**
 	 * :text
 	 */
 	TEXT(Constants.PARAMQUALIFIER_TOKEN_TEXT),
@@ -73,12 +72,13 @@ public enum TokenParamModifier {
 		}
 		VALUE_TO_ENUM = valueToEnum;
 	}
+
 	private final String myValue;
 
 	private TokenParamModifier(String theValue) {
 		myValue = theValue;
 	}
-	
+
 	public String getValue() {
 		return myValue;
 	}

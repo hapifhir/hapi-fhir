@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,22 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-
 public class RuntimeChildExtension extends RuntimeChildAny {
 
-//	private RuntimeChildUndeclaredExtensionDefinition myExtensionElement;
+	//	private RuntimeChildUndeclaredExtensionDefinition myExtensionElement;
 
-	public RuntimeChildExtension(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
+	public RuntimeChildExtension(
+			Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation);
 	}
 
@@ -54,21 +53,21 @@ public class RuntimeChildExtension extends RuntimeChildAny {
 		}
 		return super.getChildByName(theName);
 	}
-	
-//	@Override
-//	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
-//		if (IBaseExtension.class.isAssignableFrom(theDatatype)) {
-//			return myExtensionElement;
-//		}
-//		return super.getChildElementDefinitionByDatatype(theDatatype);
-//	}
-//
-//	@Override
-//	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-//		super.sealAndInitialize(theContext, theClassToElementDefinitions);
-//		
-//		myExtensionElement = theContext.getRuntimeChildUndeclaredExtensionDefinition();
-//	}
 
+	//	@Override
+	//	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
+	//		if (IBaseExtension.class.isAssignableFrom(theDatatype)) {
+	//			return myExtensionElement;
+	//		}
+	//		return super.getChildElementDefinitionByDatatype(theDatatype);
+	//	}
+	//
+	//	@Override
+	//	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+	// theClassToElementDefinitions) {
+	//		super.sealAndInitialize(theContext, theClassToElementDefinitions);
+	//
+	//		myExtensionElement = theContext.getRuntimeChildUndeclaredExtensionDefinition();
+	//	}
 
 }

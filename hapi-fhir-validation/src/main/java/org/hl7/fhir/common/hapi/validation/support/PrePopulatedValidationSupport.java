@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.ILockable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -13,15 +16,16 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -29,72 +33,107 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport {
+public class PrePopulatedValidationSupport extends BaseValidationSupport implements IValidationSupport, ILockable {
 
-	private final Map<String, IBaseResource> myCodeSystems;
-	private final Map<String, IBaseResource> myStructureDefinitions;
-	private final Map<String, IBaseResource> myValueSets;
+	private final Map<String, IBaseResource> myUrlToCodeSystems;
+	private final Map<String, IBaseResource> myUrlToStructureDefinitions;
+	private final Map<String, IBaseResource> myUrlToSearchParameters;
+	private final Map<String, IBaseResource> myUrlToValueSets;
+	private final List<IBaseResource> myCodeSystems;
+	private final List<IBaseResource> myStructureDefinitions;
+	private final List<IBaseResource> mySearchParameters;
+	private final List<IBaseResource> myValueSets;
 	private final Map<String, byte[]> myBinaries;
+	private boolean myLocked;
 
 	/**
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport(FhirContext theContext) {
-		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Pre-populated Validation Support";
 	}
 
 	/**
 	 * Constructor
 	 *
-	 * @param theStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
+	 * @param theUrlToStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
 	 *                                values are the resource itself.
-	 * @param theValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
+	 * @param theUrlToValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
-	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
+	 * @param theUrlToCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
 	 **/
 	public PrePopulatedValidationSupport(
-		FhirContext theFhirContext,
-		Map<String, IBaseResource> theStructureDefinitions,
-		Map<String, IBaseResource> theValueSets,
-		Map<String, IBaseResource> theCodeSystems) {
-		this(theFhirContext, theStructureDefinitions, theValueSets, theCodeSystems, new HashMap<>());
+			FhirContext theFhirContext,
+			Map<String, IBaseResource> theUrlToStructureDefinitions,
+			Map<String, IBaseResource> theUrlToValueSets,
+			Map<String, IBaseResource> theUrlToCodeSystems) {
+		this(
+				theFhirContext,
+				theUrlToStructureDefinitions,
+				theUrlToValueSets,
+				theUrlToCodeSystems,
+				new HashMap<>(),
+				new HashMap<>());
 	}
 
 	/**
 	 * Constructor
 	 *
-	 * @param theStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
+	 * @param theUrlToStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
 	 *                                values are the resource itself.
-	 * @param theValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
+	 * @param theUrlToValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
-	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
+	 * @param theUrlToCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
 	 * @param theBinaries				 The binary files to be returned by this module. Keys are the unique filename for the binary, and values
 	 *                                are the contents of the file as a byte array.
 	 */
 	public PrePopulatedValidationSupport(
-		FhirContext theFhirContext,
-		Map<String, IBaseResource> theStructureDefinitions,
-		Map<String, IBaseResource> theValueSets,
-		Map<String, IBaseResource> theCodeSystems,
-		Map<String, byte[]> theBinaries) {
+			FhirContext theFhirContext,
+			Map<String, IBaseResource> theUrlToStructureDefinitions,
+			Map<String, IBaseResource> theUrlToValueSets,
+			Map<String, IBaseResource> theUrlToCodeSystems,
+			Map<String, IBaseResource> theUrlToSearchParameters,
+			Map<String, byte[]> theBinaries) {
 		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
-		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
-		Validate.notNull(theValueSets, "theValueSets must not be null");
-		Validate.notNull(theCodeSystems, "theCodeSystems must not be null");
+		Validate.notNull(theUrlToStructureDefinitions, "theStructureDefinitions must not be null");
+		Validate.notNull(theUrlToValueSets, "theValueSets must not be null");
+		Validate.notNull(theUrlToCodeSystems, "theCodeSystems must not be null");
+		Validate.notNull(theUrlToSearchParameters, "theSearchParameters must not be null");
 		Validate.notNull(theBinaries, "theBinaries must not be null");
-		myStructureDefinitions = theStructureDefinitions;
-		myValueSets = theValueSets;
-		myCodeSystems = theCodeSystems;
+		myUrlToStructureDefinitions = theUrlToStructureDefinitions;
+		myStructureDefinitions =
+				theUrlToStructureDefinitions.values().stream().distinct().collect(Collectors.toList());
+
+		myUrlToValueSets = theUrlToValueSets;
+		myValueSets = theUrlToValueSets.values().stream().distinct().collect(Collectors.toList());
+
+		myUrlToCodeSystems = theUrlToCodeSystems;
+		myCodeSystems = theUrlToCodeSystems.values().stream().distinct().collect(Collectors.toList());
+
+		myUrlToSearchParameters = theUrlToSearchParameters;
+		mySearchParameters =
+				theUrlToSearchParameters.values().stream().distinct().collect(Collectors.toList());
+
 		myBinaries = theBinaries;
 	}
 
 	public void addBinary(byte[] theBinary, String theBinaryKey) {
+		validateNotLocked();
 		Validate.notNull(theBinary, "theBinaryKey must not be null");
 		Validate.notNull(theBinary, "the" + theBinaryKey + " must not be null");
 		myBinaries.put(theBinaryKey, theBinary);
+	}
+
+	private synchronized void validateNotLocked() {
+		Validate.isTrue(myLocked == false, "Can not add to validation support, module is locked");
 	}
 
 	/**
@@ -112,18 +151,23 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addCodeSystem(IBaseResource theCodeSystem) {
+		validateNotLocked();
 		Set<String> urls = processResourceAndReturnUrls(theCodeSystem, "CodeSystem");
-		addToMap(theCodeSystem, myCodeSystems, urls);
+		addToMap(theCodeSystem, myCodeSystems, myUrlToCodeSystems, urls);
 	}
 
 	private Set<String> processResourceAndReturnUrls(IBaseResource theResource, String theResourceName) {
 		Validate.notNull(theResource, "the" + theResourceName + " must not be null");
 		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResource);
 		String actualResourceName = resourceDef.getName();
-		Validate.isTrue(actualResourceName.equals(theResourceName), "the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
+		Validate.isTrue(
+				actualResourceName.equals(theResourceName),
+				"the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
 
-		Optional<IBase> urlValue = resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
-		String url = urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
+		Optional<IBase> urlValue =
+				resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
+		String url =
+				urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
 
 		Validate.notNull(url, "the" + theResourceName + ".getUrl() must not return null");
 		Validate.notBlank(url, "the" + theResourceName + ".getUrl() must return a value");
@@ -138,8 +182,11 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 
 		HashSet<String> retVal = Sets.newHashSet(url, urlWithoutVersion);
 
-		Optional<IBase> versionValue = resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
-		String version = versionValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
+		Optional<IBase> versionValue =
+				resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
+		String version = versionValue
+				.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+				.orElse(null);
 		if (isNotBlank(version)) {
 			retVal.add(urlWithoutVersion + "|" + version);
 		}
@@ -162,11 +209,20 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addStructureDefinition(IBaseResource theStructureDefinition) {
+		validateNotLocked();
 		Set<String> url = processResourceAndReturnUrls(theStructureDefinition, "StructureDefinition");
-		addToMap(theStructureDefinition, myStructureDefinitions, url);
+		addToMap(theStructureDefinition, myStructureDefinitions, myUrlToStructureDefinitions, url);
 	}
 
-	private <T extends IBaseResource> void addToMap(T theResource, Map<String, T> theMap, Collection<String> theUrls) {
+	public void addSearchParameter(IBaseResource theSearchParameter) {
+		validateNotLocked();
+		Set<String> url = processResourceAndReturnUrls(theSearchParameter, "SearchParameter");
+		addToMap(theSearchParameter, mySearchParameters, myUrlToSearchParameters, url);
+	}
+
+	private <T extends IBaseResource> void addToMap(
+			T theResource, List<T> theList, Map<String, T> theMap, Collection<String> theUrls) {
+		theList.add(theResource);
 		for (String urls : theUrls) {
 			if (isNotBlank(urls)) {
 				theMap.put(urls, theResource);
@@ -198,10 +254,10 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * </p>
 	 */
 	public void addValueSet(IBaseResource theValueSet) {
+		validateNotLocked();
 		Set<String> urls = processResourceAndReturnUrls(theValueSet, "ValueSet");
-		addToMap(theValueSet, myValueSets, urls);
+		addToMap(theValueSet, myValueSets, myUrlToValueSets, urls);
 	}
-
 
 	/**
 	 * @param theResource The resource. This method delegates to the type-specific methods (e.g. {@link #addCodeSystem(IBaseResource)})
@@ -209,9 +265,13 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * @since 5.5.0
 	 */
 	public void addResource(@Nonnull IBaseResource theResource) {
+		validateNotLocked();
 		Validate.notNull(theResource, "theResource must not be null");
 
 		switch (getFhirContext().getResourceType(theResource)) {
+			case "SearchParameter":
+				addSearchParameter(theResource);
+				break;
 			case "StructureDefinition":
 				addStructureDefinition(theResource);
 				break;
@@ -227,42 +287,68 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
-		retVal.addAll(myCodeSystems.values());
-		retVal.addAll(myStructureDefinitions.values());
-		retVal.addAll(myValueSets.values());
+		retVal.addAll(myCodeSystems);
+		retVal.addAll(myStructureDefinitions);
+		retVal.addAll(myValueSets);
 		return retVal;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Nullable
+	@Override
+	public <T extends IBaseResource> List<T> fetchAllSearchParameters() {
+		return (List<T>) Collections.unmodifiableList(mySearchParameters);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
-		return toList(myStructureDefinitions);
+		return (List<T>) Collections.unmodifiableList(myStructureDefinitions);
 	}
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		return myCodeSystems.get(theSystem);
+		return myUrlToCodeSystems.get(theSystem);
 	}
 
 	@Override
 	public IBaseResource fetchValueSet(String theUri) {
-		return myValueSets.get(theUri);
+		return myUrlToValueSets.get(theUri);
 	}
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		return myStructureDefinitions.get(theUrl);
+		return myUrlToStructureDefinitions.get(theUrl);
 	}
 
 	@Override
-	public byte[] fetchBinary(String theBinaryKey) { return myBinaries.get(theBinaryKey); }
+	public byte[] fetchBinary(String theBinaryKey) {
+		return myBinaries.get(theBinaryKey);
+	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return myCodeSystems.containsKey(theSystem);
+		return myUrlToCodeSystems.containsKey(theSystem);
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return myValueSets.containsKey(theValueSetUrl);
+		return myUrlToValueSets.containsKey(theValueSetUrl);
+	}
+
+	/**
+	 * Returns a count of all known resources
+	 */
+	public int countAll() {
+		return myBinaries.size()
+				+ myCodeSystems.size()
+				+ myStructureDefinitions.size()
+				+ myValueSets.size()
+				+ myStructureDefinitions.size();
+	}
+
+	@Override
+	public synchronized void lock() {
+		myLocked = true;
 	}
 }

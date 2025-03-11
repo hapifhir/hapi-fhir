@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -29,11 +28,14 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam implements IQueryParameterType {
+public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam
+		implements IQueryParameterType {
 
 	private A myLeftType;
 	private B myRightType;
@@ -88,7 +90,9 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		} else {
 			List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
 			if (parts.size() > 2) {
-				throw new InvalidRequestException(Msg.code(1947) + "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
+				throw new InvalidRequestException(Msg.code(1947)
+						+ "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: "
+						+ theValue);
 			}
 			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
 			if (parts.size() > 1) {
@@ -115,7 +119,7 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	 * Get the values of the subcomponents, in order.
 	 */
 	public List<IQueryParameterType> getValues() {
-		return List.of(myLeftType, myRightType);
+		return Collections.unmodifiableList(Arrays.asList(myLeftType, myRightType));
 	}
 
 	@Override
@@ -125,5 +129,4 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		b.append("myRightType", getRightValue());
 		return b.toString();
 	}
-
 }

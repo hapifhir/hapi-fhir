@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -32,26 +31,31 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 @Service
 public class MdmSearchParamSvc {
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
+
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -63,7 +67,8 @@ public class MdmSearchParamSvc {
 	public List<String> getValueFromResourceForSearchParam(IBaseResource theResource, String theSearchParam) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(resourceType, searchParam);
+		RuntimeSearchParam activeSearchParam = mySearchParamRegistry.getActiveSearchParam(
+				resourceType, searchParam, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		return mySearchParamExtractorService.extractParamValuesAsStrings(activeSearchParam, theResource);
 	}
 
@@ -87,7 +92,7 @@ public class MdmSearchParamSvc {
 
 	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
-		return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
+		return mySearchBuilderFactory.newSearchBuilder(theSourceType, resourceDao.getResourceType());
 	}
 
 	/**

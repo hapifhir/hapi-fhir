@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +17,43 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageMetadataJson {
 
 	@JsonProperty("dist-tags")
 	private DistTags myDistTags;
+
 	@JsonProperty("modified")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myModified;
+
 	@JsonProperty("name")
 	private String myName;
+
 	@JsonProperty("versions")
 	private Map<String, Version> myVersionIdToVersion;
 
@@ -78,7 +85,6 @@ public class NpmPackageMetadataJson {
 		myName = theName;
 	}
 
-
 	public static class DistTags {
 
 		@JsonProperty("latest")
@@ -94,22 +100,41 @@ public class NpmPackageMetadataJson {
 		}
 	}
 
-
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+	@JsonAutoDetect(
+			creatorVisibility = JsonAutoDetect.Visibility.NONE,
+			fieldVisibility = JsonAutoDetect.Visibility.NONE,
+			getterVisibility = JsonAutoDetect.Visibility.NONE,
+			isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+			setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class Version {
 
 		@JsonProperty("name")
 		private String myName;
+
 		@JsonProperty("version")
 		private String myVersion;
+
+		@JsonProperty("author")
+		private String myAuthor;
+
 		@JsonProperty("description")
 		private String myDescription;
+
 		@JsonProperty("fhirVersion")
 		private String myFhirVersion;
+
 		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
+
+		public String getAuthor() {
+			return myAuthor;
+		}
+
+		public void setAuthor(String theAuthor) {
+			myAuthor = theAuthor;
+		}
 
 		public String getName() {
 			return myName;

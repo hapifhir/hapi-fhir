@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -27,11 +26,11 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -41,13 +40,19 @@ import java.io.IOException;
 public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws ServletException, IOException {
+	public boolean handleException(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws ServletException, IOException {
 		return true;
 	}
 
 	@Override
-	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean incomingRequestPostProcessed(
+			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		return true;
 	}
 
@@ -68,7 +73,11 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
 
@@ -79,13 +88,22 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			IBaseResource theResponseObject,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			ResponseDetails theResponseDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
 
@@ -96,13 +114,19 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			TagList theResponseObject,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		return true;
 	}
 
 	@Override
-	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
+	public BaseServerResponseException preProcessOutgoingException(
+			RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest)
+			throws ServletException {
 		return null;
 	}
 
@@ -110,5 +134,4 @@ public class InterceptorAdapter implements IServerInterceptor {
 	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 		// nothing
 	}
-
 }

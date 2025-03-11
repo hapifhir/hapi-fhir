@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param.binder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param.binder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param.binder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -34,7 +33,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
+abstract class BaseJavaPrimitiveBinder<T> implements IParamBinder<T> {
 
 	public BaseJavaPrimitiveBinder() {
 		super();
@@ -56,16 +55,17 @@ abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 	}
 
 	@Override
-	public T parse(FhirContext theContext, String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public T parse(FhirContext theContext, String theName, List<QualifiedParamList> theParams)
+			throws InternalErrorException, InvalidRequestException {
 		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
 			return null;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException(Msg.code(1955) + "Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
+			throw new InvalidRequestException(Msg.code(1955) + "Multiple values detected for non-repeatable parameter '"
+					+ theName + "'. This server is not configured to allow multiple (AND) values for this param.");
 		}
-	
+
 		T value = doParse(theParams.get(0).get(0));
 		return value;
 	}
-
 }

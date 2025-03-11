@@ -57,7 +57,7 @@ This fact can have security implications:
   in use in another partition.
 
 * In a server using the default configuration of
-  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum))
   a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
 
 These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  
@@ -81,7 +81,7 @@ The criteria for determining the partition will depend on your use case. For exa
 
 ## Identify Partition for Read (Optional)
 
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
+A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is read in order to determine the partition to read the resource from.
 
 As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
@@ -130,14 +130,14 @@ Once enabled, HTTP Requests to the FHIR server must include the name of the part
 POST www.example.com/fhir/Patient
 ```
 
-With partitioning enabled, if we were to now create a patient in the `DEFAULT` paritition, the request would now look like this:
+With partitioning enabled, if we were to now create a patient in the `P1` partition, the request would now look like this:
 
 
 ```
-POST www.example.com/fhir/DEFAULT/Patient
+POST www.example.com/fhir/P1/Patient
 ```
 
-Failure to add a partition name to the request path will result in an error when multitenancy is enabled.
+If a tenant name is not provided in the request path, the request will default the tenant and use will use the 'DEFAULT' partition.
 
 # Limitations
 
@@ -167,8 +167,6 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Cross-partition History Operations are not supported**: It is not possible to perform a `_history` operation that spans all partitions (`_history` does work when applied to a single partition however). 
    
-* **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
-
 * **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.
 
 * **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,23 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
@@ -41,14 +41,15 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	private final Class<? extends T> myImplementingClass;
 	private final String myName;
 	private final boolean myStandardType;
-	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<>());
+	private final Map<Class<?>, Constructor<T>> myConstructors = new ConcurrentHashMap<>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<>();
 	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<>();
 	private BaseRuntimeElementDefinition<?> myRootParentDefinition;
 
-	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
+	public BaseRuntimeElementDefinition(
+			String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
 		assert StringUtils.isNotBlank(theName);
 		assert theImplementingClass != null;
 
@@ -57,7 +58,6 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		if (name.endsWith("Dt")) {
 			name = name.substring(0, name.length() - 2);
 		}
-
 
 		myName = name;
 		myStandardType = theStandardType;
@@ -85,38 +85,39 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			argumentType = theArgument.getClass();
 		}
 
-		Constructor<T> retVal = myConstructors.get(argumentType);
-		if (retVal == null) {
+		Constructor<T> retVal = myConstructors.computeIfAbsent(argumentType, type -> {
 			for (Constructor<?> next : getImplementingClass().getConstructors()) {
-				if (argumentType == VOID_CLASS) {
+				if (type == VOID_CLASS) {
 					if (next.getParameterTypes().length == 0) {
-						retVal = (Constructor<T>) next;
-						break;
+						return (Constructor<T>) next;
 					}
-				} else if (next.getParameterTypes().length == 1) {
-					if (next.getParameterTypes()[0].isAssignableFrom(argumentType)) {
-						retVal = (Constructor<T>) next;
-						break;
-					}
+				} else if (next.getParameterTypes().length == 1 && next.getParameterTypes()[0].isAssignableFrom(type)) {
+					return (Constructor<T>) next;
 				}
 			}
-			if (retVal == null) {
-				throw new ConfigurationException(Msg.code(1695) + "Class " + getImplementingClass() + " has no constructor with a single argument of type " + argumentType);
-			}
-			myConstructors.put(argumentType, retVal);
+			return null;
+		});
+
+		if (retVal == null) {
+			throw new ConfigurationException(Msg.code(1695) + "Class " + getImplementingClass()
+					+ " has no constructor with a single argument of type " + argumentType);
 		}
+
 		return retVal;
 	}
 
 	/**
 	 * @return Returns null if none
 	 */
-	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl, final String serverBaseUrl) {
+	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(
+			String theExtensionUrl, final String serverBaseUrl) {
 		validateSealed();
 		RuntimeChildDeclaredExtensionDefinition definition = myUrlToExtension.get(theExtensionUrl);
 		if (definition == null && StringUtils.isNotBlank(serverBaseUrl)) {
 			for (final Map.Entry<String, RuntimeChildDeclaredExtensionDefinition> entry : myUrlToExtension.entrySet()) {
-				final String key = (!UrlUtil.isValid(entry.getKey()) && StringUtils.isNotBlank(serverBaseUrl)) ? serverBaseUrl + entry.getKey() : entry.getKey();
+				final String key = (!UrlUtil.isValid(entry.getKey()) && StringUtils.isNotBlank(serverBaseUrl))
+						? serverBaseUrl + entry.getKey()
+						: entry.getKey();
 				if (key.equals(theExtensionUrl)) {
 					definition = entry.getValue();
 					break;
@@ -174,7 +175,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			return getConstructor(theArgument).newInstance(theArgument);
 
 		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(1696) + "Failed to instantiate type:" + getImplementingClass().getName(), e);
+			throw new ConfigurationException(
+					Msg.code(1696) + "Failed to instantiate type:"
+							+ getImplementingClass().getName(),
+					e);
 		}
 	}
 
@@ -188,7 +192,9 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	 *
 	 * @param theContext TODO
 	 */
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		for (BaseRuntimeChildDefinition next : myExtensions) {
 			next.sealAndInitialize(theContext, theClassToElementDefinitions);
 		}
@@ -196,7 +202,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		for (RuntimeChildDeclaredExtensionDefinition next : myExtensions) {
 			String extUrl = next.getExtensionUrl();
 			if (myUrlToExtension.containsKey(extUrl)) {
-				throw new ConfigurationException(Msg.code(1697) + "Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
+				throw new ConfigurationException(
+						Msg.code(1697) + "Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
 			}
 			myUrlToExtension.put(extUrl, next);
 			if (next.isModifier()) {
@@ -204,7 +211,6 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			} else {
 				myExtensionsNonModifier.add(next);
 			}
-
 		}
 
 		myExtensions = Collections.unmodifiableList(myExtensions);
@@ -217,12 +223,12 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			}
 			parent = parent.getSuperclass();
 		} while (!parent.equals(Object.class));
-
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[" + getName() + ", " + getImplementingClass().getSimpleName() + "]";
+		return getClass().getSimpleName() + "[" + getName() + ", "
+				+ getImplementingClass().getSimpleName() + "]";
 	}
 
 	protected void validateSealed() {
@@ -246,7 +252,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		/**
 		 * HAPI structure style.
 		 */
-		CONTAINED_RESOURCES, EXTENSION_DECLARED,
+		CONTAINED_RESOURCES,
+		EXTENSION_DECLARED,
 		ID_DATATYPE,
 		PRIMITIVE_DATATYPE,
 		/**
@@ -261,7 +268,5 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		RESOURCE_BLOCK,
 
 		UNDECL_EXT,
-
 	}
-
 }

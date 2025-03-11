@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,13 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.io.Files;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -35,6 +32,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.utilities.json.model.JsonArray;
+import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.slf4j.Logger;
@@ -53,7 +52,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CreatePackageCommand extends BaseCommand {
-	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommand.class);
 	public static final String TARGET_DIRECTORY_OPT = "target-directory";
 	public static final String DEPENDENCY_OPT = "dependency";
 	public static final String INCLUDE_EXAMPLE_OPT = "include-example";
@@ -61,6 +59,7 @@ public class CreatePackageCommand extends BaseCommand {
 	public static final String VERSION_OPT = "version";
 	public static final String NAME_OPT = "name";
 	public static final String DESCRIPTION_OPT = "description";
+	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommand.class);
 	private File myWorkDirectory;
 	private String myPackageName;
 	private String myPackageVersion;
@@ -82,13 +81,31 @@ public class CreatePackageCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 
-		addRequiredOption(options, null, NAME_OPT, "Package Name", "The name/id of the package, e.g. \"com.example.fhir.myapp\"");
-		addRequiredOption(options, null, VERSION_OPT, "Package Version", "The package version. FHIR packages use SemVer, e.g. \"1.0.0\"");
+		addRequiredOption(
+				options, null, NAME_OPT, "Package Name", "The name/id of the package, e.g. \"com.example.fhir.myapp\"");
+		addRequiredOption(
+				options,
+				null,
+				VERSION_OPT,
+				"Package Version",
+				"The package version. FHIR packages use SemVer, e.g. \"1.0.0\"");
 		addOptionalOption(options, null, DESCRIPTION_OPT, "Description", "A description for this package");
-		addOptionalOption(options, null, INCLUDE_PACKAGE_OPT, "File Spec", "A file spec to include in the package as a package resource/artifact");
-		addOptionalOption(options, null, INCLUDE_EXAMPLE_OPT, "File Spec", "A file spec to include in the package as an example resource/artifact");
-		addOptionalOption(options, null, TARGET_DIRECTORY_OPT, "Directory", "The directory in which to place the final package");
-		addOptionalOption(options, null, DEPENDENCY_OPT, "name:version", "Include this dependency, in the form \"name:version\"");
+		addOptionalOption(
+				options,
+				null,
+				INCLUDE_PACKAGE_OPT,
+				"File Spec",
+				"A file spec to include in the package as a package resource/artifact");
+		addOptionalOption(
+				options,
+				null,
+				INCLUDE_EXAMPLE_OPT,
+				"File Spec",
+				"A file spec to include in the package as an example resource/artifact");
+		addOptionalOption(
+				options, null, TARGET_DIRECTORY_OPT, "Directory", "The directory in which to place the final package");
+		addOptionalOption(
+				options, null, DEPENDENCY_OPT, "name:version", "Include this dependency, in the form \"name:version\"");
 
 		return options;
 	}
@@ -100,7 +117,10 @@ public class CreatePackageCommand extends BaseCommand {
 				FileUtils.deleteDirectory(myWorkDirectory);
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(1545) + "Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath() + "\"", e);
+			throw new InternalErrorException(
+					Msg.code(1545) + "Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath()
+							+ "\"",
+					e);
 		}
 	}
 
@@ -119,7 +139,7 @@ public class CreatePackageCommand extends BaseCommand {
 
 		myPackageVersion = theCommandLine.getOptionValue(VERSION_OPT);
 		if (isBlank(myPackageVersion)) {
-			throw new ParseException(Msg.code(1548) + "No package version supplied (--"+VERSION_OPT+")");
+			throw new ParseException(Msg.code(1548) + "No package version supplied (--" + VERSION_OPT + ")");
 		}
 		if (!NpmPackage.isValidVersion(myPackageVersion)) {
 			throw new ParseException(Msg.code(1549) + "Invalid package version: " + myPackageVersion);
@@ -164,7 +184,6 @@ public class CreatePackageCommand extends BaseCommand {
 		folder = "example";
 		addFiles(packageValues, folder);
 
-
 		String targetDirectory = theCommandLine.getOptionValue(TARGET_DIRECTORY_OPT);
 		if (isBlank(targetDirectory)) {
 			targetDirectory = ".";
@@ -207,9 +226,13 @@ public class CreatePackageCommand extends BaseCommand {
 					try {
 						String contents = IOUtils.toString(new FileInputStream(next), StandardCharsets.UTF_8);
 						contentBytes = contents.getBytes(StandardCharsets.UTF_8);
-						type = EncodingEnum.detectEncoding(contents).newParser(myFhirCtx).parseResource(contents).fhirType();
+						type = EncodingEnum.detectEncoding(contents)
+								.newParser(myFhirCtx)
+								.parseResource(contents)
+								.fhirType();
 					} catch (IOException | DataFormatException e) {
-						throw new ExecutionException(Msg.code(1553) + "Failed to load/parse file: " + next.getName(), e);
+						throw new ExecutionException(
+								Msg.code(1553) + "Failed to load/parse file: " + next.getName(), e);
 					}
 
 					ourLog.info("Adding {} file of type {}: {}", theFolder, type, next.getName());
@@ -219,4 +242,3 @@ public class CreatePackageCommand extends BaseCommand {
 		}
 	}
 }
-

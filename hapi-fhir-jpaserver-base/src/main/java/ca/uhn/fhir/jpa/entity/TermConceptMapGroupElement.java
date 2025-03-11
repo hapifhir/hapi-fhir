@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,32 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +51,14 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT", indexes = {
-	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")
-})
-public class TermConceptMapGroupElement implements Serializable {
+@Table(
+		name = "TRM_CONCEPT_MAP_GRP_ELEMENT",
+		indexes = {
+			@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE"),
+			@Index(name = "FK_TCMGELEMENT_GROUP", columnList = "CONCEPT_MAP_GROUP_PID")
+		})
+@IdClass(IdAndPartitionId.class)
+public class TermConceptMapGroupElement extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
@@ -49,8 +68,26 @@ public class TermConceptMapGroupElement implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CONCEPT_MAP_GROUP_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
+
+	@Column(name = "CONCEPT_MAP_GROUP_PID", nullable = false)
+	private Long myConceptMapGroupPid;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -79,8 +116,10 @@ public class TermConceptMapGroupElement implements Serializable {
 
 	public TermConceptMapGroupElement setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCode,
+				TermConcept.MAX_CODE_LENGTH,
+				"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -91,6 +130,9 @@ public class TermConceptMapGroupElement implements Serializable {
 
 	public TermConceptMapGroupElement setConceptMapGroup(TermConceptMapGroup theTermConceptMapGroup) {
 		myConceptMapGroup = theTermConceptMapGroup;
+		myConceptMapGroupPid = theTermConceptMapGroup.getId();
+		Validate.notNull(myConceptMapGroupPid, "ConceptMapGroupPid must not be null");
+		setPartitionId(theTermConceptMapGroup.getPartitionId());
 		return this;
 	}
 
@@ -152,33 +194,39 @@ public class TermConceptMapGroupElement implements Serializable {
 		TermConceptMapGroupElement that = (TermConceptMapGroupElement) o;
 
 		return new EqualsBuilder()
-			.append(getCode(), that.getCode())
-			.append(getSystem(), that.getSystem())
-			.append(getSystemVersion(), that.getSystemVersion())
-			.isEquals();
+				.append(getCode(), that.getCode())
+				.append(getSystem(), that.getSystem())
+				.append(getSystemVersion(), that.getSystemVersion())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getCode())
-			.append(getSystem())
-			.append(getSystemVersion())
-			.toHashCode();
+				.append(getCode())
+				.append(getSystem())
+				.append(getSystemVersion())
+				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myConceptMapGroup != null ? ("myConceptMapGroup - id=" + myConceptMapGroup.getId()) : ("myConceptMapGroup=(null)"))
-			.append("myCode", myCode)
-			.append("myDisplay", myDisplay)
-			.append(myConceptMapGroupElementTargets != null ? ("myConceptMapGroupElementTargets - size=" + myConceptMapGroupElementTargets.size()) : ("myConceptMapGroupElementTargets=(null)"))
-			.append("myConceptMapUrl", this.getConceptMapUrl())
-			.append("mySystem", this.getSystem())
-			.append("mySystemVersion", this.getSystemVersion())
-			.append("myValueSet", this.getValueSet())
-			.toString();
+				.append("myId", myId)
+				.append(
+						myConceptMapGroup != null
+								? ("myConceptMapGroup - id=" + myConceptMapGroup.getId())
+								: ("myConceptMapGroup=(null)"))
+				.append("myCode", myCode)
+				.append("myDisplay", myDisplay)
+				.append(
+						myConceptMapGroupElementTargets != null
+								? ("myConceptMapGroupElementTargets - size=" + myConceptMapGroupElementTargets.size())
+								: ("myConceptMapGroupElementTargets=(null)"))
+				.append("myConceptMapUrl", this.getConceptMapUrl())
+				.append("mySystem", this.getSystem())
+				.append("mySystemVersion", this.getSystemVersion())
+				.append("myValueSet", this.getValueSet())
+				.toString();
 	}
 }

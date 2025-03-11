@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.importpull;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,18 @@ package ca.uhn.fhir.batch2.jobs.importpull;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.importpull;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +45,8 @@ public class BulkImportParameterValidator implements IJobParametersValidator<Bat
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull Batch2BulkImportPullJobParameters theParameters) {
+	public List<String> validate(
+			RequestDetails theRequestDetails, @Nonnull Batch2BulkImportPullJobParameters theParameters) {
 		ourLog.info("BulkImportPull parameter validation begin");
 
 		ArrayList<String> errors = new ArrayList<>();

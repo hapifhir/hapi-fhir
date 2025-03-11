@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4654
+title: "Add scaffolding for automated migration tests that use different database vendors."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,5 +35,4 @@ public class BeanPostProcessorConfig {
 	public PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor() {
 		return new PersistenceExceptionTranslationPostProcessor();
 	}
-
 }

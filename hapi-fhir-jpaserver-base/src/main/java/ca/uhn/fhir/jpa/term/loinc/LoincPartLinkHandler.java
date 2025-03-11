@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -45,7 +44,10 @@ public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
 	private Long myPartCount;
 
-	public LoincPartLinkHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames) {
+	public LoincPartLinkHandler(
+			TermCodeSystemVersion theCodeSystemVersion,
+			Map<String, TermConcept> theCode2concept,
+			Map<String, CodeSystem.PropertyType> thePropertyNames) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
@@ -82,15 +84,14 @@ public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 		} else if (propertyType == CodeSystem.PropertyType.CODING) {
 			expectedValue = partNumber;
 		} else {
-			throw new InternalErrorException(Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
+			throw new InternalErrorException(
+					Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
 		}
 
-		Optional<TermConceptProperty> existingProprty = loincConcept
-			.getProperties()
-			.stream()
-			.filter(t -> t.getKey().equals(propertyPart))
-			.filter(t -> t.getValue().equals(expectedValue))
-			.findFirst();
+		Optional<TermConceptProperty> existingProprty = loincConcept.getProperties().stream()
+				.filter(t -> t.getKey().equals(propertyPart))
+				.filter(t -> t.getValue().equals(expectedValue))
+				.findFirst();
 		if (existingProprty.isPresent()) {
 			return;
 		}
@@ -101,6 +102,5 @@ public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 		} else {
 			loincConcept.addPropertyCoding(propertyPart, ITermLoaderSvc.LOINC_URI, partNumber, partName);
 		}
-
 	}
 }

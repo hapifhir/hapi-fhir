@@ -1,53 +1,59 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -57,26 +63,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
-
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 
 	@Override
 	@AfterEach
@@ -86,13 +88,69 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 	}
 
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnDoubleInclude(int theCount) {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+		Bundle execute = myClient.search().forResource("Patient").include(new Include("*")).revInclude(new Include("*")).count(theCount).returnBundle(Bundle.class).execute();
+
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (execute.getLink("next") != null) {
+			execute = myClient.loadPage().next(execute).execute();
+			foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) throws IOException {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(TENANT_A);
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+
+		Bundle everything = myClient.operation().onInstance(patient.toUnqualifiedVersionless().toString()).named("$everything").withParameters(parameters).returnResourceType(Bundle.class).execute();
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (everything.getLink("next") != null) {
+			everything = myClient.loadPage().next(everything).execute();
+			foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
+	}
+
 	@Test
 	public void testFetchCapabilityStatement() {
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
-		assertEquals(ourServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
+		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
 	}
 
 	@Test
@@ -104,9 +162,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
-			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(() -> new IllegalStateException());
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
+			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
 
 		// Now read back
@@ -142,8 +201,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertNull(resourceTable.getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -181,16 +240,16 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
-				"Patient", Arrays.asList(patientId)
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+				"Patient", List.of(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
-				"Patient", Arrays.asList(patientId), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
+				"Patient", List.of(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -200,18 +259,18 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
-				"Patient", Arrays.asList(patientId)
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+				"Patient", List.of(patientId)
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
-				"Patient", Arrays.asList(patientId), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoType(
+				"Patient", List.of(patientId), true
 			);
-			assertThat(forcedIds, hasSize(0));
+			assertThat(forcedIds).hasSize(0);
 		});
 	}
 
@@ -223,16 +282,16 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", List.of(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", List.of(patientId), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -242,16 +301,16 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", List.of(patientId), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
-				"Patient", Arrays.asList(patientId), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", List.of(patientId), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
@@ -267,16 +326,16 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -285,23 +344,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", List.of(patientId), List.of(TENANT_A_ID), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
 	}
 
 	@Test
-	public void testFindAndResolveByForcedIdWithNoTypeInPartition() throws IOException {
+	public void testFindAndResolveByForcedIdWithNoTypeInPartition() {
 		// Create patients
 		String patientId = "AAA";
 		IIdType idA = createPatient(withTenant(TENANT_A), withId(patientId));
@@ -310,16 +369,16 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
@@ -328,23 +387,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
 			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
-				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+			Collection<Object[]> forcedIds = myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", List.of(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
 			assertEquals(0, forcedIds.size());
 		});
 	}
 
 	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
-		assertEquals(1, forcedIds.size());
+		assertThat(forcedIds).hasSize(1);
 		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
 	}
 
@@ -362,8 +421,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idA = createResource("NamingSystem", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withStatus("draft"));
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertNull(resourceTable.getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -379,7 +438,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myClient.create().resource(patientA).execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Partition name \"TENANT-ZZZ\" is not valid"));
+			assertThat(e.getMessage()).contains("Partition name \"TENANT-ZZZ\" is not valid");
 		}
 
 	}
@@ -416,12 +475,63 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
+	}
+
+	@Test
+	public void testTransactionPut_withSearchNarrowingInterceptor_createsPatient() {
+		// setup
+		IBaseResource patientA = buildPatient(withTenant(TENANT_B), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+
+		Bundle transactioBundle = new Bundle();
+		transactioBundle.setType(Bundle.BundleType.TRANSACTION);
+		transactioBundle.addEntry()
+			.setFullUrl("http://localhost:8000/TENANT-A/Patient/1234a")
+			.setResource((Resource) patientA)
+			.getRequest().setUrl("Patient/1234a").setMethod(Bundle.HTTPVerb.PUT);
+
+		myServer.registerInterceptor(new SearchNarrowingInterceptor());
+
+		// execute
+		myClient.transaction().withBundle(transactioBundle).execute();
+
+		// verify - read back using DAO
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_B);
+		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+		assertEquals("Family", patient1.getName().get(0).getFamily());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"Patient/1234a", "TENANT-B/Patient/1234a"})
+	public void testTransactionGet_withSearchNarrowingInterceptor_retrievesPatient(String theEntryUrl) {
+		// setup
+		createPatient(withTenant(TENANT_B), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+
+		Bundle transactioBundle = new Bundle();
+		transactioBundle.setType(Bundle.BundleType.TRANSACTION);
+		transactioBundle.addEntry()
+			.getRequest().setUrl(theEntryUrl).setMethod(Bundle.HTTPVerb.GET);
+
+		myServer.registerInterceptor(new SearchNarrowingInterceptor());
+
+		// execute
+		Bundle result = myClient.transaction().withBundle(transactioBundle).execute();
+
+		// verify
+		assertThat(result.getEntry()).hasSize(1);
+		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
+		assertNotNull(retrievedPatient);
+		assertEquals("Family", retrievedPatient.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -439,10 +549,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = myPatientDao.create((Patient) patientB, requestDetails).getId();
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertNull(resourceTable.getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertNull(resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -471,6 +582,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
+	@Disabled("This test relied on a tenantId mismatch with the partition ID of the resource - This " +
+		"doesn't really make sense since tenant ID != partition ID")
 	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
 		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
@@ -480,7 +593,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			String idPart = ((Patient) patientA).getIdElement().getIdPart();
+			assertThat(e.getMessage()).contains("HAPI-0960: Can not create resource with ID[" + idPart + "]");
 		}
 	}
 
@@ -502,10 +616,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myPatientDao.update((Patient) patientB, requestDetails);
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertNull(resourceTable.getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertNull(resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -565,10 +680,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IdType idB = new IdType(response.getEntry().get(1).getResponse().getLocation());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
-			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+            assert resourceTable.getPartitionId().getPartitionId() != null;
+            assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -592,19 +709,19 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
-	public void testIncludeInTenantWithAssignedID() throws Exception {
+	public void testIncludeInTenantWithAssignedID() {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withId("test"), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
-		assertThat(response.getEntry(), hasSize(2));
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	@Test
-	public void testIncludeInTenantWithAutoGeneratedID() throws Exception {
+	public void testIncludeInTenantWithAutoGeneratedID() {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
-		assertThat(response.getEntry(), hasSize(2));
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
@@ -612,6 +729,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = createResource("Condition", withTenant(TENANT_A), withObservationCode("http://cs", "A"));
 		Condition theCondition = myClient.read().resource(Condition.class).withId(idB).execute();
 		theCondition.getSubject().setReference("Patient/" + idA.getIdPart());
+		logAllResources();
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
 		doUpdateResource(theCondition);
 	}
 
@@ -622,7 +741,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		private BulkDataExportProvider myProvider;
 
 		@Mock
-		private IBatch2JobRunner myJobRunner;
+		private IJobCoordinator myJobCoordinator;
+
+		String myTenantName = null;
 
 		@Test
 		public void testBulkExportForDifferentPartitions() throws IOException {
@@ -643,21 +764,22 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			map.put("Patient", Arrays.asList("Binary/1", "Binary/2"));
 			results.setResourceTypeToBinaryIds(map);
 
-			Batch2JobInfo jobInfo = new Batch2JobInfo();
-			jobInfo.setJobId(jobId);
-			jobInfo.setStatus(BulkExportJobStatusEnum.COMPLETE);
+			JobInstance jobInfo = new JobInstance();
+			jobInfo.setInstanceId(jobId);
+			jobInfo.setStatus(StatusEnum.COMPLETED);
 			jobInfo.setReport(JsonUtil.serialize(results));
+			jobInfo.setParameters(new BulkExportJobParameters());
 
 			// Create a bulk job
-			BulkDataExportOptions options = new BulkDataExportOptions();
+			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
-			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-			startResponse.setJobId(jobId);
-			when(myJobRunner.startNewJob(any()))
+			startResponse.setInstanceId(jobId);
+			when(myJobCoordinator.startInstance(isNotNull(), any()))
 				.thenReturn(startResponse);
-			when(myJobRunner.getJobInfo(anyString()))
+			when(myJobCoordinator.getInstance(anyString()))
 				.thenReturn(jobInfo);
 
 			// mocking
@@ -666,36 +788,28 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			reqDetails.addHeader(Constants.HEADER_PREFER,
 				"respond-async");
 			servletRequestDetails.setServletRequest(reqDetails);
-			doReturn(JpaConstants.DEFAULT_PARTITION_NAME + "/")
-				.when(servletRequestDetails).getServerBaseForRequest();
 			when(servletRequestDetails.getServer())
 				.thenReturn(mockServer);
 			when(servletRequestDetails.getServletResponse())
 				.thenReturn(mockResponse);
 
-			List<IPrimitiveType<String>> filters = new ArrayList<>();
-			if (options.getFilters() != null) {
-				for (String v : options.getFilters()) {
-					filters.add(new StringType(v));
-				}
-			}
-
 			//perform export-poll-status
+			myTenantName = createInPartition;
 			HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobId));
 			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+				assertThat(responseJson.getOutput().get(0).getUrl()).contains(createInPartition + "/Binary/");
 			}
 		}
 
 		@BeforeEach
-		private void setBulkDataExportProvider() {
-			ourRestServer.registerProvider(myProvider);
+		public void setBulkDataExportProvider() {
+			myServer.getRestfulServer().registerProvider(myProvider);
 		}
 
 		private String buildExportUrl(String createInPartition, String jobId) {
-			return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			return myClient.getServerBase() + "/" + createInPartition + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 		}
 	}

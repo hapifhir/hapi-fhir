@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Organization;
@@ -26,31 +25,30 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class ResourceRefs {
 
-   private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 
-   public static void main(String[] args) {
-      manualContained();
-   }
+	public static void main(String[] args) {
+		manualContained();
+	}
 
-   public static void manualContained() {
-      // START SNIPPET: manualContained
-      // Create an organization, and give it a local ID
-      Organization org = new Organization();
-      org.setId("#localOrganization");
-      org.getNameElement().setValue("Contained Test Organization");
+	public static void manualContained() {
+		// START SNIPPET: manualContained
+		// Create an organization, and give it a local ID
+		Organization org = new Organization();
+		org.setId("#localOrganization");
+		org.getNameElement().setValue("Contained Test Organization");
 
-      // Create a patient
-      Patient patient = new Patient();
-      patient.setId("Patient/1333");
-      patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 
-      // Set the reference, and manually add the contained resource
-      patient.getManagingOrganization().setReference("#localOrganization");
-      patient.getContained().add(org);
+		// Set the reference, and manually add the contained resource
+		patient.getManagingOrganization().setReference("#localOrganization");
+		patient.getContained().add(org);
 
-      String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-      System.out.println(encoded);
-      // END SNIPPET: manualContained
-   }
-
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		System.out.println(encoded);
+		// END SNIPPET: manualContained
+	}
 }

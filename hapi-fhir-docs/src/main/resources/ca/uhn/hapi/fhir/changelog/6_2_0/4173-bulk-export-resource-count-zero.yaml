@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4173
+title: "When triggering a batch export, the number of resources processed is returned as zero.  This is now fixed to return the total number of resources processed across a single or multiple bundles."

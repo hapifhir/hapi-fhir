@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,9 @@ package ca.uhn.fhir.jpa.model.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.config;
+
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 
 /**
  * @since 5.0.0
@@ -30,6 +31,56 @@ public class PartitionSettings {
 	private boolean myIncludePartitionInSearchHashes = false;
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
+	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
+	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
+	private boolean myDatabasePartitionMode = false;
+
+	public PartitionSettings() {
+		super();
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isDatabasePartitionMode() {
+		return myDatabasePartitionMode;
+	}
+
+	/**
+	 * This flag activates partition IDs in PKs mode, which is newly introduced in HAPI FHIR 8.0.0.
+	 * This mode causes partition IDs to be included in all primary keys, joins, and emitted
+	 * SQL. It also affects the generated schema and migrations. This setting should not be changed
+	 * after the database has been initialized, unless you have performed an appropriate migration.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
+		myDatabasePartitionMode = theDatabasePartitionMode;
+	}
+
+	/**
+	 * Should we always open a new database transaction if the partition context changes
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isAlwaysOpenNewTransactionForDifferentPartition() {
+		return myAlwaysOpenNewTransactionForDifferentPartition;
+	}
+
+	/**
+	 * Should we always open a new database transaction if the partition context changes
+	 *
+	 * @since 6.6.0
+	 */
+	public void setAlwaysOpenNewTransactionForDifferentPartition(
+			boolean theAlwaysOpenNewTransactionForDifferentPartition) {
+		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
+	}
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
@@ -38,6 +89,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public boolean isIncludePartitionInSearchHashes() {
@@ -51,6 +105,9 @@ public class PartitionSettings {
 	 * better when using native database partitioning features.
 	 * <p>
 	 * This setting has no effect if partitioning is not enabled via {@link #isPartitioningEnabled()}.
+	 * </p>
+	 * <p>
+	 * If {@link StorageSettings#isIndexStorageOptimized()} is enabled this setting should be set to <code>false</code>.
 	 * </p>
 	 */
 	public PartitionSettings setIncludePartitionInSearchHashes(boolean theIncludePartitionInSearchHashes) {
@@ -136,6 +193,42 @@ public class PartitionSettings {
 		myDefaultPartitionId = theDefaultPartitionId;
 	}
 
+	/**
+	 * If enabled the JPA server will allow unqualified cross partition reference
+	 */
+	public boolean isAllowUnqualifiedCrossPartitionReference() {
+		return myAllowReferencesAcrossPartitions.equals(
+				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
+
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
+	public boolean isConditionalCreateDuplicateIdentifiersEnabled() {
+		return myConditionalCreateDuplicateIdentifiersEnabled;
+	}
+
+	/**
+	 * The {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * table is used to prevent accidental concurrent conditional create/update operations
+	 * from creating duplicate resources by inserting a row in that table as a part
+	 * of the database transaction performing the write operation. If this setting
+	 * is set to {@literal false} (which is the default), the partition
+	 * ID is not written to this table, meaning that duplicates are prevented across
+	 * partitions. If this setting is {@literal true}, duplicates will not be
+	 * prevented if they appear on different partitions.
+	 */
+	public void setConditionalCreateDuplicateIdentifiersEnabled(
+			boolean theConditionalCreateDuplicateIdentifiersEnabled) {
+		myConditionalCreateDuplicateIdentifiersEnabled = theConditionalCreateDuplicateIdentifiersEnabled;
+	}
 
 	public enum CrossPartitionReferenceMode {
 
@@ -145,18 +238,9 @@ public class PartitionSettings {
 		NOT_ALLOWED,
 
 		/**
-		 * References can cross partition boundaries, in a way that hides the existence of partitions to the end user
+		 * References can cross partition boundaries, with an assumption that boundaries
+		 * will be managed by the database.
 		 */
-		ALLOWED_UNQUALIFIED
-
+		ALLOWED_UNQUALIFIED,
 	}
-
-	/**
-	 * If enabled the JPA server will allow unqualified cross partition reference
-	 *
-	 */
-	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
-	}
-
 }

@@ -141,6 +141,10 @@ body
 }
 
 /* Disable the servers dropdown, which is useless here */
-.swagger-ui .scheme-container {
-   display: none;
+.swagger-ui .scheme-container .servers-title {
+    display: none;
+}
+
+.swagger-ui .scheme-container .servers {
+    display: none;
 }

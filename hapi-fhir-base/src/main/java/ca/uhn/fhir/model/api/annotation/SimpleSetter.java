@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,22 +26,20 @@ import java.lang.annotation.Target;
 
 /**
  * Marker annotation for a primitive setter method that can be used to
- * indicate a "simple setter" method on a resource or composite type.  
- * 
+ * indicate a "simple setter" method on a resource or composite type.
+ *
  * This annotation is used by HAPI's code generator and can be ignored by
  * client code
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.CONSTRUCTOR})
+@Target(value = {ElementType.CONSTRUCTOR})
 public @interface SimpleSetter {
-	
+
 	String suffix() default "";
-	
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(value= {ElementType.PARAMETER})
+	@Target(value = {ElementType.PARAMETER})
 	public @interface Parameter {
 		String name();
-	}	
-	
+	}
 }

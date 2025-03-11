@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.servlet;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +17,40 @@ package ca.uhn.fhir.rest.server.servlet;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	private final ServletRequestDetails myWrap;
-	private Map<String, List<String>> myHeaders = new HashMap<>();
+	/**
+	 * Map with case-insensitive keys
+	 */
+	private final ListMultimap<String, String> myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+			.arrayListValues()
+			.build();
 
 	/**
 	 * Constructor
 	 *
 	 * @param theRequestDetails The parent request details
 	 */
-	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
+	public ServletSubRequestDetails(@Nonnull ServletRequestDetails theRequestDetails) {
 		super(theRequestDetails.getInterceptorBroadcaster());
 
 		myWrap = theRequestDetails;
 
-		if (theRequestDetails != null) {
-			Map<String, List<String>> headers = theRequestDetails.getHeaders();
-			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
-				myHeaders.put(next.getKey().toLowerCase(), next.getValue());
-			}
+		Map<String, List<String>> headers = theRequestDetails.getHeaders();
+		for (Map.Entry<String, List<String>> next : headers.entrySet()) {
+			myHeaders.putAll(next.getKey(), next.getValue());
 		}
 	}
 
@@ -60,16 +64,15 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		return myWrap.getServletResponse();
 	}
 
+	@Override
 	public void addHeader(String theName, String theValue) {
-		String lowerCase = theName.toLowerCase();
-		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
-		list.add(theValue);
+		myHeaders.put(theName, theValue);
 	}
 
 	@Override
 	public String getHeader(String theName) {
-		List<String> list = myHeaders.get(theName.toLowerCase());
-		if (list == null || list.isEmpty()) {
+		List<String> list = myHeaders.get(theName);
+		if (list.isEmpty()) {
 			return null;
 		}
 		return list.get(0);
@@ -78,7 +81,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	@Override
 	public List<String> getHeaders(String theName) {
 		List<String> list = myHeaders.get(theName.toLowerCase());
-		if (list == null || list.isEmpty()) {
+		if (list.isEmpty()) {
 			return null;
 		}
 		return list;
@@ -93,5 +96,4 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	public boolean isSubRequest() {
 		return true;
 	}
-
 }

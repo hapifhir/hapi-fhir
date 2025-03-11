@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5006
+title: "Expanding a ValueSet on a property using a filter operator that is
+        not supported (ISA, NOTISA, etc) would throw an exception and fail
+        expansion.
+        This has been fixed.
+"

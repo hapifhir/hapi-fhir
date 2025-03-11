@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +17,23 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * RESTful method annotation used for a method which provides
  * the FHIR "conformance" method.
- * 
+ *
  * See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
  * fore more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
+@Target(value = ElementType.METHOD)
 public @interface Metadata {
 
 	long cacheMillis() default 60 * 1000L;
-
 }

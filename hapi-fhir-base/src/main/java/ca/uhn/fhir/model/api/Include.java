@@ -1,19 +1,8 @@
-package ca.uhn.fhir.model.api;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.io.Serializable;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +17,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Represents a FHIR resource path specification, e.g. <code>Patient:name</code>
@@ -37,13 +36,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * upgrading servers.
  * </p>
  * <p>
- * Note on thrwead safety: This class is not thread safe.
+ * Note on thread safety: This class is not thread safe.
  * </p>
  */
 public class Include implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private final boolean myImmutable;
 	private boolean myIterate;
 	private String myValue;
@@ -53,7 +52,7 @@ public class Include implements Serializable {
 
 	/**
 	 * Constructor for <b>non-recursive</b> include
-	 * 
+	 *
 	 * @param theValue
 	 *           The <code>_include</code> value, e.g. "Patient:name"
 	 */
@@ -63,7 +62,7 @@ public class Include implements Serializable {
 
 	/**
 	 * Constructor for an include
-	 * 
+	 *
 	 * @param theValue
 	 *           The <code>_include</code> value, e.g. "Patient:name"
 	 * @param theIterate
@@ -75,7 +74,7 @@ public class Include implements Serializable {
 
 	/**
 	 * Constructor for an include
-	 * 
+	 *
 	 * @param theValue
 	 *           The <code>_include</code> value, e.g. "Patient:name"
 	 * @param theIterate
@@ -148,7 +147,6 @@ public class Include implements Serializable {
 	 */
 	public String getParamTargetType() {
 		return myParamTargetType;
-
 	}
 
 	public String getValue() {
@@ -210,7 +208,7 @@ public class Include implements Serializable {
 				paramName = value.substring(firstColon + 1);
 				paramTargetType = null;
 			} else {
-				paramName =  value.substring(firstColon + 1, secondColon);
+				paramName = value.substring(firstColon + 1, secondColon);
 				paramTargetType = value.substring(secondColon + 1);
 			}
 		}
@@ -219,7 +217,6 @@ public class Include implements Serializable {
 		myParamName = paramName;
 		myParamTargetType = paramTargetType;
 		myValue = theValue;
-
 	}
 
 	/**
@@ -263,7 +260,7 @@ public class Include implements Serializable {
 	 * <th>{@link IllegalStateException}</th>
 	 * </tr>
 	 * </table>
-	 * 
+	 *
 	 * @param theResourceType
 	 *           The resource type (e.g. "Organization")
 	 * @return A new copy of the include. Note that if this include is {@link #toLocked() locked}, the returned include
@@ -271,16 +268,17 @@ public class Include implements Serializable {
 	 */
 	public Include withType(String theResourceType) {
 		StringBuilder b = new StringBuilder();
-		
+
 		String paramType = getParamType();
 		String paramName = getParamName();
 		if (isBlank(paramType) || isBlank(paramName)) {
-			throw new IllegalStateException(Msg.code(1889) + "This include does not contain a value in the format [ResourceType]:[paramName]");
+			throw new IllegalStateException(
+					Msg.code(1889) + "This include does not contain a value in the format [ResourceType]:[paramName]");
 		}
 		b.append(paramType);
 		b.append(":");
 		b.append(paramName);
-		
+
 		if (isNotBlank(theResourceType)) {
 			b.append(':');
 			b.append(theResourceType);
@@ -288,5 +286,4 @@ public class Include implements Serializable {
 		Include retVal = new Include(b.toString(), myIterate, myImmutable);
 		return retVal;
 	}
-
 }

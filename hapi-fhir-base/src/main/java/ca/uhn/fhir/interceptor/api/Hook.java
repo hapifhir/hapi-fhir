@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,9 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -48,7 +46,11 @@ public @interface Hook {
 	 * and allowable values can be positive or negative or 0.
 	 * <p>
 	 * If no order is specified, or the order is set to <code>0</code> (the default order),
-	 * the order specified at the interceptor type level will take precedence.
+	 * the order specified at the {@link Interceptor#order() interceptor type level} will be used.
+	 * </p>
+	 * <p>
+	 * Note that if two hook methods have the same order, then the order of execution is undefined. If
+	 * order is important, then an order must always be explicitly stated.
 	 * </p>
 	 */
 	int order() default Interceptor.DEFAULT_ORDER;

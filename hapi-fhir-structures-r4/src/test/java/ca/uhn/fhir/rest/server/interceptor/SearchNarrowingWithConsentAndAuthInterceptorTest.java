@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -37,19 +38,14 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -154,9 +150,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
 
@@ -201,9 +197,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
 
@@ -248,9 +244,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
 
@@ -296,9 +292,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
 
@@ -351,7 +347,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Patient/P0", "Observation/O0");
 
 	}
 
@@ -405,7 +401,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Patient/P0", "Observation/O0");
 
 	}
 
@@ -456,11 +452,10 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 				.withNoParameters(Parameters.class)
 				.returnResourceType(Bundle.class)
 				.execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
+			fail();		} catch (ForbiddenOperationException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Access denied by"));
+			assertThat(e.getMessage()).contains("Access denied by");
 
 		}
 
@@ -523,7 +518,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Search(allowUnknownParams = true)
 		@Override
-		public synchronized List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+		public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
 			myRequestParams.add(theRequestDetails.getParameters());
 			return super.searchAll(theRequestDetails);
 		}

@@ -1,13 +1,18 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -17,6 +22,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,13 +39,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
@@ -49,6 +55,16 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
+
+	@Override
+	@AfterEach
+	public void after() {
+		super.after();
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
+	}
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
@@ -123,20 +139,20 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDeleteValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = runInTransaction(()-> {
 			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -156,7 +172,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -164,20 +180,20 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDeleteValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		Long termValueSetId = runInTransaction(()-> {
 			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -196,7 +212,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(termValueSetId);
+				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -217,7 +233,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
 		loadAndPersistCodeSystemAndValueSet();
@@ -245,97 +261,99 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -355,10 +373,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -366,9 +384,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 
 		});
@@ -379,7 +397,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
-		assertThat(toCodes(codes), containsInAnyOrder("C"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("C");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
@@ -387,9 +405,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(1);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 3);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B", "C"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B", "C");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id_v2.getIdPartAsLong()));
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}
@@ -410,10 +428,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -421,9 +439,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 
@@ -440,12 +458,62 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id_v2.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id_v2.getIdPartAsLong()));
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 			assertEquals(CS_URL_2, termCodeSystem.getCodeSystemUri());
 		});
+	}
+
+	/**
+	 * See #4206
+	 */
+	@Test
+	public void testUpdateLargeCodeSystemInRapidSuccession() {
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(100);
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(true);
+
+		CodeSystem codeSystem;
+		codeSystem = createCodeSystemWithManyCodes(0, 1000);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(1, 1001);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(2, 1002);
+		myCodeSystemDao.update(codeSystem, mySrd);
+
+		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+			});
+
+		IValidationSupport.CodeValidationResult outcome;
+
+		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1002", null, null);
+		assertTrue(outcome.isOk());
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1003", null, null);
+		assertFalse(outcome.isOk());
+
+	}
+
+	@Nonnull
+	private static CodeSystem createCodeSystemWithManyCodes(int theCodeCountStart, int theCodeCountEnd) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/A");
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setVersion("1");
+		for (int i = theCodeCountStart; i <= theCodeCountEnd; i++) {
+			codeSystem
+				.addConcept().setCode("A" + i).setDisplay("Code A" + i);
+		}
+		return codeSystem;
 	}
 
 	@Test
@@ -463,10 +531,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		Set<TermConcept> codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "A");
-		assertThat(toCodes(codes), containsInAnyOrder("A"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("A");
 
 		codes = myTermSvc.findCodesBelow(id.getIdPartAsLong(), id.getVersionIdPartAsLong(), "B");
-		assertThat(toCodes(codes), containsInAnyOrder("B"));
+		assertThat(toCodes(codes)).containsExactlyInAnyOrder("B");
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
@@ -474,9 +542,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_1 = termCodeSystemVersions.get(0);
 			assertEquals(termCodeSystemVersion_1.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts = new HashSet<>(termCodeSystemVersion_1.getConcepts());
-			assertThat(toCodes(termConcepts), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 
 		});
@@ -492,9 +560,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());
-			assertThat(toCodes(termConcepts_updated), containsInAnyOrder("A", "B"));
+			assertThat(toCodes(termConcepts_updated)).containsExactlyInAnyOrder("A", "B");
 
-			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(JpaPid.fromId(id.getIdPartAsLong()));
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 		});
 	}

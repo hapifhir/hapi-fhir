@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -15,10 +15,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
@@ -31,21 +32,19 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	private ISearchResultDao mySearchResultDao;
 
 	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinator;
-
-	@Autowired
 	private ISearchCacheSvc myDatabaseCacheSvc;
 
 	@AfterEach
 	public void after() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
-		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);
 	}
 
+	/**
+	 * Semi-obsolete test.  This used to test incremental deletion, but we now work until done or a timeout.
+	 */
 	@Test
 	public void testDeleteDontMarkPreviouslyMarkedSearchesAsDeleted() {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
-		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(10);
 
 		runInTransaction(()->{
 			mySearchResultDao.deleteAll();
@@ -85,28 +84,12 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 			assertEquals(30, mySearchResultDao.count());
 		});
 
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
+		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions(), Instant.now().plus(10, ChronoUnit.SECONDS));
 		runInTransaction(()->{
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
-			assertEquals(13, mySearchDao.count());
-			assertEquals(3, mySearchDao.countDeleted());
-			// We delete a max of 5 results per search, so half are gone
-			assertEquals(15, mySearchResultDao.count());
-		});
-
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->{
-			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
-			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
-			assertEquals(6, mySearchDao.count());
-			assertEquals(6, mySearchDao.countDeleted());
-			assertEquals(0, mySearchResultDao.count());
-		});
-
-		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());
+			// We delete a max of 5 results per search, so half are gone
 			assertEquals(0, mySearchResultDao.count());
 		});
 	}

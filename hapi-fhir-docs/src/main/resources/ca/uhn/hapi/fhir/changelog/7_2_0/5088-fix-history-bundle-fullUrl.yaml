@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5088
+title: "Previously, the fullUrl for resources in _history bundles was not generated correctly when using a client 
+provided id. The same problem started to happen for the resources with server generated ids more recently  
+(after 6.9.10). This has now been fixed"

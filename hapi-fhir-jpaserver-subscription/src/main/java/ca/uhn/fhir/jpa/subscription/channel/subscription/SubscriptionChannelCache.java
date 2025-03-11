@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.channel.subscription;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +61,7 @@ class SubscriptionChannelCache {
 		return myCache.containsKey(theChannelName);
 	}
 
+	@VisibleForTesting
 	void logForUnitTest() {
 		for (String key : myCache.keySet()) {
 			ourLog.info("SubscriptionChannelCache: {}", key);

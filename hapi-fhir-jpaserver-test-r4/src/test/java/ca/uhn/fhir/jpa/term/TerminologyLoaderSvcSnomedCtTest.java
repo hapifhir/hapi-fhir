@@ -25,10 +25,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -88,19 +85,42 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		TreeSet<String> allCodes = toCodes(csv, true);
 		ourLog.info(allCodes.toString());
 
-		assertThat(allCodes, hasItem("116680003"));
-		assertThat(allCodes, not(hasItem("207527008")));
+		assertThat(allCodes).contains("116680003");
+		assertThat(allCodes).doesNotContain("207527008");
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());
-		assertThat(allCodes, hasItem("126816002"));
+		assertThat(allCodes).contains("126816002");
+	}
+
+	@Test
+	public void testLoadSnowmedCtWithCanadianEditionFileNamingConvention() throws Exception {
+		myFiles.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Description_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
+		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
+		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
+
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+
+		TermCodeSystemVersion csv = myCsvCaptor.getValue();
+		TreeSet<String> allCodes = toCodes(csv, true);
+		ourLog.info(allCodes.toString());
+
+		assertThat(allCodes).contains("116680003");
+		assertThat(allCodes).doesNotContain("207527008");
+
+		allCodes = toCodes(csv, false);
+		ourLog.info(allCodes.toString());
+		assertThat(allCodes).contains("126816002");
 	}
 
 	/**
 	 * This is just for trying stuff, it won't run without
 	 * local files external to the git repo
 	 */
-	@Disabled
+	@Disabled("for manual testing")
 	@Test
 	public void testLoadSnomedCtAgainstRealFile() throws Exception {
 		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
@@ -121,7 +141,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 			mySvc.loadSnomedCt(list(bos.toByteArray()), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input: "));
+			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input: ");
 		}
 	}
 

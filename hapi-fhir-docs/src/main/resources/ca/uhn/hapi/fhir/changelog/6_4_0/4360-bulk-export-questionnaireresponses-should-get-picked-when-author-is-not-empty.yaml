@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4360
+title: "Previously, Patient Bulk Export on certain resources with reference to patient only in author or performer did not get exported.
+This has been fixed."

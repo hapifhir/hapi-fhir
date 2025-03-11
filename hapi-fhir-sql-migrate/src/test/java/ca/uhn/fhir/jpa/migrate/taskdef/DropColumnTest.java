@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DropColumnTest extends BaseTest {
 
@@ -27,7 +25,7 @@ public class DropColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID");
 
 		// Do it again to make sure there is no error
 		getMigrator().migrate();
@@ -46,11 +44,11 @@ public class DropColumnTest extends BaseTest {
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
 		executeSql("alter table CHILD add constraint FK_BROTHER foreign key (SIBLINGREF) references SIBLING(PID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(1);
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"), containsInAnyOrder("FK_BROTHER"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).containsExactlyInAnyOrder("FK_MOM");
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD")).containsExactlyInAnyOrder("FK_BROTHER");
 
 		DropColumnTask task = new DropColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -59,13 +57,13 @@ public class DropColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "SIBLINGREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD")).containsExactlyInAnyOrder("PID", "SIBLINGREF");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(0));
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD"), hasSize(1));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD")).hasSize(0);
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD")).hasSize(1);
 
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), hasSize(0));
-		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"), containsInAnyOrder("FK_BROTHER"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD")).hasSize(0);
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD")).containsExactlyInAnyOrder("FK_BROTHER");
 
 		// Do it again to make sure there is no error
 		getMigrator().migrate();

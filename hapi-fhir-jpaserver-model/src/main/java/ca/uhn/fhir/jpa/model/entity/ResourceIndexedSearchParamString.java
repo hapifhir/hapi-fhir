@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,69 +17,99 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-//@formatter:off
-@Embeddable
+// @formatter:off
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
-@Table(name = "HFJ_SPIDX_STRING", indexes = {
-	/*
-	 * Note: We previously had indexes with the following names,
-	 * do not reuse these names:
-	 * IDX_SP_STRING
-	 */
+@Table(
+		name = ResourceIndexedSearchParamString.HFJ_SPIDX_STRING,
+		indexes = {
+			/*
+			 * Note: We previously had indexes with the following names,
+			 * do not reuse these names:
+			 * IDX_SP_STRING
+			 */
 
-	// This is used for sorting, and for :contains queries currently
-	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
-
-	@Index(name = "IDX_SP_STRING_HASH_NRM_V2", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
-
-	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
-})
+			// This is used for sorting, and for :contains queries currently
+			@Index(name = "IDX_SP_STRING_HASH_IDENT_V2", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID"),
+			@Index(
+					name = "IDX_SP_STRING_HASH_NRM_V2",
+					columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
+			@Index(name = "IDX_SP_STRING_RESID_V2", columnList = "RES_ID,HASH_NORM_PREFIX,PARTITION_ID")
+		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
-	public static final int MAX_LENGTH = 200;
+	public static final int MAX_LENGTH = 768;
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_SPIDX_STRING = "HFJ_SPIDX_STRING";
+
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
+	@GenericGenerator(name = "SEQ_SPIDX_STRING", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
-		foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	private String myValueExact;
@@ -94,11 +122,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
 	/**
-	 * @since 3.6.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
-	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
@@ -108,9 +131,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		super();
 	}
 
-	public ResourceIndexedSearchParamString(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
+	public ResourceIndexedSearchParamString(
+			PartitionSettings thePartitionSettings,
+			StorageSettings theStorageSettings,
+			String theResourceType,
+			String theParamName,
+			String theValueNormalized,
+			String theValueExact) {
 		setPartitionSettings(thePartitionSettings);
-		setModelConfig(theModelConfig);
+		setStorageSettings(theStorageSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
@@ -130,12 +159,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
+	}
+
+	@Override
 	public void clearHashes() {
 		myHashIdentity = null;
 		myHashNormalizedPrefix = null;
 		myHashExact = null;
 	}
-
 
 	@Override
 	public void calculateHashes() {
@@ -147,7 +180,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		String paramName = getParamName();
 		String valueNormalized = getValueNormalized();
 		String valueExact = getValueExact();
-		setHashNormalizedPrefix(calculateHashNormalized(getPartitionSettings(), getPartitionId(), getModelConfig(), resourceType, paramName, valueNormalized));
+		setHashNormalizedPrefix(calculateHashNormalized(
+				getPartitionSettings(),
+				getPartitionId(),
+				getStorageSettings(),
+				resourceType,
+				paramName,
+				valueNormalized));
 		setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
@@ -165,21 +204,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
 		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
+		b.append(getValueNormalized(), obj.getValueNormalized());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashExact() {
@@ -208,7 +239,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		myId = theId;
 	}
 
-
 	public String getValueExact() {
 		return myValueExact;
 	}
@@ -236,9 +266,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getValueExact());
+		b.append(getHashIdentity());
+		b.append(getHashExact());
+		b.append(getHashNormalizedPrefix());
+		b.append(getValueNormalized());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -250,8 +283,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("hashIdentity", getHashIdentity());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
 		b.append("partitionId", getPartitionId());
@@ -268,21 +303,51 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 
-	public static long calculateHashExact(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValueExact) {
+	public static long calculateHashExact(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theValueExact) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashExact(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
+		return calculateHashExact(
+				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
-	public static long calculateHashExact(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValueExact) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+	public static long calculateHashExact(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theValueExact) {
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
-	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+	public static long calculateHashNormalized(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			StorageSettings theStorageSettings,
+			String theResourceType,
+			String theParamName,
+			String theValueNormalized) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashNormalized(thePartitionSettings, requestPartitionId, theModelConfig, theResourceType, theParamName, theValueNormalized);
+		return calculateHashNormalized(
+				thePartitionSettings,
+				requestPartitionId,
+				theStorageSettings,
+				theResourceType,
+				theParamName,
+				theValueNormalized);
 	}
 
-	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+	public static long calculateHashNormalized(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			StorageSettings theStorageSettings,
+			String theResourceType,
+			String theParamName,
+			String theValueNormalized) {
 		/*
 		 * If we're not allowing contained searches, we'll add the first
 		 * bit of the normalized value to the hash. This helps to
@@ -290,12 +355,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		 * performance.
 		 */
 		int hashPrefixLength = HASH_PREFIX_LENGTH;
-		if (theModelConfig.isAllowContainsSearches()) {
+		if (theStorageSettings.isAllowContainsSearches()) {
 			hashPrefixLength = 0;
 		}
 
 		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override
@@ -305,7 +370,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

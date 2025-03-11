@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,13 +27,13 @@ import java.lang.annotation.Target;
 /**
  * INTERNAL API (do not use): REST method annotation for the method called when a client requests a page.
  * <p>
- * This annotation is currently intended as an internal part of HAPI's API. At some point we 
+ * This annotation is currently intended as an internal part of HAPI's API. At some point we
  * will hopefully provide a way to create alternate implementations of the GetPage mewthod. If
  * you would like to help out or have ideas, please get in touch!
  * </p>
  */
-@Target(value= ElementType.METHOD)
-@Retention(value=RetentionPolicy.RUNTIME)
+@Target(value = ElementType.METHOD)
+@Retention(value = RetentionPolicy.RUNTIME)
 public @interface GetPage {
 	// nothing
 }

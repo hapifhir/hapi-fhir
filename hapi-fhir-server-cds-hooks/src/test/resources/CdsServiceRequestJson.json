@@ -1,0 +1,37 @@
+{
+	"hook" : "Hook Name",
+	"fhirServer" : "https://localhost:2401",
+	"context" : {
+		"patientId" : "Patient/123",
+		"selections" : [ "MedicationRequest/456", "MedicationRequest/789" ],
+		"draftOrders" : {
+			"resourceType": "Bundle",
+			"entry": [ {
+				"resource": {
+					"resourceType": "MedicationRequest",
+					"id": "abc"
+				}
+			}, {
+				"resource": {
+					"resourceType": "MedicationRequest",
+					"id": "def"
+				}
+			} ]
+		}
+	},
+	"prefetch" : {
+		"patientKey" : {
+			"resourceType": "Patient",
+			"name": [ {
+				"family": "Jehoshaphat"
+			} ]
+		},
+		"daughterKey" : {
+			"resourceType": "Patient",
+			"name": [ {
+				"family": "Athaliah"
+			} ]
+		},
+		"parentKey" : null
+	}
+}

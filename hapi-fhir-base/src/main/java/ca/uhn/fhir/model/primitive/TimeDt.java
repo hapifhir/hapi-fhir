@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.primitive;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.primitive;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -27,13 +26,13 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 /**
  * Represents a Time datatype, per the FHIR specification. A time is a specification of hours and minutes (and optionally milliseconds), with NO date and NO timezone information attached. It is
  * expressed as a string in the form <code>HH:mm:ss[.SSSS]</code>
- * 
+ *
  * <p>
  * This datatype is not valid in FHIR DSTU1
  * </p>
- * 
+ *
  * @since FHIR DSTU 2 / HAPI 0.8
- * 
+ *
  *        TODO: have a way of preventing this from being used in DSTU1 resources
  *        TODO: validate time?
  */
@@ -55,5 +54,4 @@ public class TimeDt extends StringDt implements IQueryParameterType {
 		this();
 		setValue(theValue);
 	}
-
 }

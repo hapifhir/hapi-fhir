@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -51,23 +52,17 @@
 
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-api</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-xslt</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
+		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId>
 			<version>2.11.0</version> <optional>true</optional> </dependency> -->
 
 		<!-- General -->
@@ -121,9 +116,15 @@
 		</dependency>
 
 		<!-- @Nonnull annotation -->
+
+		<!-- We need to leave this in because otherwise hapi-fhir-structures-dstu3: will fail to generate javadoc -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -132,6 +133,16 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>uk.org.webcompere</groupId>
+			<artifactId>system-stubs-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- OpenTelemetry -->
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -187,10 +198,35 @@
 							<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
 							<versionPropertyName>hapifhir.version</versionPropertyName>
 							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+							<properties>
+								<hapi.scmbranch>${scmBranch}</hapi.scmbranch>
+							</properties>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<configuration>
+					<target>
+<!--						suppress UnresolvedMavenProperty-->
+						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>
+					</target>
+				</configuration>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>delete-module-cache-file</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 		<resources>
 			<resource>
@@ -203,5 +239,28 @@
 			</resource>
 		</resources>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencies>
+				<!-- dependencies required for Android -->
+				<dependency>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+					<scope>provided</scope>
+					<optional>true</optional>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
 </project>

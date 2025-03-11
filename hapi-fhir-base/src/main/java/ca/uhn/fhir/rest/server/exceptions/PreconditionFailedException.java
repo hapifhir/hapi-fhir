@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,16 @@ package ca.uhn.fhir.rest.server.exceptions;
  * limitations under the License.
  * #L%
  */
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Represents an <b>HTTP 412 Precondition Failed</b> response. This exception
- * should be thrown for an {@link Update} operation if that operation requires a version to 
+ * should be thrown for an {@link Update} operation if that operation requires a version to
  * be specified in an HTTP header, and none was.
  */
 @SuppressWarnings("deprecation")
@@ -36,15 +34,16 @@ import ca.uhn.fhir.util.CoverageIgnore;
 public class PreconditionFailedException extends ResourceVersionNotSpecifiedException {
 	@SuppressWarnings("hiding")
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
+
 	private static final long serialVersionUID = 1L;
 
 	public PreconditionFailedException(String error) {
 		super(STATUS_CODE, error);
 	}
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
@@ -52,5 +51,4 @@ public class PreconditionFailedException extends ResourceVersionNotSpecifiedExce
 	public PreconditionFailedException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 }

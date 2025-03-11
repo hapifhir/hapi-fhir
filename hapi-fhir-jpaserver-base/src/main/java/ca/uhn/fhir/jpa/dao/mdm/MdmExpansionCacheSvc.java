@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.mdm;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.mdm;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class MdmExpansionCacheSvc {
 		ourLog.debug(buildLogMessage("About to lookup cached resource ID " + theSourceId));
 		String goldenResourceId = mySourceToGoldenIdCache.get(theSourceId);
 
-		//A golden resources' golden resource ID is itself.
+		// A golden resources' golden resource ID is itself.
 		if (StringUtils.isBlank(goldenResourceId)) {
 			if (mySourceToGoldenIdCache.containsValue(theSourceId)) {
 				goldenResourceId = theSourceId;
@@ -76,14 +75,14 @@ public class MdmExpansionCacheSvc {
 		StringBuilder builder = new StringBuilder();
 		builder.append(message);
 		if (ourLog.isDebugEnabled() || theAddCacheContentContent) {
-			builder.append("\n")
-				.append("Current cache content is:")
-				.append("\n");
-			mySourceToGoldenIdCache.entrySet().stream().forEach(entry -> builder.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n"));
+			builder.append("\n").append("Current cache content is:").append("\n");
+			mySourceToGoldenIdCache.entrySet().stream().forEach(entry -> builder.append(entry.getKey())
+					.append(" -> ")
+					.append(entry.getValue())
+					.append("\n"));
 			return builder.toString();
 		}
 		return builder.toString();
-
 	}
 
 	/**

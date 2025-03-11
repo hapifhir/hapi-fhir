@@ -1,0 +1,9 @@
+---
+type: change
+issue: 4363
+title: "Common `SearchParameter` functionality has been refactored. In particular, 
+1) Validation logic performed inside `JpaResourceDaoSearchParameter` has been moved into a new class called 
+`SearchParameterDaoValidator` 2) Logic for extracting combo unique and combo non-unique search parameters 
+that was inside `SearchParamWithInlineReferencesExtractor` has been moved into `BaseSearchParamExtractor`
+and 3) a new interface called `IResourceIndexComboSearchParameter` has been added which provides a common interface 
+for combo unique and combo non-unique search parameters."

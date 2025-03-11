@@ -1,0 +1,46 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- define the root first, so the rest can inherit our logger -->
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+	<logger name="ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber" level="info"/>
+	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" level="info"/>
+	<logger name="org.eclipse.jetty.websocket" level="info"/>
+	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" level="info"/>
+	<logger name="org.eclipse" level="error"/>
+	<logger name="ca.uhn.fhir.rest.client" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
+
+	<!-- set to debug to enable term expansion logs -->
+
+	<logger name="ca.uhn.fhir.jpa.term" level="info"/>
+	<!-- Set to 'trace' to enable SQL logging -->
+	<logger name="org.hibernate.SQL" level="info"/>
+	<!-- Set to 'trace' to enable SQL Value logging -->
+	<logger name="org.hibernate.type" level="info"/>
+
+	<logger name="org.springframework.test.context.cache" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.bulk" level="info"/>
+
+	<!-- more debugging -->
+	<!--
+	<logger name="org.elasticsearch.client" level="trace"/>
+	<logger name="org.hibernate.search.elasticsearch.request" level="TRACE"/>
+	<logger name="ca.uhn.fhir.jpa.model.search" level="debug"/>
+	<logger name="org.elasticsearch.client" level="trace"/>
+	<logger name="org.hibernate.search" level="debug"/>
+	<logger name="org.hibernate.search.query" level="TRACE"/>
+	<logger name="org.hibernate.search.elasticsearch.request" level="TRACE"/>
+	 -->
+	<!-- See https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#backend-lucene-io-writer-infostream for lucene logging
+	<logger name="org.hibernate.search.backend.lucene.infostream" level="TRACE"/>  -->
+
+</configuration>

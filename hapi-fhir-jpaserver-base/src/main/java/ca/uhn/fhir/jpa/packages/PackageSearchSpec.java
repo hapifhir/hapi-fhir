@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import org.apache.commons.lang3.Validate;
 
@@ -28,6 +27,8 @@ public class PackageSearchSpec {
 	private String myResourceUrl;
 	private CharSequence myDescription;
 	private String myFhirVersion;
+	private String myVersion;
+	private String myAuthor;
 
 	public String getFhirVersion() {
 		return myFhirVersion;
@@ -69,5 +70,21 @@ public class PackageSearchSpec {
 
 	public void setDescription(CharSequence theDescription) {
 		myDescription = theDescription;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public void setVersion(String theVersion) {
+		myVersion = theVersion;
+	}
+
+	public void setAuthor(String theAuthor) {
+		myAuthor = theAuthor;
+	}
+
+	public String getAuthor() {
+		return myAuthor;
 	}
 }

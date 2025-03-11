@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.context.api;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Set;
+package ca.uhn.fhir.context.api;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+
+import java.util.Set;
 
 /**
  * Created by Bill de Beaubien on 3/4/2015.
@@ -31,7 +30,7 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
  * Controls how bundles decide whether referenced resources should be included
  */
 public enum BundleInclusionRule {
-	
+
 	/**
 	 * Decision is based on whether the resource's Include is in the IncludeSet (e.g. DiagnosticReport.result). Note that the resource has to be populated to be included.
 	 *
@@ -39,7 +38,8 @@ public enum BundleInclusionRule {
 	 */
 	BASED_ON_INCLUDES {
 		@Override
-		public boolean shouldIncludeReferencedResource(ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes) {
+		public boolean shouldIncludeReferencedResource(
+				ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes) {
 			return theReferenceInfo.matchesIncludeSet(theIncludes);
 		}
 	},
@@ -51,10 +51,12 @@ public enum BundleInclusionRule {
 	 */
 	BASED_ON_RESOURCE_PRESENCE {
 		@Override
-		public boolean shouldIncludeReferencedResource(ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes) {
+		public boolean shouldIncludeReferencedResource(
+				ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes) {
 			return true;
 		}
 	};
 
-	public abstract boolean shouldIncludeReferencedResource(ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes);
+	public abstract boolean shouldIncludeReferencedResource(
+			ResourceReferenceInfo theReferenceInfo, Set<Include> theIncludes);
 }

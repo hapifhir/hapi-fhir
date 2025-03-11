@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4813
+backport: 6.4.5
+title: "Under heavy concurrency, a bug resulted in identical tag definitions being rejected with a `NonUniqueResultException` some of the time.  This has been corrected."

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4917
+title: "Matching algorithms have been refactored to allow
+   greater flexibility in setting and defining nicknames
+   as well as allowing bean injection into matcher classes.
+   "

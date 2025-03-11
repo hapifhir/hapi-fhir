@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,18 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
+package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * Quantity parameter type for use in fluent client interfaces
  */
 @SuppressWarnings("deprecation")
-public class QuantityClientParam extends BaseClientParam  implements IParam {
+public class QuantityClientParam extends BaseClientParam implements IParam {
 
 	private String myParamName;
 
@@ -127,7 +127,7 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 	/**
 	 * Use the given quantity prefix
-	 * 
+	 *
 	 * @param thePrefix The prefix, or <code>null</code> for no prefix
 	 */
 	public IMatches<IAndUnits> withPrefix(final ParamPrefixEnum thePrefix) {
@@ -175,9 +175,8 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 		@Override
 		public ICriterion<QuantityClientParam> andUnits(String theSystem, String theUnits) {
-			return new QuantityCriterion(getParamName(), myPrefix, myValue , defaultString(theSystem) , defaultString(theUnits));
+			return new QuantityCriterion(
+					getParamName(), myPrefix, myValue, defaultString(theSystem), defaultString(theUnits));
 		}
-
 	}
-
 }

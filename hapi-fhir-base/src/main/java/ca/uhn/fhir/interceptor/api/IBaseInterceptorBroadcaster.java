@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,10 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 
@@ -31,6 +33,18 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	boolean callHooks(POINTCUT thePointcut, HookParams theParams);
 
 	/**
+	 * A supplier-based callHooks() for lazy construction of the HookParameters.
+	 * @return false if any hook methods return false, return true otherwise.
+	 */
+	default boolean ifHasCallHooks(POINTCUT thePointcut, Supplier<HookParams> theParamsSupplier) {
+		if (hasHooks(thePointcut)) {
+			HookParams params = theParamsSupplier.get();
+			return callHooks(thePointcut, params);
+		}
+		return true; // callHooks returns true when none present
+	}
+
+	/**
 	 * Invoke registered interceptor hook methods for the given Pointcut. This method
 	 * should only be called for pointcuts that return a type other than
 	 * <code>void</code> or <code>boolean</code>
@@ -40,6 +54,19 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	Object callHooksAndReturnObject(POINTCUT thePointcut, HookParams theParams);
 
 	/**
+	 * A supplier-based version of callHooksAndReturnObject for lazy construction of the params.
+	 *
+	 * @return Returns the object returned by the first hook method that did not return <code>null</code> or <code>null</code>
+	 */
+	default Object ifHasCallHooksAndReturnObject(POINTCUT thePointcut, Supplier<HookParams> theParams) {
+		if (hasHooks(thePointcut)) {
+			HookParams params = theParams.get();
+			return callHooksAndReturnObject(thePointcut, params);
+		}
+		return null;
+	}
+
+	/**
 	 * Does this broadcaster have any hooks for the given pointcut?
 	 *
 	 * @param thePointcut The poointcut
@@ -47,4 +74,19 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	 * @since 4.0.0
 	 */
 	boolean hasHooks(POINTCUT thePointcut);
+
+	List<IInvoker> getInvokersForPointcut(POINTCUT thePointcut);
+
+	interface IInvoker extends Comparable<IInvoker> {
+
+		Object invoke(HookParams theParams);
+
+		int getOrder();
+
+		Object getInterceptor();
+
+		default String getHookDescription() {
+			return toString();
+		}
+	}
 }

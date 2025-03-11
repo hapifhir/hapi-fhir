@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -51,7 +50,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param thePrefix
 	 *           The comparator, or <code>null</code> for an equals comparator
 	 * @param theValue
@@ -70,7 +69,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param thePrefix
 	 *           The comparator, or <code>null</code> for an equals comparator
 	 * @param theValue
@@ -89,7 +88,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param thePrefix
 	 *           The comparator, or <code>null</code> for an equals comparator
 	 * @param theValue
@@ -108,7 +107,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theQuantity
 	 *           A quantity value (with no system or units), such as "100.0" or "gt4"
 	 */
@@ -118,7 +117,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theQuantity
 	 *           A quantity value (with no system or units), such as <code>100</code>
 	 */
@@ -128,7 +127,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theQuantity
 	 *           A quantity value (with no system or units), such as "100.0" or "&lt;=4"
 	 * @param theSystem
@@ -196,7 +195,6 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 		if (parts.size() > 2 && StringUtils.isNotBlank(parts.get(2))) {
 			setUnits(parts.get(2));
 		}
-
 	}
 
 	/**
@@ -204,7 +202,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	 * <p>
 	 * Note that prior to HAPI FHIR 1.5, this method returned a {@link UriDt}
 	 * </p>
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	public String getSystem() {
@@ -229,7 +227,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 	 * <p>
 	 * Note that prior to HAPI FHIR 1.5, this method returned a {@link DecimalDt}
 	 * </p>
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	public BigDecimal getValue() {
@@ -302,22 +300,23 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
 		return b.toString();
 	}
 
-    public static QuantityParam toQuantityParam(IQueryParameterType theParam) {
-        if (theParam instanceof BaseQuantityDt) {
-            BaseQuantityDt param = (BaseQuantityDt) theParam;
-            String systemValue = param.getSystemElement().getValueAsString();
-            String unitsValue = param.getUnitsElement().getValueAsString();
-            ParamPrefixEnum cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
-            BigDecimal valueValue = param.getValueElement().getValue();
-            return new QuantityParam()
-                .setSystem(systemValue)
-                .setUnits(unitsValue)
-                .setPrefix(cmpValue)
-                .setValue(valueValue);
-        } else if (theParam instanceof QuantityParam) {
-            return (QuantityParam) theParam;
-        } else {
-            throw new IllegalArgumentException(Msg.code(1948) + "Invalid quantity type: " + theParam.getClass());
-        }
-    }
+	public static QuantityParam toQuantityParam(IQueryParameterType theParam) {
+		if (theParam instanceof BaseQuantityDt) {
+			BaseQuantityDt param = (BaseQuantityDt) theParam;
+			String systemValue = param.getSystemElement().getValueAsString();
+			String unitsValue = param.getUnitsElement().getValueAsString();
+			ParamPrefixEnum cmpValue =
+					ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
+			BigDecimal valueValue = param.getValueElement().getValue();
+			return new QuantityParam()
+					.setSystem(systemValue)
+					.setUnits(unitsValue)
+					.setPrefix(cmpValue)
+					.setValue(valueValue);
+		} else if (theParam instanceof QuantityParam) {
+			return (QuantityParam) theParam;
+		} else {
+			throw new IllegalArgumentException(Msg.code(1948) + "Invalid quantity type: " + theParam.getClass());
+		}
+	}
 }

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5353
+jira: SMILE-7451
+backport: 6.8.4
+title: "Previously, when using revincludes and includes with iterate, while also using revincludes without iterate,
+the result omitted some resources that should have been included. This issue has now been fixed."

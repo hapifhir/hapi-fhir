@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.model.config;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.subscription.model.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +30,9 @@ import org.springframework.context.annotation.Configuration;
 public class SubscriptionModelConfig {
 
 	@Bean
-	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-		return new SubscriptionCanonicalizer(theFhirContext);
+	public SubscriptionCanonicalizer subscriptionCanonicalizer(
+			FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
+		return new SubscriptionCanonicalizer(theFhirContext, theSubscriptionSettings);
 	}
 
 	@Bean

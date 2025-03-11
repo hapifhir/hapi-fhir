@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,16 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * Utility to hide complexity involved in obtaining connection pool information
@@ -37,14 +36,13 @@ public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {
 
 	private IConnectionPoolInfoProvider myProvider;
 
-
 	public ConnectionPoolInfoProvider(DataSource theDataSource) {
 		if (theDataSource.getClass().isAssignableFrom(BasicDataSource.class)) {
-			myProvider =  new BasicDataSourceConnectionPoolInfoProvider((BasicDataSource) theDataSource);
+			myProvider = new BasicDataSourceConnectionPoolInfoProvider((BasicDataSource) theDataSource);
 			return;
 		}
 
-		if ( theDataSource.getClass().isAssignableFrom(ProxyDataSource.class)) {
+		if (theDataSource.getClass().isAssignableFrom(ProxyDataSource.class)) {
 			boolean basiDataSourceWrapped;
 			try {
 				basiDataSourceWrapped = theDataSource.isWrapperFor(BasicDataSource.class);
@@ -52,10 +50,10 @@ public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {
 					BasicDataSource basicDataSource = theDataSource.unwrap(BasicDataSource.class);
 					myProvider = new BasicDataSourceConnectionPoolInfoProvider(basicDataSource);
 				}
-			} catch (SQLException ignored) { }
+			} catch (SQLException ignored) {
+			}
 		}
 	}
-
 
 	@Override
 	public Optional<Integer> getTotalConnectionSize() {
@@ -72,6 +70,3 @@ public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {
 		return myProvider == null ? Optional.empty() : myProvider.getMaxWaitMillis();
 	}
 }
-
-
-

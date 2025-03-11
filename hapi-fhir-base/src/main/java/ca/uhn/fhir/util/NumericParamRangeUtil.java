@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -35,9 +34,7 @@ public class NumericParamRangeUtil {
 	 * @return a Pair of BigDecimal(s) with the low and high range boundaries
 	 */
 	public static Pair<BigDecimal, BigDecimal> getRange(BigDecimal theNumber) {
-		BigDecimal halfRange = BigDecimal.valueOf(.5).movePointLeft( theNumber.scale() );
+		BigDecimal halfRange = BigDecimal.valueOf(.5).movePointLeft(theNumber.scale());
 		return Pair.of(theNumber.subtract(halfRange), theNumber.add(halfRange));
 	}
-
-
 }

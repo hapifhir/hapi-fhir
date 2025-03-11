@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +17,26 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.SubscriptionUtil;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +45,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
@@ -48,15 +53,23 @@ import javax.annotation.Nonnull;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
+public class SubscriptionActivatingSubscriber implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+
+	@Autowired
+	private FhirContext myFhirContext;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
+	@Autowired
+	private SubscriptionSettings mySubscriptionSettings;
+
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	/**
 	 * Constructor
 	 */
@@ -72,21 +85,31 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		}
 
 		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		if (!isSubscription(payload)) {
+		if (!payload.hasPayloadType(myFhirContext, "Subscription")) {
 			return;
 		}
 
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
+				if (payload.getPayload(myFhirContext) == null) {
+					Optional<ResourceModifiedMessage> inflatedMsg =
+							myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
+									payload);
+					if (inflatedMsg.isEmpty()) {
+						return;
+					}
+					payload = inflatedMsg.get();
+				}
+
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
+			case TRANSACTION:
 			case DELETE:
 			case MANUALLY_TRIGGERED:
 			default:
 				break;
 		}
-
 	}
 
 	/**
@@ -97,12 +120,15 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	 */
 	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
-		// subscriber applies..
-		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
+		// subscriber applies.
+		CanonicalSubscriptionChannelType subscriptionChannelType =
+				mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !mySubscriptionSettings
+						.getSupportedSubscriptionTypes()
+						.contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -124,18 +150,24 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+			subscription =
+					subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
-			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
+			ourLog.info(
+					"Activating subscription {} from status {} to {}",
+					subscription.getIdElement().toUnqualified().getValue(),
+					SubscriptionConstants.REQUESTED_STATUS,
+					SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
-			subscriptionDao.update(subscription, srd);
+
+			RequestPartitionId partitionId =
+					(RequestPartitionId) subscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+			subscriptionDao.update(subscription, new SystemRequestDetails().setRequestPartitionId(partitionId));
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
 			subscription = subscription != null ? subscription : theSubscription;
-			ourLog.error("Failed to activate subscription "
-				+ subscription.getIdElement()
-				+ " : " + e.getMessage());
+			ourLog.error("Failed to activate subscription " + subscription.getIdElement() + " : " + e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ERROR_STATUS);
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
@@ -144,4 +176,9 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		}
 	}
 
+	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
+		Subscription.SubscriptionChannelType channelType =
+				mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
+		return mySubscriptionSettings.getSupportedSubscriptionTypes().contains(channelType);
+	}
 }

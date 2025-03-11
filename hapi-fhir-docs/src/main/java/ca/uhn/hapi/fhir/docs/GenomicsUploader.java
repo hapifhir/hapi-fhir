@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -40,7 +39,8 @@ public class GenomicsUploader {
 		dnaSequenceVariantName.setCode("dnaSequenceVariantName");
 		dnaSequenceVariantName.setType(Enumerations.SearchParamType.TOKEN);
 		dnaSequenceVariantName.setTitle("DNASequenceVariantName");
-		dnaSequenceVariantName.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName')");
+		dnaSequenceVariantName.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName')");
 		dnaSequenceVariantName.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(dnaSequenceVariantName).execute();
 
@@ -51,7 +51,8 @@ public class GenomicsUploader {
 		dNAVariantId.setCode("dnaVariantId");
 		dNAVariantId.setType(Enumerations.SearchParamType.TOKEN);
 		dNAVariantId.setTitle("DNAVariantId");
-		dNAVariantId.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId')");
+		dNAVariantId.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId')");
 		dNAVariantId.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(dNAVariantId).execute();
 
@@ -73,9 +74,9 @@ public class GenomicsUploader {
 		alleleName.setCode("alleleName");
 		alleleName.setType(Enumerations.SearchParamType.TOKEN);
 		alleleName.setTitle("AlleleName");
-		alleleName.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName')");
+		alleleName.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName')");
 		alleleName.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(alleleName).execute();
 	}
-
 }

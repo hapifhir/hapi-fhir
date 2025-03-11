@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -15,7 +16,6 @@
 	<name>HAPI FHIR - Command Line Client - Base Project</name>
 	
 	<modules>
-		<module>hapi-fhir-cli-jpaserver</module>
 		<module>hapi-fhir-cli-api</module>
 		<module>hapi-fhir-cli-app</module>
 	</modules>

@@ -1,6 +1,7 @@
 package org.hl7.fhir.utilities.xhtml;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ public class XhtmlNodeTest {
 		
 		String output = node.getValueAsString();
 		ourLog.info(output);
-		
+
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
 	}
 	
@@ -32,7 +33,7 @@ public class XhtmlNodeTest {
 		
 		String output = node.getValueAsString();
 		ourLog.info(output);
-		
+
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"http://pbs.twimg.com/profile_images/544507893991485440/r_vo3uj2_bigger.png\" alt=\"Twitter Avatar\"/>@fhirabend</div>", output);
 	}
 	

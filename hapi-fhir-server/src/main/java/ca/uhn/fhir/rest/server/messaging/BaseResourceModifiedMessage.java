@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.rest.server.messaging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -29,12 +29,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -43,10 +46,21 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 
 	@JsonProperty("payload")
 	protected String myPayload;
+
 	@JsonProperty("payloadId")
 	protected String myPayloadId;
+
+	@JsonProperty(value = "partitionId")
+	protected RequestPartitionId myPartitionId;
+
+	@JsonProperty(value = "payloadVersion")
+	protected String myPayloadVersion;
+
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
+
+	@JsonIgnore
+	protected transient String myPayloadType;
 
 	/**
 	 * Constructor
@@ -55,22 +69,50 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		super();
 	}
 
-	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public BaseResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		this();
+		setOperationType(theOperationType);
+		setPayloadId(theIdType);
+	}
+
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
 		setOperationType(theOperationType);
 		setNewPayload(theFhirContext, theResource);
 	}
 
-	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
 			setTransactionId(theRequest.getTransactionGuid());
 		}
 	}
 
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setTransactionId(theRequest.getTransactionGuid());
+		}
+		myPartitionId = theRequestPartitionId;
+	}
+
 	@Override
 	public String getPayloadId() {
 		return myPayloadId;
+	}
+
+	public String getPayloadVersion() {
+		return myPayloadVersion;
 	}
 
 	/**
@@ -80,6 +122,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		myPayloadId = null;
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.toUnqualifiedVersionless().getValue();
+			myPayloadVersion = thePayloadId.getVersionIdPart();
 		}
 	}
 
@@ -110,12 +153,15 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	 */
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
+
 		if (myPayloadId != null) {
-			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
+			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId).withVersion(myPayloadVersion);
 		}
+
 		return retVal;
 	}
 
+	@Nullable
 	public IBaseResource getNewPayload(FhirContext theCtx) {
 		if (myPayloadDecoded == null && isNotBlank(myPayload)) {
 			myPayloadDecoded = theCtx.newJsonParser().parseResource(myPayload);
@@ -123,6 +169,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadDecoded;
 	}
 
+	@Nullable
 	public IBaseResource getPayload(FhirContext theCtx) {
 		IBaseResource retVal = myPayloadDecoded;
 		if (retVal == null && isNotBlank(myPayload)) {
@@ -133,6 +180,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return retVal;
 	}
 
+	@Nonnull
 	public String getPayloadString() {
 		if (this.myPayload != null) {
 			return this.myPayload;
@@ -141,7 +189,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return "";
 	}
 
-	protected void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
 		 * would be caught before we even get here. This check is basically a last-ditch
@@ -173,12 +221,21 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		setPayloadId(payloadIdType);
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("payloadId", myPayloadId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("partitionId", myPartitionId)
+				.append("payloadId", myPayloadId)
+				.toString();
 	}
 
 	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
@@ -203,15 +260,46 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return true;
 	}
 
-
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		if (super.getMessageKeyOrNull() != null) {
-			return super.getMessageKeyOrNull();
-		}
-		return myPayloadId;
+	public String getMessageKeyOrDefault() {
+		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
 	}
 
-}
+	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {
+		if (myPayloadType == null) {
+			myPayloadType = getPayloadType(theFhirContext);
+		}
+		return theResourceName.equals(myPayloadType);
+	}
 
+	@Nullable
+	public String getPayloadType(FhirContext theFhirContext) {
+		String retval = null;
+		IIdType payloadId = getPayloadId(theFhirContext);
+		if (payloadId != null) {
+			retval = payloadId.getResourceType();
+		}
+		if (isBlank(retval)) {
+			IBaseResource payload = getNewPayload(theFhirContext);
+			if (payload != null) {
+				retval = theFhirContext.getResourceType(payload);
+			}
+		}
+		return retval;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		BaseResourceModifiedMessage that = (BaseResourceModifiedMessage) theO;
+		return Objects.equals(myPayload, that.myPayload) && Objects.equals(getPayloadId(), that.getPayloadId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), myPayload, getPayloadId());
+	}
+}

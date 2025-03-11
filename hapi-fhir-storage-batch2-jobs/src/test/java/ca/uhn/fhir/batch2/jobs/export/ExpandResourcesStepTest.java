@@ -4,22 +4,34 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,10 +41,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -43,7 +59,7 @@ import static org.mockito.Mockito.when;
 public class ExpandResourcesStepTest {
 
 	@Mock
-	private IBulkExportProcessor myProcessor;
+	private IBulkExportProcessor<?> myProcessor;
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -51,71 +67,99 @@ public class ExpandResourcesStepTest {
 	@Mock
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
+	@Mock
+	IIdHelperService<JpaPid> myIdHelperService;
+
+	@Spy
+	private InterceptorService myInterceptorService = new InterceptorService();
+
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+	@Spy
+	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+
+	@Spy
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@InjectMocks
 	private ExpandResourcesStep mySecondStep;
 
-	private BulkExportJobParameters createParameters() {
+	@BeforeEach
+	public void init() {
+		mySecondStep.setIdHelperServiceForUnitTest(myIdHelperService);
+	}
+
+	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
-		parameters.setStartDate(new Date());
+		parameters.setSince(new Date());
+		if (thePartitioned) {
+			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		}
 		return parameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> createInput(BulkExportIdList theData,
-																													BulkExportJobParameters theParameters,
-																													JobInstance theInstance) {
-		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = new StepExecutionDetails<>(
+	private StepExecutionDetails<BulkExportJobParameters, ResourceIdList> createInput(ResourceIdList theData,
+                                                                                      BulkExportJobParameters theParameters,
+                                                                                      JobInstance theInstance) {
+		return new StepExecutionDetails<>(
 			theParameters,
 			theData,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
-		return input;
 	}
 
 	private IFhirResourceDao<?> mockOutDaoRegistry() {
-		IFhirResourceDao mockDao = mock(IFhirResourceDao.class);
+		IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
 		when(myDaoRegistry.getResourceDao(anyString()))
 			.thenReturn(mockDao);
 		return mockDao;
 	}
 
-	@Test
-	public void jobComplete_withBasicParameters_succeeds() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void jobComplete_withBasicParameters_succeeds(boolean thePartitioned) {
 		//setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
-		IJobDataSink<BulkExportExpandedResources> sink = mock(IJobDataSink.class);
+		IJobDataSink<ExpandedResourcesList> sink = mock(IJobDataSink.class);
 		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
-		BulkExportIdList idList = new BulkExportIdList();
+		ResourceIdList idList = new ResourceIdList();
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		ArrayList<Id> ids = new ArrayList<>();
+		ArrayList<TypedPidJson> batchResourceIds = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			String stringId = "Patient/" + i;
-			Id id = new Id();
-			id.setResourceType("Patient");
-			id.setId(stringId);
-			ids.add(id);
+			String stringId = String.valueOf(i);
+			TypedPidJson batchResourceId = new TypedPidJson();
+			batchResourceId.setResourceType("Patient");
+			batchResourceId.setPid(stringId);
+			batchResourceIds.add(batchResourceId);
 
 			Patient patient = new Patient();
 			patient.setId(stringId);
 			resources.add(patient);
 		}
-		idList.setIds(ids);
+		idList.setIds(batchResourceIds);
 
-		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = createInput(
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
-			createParameters(),
+			createParameters(thePartitioned),
 			instance
 		);
-		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
-		when(patientDao.readByPid(any(ResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
+			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
+			for (var next : inputSet) {
+				map.put(next, Optional.empty());
+			}
+			return new PersistentIdToForcedIdMap<>(map);
+		});
 
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
@@ -125,16 +169,22 @@ public class ExpandResourcesStepTest {
 
 
 		// data sink
-		ArgumentCaptor<BulkExportExpandedResources> expandedCaptor = ArgumentCaptor.forClass(BulkExportExpandedResources.class);
+		ArgumentCaptor<ExpandedResourcesList> expandedCaptor = ArgumentCaptor.forClass(ExpandedResourcesList.class);
 		verify(sink)
 			.accept(expandedCaptor.capture());
-		BulkExportExpandedResources expandedResources = expandedCaptor.getValue();
-		assertEquals(resources.size(), expandedResources.getStringifiedResources().size());
+		ExpandedResourcesList expandedResources = expandedCaptor.getValue();
+		assertThat(expandedResources.getStringifiedResources()).hasSize(resources.size());
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
 		String stringifiedElement = expandedResources.getStringifiedResources().get(0);
 		assertFalse(stringifiedElement.contains("\t"));
 		assertFalse(stringifiedElement.contains("\n"));
 		assertFalse(stringifiedElement.contains(" "));
+
+		// Patient Search
+		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
+		verify(patientDao).search(any(), patientSearchCaptor.capture());
+		assertEquals(input.getParameters().getPartitionId(), patientSearchCaptor.getValue().getRequestPartitionId());
+
 	}
 }

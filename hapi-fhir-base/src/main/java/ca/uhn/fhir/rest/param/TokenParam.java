@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,14 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -57,7 +57,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * @param theCodingDt The coding
 	 */
 	public TokenParam(BaseCodingDt theCodingDt) {
-		this(toSystemValue(theCodingDt.getSystemElement()), theCodingDt.getCodeElement().getValue());
+		this(
+				toSystemValue(theCodingDt.getSystemElement()),
+				theCodingDt.getCodeElement().getValue());
 	}
 
 	/**
@@ -68,7 +70,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * @param theIdentifierDt The identifier
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
-		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
+		this(
+				toSystemValue(theIdentifierDt.getSystemElement()),
+				theIdentifierDt.getValueElement().getValue());
 	}
 
 	/**
@@ -88,7 +92,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException(Msg.code(1938) + "theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException(
+					Msg.code(1938)
+							+ "theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
@@ -126,7 +132,9 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
 			if (getValue() != null) {
-				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
+				return ParameterUtil.escape(StringUtils.defaultString(getSystem()))
+						+ '|'
+						+ ParameterUtil.escape(getValue());
 			} else {
 				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|';
 			}
@@ -140,18 +148,22 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
 		setModifier(null);
+		setSystem(null);
+
 		if (theQualifier != null) {
+			if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
+				setMdmExpand(true);
+			}
+
 			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
 			setModifier(modifier);
 
 			if (modifier == TokenParamModifier.TEXT) {
-				setSystem(null);
 				setValue(ParameterUtil.unescape(theParameter));
 				return;
 			}
 		}
 
-		setSystem(null);
 		if (theParameter == null) {
 			setValue(null);
 		} else {
@@ -243,7 +255,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return this;
 	}
 
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -289,5 +300,4 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	private static String toSystemValue(UriDt theSystem) {
 		return theSystem.getValueAsString();
 	}
-
 }

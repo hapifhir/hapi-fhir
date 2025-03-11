@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,14 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import com.google.gson.JsonObject;
+import jakarta.annotation.Nonnull;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.aggregation.SearchAggregation;
@@ -35,7 +35,6 @@ import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -48,15 +47,15 @@ class TokenAutocompleteSearch {
 	private static final AggregationKey<JsonObject> AGGREGATION_KEY = AggregationKey.of("autocomplete");
 
 	private final FhirContext myFhirContext;
-	private final ModelConfig myModelConfig;
+	private final StorageSettings myStorageSettings;
 	private final SearchSession mySession;
 
-	public TokenAutocompleteSearch(FhirContext theFhirContext, ModelConfig theModelConfig, SearchSession theSession) {
+	public TokenAutocompleteSearch(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, SearchSession theSession) {
 		myFhirContext = theFhirContext;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		mySession = theSession;
 	}
-
 
 	/**
 	 * Search for tokens indexed by theSPName on theResourceName matching  theSearchText.
@@ -66,22 +65,25 @@ class TokenAutocompleteSearch {
 	 * @return A collection of Coding elements
 	 */
 	@Nonnull
-	public List<TokenAutocompleteHit> search(String theResourceName, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
+	public List<TokenAutocompleteHit> search(
+			String theResourceName, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
 
 		TokenAutocompleteAggregation tokenAutocompleteAggregation =
-			new TokenAutocompleteAggregation(theSPName, theCount, theSearchText, theSearchModifier);
+				new TokenAutocompleteAggregation(theSPName, theCount, theSearchText, theSearchModifier);
 
 		// compose the query json
-		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
-			.where(predFactory -> predFactory.bool(boolBuilder -> {
-				ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, boolBuilder, predFactory);
+		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession
+				.search(ResourceTable.class)
+				.where(predFactory -> predFactory.bool(boolBuilder -> {
+					ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(
+							myFhirContext, myStorageSettings, boolBuilder, predFactory);
 
-				// we apply resource-level predicates here, at the top level
-				if (isNotBlank(theResourceName)) {
-					clauseBuilder.addResourceTypeClause(theResourceName);
-				}
-			}))
-			.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation));
+					// we apply resource-level predicates here, at the top level
+					if (isNotBlank(theResourceName)) {
+						clauseBuilder.addResourceTypeClause(theResourceName);
+					}
+				}))
+				.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation));
 
 		// run the query, but with 0 results.  We only care about the aggregations.
 		SearchResult<?> result = query.fetch(0);
@@ -100,11 +102,11 @@ class TokenAutocompleteSearch {
 		JsonObject jsonAggregation = tokenAutocompleteAggregation.toJsonAggregation();
 
 		SearchAggregation<JsonObject> aggregation = mySession
-			.scope( ResourceTable.class )
-			.aggregation()
-			.extension(ElasticsearchExtension.get())
-			.fromJson(jsonAggregation)
-			.toAggregation();
+				.scope(ResourceTable.class)
+				.aggregation()
+				.extension(ElasticsearchExtension.get())
+				.fromJson(jsonAggregation)
+				.toAggregation();
 
 		return aggregation;
 	}

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
 
 /**
  * Composite parameter type for use in fluent client interfaces
@@ -28,18 +27,15 @@ public class CompositeClientParam<A extends IParam, B extends IParam> extends Ba
 	private String myName;
 
 	public CompositeClientParam(String theName) {
-		myName=theName;
+		myName = theName;
 	}
-
 
 	@Override
 	public String getParamName() {
 		return myName;
 	}
-	
+
 	public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
-		return new CompositeCriterion<A,B>(myName, theLeft);
+		return new CompositeCriterion<A, B>(myName, theLeft);
 	}
-	
-	
 }

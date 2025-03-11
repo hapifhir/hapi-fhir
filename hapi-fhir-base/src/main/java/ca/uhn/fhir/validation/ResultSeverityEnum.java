@@ -1,10 +1,8 @@
-package ca.uhn.fhir.validation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,12 +29,12 @@ public enum ResultSeverityEnum {
 	 * The issue has no relation to the degree of success of the action
 	 */
 	INFORMATION("information"),
-	
+
 	/**
 	 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired
 	 */
 	WARNING("warning"),
-	
+
 	/**
 	 * The issue is sufficiently important to cause the action to fail
 	 */

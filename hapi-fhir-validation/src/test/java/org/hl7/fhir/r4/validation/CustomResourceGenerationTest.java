@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -15,9 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomResourceGenerationTest extends BaseTest {
+public class CustomResourceGenerationTest extends BaseValidationTestWithInlineMocks {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CustomResourceGenerationTest.class);
 	private FhirContext myCtx = FhirContext.forR4();
@@ -42,10 +43,10 @@ public class CustomResourceGenerationTest extends BaseTest {
 		String outcome = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(outcome);
 
-		assertEquals(3, result.getMessages().size());
+		assertThat(result.getMessages()).hasSize(3);
 		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
-		assertEquals("This property must be an Array, not a primitive property", result.getMessages().get(1).getMessage());
-		assertEquals("Unrecognised property '@id1'", result.getMessages().get(2).getMessage());
+		assertEquals("The property name must be a JSON Array, not a Primitive property (at CustomResource)", result.getMessages().get(1).getMessage());
+		assertEquals("Unrecognized property 'id1'", result.getMessages().get(2).getMessage());
 
 	}
 

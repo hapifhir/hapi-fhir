@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +159,7 @@ public class FhirResourceDaoR5CodeSystemTest extends BaseJpaR5Test {
 
 	private IIdType createLargeCodeSystem(String theVersion) {
 		CodeSystem cs = new CodeSystem();
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		cs.setUrl("http://foo");
 		if (theVersion != null) {
 			cs.setVersion(theVersion);

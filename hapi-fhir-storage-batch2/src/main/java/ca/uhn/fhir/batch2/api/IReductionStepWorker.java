@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,24 @@ package ca.uhn.fhir.batch2.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.model.api.IModelJson;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
- * Reduction step worker.
+ * Reduction step worker. Once all chunks from the previous step have completed, consume() will first be called on
+ * all chunks, and then finally run() will be called on this step.
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
  * @param <OT> Output Job Report Type
  */
 public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends IJobStepWorker<PT, IT, OT> {
+		extends IJobStepWorker<PT, IT, OT> {
+
+	// TODO KHS create an abstract superclass under this that enforces the one-at-a-time contract
+	// (this contract is currently baked into the implementations inconsistently)
 
 	/**
 	 *

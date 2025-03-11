@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5037
+jira: SMILE-6370
+title: "Previously, when the last source resource with a `MATCH` link was deleted, the golden resource 
+remained in the database, leaving it orphaned. This has now been fixed such that when there are no more 
+`MATCH` links left associated with a golden resource, the golden resource will automatically be deleted."

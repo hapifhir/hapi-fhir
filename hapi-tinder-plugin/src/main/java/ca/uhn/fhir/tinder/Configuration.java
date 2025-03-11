@@ -1,10 +1,10 @@
 package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,13 @@ public class Configuration {
 	private final List<String> resourceNames = new ArrayList<>();
 	private String baseDir;
 
-	public Configuration(String version, String baseDir, File targetDirectory, String packageBase, List<String> baseResourceNames, List<String> excludeResourceNames) {
+	public Configuration(
+			String version,
+			String baseDir,
+			File targetDirectory,
+			String packageBase,
+			List<String> baseResourceNames,
+			List<String> excludeResourceNames) {
 		this.targetDirectory = targetDirectory;
 		this.packageBase = packageBase;
 		this.packageDirectoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
@@ -45,13 +51,19 @@ public class Configuration {
 				fhirContext = FhirContext.forR4();
 				packageSuffix = ".r4";
 				break;
+			case "r5":
+				fhirContext = FhirContext.forR5();
+				packageSuffix = ".r5";
+				break;
 			default:
 				throw new IllegalArgumentException(Msg.code(92) + "Unknown version configured: " + version);
 		}
 
 		this.version = version;
 		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
-			ourLog.info("No resource names supplied, going to use all resources from version: {}", fhirContext.getVersion().getVersion());
+			ourLog.info(
+					"No resource names supplied, going to use all resources from version: {}",
+					fhirContext.getVersion().getVersion());
 
 			Properties p = new Properties();
 			try {

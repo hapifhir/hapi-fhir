@@ -1,5 +1,3 @@
-package org.hl7.fhir.r4.hapi.ctx;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -9,9 +7,9 @@ package org.hl7.fhir.r4.hapi.ctx;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,24 +17,35 @@ package org.hl7.fhir.r4.hapi.ctx;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.r4.hapi.ctx;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.hapi.fluentpath.FhirPathR4;
-import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
-import org.hl7.fhir.r4.model.*;
-
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.hapi.fluentpath.FhirPathR4;
+import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StructureDefinition;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 public class FhirR4 implements IFhirVersion {
 
@@ -70,7 +79,7 @@ public class FhirR4 implements IFhirVersion {
 
 	@Override
 	public InputStream getFhirVersionPropertiesFile() {
-		String path = "org/hl7/fhir/r4/model/fhirversion.properties";
+		String path = "org/hl7/fhir/r4/hapi/model/fhirversion.properties";
 		InputStream str = FhirR4.class.getResourceAsStream("/" + path);
 		if (str == null) {
 			str = FhirR4.class.getResourceAsStream(path);
@@ -120,5 +129,4 @@ public class FhirR4 implements IFhirVersion {
 	public IIdType newIdType() {
 		return new IdType();
 	}
-
 }

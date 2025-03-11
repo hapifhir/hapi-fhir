@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,14 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -64,7 +64,8 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 	public ResponseTerminologyDisplayPopulationInterceptor(IValidationSupport theValidationSupport) {
 		super(theValidationSupport);
 
-		myCodingDefinitition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myContext.getElementDefinition("Coding"));
+		myCodingDefinitition = (BaseRuntimeElementCompositeDefinition<?>)
+				Objects.requireNonNull(myContext.getElementDefinition("Coding"));
 		myCodingType = myCodingDefinitition.getImplementingClass();
 		myCodingSystemChild = myCodingDefinitition.getChildByName("system");
 		myCodingCodeChild = myCodingDefinitition.getChildByName("code");
@@ -81,21 +82,40 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 		for (IBaseResource nextResource : resources) {
 			terser.visit(nextResource, new MappingVisitor());
 		}
-
 	}
 
 	private class MappingVisitor implements IModelVisitor {
 
 		@Override
-		public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+		public void acceptElement(
+				IBaseResource theResource,
+				IBase theElement,
+				List<String> thePathToElement,
+				BaseRuntimeChildDefinition theChildDefinition,
+				BaseRuntimeElementDefinition<?> theDefinition) {
 			if (myCodingType.isAssignableFrom(theElement.getClass())) {
-				String system = myCodingSystemChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
-				String code = myCodingCodeChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
+				String system = myCodingSystemChild
+						.getAccessor()
+						.getFirstValueOrNull(theElement)
+						.map(t -> (IPrimitiveType<?>) t)
+						.map(t -> t.getValueAsString())
+						.orElse(null);
+				String code = myCodingCodeChild
+						.getAccessor()
+						.getFirstValueOrNull(theElement)
+						.map(t -> (IPrimitiveType<?>) t)
+						.map(t -> t.getValueAsString())
+						.orElse(null);
 				if (isBlank(system) || isBlank(code)) {
 					return;
 				}
 
-				String display = myCodingDisplayChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
+				String display = myCodingDisplayChild
+						.getAccessor()
+						.getFirstValueOrNull(theElement)
+						.map(t -> (IPrimitiveType<?>) t)
+						.map(t -> t.getValueAsString())
+						.orElse(null);
 				if (isNotBlank(display)) {
 					return;
 				}
@@ -103,18 +123,15 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 				ValidationSupportContext validationSupportContext = new ValidationSupportContext(myValidationSupport);
 				if (myValidationSupport.isCodeSystemSupported(validationSupportContext, system)) {
 
-					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(validationSupportContext, system, code);
+					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(
+							validationSupportContext, new LookupCodeRequest(system, code));
 					if (lookupCodeResult != null && lookupCodeResult.isFound()) {
 						String newDisplay = lookupCodeResult.getCodeDisplay();
 						IPrimitiveType<?> newString = myStringDefinition.newInstance(newDisplay);
 						myCodingDisplayChild.getMutator().addValue(theElement, newString);
 					}
-
 				}
 			}
-
 		}
-
 	}
-
 }

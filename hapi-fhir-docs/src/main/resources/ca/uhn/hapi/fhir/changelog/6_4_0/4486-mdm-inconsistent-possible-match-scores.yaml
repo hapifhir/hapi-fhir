@@ -1,0 +1,3 @@
+type: fix
+issue: 4486
+title: "Previously, some MDM links of type `POSSIBLE_MATCH` were saved with unnormalized score values. This has been fixed."

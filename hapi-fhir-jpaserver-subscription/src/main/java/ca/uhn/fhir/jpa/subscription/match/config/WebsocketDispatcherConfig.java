@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.config;
-
 /*
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.subscription.match.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.config;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Autowired
-	ModelConfig myModelConfig;
+	SubscriptionSettings mySubscriptionSettings;
 
 	@Bean
 	public WebsocketConnectionValidator websocketConnectionValidator() {
@@ -48,7 +47,9 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), myModelConfig.getWebsocketContextPath()).setAllowedOrigins("*");
+		theRegistry
+				.addHandler(subscriptionWebSocketHandler(), mySubscriptionSettings.getWebsocketContextPath())
+				.setAllowedOrigins("*");
 	}
 
 	@Bean
@@ -56,5 +57,4 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
 		return retVal;
 	}
-
 }

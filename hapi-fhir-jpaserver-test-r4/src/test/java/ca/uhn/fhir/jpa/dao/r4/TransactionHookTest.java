@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -25,34 +26,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(true);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 	}
 
-	PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_TRANSACTION_PROCESSED);
+	PointcutLatch myTransactionProcessedLatch = new PointcutLatch(Pointcut.STORAGE_TRANSACTION_PROCESSED);
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
 
 	@BeforeEach
 	public void beforeEach() {
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED,  myPointcutLatch);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,  myPointcutLatch);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,  myPointcutLatch);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED,  myPointcutLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, myTransactionProcessedLatch);
+	}
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorService.unregisterInterceptor(myTransactionProcessedLatch);
 	}
 
 	@Test
@@ -85,17 +86,14 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		//Delete an observation
 		b.addEntry().getRequest().setMethod(DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
 
+		List<HookParams> hookParams = callTransaction(b);
 
-		myPointcutLatch.setExpectedCount(4);
-		mySystemDao.transaction(mySrd, b);
-		List<HookParams> hookParams = myPointcutLatch.awaitExpected();
-
-		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(3).get(DeferredInterceptorBroadcasts.class);
+		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(0).get(DeferredInterceptorBroadcasts.class);
 		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts = broadcastsParam.getDeferredInterceptorBroadcasts();
-		assertThat(deferredInterceptorBroadcasts.entries(), hasSize(3));
+		assertThat(deferredInterceptorBroadcasts.entries()).hasSize(3);
 
 		List<HookParams> createPointcutInvocations = deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED);
-		assertThat(createPointcutInvocations, hasSize(2));
+		assertThat(createPointcutInvocations).hasSize(2);
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
 		InterceptorInvocationTimingEnum timing = createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
@@ -107,11 +105,11 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		assertTrue(secondCreatedResource instanceof Patient);
 		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
-		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED), hasSize(1));
+		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)).hasSize(1);
 	}
 
 	@Test
-	public void testDeleteInTransactionShouldSucceedWhenReferencesAreAlsoRemoved() {
+	public void testDeleteInTransactionShouldSucceedWhenReferencesAreAlsoRemoved() throws InterruptedException {
 		final Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
 		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
@@ -134,7 +132,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 		try {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
-			mySystemDao.transaction(mySrd, b);
+			callTransaction(b);
 		} catch (ResourceVersionConflictException e) {
 			fail();
 		}
@@ -142,7 +140,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testDeleteWithHas_SourceModifiedToNoLongerIncludeReference() {
+	public void testDeleteWithHas_SourceModifiedToNoLongerIncludeReference() throws InterruptedException {
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -166,7 +164,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		Bundle b = new Bundle();
 		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
-		mySystemDao.transaction(mySrd, b);
+		callTransaction(b);
 
 		myObservationDao.read(obs1id);
 		try {
@@ -177,11 +175,17 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		}
 
 		rpt = myDiagnosticReportDao.read(rptId);
-		assertThat(rpt.getResult(), empty());
+		assertThat(rpt.getResult()).isEmpty();
+	}
+
+	private List<HookParams> callTransaction(Bundle b) throws InterruptedException {
+		myTransactionProcessedLatch.setExpectedCount(1);
+		mySystemDao.transaction(mySrd, b);
+		return myTransactionProcessedLatch.awaitExpected();
 	}
 
 	@Test
-	public void testDeleteWithId_SourceModifiedToNoLongerIncludeReference() {
+	public void testDeleteWithId_SourceModifiedToNoLongerIncludeReference() throws InterruptedException {
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -204,7 +208,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		Bundle b = new Bundle();
 		b.addEntry().getRequest().setMethod(DELETE).setUrl(obs1id.getValue());
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl(rptId.getValue());
-		mySystemDao.transaction(mySrd, b);
+		callTransaction(b);
 
 		myObservationDao.read(obs2id);
 		myDiagnosticReportDao.read(rptId);
@@ -219,7 +223,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testDeleteWithHas_SourceModifiedToStillIncludeReference() {
+	public void testDeleteWithHas_SourceModifiedToStillIncludeReference() throws InterruptedException {
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -245,10 +249,10 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
-			mySystemDao.transaction(mySrd, b);
+			callTransaction(b);
 			fail();
 		} catch (ResourceVersionConflictException e ) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
+			assertThat(e.getMessage()).matches(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result");
 		}
 
 		myObservationDao.read(obs1id);

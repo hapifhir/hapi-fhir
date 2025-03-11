@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -37,7 +36,9 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 
 	private BaseRuntimeElementDefinition<?> myElem;
 
-	RuntimeChildContainedResources(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
+	RuntimeChildContainedResources(
+			Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName)
+			throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
@@ -73,7 +74,9 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Class<?> actualType = theContext.getVersion().getContainedType();
 		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
 			@SuppressWarnings("unchecked")
@@ -82,8 +85,8 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 		} else if (List.class.isAssignableFrom(actualType)) {
 			myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
 		} else {
-			throw new ConfigurationException(Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
+			throw new ConfigurationException(
+					Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
 		}
 	}
-
 }

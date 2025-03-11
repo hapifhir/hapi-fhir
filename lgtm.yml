@@ -6,5 +6,5 @@ extraction:
       maven: 
         version: 3.8.4
       build_command:
-        - mvn -P ALLMODULES,LGTM -Dmaven.test.skip install
+         - mvn -P LGTM -Dmaven.test.skip install
 

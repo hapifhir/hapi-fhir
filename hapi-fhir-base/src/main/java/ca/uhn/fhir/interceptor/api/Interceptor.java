@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -31,18 +30,18 @@ import java.lang.annotation.Target;
  * is not mandatory for interceptor classes, but is added as a marker by convention.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 public @interface Interceptor {
 
 	/**
-	 * @see #order() 
+	 * @see #order()
 	 */
 	int DEFAULT_ORDER = 0;
 
 	/**
 	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
-	 * and allowable values can be positive or negative or 0.
+	 * and allowable values can be positive or negative or 0. Ignored when annotation is set on a method.
 	 */
 	int order() default DEFAULT_ORDER;
 }

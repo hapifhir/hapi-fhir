@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.sched;
-
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.sched;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -83,10 +82,10 @@ public class ScheduledJobDefinition {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myJobClass", myJobClass)
-			.append("myId", myId)
-			.append("myGroup", myGroup)
-			.toString();
+				.append("myJobClass", myJobClass)
+				.append("myId", myId)
+				.append("myGroup", myGroup)
+				.toString();
 	}
 
 	public JobKey toJobKey() {

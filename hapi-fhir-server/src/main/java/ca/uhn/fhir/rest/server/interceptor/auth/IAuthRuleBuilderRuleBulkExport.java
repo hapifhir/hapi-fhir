@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,13 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * @since 5.5.0
@@ -53,6 +54,22 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnGroup(@Nonnull IIdType theFocusResourceId) {
 		return patientExportOnGroup(theFocusResourceId.getValue());
 	}
+
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId);
+
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnAllPatients();
+
+	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull IIdType theFocusResourceId) {
+		return patientExportOnPatient(theFocusResourceId.getValue());
+	}
+
+	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatients(
+			@Nonnull Collection<IIdType> theFocusResourceIds) {
+		return patientExportOnPatientStrings(
+				theFocusResourceIds.stream().map(IIdType::getValue).collect(Collectors.toList()));
+	}
+
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(Collection<String> theFocusResourceIds);
 
 	/**
 	 * Allow/deny <b>patient-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>

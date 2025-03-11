@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,12 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-
-import javax.servlet.http.HttpServletRequest;
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -32,7 +30,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 
 	/**
 	 * Actually create and return the conformance statement
-	 * 
+	 *
 	 * See the class documentation for an important note if you are extending this class
 	 */
 	T getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails);
@@ -46,7 +44,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * This setter is needed in implementation classes (along with
 	 * a no-arg constructor) to avoid reference cycles in the
 	 * Spring wiring of a RestfulServer instance.
-	 * 
+	 *
 	 * @param theRestfulServer
 	 */
 	void setRestfulServer(RestfulServer theRestfulServer);

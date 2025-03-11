@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.api;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,10 @@ package ca.uhn.fhir.jpa.subscription.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.api;
 
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nullable;
 
 /**
  * This is used by "message" type subscriptions to provide a key to the message wrapper before submitting it to the channel

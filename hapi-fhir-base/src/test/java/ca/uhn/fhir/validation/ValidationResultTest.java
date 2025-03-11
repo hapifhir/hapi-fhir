@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class ValidationResultTest {
@@ -20,7 +20,7 @@ class ValidationResultTest {
 		List<SingleValidationMessage> validationMessages = getTestValidationErrors(2);
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
-		assertTrue(toStringValue.contains("Error message #" + 1));
+		assertThat(toStringValue).contains("Error message #" + 1);
 		assertFalse(toStringValue.contains("Error message #" + 2));
 	}
 
@@ -30,7 +30,7 @@ class ValidationResultTest {
 			getTestValidationErrors(ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT * 2);
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
-		assertTrue(toStringValue.contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT));
+		assertThat(toStringValue).contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT);
 		assertFalse(toStringValue.contains("Error message #" + (ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT + 1)));
 	}
 
@@ -40,7 +40,7 @@ class ValidationResultTest {
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		vr.setErrorDisplayLimit(8);
 		String toStringValue = vr.toString();
-		assertTrue(toStringValue.contains("Error message #" + 8));
+		assertThat(toStringValue).contains("Error message #" + 8);
 		assertFalse(toStringValue.contains("Error message #" + 9));
 	}
 

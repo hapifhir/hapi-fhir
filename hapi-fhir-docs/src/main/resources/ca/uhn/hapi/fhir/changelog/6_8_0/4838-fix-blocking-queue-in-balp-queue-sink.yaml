@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4838
+title: "The BALP AsyncMemoryQueueBackedFhirClientBalpSink incorrectly used a non-blocking method
+   to add events to the blocking queue, resulting in race conditions on a heavily loaded
+   server."

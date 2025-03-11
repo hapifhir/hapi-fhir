@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4128
+title: "In the JPA server, when deleting a resource the associated tags were previously deleted even though
+  the FHIR specification states that tags are independent of FHIR versioning. After this fix, resource tags
+  and security labels will remain when a resource is deleted. They can be fetched using the `$meta` operation
+  against the deleted resource, and will remain if the resource is brought back in a subsequent update."

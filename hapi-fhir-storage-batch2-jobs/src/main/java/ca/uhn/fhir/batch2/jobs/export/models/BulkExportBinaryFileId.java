@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.export.models;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.export.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.export.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,8 +29,7 @@ public class BulkExportBinaryFileId extends BulkExportJobBase {
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
-	public BulkExportBinaryFileId() {
-	}
+	public BulkExportBinaryFileId() {}
 
 	public String getBinaryId() {
 		return myBinaryId;

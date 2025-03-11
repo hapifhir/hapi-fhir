@@ -1,19 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.servlet.http.HttpServletRequest;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +17,30 @@ import javax.servlet.http.HttpServletRequest;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort);
+	IBundleProvider encounterInstanceEverything(
+			HttpServletRequest theServletRequest,
+			IIdType theId,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdate,
+			SortSpec theSort);
 
-	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSortSpec);
-
+	IBundleProvider encounterTypeEverything(
+			HttpServletRequest theServletRequest,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdated,
+			SortSpec theSortSpec);
 }

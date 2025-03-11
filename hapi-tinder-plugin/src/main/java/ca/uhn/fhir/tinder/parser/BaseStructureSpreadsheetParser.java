@@ -1,11 +1,18 @@
 package ca.uhn.fhir.tinder.parser;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.tinder.model.*;
+import ca.uhn.fhir.tinder.model.AnyChild;
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Child;
+import ca.uhn.fhir.tinder.model.ResourceBlock;
+import ca.uhn.fhir.tinder.model.ResourceBlockCopy;
+import ca.uhn.fhir.tinder.model.SearchParameter;
+import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.util.XMLUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
@@ -17,7 +24,14 @@ import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -31,7 +45,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		myBindingRefs = new HashMap<>();
 	}
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureSpreadsheetParser.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(BaseStructureSpreadsheetParser.class);
 	private int myColBinding = -1;
 	private int myColModifier = -1;
 	private int myColSummary = -1;
@@ -52,7 +67,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		if (getVersion().equals("dstu2")) {
 			ourLog.info("Loading ValueSets...");
 			FhirContext ctx = FhirContext.forDstu2();
-			String path = ctx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/valueset") + "/valuesets.xml";
+			String path =
+					ctx.getVersion().getPathToSchemaDefinitions().replace("/schema", "/valueset") + "/valuesets.xml";
 
 			InputStream valuesetText = BaseStructureSpreadsheetParser.class.getResourceAsStream(path);
 			Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, new InputStreamReader(valuesetText));
@@ -150,7 +166,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				elements.put(elem.getName(), elem);
 				BaseElement parent = elements.get(elem.getElementParentName());
 				if (parent == null) {
-					throw new Exception(Msg.code(165) + "Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
+					throw new Exception(Msg.code(165) + "Can't find element " + elem.getElementParentName()
+							+ "  -  Valid values are: " + elements.keySet());
 				}
 				parent.addChild(elem);
 
@@ -160,7 +177,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				if (elem instanceof Child) {
 					scanForSimpleSetters(elem);
 				}
-
 			}
 
 			postProcess(resource);
@@ -192,24 +208,25 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					BaseElement parent = elements.get(element.getElementParentName());
 					List<BaseElement> children = parent.getChildren();
 					for (BaseElement child : children) {
-						if (!child.equals(blockCopy) && child instanceof ResourceBlock 
-						&& child.getElementName().equals(blockCopy.getElementName())) {
-							((ResourceBlockCopy)blockCopy).setReferencedBlock((ResourceBlock)child);
+						if (!child.equals(blockCopy)
+								&& child instanceof ResourceBlock
+								&& child.getElementName().equals(blockCopy.getElementName())) {
+							((ResourceBlockCopy) blockCopy).setReferencedBlock((ResourceBlock) child);
 							break refLoop;
 						}
 					}
 					element = parent;
 				}
 			}
-			
+
 			index++;
 		}
 
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
-
 	}
 
-	private Element findSheetByName(String spreadsheetName, String wantedName, Document file, boolean theFailIfNotFound) throws Exception {
+	private Element findSheetByName(String spreadsheetName, String wantedName, Document file, boolean theFailIfNotFound)
+			throws Exception {
 		Element retVal = null;
 		for (int i = 0; i < file.getElementsByTagName("Worksheet").getLength() && retVal == null; i++) {
 			retVal = (Element) file.getElementsByTagName("Worksheet").item(i);
@@ -219,7 +236,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		}
 
 		if (retVal == null && theFailIfNotFound) {
-			throw new Exception(Msg.code(166) + "Failed to find worksheet with name '" + wantedName + "' in spreadsheet: " + spreadsheetName);
+			throw new Exception(Msg.code(166) + "Failed to find worksheet with name '" + wantedName
+					+ "' in spreadsheet: " + spreadsheetName);
 		}
 		return retVal;
 	}
@@ -346,11 +364,14 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					// if(true)continue;
 
 					if (isBlank(nextCompositeParam.getPath())) {
-						throw new MojoExecutionException(Msg.code(167) + "Composite param " + nextCompositeParam.getName() + " has no path");
+						throw new MojoExecutionException(
+								Msg.code(167) + "Composite param " + nextCompositeParam.getName() + " has no path");
 					}
 
 					if (nextCompositeParam.getPath().indexOf('&') == -1) {
-						throw new MojoExecutionException(Msg.code(168) + "Composite param " + nextCompositeParam.getName() + " has path with no '&': " + nextCompositeParam.getPath());
+						throw new MojoExecutionException(
+								Msg.code(168) + "Composite param " + nextCompositeParam.getName()
+										+ " has path with no '&': " + nextCompositeParam.getPath());
 					}
 
 					String[] parts = nextCompositeParam.getPath().split("\\&");
@@ -374,7 +395,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						possibleMatches.add(theResource.getName() + "." + nextPart.replace("-[x]", "[x]"));
 
 						for (SearchParameter nextParam : theResource.getSearchParameters()) {
-							if (possibleMatches.contains(nextParam.getPath()) || possibleMatches.contains(nextParam.getName())) {
+							if (possibleMatches.contains(nextParam.getPath())
+									|| possibleMatches.contains(nextParam.getName())) {
 								part.add(nextParam);
 							}
 						}
@@ -383,23 +405,27 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						 * Paths have changed in DSTU2
 						 */
 						for (SearchParameter nextParam : theResource.getSearchParameters()) {
-							if (nextPart.equals("value[x]") && (nextParam.getName().startsWith("value-"))) {
+							if (nextPart.equals("value[x]")
+									&& (nextParam.getName().startsWith("value-"))) {
 								part.add(nextParam);
 							}
-							if (nextPart.equals("component-value[x]") && (nextParam.getName().startsWith("component-value-"))) {
+							if (nextPart.equals("component-value[x]")
+									&& (nextParam.getName().startsWith("component-value-"))) {
 								part.add(nextParam);
 							}
 						}
 
 						if (part.isEmpty()) {
-							throw new MojoExecutionException(Msg.code(169) + "Composite param " + nextCompositeParam.getName() + " has path that doesn't seem to correspond to any other params: " + nextPart);
+							throw new MojoExecutionException(Msg.code(169) + "Composite param "
+									+ nextCompositeParam.getName()
+									+ " has path that doesn't seem to correspond to any other params: " + nextPart);
 						}
-
 					}
 
 					if (compositeOf.size() > 2) {
 						// TODO: change back to exception maybe? Grahame says these aren't allowed..
-						ourLog.warn("Composite param " + nextCompositeParam.getName() + " has >2 parts, this isn't supported yet");
+						ourLog.warn("Composite param " + nextCompositeParam.getName()
+								+ " has >2 parts, this isn't supported yet");
 						continue;
 					}
 
@@ -412,10 +438,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 							composite.setPath(nextCompositeParam.getPath());
 							composite.setType("composite");
 							composite.setCompositeOf(Arrays.asList(part1.getName(), part2.getName()));
-							composite.setCompositeTypes(Arrays.asList(WordUtils.capitalize(part1.getType()), WordUtils.capitalize(part2.getType())));
+							composite.setCompositeTypes(Arrays.asList(
+									WordUtils.capitalize(part1.getType()), WordUtils.capitalize(part2.getType())));
 						}
 					}
-
 				}
 			}
 		}
@@ -520,7 +546,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -529,5 +554,4 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		// nothing
 	}
-
 }

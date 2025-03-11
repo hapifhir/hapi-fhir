@@ -37,9 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -79,7 +77,7 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 			assertEquals("Patient/123", ourLastId.getValue());
 			assertEquals("{name{family,given}}", ourLastQuery);
 
@@ -100,7 +98,7 @@ public class GraphQLR4RawTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("Unknown resource type"));
+			assertThat(responseContent).contains("Unknown resource type");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -124,7 +122,7 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 			assertEquals("Patient/123", ourLastId.getValue());
 			assertEquals("{name{family,given}}", ourLastQuery);
 
@@ -151,7 +149,7 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 			assertEquals("Patient/123", ourLastId.getValue());
 			assertEquals("{name{family,given}}", ourLastQuery);
 			assertEquals("Patient", ourLastResourceType);
@@ -179,7 +177,7 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
 			assertNull(ourLastId);
 			assertNull(ourLastResourceType);
 			assertEquals("{PatientList(date: \"2022\") {name{family,given}}}", ourLastQuery);
@@ -204,8 +202,8 @@ public class GraphQLR4RawTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
 			assertEquals("{\"foo\"}", responseContent);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
-			assertEquals(null, ourLastId);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
+			assertNull(ourLastId);
 			assertEquals("{name{family,given}}", ourLastQuery);
 
 		} finally {

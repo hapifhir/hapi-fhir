@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.pid;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +17,40 @@ package ca.uhn.fhir.jpa.api.pid;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.pid;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-abstract public class BaseResourcePidList implements IResourcePidList {
+public abstract class BaseResourcePidList<T extends IResourcePersistentId<?>> implements IResourcePidList<T> {
 
-	final List<ResourcePersistentId> myIds = new ArrayList<>();
+	final List<T> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseResourcePidList(Collection<ResourcePersistentId> theIds, Date theLastDate) {
+	private final RequestPartitionId myRequestPartitionId;
+
+	BaseResourcePidList(Collection<T> theIds, @Nullable Date theLastDate, RequestPartitionId theRequestPartitionId) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	@Nullable
 	@Override
 	public Date getLastDate() {
 		return myLastDate;
@@ -68,12 +77,16 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<ResourcePersistentId> getIds() {
+	public List<T> getIds() {
 		return Collections.unmodifiableList(myIds);
 	}
 
-	public ResourcePersistentId getId(int theIndex) {
+	public T getId(int theIndex) {
 		return myIds.get(theIndex);
 	}
-}
 
+	@Override
+	public String toString() {
+		return myIds.toString();
+	}
+}

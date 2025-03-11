@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.apache;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +17,52 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.i18n.Msg;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-import java.util.Map.Entry;
-
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * A Http Client based on Apache. This is an adapter around the class
  * {@link org.apache.http.client.HttpClient HttpClient}
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
 	private final HttpClient myClient;
 
-	public ApacheHttpClient(HttpClient theClient, StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public ApacheHttpClient(
+			HttpClient theClient,
+			StringBuilder theUrl,
+			Map<String, List<String>> theIfNoneExistParams,
+			String theIfNoneExistString,
+			RequestTypeEnum theRequestType,
+			List<Header> theHeaders) {
 		super(theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 		this.myClient = theClient;
 	}
@@ -56,28 +70,27 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
 		String url = myUrl.toString();
 		switch (myRequestType) {
-		case DELETE:
-			return new HttpDelete(url);
-		case PATCH:
-			HttpPatch httpPatch = new HttpPatch(url);
-			httpPatch.setEntity(theEntity);
-			return httpPatch;
-		case OPTIONS:
-			return new HttpOptions(url);
-		case POST:
-			HttpPost httpPost = new HttpPost(url);
-			httpPost.setEntity(theEntity);
-			return httpPost;
-		case PUT:
-			HttpPut httpPut = new HttpPut(url);
-			httpPut.setEntity(theEntity);
-			return httpPut;
-		case GET:
-		default:
-			return new HttpGet(url);
+			case DELETE:
+				return new HttpDelete(url);
+			case PATCH:
+				HttpPatch httpPatch = new HttpPatch(url);
+				httpPatch.setEntity(theEntity);
+				return httpPatch;
+			case OPTIONS:
+				return new HttpOptions(url);
+			case POST:
+				HttpPost httpPost = new HttpPost(url);
+				httpPost.setEntity(theEntity);
+				return httpPost;
+			case PUT:
+				HttpPut httpPut = new HttpPut(url);
+				httpPut.setEntity(theEntity);
+				return httpPut;
+			case GET:
+			default:
+				return new HttpGet(url);
 		}
 	}
-
 
 	private UrlEncodedFormEntity createFormEntity(List<NameValuePair> parameters) {
 		try {
@@ -87,10 +100,9 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		}
 	}
 
-
 	@Override
 	protected IHttpRequest createHttpRequest() {
-		return createHttpRequest((HttpEntity)null);
+		return createHttpRequest((HttpEntity) null);
 	}
 
 	@Override
@@ -122,7 +134,6 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		UrlEncodedFormEntity entity = createFormEntity(parameters);
 		return createHttpRequest(entity);
 	}
-
 
 	@Override
 	protected IHttpRequest createHttpRequest(String theContents) {

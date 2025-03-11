@@ -17,11 +17,11 @@ public class StringSimilarityR4Test extends BaseMatcherR4Test {
 	public static final String LEFT = "somon";
 	public static final String RIGHT = "slomon";
 
-	private static final HapiStringSimilarity JARO_WINKLER = new HapiStringSimilarity(new JaroWinkler());
-	private static final HapiStringSimilarity COSINE = new HapiStringSimilarity(new Cosine());
-	private static final HapiStringSimilarity JACCARD = new HapiStringSimilarity(new Jaccard());
-	private static final HapiStringSimilarity LEVENSCHTEIN = new HapiStringSimilarity(new NormalizedLevenshtein());
-	private static final HapiStringSimilarity SORENSEN_DICE = new HapiStringSimilarity(new SorensenDice());
+	protected static final HapiStringSimilarity JARO_WINKLER = new HapiStringSimilarity(new JaroWinkler());
+	protected static final HapiStringSimilarity COSINE = new HapiStringSimilarity(new Cosine());
+	protected static final HapiStringSimilarity JACCARD = new HapiStringSimilarity(new Jaccard());
+	protected static final HapiStringSimilarity LEVENSCHTEIN = new HapiStringSimilarity(new NormalizedLevenshtein());
+	protected static final HapiStringSimilarity SORENSEN_DICE = new HapiStringSimilarity(new SorensenDice());
 
 	@Test
 	public void testSlomon() {

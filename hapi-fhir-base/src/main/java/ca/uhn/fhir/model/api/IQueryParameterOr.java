@@ -1,12 +1,8 @@
-package ca.uhn.fhir.model.api;
-
-import java.io.Serializable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +17,17 @@ import java.io.Serializable;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
+package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+
+import java.io.Serializable;
+import java.util.List;
 
 public interface IQueryParameterOr<T extends IQueryParameterType> extends Serializable {
 
 	void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
 
 	List<T> getValuesAsQueryTokens();
-
 }

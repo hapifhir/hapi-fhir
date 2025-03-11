@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -16,23 +17,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class InMemoryTerminologyServerValidationSupportTest {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(InMemoryTerminologyServerValidationSupportTest.class);
+public class InMemoryTerminologyServerValidationSupportTest extends BaseValidationTestWithInlineMocks {
 	private InMemoryTerminologyServerValidationSupport mySvc;
-	private FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4();
 	private DefaultProfileValidationSupport myDefaultSupport;
 	private ValidationSupportChain myChain;
 	private PrePopulatedValidationSupport myPrePopulated;
@@ -50,8 +48,153 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		myDefaultSupport.fetchCodeSystem("http://foo");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL
+	})
+	public void testExpandValueSet_commonVS_expandOk(String theValueSet) {
+		ValueSet vs = (ValueSet) myChain.fetchValueSet(theValueSet);
+		assertNotNull(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+		assertNotNull(expansion);
+		assertNull(expansion.getError());
+		ValueSet valueSet = (ValueSet) expansion.getValueSet();
+		assertNotNull(valueSet);
+		assertNotNull(valueSet.getExpansion());
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL
+	})
+	public void testExpandValueSet_customVSBasedOnCommonCS_expandOk(String theCodeSystem) {
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(theCodeSystem);
+		myPrePopulated.addValueSet(vs);
+
+		vs = (ValueSet) myChain.fetchValueSet(vs.getUrl());
+		assertNotNull(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+		assertNotNull(expansion);
+		assertNull(expansion.getError());
+		ValueSet valueSet = (ValueSet) expansion.getValueSet();
+		assertNotNull(valueSet);
+		assertNotNull(valueSet.getExpansion());
+	}
+
 	@Test
-	public void testValidateCodeWithInferredSystem_CommonCodeSystemsCs_BuiltInVs() {
+	public void testValidateCode_mimetypeVSRandomCode_returnsOk() {
+		final String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+		final String valueSetUrl = CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL;
+
+		final String code = "someRandomCode";
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, valueSetUrl);
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals(code, outcome.getCode());
+	}
+
+	@Test
+	public void testValidateCode_customMimetypeVSRandomCode_returnsOk() {
+		final String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+		final String code = "someRandomCode";
+
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(codeSystem);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+	}
+
+	@Test
+	public void testValidateCode_customMimetypeVSCodeInVS_returnsOk() {
+		String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+
+		final String code = "someRandomCode";
+		final String display = "Display " + code;
+
+		ValueSet vs = new ValueSet();
+		vs.setId("example-vs");
+		vs.setUrl("http://example.com/example-vs");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(codeSystem);
+		vsInclude.addConcept().setCode(code).setDisplay(display);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals(code, outcome.getCode());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL
+	})
+	public void testValidateCode_customMimetypeVSCodeNotInVS_returnsError(String theCodeSystem) {
+		final String code = "someRandomCode";
+		final String codeToValidate = "otherCode";
+
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(theCodeSystem);
+		vsInclude.addConcept().setCode(code).setDisplay("Display " + code);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, theCodeSystem, codeToValidate, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'");
+	}
+
+	@Test
+	public void testValidateCodeWithInferredSystem_CommonCs_BuiltInVs() {
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 		ConceptValidationOptions options = new ConceptValidationOptions().setInferSystem(true);
@@ -62,7 +205,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		// ValidateCode
 		outcome = myChain.validateCode(valCtx, options, null, "txt", null, valueSetUrl);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getSourceDetails());
 		assertEquals("txt", outcome.getCode());
 
 		// ValidateCodeInValueSet
@@ -70,7 +213,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertNotNull(valueSet);
 		outcome = myChain.validateCodeInValueSet(valCtx, options, null, "txt", null, valueSet);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/mimetypes", outcome.getSourceDetails());
 		assertEquals("txt", outcome.getCode());
 	}
 
@@ -91,13 +234,13 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		IValidationSupport.CodeValidationResult outcome;
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 		assertTrue(outcome.isOk());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -127,7 +270,9 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		IValidationSupport.CodeValidationResult outcome;
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertNull(outcome.getMessage());
+		assertNull(outcome.getSeverityCode());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 		assertTrue(outcome.isOk());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
@@ -155,7 +300,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: "+ Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -224,7 +369,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
 		assertNotNull(expansion.getValueSet());
-		assertEquals(1, ((ValueSet)expansion.getValueSet()).getExpansion().getContains().size());
+		assertThat(((ValueSet) expansion.getValueSet()).getExpansion().getContains()).hasSize(1);
 
 		// Validate code - good
 		codeSystemUrl = "http://snomed.info/sct";
@@ -243,10 +388,13 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
+		assertTrue(outcome.isOk());
+		assertEquals("28571000087109", outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"");
+		assertEquals("warning", outcome.getSeverityCode());
+		assertThat(outcome.getSourceDetails()).startsWith("Code was validated against in-memory expansion");
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";
@@ -265,13 +413,10 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		code = "BLAH";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
-		assertEquals(null, outcome.getDisplay());
-		assertEquals(null, outcome.getCodeSystemVersion());
+		assertNull(outcome.getCode());
+		assertNull(outcome.getDisplay());
+		assertNull(outcome.getCodeSystemVersion());
 	}
-
-
-
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
@@ -306,7 +451,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertNull(expansion.getError());
 		ValueSet valueSet = (ValueSet) expansion.getValueSet();
 		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 
@@ -361,12 +506,14 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		code = "123";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("for in-memory expansion of ValueSet");
+		assertThat(outcome.getSourceDetails()).contains("In-memory expansion containing 0 codes");
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
 		assertNull(expansion.getError());
 		ValueSet valueSet = (ValueSet) expansion.getValueSet();
 		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
@@ -420,7 +567,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
 		ValueSet valueSet = (ValueSet) expansion.getValueSet();
 		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
@@ -457,7 +604,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 			 null,
 			 theValueSet);
 
-		 assertTrue(codeValidationResult.isOk());
+			assertTrue(codeValidationResult.isOk());
 	 }
 
     private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {

@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -110,7 +111,6 @@
 					<classpathDependencyExcludes>
 						<dependencyExclude>org.slf4j:slf4j-android</dependencyExclude>
 					</classpathDependencyExcludes>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 				<executions>
 					<execution>
@@ -131,12 +131,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -152,6 +146,17 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>

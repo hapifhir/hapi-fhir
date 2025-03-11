@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -15,8 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourceProviderR4Test {
 
@@ -51,7 +53,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}
@@ -77,7 +79,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be default only
-		assertEquals(1, designationList.size()); 
+		assertThat(designationList).hasSize(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 
 	}
@@ -101,7 +103,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertEquals(3, designationList.size()); 
+		assertThat(designationList).hasSize(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -130,7 +132,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 
@@ -153,7 +155,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// should be default only
-		assertEquals(1, designationList.size()); 
+		assertThat(designationList).hasSize(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 		
 		//-- third call with no language
@@ -174,7 +176,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertEquals(3, designationList.size()); 
+		assertThat(designationList).hasSize(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -198,7 +200,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}
@@ -206,8 +208,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 	
 	private void verifyParameterList(List<ParametersParameterComponent> parameterList) {
 		assertEquals("display", parameterList.get(0).getName());
-		assertEquals(("Systolic blood pressure 12 hour minimum"),
-				((StringType) parameterList.get(0).getValue()).getValue());
+		assertEquals(("Systolic blood pressure 12 hour minimum"), ((StringType) parameterList.get(0).getValue()).getValue());
 
 		assertEquals("abstract", parameterList.get(1).getName());
 		assertEquals(false, ((BooleanType) parameterList.get(1).getValue()).getValue());

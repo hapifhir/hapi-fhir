@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException;
 import org.apache.commons.io.FileUtils;
 import org.jdom2.Content;
 import org.jdom2.Element;
@@ -33,16 +32,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -59,15 +57,14 @@ public class ChangelogMigrator {
 
 		org.jdom2.Document document = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		//If want to make namespace aware.
-		//factory.setNamespaceAware(true);
+		// If want to make namespace aware.
+		// factory.setNamespaceAware(true);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 		org.w3c.dom.Document w3cDocument = documentBuilder.parse(new File("src/changes/changes.xml"));
 		document = new DOMBuilder().build(w3cDocument);
 
 		int actionCount = 0;
 		int releaseCount = 0;
-
 
 		Element docElement = document.getRootElement();
 		Element bodyElement = docElement.getChild("body", NS);
@@ -106,7 +103,9 @@ public class ChangelogMigrator {
 						throw new Error(Msg.code(630) + "Unknown type: " + type);
 				}
 
-				String issue = nextAction.getAttribute("issue") != null ? nextAction.getAttribute("issue").getValue() : null;
+				String issue = nextAction.getAttribute("issue") != null
+						? nextAction.getAttribute("issue").getValue()
+						: null;
 				if (isNotBlank(issue)) {
 					itemMap.put("issue", issue);
 				}
@@ -127,7 +126,8 @@ public class ChangelogMigrator {
 				actionCount++;
 			}
 
-			String releaseDir = "hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
+			String releaseDir =
+					"hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
 			File releaseDirFile = new File(releaseDir);
 			FileUtils.forceMkdir(releaseDirFile);
 			File file = new File(releaseDirFile, "changes.yaml");
@@ -138,7 +138,6 @@ public class ChangelogMigrator {
 
 				ObjectMapper mapper = new ObjectMapper(yf);
 				mapper.writeValue(writer, items);
-
 			}
 
 			file = new File(releaseDirFile, "version.yaml");
@@ -153,15 +152,9 @@ public class ChangelogMigrator {
 					versionMap.put("codename", description);
 				}
 				mapper.writeValue(writer, versionMap);
-
 			}
-
 		}
 
 		ourLog.info("Found {} releases and {} actions", releaseCount, actionCount);
-
 	}
-
 }
-
-

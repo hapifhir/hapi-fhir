@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -27,7 +29,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,12 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
@@ -50,9 +47,9 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
+	@AfterEach
+	public void afterClearInterceptor() {
+		myServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
 	}
 
@@ -72,7 +69,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			}
 		}
 
-		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
 	@Test
@@ -95,7 +92,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
 		spMap.add("_id", new TokenParam("my-questionnaire-response"));
 		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
-		assertThat(search.size(), is(equalTo(2)));
+		assertEquals(2, search.size());
 	}
 
 	@SuppressWarnings("unused")
@@ -117,7 +114,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome())).contains("Answer value must be of the type string");
 		}
 	}
 
@@ -158,7 +155,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()  + "&_include=QuestionnaireResponse:questionnaire")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(results.getEntry().size(), is(equalTo(2)));
+		assertThat(results.getEntry()).hasSize(2);
 
 		List<String> expectedIds = new ArrayList<>();
 		expectedIds.add(qrIdType.getValue());
@@ -213,7 +210,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			"    </item>\n" +
 			"</QuestionnaireResponse>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse");
 		post.setEntity(new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id2;
@@ -222,18 +219,18 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/QuestionnaireResponse/"));
+			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 			id2 = new IdType(newIdString);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
 		response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("Exclusion Criteria"));
+			assertThat(responseString).contains("Exclusion Criteria");
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -243,12 +240,12 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/$validate");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/$validate");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("No resource supplied for $validate operation"));
+			assertThat(responseString).contains("No resource supplied for $validate operation");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
@@ -264,7 +261,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -284,13 +281,13 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("Resource has no ID"));
+			assertThat(responseString).contains("Resource has no ID");
 			assertEquals(422, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);

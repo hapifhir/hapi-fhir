@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +17,39 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class BaseTableTask extends BaseTask {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableTask.class);
 	private String myTableName;
 
+	private final List<ColumnDriverMappingOverride> myColumnDriverMappingOverrides;
 
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
+		this(theProductVersion, theSchemaVersion, Collections.emptySet());
+	}
+
+	public BaseTableTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
 		super(theProductVersion, theSchemaVersion);
+		myColumnDriverMappingOverrides = new ArrayList<>(theColumnDriverMappingOverrides);
 	}
 
 	public String getTableName() {
@@ -56,11 +74,12 @@ public abstract class BaseTableTask extends BaseTask {
 	}
 
 	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
-		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(theColumnType).get(getDriverType());
+		final String retVal = getColumnSqlWithToken(theColumnType);
+
 		Objects.requireNonNull(retVal);
 
 		if (theColumnType == ColumnTypeEnum.STRING) {
-			retVal = retVal.replace("?", Long.toString(theColumnLength));
+			return retVal.replace("?", Long.toString(theColumnLength));
 		}
 
 		return retVal;
@@ -69,5 +88,30 @@ public abstract class BaseTableTask extends BaseTask {
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		theBuilder.append(myTableName);
+	}
+
+	@Nonnull
+	private String getColumnSqlWithToken(ColumnTypeEnum theColumnType) {
+		final List<ColumnDriverMappingOverride> eligibleOverrides = myColumnDriverMappingOverrides.stream()
+				.filter(override -> override.getColumnType() == theColumnType)
+				.filter(override -> override.getDriverType() == getDriverType())
+				.collect(Collectors.toUnmodifiableList());
+
+		if (eligibleOverrides.size() > 1) {
+			ourLog.info("There is more than one eligible override: {}.  Picking the first one", eligibleOverrides);
+		}
+
+		if (eligibleOverrides.size() == 1) {
+			return eligibleOverrides.get(0).getColumnTypeSql();
+		}
+
+		if (!ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
+				.containsKey(theColumnType)) {
+			throw new IllegalArgumentException(Msg.code(2449) + "Column type does not exist: " + theColumnType);
+		}
+
+		return ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
+				.get(theColumnType)
+				.get(getDriverType());
 	}
 }

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5498
+title: "Added support for `id-only` and `empty` payload content types for notifications
+triggered by R5, R4B, and R4 back-ported topic subscriptions."

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4617
+title: "Previously, Quartz jobs were scheduled after the scheduler was started which resulted in a race
+condition where duplicate `TRIGGER_ACCESS` entries were being added to the `QRTZ_LOCKS` table.
+This has been fixed."

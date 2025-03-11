@@ -1,10 +1,8 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,14 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,8 +38,7 @@ public class HookParams {
 	/**
 	 * Constructor
 	 */
-	public HookParams() {
-	}
+	public HookParams() {}
 
 	/**
 	 * Constructor
@@ -64,13 +60,13 @@ public class HookParams {
 		return doAdd(theType, theParam);
 	}
 
-//	/**
-//	 * This is useful for providing a lazy-loaded (generally expensive to create)
-//	 * parameters
-//	 */
-//	public <T> HookParams addSupplier(Class<T> theType, Supplier<T> theParam) {
-//		return doAdd(theType, theParam);
-//	}
+	//	/**
+	//	 * This is useful for providing a lazy-loaded (generally expensive to create)
+	//	 * parameters
+	//	 */
+	//	public <T> HookParams addSupplier(Class<T> theType, Supplier<T> theParam) {
+	//		return doAdd(theType, theParam);
+	//	}
 
 	private <T> HookParams doAdd(Class<T> theType, Object theParam) {
 		Validate.isTrue(theType.equals(Supplier.class) == false, "Can not add parameters of type Supplier");
@@ -113,9 +109,7 @@ public class HookParams {
 	}
 
 	public Collection<Object> values() {
-		return
-			Collections.unmodifiableCollection(myParams.values())
-				.stream()
+		return Collections.unmodifiableCollection(myParams.values()).stream()
 				.map(t -> unwrapValue(t))
 				.collect(Collectors.toList());
 	}
@@ -137,8 +131,14 @@ public class HookParams {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-			.append("params", myParams)
-			.toString();
+		StringBuilder b = new StringBuilder();
+		myParams.forEach((key, value) -> {
+			b.append("  ")
+					.append(key.getSimpleName())
+					.append(": ")
+					.append(value)
+					.append("\n");
+		});
+		return b.toString();
 	}
 }

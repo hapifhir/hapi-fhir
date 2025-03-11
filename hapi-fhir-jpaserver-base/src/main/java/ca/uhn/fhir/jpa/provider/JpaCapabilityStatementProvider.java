@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -40,7 +40,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -51,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaCapabilityStatementProvider extends ServerCapabilityStatementProvider {
 
 	private final FhirContext myContext;
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
@@ -59,17 +58,22 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull DaoConfig theDaoConfig, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(
+			@Nonnull RestfulServer theRestfulServer,
+			@Nonnull IFhirSystemDao<?, ?> theSystemDao,
+			@Nonnull JpaStorageSettings theStorageSettings,
+			@Nonnull ISearchParamRegistry theSearchParamRegistry,
+			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
 		Validate.notNull(theSystemDao);
-		Validate.notNull(theDaoConfig);
+		Validate.notNull(theStorageSettings);
 		Validate.notNull(theSearchParamRegistry);
 
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		setIncludeResourceCounts(true);
 	}
 
@@ -88,24 +92,12 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	}
 
 	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
-
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myDaoConfig.getWebsocketContextPath());
-			}
-		}
-
-	}
-
-	@Override
 	protected void postProcessRestResource(FhirTerser theTerser, IBase theResource, String theResourceName) {
 		super.postProcessRestResource(theTerser, theResource, theResourceName);
 
 		theTerser.addElement(theResource, "versioning", ResourceVersionPolicy.VERSIONEDUPDATE.toCode());
 
-		if (myDaoConfig.isAllowMultipleDelete()) {
+		if (myStorageSettings.isAllowMultipleDelete()) {
 			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.MULTIPLE.toCode());
 		} else {
 			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.SINGLE.toCode());
@@ -117,11 +109,15 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			if (counts != null) {
 				Long count = counts.get(theResourceName);
 				if (count != null) {
-					ExtensionUtil.setExtension(myContext, theResource, ExtensionConstants.CONF_RESOURCE_COUNT, "decimal", Long.toString(count));
+					ExtensionUtil.setExtension(
+							myContext,
+							theResource,
+							ExtensionConstants.CONF_RESOURCE_COUNT,
+							"decimal",
+							Long.toString(count));
 				}
 			}
 		}
-
 	}
 
 	public boolean isIncludeResourceCounts() {
@@ -132,8 +128,8 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
-	public void setDaoConfig(DaoConfig myDaoConfig) {
-		this.myDaoConfig = myDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
 	}
 
 	@CoverageIgnore
@@ -148,6 +144,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 	@Override
 	protected boolean searchParamEnabled(String theSearchParam) {
-		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
 	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
+package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 public interface ITransaction {
 
@@ -31,7 +30,7 @@ public interface ITransaction {
 	 * Use a list of resources as the transaction input
 	 */
 	ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources);
-	
+
 	/**
 	 * Use the given Bundle resource as the transaction input
 	 */
@@ -41,5 +40,4 @@ public interface ITransaction {
 	 * Use the given raw text (should be a Bundle resource) as the transaction input
 	 */
 	ITransactionTyped<String> withBundle(String theBundle);
-
 }

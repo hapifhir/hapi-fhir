@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -37,14 +36,18 @@ public class LoincGroupFileHandler extends BaseLoincHandler implements IZipConte
 
 	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";
 
-	public LoincGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+	public LoincGroupFileHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 	}
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		//"ParentGroupId","GroupId","Group","Archetype","Status","VersionFirstReleased"
+		// "ParentGroupId","GroupId","Group","Archetype","Status","VersionFirstReleased"
 		String parentGroupId = trim(theRecord.get("ParentGroupId"));
 		String groupId = trim(theRecord.get("GroupId"));
 		String groupName = trim(theRecord.get("Group"));
@@ -61,15 +64,10 @@ public class LoincGroupFileHandler extends BaseLoincHandler implements IZipConte
 		}
 
 		ValueSet parentValueSet = getValueSet(parentGroupValueSetId, VS_URI_PREFIX + parentGroupId, null, null);
-		parentValueSet
-			.getCompose()
-			.getIncludeFirstRep()
-			.addValueSet(VS_URI_PREFIX + groupId);
+		parentValueSet.getCompose().getIncludeFirstRep().addValueSet(VS_URI_PREFIX + groupId);
 
 		// Create group to set its name (terms are added in a different
 		// handler)
 		getValueSet(groupValueSetId, VS_URI_PREFIX + groupId, groupName, null);
 	}
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.json;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,15 @@ package ca.uhn.fhir.mdm.rules.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
-
-import javax.annotation.Nullable;
 
 public class MdmSimilarityJson implements IModelJson {
 	@JsonProperty(value = "algorithm", required = true)

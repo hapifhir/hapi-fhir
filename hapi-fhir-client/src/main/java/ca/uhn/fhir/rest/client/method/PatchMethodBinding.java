@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +17,30 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for an operation that has a resource type but not a resource body in the
@@ -48,9 +53,16 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	private int myResourceParamIndex;
 
 	public PatchMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider, Patch.class, theMethod.getAnnotation(Patch.class).type());
+		super(
+				theMethod,
+				theContext,
+				theProvider,
+				Patch.class,
+				theMethod.getAnnotation(Patch.class).type());
 
-		for (ListIterator<Class<?>> iter = Arrays.asList(theMethod.getParameterTypes()).listIterator(); iter.hasNext();) {
+		for (ListIterator<Class<?>> iter =
+						Arrays.asList(theMethod.getParameterTypes()).listIterator();
+				iter.hasNext(); ) {
 			int nextIndex = iter.nextIndex();
 			Class<?> next = iter.next();
 			if (next.equals(PatchTypeEnum.class)) {
@@ -64,10 +76,12 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		}
 
 		if (myPatchTypeParameterIndex == -1) {
-			throw new ConfigurationException(Msg.code(1414) + "Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(1414) + "Method has no parameter of type "
+					+ PatchTypeEnum.class.getName() + " - " + theMethod.toString());
 		}
 		if (myResourceParamIndex == -1) {
-			throw new ConfigurationException(Msg.code(1415) + "Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(1415) + "Method has no parameter with @"
+					+ ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
 		}
 	}
 
@@ -104,7 +118,8 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		if (idDt.hasResourceType() == false) {
 			idDt = idDt.withResourceType(getResourceName());
 		} else if (getResourceName().equals(idDt.getResourceType()) == false) {
-			throw new InvalidRequestException(Msg.code(1417) + "ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
+			throw new InvalidRequestException(Msg.code(1417) + "ID parameter has the wrong resource type, expected '"
+					+ getResourceName() + "', found: " + idDt.getResourceType());
 		}
 
 		PatchTypeEnum patchType = (PatchTypeEnum) theArgs[myPatchTypeParameterIndex];
@@ -120,13 +135,17 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		return retVal;
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, IIdType theId, PatchTypeEnum thePatchType, String theBody) {
-		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, theId, thePatchType.getContentType(), theBody);
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext, IIdType theId, PatchTypeEnum thePatchType, String theBody) {
+		HttpPatchClientInvocation retVal =
+				new HttpPatchClientInvocation(theContext, theId, thePatchType.getContentType(), theBody);
 		return retVal;
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, String theUrlPath, PatchTypeEnum thePatchType, String theBody) {
-		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, theUrlPath, thePatchType.getContentType(), theBody);
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext, String theUrlPath, PatchTypeEnum thePatchType, String theBody) {
+		HttpPatchClientInvocation retVal =
+				new HttpPatchClientInvocation(theContext, theUrlPath, thePatchType.getContentType(), theBody);
 		return retVal;
 	}
 
@@ -135,11 +154,16 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		return null;
 	}
 
-	public static HttpPatchClientInvocation createPatchInvocation(FhirContext theContext, PatchTypeEnum thePatchType, String theBody, String theResourceType, Map<String, List<String>> theMatchParams) {
+	public static HttpPatchClientInvocation createPatchInvocation(
+			FhirContext theContext,
+			PatchTypeEnum thePatchType,
+			String theBody,
+			String theResourceType,
+			Map<String, List<String>> theMatchParams) {
 		StringBuilder urlBuilder = MethodUtil.createUrl(theResourceType, theMatchParams);
 		String url = urlBuilder.toString();
-		HttpPatchClientInvocation retVal = new HttpPatchClientInvocation(theContext, url, thePatchType.getContentType(), theBody);
+		HttpPatchClientInvocation retVal =
+				new HttpPatchClientInvocation(theContext, url, thePatchType.getContentType(), theBody);
 		return retVal;
 	}
-
 }

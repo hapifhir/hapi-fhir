@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +17,22 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.util.CoverageIgnore;
 
-public class UriOrListParam  extends BaseOrListParam<UriOrListParam, UriParam> {
+public class UriOrListParam extends BaseOrListParam<UriOrListParam, UriParam> {
 
 	@CoverageIgnore
 	@Override
 	UriParam newInstance() {
 		return new UriParam();
 	}
-	
+
 	@CoverageIgnore
 	@Override
 	public UriOrListParam addOr(UriParam theParameter) {
 		add(theParameter);
 		return this;
 	}
-
-
 }

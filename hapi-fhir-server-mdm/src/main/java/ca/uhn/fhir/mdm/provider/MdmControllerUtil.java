@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -59,7 +58,8 @@ public class MdmControllerUtil {
 	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
 		IdDt goldenResourceId = new IdDt(theId);
 		if (goldenResourceId.getIdPart() == null) {
-			throw new InvalidRequestException(Msg.code(1505) + theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
+			throw new InvalidRequestException(Msg.code(1505) + theParamName + " is '" + theId
+					+ "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
 		return goldenResourceId;
 	}
@@ -67,7 +67,9 @@ public class MdmControllerUtil {
 	public static IIdType getSourceIdDtOrThrowException(String theParamName, String theSourceId) {
 		IdDt sourceId = new IdDt(theSourceId);
 		if (sourceId.getIdPart() == null) {
-			throw new InvalidRequestException(Msg.code(1506) + theParamName + " is '" + theSourceId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
+			throw new InvalidRequestException(
+					Msg.code(1506) + theParamName + " is '" + theSourceId
+							+ "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
 		return sourceId;
 	}

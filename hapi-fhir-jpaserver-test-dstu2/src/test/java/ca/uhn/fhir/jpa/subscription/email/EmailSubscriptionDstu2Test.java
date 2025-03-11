@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -17,7 +19,6 @@ import ca.uhn.fhir.rest.server.mail.MailSvc;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,16 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -57,16 +57,14 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		super.after();
 
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Override
 	@BeforeEach
 	public void before() throws Exception {
-		super.before();
 
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
@@ -89,7 +87,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -108,7 +106,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);
@@ -124,13 +122,13 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
+		await().untilAsserted(() -> assertThat(mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart())).isNotNull());
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
-		assertEquals(0, Arrays.asList(ourGreenMail.getReceivedMessages()).size());
+		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages())).isEmpty();
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		 sendObservation(code, "SNOMED-CT");
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertEquals(2, messages.length);

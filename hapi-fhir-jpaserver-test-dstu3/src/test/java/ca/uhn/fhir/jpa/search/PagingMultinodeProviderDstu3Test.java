@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -25,8 +23,8 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -39,9 +37,9 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(ourSearchCoordinatorSvc);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
 	@Test
@@ -63,32 +61,32 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.sort().ascending(Patient.SP_FAMILY)
 			.count(10)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009");
 
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019");
 
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029");
 
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039");
 	}
 
 	@Test
@@ -110,7 +108,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
-		found = ourClient
+		found = myClient
 			.search()
 			.forResource(Patient.class)
 			.sort().ascending(Patient.SP_FAMILY)
@@ -118,29 +116,29 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 			.offset(0)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009");
 		assertThat(found.getLink().stream().filter(l -> l.getRelation().equals("next")).map(l -> l.getUrl()).findAny()
-			.orElseThrow(() -> new IllegalStateException("No next page link")).contains("_offset=10"), is(true));
+			.orElseThrow(() -> new IllegalStateException("No next page link")).contains("_offset=10")).isEqualTo(true);
 
 		myCaptureQueriesListener.clear();
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019");
 
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029");
 
-		found = ourClient
+		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039");
 	}
 
 

@@ -1,13 +1,8 @@
-package org.hl7.fhir.instance.model.api;
-
-import java.io.Serializable;
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +17,15 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * This interface is a simple marker for anything which is an HL7
  * structure of some kind. It is provided mostly to simplify convergence
- * between the HL7.org structures and the HAPI ones. 
+ * between the HL7.org structures and the HAPI ones.
  */
 public interface IBase extends Serializable {
 
@@ -35,7 +34,7 @@ public interface IBase extends Serializable {
 	/**
 	 * Returns <code>true</code> if any comments would be returned by {@link #getFormatCommentsPre()}
 	 * or {@link #getFormatCommentsPost()}
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	boolean hasFormatComment();
@@ -43,7 +42,7 @@ public interface IBase extends Serializable {
 	/**
 	 * Returns a list of comments appearing immediately before this element within the serialized
 	 * form of the resource. Creates the list if it does not exist, so this method will not return <code>null</code>
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	List<String> getFormatCommentsPre();
@@ -51,7 +50,7 @@ public interface IBase extends Serializable {
 	/**
 	 * Returns a list of comments appearing immediately after this element within the serialized
 	 * form of the resource. Creates the list if it does not exist, so this method will not return <code>null</code>
-	 * 
+	 *
 	 * @since 1.5
 	 */
 	List<String> getFormatCommentsPost();
@@ -59,7 +58,9 @@ public interface IBase extends Serializable {
 	/**
 	 * Returns the FHIR type name for the given element, e.g. "Patient" or "unsignedInt"
 	 */
-	default String fhirType() { return null; }
+	default String fhirType() {
+		return null;
+	}
 
 	/**
 	 * Retrieves any user suplied data in this element
@@ -70,5 +71,4 @@ public interface IBase extends Serializable {
 	 * Sets a user supplied data value in this element
 	 */
 	void setUserData(String theName, Object theValue);
-
 }

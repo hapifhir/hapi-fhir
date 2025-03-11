@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5436
+title: "Moving clinical reasoning to non-javax dependency for alignment with incoming hapi-fhir changes, bumping CR version and updating impacted classes and services"

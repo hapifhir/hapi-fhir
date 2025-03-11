@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +17,81 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.method;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import java.util.*;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.param.binder.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.CompositeAndListParam;
+import ca.uhn.fhir.rest.param.CompositeOrListParam;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.NumberAndListParam;
+import ca.uhn.fhir.rest.param.NumberOrListParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.binder.CalendarBinder;
+import ca.uhn.fhir.rest.param.binder.DateBinder;
+import ca.uhn.fhir.rest.param.binder.FhirPrimitiveBinder;
+import ca.uhn.fhir.rest.param.binder.IParamBinder;
+import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
+import ca.uhn.fhir.rest.param.binder.QueryParameterOrBinder;
+import ca.uhn.fhir.rest.param.binder.QueryParameterTypeBinder;
+import ca.uhn.fhir.rest.param.binder.StringBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SearchParameter extends BaseQueryParameter {
 
 	private static final String EMPTY_STRING = "";
-	private static HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
-	private static HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
+	private static final HashMap<RestSearchParameterTypeEnum, Set<String>> ourParamQualifiers;
+	private static final HashMap<Class<?>, RestSearchParameterTypeEnum> ourParamTypes;
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {
@@ -54,45 +101,66 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(StringParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringAndListParam.class, RestSearchParameterTypeEnum.STRING);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_STRING_CONTAINS, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.STRING,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_STRING_EXACT,
+						Constants.PARAMQUALIFIER_STRING_CONTAINS,
+						Constants.PARAMQUALIFIER_MISSING,
+						EMPTY_STRING));
 
 		ourParamTypes.put(UriParam.class, RestSearchParameterTypeEnum.URI);
 		ourParamTypes.put(UriOrListParam.class, RestSearchParameterTypeEnum.URI);
 		ourParamTypes.put(UriAndListParam.class, RestSearchParameterTypeEnum.URI);
 		// TODO: are these right for URI?
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.URI, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.URI,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(TokenParam.class, RestSearchParameterTypeEnum.TOKEN);
 		ourParamTypes.put(TokenOrListParam.class, RestSearchParameterTypeEnum.TOKEN);
 		ourParamTypes.put(TokenAndListParam.class, RestSearchParameterTypeEnum.TOKEN);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.TOKEN, CollectionUtil.newSet(Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.TOKEN,
+				CollectionUtil.newSet(
+						Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(DateParam.class, RestSearchParameterTypeEnum.DATE);
 		ourParamTypes.put(DateOrListParam.class, RestSearchParameterTypeEnum.DATE);
 		ourParamTypes.put(DateAndListParam.class, RestSearchParameterTypeEnum.DATE);
 		ourParamTypes.put(DateRangeParam.class, RestSearchParameterTypeEnum.DATE);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.DATE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.DATE,
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(QuantityParam.class, RestSearchParameterTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityOrListParam.class, RestSearchParameterTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityAndListParam.class, RestSearchParameterTypeEnum.QUANTITY);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.QUANTITY, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.QUANTITY,
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(NumberParam.class, RestSearchParameterTypeEnum.NUMBER);
 		ourParamTypes.put(NumberOrListParam.class, RestSearchParameterTypeEnum.NUMBER);
 		ourParamTypes.put(NumberAndListParam.class, RestSearchParameterTypeEnum.NUMBER);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.NUMBER, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.NUMBER,
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(ReferenceParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceOrListParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceAndListParam.class, RestSearchParameterTypeEnum.REFERENCE);
 		// --vvvv-- no empty because that gets added from OptionalParam#chainWhitelist
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
 
 		ourParamTypes.put(CompositeParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeOrListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, RestSearchParameterTypeEnum.COMPOSITE);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(
+				RestSearchParameterTypeEnum.COMPOSITE,
+				CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(HasParam.class, RestSearchParameterTypeEnum.HAS);
 		ourParamTypes.put(HasOrListParam.class, RestSearchParameterTypeEnum.HAS);
@@ -108,8 +176,7 @@ public class SearchParameter extends BaseQueryParameter {
 	private boolean myRequired;
 	private Class<?> myType;
 
-	public SearchParameter() {
-	}
+	public SearchParameter() {}
 
 	public SearchParameter(String theName, boolean theRequired) {
 		this.myName = theName;
@@ -118,7 +185,7 @@ public class SearchParameter extends BaseQueryParameter {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.rest.param.IParameter#encode(java.lang.Object)
 	 */
 	@Override
@@ -140,7 +207,7 @@ public class SearchParameter extends BaseQueryParameter {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.rest.param.IParameter#getName()
 	 */
 	@Override
@@ -194,7 +261,11 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setType(FhirContext theContext, final Class<?> type, Class<? extends Collection<?>> theInnerCollectionType, Class<? extends Collection<?>> theOuterCollectionType) {
+	public void setType(
+			FhirContext theContext,
+			final Class<?> type,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<? extends Collection<?>> theOuterCollectionType) {
 
 		this.myType = type;
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
@@ -202,7 +273,8 @@ public class SearchParameter extends BaseQueryParameter {
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type, myCompositeTypes);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type, myCompositeTypes);
+			myParamBinder =
+					new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type, myCompositeTypes);
 		} else if (String.class.equals(type)) {
 			myParamBinder = new StringBinder();
 			myParamType = RestSearchParameterTypeEnum.STRING;
@@ -213,7 +285,8 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamBinder = new CalendarBinder();
 			myParamType = RestSearchParameterTypeEnum.DATE;
 		} else if (IPrimitiveType.class.isAssignableFrom(type) && ReflectionUtil.isInstantiable(type)) {
-			RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition) theContext.getElementDefinition((Class<? extends IPrimitiveType<?>>) type);
+			RuntimePrimitiveDatatypeDefinition def = (RuntimePrimitiveDatatypeDefinition)
+					theContext.getElementDefinition((Class<? extends IPrimitiveType<?>>) type);
 			if (def.getNativeType() != null) {
 				if (def.getNativeType().equals(Date.class)) {
 					myParamBinder = new FhirPrimitiveBinder((Class<IPrimitiveType<?>>) type);
@@ -224,7 +297,8 @@ public class SearchParameter extends BaseQueryParameter {
 				}
 			}
 		} else {
-			throw new ConfigurationException(Msg.code(1406) + "Unsupported data type for parameter: " + type.getCanonicalName());
+			throw new ConfigurationException(
+					Msg.code(1406) + "Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
 		RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(type);
@@ -281,5 +355,4 @@ public class SearchParameter extends BaseQueryParameter {
 		retVal.append("required", myRequired);
 		return retVal.toString();
 	}
-
 }

@@ -19,11 +19,13 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -31,17 +33,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
@@ -49,11 +44,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -62,17 +54,24 @@ import static org.mockito.Mockito.verify;
 
 public class LoggingInterceptorDstu2Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer servlet;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static int ourDelayMs;
 	private static Exception ourThrowException;
 
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		.setDefaultResponseEncoding(EncodingEnum.XML)
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new PlainProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100))
+		.setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
+
 	@BeforeEach
 	public void before() {
-		servlet.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getInterceptorService().unregisterAllInterceptors();
 		ourThrowException = null;
 		ourDelayMs=0;
 	}
@@ -86,30 +85,30 @@ public class LoggingInterceptorDstu2Test {
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
 		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
 
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/EX");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/EX");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
+		assertThat(captor.getAllValues().get(0)).contains("ERROR - GET " + ourServer.getBaseUrl() + "/Patient/EX");
 	}
 
 	@Test
 	public void testMetadata() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		
@@ -117,7 +116,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("metadata - "));
+		assertThat(captor.getValue()).contains("metadata - ");
 	}
 
 	@Test
@@ -125,12 +124,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -147,12 +146,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -167,19 +166,19 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${requestId}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals(Constants.REQUEST_ID_LENGTH, captor.getValue().length());
+		assertThat(captor.getValue()).hasSize(Constants.REQUEST_ID_LENGTH);
 	}
 
 	@Test
@@ -187,19 +186,19 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${processingTimeMillis}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), startsWith("read - "));
+		assertThat(captor.getValue()).startsWith("read - ");
 		Integer.parseInt(captor.getValue().substring("read - ".length()));
 	}
 
@@ -209,12 +208,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${processingTimeMillis}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -223,7 +222,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), matchesPattern("[1-9][0-9]{1,3}"));
+		assertThat(captor.getValue()).matches("[1-9][0-9]{1,3}");
 	}
 
 	@Test
@@ -231,12 +230,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		httpGet.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
 
 		HttpResponse status = ourClient.execute(httpGet);
@@ -252,7 +251,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -261,7 +260,7 @@ public class LoggingInterceptorDstu2Test {
 		p.addIdentifier().setValue("VAL");
 		String input = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -280,7 +279,7 @@ public class LoggingInterceptorDstu2Test {
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
 		interceptor.setErrorMessageFormat("ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
@@ -291,7 +290,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ourThrowException = new NullPointerException("FOO");
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -309,12 +308,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$everything");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -330,12 +329,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$everything");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		
@@ -350,12 +349,12 @@ public class LoggingInterceptorDstu2Test {
 	public void testRead() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -363,7 +362,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
+		assertThat(captor.getValue()).contains("read - Patient/1");
 	}
 
 	@Test
@@ -371,12 +370,12 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${idOrResourceName} - ${requestParameters}");
-		servlet.getInterceptorService().registerInterceptor(interceptor);
+		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -384,36 +383,12 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+		assertThat(captor.getValue()).contains("search-type - Patient - ?_id=1");
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.setPlainProviders(new PlainProvider());
-
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	/**
@@ -436,7 +411,7 @@ public class LoggingInterceptorDstu2Test {
 		}
 
 		public Map<String, Patient> getIdToPatient() {
-			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
+			Map<String, Patient> idToPatient = new HashMap<>();
 			{
 				Patient patient = createPatient1();
 				idToPatient.put("1", patient);
@@ -537,5 +512,6 @@ public class LoggingInterceptorDstu2Test {
 		}
 
 	}
+
 
 }

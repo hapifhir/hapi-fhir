@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,11 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
-public enum ConsentOperationStatusEnum {
+import java.util.stream.Stream;
+
+public enum ConsentOperationStatusEnum implements IConsentVote {
 
 	/**
 	 * The requested operation cannot proceed, and an operation outcome suitable for
@@ -40,5 +41,70 @@ public enum ConsentOperationStatusEnum {
 	 * counting/caching methods)
 	 */
 	AUTHORIZED,
+	;
 
+	/**
+	 * Assigns ordinals to the verdicts by strength:
+	 * REJECT > AUTHORIZED > PROCEED.
+	 * @return 2/1/0 for REJECT/AUTHORIZED/PROCEED
+	 */
+	int getPrecedence() {
+		switch (this) {
+			case REJECT:
+				return 2;
+			case AUTHORIZED:
+				return 1;
+			case PROCEED:
+			default:
+				return 0;
+		}
+	}
+
+	/**
+	 * Does this vote abstain from the verdict?
+	 * I.e. this == PROCEED
+	 * @return true if this vote can be ignored
+	 */
+	boolean isAbstain() {
+		return this == PROCEED;
+	}
+
+	/**
+	 * Does this vote participate from the verdict?
+	 * I.e. this != PROCEED
+	 * @return false if this vote can be ignored
+	 */
+	boolean isActiveVote() {
+		return this != PROCEED;
+	}
+
+	@Override
+	public ConsentOperationStatusEnum getStatus() {
+		return this;
+	}
+
+	/**
+	 * Evaluate verdicts in order, taking the first "decision" (i.e. first non-PROCEED) verdict.
+	 *
+	 * @return the first decisive verdict, or PROCEED when empty or all PROCEED.
+	 */
+	public static ConsentOperationStatusEnum serialReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return IConsentVote.serialReduce(PROCEED, theVoteStream);
+	}
+
+	public static ConsentOperationStatusEnum parallelReduce(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return IConsentVote.parallelReduce(PROCEED, theVoteStream);
+	}
+
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
+	public static ConsentOperationStatusEnum serialEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return serialReduce(theVoteStream);
+	}
+
+	/** @deprecated for rename */
+	@Deprecated(forRemoval = true)
+	public static ConsentOperationStatusEnum parallelEvaluate(Stream<ConsentOperationStatusEnum> theVoteStream) {
+		return parallelReduce(theVoteStream);
+	}
 }

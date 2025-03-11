@@ -1,10 +1,8 @@
-package ca.uhn.fhir.storage.test;
-
 /*-
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.storage.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.storage.test;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.conformance.DateSearchTestCase;
@@ -42,7 +41,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Run the tests defined in {@link DateSearchTestCase} in a DAO test as a @Nested suite.
@@ -95,7 +94,7 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
+//	@CsvSource("2020-01-01,eb2021-01-01, True, eb == ends-before")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
 		if (isShouldSkip(theResourceDate, theQuery)) {
@@ -120,7 +119,7 @@ public abstract class BaseDateSearchDaoTests {
 			"Expected " + theQuery + " to " +
 				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
 				" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
-		assertEquals(theExpectedMatch, matched, message);
+		assertThat(matched).as(message).isEqualTo(theExpectedMatch);
 	}
 
 

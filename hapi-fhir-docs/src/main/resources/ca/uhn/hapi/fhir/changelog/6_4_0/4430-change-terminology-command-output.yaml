@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4430
+title: "The cli reindex-terminology command reports errors with a simpler log message."

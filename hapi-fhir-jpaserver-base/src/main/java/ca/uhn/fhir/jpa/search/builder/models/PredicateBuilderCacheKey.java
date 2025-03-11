@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.models;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,29 @@ package ca.uhn.fhir.jpa.search.builder.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.models;
 
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class PredicateBuilderCacheKey {
-	private final DbColumn myDbColumn;
+	private final DbColumn[] myDbColumn;
 	private final PredicateBuilderTypeEnum myType;
 	private final String myParamName;
 	private final int myHashCode;
 
-	public PredicateBuilderCacheKey(DbColumn theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
+	public PredicateBuilderCacheKey(DbColumn[] theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
 		myDbColumn = theDbColumn;
 		myType = theType;
 		myParamName = theParamName;
-		myHashCode = new HashCodeBuilder().append(myDbColumn).append(myType).append(myParamName).toHashCode();
+		HashCodeBuilder hashBuilder = new HashCodeBuilder().append(myType).append(myParamName);
+		if (theDbColumn != null) {
+			for (DbColumn next : theDbColumn) {
+				hashBuilder.append(next);
+			}
+		}
+		myHashCode = hashBuilder.toHashCode();
 	}
 
 	@Override
@@ -50,10 +55,10 @@ public class PredicateBuilderCacheKey {
 		PredicateBuilderCacheKey that = (PredicateBuilderCacheKey) theO;
 
 		return new EqualsBuilder()
-			.append(myDbColumn, that.myDbColumn)
-			.append(myType, that.myType)
-			.append(myParamName, that.myParamName)
-			.isEquals();
+				.append(myDbColumn, that.myDbColumn)
+				.append(myType, that.myType)
+				.append(myParamName, that.myParamName)
+				.isEquals();
 	}
 
 	@Override

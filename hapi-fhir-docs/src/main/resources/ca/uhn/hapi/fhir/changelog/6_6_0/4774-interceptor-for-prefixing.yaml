@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4774
+title: "A new Pointcut called `STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX` has been added. This pointcut is called when a binary blob is about to be stored, 
+and allows implementers to attach a prefix to the blob ID before it is stored."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,11 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.model;
 
-
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,7 +33,12 @@ import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BulkExportResponseJson {
 
 	@JsonProperty("transactionTime")
@@ -45,8 +48,10 @@ public class BulkExportResponseJson {
 
 	@JsonProperty("request")
 	private String myRequest;
+
 	@JsonProperty("requiresAccessToken")
 	private Boolean myRequiresAccessToken;
+
 	@JsonProperty("output")
 	private List<Output> myOutput;
 
@@ -119,6 +124,7 @@ public class BulkExportResponseJson {
 
 		@JsonProperty("type")
 		private String myType;
+
 		@JsonProperty("url")
 		private String myUrl;
 
@@ -139,7 +145,5 @@ public class BulkExportResponseJson {
 			myUrl = theUrl;
 			return this;
 		}
-
 	}
-
 }

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.term.hsearch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -34,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Map.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
@@ -273,14 +274,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public void afterCleanupDao() {
 		if (CLEANUP_DATA) {
 			super.afterCleanupDao();
-		}
-	}
-
-	@Override
-	@AfterEach
-	public void afterResetInterceptors() {
-		if (CLEANUP_DATA) {
-			super.afterResetInterceptors();
 		}
 	}
 

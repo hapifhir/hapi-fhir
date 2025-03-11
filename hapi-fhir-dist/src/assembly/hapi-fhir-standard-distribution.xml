@@ -5,7 +5,6 @@
 
 	<formats>
 		<format>zip</format>
-		<format>tar.bz2</format>
 	</formats>
 
 	<includeBaseDirectory>false</includeBaseDirectory>

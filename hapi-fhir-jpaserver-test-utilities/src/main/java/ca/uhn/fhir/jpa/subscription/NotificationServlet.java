@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@ package ca.uhn.fhir.jpa.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +45,6 @@ public class NotificationServlet extends HttpServlet {
 		receivedNotificationCount.incrementAndGet();
 		receivedAuthorizationHeaders.add(req.getHeader("Authorization"));
 	}
-
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) {

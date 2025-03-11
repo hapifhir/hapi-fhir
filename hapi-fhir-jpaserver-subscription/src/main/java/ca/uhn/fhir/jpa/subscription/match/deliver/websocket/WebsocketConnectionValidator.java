@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +17,22 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nonnull;
 
 public class WebsocketConnectionValidator {
 	private static Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);
 
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
-
 
 	/**
 	 * Constructor
@@ -46,7 +43,8 @@ public class WebsocketConnectionValidator {
 
 	public WebsocketValidationResponse validate(@Nonnull IdType id) {
 		if (!id.hasIdPart() || !id.isIdPartValid()) {
-			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - No ID included: " + id.getValue());
+			return WebsocketValidationResponse.INVALID_RESPONSE(
+					"Invalid bind request - No ID included: " + id.getValue());
 		}
 
 		if (!id.hasResourceType()) {
@@ -56,11 +54,13 @@ public class WebsocketConnectionValidator {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
 
 		if (activeSubscription == null) {
-			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - Unknown subscription: " + id.getValue());
+			return WebsocketValidationResponse.INVALID_RESPONSE(
+					"Invalid bind request - Unknown subscription: " + id.getValue());
 		}
 
 		if (activeSubscription.getSubscription().getChannelType() != CanonicalSubscriptionChannelType.WEBSOCKET) {
-			return WebsocketValidationResponse.INVALID_RESPONSE("Subscription " + id.getValue() + " is not a " + CanonicalSubscriptionChannelType.WEBSOCKET + " subscription");
+			return WebsocketValidationResponse.INVALID_RESPONSE("Subscription " + id.getValue() + " is not a "
+					+ CanonicalSubscriptionChannelType.WEBSOCKET + " subscription");
 		}
 
 		return WebsocketValidationResponse.VALID_RESPONSE(activeSubscription);

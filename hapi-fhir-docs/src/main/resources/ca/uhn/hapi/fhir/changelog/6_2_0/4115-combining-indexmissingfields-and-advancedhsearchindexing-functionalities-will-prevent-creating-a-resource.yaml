@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4115
+title: "Previously, enabling 'indexMissingFields' and 'advancedHSearchIndexing'
+      functionalities would cause creating a Patient resource to return HTTP 500. 
+      Upon further investigation, the same happened for creating an Observation. 
+      This has been fixed."

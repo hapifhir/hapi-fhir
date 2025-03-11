@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -31,7 +30,7 @@ import java.io.IOException;
  * <p>
  * See the <a href="https://hapifhir.io/hapi-fhir/docs/interceptors/client_interceptors.html">HAPI Documentation Client Interceptor</a>
  * page for more information on how to use this feature.
- * </p> 
+ * </p>
  */
 public interface IClientInterceptor {
 
@@ -40,11 +39,10 @@ public interface IClientInterceptor {
 	 */
 	@Hook(Pointcut.CLIENT_REQUEST)
 	void interceptRequest(IHttpRequest theRequest);
-	
+
 	/**
 	 * Fired by the client upon receiving an HTTP response, prior to processing that response
 	 */
 	@Hook(Pointcut.CLIENT_RESPONSE)
 	void interceptResponse(IHttpResponse theResponse) throws IOException;
-
 }

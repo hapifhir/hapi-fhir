@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,28 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
 
 public interface IGoldenResourceSearchSvc {
 
 	/**
-	 * Fetches a page of resource IDs for golden resources of the given type. The page size is up to the discretion of the implementation.
+	 * Fetches a cursor of resource IDs for golden resources of the given type.
 	 *
 	 * @param theStart The start of the date range, must be inclusive.
 	 * @param theEnd   The end of the date range, should be exclusive.
-	 * @param thePageSize  The number of golden resources to request at a time.
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theResourceType the type of resource.
 	 */
-	IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
-
+	IResourcePidStream fetchGoldenResourceIdStream(
+			Date theStart,
+			Date theEnd,
+			@Nullable RequestPartitionId theRequestPartitionId,
+			@Nonnull String theResourceType);
 }

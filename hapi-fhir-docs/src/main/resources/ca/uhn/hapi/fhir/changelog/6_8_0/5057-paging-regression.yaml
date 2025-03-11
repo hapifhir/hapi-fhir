@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5057
+title: "Fixed recently introduced regression that when following bundle next links through to the end, in certain circumstances
+a next link would appear in the final bundle when in fact it was the last page."

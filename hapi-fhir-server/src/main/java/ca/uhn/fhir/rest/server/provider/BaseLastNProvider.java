@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -45,19 +44,22 @@ public abstract class BaseLastNProvider {
 
 	@Operation(name = Constants.OPERATION_LASTN, typeName = "Observation", idempotent = true)
 	public IBaseBundle lastN(
-		ServletRequestDetails theRequestDetails,
-		@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
-		@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
-		@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,
-		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax
-	) {
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
+			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBaseCoding> theCategories,
+			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBaseCoding> theCodes,
+			@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax) {
 		return processLastN(theSubject, theCategories, theCodes, theMax);
 	}
 
 	/**
 	 * Subclasses should implement this method
 	 */
-	protected abstract IBaseBundle processLastN(IBaseReference theSubject, List<IBaseCoding> theCategories, List<IBaseCoding> theCodes, IPrimitiveType<Integer> theMax);
-
-
+	protected abstract IBaseBundle processLastN(
+			IBaseReference theSubject,
+			List<IBaseCoding> theCategories,
+			List<IBaseCoding> theCodes,
+			IPrimitiveType<Integer> theMax);
 }

@@ -1,13 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +17,13 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.util.CoverageIgnore;
 
-public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeOrListParam<?,?>, CompositeParam<A,B>> {
+public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>
+		extends BaseOrListParam<CompositeOrListParam<?, ?>, CompositeParam<A, B>> {
 
 	private Class<A> myLeftType;
 	private Class<B> myRightType;
@@ -45,8 +44,8 @@ public class CompositeOrListParam<A extends IQueryParameterType, B extends IQuer
 
 	@CoverageIgnore
 	@Override
-	CompositeParam<A,B> newInstance() {
-		return new CompositeParam<A,B>(myLeftType, myRightType);
+	CompositeParam<A, B> newInstance() {
+		return new CompositeParam<A, B>(myLeftType, myRightType);
 	}
 
 	@CoverageIgnore
@@ -55,6 +54,4 @@ public class CompositeOrListParam<A extends IQueryParameterType, B extends IQuer
 		add(theParameter);
 		return this;
 	}
-	
-
 }

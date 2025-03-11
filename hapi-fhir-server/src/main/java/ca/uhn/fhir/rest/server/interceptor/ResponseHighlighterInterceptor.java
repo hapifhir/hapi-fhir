@@ -1,7 +1,27 @@
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -19,21 +39,29 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.util.NarrativeUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.xhtml.NodeType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -49,26 +77,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-/*
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 /**
  * This interceptor detects when a request is coming from a browser, and automatically returns a response with syntax
  * highlighted (coloured) HTML for the response instead of just returning raw XML/JSON.
@@ -83,13 +91,16 @@ public class ResponseHighlighterInterceptor {
 	 * requesting _format=json or xml so eventually this parameter should be removed
 	 */
 	public static final String PARAM_RAW = "_raw";
+
 	public static final String PARAM_RAW_TRUE = "true";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
-	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[]{Constants.FORMAT_JSON};
-	private static final String[] PARAM_FORMAT_VALUE_XML = new String[]{Constants.FORMAT_XML};
-	private static final String[] PARAM_FORMAT_VALUE_TTL = new String[]{Constants.FORMAT_TURTLE};
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptor.class);
+	private static final String[] PARAM_FORMAT_VALUE_JSON = new String[] {Constants.FORMAT_JSON};
+	private static final String[] PARAM_FORMAT_VALUE_XML = new String[] {Constants.FORMAT_XML};
+	private static final String[] PARAM_FORMAT_VALUE_TTL = new String[] {Constants.FORMAT_TURTLE};
 	private boolean myShowRequestHeaders = false;
 	private boolean myShowResponseHeaders = true;
+	private boolean myShowNarrative = true;
 
 	/**
 	 * Constructor
@@ -179,7 +190,13 @@ public class ResponseHighlighterInterceptor {
 
 				if (inQuote) {
 					theTarget.append(nextChar);
-					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					if (prevChar != '\\'
+							&& nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -202,7 +219,12 @@ public class ResponseHighlighterInterceptor {
 						theTarget.append(nextChar);
 						theTarget.append("</span>");
 						inValue = false;
-					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					} else if (nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						if (inValue) {
 							theTarget.append("<span class='hlQuot'>&quot;");
 						} else {
@@ -224,7 +246,13 @@ public class ResponseHighlighterInterceptor {
 
 				if (inQuote) {
 					theTarget.append(nextChar);
-					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					if (prevChar != '\\'
+							&& nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -246,7 +274,12 @@ public class ResponseHighlighterInterceptor {
 					theTarget.append(nextChar);
 					theTarget.append("</span>");
 				} else {
-					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					if (nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						theTarget.append("<span class='hlQuot'>&quot;");
 						inQuote = true;
 						i += 5;
@@ -261,7 +294,12 @@ public class ResponseHighlighterInterceptor {
 
 				if (inQuote) {
 					theTarget.append(nextChar);
-					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					if (nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						theTarget.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -274,7 +312,12 @@ public class ResponseHighlighterInterceptor {
 					} else if (nextChar == ' ') {
 						theTarget.append("</span><span class='hlAttr'>");
 						theTarget.append(nextChar);
-					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
+					} else if (nextChar == '&'
+							&& nextChar2 == 'q'
+							&& nextChar3 == 'u'
+							&& nextChar4 == 'o'
+							&& nextChar5 == 't'
+							&& nextChar6 == ';') {
 						theTarget.append("<span class='hlQuot'>&quot;");
 						inQuote = true;
 						i += 5;
@@ -298,7 +341,11 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) {
+	public boolean handleException(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse) {
 		/*
 		 * It's not a browser...
 		 */
@@ -332,7 +379,13 @@ public class ResponseHighlighterInterceptor {
 		responseDetails.setResponseCode(theException.getStatusCode());
 
 		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), null, theServletRequest, responseDetails.getResponseCode());
+		streamResponse(
+				theRequestDetails,
+				theServletResponse,
+				responseDetails.getResponseResource(),
+				null,
+				theServletRequest,
+				responseDetails.getResponseCode());
 
 		return false;
 	}
@@ -378,8 +431,13 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean outgoingGraphqlResponse(RequestDetails theRequestDetails, String theRequest, String theResponse, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws AuthenticationException {
+	public boolean outgoingGraphqlResponse(
+			RequestDetails theRequestDetails,
+			String theRequest,
+			String theResponse,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 
 		/*
 		 * Return true here so that we still fire SERVER_OUTGOING_GRAPHQL_RESPONSE!
@@ -395,13 +453,23 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			ResponseDetails theResponseObject,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 
 		if (!Boolean.TRUE.equals(theRequestDetails.getAttribute("ResponseHighlighterInterceptorHandled"))) {
 			String graphqlResponse = null;
 			IBaseResource resourceResponse = theResponseObject.getResponseResource();
-			if (handleOutgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse, graphqlResponse, resourceResponse)) {
+			if (handleOutgoingResponse(
+					theRequestDetails,
+					theResponseObject,
+					theServletRequest,
+					theServletResponse,
+					graphqlResponse,
+					resourceResponse)) {
 				return true;
 			}
 		}
@@ -410,32 +478,50 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
-	public void capabilityStatementGenerated(RequestDetails theRequestDetails, IBaseConformance theCapabilityStatement) {
+	public void capabilityStatementGenerated(
+			RequestDetails theRequestDetails, IBaseConformance theCapabilityStatement) {
 		FhirTerser terser = theRequestDetails.getFhirContext().newTerser();
 
-		Set<String> formats = terser.getValues(theCapabilityStatement, "format", IPrimitiveType.class)
-			.stream()
-			.map(t -> t.getValueAsString())
-			.collect(Collectors.toSet());
-		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_JSON_NEW, Constants.FORMATS_HTML_JSON);
-		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_FHIR_XML_NEW, Constants.FORMATS_HTML_XML);
-		addFormatConditionally(theCapabilityStatement, terser, formats, Constants.CT_RDF_TURTLE, Constants.FORMATS_HTML_TTL);
+		Set<String> formats = terser.getValues(theCapabilityStatement, "format", IPrimitiveType.class).stream()
+				.map(t -> t.getValueAsString())
+				.collect(Collectors.toSet());
+		addFormatConditionally(
+				theCapabilityStatement, terser, formats, Constants.CT_FHIR_JSON_NEW, Constants.FORMATS_HTML_JSON);
+		addFormatConditionally(
+				theCapabilityStatement, terser, formats, Constants.CT_FHIR_XML_NEW, Constants.FORMATS_HTML_XML);
+		addFormatConditionally(
+				theCapabilityStatement, terser, formats, Constants.CT_RDF_TURTLE, Constants.FORMATS_HTML_TTL);
 	}
 
-	private void addFormatConditionally(IBaseConformance theCapabilityStatement, FhirTerser terser, Set<String> formats, String wanted, String toAdd) {
+	private void addFormatConditionally(
+			IBaseConformance theCapabilityStatement,
+			FhirTerser terser,
+			Set<String> formats,
+			String wanted,
+			String toAdd) {
 		if (formats.contains(wanted)) {
 			terser.addElement(theCapabilityStatement, "format", toAdd);
 		}
 	}
 
-
-	private boolean handleOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, String theGraphqlResponse, IBaseResource theResourceResponse) {
+	private boolean handleOutgoingResponse(
+			RequestDetails theRequestDetails,
+			ResponseDetails theResponseObject,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse,
+			String theGraphqlResponse,
+			IBaseResource theResourceResponse) {
+		if (theResourceResponse == null && theGraphqlResponse == null) {
+			// this will happen during, for example, a bulk export polling request
+			return true;
+		}
 		/*
 		 * Request for _raw
 		 */
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
 		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
-			ourLog.warn("Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
+			ourLog.warn(
+					"Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
 			return true;
 		}
 
@@ -468,7 +554,8 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * It's not a browser...
 		 */
-		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
+		Set<String> highestRankedAcceptValues =
+				RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!force && highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return true;
 		}
@@ -500,7 +587,8 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theResourceResponse, theGraphqlResponse, theServletRequest, 200);
+		streamResponse(
+				theRequestDetails, theServletResponse, theResourceResponse, theGraphqlResponse, theServletRequest, 200);
 		return false;
 	}
 
@@ -522,7 +610,13 @@ public class ResponseHighlighterInterceptor {
 		}
 	}
 
-	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource theResource, String theGraphqlResponse, ServletRequest theServletRequest, int theStatusCode) {
+	private void streamResponse(
+			RequestDetails theRequestDetails,
+			HttpServletResponse theServletResponse,
+			IBaseResource theResource,
+			String theGraphqlResponse,
+			ServletRequest theServletRequest,
+			int theStatusCode) {
 		EncodingEnum encoding;
 		String encoded;
 		Map<String, String[]> parameters = theRequestDetails.getParameters();
@@ -537,10 +631,13 @@ public class ResponseHighlighterInterceptor {
 			IParser p;
 			if (parameters.containsKey(Constants.PARAM_FORMAT)) {
 				FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
-				p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
+				p = RestfulServerUtils.getNewParser(
+						theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
 			} else {
-				EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
-				p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
+				EncodingEnum defaultResponseEncoding =
+						theRequestDetails.getServer().getDefaultResponseEncoding();
+				p = defaultResponseEncoding.newParser(
+						theRequestDetails.getServer().getFhirContext());
 				RestfulServerUtils.configureResponseParser(theRequestDetails, p);
 			}
 
@@ -559,7 +656,6 @@ public class ResponseHighlighterInterceptor {
 
 			encoding = p.getEncoding();
 			encoded = p.encodeResourceToString(theResource);
-
 		}
 
 		if (theRequestDetails.getServer() instanceof RestfulServer) {
@@ -579,90 +675,8 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("	<head>\n");
 			outputBuffer.append("		<meta charset=\"utf-8\" />\n");
 			outputBuffer.append("       <style>\n");
-			outputBuffer.append(".httpStatusDiv {");
-			outputBuffer.append("  font-size: 1.2em;");
-			outputBuffer.append("  font-weight: bold;");
-			outputBuffer.append("}");
-			outputBuffer.append(".hlQuot { color: #88F; }\n");
-			outputBuffer.append(".hlQuot a { text-decoration: underline; text-decoration-color: #CCC; }\n");
-			outputBuffer.append(".hlQuot a:HOVER { text-decoration: underline; text-decoration-color: #008; }\n");
-			outputBuffer.append(".hlQuot .uuid, .hlQuot .dateTime {\n");
-			outputBuffer.append("  user-select: all;\n");
-			outputBuffer.append("  -moz-user-select: all;\n");
-			outputBuffer.append("  -webkit-user-select: all;\n");
-			outputBuffer.append("  -ms-user-select: element;\n");
-			outputBuffer.append("}\n");
-			outputBuffer.append(".hlAttr {\n");
-			outputBuffer.append("  color: #888;\n");
-			outputBuffer.append("}\n");
-			outputBuffer.append(".hlTagName {\n");
-			outputBuffer.append("  color: #006699;\n");
-			outputBuffer.append("}\n");
-			outputBuffer.append(".hlControl {\n");
-			outputBuffer.append("  color: #660000;\n");
-			outputBuffer.append("}\n");
-			outputBuffer.append(".hlText {\n");
-			outputBuffer.append("  color: #000000;\n");
-			outputBuffer.append("}\n");
-			outputBuffer.append(".hlUrlBase {\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".headersDiv {\n");
-			outputBuffer.append("  padding: 10px;");
-			outputBuffer.append("  margin-left: 10px;");
-			outputBuffer.append("  border: 1px solid #CCC;");
-			outputBuffer.append("  border-radius: 10px;");
-			outputBuffer.append("}");
-			outputBuffer.append(".headersRow {\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".headerName {\n");
-			outputBuffer.append("  color: #888;\n");
-			outputBuffer.append("  font-family: monospace;\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".headerValue {\n");
-			outputBuffer.append("  color: #88F;\n");
-			outputBuffer.append("  font-family: monospace;\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".responseBodyTable {");
-			outputBuffer.append("  width: 100%;\n");
-			outputBuffer.append("  margin-left: 0px;\n");
-			outputBuffer.append("  margin-top: -10px;\n");
-			outputBuffer.append("  position: relative;\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".responseBodyTableFirstColumn {");
-			outputBuffer.append("}");
-			outputBuffer.append(".responseBodyTableSecondColumn {");
-			outputBuffer.append("  position: absolute;\n");
-			outputBuffer.append("  margin-left: 70px;\n");
-			outputBuffer.append("  vertical-align: top;\n");
-			outputBuffer.append("  left: 0px;\n");
-			outputBuffer.append("  right: 0px;\n");
-			outputBuffer.append("}");
-			outputBuffer.append(".responseBodyTableSecondColumn PRE {");
-			outputBuffer.append("  margin: 0px;");
-			outputBuffer.append("}");
-			outputBuffer.append(".sizeInfo {");
-			outputBuffer.append("  margin-top: 20px;");
-			outputBuffer.append("  font-size: 0.8em;");
-			outputBuffer.append("}");
-			outputBuffer.append(".lineAnchor A {");
-			outputBuffer.append("  text-decoration: none;");
-			outputBuffer.append("  padding-left: 20px;");
-			outputBuffer.append("}");
-			outputBuffer.append(".lineAnchor {");
-			outputBuffer.append("  display: block;");
-			outputBuffer.append("  padding-right: 20px;");
-			outputBuffer.append("}");
-			outputBuffer.append(".selectedLine {");
-			outputBuffer.append("  background-color: #EEF;");
-			outputBuffer.append("  font-weight: bold;");
-			outputBuffer.append("}");
-			outputBuffer.append("H1 {");
-			outputBuffer.append("  font-size: 1.1em;");
-			outputBuffer.append("  color: #666;");
-			outputBuffer.append("}");
-			outputBuffer.append("BODY {\n");
-			outputBuffer.append("  font-family: Arial;\n");
-			outputBuffer.append("}");
+			outputBuffer.append(
+					ClasspathUtil.loadResource("ca/uhn/fhir/rest/server/interceptor/ResponseHighlighter.css"));
 			outputBuffer.append("       </style>\n");
 			outputBuffer.append("	</head>\n");
 			outputBuffer.append("\n");
@@ -753,6 +767,16 @@ public class ResponseHighlighterInterceptor {
 				// ignore (this will hit if we're running in a servlet 2.5 environment)
 			}
 
+			if (myShowNarrative) {
+				String narrativeHtml = extractNarrativeHtml(theRequestDetails, theResource);
+				if (isNotBlank(narrativeHtml)) {
+					outputBuffer.append("<h1>Narrative</h1>");
+					outputBuffer.append("<div class=\"narrativeBody\">");
+					outputBuffer.append(narrativeHtml);
+					outputBuffer.append("</div>");
+				}
+			}
+
 			outputBuffer.append("<h1>Response Body</h1>");
 
 			outputBuffer.append("<div class=\"responseBodyTable\">");
@@ -788,7 +812,9 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("\n");
 
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
-			String jsStr = jsStream != null ? IOUtils.toString(jsStream, StandardCharsets.UTF_8) : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
+			String jsStr = jsStream != null
+					? IOUtils.toString(jsStream, StandardCharsets.UTF_8)
+					: "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
 
 			String baseUrl = theRequestDetails.getServerBaseForRequest();
 
@@ -810,10 +836,9 @@ public class ResponseHighlighterInterceptor {
 			writeLength(theServletResponse, outputBuffer.length());
 			theServletResponse.getWriter().append(" total including HTML)");
 
-			theServletResponse.getWriter().append(" in estimated ");
+			theServletResponse.getWriter().append(" in approximately ");
 			theServletResponse.getWriter().append(writeSw.toString());
 			theServletResponse.getWriter().append("</div>");
-
 
 			theServletResponse.getWriter().append("</body>");
 			theServletResponse.getWriter().append("</html>");
@@ -822,6 +847,84 @@ public class ResponseHighlighterInterceptor {
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(322) + e);
 		}
+	}
+
+	@VisibleForTesting
+	@Nullable
+	String extractNarrativeHtml(@Nonnull RequestDetails theRequestDetails, @Nullable IBaseResource theResource) {
+		if (theResource == null) {
+			return null;
+		}
+
+		FhirContext ctx = theRequestDetails.getFhirContext();
+
+		// Try to extract the narrative from the resource. First, just see if there
+		// is a narrative in the normal spot.
+		XhtmlNode xhtmlNode = extractNarrativeFromElement(theResource, ctx);
+
+		// If the resource is a document, see if the Composition has a narrative
+		if (xhtmlNode == null && "Bundle".equals(ctx.getResourceType(theResource))) {
+			if ("document".equals(ctx.newTerser().getSinglePrimitiveValueOrNull(theResource, "type"))) {
+				IBaseResource firstResource =
+						ctx.newTerser().getSingleValueOrNull(theResource, "entry.resource", IBaseResource.class);
+				if (firstResource != null && "Composition".equals(ctx.getResourceType(firstResource))) {
+					xhtmlNode = extractNarrativeFromComposition(firstResource, ctx);
+				}
+			}
+		}
+
+		// If the resource is a Parameters, see if it has a narrative in the first
+		// parameter
+		if (xhtmlNode == null && "Parameters".equals(ctx.getResourceType(theResource))) {
+			String firstParameterName = ctx.newTerser().getSinglePrimitiveValueOrNull(theResource, "parameter.name");
+			if ("Narrative".equals(firstParameterName)) {
+				String firstParameterValue =
+						ctx.newTerser().getSinglePrimitiveValueOrNull(theResource, "parameter.value[x]");
+				if (defaultString(firstParameterValue).startsWith("<div")) {
+					xhtmlNode = new XhtmlNode();
+					xhtmlNode.setValueAsString(firstParameterValue);
+				}
+			}
+		}
+
+		/*
+		 * Sanitize the narrative so that it's safe to render (strip any
+		 * links, potentially unsafe CSS, etc.)
+		 */
+		if (xhtmlNode != null) {
+			xhtmlNode = NarrativeUtil.sanitize(xhtmlNode);
+			return xhtmlNode.getValueAsString();
+		}
+
+		return null;
+	}
+
+	private XhtmlNode extractNarrativeFromComposition(IBaseResource theComposition, FhirContext theCtx) {
+		XhtmlNode retVal = new XhtmlNode(NodeType.Element, "div");
+
+		XhtmlNode xhtmlNode = extractNarrativeFromElement(theComposition, theCtx);
+		if (xhtmlNode != null) {
+			retVal.add(xhtmlNode);
+		}
+
+		List<IBase> sections = theCtx.newTerser().getValues(theComposition, "section");
+		for (IBase section : sections) {
+			String title = theCtx.newTerser().getSinglePrimitiveValueOrNull(section, "title");
+			if (isNotBlank(title)) {
+				XhtmlNode sectionNarrative = extractNarrativeFromElement(section, theCtx);
+				if (sectionNarrative != null && sectionNarrative.hasChildren()) {
+					XhtmlNode titleNode = new XhtmlNode(NodeType.Element, "h1");
+					titleNode.addText(title);
+					retVal.add(titleNode);
+					retVal.add(sectionNarrative);
+				}
+			}
+		}
+
+		if (retVal.isEmpty()) {
+			return null;
+		}
+		return retVal;
 	}
 
 	private void writeLength(HttpServletResponse theServletResponse, int theLength) throws IOException {
@@ -834,7 +937,8 @@ public class ResponseHighlighterInterceptor {
 		}
 	}
 
-	private void streamResponseHeaders(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, StringBuilder b) {
+	private void streamResponseHeaders(
+			RequestDetails theRequestDetails, HttpServletResponse theServletResponse, StringBuilder b) {
 		if (theServletResponse.getHeaderNames().isEmpty() == false) {
 			b.append("<h1>Response Headers</h1>");
 
@@ -846,7 +950,8 @@ public class ResponseHighlighterInterceptor {
 					 * actually returning an HTML one
 					 */
 					if (nextHeaderName.equalsIgnoreCase(Constants.HEADER_CONTENT_TYPE)) {
-						ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, theRequestDetails.getServer().getDefaultResponseEncoding());
+						ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
+								theRequestDetails, theRequestDetails.getServer().getDefaultResponseEncoding());
 						if (responseEncoding != null && isNotBlank(responseEncoding.getResourceContentType())) {
 							nextHeaderValue = responseEncoding.getResourceContentType() + ";charset=utf-8";
 						}
@@ -868,9 +973,88 @@ public class ResponseHighlighterInterceptor {
 
 	private void appendHeader(StringBuilder theBuilder, String theHeaderName, String theHeaderValue) {
 		theBuilder.append("<div class=\"headersRow\">");
-		theBuilder.append("<span class=\"headerName\">").append(theHeaderName).append(": ").append("</span>");
+		theBuilder
+				.append("<span class=\"headerName\">")
+				.append(theHeaderName)
+				.append(": ")
+				.append("</span>");
 		theBuilder.append("<span class=\"headerValue\">").append(theHeaderValue).append("</span>");
 		theBuilder.append("</div>");
 	}
 
+	/**
+	 * If set to {@literal true} (default is {@literal true}), if the response is a FHIR
+	 * resource, and that resource includes a <a href="http://hl7.org/fhir/narrative.html">Narrative</div>,
+	 * the narrative will be rendered in the HTML response page as actual rendered HTML.
+	 * <p>
+	 * The narrative to be rendered will be sourced from one of 3 possible locations,
+	 * depending on the resource being returned by the server:
+	 *    <ul>
+	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
+	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *    </ul>
+	 * </p>
+	 * <p>
+	 *    In all cases, the narrative is scanned to ensure that it does not contain any tags
+	 *    or attributes that are not explicitly allowed by the FHIR specification in order
+	 *    to <a href="http://hl7.org/fhir/narrative.html#xhtml">prevent active content</a>.
+	 *    If any such tags or attributes are found, the narrative is not rendered and
+	 *    instead a warning is displayed. Note that while this scanning is helpful, it does
+	 *    not completely mitigate the security risks associated with narratives. See
+	 *    <a href="http://hl7.org/fhir/security.html#narrative">FHIR Security: Narrative</a>
+	 *    for more information.
+	 * </p>
+	 *
+	 * @return Should the narrative be rendered?
+	 * @since 6.6.0
+	 */
+	public boolean isShowNarrative() {
+		return myShowNarrative;
+	}
+
+	/**
+	 * If set to {@literal true} (default is {@literal true}), if the response is a FHIR
+	 * resource, and that resource includes a <a href="http://hl7.org/fhir/narrative.html">Narrative</div>,
+	 * the narrative will be rendered in the HTML response page as actual rendered HTML.
+	 * <p>
+	 * The narrative to be rendered will be sourced from one of 3 possible locations,
+	 * depending on the resource being returned by the server:
+	 *    <ul>
+	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
+	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *    </ul>
+	 * </p>
+	 * <p>
+	 *    In all cases, the narrative is scanned to ensure that it does not contain any tags
+	 *    or attributes that are not explicitly allowed by the FHIR specification in order
+	 *    to <a href="http://hl7.org/fhir/narrative.html#xhtml">prevent active content</a>.
+	 *    If any such tags or attributes are found, the narrative is not rendered and
+	 *    instead a warning is displayed. Note that while this scanning is helpful, it does
+	 *    not completely mitigate the security risks associated with narratives. See
+	 *    <a href="http://hl7.org/fhir/security.html#narrative">FHIR Security: Narrative</a>
+	 *    for more information.
+	 * </p>
+	 *
+	 * @param theShowNarrative Should the narrative be rendered?
+	 * @since 6.6.0
+	 */
+	public void setShowNarrative(boolean theShowNarrative) {
+		myShowNarrative = theShowNarrative;
+	}
+
+	/**
+	 * Extracts the narrative from an element (typically a FHIR resource) that holds
+	 * a "text" element
+	 */
+	@Nullable
+	private static XhtmlNode extractNarrativeFromElement(@Nonnull IBase theElement, FhirContext ctx) {
+		if (ctx.getElementDefinition(theElement.getClass()).getChildByName("text") != null) {
+			return ctx.newTerser()
+					.getSingleValue(theElement, "text.div", XhtmlNode.class)
+					.orElse(null);
+		}
+		return null;
+	}
 }

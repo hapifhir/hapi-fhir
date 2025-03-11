@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * HL7org structures use a List for contained instead of a distinct datatype  
+ * HL7org structures use a List for contained instead of a distinct datatype
  */
 public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefinition<IBaseResource> {
 
@@ -35,5 +34,4 @@ public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefiniti
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.CONTAINED_RESOURCE_LIST;
 	}
-
 }

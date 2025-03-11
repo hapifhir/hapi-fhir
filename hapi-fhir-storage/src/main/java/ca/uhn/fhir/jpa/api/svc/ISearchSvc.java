@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -26,6 +25,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 public interface ISearchSvc {
 
-	IBundleProvider executeQuery(String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId);
-
+	IBundleProvider executeQuery(
+			String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId);
 }

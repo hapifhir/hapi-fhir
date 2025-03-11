@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,17 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class UriParam extends BaseParam implements IQueryParameterType {
 
@@ -91,7 +90,7 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	/**
 	 * Sets the qualifier for this param (may be <code>null</code> and generally will be)
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> for easy method chanining
 	 */
 	public UriParam setQualifier(UriParamQualifierEnum theQualifier) {
@@ -101,7 +100,7 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	/**
 	 * Sets the value for this param
-	 * 
+	 *
 	 * @return Returns a reference to <code>this</code> for easy method chanining
 	 */
 	public UriParam setValue(String theValue) {
@@ -115,5 +114,4 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 		builder.append("value", getValue());
 		return builder.toString();
 	}
-
 }

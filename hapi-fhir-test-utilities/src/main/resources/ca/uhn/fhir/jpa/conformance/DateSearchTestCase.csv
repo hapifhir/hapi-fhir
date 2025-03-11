@@ -1,4 +1,8 @@
 #ObservationDate, Query, Result, Comment (ignored)
+2020-01-01,eb2021-01-01, True, eb == ends-before
+2020-01-01,eb2019-01-01, False, eb == ends-before
+2020-01-01,sa2019-01-01, True, sa == starts-after
+2020-01-01,sa2021-01-01, False, sa == starts-after
 2020,eq2020, True, A harmless comment
 2021,eq2020, False
 2020-01,eq2020, True
@@ -19,7 +23,7 @@
 2020-01-01,eq2020-01, True
 2020-01-30,eq2020-01, True
 2021-01-01,eq2020-01, False
-2020-01-01T08:00:00.000,eq2020-01, True
+2020-01-01T08:00:00.000,eq2020-01, True,
 2019-12-31T08:00:00.000,eq2020-01, False
 2020-01-01T12:00:00.000Z,eq2020-01, True
 2019-12-31T12:00:00.000Z,eq2020-01, False

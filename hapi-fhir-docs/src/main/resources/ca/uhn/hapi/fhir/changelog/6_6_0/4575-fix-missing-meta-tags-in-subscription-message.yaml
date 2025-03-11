@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4575
+title: "Previously, the full set of meta tags is not present in the payload of the subscription message when UPDATE the resource. Now, this issue has been fixed."

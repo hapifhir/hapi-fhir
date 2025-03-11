@@ -1,10 +1,8 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
@@ -38,11 +37,12 @@ import java.io.IOException;
  */
 public interface IJsonLikeParser extends IParser {
 
-	void encodeResourceToJsonLikeWriter(IBaseResource theResource, BaseJsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
+	void encodeResourceToJsonLikeWriter(IBaseResource theResource, BaseJsonLikeWriter theJsonLikeWriter)
+			throws IOException, DataFormatException;
 
 	/**
 	 * Parses a resource from a JSON-like data structure
-	 * 
+	 *
 	 * @param theResourceType
 	 *           The resource type to use. This can be used to explicitly specify a class which extends a built-in type
 	 *           (e.g. a custom type extending the default Patient class)
@@ -52,11 +52,12 @@ public interface IJsonLikeParser extends IParser {
 	 * @throws DataFormatException
 	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	<T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, JsonLikeStructure theJsonLikeStructure)
+			throws DataFormatException;
 
 	/**
 	 * Parses a resource from a JSON-like data structure
-	 * 
+	 *
 	 * @param theJsonLikeStructure
 	 *           The JSON-like structure to parse
 	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or
@@ -65,5 +66,4 @@ public interface IJsonLikeParser extends IParser {
 	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
 	IBaseResource parseResource(JsonLikeStructure theJsonLikeStructure) throws DataFormatException;
-
 }

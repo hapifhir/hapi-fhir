@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,22 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -54,7 +58,7 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> getOrCreateExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension<?,?> extension = getExtensionByUrl(baseHasExtensions, theUrl);
+		IBaseExtension<?, ?> extension = getExtensionByUrl(baseHasExtensions, theUrl);
 		if (extension == null) {
 			extension = baseHasExtensions.addExtension();
 			extension.setUrl(theUrl);
@@ -83,7 +87,7 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> addExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension<?,?> extension = baseHasExtensions.addExtension();
+		IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
 		if (theUrl != null) {
 			extension.setUrl(theUrl);
 		}
@@ -99,14 +103,16 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void addExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
-		IBaseExtension<?,?> ext = addExtension(theBase, theUrl);
+	public static void addExtension(
+			FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
+		IBaseExtension<?, ?> ext = addExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
 	private static IBaseHasExtensions validateExtensionSupport(IBase theBase) {
 		if (!(theBase instanceof IBaseHasExtensions)) {
-			throw new IllegalArgumentException(Msg.code(1747) + String.format("Expected instance that supports extensions, but got %s", theBase));
+			throw new IllegalArgumentException(
+					Msg.code(1747) + String.format("Expected instance that supports extensions, but got %s", theBase));
 		}
 		return (IBaseHasExtensions) theBase;
 	}
@@ -155,17 +161,35 @@ public class ExtensionUtil {
 	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
 	 */
 	public static IBaseExtension<?, ?> getExtensionByUrl(IBase theBase, String theExtensionUrl) {
-		Predicate<IBaseExtension<?,?>> filter;
+		Predicate<IBaseExtension<?, ?>> filter;
 		if (theExtensionUrl == null) {
 			filter = (e -> true);
 		} else {
 			filter = (e -> theExtensionUrl.equals(e.getUrl()));
 		}
 
-		return getExtensionsMatchingPredicate(theBase, filter)
-			.stream()
-			.findFirst()
-			.orElse(null);
+		return getExtensionsMatchingPredicate(theBase, filter).stream()
+				.findFirst()
+				.orElse(null);
+	}
+
+	/**
+	 * Given a resource or other structure that can have direct extensions,
+	 * pulls out any extensions that have the given theExtensionUrl and a primitive value type,
+	 * and returns a list of the string version of the extension values.
+	 */
+	public static List<String> getExtensionPrimitiveValues(IBase theBase, String theExtensionUrl) {
+		if (theBase instanceof IBaseHasExtensions) {
+			return ((IBaseHasExtensions) theBase)
+					.getExtension().stream()
+							.filter(t -> theExtensionUrl.equals(t.getUrl()))
+							.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+							.map(t -> (IPrimitiveType<?>) t.getValue())
+							.map(IPrimitiveType::getValueAsString)
+							.filter(StringUtils::isNotBlank)
+							.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -175,12 +199,11 @@ public class ExtensionUtil {
 	 * @param theFilter Predicate to match the extension against
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
-	public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension<?,?>> theFilter) {
-		return validateExtensionSupport(theBase)
-			.getExtension()
-			.stream()
-			.filter(theFilter)
-			.collect(Collectors.toList());
+	public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(
+			IBase theBase, Predicate<? super IBaseExtension<?, ?>> theFilter) {
+		return validateExtensionSupport(theBase).getExtension().stream()
+				.filter(theFilter)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -211,11 +234,10 @@ public class ExtensionUtil {
 	 * @param theFilter Defines which extensions should be cleared
 	 * @return Returns all extension that were removed
 	 */
-	private static List<IBaseExtension<?, ?>> clearExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension<?,?>> theFilter) {
+	private static List<IBaseExtension<?, ?>> clearExtensionsMatchingPredicate(
+			IBase theBase, Predicate<? super IBaseExtension<?, ?>> theFilter) {
 		List<IBaseExtension<?, ?>> retVal = getExtensionsMatchingPredicate(theBase, theFilter);
-		validateExtensionSupport(theBase)
-			.getExtension()
-			.removeIf(theFilter);
+		validateExtensionSupport(theBase).getExtension().removeIf(theFilter);
 		return retVal;
 	}
 
@@ -227,7 +249,7 @@ public class ExtensionUtil {
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
 	public static List<IBaseExtension<?, ?>> getExtensionsByUrl(IBaseHasExtensions theBase, String theExtensionUrl) {
-		Predicate<IBaseExtension<?,?>> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
+		Predicate<IBaseExtension<?, ?>> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
 		return getExtensionsMatchingPredicate(theBase, urlEqualityPredicate);
 	}
 
@@ -238,7 +260,7 @@ public class ExtensionUtil {
 	 * @param theValue       The value to set
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?,?> theExtension, String theValue) {
+	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?, ?> theExtension, String theValue) {
 		setExtension(theFhirContext, theExtension, "string", theValue);
 	}
 
@@ -250,7 +272,8 @@ public class ExtensionUtil {
 	 * @param theValue         The value to set
 	 * @param theFhirContext   The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?,?> theExtension, String theExtensionType, Object theValue) {
+	public static void setExtension(
+			FhirContext theFhirContext, IBaseExtension<?, ?> theExtension, String theExtensionType, Object theValue) {
 		theExtension.setValue(TerserUtil.newElement(theFhirContext, theExtensionType, theValue));
 	}
 
@@ -263,7 +286,7 @@ public class ExtensionUtil {
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
 	public static void setExtensionAsString(FhirContext theFhirContext, IBase theBase, String theUrl, String theValue) {
-		IBaseExtension<?,?> ext = getOrCreateExtension(theBase, theUrl);
+		IBaseExtension<?, ?> ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValue);
 	}
 
@@ -276,8 +299,9 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
-		IBaseExtension<?,?> ext = getOrCreateExtension(theBase, theUrl);
+	public static void setExtension(
+			FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
+		IBaseExtension<?, ?> ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
@@ -288,7 +312,35 @@ public class ExtensionUtil {
 	 * @param theRightExtension : Extension to be evaluated #2
 	 * @return Result of the comparison
 	 */
-	public static boolean equals(IBaseExtension<?,?> theLeftExtension, IBaseExtension<?,?> theRightExtension) {
+	public static boolean equals(IBaseExtension<?, ?> theLeftExtension, IBaseExtension<?, ?> theRightExtension) {
 		return TerserUtil.equals(theLeftExtension, theRightExtension);
+	}
+
+	/**
+	 * Given an extension, looks for the first child extension with the given URL of {@literal theChildExtensionUrl}
+	 * and a primitive datatype value, and returns the String version of that value. E.g. if the
+	 * value is a FHIR boolean, it would return the string "true" or "false. If the extension
+	 * has no value, or the value is not a primitive datatype, or the URL is not found, the method
+	 * will return {@literal null}.
+	 *
+	 * @param theExtension The parent extension. Must not be null.
+	 * @param theChildExtensionUrl The child extension URL. Must not be null or blank.
+	 * @since 6.6.0
+	 */
+	public static <D, T extends IBaseExtension<T, D>> String extractChildPrimitiveExtensionValue(
+			@Nonnull IBaseExtension<T, D> theExtension, @Nonnull String theChildExtensionUrl) {
+		Validate.notNull(theExtension, "theExtension must not be null");
+		Validate.notBlank(theChildExtensionUrl, "theChildExtensionUrl must not be null or blank");
+
+		Optional<T> codeExtension = theExtension.getExtension().stream()
+				.filter(t -> theChildExtensionUrl.equals(t.getUrl()))
+				.findFirst();
+		String retVal = null;
+		if (codeExtension.isPresent() && codeExtension.get().getValue() instanceof IPrimitiveType) {
+			IPrimitiveType<?> codeValue =
+					(IPrimitiveType<?>) codeExtension.get().getValue();
+			retVal = codeValue.getValueAsString();
+		}
+		return retVal;
 	}
 }

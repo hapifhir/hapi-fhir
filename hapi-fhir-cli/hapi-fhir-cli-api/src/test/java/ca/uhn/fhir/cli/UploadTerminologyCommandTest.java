@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -16,11 +17,14 @@ import com.google.common.base.Charsets;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,17 +46,15 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -89,7 +91,7 @@ public class UploadTerminologyCommandTest {
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	static Stream<Arguments> paramsProvider(){
@@ -103,9 +105,9 @@ public class UploadTerminologyCommandTest {
 	}
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -163,9 +165,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -203,10 +205,10 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(2, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(2);
 		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile, uploadFile, containsString("\"CODE\",\"Display\""));
+		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
 	}
 
 	@ParameterizedTest
@@ -239,9 +241,8 @@ public class UploadTerminologyCommandTest {
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();
-		} catch (Error e) {
-			assertThat(e.toString(), containsString("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem"));
+			fail();		} catch (Error e) {
+			assertThat(e.toString()).contains("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem");
 		}
 	}
 
@@ -264,9 +265,8 @@ public class UploadTerminologyCommandTest {
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
 
-			fail();
-		} catch (Error e) {
-			assertThat(e.toString(), containsString("Don't know how to handle file:"));
+			fail();		} catch (Error e) {
+			assertThat(e.toString()).contains("Don't know how to handle file:");
 		}
 	}
 
@@ -276,15 +276,15 @@ public class UploadTerminologyCommandTest {
 		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
 		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 1024L * 1024L)));
+		assertEquals(1024L * 1024L * 1024L, bytes);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 500L)));
+		assertEquals(1024L * 500L, bytes);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes, is(equalTo(1024L * 1024L * 10L)));
+		assertEquals(1024L * 1024L * 10L, bytes);
 	}
 
 	@ParameterizedTest
@@ -308,9 +308,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*temp.*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*temp.*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -328,9 +328,8 @@ public class UploadTerminologyCommandTest {
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();
-		} catch (Error e) {
-			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
+			fail();		} catch (Error e) {
+			assertThat(e.toString().replace('\\', '/')).contains("FileNotFoundException: target/concepts.csv/foo.csv");
 		}
 	}
 
@@ -360,9 +359,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -387,14 +386,13 @@ public class UploadTerminologyCommandTest {
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
-		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -426,9 +424,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -459,9 +457,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	@ParameterizedTest
@@ -477,6 +475,86 @@ public class UploadTerminologyCommandTest {
 		myBaseRestServerHelper.registerInterceptor(requestValidatingInterceptor);
 
 		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	@SuppressWarnings("unused") // Both params for @BeforeEach
+	void testZipFileInParameters(String theFhirVersion, boolean theIncludeTls) {
+		final IBaseParameters inputParameters = switch (myCtx.getVersion().getVersion()) {
+			case DSTU2, DSTU2_HL7ORG, DSTU2_1 -> new org.hl7.fhir.dstu2.model.Parameters();
+			case DSTU3 -> new org.hl7.fhir.dstu3.model.Parameters();
+			case R4 -> new Parameters();
+			case R4B -> new org.hl7.fhir.r4b.model.Parameters();
+			case R5 -> new org.hl7.fhir.r5.model.Parameters();
+		};
+
+		final UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
+		uploadTerminologyCommand.setFhirContext(myCtx);
+		uploadTerminologyCommand.setTransferSizeBytes(1);
+
+		uploadTerminologyCommand.addFileToRequestBundle(inputParameters, "something.zip", new byte[] {1,2});
+
+		final String actualAttachmentUrl = getAttachmentUrl(inputParameters, myCtx);
+		assertTrue(actualAttachmentUrl.endsWith(".zip"));
+	}
+
+	private static String getAttachmentUrl(IBaseParameters theInputParameters, FhirContext theCtx) {
+		switch (theCtx.getVersion().getVersion()) {
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1: {
+				assertInstanceOf(org.hl7.fhir.dstu2.model.Parameters.class, theInputParameters);
+				final org.hl7.fhir.dstu2.model.Parameters dstu2Parameters = (org.hl7.fhir.dstu2.model.Parameters) theInputParameters;
+				final List<org.hl7.fhir.dstu2.model.Parameters.ParametersParameterComponent> dstu2ParametersList = dstu2Parameters.getParameter();
+				final Optional<org.hl7.fhir.dstu2.model.Parameters.ParametersParameterComponent> optDstu2FileParam = dstu2ParametersList.stream().filter(param -> TerminologyUploaderProvider.PARAM_FILE.equals(param.getName())).findFirst();
+				assertTrue(optDstu2FileParam.isPresent());
+				final org.hl7.fhir.dstu2.model.Type dstu2Value = optDstu2FileParam.get().getValue();
+				assertInstanceOf(org.hl7.fhir.dstu2.model.Attachment.class, dstu2Value);
+				final org.hl7.fhir.dstu2.model.Attachment dstu2Attachment = (org.hl7.fhir.dstu2.model.Attachment) dstu2Value;
+				return dstu2Attachment.getUrl();
+			}
+			case DSTU3: {
+				assertInstanceOf(org.hl7.fhir.dstu3.model.Parameters.class, theInputParameters);
+				final org.hl7.fhir.dstu3.model.Parameters dstu3Parameters = (org.hl7.fhir.dstu3.model.Parameters) theInputParameters;
+				final List<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> dstu3ParametersList = dstu3Parameters.getParameter();
+				final Optional<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> optDstu3FileParam = dstu3ParametersList.stream().filter(param -> TerminologyUploaderProvider.PARAM_FILE.equals(param.getName())).findFirst();
+				assertTrue(optDstu3FileParam.isPresent());
+				final org.hl7.fhir.dstu3.model.Type dstu3Value = optDstu3FileParam.get().getValue();
+				assertInstanceOf(org.hl7.fhir.dstu3.model.Attachment.class, dstu3Value);
+				final org.hl7.fhir.dstu3.model.Attachment dstu3Attachment = (org.hl7.fhir.dstu3.model.Attachment) dstu3Value;
+				return dstu3Attachment.getUrl();
+			}
+			case R4: {
+				assertInstanceOf(Parameters.class, theInputParameters);
+				final Parameters r4Parameters = (Parameters) theInputParameters;
+				final Parameters.ParametersParameterComponent r4Parameter = r4Parameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
+				final Type r4Value = r4Parameter.getValue();
+				assertInstanceOf(Attachment.class, r4Value);
+				final Attachment r4Attachment = (Attachment) r4Value;
+				return r4Attachment.getUrl();
+			}
+			case R4B: {
+				assertInstanceOf(org.hl7.fhir.r4b.model.Parameters.class, theInputParameters);
+				final org.hl7.fhir.r4b.model.Parameters r4bParameters = (org.hl7.fhir.r4b.model.Parameters) theInputParameters;
+				final org.hl7.fhir.r4b.model.Parameters.ParametersParameterComponent r4bParameter = r4bParameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
+				final org.hl7.fhir.r4b.model.DataType value = r4bParameter.getValue();
+				assertInstanceOf(org.hl7.fhir.r4b.model.Attachment.class, value);
+				final org.hl7.fhir.r4b.model.Attachment r4bAttachment = (org.hl7.fhir.r4b.model.Attachment) value;
+				return r4bAttachment.getUrl();
+			}
+			case R5: {
+				assertInstanceOf(org.hl7.fhir.r5.model.Parameters.class, theInputParameters);
+				final org.hl7.fhir.r5.model.Parameters r4Parameters = (org.hl7.fhir.r5.model.Parameters) theInputParameters;
+				final org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent parameter = r4Parameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
+				final org.hl7.fhir.r5.model.DataType value = parameter.getValue();
+				assertInstanceOf(org.hl7.fhir.r5.model.Attachment.class, value);
+				final org.hl7.fhir.r5.model.Attachment attachment = (org.hl7.fhir.r5.model.Attachment) value;
+				return attachment.getUrl();
+			}
+			default:
+				throw new IllegalStateException("Unknown FHIR version: " + theCtx.getVersion().getVersion());
+		}
 	}
 
 	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
@@ -501,9 +579,9 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadIcd10cm(myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*files.*\\.zip$");
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
 	private RequestValidatingInterceptor createRequestValidatingInterceptor(){

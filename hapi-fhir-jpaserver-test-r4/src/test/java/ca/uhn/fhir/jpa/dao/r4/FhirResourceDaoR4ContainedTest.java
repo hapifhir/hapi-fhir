@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -23,28 +24,29 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestIntent;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
+import org.hl7.fhir.r4.model.Specimen;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
 
 	@BeforeEach
 	public void before() throws Exception {
-		myModelConfig.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResources(true);
 	}
 
 	@AfterEach
 	public void after() throws Exception {
-		myModelConfig.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(false);
 	}
 
 	@Test
@@ -57,13 +59,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		obs.getCode().setText("Some Observation");
 		obs.setSubject(new Reference(p));
 		 				
-		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
 			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
@@ -78,7 +80,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test
@@ -93,13 +95,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		obs.getContained().add(p);
 		obs.getSubject().setReference("#fooId");
 		
-		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
 			Long i = myEntityManager
@@ -114,7 +116,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setLoadSynchronous(true);
 
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 
 	}
 	
@@ -153,13 +155,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		patient.addGeneralPractitioner().setReference("#org1");
 		patient.getManagingOrganization().setReference("#org2");
 				
-		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient createdPatient = myPatientDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
 		
 		runInTransaction(()->{
 			Long i = myEntityManager
@@ -183,7 +185,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("general-practitioner", new ReferenceParam("family", "Smith"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test
@@ -224,13 +226,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		encounter.addReasonReference().setReference("#obs1");
 		encounter.getContained().add(obs);
 		
-		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter createdEncounter = myEncounterDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		
 		runInTransaction(()->{
 			// The practitioner
@@ -267,7 +269,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("based-on", new ReferenceParam("authored", "2021-02-23"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map)), containsInAnyOrder(toValues(id)));
+		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test

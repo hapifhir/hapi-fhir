@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -16,10 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isOneOf;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class PartitionRunnerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunnerTest.class);
@@ -35,8 +34,8 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void emptyList() {
-		List<ResourcePersistentId> resourceIds = buildPidList(0);
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		List<IResourcePersistentId> resourceIds = buildPidList(0);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(0);
 
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
@@ -44,7 +43,7 @@ public class PartitionRunnerTest {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return getPartitionRunner(DaoConfig.DEFAULT_EXPUNGE_BATCH_SIZE);
+		return getPartitionRunner(JpaStorageSettings.DEFAULT_EXPUNGE_BATCH_SIZE);
 	}
 
 	private PartitionRunner getPartitionRunner(int theBatchSize) {
@@ -55,19 +54,19 @@ public class PartitionRunnerTest {
 		return new PartitionRunner("TEST", "test", theBatchSize, theThreadCount);
 	}
 
-	private List<ResourcePersistentId> buildPidList(int size) {
-		List<ResourcePersistentId> list = new ArrayList<>();
+	private List<IResourcePersistentId> buildPidList(int size) {
+		List<IResourcePersistentId> list = new ArrayList<>();
 		for (long i = 0; i < size; ++i) {
-			list.add(new ResourcePersistentId(i + 1));
+			list.add(JpaPid.fromId(i + 1));
 		}
 		return list;
 	}
 
 	@Test
 	public void oneItem() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(1);
+		List<IResourcePersistentId> resourceIds = buildPidList(1);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
@@ -78,9 +77,9 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void twoItems() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(2);
+		List<IResourcePersistentId> resourceIds = buildPidList(2);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
@@ -90,47 +89,71 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void tenItemsBatch5() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(10);
+		List<IResourcePersistentId> resourceIds = buildPidList(10);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertEquals(5, partitionCall1.size);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertEquals(5, partitionCall2.size);
-		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
+		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
 	}
 
 	@Test
 	public void nineItemsBatch5() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(9);
+		List<IResourcePersistentId> resourceIds = buildPidList(9);
 
 		// We don't care in which order, but one partition size should be
 		// 5 and one should be 4
 		Set<Integer> nums = Sets.newHashSet(5, 4);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertEquals(true, nums.remove(partitionCall1.size));
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertEquals(true, nums.remove(partitionCall2.size));
-		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
+		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
+	}
+
+
+
+	/**
+	 * See #5636 $expunge operation ignoring ExpungeThreadCount setting in certain cases
+	 */
+	@Test
+	public void testExpunge_withTasksSizeBiggerThanExecutorQueue_usesConfiguredNumberOfThreads() throws InterruptedException {
+		// setup
+		List<IResourcePersistentId> resourceIds = buildPidList(2500);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		// with batch size = 2 we expect 2500/2 runnableTasks to be created
+		myLatch.setExpectedCount(1250);
+
+		// execute
+		getPartitionRunner(2, 2).runInPartitionedThreads(resourceIds, partitionConsumer);
+		List<HookParams> calls = myLatch.awaitExpected();
+
+		// validate - only two threads should be used for execution
+		for (int i = 0; i < 1250; i++) {
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, i);
+			assertThat(partitionCall.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
+		}
 	}
 
 	@Test
 	public void tenItemsOneThread() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(10);
+		List<IResourcePersistentId> resourceIds = buildPidList(10);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5, 1).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
@@ -146,7 +169,7 @@ public class PartitionRunnerTest {
 		}
 	}
 
-	private Consumer<List<ResourcePersistentId>> buildPartitionConsumer(PointcutLatch latch) {
+	private Consumer<List<IResourcePersistentId>> buildPartitionConsumer(PointcutLatch latch) {
 		return list -> latch.call(new PartitionCall(Thread.currentThread().getName(), list.size()));
 	}
 

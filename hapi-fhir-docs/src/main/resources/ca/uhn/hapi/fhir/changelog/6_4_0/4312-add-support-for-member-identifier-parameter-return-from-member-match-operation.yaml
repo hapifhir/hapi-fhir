@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4312
+title: "Previously, when $member-match operation is executed, the parameters that were returned did not include the member identifier as a parameter.
+This has now been added, and the consent resource is now updated with this identifier that's being returned."

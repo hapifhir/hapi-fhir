@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4782
+title: "Previously, a FHIRPath patch delete operation where the path resolved to an element in a collection, the element
+was not always being removed from the collection. This has been fixed."

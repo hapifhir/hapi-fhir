@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.config;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,17 @@ package ca.uhn.fhir.batch2.jobs.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.config;
 
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
-import ca.uhn.fhir.batch2.jobs.services.Batch2JobRunnerImpl;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.context.annotation.Bean;
 
 public class BatchCommonCtx {
 	@Bean
-	UrlPartitioner urlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	UrlPartitioner urlPartitioner(
+			MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new UrlPartitioner(theMatchUrlService, theRequestPartitionHelperSvc);
-	}
-
-	@Bean
-	public IBatch2JobRunner batch2JobRunner() {
-		return new Batch2JobRunnerImpl();
 	}
 }

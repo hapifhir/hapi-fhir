@@ -1,17 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.servlet.http.HttpServletResponse;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +17,13 @@ import javax.servlet.http.HttpServletResponse;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IFhirResourceDao<T> {
 
@@ -39,6 +37,6 @@ public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IF
 	 * @param theServletResponse
 	 * @return
 	 */
-	IBundleProvider observationsLastN(SearchParameterMap paramMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
-
+	IBundleProvider observationsLastN(
+			SearchParameterMap paramMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -28,17 +27,15 @@ import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.INTEGER_0;
 
 public class SearchParameterMapCalculator {
 
-	static public boolean isWantCount(SearchParameterMap myParams) {
+	public static boolean isWantCount(SearchParameterMap myParams) {
 		return isWantCount(myParams.getSearchTotalMode());
 	}
 
-	static public boolean isWantCount(SearchTotalModeEnum theSearchTotalModeEnum){
+	public static boolean isWantCount(SearchTotalModeEnum theSearchTotalModeEnum) {
 		return SearchTotalModeEnum.ACCURATE.equals(theSearchTotalModeEnum);
 	}
 
-	static public boolean isWantOnlyCount(SearchParameterMap myParams) {
-		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
-			| INTEGER_0.equals(myParams.getCount());
+	public static boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode()) | INTEGER_0.equals(myParams.getCount());
 	}
-
 }

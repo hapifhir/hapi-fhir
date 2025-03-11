@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
@@ -26,13 +25,13 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,21 +45,24 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 
 	@Autowired
 	private MdmCandidateSearchSvc myMdmCandidateSearchSvc;
+
 	@Autowired
 	private MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 
 	@Override
 	@Nonnull
 	@Transactional
-	public List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
+	public List<MatchedTarget> getMatchedTargets(
+			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+		Collection<IAnyResource> targetCandidates =
+				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
-			.map(candidate -> new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
-			.collect(Collectors.toList());
+				.map(candidate ->
+						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+				.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
 		return matches;
 	}
-
 }

@@ -1,19 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +17,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-public class ReferenceClientParam extends BaseClientParam  implements IParam {
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public class ReferenceClientParam extends BaseClientParam implements IParam {
 
 	private String myName;
 
@@ -137,7 +135,5 @@ public class ReferenceClientParam extends BaseClientParam  implements IParam {
 		public String getParameterValue(FhirContext theContext) {
 			return myWrappedCriterion.getParameterValue(theContext);
 		}
-
 	}
-
 }

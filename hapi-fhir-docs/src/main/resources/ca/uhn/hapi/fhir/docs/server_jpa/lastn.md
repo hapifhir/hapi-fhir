@@ -24,9 +24,9 @@ The grouping of Observation resources by `Observation.code` means that the `$las
 
 # Deployment and Configuration
 
-The `$lastn` operation is disabled by default. The operation can be enabled by setting the DaoConfig#setLastNEnabled
+The `$lastn` operation is disabled by default. The operation can be enabled by setting the JpaStorageSettings#setLastNEnabled
 property (
-see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setLastNEnabled(boolean)))
+see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setLastNEnabled(boolean)))
 .
 
 In addition, the Elasticsearch client service, `ElasticsearchSvcImpl` will need to be instantiated with parameters

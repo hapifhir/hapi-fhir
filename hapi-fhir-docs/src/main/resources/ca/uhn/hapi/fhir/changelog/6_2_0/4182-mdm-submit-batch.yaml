@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4182
+title: "`$mdm-submit` can now be run as a batch job, which will return a job ID, and can be polled for status. This can be accomplished by sending a `Prefer: respond-async` header with the request."

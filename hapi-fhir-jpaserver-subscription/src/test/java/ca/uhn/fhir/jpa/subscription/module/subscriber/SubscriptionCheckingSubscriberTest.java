@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -35,10 +36,12 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -58,10 +61,12 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -82,11 +87,13 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 
 		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertEquals(0, ourContentTypes.size());
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 	@Test
@@ -120,10 +127,12 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
+		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendResource(observation);
+		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertEquals(1, ourContentTypes.size());
+		assertThat(ourContentTypes).hasSize(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 

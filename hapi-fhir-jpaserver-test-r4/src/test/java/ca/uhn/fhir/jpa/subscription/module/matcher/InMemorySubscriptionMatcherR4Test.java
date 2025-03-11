@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -19,6 +24,8 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -33,6 +40,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,11 +62,13 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -67,6 +77,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -77,10 +89,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -99,24 +111,24 @@ public class InMemorySubscriptionMatcherR4Test {
 	MatchUrlService myMatchUrlService;
 
 	@Autowired
-	ModelConfig myModelConfig;
+    StorageSettings myStorageSettings;
 
 	@AfterEach
 	public void after() throws Exception {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 	}
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
-		assertTrue(result.supported(), result.getUnsupportedReason());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
 		assertTrue(result.matched());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	private void assertNotMatched(Resource theResource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(theResource, theParams);
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched(), "Failed on ID: " + theResource.getId());
+		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
+		assertThat(result.matched()).as("Failed on ID: " + theResource.getId()).isFalse();
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
 	}
 
@@ -250,7 +262,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -282,7 +294,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_InvalidUCUMUnit() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -298,7 +310,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NoSystem() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -315,7 +327,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NotUcumSystem() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -363,6 +375,100 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLastUpdated(new DateRangeParam(today, null));
 		assertUnsupported(patient, params);
+	}
+
+
+	@ParameterizedTest
+	@CsvSource({
+		"true,   http://profile1",
+		"true,   http://profile2",
+		"false,  http://profile99"
+	})
+	public void testSearchMetaProfile(boolean theExpectMatched, String theProfile) {
+		Patient patient = new Patient();
+		patient.getMeta().addProfile("http://profile1");
+		patient.getMeta().addProfile("http://profile2");
+		patient.getMeta().addProfile(null);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Constants.PARAM_PROFILE, new UriParam(theProfile));
+		if (theExpectMatched) {
+			assertMatched(patient, params);
+		} else {
+			assertNotMatched(patient, params);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"true,  http://system1, value1",
+		"true,                , value1",
+		"true,  http://system1, ",
+		"false, http://system1, value2",
+		"false,               , value99",
+		"true,                , ",
+	})
+	public void testSearchMetaTag(boolean theExpectMatched, String theSystem, String theValue) {
+		Patient patient = new Patient();
+		patient.getMeta().addTag("http://system1", "value1", "display1");
+		patient.getMeta().addTag("http://system2", "value2", "display2");
+		patient.getMeta().addTag(null, null, "display3");
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Constants.PARAM_TAG, new TokenParam(theSystem, theValue));
+		if (theExpectMatched) {
+			assertMatched(patient, params);
+		} else {
+			assertNotMatched(patient, params);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"false,  http://system1, value1",
+		"false,                , value1",
+		"false,  http://system1, ",
+		"true,   http://system1, value2",
+		"true,                 , value99",
+		"true, , ",
+	})
+	public void testSearchMetaTagNot(boolean theExpectMatched, String theSystem, String theValue) {
+		Patient patient = new Patient();
+		patient.getMeta().addTag("http://system1", "value1", "display1");
+		patient.getMeta().addTag("http://system2", "value2", "display2");
+		patient.getMeta().addTag(null, null, "display3");
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Constants.PARAM_TAG, new TokenParam(theSystem, theValue).setModifier(TokenParamModifier.NOT));
+		if (theExpectMatched) {
+			assertMatched(patient, params);
+		} else {
+			assertNotMatched(patient, params);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"true,  http://system1, value1",
+		"true,                , value1",
+		"true,  http://system1, ",
+		"false, http://system1, value2",
+		"false,               , value99",
+		"true,                , ",
+	})
+	public void testSearchMetaSecurity(boolean theExpectMatched, String theSystem, String theValue) {
+		Patient patient = new Patient();
+		patient.getMeta().addSecurity("http://system1", "value1", "display1");
+		patient.getMeta().addSecurity("http://system2", "value2", "display2");
+		patient.getMeta().addSecurity(null, null, "display3");
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Constants.PARAM_SECURITY, new TokenParam(theSystem, theValue));
+		if (theExpectMatched) {
+			assertMatched(patient, params);
+		} else {
+			assertNotMatched(patient, params);
+		}
 	}
 
 	@Test
@@ -620,7 +726,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
-		String value = StringUtils.rightPad(methodName, 200, 'a');
+		String value = StringUtils.rightPad(methodName, ResourceIndexedSearchParamString.MAX_LENGTH, 'a');
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -930,41 +1036,6 @@ public class InMemorySubscriptionMatcherR4Test {
 		}
 	}
 
-	@Test
-	public void testSearchWithSecurityAndProfileParamsUnsupported() {
-		String methodName = "testSearchWithSecurityAndProfileParams";
-
-		Organization org = new Organization();
-		org.getNameElement().setValue("FOO");
-		org.getMeta().addSecurity("urn:taglist", methodName + "1a", null);
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add("_security", new TokenParam("urn:taglist", methodName + "1a"));
-			assertUnsupported(org, params);
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.add("_profile", new UriParam("http://" + methodName));
-			assertUnsupported(org, params);
-		}
-	}
-
-	@Test
-	public void testSearchWithTagParameterUnsupported() {
-		String methodName = "testSearchWithTagParameter";
-
-		Organization org = new Organization();
-		org.getNameElement().setValue("FOO");
-		org.getMeta().addTag("urn:taglist", methodName + "1a", null);
-		org.getMeta().addTag("urn:taglist", methodName + "1b", null);
-
-		{
-			// One tag
-			SearchParameterMap params = new SearchParameterMap();
-			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a"));
-			assertUnsupported(org, params);
-		}
-	}
 
 	@Test
 	public void testSearchWithVeryLongUrlLonger() {
@@ -1070,4 +1141,34 @@ public class InMemorySubscriptionMatcherR4Test {
 		map.add(Patient.SP_NAME, or);
 		assertMatched(p, map);
 	}
+
+
+	@Autowired
+	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
+
+	@Test
+	public void testMatchCustomSearchParameter() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("display-contracted");
+		sp.setName("display-contracted");
+		sp.setCode("display-contracted");
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("PractitionerRole");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("PractitionerRole.active");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		mySearchParameterDao.update(sp, new SystemRequestDetails());
+
+		PractitionerRole pr = new PractitionerRole();
+		pr.setActive(true);
+
+		SearchParameterMap params;
+
+		params = SearchParameterMap.newSynchronous("display-contracted", new TokenParam("true"));
+		assertMatched(pr, params);
+
+		params = SearchParameterMap.newSynchronous("display-contracted", new TokenParam("false"));
+		assertNotMatched(pr, params);
+	}
+
 }

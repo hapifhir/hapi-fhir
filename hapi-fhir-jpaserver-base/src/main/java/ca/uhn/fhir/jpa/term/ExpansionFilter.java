@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,14 +49,21 @@ class ExpansionFilter {
 	/**
 	 * Constructor
 	 */
-	ExpansionFilter(ExpansionFilter theExpansionFilter, List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
+	ExpansionFilter(
+			ExpansionFilter theExpansionFilter,
+			List<ValueSet.ConceptSetFilterComponent> theFilters,
+			Integer theMaxCount) {
 		this(theExpansionFilter.getSystem(), theExpansionFilter.getCode(), theFilters, theMaxCount);
 	}
 
 	/**
 	 * Constructor
 	 */
-	ExpansionFilter(@Nullable String theSystem, @Nullable String theCode, @Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
+	ExpansionFilter(
+			@Nullable String theSystem,
+			@Nullable String theCode,
+			@Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters,
+			Integer theMaxCount) {
 		Validate.isTrue(isNotBlank(theSystem) == isNotBlank(theCode));
 		Validate.notNull(theFilters);
 
@@ -102,10 +108,11 @@ class ExpansionFilter {
 	public static ExpansionFilter fromFilterString(@Nullable String theFilter) {
 		ExpansionFilter filter;
 		if (isNoneBlank(theFilter)) {
-			List<ValueSet.ConceptSetFilterComponent> filters = Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
-				.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue(theFilter));
+			List<ValueSet.ConceptSetFilterComponent> filters =
+					Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
+							.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+							.setOp(ValueSet.FilterOperator.EQUAL)
+							.setValue(theFilter));
 			filter = new ExpansionFilter(null, null, filters, null);
 		} else {
 			filter = ExpansionFilter.NO_FILTER;

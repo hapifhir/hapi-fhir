@@ -1,0 +1,857 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "positive",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-patient",
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2054-5",
+									"display": "Black or African American"
+								}
+							}
+						]
+					},
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "9999999910"
+					}
+				],
+				"name": [
+					{
+						"family": "Jones",
+						"given": [
+							"Rick"
+						]
+					}
+				],
+				"gender": "male",
+				"birthDate": "1955-11-05"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/positive"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "Practitioner-positive",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "9941339108"
+					},
+					{
+						"system": "http://www.acme.org/practitioners",
+						"value": "25456"
+					}
+				],
+				"name": [
+					{
+						"family": "Careful",
+						"given": [
+							"Adam"
+						],
+						"prefix": [
+							"Dr"
+						]
+					}
+				],
+				"address": [
+					{
+						"use": "home",
+						"line": [
+							"1003 Healthcare Drive"
+						],
+						"city": "Amherst",
+						"state": "MA",
+						"postalCode": "01002"
+					}
+				],
+				"qualification": [
+					{
+						"identifier": [
+							{
+								"system": "http://example.org/UniversityIdentifier",
+								"value": "12345"
+							}
+						],
+						"code": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0360",
+									"code": "BS",
+									"display": "Bachelor of Science"
+								}
+							],
+							"text": "Bachelor of Science"
+						},
+						"period": {
+							"start": "1995"
+						},
+						"issuer": {
+							"display": "Example University"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/positive"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Coverage",
+				"id": "Coverage-positive",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-coverage"
+					]
+				},
+				"identifier": [
+					{
+						"system": "http://example.com/fhir/NampingSystem/certificate",
+						"value": "12345"
+					}
+				],
+				"status": "active",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+							"code": "EHCPOL",
+							"display": "extended healthcare"
+						}
+					]
+				},
+				"policyHolder": {
+					"reference": "http://example.org/FHIR/Organization/CBI35"
+				},
+				"subscriber": {
+					"reference": "Patient/positive"
+				},
+				"beneficiary": {
+					"reference": "Patient/positive"
+				},
+				"dependent": "0",
+				"relationship": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+							"code": "self"
+						}
+					]
+				},
+				"period": {
+					"start": "2011-05-23",
+					"end": "2030-05-23"
+				},
+				"payor": [
+					{
+						"reference": "http://example.org/fhir/Organization/example-payer",
+						"display": "Payer XYZ"
+					}
+				],
+				"class": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+									"code": "group"
+								}
+							]
+						},
+						"value": "CB135",
+						"name": "Corporate Baker's Inc. Local #35"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Coverage/positive"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Condition",
+				"id": "Diabetes",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+					]
+				},
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+							"code": "active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+							"code": "confirmed"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE19",
+							"display": "History of Diabetes"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"onsetDateTime": "2015-10-31",
+				"recordedDate": "2015-11-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Condition/Diabetes"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Condition",
+				"id": "Hypertension",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+					]
+				},
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+							"code": "active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+							"code": "confirmed"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE18",
+							"display": "History of Hypertension"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"onsetDateTime": "2015-10-31",
+				"recordedDate": "2015-11-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Condition/Hypertension"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Condition",
+				"id": "SleepApnea",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea",
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
+				},
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+							"code": "active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+							"code": "confirmed"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE17",
+							"display": "Obstructive sleep apnea (OSA)"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"onsetDateTime": "2015-10-31",
+				"recordedDate": "2015-11-01"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Condition/SleepApnea"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "BloodPressure",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-blood-pressure",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://loinc.org",
+								"code": "85354-9",
+								"display": "Blood pressure panel with all children optional"
+							},
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						],
+						"text": "Vital Signs"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE18",
+							"display": "Blood pressure panel with all children optional"
+						}
+					],
+					"text": "Blood pressure systolic and diastolic"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-02T09:45:10+01:00",
+				"issued": "2023-04-03T15:45:10+01:00",
+				"component": [
+					{
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "8480-6",
+									"display": "Systolic blood pressure"
+								}
+							],
+							"text": "Systolic blood pressure"
+						},
+						"valueQuantity": {
+							"value": 109,
+							"unit": "mmHg",
+							"system": "http://unitsofmeasure.org",
+							"code": "mm[Hg]"
+						}
+					},
+					{
+						"code": {
+							"coding": [
+								{
+									"system": "http://loinc.org",
+									"code": "8462-4",
+									"display": "Diastolic blood pressure"
+								}
+							],
+							"text": "Diastolic blood pressure"
+						},
+						"valueQuantity": {
+							"value": 44,
+							"unit": "mmHg",
+							"system": "http://unitsofmeasure.org",
+							"code": "mm[Hg]"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/BloodPressure"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "BMI",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-bmi",
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-bmi",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						],
+						"text": "Vital Signs"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "39156-5",
+							"display": "Body mass index (BMI) [Ratio]"
+						},
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE22",
+							"display": "Body mass index (BMI) [Ratio]"
+						}
+					],
+					"text": "BMI"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-04",
+				"valueQuantity": {
+					"value": 16.2,
+					"unit": "kg/m2",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg/m2"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/BMI"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "Glucose",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-lab",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						],
+						"text": "Laboratory"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "15074-8",
+							"display": "Glucose [Moles/volume] in Blood"
+						},
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE19",
+							"display": "Glucose [Moles/volume] in Blood"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-02T09:30:10+01:00",
+				"issued": "2023-04-03T15:30:10+01:00",
+				"valueQuantity": {
+					"value": 8.0,
+					"unit": "mmol/l",
+					"system": "http://unitsofmeasure.org",
+					"code": "mmol/L"
+				},
+				"interpretation": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+								"code": "H",
+								"display": "High"
+							}
+						]
+					}
+				],
+				"referenceRange": [
+					{
+						"low": {
+							"value": 3.1,
+							"unit": "mmol/l",
+							"system": "http://unitsofmeasure.org",
+							"code": "mmol/L"
+						},
+						"high": {
+							"value": 7.5,
+							"unit": "mmol/l",
+							"system": "http://unitsofmeasure.org",
+							"code": "mmol/L"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/Glucose"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "Height",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-height",
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-height",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						],
+						"text": "Vital Signs"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "8302-2",
+							"display": "Body height"
+						},
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE20",
+							"display": "Body height"
+						}
+					],
+					"text": "height"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-04",
+				"valueQuantity": {
+					"value": 69,
+					"unit": "in",
+					"system": "http://unitsofmeasure.org",
+					"code": "[in_i]"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/Height"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "Neck",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-neck-circumference",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "exam",
+								"display": "Exam"
+							}
+						],
+						"text": "Exam"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE23",
+							"display": "Neck Circumference"
+						}
+					],
+					"text": "Neck Circumference"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-04",
+				"valueQuantity": {
+					"value": 16,
+					"unit": "in",
+					"system": "http://unitsofmeasure.org",
+					"code": "[in_i]"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/Neck"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Observation",
+				"id": "Weight",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-weight",
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-weight",
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "vital-signs",
+								"display": "Vital Signs"
+							}
+						],
+						"text": "Vital Signs"
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "29463-7",
+							"display": "Body Weight"
+						},
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE21",
+							"display": "Body weight"
+						}
+					],
+					"text": "weight"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"effectiveDateTime": "2023-04-04",
+				"valueQuantity": {
+					"value": 185,
+					"unit": "[lb_av]",
+					"system": "http://unitsofmeasure.org",
+					"code": "[lb_av]"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/Weight"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ServiceRequest",
+				"id": "SleepStudy",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+						"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
+					]
+				},
+				"status": "draft",
+				"intent": "order",
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE2",
+							"display": "Home sleep apnea testing (HSAT)"
+						}
+					],
+					"text": "Home sleep apnea testing (HSAT)"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"authoredOn": "2023-04-06",
+				"reasonReference": [
+					{
+						"reference": "Condition/SleepApnea"
+					}
+				],
+				"occurrenceDateTime": "2023-04-10",
+				"requester": {
+					"reference": "Practitioner/positive-Practitioner"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ServiceRequest/SleepStudy"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "ServiceRequest",
+				"id": "SleepStudy2",
+				"meta": {
+					"profile": [
+						"http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+						"http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-servicerequest"
+					]
+				},
+				"status": "draft",
+				"intent": "order",
+				"code": {
+					"coding": [
+						{
+							"system": "http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes",
+							"code": "ASLP.A1.DE14",
+							"display": "Artificial intelligence (AI)"
+						}
+					],
+					"text": "Artificial intelligence (AI)"
+				},
+				"subject": {
+					"reference": "Patient/positive"
+				},
+				"authoredOn": "2023-04-06",
+				"reasonReference": [
+					{
+						"reference": "Condition/SleepApnea"
+					}
+				],
+				"occurrenceDateTime": "2023-04-15",
+				"requester": {
+					"reference": "Practitioner/positive-Practitioner"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ServiceRequest/SleepStudy2"
+			}
+		}
+	]
+}

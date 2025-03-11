@@ -1,10 +1,8 @@
-package ca.uhn.fhir.spring.boot.autoconfigure;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,88 +17,87 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "hapi.fhir")
 public class FhirProperties {
 
-    private FhirVersionEnum version = FhirVersionEnum.DSTU2;
+	private FhirVersionEnum version = FhirVersionEnum.DSTU2;
 
-    private Server server = new Server();
+	private Server server = new Server();
 
-    private Validation validation = new Validation();
+	private Validation validation = new Validation();
 
-    public FhirVersionEnum getVersion() {
-        return version;
-    }
+	public FhirVersionEnum getVersion() {
+		return version;
+	}
 
-    public void setVersion(FhirVersionEnum version) {
-        this.version = version;
-    }
+	public void setVersion(FhirVersionEnum version) {
+		this.version = version;
+	}
 
-    public Server getServer() {
-        return server;
-    }
+	public Server getServer() {
+		return server;
+	}
 
-    public void setServer(Server server) {
-        this.server = server;
-    }
+	public void setServer(Server server) {
+		this.server = server;
+	}
 
-    public Validation getValidation() {
-        return validation;
-    }
+	public Validation getValidation() {
+		return validation;
+	}
 
-    public void setValidation(Validation validation) {
-        this.validation = validation;
-    }
+	public void setValidation(Validation validation) {
+		this.validation = validation;
+	}
 
-    public static class Server {
+	public static class Server {
 
-        private String url;
+		private String url;
 
-        private String path = "/fhir/*";
+		private String path = "/fhir/*";
 
-        public String getUrl() {
-            return url;
-        }
+		public String getUrl() {
+			return url;
+		}
 
-        public void setUrl(String url) {
-            this.url = url;
-        }
+		public void setUrl(String url) {
+			this.url = url;
+		}
 
-        public String getPath() {
-            return path;
-        }
+		public String getPath() {
+			return path;
+		}
 
-        public void setPath(String path) {
-            this.path = path;
-        }
-    }
+		public void setPath(String path) {
+			this.path = path;
+		}
+	}
 
-    public static class Validation {
+	public static class Validation {
 
-        private boolean enabled = true;
+		private boolean enabled = true;
 
-        private boolean requestOnly = true;
+		private boolean requestOnly = true;
 
-        public boolean isEnabled() {
-            return enabled;
-        }
+		public boolean isEnabled() {
+			return enabled;
+		}
 
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
 
-        public boolean isRequestOnly() {
-            return requestOnly;
-        }
+		public boolean isRequestOnly() {
+			return requestOnly;
+		}
 
-        public void setRequestOnly(boolean requestOnly) {
-            this.requestOnly = requestOnly;
-        }
-    }
+		public void setRequestOnly(boolean requestOnly) {
+			this.requestOnly = requestOnly;
+		}
+	}
 }

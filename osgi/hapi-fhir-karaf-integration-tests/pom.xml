@@ -166,12 +166,6 @@
             <scope>test</scope>
       </dependency>
       <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
-            <version>1.3_1</version>
-            <scope>runtime</scope>
-      </dependency>
-      <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
       </dependency>
@@ -201,7 +195,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
 					<systemPropertyVariables>
 						<karaf.version>${apache_karaf_version}</karaf.version>

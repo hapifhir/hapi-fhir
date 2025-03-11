@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4078
+title: "Modified BinaryAccessProvider to use a safer method of checking the contents of an input stream. Thanks to @ttntrifork for the fix!"

@@ -3,10 +3,12 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.time.DateUtils;
@@ -16,6 +18,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +26,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mockStatic;
+
 
 public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	private static final long TEST_REFRESH_INTERVAL = DateUtils.MILLIS_PER_DAY;
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
-	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
+	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+
+	@Autowired
+	private SearchParamRegistryImpl mySearchParamRegistry;
 
 	private final static String RESOURCE_NAME = "Patient";
 	private TestCallback myMaleTestCallback = new TestCallback("MALE");
@@ -51,6 +61,63 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
+	}
+
+	@Test
+	public void forceRefresh_beforeSearchParametersInitialized_willNotFallIntoAnInfiniteLoop() {
+		// setup
+		int maxRetries = 3; // a small number for short tests
+		AtomicInteger counter = new AtomicInteger();
+		AtomicBoolean initCheck = new AtomicBoolean();
+
+		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+			"StructureDefinition",
+			SearchParameterMap.newSynchronous(),
+			new IResourceChangeListener() {
+				@Override
+				public void handleInit(Collection<IIdType> theResourceIds) {
+					initCheck.set(true);
+				}
+
+				@Override
+				public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+
+				}
+			},
+			100
+		);
+
+		assertTrue((cache instanceof ResourceChangeListenerCache));
+
+		// set the HSearchIndexing
+		boolean useAdvancedHSearch = myStorageSettings.isAdvancedHSearchIndexing();
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+
+		// so they will be forced to be refreshed
+		mySearchParamRegistry.setActiveSearchParams(null);
+		try (MockedStatic<ResourceChangeListenerCache> cacheConstants = mockStatic(ResourceChangeListenerCache.class)) {
+			cacheConstants.when(ResourceChangeListenerCache::getMaxRetries).thenAnswer((args) -> {
+				if (counter.getAndIncrement() > maxRetries) {
+					// fail after a few tries to ensure we don't fall into an infinite loop
+					fail("This should not fall into an infinite loop");
+				}
+				return maxRetries;
+			});
+			cacheConstants.when(ResourceChangeListenerCache::now)
+				.thenCallRealMethod();
+
+			// test
+			ResourceChangeResult result = cache.forceRefresh();
+
+			// verify
+			assertEquals(0, result.created);
+			assertEquals(0, result.updated);
+			assertEquals(0, result.deleted);
+			assertTrue(initCheck.get());
+		} finally {
+			// reset for other tests
+			myStorageSettings.setAdvancedHSearchIndexing(useAdvancedHSearch);
+		}
 	}
 
 	@Test
@@ -102,9 +169,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedCreated, long theExpectedUpdated, long theExpectedDeleted) {
-		assertEquals(theExpectedCreated, theResult.created, "created results");
-		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedDeleted, theResult.deleted, "deleted results");
+		assertThat(theResult.created).as("created results").isEqualTo(theExpectedCreated);
+		assertThat(theResult.updated).as("updated results").isEqualTo(theExpectedUpdated);
+		assertThat(theResult.deleted).as("deleted results").isEqualTo(theExpectedDeleted);
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -122,7 +189,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		theTestCallback.awaitInitExpected();
 
 		List<IIdType> resourceIds = theTestCallback.getInitResourceIds();
-		assertThat(resourceIds, hasSize(1));
+		assertThat(resourceIds).hasSize(1);
 		IIdType resourceId = resourceIds.get(0);
 		assertEquals(patientId.toString(), resourceId.toString());
 		assertEquals(1L, resourceId.getVersionIdPartAsLong());
@@ -130,9 +197,10 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		return patient;
 	}
 
-	private IdDt createPatientAndRefreshCache(Patient thePatient, TestCallback theTestCallback, long theExpectedCount) throws InterruptedException {
+	private IdDt createPatientAndRefreshCache(Patient thePatient, TestCallback theTestCallback, long theExpectedCount) {
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		ResourceChangeResult result = myResourceChangeListenerCacheRefresher.forceRefreshAllCachesForUnitTest();
+		ResourceChangeResult result = ProxyUtil.getSingletonTarget(myResourceChangeListenerCacheRefresher, ResourceChangeListenerCacheRefresherImpl.class)
+			.forceRefreshAllCachesForUnitTest();
 		assertResult(result, theExpectedCount, 0, 0);
 		return new IdDt(retval);
 	}
@@ -229,7 +297,9 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
+		otherTestCallback.setInitExpectedCount(1);
 		otherCache.forceRefresh();
+		otherTestCallback.awaitInitExpected();
 		assertEquals(2, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myMaleTestCallback);
@@ -306,12 +376,12 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		}
 
 		public IIdType getUpdateResourceId() {
-			assertThat(myResourceChangeEvent.getUpdatedResourceIds(), hasSize(1));
+			assertThat(myResourceChangeEvent.getUpdatedResourceIds()).hasSize(1);
 			return myResourceChangeEvent.getUpdatedResourceIds().get(0);
 		}
 
 		public IIdType getDeletedResourceId() {
-			assertThat(myResourceChangeEvent.getDeletedResourceIds(), hasSize(1));
+			assertThat(myResourceChangeEvent.getDeletedResourceIds()).hasSize(1);
 			return myResourceChangeEvent.getDeletedResourceIds().get(0);
 		}
 	}

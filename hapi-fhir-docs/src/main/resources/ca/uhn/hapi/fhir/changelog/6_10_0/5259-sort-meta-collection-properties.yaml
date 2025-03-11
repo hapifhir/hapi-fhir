@@ -1,0 +1,7 @@
+---
+type: change
+issue: 5229
+title: "Previously, when using INLINE tag storage mode, a superfluous version of a resource would be created as a result
+  of an update request which didn't have a real logical change to the resource but only changed the order of existing
+  items in tag, security label or profile collections. This change prevents this behaviour. Also on resource retrieval,
+  these meta collections are sorted alphabetically, based on (security, code) pair for tags and security labels."

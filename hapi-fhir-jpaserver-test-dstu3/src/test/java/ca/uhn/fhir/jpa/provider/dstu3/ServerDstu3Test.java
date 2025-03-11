@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
@@ -26,7 +27,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
+		myRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 
@@ -35,14 +36,14 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=xml");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
@@ -67,9 +68,9 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testFetchOpenApi() throws IOException {
-		ourRestServer.registerInterceptor(new OpenApiInterceptor());
+		myRestServer.registerInterceptor(new OpenApiInterceptor());
 
-		HttpGet get = new HttpGet(ourServerBase + "/api-docs");
+		HttpGet get = new HttpGet(myServerBase + "/api-docs");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -41,6 +40,8 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -52,8 +53,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -63,7 +62,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
@@ -98,15 +99,19 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $upload-external-codesystem
 	 * </code>
 	 */
-	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
-//		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
-	})
+	@Operation(
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM,
+			idempotent = false,
+			returnParameters = {
+				//		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
+			})
 	public IBaseParameters uploadSnapshot(
-		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
-		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
-		RequestDetails theRequestDetails
-	) {
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
+					List<ICompositeType> theFiles,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 
@@ -115,10 +120,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		}
 
 		if (theFiles == null || theFiles.size() == 0) {
-			throw new InvalidRequestException(Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
+			throw new InvalidRequestException(
+					Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
-			ValidateUtil.isTrueOrThrowInvalidRequest(getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"),
+					"Package must be of type Attachment");
 		}
 
 		try {
@@ -151,8 +159,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
-			ParametersUtil.addParameterToParametersInteger(getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
-			ParametersUtil.addParameterToParametersReference(getContext(), retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
+			ParametersUtil.addParameterToParametersInteger(
+					getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
+			ParametersUtil.addParameterToParametersReference(
+					getContext(), retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
 
 			return retVal;
 		} finally {
@@ -165,15 +175,23 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-add
 	 * </code>
 	 */
-	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
-	})
+	@Operation(
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD,
+			idempotent = false,
+			returnParameters = {})
 	public IBaseParameters uploadDeltaAdd(
-		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
-		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
-		@OperationParam(name = PARAM_CODESYSTEM, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "CodeSystem") List<IBaseResource> theCodeSystems,
-		RequestDetails theRequestDetails
-	) {
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
+					List<ICompositeType> theFiles,
+			@OperationParam(
+							name = PARAM_CODESYSTEM,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "CodeSystem")
+					List<IBaseResource> theCodeSystems,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
@@ -182,28 +200,36 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
 			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
-			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
+			UploadStatistics outcome =
+					myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
 			endRequest(theServletRequest);
 		}
 	}
-
 
 	/**
 	 * <code>
 	 * $apply-codesystem-delta-remove
 	 * </code>
 	 */
-	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
-	})
+	@Operation(
+			typeName = "CodeSystem",
+			name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE,
+			idempotent = false,
+			returnParameters = {})
 	public IBaseParameters uploadDeltaRemove(
-		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
-		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
-		@OperationParam(name = PARAM_CODESYSTEM, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "CodeSystem") List<IBaseResource> theCodeSystems,
-		RequestDetails theRequestDetails
-	) {
+			HttpServletRequest theServletRequest,
+			@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
+					List<ICompositeType> theFiles,
+			@OperationParam(
+							name = PARAM_CODESYSTEM,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "CodeSystem")
+					List<IBaseResource> theCodeSystems,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
 		try {
@@ -212,15 +238,16 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
 			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
-			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
+			UploadStatistics outcome =
+					myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
 			endRequest(theServletRequest);
 		}
-
 	}
 
-	private void convertCodeSystemsToFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
+	private void convertCodeSystemsToFileDescriptors(
+			List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
 		Map<String, String> codes = new LinkedHashMap<>();
 		Map<String, List<CodeSystem.ConceptPropertyComponent>> codeToProperties = new LinkedHashMap<>();
 
@@ -229,7 +256,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		if (theCodeSystems != null) {
 			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
 				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
+				convertCodeSystemCodesToCsv(
+						nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
 			}
 		}
 
@@ -248,7 +276,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			}
 			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
 			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
+					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			theFiles.add(fileDescriptor);
 		}
 
@@ -267,7 +296,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			}
 			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
 			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
+					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			theFiles.add(fileDescriptor);
 		}
 		// Create codeToProperties file
@@ -288,7 +318,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					b.append(",");
 					b.append(csvEscape(propertyComponent.getCode()));
 					b.append(",");
-					//TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum contain different types
+					// TODO: check this for different types, other types should be added once
+					// TermConceptPropertyTypeEnum contain different types
 					b.append(csvEscape(propertyComponent.getValueStringType().getValue()));
 					b.append(",");
 					b.append(csvEscape(propertyComponent.getValue().primitiveValue()));
@@ -297,25 +328,28 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			}
 			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
 			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
-			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor =
+					new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			theFiles.add(fileDescriptor);
 		}
-
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Nonnull
 	CodeSystem canonicalizeCodeSystem(@Nonnull IBaseResource theCodeSystem) {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theCodeSystem);
-		ValidateUtil.isTrueOrThrowInvalidRequest(resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
 
 		CodeSystem nextCodeSystem;
 		switch (getContext().getVersion().getVersion()) {
 			case DSTU3:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource(
+						(org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
 				break;
 			case R5:
-				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource(
+						(org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
 				break;
 			default:
 				nextCodeSystem = (CodeSystem) theCodeSystem;
@@ -323,7 +357,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return nextCodeSystem;
 	}
 
-	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, Map<String, List<CodeSystem.ConceptPropertyComponent>> theProperties, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
+	private void convertCodeSystemCodesToCsv(
+			List<CodeSystem.ConceptDefinitionComponent> theConcept,
+			Map<String, String> theCodes,
+			Map<String, List<CodeSystem.ConceptPropertyComponent>> theProperties,
+			String theParentCode,
+			Multimap<String, String> theCodeToParentCodes) {
 		for (CodeSystem.ConceptDefinitionComponent nextConcept : theConcept) {
 			if (isNotBlank(nextConcept.getCode())) {
 				theCodes.put(nextConcept.getCode(), nextConcept.getDisplay());
@@ -333,7 +372,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				if (nextConcept.getProperty() != null) {
 					theProperties.put(nextConcept.getCode(), nextConcept.getProperty());
 				}
-				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
+				convertCodeSystemCodesToCsv(
+						nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
 			}
 		}
 	}
@@ -363,18 +403,20 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	@Nonnull
-	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
+	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(
+			@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment")
+					List<ICompositeType> theFiles) {
 		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
 		if (theFiles != null) {
 			for (ICompositeType next : theFiles) {
 
-				String nextUrl = AttachmentUtil.getOrCreateUrl(getContext(), next).getValue();
+				String nextUrl =
+						AttachmentUtil.getOrCreateUrl(getContext(), next).getValue();
 				ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
 
 				byte[] nextData;
 				if (nextUrl.startsWith("localfile:")) {
 					String nextLocalFile = nextUrl.substring("localfile:".length());
-
 
 					if (isNotBlank(nextLocalFile)) {
 						ourLog.info("Reading in local file: {}", nextLocalFile);
@@ -386,8 +428,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					}
 
 				} else {
-					nextData = AttachmentUtil.getOrCreateData(getContext(), next).getValue();
-					ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
+					nextData =
+							AttachmentUtil.getOrCreateData(getContext(), next).getValue();
+					ValidateUtil.isTrueOrThrowInvalidRequest(
+							nextData != null && nextData.length > 0, "Missing Attachment.data value");
 					files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
 				}
 			}
@@ -397,9 +441,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParametersInteger(getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
-		ParametersUtil.addParameterToParametersReference(getContext(), retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
+		ParametersUtil.addParameterToParametersInteger(
+				getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
+		ParametersUtil.addParameterToParametersReference(
+				getContext(), retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
 		return retVal;
+	}
+
+	public void setTerminologyLoaderSvc(ITermLoaderSvc theTermLoaderSvc) {
+		myTerminologyLoaderSvc = theTermLoaderSvc;
 	}
 
 	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
@@ -425,11 +475,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private static String csvEscape(String theValue) {
-		return '"' +
-			theValue
-				.replace("\"", "\"\"")
-				.replace("\n", "\\n")
-				.replace("\r", "") +
-			'"';
+		if (theValue == null) {
+			return "";
+		}
+		return '"' + theValue.replace("\"", "\"\"").replace("\n", "\\n").replace("\r", "") + '"';
 	}
 }

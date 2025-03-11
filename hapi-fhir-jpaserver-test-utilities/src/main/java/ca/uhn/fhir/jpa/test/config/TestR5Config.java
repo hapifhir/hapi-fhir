@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,33 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +54,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -57,14 +65,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaR5Config.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
+	SubscriptionTopicConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	TestHSearchAddInConfig.DefaultLuceneHeap.class
+	TestHSearchAddInConfig.DefaultLuceneHeap.class,
+	HfqlRestProviderCtxConfig.class
 })
 public class TestR5Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR5Config.class);
+	public static final Predicate<String> SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES = CircularQueueCaptureQueriesListener.DEFAULT_SELECT_INCLUSION_CRITERIA.and(t -> !t.toLowerCase(Locale.US).startsWith("select next value"));
 	public static Integer ourMaxThreads;
+
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
+	private boolean myIncludePartitionIdsInPks;
 
 	static {
 		/*
@@ -72,19 +86,21 @@ public class TestR5Config {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 *
-		 * A minimum of 2 is necessary for most transactions,
-		 * so 2 will be our limit
+		 * A minimum of 3 is necessary for most transactions,
+		 * so 3 will be our minimum
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
-			if ("true".equals(System.getProperty("single_db_connection"))) {
+			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
 
 		}
 	}
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	@Autowired
@@ -93,7 +109,8 @@ public class TestR5Config {
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
-		return new CircularQueueCaptureQueriesListener();
+		return new CircularQueueCaptureQueriesListener()
+				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
 	}
 
 	@Bean
@@ -141,8 +158,14 @@ public class TestR5Config {
 
 		};
 
+		String connectionString = "jdbc:h2:mem:testdb_r5";
+		if (myIncludePartitionIdsInPks) {
+			// Use a separate schema for partitioned PKs
+			connectionString += "_partitioned";
+		}
+
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r5");
+		retVal.setUrl(connectionString);
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -157,6 +180,7 @@ public class TestR5Config {
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
+			.afterMethod(captureQueriesListener())
 			.build();
 
 		return dataSource;
@@ -168,15 +192,15 @@ public class TestR5Config {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR5");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
+	protected Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

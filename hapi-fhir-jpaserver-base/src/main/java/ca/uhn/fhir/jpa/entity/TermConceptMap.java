@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,31 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +49,20 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL", "VER"})
-})
-public class TermConceptMap implements Serializable {
+@Table(
+		name = "TRM_CONCEPT_MAP",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CONCEPT_MAP_URL",
+					columnNames = {"PARTITION_ID", "URL", "VER"})
+		},
+		indexes = {
+			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
+			// automatically
+			@Index(name = "FK_TRMCONCEPTMAP_RES", columnList = "RES_ID")
+		})
+@IdClass(IdAndPartitionId.class)
+public class TermConceptMap extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final int MAX_URL_LENGTH = 200;
@@ -56,11 +81,26 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
+	@ManyToOne()
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						nullable = false,
+						insertable = false,
+						updatable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "SOURCE_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
@@ -74,7 +114,7 @@ public class TermConceptMap implements Serializable {
 
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
-	
+
 	@OneToMany(mappedBy = "myConceptMap")
 	private List<TermConceptMapGroup> myConceptMapGroups;
 
@@ -96,15 +136,8 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setResource(ResourceTable theResource) {
 		myResource = theResource;
-		return this;
-	}
-
-	public Long getResourcePid() {
-		return myResourcePid;
-	}
-
-	public TermConceptMap setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
+		myResourcePid = theResource.getId().getId();
+		setPartitionId(theResource.getPartitionId());
 		return this;
 	}
 
@@ -113,8 +146,10 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setSource(String theSource) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSource, TermValueSet.MAX_URL_LENGTH,
-			"Source exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theSource));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theSource,
+				TermValueSet.MAX_URL_LENGTH,
+				"Source exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theSource));
 		mySource = theSource;
 		return this;
 	}
@@ -124,8 +159,10 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setTarget(String theTarget) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theTarget, TermValueSet.MAX_URL_LENGTH,
-			"Target exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theTarget));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theTarget,
+				TermValueSet.MAX_URL_LENGTH,
+				"Target exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theTarget));
 		myTarget = theTarget;
 		return this;
 	}
@@ -136,8 +173,8 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setUrl(@Nonnull String theUrl) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theUrl, MAX_URL_LENGTH, "URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
 		myUrl = theUrl;
 		return this;
 	}
@@ -147,23 +184,28 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setVersion(String theVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
-			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theVersion,
+				MAX_VER_LENGTH,
+				"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
 		myVersion = theVersion;
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
-			.append("myResourcePid", myResourcePid)
-			.append("mySource", mySource)
-			.append("myTarget", myTarget)
-			.append("myUrl", myUrl)
-			.append("myVersion", myVersion)
-			.append(myConceptMapGroups != null ? ("myConceptMapGroups - size=" + myConceptMapGroups.size()) : ("myConceptMapGroups=(null)"))
-			.toString();
+				.append("myId", myId)
+				.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
+				.append("myResourcePid", myResourcePid)
+				.append("mySource", mySource)
+				.append("myTarget", myTarget)
+				.append("myUrl", myUrl)
+				.append("myVersion", myVersion)
+				.append(
+						myConceptMapGroups != null
+								? ("myConceptMapGroups - size=" + myConceptMapGroups.size())
+								: ("myConceptMapGroups=(null)"))
+				.toString();
 	}
 }

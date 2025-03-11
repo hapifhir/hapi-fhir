@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -54,11 +53,11 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 		myResourceIdsToIgnoreConflict = theParentList.myResourceIdsToIgnoreConflict;
 	}
 
-
 	public boolean isResourceIdMarkedForDeletion(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsMarkedForDeletion.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsMarkedForDeletion.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdMarkedForDeletion(IIdType theIdType) {
@@ -70,7 +69,8 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 	public boolean isResourceIdToIgnoreConflict(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsToIgnoreConflict.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsToIgnoreConflict.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdToIgnoreConflict(IIdType theIdType) {
@@ -114,7 +114,7 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 
 			@Override
 			public void remove() {
-				Assert.isTrue(myLastOperationWasNext);
+				Assert.isTrue(myLastOperationWasNext, "myLastOperationWasNext is not true");
 				myNextIndex--;
 				myList.remove(myNextIndex);
 				myLastOperationWasNext = false;

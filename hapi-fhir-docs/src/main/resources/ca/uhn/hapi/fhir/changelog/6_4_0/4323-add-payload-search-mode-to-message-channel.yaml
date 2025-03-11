@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4323
+title: "Previously, the feature of Payload Search Result Mode only applied to Rest Hook subscriptions.
+Now, this feature also applies to Message channel type. Message delivery module will perform a search using 
+user-defined criteria and the search results will be delivered to the user-specified endpoint channel as a bundle
+resource when Payload Search Result Mode is used."

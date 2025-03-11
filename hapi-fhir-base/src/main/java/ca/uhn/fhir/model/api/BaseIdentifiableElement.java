@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -84,8 +83,7 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 	private static class LockedId extends IdDt {
 
 		@CoverageIgnore
-		public LockedId() {
-		}
+		public LockedId() {}
 
 		@CoverageIgnore
 		public LockedId(String theElementSpecificId) {
@@ -95,15 +93,15 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		@Override
 		@CoverageIgnore
 		public IdDt setValue(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException(Msg.code(1899) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
+			throw new UnsupportedOperationException(
+					Msg.code(1899) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
 
 		@Override
 		@CoverageIgnore
 		public void setValueAsString(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException(Msg.code(1900) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
+			throw new UnsupportedOperationException(
+					Msg.code(1900) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
-
 	}
-
 }

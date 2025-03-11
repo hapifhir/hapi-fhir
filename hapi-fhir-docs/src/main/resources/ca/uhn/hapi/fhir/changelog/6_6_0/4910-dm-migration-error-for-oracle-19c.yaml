@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4910
+title: "Remove some references to `all_constraints` table in oracle database migration tasks which were causing errors for version 19c."

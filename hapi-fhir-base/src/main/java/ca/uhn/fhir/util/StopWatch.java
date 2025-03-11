@@ -1,20 +1,8 @@
-package ca.uhn.fhir.util;
-
-import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +17,17 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A multipurpose stopwatch which can be used to time tasks and produce
@@ -267,9 +266,7 @@ public class StopWatch {
 	public void startTask(String theTaskName) {
 		endCurrentTask();
 		Validate.notBlank(theTaskName, "Task name must not be blank");
-		myCurrentTask = new TaskTiming()
-			.setTaskName(theTaskName)
-			.setStart(now());
+		myCurrentTask = new TaskTiming().setTaskName(theTaskName).setStart(now());
 		myTasks.add(myCurrentTask);
 	}
 
@@ -330,7 +327,8 @@ public class StopWatch {
 	/**
 	 * Append a right-aligned and zero-padded numeric value to a `StringBuilder`.
 	 */
-	static void appendRightAlignedNumber(StringBuilder theStringBuilder, String thePrefix, int theNumberOfDigits, long theValueToAppend) {
+	static void appendRightAlignedNumber(
+			StringBuilder theStringBuilder, String thePrefix, int theNumberOfDigits, long theValueToAppend) {
 		theStringBuilder.append(thePrefix);
 		if (theNumberOfDigits > 1) {
 			int pad = (theNumberOfDigits - 1);
@@ -398,9 +396,12 @@ public class StopWatch {
 			}
 		} else {
 			long millisAsLong = (long) theMillis;
-			appendRightAlignedNumber(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
-			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
-			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
+			appendRightAlignedNumber(
+					buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+			appendRightAlignedNumber(
+					buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
+			appendRightAlignedNumber(
+					buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
 			if (theMillis <= DateUtils.MILLIS_PER_MINUTE) {
 				appendRightAlignedNumber(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
 			}
@@ -416,7 +417,7 @@ public class StopWatch {
 	}
 
 	@VisibleForTesting
-	static public void setNowForUnitTest(Long theNowForUnitTest) {
+	public static void setNowForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
 	}
 
@@ -459,5 +460,4 @@ public class StopWatch {
 			return this;
 		}
 	}
-
 }

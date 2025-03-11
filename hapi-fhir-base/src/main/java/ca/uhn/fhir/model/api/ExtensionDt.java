@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -34,20 +33,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @DatatypeDef(name = "Extension")
-public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt, IDatatype> {
+public class ExtensionDt extends BaseIdentifiableElement
+		implements ICompositeDatatype, IBaseExtension<ExtensionDt, IDatatype> {
 
 	private static final long serialVersionUID = 6399491332783085935L;
 
 	private boolean myModifier;
-	
-	@Child(name="url", type=StringDt.class, order=0, min=1, max=1)	
+
+	@Child(name = "url", type = StringDt.class, order = 0, min = 1, max = 1)
 	private StringDt myUrl;
 
 	@Child(name = "value", type = IDatatype.class, order = 1, min = 0, max = 1)
 	private IBaseDatatype myValue;
-	
-	public ExtensionDt() {
-	}
+
+	public ExtensionDt() {}
 
 	public ExtensionDt(boolean theIsModifier) {
 		myModifier = theIsModifier;
@@ -66,7 +65,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 
 		myModifier = theIsModifier;
 		myUrl = new StringDt(theUrl);
-		myValue=theValue;
+		myValue = theValue;
 	}
 
 	/**
@@ -110,17 +109,19 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * Note that if this extension contains extensions (instead of a datatype) then <b>this method will return null</b>. In that case, you must use {@link #getUndeclaredExtensions()} and
 	 * {@link #getUndeclaredModifierExtensions()} to retrieve the child extensions.
 	 * </p>
-	 * 
+	 *
 	 * @throws ClassCastException
 	 *             If the value of this extension is not a primitive datatype
 	 */
 	public IPrimitiveDatatype<?> getValueAsPrimitive() {
 		if (!(getValue() instanceof IPrimitiveDatatype)) {
-			throw new ClassCastException(Msg.code(1887) + "Extension with URL["+myUrl+"] can not be cast to primitive type, type is: "+ getClass().getCanonicalName());
+			throw new ClassCastException(
+					Msg.code(1887) + "Extension with URL[" + myUrl + "] can not be cast to primitive type, type is: "
+							+ getClass().getCanonicalName());
 		}
 		return (IPrimitiveDatatype<?>) getValue();
 	}
-	
+
 	@Override
 	public boolean isEmpty() {
 		return super.isBaseEmpty() && (myValue == null || myValue.isEmpty());
@@ -152,7 +153,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	}
 
 	@Override
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return new ArrayList<T>();
 	}
@@ -169,7 +170,4 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		retVal.append("value", getValue());
 		return retVal.build();
 	}
-	
-	
-
 }

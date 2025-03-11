@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4582
+backport: 6.4.1
+title: "Update IBaseCoding, Tag, and tinder Child to support new userSelected and version fields for resource tags."

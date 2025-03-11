@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 public class MetadataResourceDstu3Test {
@@ -21,9 +22,9 @@ public class MetadataResourceDstu3Test {
         String copiedCodeSystemName = copiedCodeSystem.getName();
         Narrative.NarrativeStatus copiedCodeSystemTextStatus = copiedCodeSystem.getText().getStatus();
 
-        assertTrue(copiedCodeSystem instanceof MetadataResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-        assertEquals("1001", copiedCodeSystemID);
-        assertEquals("Name123", copiedCodeSystemName);
-        assertEquals(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus(), copiedCodeSystemTextStatus);
+			assertTrue(copiedCodeSystem instanceof MetadataResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
+			assertEquals("1001", copiedCodeSystemID);
+			assertEquals("Name123", copiedCodeSystemName);
+			assertEquals(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus(), copiedCodeSystemTextStatus);
     }
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,53 +17,54 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * A HTTP Client interface.
  */
 public interface IHttpClient {
 
-    /**
-     * Create a byte request
-    * @param theContext TODO
-    * @param theContents the contents
-    * @param theContentType the contentType 
-    * @param theEncoding the encoding
-     * @return the http request to be executed
-     */
-    IHttpRequest createByteRequest(FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding);
+	/**
+	 * Create a byte request
+	 * @param theContext TODO
+	 * @param theContents the contents
+	 * @param theContentType the contentType
+	 * @param theEncoding the encoding
+	 * @return the http request to be executed
+	 */
+	IHttpRequest createByteRequest(
+			FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding);
 
-    /**
-     * Create a parameter request
-    * @param theContext TODO
-    * @param theParams the parameters
-    * @param theEncoding the encoding
-     * @return the http request to be executed
-     */
-    IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding);
+	/**
+	 * Create a parameter request
+	 * @param theContext TODO
+	 * @param theParams the parameters
+	 * @param theEncoding the encoding
+	 * @return the http request to be executed
+	 */
+	IHttpRequest createParamRequest(
+			FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding);
 
-    /**
-     * Create a binary request
-    * @param theContext TODO
-    * @param theBinary the binary
-     * @return the http request to be executed
-     */
-    IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
+	/**
+	 * Create a binary request
+	 * @param theContext TODO
+	 * @param theBinary the binary
+	 * @return the http request to be executed
+	 */
+	IHttpRequest createBinaryRequest(FhirContext theContext, IBaseBinary theBinary);
 
-    /**
-     * Create a normal http get request
-    * @param theContext TODO
-    * @param theEncoding the request encoding
-     * @return the http request to be executed
-     */
-    IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
-
+	/**
+	 * Create a normal http get request
+	 * @param theContext TODO
+	 * @param theEncoding the request encoding
+	 * @return the http request to be executed
+	 */
+	IHttpRequest createGetRequest(FhirContext theContext, EncodingEnum theEncoding);
 }

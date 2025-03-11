@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.submit.config;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.submit.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
@@ -31,18 +30,17 @@ import org.springframework.context.annotation.Configuration;
 public class SearchParamSubmitterConfig {
 
 	@Bean
-	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext){
+	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
 		return new SearchParameterCanonicalizer(theFhirContext);
 	}
 
 	@Bean
-	public SearchParamValidatingInterceptor searchParamValidatingInterceptor(){
+	public SearchParamValidatingInterceptor searchParamValidatingInterceptor() {
 		return new SearchParamValidatingInterceptor();
 	}
 
 	@Bean
-	public SearchParamSubmitInterceptorLoader searchParamSubmitInterceptorLoader(){
+	public SearchParamSubmitInterceptorLoader searchParamSubmitInterceptorLoader() {
 		return new SearchParamSubmitInterceptorLoader();
 	}
-
 }

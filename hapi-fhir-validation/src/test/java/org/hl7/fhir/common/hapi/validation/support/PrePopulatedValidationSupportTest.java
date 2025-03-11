@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -8,10 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class PrePopulatedValidationSupportTest {
+public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
 	private final PrePopulatedValidationSupport mySvc = new PrePopulatedValidationSupport(FhirContext.forR4Cached());
 
@@ -30,9 +30,9 @@ public class PrePopulatedValidationSupportTest {
 		sd.setUrl("http://sd");
 		mySvc.addResource(sd);
 
-		assertSame(cs, mySvc.fetchCodeSystem("http://cs"));
-		assertSame(vs, mySvc.fetchValueSet("http://vs"));
-		assertSame(sd, mySvc.fetchStructureDefinition("http://sd"));
+		assertThat(mySvc.fetchCodeSystem("http://cs")).isSameAs(cs);
+		assertThat(mySvc.fetchValueSet("http://vs")).isSameAs(vs);
+		assertThat(mySvc.fetchStructureDefinition("http://sd")).isSameAs(sd);
 
 	}
 
@@ -48,7 +48,7 @@ public class PrePopulatedValidationSupportTest {
 		}
 
 		for (Map.Entry<String,byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
-			assertArrayEquals(entry.getValue(), mySvc.fetchBinary(entry.getKey()));
+			assertThat(mySvc.fetchBinary(entry.getKey())).containsExactly(entry.getValue());
 		}
 	}
 }

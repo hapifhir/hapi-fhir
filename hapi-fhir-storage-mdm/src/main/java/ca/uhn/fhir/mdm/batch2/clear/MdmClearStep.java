@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.batch2.clear;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -27,59 +26,69 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("rawtypes")
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearStep.class);
+	private static Runnable ourClearCompletionCallbackForUnitTest;
 
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
-	@Autowired
-	DaoRegistry myDaoRegistry;
+
 	@Autowired
 	IIdHelperService myIdHelperService;
-	@Autowired
-	FhirContext myFhirContext;
+
 	@Autowired
 	IMdmLinkDao myMdmLinkSvc;
 
+	@Autowired
+	private IMdmClearHelperSvc<? extends IResourcePersistentId<?>> myIMdmClearHelperSvc;
+
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
-
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(theStepExecutionDetails.getParameters().getRequestPartitionId());
+		requestDetails.setRetry(true);
+		requestDetails.setMaxRetries(100);
+		requestDetails.setRequestPartitionId(theStepExecutionDetails.getData().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
+		myHapiTransactionService.execute(
+				requestDetails,
+				transactionDetails,
+				buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
 
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	MdmClearJob buildJob(
+			RequestDetails requestDetails,
+			TransactionDetails transactionDetails,
+			StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
 	}
 
@@ -90,7 +99,10 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+		public MdmClearJob(
+				RequestDetails theRequestDetails,
+				TransactionDetails theTransactionDetails,
+				StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
@@ -98,29 +110,66 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			myChunkId = theStepExecutionDetails.getChunkId();
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
-			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			List<? extends IResourcePersistentId> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 			if (persistentIds.isEmpty()) {
 				return null;
 			}
 
-			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
-			StopWatch sw = new StopWatch();
+			// avoid double deletion of mdm links
+			MdmStorageInterceptor.setLinksDeletedBeforehand();
 
-			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
+			try {
+				performWork(persistentIds);
 
-			// We know the list is not empty, and that all resource types are the same, so just use the first one
-			String resourceName  = myData.getResourceType(0);
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
-
-			DeleteConflictList conflicts = new DeleteConflictList();
-			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
-
-			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+			} finally {
+				MdmStorageInterceptor.resetLinksDeletedBeforehand();
+			}
 
 			return null;
 		}
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		private void performWork(List<? extends IResourcePersistentId> thePersistentIds) {
+			ourLog.info(
+					"Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]",
+					thePersistentIds.size(),
+					myInstanceId,
+					myChunkId);
+			StopWatch sw = new StopWatch();
+
+			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(thePersistentIds);
+			ourLog.trace("Deleted {} mdm links in {}", thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
+
+			// use the expunge service to delete multiple resources at once efficiently
+			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
+			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null);
+
+			ourLog.trace(
+					"Deleted {} of {} golden resources in {}",
+					deletedRecords,
+					thePersistentIds.size(),
+					StopWatch.formatMillis(sw.getMillis()));
+
+			ourLog.info(
+					"Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+					deletedRecords,
+					thePersistentIds.size(),
+					sw,
+					sw.formatThroughput(thePersistentIds.size(), TimeUnit.SECONDS),
+					myInstanceId,
+					myChunkId);
+
+			if (ourClearCompletionCallbackForUnitTest != null) {
+				ourClearCompletionCallbackForUnitTest.run();
+			}
+		}
+	}
+
+	@VisibleForTesting
+	public static void setClearCompletionCallbackForUnitTest(Runnable theClearCompletionCallbackForUnitTest) {
+		ourClearCompletionCallbackForUnitTest = theClearCompletionCallbackForUnitTest;
 	}
 }

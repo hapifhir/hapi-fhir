@@ -11,3 +11,4 @@
 "http://example.com/codesystem/2","Version 2s","http://example.com/codesystem/3","Version 3t","Code 2b","Display 2b","Code 3b","Display 3b","equal","3b This is a comment."
 "http://example.com/codesystem/2","Version 2s","http://example.com/codesystem/3","Version 3t","Code 2c","Display 2c","Code 3c","Display 3c","equal","3c This is a comment."
 "http://example.com/codesystem/2","Version 2s","http://example.com/codesystem/3","Version 3t","Code 2d","Display 2d","Code 3d","Display 3d","equal","3d This is a comment."
+"http://example.com/codesystem/2","Version 2s","http://example.com/codesystem/3","Version 3t","Code 2e","Display 2e","","","unmatched","3e This is a comment."

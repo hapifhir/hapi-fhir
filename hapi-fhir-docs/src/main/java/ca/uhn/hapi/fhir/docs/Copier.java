@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -30,7 +29,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -44,10 +47,16 @@ public class Copier {
 		IGenericClient target = ctx.newRestfulGenericClient("https://try.smilecdr.com:8000");
 
 		List<String> resType = Arrays.asList(
-			"Patient", "Organization", "Encounter", "Procedure",
-			"Observation", "ResearchSubject", "Specimen",
-			"ResearchStudy", "Location", "Practitioner"
-		);
+				"Patient",
+				"Organization",
+				"Encounter",
+				"Procedure",
+				"Observation",
+				"ResearchSubject",
+				"Specimen",
+				"ResearchStudy",
+				"Location",
+				"Practitioner");
 
 		List<IBaseResource> queued = new ArrayList<>();
 		Set<String> sent = new HashSet<>();
@@ -62,37 +71,46 @@ public class Copier {
 
 				String missingRef = null;
 				for (ResourceReferenceInfo nextRefInfo : ctx.newTerser().getAllResourceReferences(nextQueued)) {
-					String nextRef = nextRefInfo.getResourceReference().getReferenceElement().getValue();
+					String nextRef = nextRefInfo
+							.getResourceReference()
+							.getReferenceElement()
+							.getValue();
 					if (isNotBlank(nextRef) && !sent.contains(nextRef)) {
 						missingRef = nextRef;
 					}
 				}
 				if (missingRef != null) {
-					ourLog.info("Can't send {} because of missing ref {}", nextQueued.getIdElement().getIdPart(), missingRef);
+					ourLog.info(
+							"Can't send {} because of missing ref {}",
+							nextQueued.getIdElement().getIdPart(),
+							missingRef);
 					continue;
 				}
 
-				IIdType newId = target
-					.update()
-					.resource(nextQueued)
-					.execute()
-					.getId();
+				IIdType newId = target.update().resource(nextQueued).execute().getId();
 
-				ourLog.info("Copied resource {} and got ID {}", nextQueued.getIdElement().getValue(), newId);
+				ourLog.info(
+						"Copied resource {} and got ID {}",
+						nextQueued.getIdElement().getValue(),
+						newId);
 				sent.add(nextQueued.getIdElement().toUnqualifiedVersionless().getValue());
 				queued.remove(nextQueued);
 			}
 		}
-
-
 	}
 
-	private static void copy(FhirContext theCtx, IGenericClient theSource, IGenericClient theTarget, String theResType, List<IBaseResource> theQueued, Set<String> theSent) {
+	private static void copy(
+			FhirContext theCtx,
+			IGenericClient theSource,
+			IGenericClient theTarget,
+			String theResType,
+			List<IBaseResource> theQueued,
+			Set<String> theSent) {
 		Bundle received = theSource
-			.search()
-			.forResource(theResType)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(theResType)
+				.returnBundle(Bundle.class)
+				.execute();
 		copy(theCtx, theTarget, theResType, theQueued, theSent, received);
 
 		while (received.getLink("next") != null) {
@@ -100,13 +118,19 @@ public class Copier {
 			received = theSource.loadPage().next(received).execute();
 			copy(theCtx, theTarget, theResType, theQueued, theSent, received);
 		}
-
 	}
 
-	private static void copy(FhirContext theCtx, IGenericClient theTarget, String theResType, List<IBaseResource> theQueued, Set<String> theSent, Bundle theReceived) {
+	private static void copy(
+			FhirContext theCtx,
+			IGenericClient theTarget,
+			String theResType,
+			List<IBaseResource> theQueued,
+			Set<String> theSent,
+			Bundle theReceived) {
 		for (Bundle.BundleEntryComponent nextEntry : theReceived.getEntry()) {
 			Resource nextResource = nextEntry.getResource();
-			nextResource.setId(theResType + "/" + "CR-" + nextResource.getIdElement().getIdPart());
+			nextResource.setId(
+					theResType + "/" + "CR-" + nextResource.getIdElement().getIdPart());
 
 			boolean haveUnsentReference = false;
 			for (ResourceReferenceInfo nextRefInfo : theCtx.newTerser().getAllResourceReferences(nextResource)) {
@@ -127,15 +151,10 @@ public class Copier {
 				continue;
 			}
 
-			IIdType newId = theTarget
-				.update()
-				.resource(nextResource)
-				.execute()
-				.getId();
+			IIdType newId = theTarget.update().resource(nextResource).execute().getId();
 
 			ourLog.info("Copied resource {} and got ID {}", nextResource.getId(), newId);
 			theSent.add(nextResource.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 	}
-
 }

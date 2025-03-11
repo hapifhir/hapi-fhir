@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5933
+title: "Bulk export was failing with a HAPI-1775 error with the persistence module configured for DSTU3.
+        This has been fixed."

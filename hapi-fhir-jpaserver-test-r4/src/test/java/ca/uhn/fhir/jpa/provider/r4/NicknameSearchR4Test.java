@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
@@ -11,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 	@Autowired
@@ -46,12 +46,12 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 
 		Bundle result = myClient
 			.loadPage()
-			.byUrl(ourServerBase + "/Patient?name:nickname=kenneth")
+			.byUrl(myServerBase + "/Patient?name:nickname=kenneth")
 			.andReturnBundle(Bundle.class)
 			.execute();
 
 		List<Patient> resources = BundleUtil.toListOfResourcesOfType(myFhirContext,result, Patient.class);
-		assertThat(resources, hasSize(1));
+		assertThat(resources).hasSize(1);
 		assertEquals("ken", resources.get(0).getNameFirstRep().getGivenAsSingleString());
 	}
 }

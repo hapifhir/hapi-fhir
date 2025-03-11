@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
@@ -28,7 +27,8 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType> implements IQueryParameterOr<PT> {
+public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType>
+		implements IQueryParameterOr<PT> {
 
 	private List<PT> myList = new ArrayList<>();
 

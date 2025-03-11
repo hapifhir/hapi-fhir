@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4878
+title: "Batch jobs occasionaly reported zero (0) record processed counts.  This has been corrected."

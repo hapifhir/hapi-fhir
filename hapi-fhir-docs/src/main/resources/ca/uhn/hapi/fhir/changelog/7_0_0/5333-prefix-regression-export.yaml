@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5333
+backport: 6.8.3
+jira: SMILE-7403
+title: "A regression was introduced in 2023.08.R01 which caused binary storage prefixes to not be applied to exported binary blobs. This has been fixed."

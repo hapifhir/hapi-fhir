@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,24 @@ package ca.uhn.fhir.rest.server.messaging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging;
 
-
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {
@@ -145,7 +149,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	/**
 	 * Adds a transaction ID to this message. This ID can be used for many purposes. For example, performing tracing
 	 * across asynchronous hooks, tying data together, or downstream logging purposes.
-	 *
+	 * <p>
 	 * One current internal implementation uses this field to tie back MDM processing results (which are asynchronous)
 	 * to the original transaction log that caused the MDM processing to occur.
 	 *
@@ -163,13 +167,39 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
+	@Deprecated
 	@Nullable
 	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+	public String getMessageKey() {
 		return myMessageKey;
 	}
 
 	public void setMessageKey(String theMessageKey) {
 		myMessageKey = theMessageKey;
+	}
+
+	/**
+	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns <code>null</code>.
+	 *
+	 * @return the message key value or default
+	 */
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
+
+	/**
+	 * Provides a fallback value when method {@link #getMessageKey()} returns <code>null</code>.
+	 *
+	 * @return null by default
+	 */
+	@Nullable
+	protected String getMessageKeyDefaultValue() {
+		return null;
 	}
 
 	public enum OperationTypeEnum {
@@ -185,8 +215,44 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 			myRestOperationTypeEnum = theRestOperationTypeEnum;
 		}
 
+		public static OperationTypeEnum from(RestOperationTypeEnum theRestOperationType) {
+			switch (theRestOperationType) {
+				case CREATE:
+					return CREATE;
+				case UPDATE:
+					return UPDATE;
+				case DELETE:
+					return DELETE;
+				default:
+					throw new IllegalArgumentException(
+							Msg.code(2348) + "Unsupported operation type: " + theRestOperationType);
+			}
+		}
+
 		public RestOperationTypeEnum asRestOperationType() {
 			return myRestOperationTypeEnum;
 		}
+	}
+
+	@VisibleForTesting
+	public Map<String, String> getAttributes() {
+		return ObjectUtils.defaultIfNull(myAttributes, Collections.emptyMap());
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		BaseResourceMessage that = (BaseResourceMessage) theO;
+		return getOperationType() == that.getOperationType()
+				&& Objects.equals(getAttributes(), that.getAttributes())
+				&& Objects.equals(getTransactionId(), that.getTransactionId())
+				&& Objects.equals(getMediaType(), that.getMediaType())
+				&& Objects.equals(getMessageKey(), that.getMessageKey());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getOperationType(), getAttributes(), getTransactionId(), getMediaType());
 	}
 }

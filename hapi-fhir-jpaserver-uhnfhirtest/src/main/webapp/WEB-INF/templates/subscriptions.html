@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head th:include="tmpl-head :: head">
-<title>RESTful Tester</title>
+<head>
+	<th:block th:insert="~{tmpl-head :: head}" />
+	<title>RESTful Tester</title>
 </head>
 
 <body>
@@ -9,16 +10,16 @@
 		<input type="hidden" id="serverId" name="serverId"
 			th:value="${serverId}" />
 
-		<div th:replace="tmpl-navbar-top :: top"></div>
+		<div th:replace="~{tmpl-navbar-top :: top}"></div>
 
 		<div class="container-fluid">
 			<div class="row">
 
-				<div th:replace="tmpl-navbar-left :: left"></div>
+				<div th:replace="~{tmpl-navbar-left :: left}"></div>
 
 				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
 
-					<div th:replace="tmpl-banner :: banner"></div>
+					<div th:replace="~{tmpl-banner :: banner}"></div>
 
 					<!-- ********************************************************** -->
 					<!-- ** Subscriptions Playground                             ** -->
@@ -42,10 +43,10 @@
 						<!-- Nav tabs -->
 						<ul class="nav nav-tabs" role="tablist">
 							<li role="presentation" class="active"><a href="#wss"
-								aria-controls="wss" role="tab" data-toggle="tab">Static
+								aria-controls="wss" role="tab" data-bs-toggle="tab">Static
 									Websocket</a></li>
 							<li role="presentation"><a href="#wsd" aria-controls="wsd"
-								role="tab" data-toggle="tab">Dynamic Websocket</a></li>
+								role="tab" data-bs-toggle="tab">Dynamic Websocket</a></li>
 						</ul>
 
 						<!-- Tab panes -->
@@ -182,6 +183,6 @@
 
 	</form>
 
-	<div th:replace="tmpl-footer :: footer"></div>
+	<div th:replace="~{tmpl-footer :: footer}"></div>
 </body>
 </html>

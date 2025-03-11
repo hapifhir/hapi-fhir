@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4491
+title: "Batch2 Jobs in the FINALIZE state can now be
+      cancelled."

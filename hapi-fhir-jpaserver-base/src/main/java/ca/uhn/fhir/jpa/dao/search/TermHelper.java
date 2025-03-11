@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.search;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,8 +28,7 @@ import java.util.stream.Collectors;
 public class TermHelper {
 
 	/** characters which indicate the string parameter is a simple query string */
-	private static final char[] simpleQuerySyntaxCharacters = new char[] { '+', '|', '"', '(', ')', '~' };
-
+	private static final char[] simpleQuerySyntaxCharacters = new char[] {'+', '|', '"', '(', ')', '~'};
 
 	/**
 	 * Each input set element is:
@@ -39,26 +37,21 @@ public class TermHelper {
 	 */
 	public static Set<String> makePrefixSearchTerm(Set<String> theStringSet) {
 		return theStringSet.stream()
-			.map(s -> isToLeftUntouched(s) || isQuoted(s) ? s : suffixTokensWithStar(s) )
-			.collect(Collectors.toSet());
+				.map(s -> isToLeftUntouched(s) || isQuoted(s) ? s : suffixTokensWithStar(s))
+				.collect(Collectors.toSet());
 	}
-
 
 	private static String suffixTokensWithStar(String theStr) {
 		StringBuilder sb = new StringBuilder();
 
-		Arrays.stream(theStr.trim().split(" "))
-			.forEach(s -> sb.append(s).append("* "));
+		Arrays.stream(theStr.trim().split(" ")).forEach(s -> sb.append(s).append("* "));
 
 		return sb.toString().trim();
 	}
 
-
 	private static boolean isQuoted(String theS) {
-		return ( theS.startsWith("\"") && theS.endsWith("\"") ) ||
-			( theS.startsWith("'") && theS.endsWith("'") );
+		return (theS.startsWith("\"") && theS.endsWith("\"")) || (theS.startsWith("'") && theS.endsWith("'"));
 	}
-
 
 	/**
 	 * Returns true when the input string is recognized as Lucene Simple Query Syntax
@@ -66,13 +59,14 @@ public class TermHelper {
 	 */
 	static boolean isToLeftUntouched(String theString) {
 		// remove backslashed * and - characters from string before checking, as those shouldn't be considered
-		if (theString.startsWith("-")) { return true; } // it is SimpleQuerySyntax
+		if (theString.startsWith("-")) {
+			return true;
+		} // it is SimpleQuerySyntax
 
-		if (theString.endsWith("*")) { return true; } // it is SimpleQuerySyntax
+		if (theString.endsWith("*")) {
+			return true;
+		} // it is SimpleQuerySyntax
 
 		return StringUtils.containsAny(theString, simpleQuerySyntaxCharacters);
 	}
-
-
-
 }

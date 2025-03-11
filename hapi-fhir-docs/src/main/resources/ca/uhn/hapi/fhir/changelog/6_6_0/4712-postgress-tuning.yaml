@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 4712
+title: "Postgres indexing settings have changed.  Autovacuum will run more frequently, and hashed columns will track more most-frequent items."

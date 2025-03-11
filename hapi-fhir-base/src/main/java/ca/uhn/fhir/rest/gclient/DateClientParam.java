@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +17,21 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Date;
+package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
+import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Date parameter type for use in fluent client interfaces
  */
-public class DateClientParam  extends BaseClientParam implements IParam {
+public class DateClientParam extends BaseClientParam implements IParam {
 
 	private String myParamName;
 
@@ -126,7 +125,6 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		public IDateSpecifier orExactly() {
 			return new DateWithPrefix(ParamPrefixEnum.EQUAL, this);
 		}
-
 	}
 
 	private class DateWithPrefix implements IDateSpecifier {
@@ -216,7 +214,6 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 		IDateCriterion millis(Date theValue);
 
 		IDateCriterion millis(String theValue);
-
 	}
 
 	public interface IDateCriterion extends ICriterion<DateClientParam> {
@@ -230,5 +227,4 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 
 		IDateSpecifier orExactly();
 	}
-
 }

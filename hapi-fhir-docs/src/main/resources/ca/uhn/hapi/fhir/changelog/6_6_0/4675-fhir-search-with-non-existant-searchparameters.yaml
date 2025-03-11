@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4675
+title: "Previously, when a `_has` query was performed with a non-existent reference field, the query succeed with 
+empty results in H2 and failed with a 500 Server Error in Postgres. Now all database vendors will throw an 
+`InvalidRequestException` if a non-existent reference field is provided for a `_has` query."

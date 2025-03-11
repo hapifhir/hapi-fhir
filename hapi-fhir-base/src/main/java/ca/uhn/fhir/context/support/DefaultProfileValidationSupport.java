@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context.support;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +17,24 @@ package ca.uhn.fhir.context.support;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.support;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.BundleUtil;
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.ILockable;
+import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class returns the vocabulary that is shipped with the base FHIR
@@ -58,185 +48,117 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
-	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
-	private static final String URL_PREFIX_STRUCTURE_DEFINITION_BASE = "http://hl7.org/fhir/";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultProfileValidationSupport.class);
-	private final FhirContext myCtx;
+	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations =
+			Collections.synchronizedMap(new HashMap<>());
 
-	private Map<String, IBaseResource> myCodeSystems;
-	private Map<String, IBaseResource> myStructureDefinitions;
-	private Map<String, IBaseResource> myValueSets;
-	private List<String> myTerminologyResources;
-	private List<String> myStructureDefinitionResources;
+	/**
+	 * Userdata key indicating the source package ID for this package
+	 */
+	public static final String SOURCE_PACKAGE_ID =
+			DefaultProfileValidationSupport.class.getName() + "_SOURCE_PACKAGE_ID";
+
+	private final FhirContext myCtx;
+	/**
+	 * This module just delegates all calls to a concrete implementation which will
+	 * be in this field. Which implementation gets used depends on the FHIR version.
+	 */
+	private final IValidationSupport myDelegate;
+
+	private final Runnable myFlush;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theFhirContext The context to use
 	 */
-	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
+	public DefaultProfileValidationSupport(@Nonnull FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		myCtx = theFhirContext;
-	}
 
+		IValidationSupport strategy;
+		synchronized (ourImplementations) {
+			strategy = ourImplementations.get(theFhirContext.getVersion().getVersion());
 
-	private void initializeResourceLists() {
-
-		if (myTerminologyResources != null && myStructureDefinitionResources != null) {
-			return;
-		}
-
-		List<String> terminologyResources = new ArrayList<>();
-		List<String> structureDefinitionResources = new ArrayList<>();
-		switch (getFhirContext().getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/instance/model/valueset/v3-codesystems.xml");
-				Properties profileNameProperties = new Properties();
-				try {
-					profileNameProperties.load(DefaultProfileValidationSupport.class.getResourceAsStream("/org/hl7/fhir/instance/model/profile/profiles.properties"));
-					for (Object nextKey : profileNameProperties.keySet()) {
-						structureDefinitionResources.add("/org/hl7/fhir/instance/model/profile/" + nextKey);
-					}
-				} catch (IOException e) {
-					throw new ConfigurationException(Msg.code(1740) + e);
+			if (strategy == null) {
+				if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
+					/*
+					 * I don't love that we use reflection here, but this class is in
+					 * hapi-fhir-base, and the class we're creating is in
+					 * hapi-fhir-validation. There are complicated dependency chains that
+					 * make this hard to clean up. At some point it'd be nice to figure out
+					 * a cleaner solution though.
+					 */
+					strategy = ReflectionUtil.newInstance(
+							"org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy",
+							IValidationSupport.class,
+							new Class[] {FhirContext.class},
+							new Object[] {theFhirContext});
+					((ILockable) strategy).lock();
+				} else {
+					strategy = new DefaultProfileValidationSupportBundleStrategy(theFhirContext);
 				}
-				break;
-			case DSTU2_1:
-				terminologyResources.add("/org/hl7/fhir/dstu2016may/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/dstu2016may/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/dstu2016may/model/valueset/v3-codesystems.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu2016may/model/profile/profiles-resources.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu2016may/model/profile/profiles-types.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu2016may/model/profile/profiles-others.xml");
-				break;
-			case DSTU3:
-				terminologyResources.add("/org/hl7/fhir/dstu3/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/dstu3/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/dstu3/model/valueset/v3-codesystems.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu3/model/profile/profiles-resources.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu3/model/profile/profiles-types.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu3/model/profile/profiles-others.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/dstu3/model/extension/extension-definitions.xml");
-				break;
-			case R4:
-				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v3-codesystems.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-resources.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-types.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-others.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r4/model/extension/extension-definitions.xml");
-				break;
-			case R5:
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-resources.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-types.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-others.xml");
-				structureDefinitionResources.add("/org/hl7/fhir/r5/model/extension/extension-definitions.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/r5/model/valueset/v3-codesystems.xml");
-				break;
+				ourImplementations.put(theFhirContext.getVersion().getVersion(), strategy);
+			}
 		}
 
-		myTerminologyResources = terminologyResources;
-		myStructureDefinitionResources = structureDefinitionResources;
+		myDelegate = strategy;
+		if (myDelegate instanceof DefaultProfileValidationSupportBundleStrategy) {
+			myFlush = () -> ((DefaultProfileValidationSupportBundleStrategy) myDelegate).flush();
+		} else {
+			myFlush = () -> {};
+		}
 	}
 
+	@Override
+	public String getName() {
+		return myCtx.getVersion().getVersion() + " FHIR Standard Profile Validation Support";
+	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
-		ArrayList<IBaseResource> retVal = new ArrayList<>();
-		retVal.addAll(myCodeSystems.values());
-		retVal.addAll(myStructureDefinitions.values());
-		retVal.addAll(myValueSets.values());
+		List<IBaseResource> retVal = myDelegate.fetchAllConformanceResources();
+		addPackageInformation(retVal);
 		return retVal;
 	}
 
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
-		return toList(provideStructureDefinitionMap());
+		List<T> retVal = myDelegate.fetchAllStructureDefinitions();
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
-		return null;
+		List<T> retVal = myDelegate.fetchAllNonBaseStructureDefinitions();
+		addPackageInformation(retVal);
+		return retVal;
 	}
-
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		return fetchCodeSystemOrValueSet(theSystem, true);
-	}
-
-	private IBaseResource fetchCodeSystemOrValueSet(String theSystem, boolean codeSystem) {
-		synchronized (this) {
-			Map<String, IBaseResource> codeSystems = myCodeSystems;
-			Map<String, IBaseResource> valueSets = myValueSets;
-			if (codeSystems == null || valueSets == null) {
-				codeSystems = new HashMap<>();
-				valueSets = new HashMap<>();
-
-				initializeResourceLists();
-				for (String next : myTerminologyResources) {
-					loadCodeSystems(codeSystems, valueSets, next);
-				}
-
-				myCodeSystems = codeSystems;
-				myValueSets = valueSets;
-			}
-
-			// System can take the form "http://url|version"
-			String system = theSystem;
-			String version = null;
-			int pipeIdx = system.indexOf('|');
-			if (pipeIdx > 0) {
-				version = system.substring(pipeIdx + 1);
-				system = system.substring(0, pipeIdx);
-			}
-
-			IBaseResource candidate;
-			if (codeSystem) {
-				candidate = codeSystems.get(system);
-			} else {
-				candidate = valueSets.get(system);
-			}
-
-			if (candidate != null && isNotBlank(version) && !system.startsWith("http://hl7.org") && !system.startsWith("http://terminology.hl7.org")) {
-				if (!StringUtils.equals(version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
-					candidate = null;
-				}
-			}
-
-			return candidate;
-		}
+		IBaseResource retVal = myDelegate.fetchCodeSystem(theSystem);
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		String url = theUrl;
-		if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
-			// no change
-		} else if (url.indexOf('/') == -1) {
-			url = URL_PREFIX_STRUCTURE_DEFINITION + url;
-		} else if (StringUtils.countMatches(url, '/') == 1) {
-			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
-		}
-		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
-		return structureDefinitionMap.get(url);
+		IBaseResource retVal = myDelegate.fetchStructureDefinition(theUrl);
+		addPackageInformation(retVal);
+		return retVal;
 	}
 
 	@Override
 	public IBaseResource fetchValueSet(String theUrl) {
-		IBaseResource retVal = fetchCodeSystemOrValueSet(theUrl, false);
+		IBaseResource retVal = myDelegate.fetchValueSet(theUrl);
+		addPackageInformation(retVal);
 		return retVal;
 	}
 
 	public void flush() {
-		myCodeSystems = null;
-		myStructureDefinitions = null;
+		myFlush.run();
 	}
 
 	@Override
@@ -244,132 +166,14 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return myCtx;
 	}
 
-	private Map<String, IBaseResource> provideStructureDefinitionMap() {
-		Map<String, IBaseResource> structureDefinitions = myStructureDefinitions;
-		if (structureDefinitions == null) {
-			structureDefinitions = new HashMap<>();
-
-			initializeResourceLists();
-			for (String next : myStructureDefinitionResources) {
-				loadStructureDefinitions(structureDefinitions, next);
-			}
-
-			myStructureDefinitions = structureDefinitions;
-		}
-		return structureDefinitions;
-	}
-
-	private void loadCodeSystems(Map<String, IBaseResource> theCodeSystems, Map<String, IBaseResource> theValueSets, String theClasspath) {
-		ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
-		InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-		InputStreamReader reader = null;
-		if (inputStream != null) {
-			try {
-				reader = new InputStreamReader(inputStream, Constants.CHARSET_UTF8);
-				List<IBaseResource> resources = parseBundle(reader);
-				for (IBaseResource next : resources) {
-
-					RuntimeResourceDefinition nextDef = getFhirContext().getResourceDefinition(next);
-					Map<String, IBaseResource> map = null;
-					switch (nextDef.getName()) {
-						case "CodeSystem":
-							map = theCodeSystems;
-							break;
-						case "ValueSet":
-							map = theValueSets;
-							break;
-					}
-
-					if (map != null) {
-						String urlValueString = getConformanceResourceUrl(next);
-						if (isNotBlank(urlValueString)) {
-							map.put(urlValueString, next);
-						}
-
-						switch (myCtx.getVersion().getVersion()) {
-							case DSTU2:
-							case DSTU2_HL7ORG:
-
-								IPrimitiveType<?> codeSystem = myCtx.newTerser().getSingleValueOrNull(next, "ValueSet.codeSystem.system", IPrimitiveType.class);
-								if (codeSystem != null && isNotBlank(codeSystem.getValueAsString())) {
-									theCodeSystems.put(codeSystem.getValueAsString(), next);
-								}
-
-								break;
-
-							default:
-							case DSTU2_1:
-							case DSTU3:
-							case R4:
-							case R5:
-								break;
-						}
-					}
-
-
-				}
-			} finally {
-				try {
-					if (reader != null) {
-						reader.close();
-					}
-					inputStream.close();
-				} catch (IOException e) {
-					ourLog.warn("Failure closing stream", e);
-				}
-			}
-		} else {
-			ourLog.warn("Unable to load resource: {}", theClasspath);
-		}
-	}
-
-	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
-		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
-		try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
-			if (valuesetText != null) {
-				try (InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8)) {
-
-					List<IBaseResource> resources = parseBundle(reader);
-					for (IBaseResource next : resources) {
-
-						String nextType = getFhirContext().getResourceType(next);
-						if ("StructureDefinition".equals(nextType)) {
-
-							String url = getConformanceResourceUrl(next);
-							if (isNotBlank(url)) {
-								theCodeSystems.put(url, next);
-							}
-
-						}
-
-					}
-				}
-			} else {
-				ourLog.warn("Unable to load resource: {}", theClasspath);
-			}
-		} catch (IOException theE) {
-			ourLog.warn("Unable to load resource: {}", theClasspath);
-		}
-	}
-
-	private String getConformanceResourceUrl(IBaseResource theResource) {
-		return getConformanceResourceUrl(getFhirContext(), theResource);
-	}
-
-	private List<IBaseResource> parseBundle(InputStreamReader theReader) {
-		IBaseResource parsedObject = getFhirContext().newXmlParser().parseResource(theReader);
-		if (parsedObject instanceof IBaseBundle) {
-			IBaseBundle bundle = (IBaseBundle) parsedObject;
-			return BundleUtil.toListOfResources(getFhirContext(), bundle);
-		} else {
-			return Collections.singletonList(parsedObject);
-		}
-	}
-
 	@Nullable
 	public static String getConformanceResourceUrl(FhirContext theFhirContext, IBaseResource theResource) {
 		String urlValueString = null;
-		Optional<IBase> urlValue = theFhirContext.getResourceDefinition(theResource).getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
+		Optional<IBase> urlValue = theFhirContext
+				.getResourceDefinition(theResource)
+				.getChildByName("url")
+				.getAccessor()
+				.getFirstValueOrNull(theResource);
 		if (urlValue.isPresent()) {
 			IPrimitiveType<?> urlValueType = (IPrimitiveType<?>) urlValue.get();
 			urlValueString = urlValueType.getValueAsString();
@@ -377,8 +181,42 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return urlValueString;
 	}
 
-	static <T extends IBaseResource> List<T> toList(Map<String, IBaseResource> theMap) {
-		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
-		return (List<T>) Collections.unmodifiableList(retVal);
+	private <T extends IBaseResource> void addPackageInformation(List<T> theResources) {
+		if (theResources != null) {
+			theResources.forEach(this::addPackageInformation);
+		}
+	}
+
+	private void addPackageInformation(IBaseResource theResource) {
+		if (theResource != null) {
+			String sourcePackageId = null;
+			switch (myCtx.getVersion().getVersion()) {
+				case DSTU2:
+				case DSTU2_HL7ORG:
+					sourcePackageId = "hl7.fhir.r2.core";
+					break;
+				case DSTU2_1:
+					return;
+				case DSTU3:
+					sourcePackageId = "hl7.fhir.r3.core";
+					break;
+				case R4:
+					sourcePackageId = "hl7.fhir.r4.core";
+					break;
+				case R4B:
+					sourcePackageId = "hl7.fhir.r4b.core";
+					break;
+				case R5:
+					sourcePackageId = "hl7.fhir.r5.core";
+					break;
+			}
+
+			Validate.notNull(
+					sourcePackageId,
+					"Don't know how to handle package ID: %s",
+					myCtx.getVersion().getVersion());
+
+			theResource.setUserData(SOURCE_PACKAGE_ID, sourcePackageId);
+		}
 	}
 }

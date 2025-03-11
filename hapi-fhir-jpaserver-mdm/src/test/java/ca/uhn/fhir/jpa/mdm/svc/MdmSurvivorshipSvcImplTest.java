@@ -1,59 +1,234 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.svc.MdmSurvivorshipSvcImpl;
+import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class MdmSurvivorshipSvcImplTest extends BaseMdmR4Test {
+@ExtendWith(MockitoExtension.class)
+public class MdmSurvivorshipSvcImplTest {
 
-	@Autowired
-	private IMdmSurvivorshipService myMdmSurvivorshipService;
+	@Spy
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
-	@Test
-	public void testRulesOnCreate() {
-		Patient p1 = buildFrankPatient();
-		Patient p2 = new Patient();
+	@Mock
+	private DaoRegistry myDaoRegistry;
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+	private GoldenResourceHelper myGoldenResourceHelper;
 
-		assertFalse(p2.hasIdElement());
-		assertTrue(p2.getIdentifier().isEmpty());
-		assertTrue(p2.getMeta().isEmpty());
+	// mocks for our GoldenResourceHelper
+	@Mock
+	private IMdmSettings myMdmSettings;
+	@Mock
+	private EIDHelper myEIDHelper;
+	@Mock
+	private MdmPartitionHelper myMdmPartitionHelper;
 
-		assertTrue(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep()));
-		assertNull(p2.getBirthDate());
-		assertEquals(p1.getTelecom().size(), p2.getTelecom().size());
-		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
+	@Mock
+	private IdHelperService myIIdHelperService;
+
+	@Mock
+	private IMdmLinkQuerySvc myMdmLinkQuerySvc;
+
+	@Mock
+	private HapiTransactionService myTransactionService;
+
+	private MdmSurvivorshipSvcImpl mySvc;
+
+	@BeforeEach
+	public void before() {
+		myGoldenResourceHelper = spy(new GoldenResourceHelper(
+			myFhirContext,
+			myMdmSettings,
+			myEIDHelper,
+			myMdmPartitionHelper
+		));
+
+		mySvc = new MdmSurvivorshipSvcImpl(
+			myFhirContext,
+			myGoldenResourceHelper,
+			myDaoRegistry,
+			myMdmLinkQuerySvc,
+			myIIdHelperService,
+			myTransactionService
+		);
 	}
 
-	@Test
-	public void testRulesOnMerge() {
-		Patient p1 = buildFrankPatient();
-		String p1Name = p1.getNameFirstRep().getNameAsSingleString();
-		Patient p2 = buildPaulPatient();
-		String p2Name = p2.getNameFirstRep().getNameAsSingleString();
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@ParameterizedTest
+	@ValueSource(booleans = {true,false})
+	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder(boolean theIsUseNonNumericId) {
+		// setup
+		// create resources
+		int goldenId = 777;
+		Patient goldenPatient = new Patient();
+		goldenPatient.addAddress()
+			.setCity("Toronto")
+			.addLine("200 fake st");
+		goldenPatient.addName()
+			.setFamily("Doe")
+			.addGiven("Jane");
+		goldenPatient.setId("Patient/" + goldenId);
+		MdmResourceUtil.setMdmManaged(goldenPatient);
+		MdmResourceUtil.setGoldenResource(goldenPatient);
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
+		List<IBaseResource> resources = new ArrayList<>();
+		List<MdmLinkJson> links = new ArrayList<>();
+		Map<IIdType, IResourceLookup<JpaPid>> sourceIdToPid = new HashMap<>();
+		for (int i = 0; i < 10; i++) {
+			// we want our resources to be slightly different
+			Patient patient = new Patient();
+			patient.addName()
+				.setFamily("Doe")
+				.addGiven("John" + i);
+			patient.addAddress()
+				.setCity("Toronto")
+				.addLine(String.format("11%d fake st", i));
+			patient.addIdentifier()
+				.setSystem("http://example.com")
+				.setValue("Value" + i);
+			patient.setId("Patient/" + (theIsUseNonNumericId ? "pat" + i : Integer.toString(i)));
+			resources.add(patient);
 
-		assertFalse(p2.hasIdElement());
-		assertFalse(p2.getIdentifier().isEmpty());
-		assertTrue(p2.getMeta().isEmpty());
+			MdmLinkJson link = createLinkJson(
+				patient,
+				goldenPatient
+			);
+			link.setSourcePid(JpaPid.fromId((long)i));
+			link.setGoldenPid(JpaPid.fromId((long)goldenId));
+			link.setSourceId(patient.getId());
+			link.setGoldenResourceId(goldenPatient.getId());
+			links.add(link);
+			sourceIdToPid.put(patient.getIdElement(), new JpaResourceLookup("Patient", patient.getIdPart(), (Long) link.getSourcePid().getId(), null, new PartitionablePartitionId()));
+		}
 
-		assertEquals(2, p2.getName().size());
-		assertEquals(p2Name, p2.getName().get(0).getNameAsSingleString());
-		assertEquals(p1Name, p2.getName().get(1).getNameAsSingleString());
-		assertNull(p2.getBirthDate());
+		IFhirResourceDao resourceDao = mock(IFhirResourceDao.class);
 
-		assertEquals(p1.getTelecom().size(), p1.getTelecom().size());
-		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
+		// when
+		IHapiTransactionService.IExecutionBuilder executionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+		when(myTransactionService.withRequest(any())).thenReturn(executionBuilder);
+		doAnswer(a -> {
+			Runnable callback = a.getArgument(0);
+			callback.run();
+			return 0;
+		}).when(executionBuilder).execute(any(Runnable.class));
+		when(myDaoRegistry.getResourceDao(eq("Patient")))
+			.thenReturn(resourceDao);
+		AtomicInteger counter = new AtomicInteger();
+		when(resourceDao.readByPid(any()))
+			.thenAnswer(params -> resources.get(counter.getAndIncrement()));
+		Page<MdmLinkJson> linkPage = new PageImpl<>(links);
+		when(myMdmLinkQuerySvc.queryLinks(any(), any()))
+			.thenReturn(linkPage);
+		when(myMdmSettings.getMdmRules())
+			.thenReturn(new MdmRulesJson());
+		doReturn(sourceIdToPid).when(myIIdHelperService)
+			.resolveResourceIdentities(any(RequestPartitionId.class), any(List.class), any());
+		// we will return a non-empty list to reduce mocking
+		when(myEIDHelper.getExternalEid(any()))
+			.thenReturn(Collections.singletonList(new CanonicalEID("example", "value", "use")));
+
+		// test
+		Patient goldenPatientRebuilt = mySvc.rebuildGoldenResourceWithSurvivorshipRules(
+			new SystemRequestDetails(),
+			goldenPatient,
+			createTransactionContext()
+		);
+
+		// verify
+		assertNotNull(goldenPatientRebuilt);
+		// make sure it doesn't match the previous golden resource
+		assertThat(goldenPatientRebuilt).isNotEqualTo(goldenPatient);
+		assertThat(goldenPatientRebuilt.getName().get(0).getGiven()).isNotEqualTo(goldenPatient.getName().get(0).getGiven());
+		assertThat(goldenPatientRebuilt.getAddress().get(0).getLine().get(0)).isNotEqualTo(goldenPatient.getAddress().get(0).getLine().get(0));
+		// make sure it's still a golden resource
+		assertTrue(MdmResourceUtil.isGoldenRecord(goldenPatientRebuilt));
+
+		verify(resourceDao)
+			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));
+
+		ArgumentCaptor<List<IIdType>> idsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myIIdHelperService).resolveResourceIdentities(any(RequestPartitionId.class), idsCaptor.capture(), any());
+		assertNotNull(idsCaptor.getValue());
+		assertFalse(idsCaptor.getValue().isEmpty());
+		List<String> ids = idsCaptor.getValue().stream().map(IIdType::getValue).toList();
+
+		List<String> expectedIds = resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList();
+		assertThat(ids).asList().containsExactlyInAnyOrder(expectedIds.toArray());
 	}
 
+	private MdmTransactionContext createTransactionContext() {
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
+		context.setResourceType("Patient");
+		return context;
+	}
+
+	private MdmLinkJson createLinkJson(
+		IBaseResource theSource,
+		IBaseResource theGolden
+	) {
+		MdmLinkJson linkJson = new MdmLinkJson();
+		linkJson.setLinkSource(MdmLinkSourceEnum.AUTO);
+		linkJson.setGoldenResourceId(theGolden.getIdElement().getValueAsString());
+		linkJson.setSourceId(theSource.getIdElement().getValueAsString());
+		linkJson.setMatchResult(MdmMatchResultEnum.MATCH);
+
+		return linkJson;
+	}
 }

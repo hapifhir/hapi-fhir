@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +17,27 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
-import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
-import java.util.Optional;
-
-import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 public class StepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -50,10 +51,9 @@ public class StepExecutor {
 	 * Calls the worker execution step, and performs error handling logic for jobs that failed.
 	 */
 	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(
-		StepExecutionDetails<PT, IT> theStepExecutionDetails,
-		IJobStepWorker<PT, IT, OT> theStepWorker,
-		BaseDataSink<PT, IT, OT> theDataSink
-	) {
+			StepExecutionDetails<PT, IT> theStepExecutionDetails,
+			IJobStepWorker<PT, IT, OT> theStepWorker,
+			BaseDataSink<PT, IT, OT> theDataSink) {
 		String jobDefinitionId = theDataSink.getJobDefinitionId();
 		String targetStepId = theDataSink.getTargetStep().getStepId();
 		String chunkId = theStepExecutionDetails.getChunkId();
@@ -62,41 +62,52 @@ public class StepExecutor {
 		try {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
+		} catch (RetryChunkLaterException ex) {
+			Date nextPollTime = Date.from(Instant.now().plus(ex.getNextPollDuration()));
+			ourLog.debug(
+					"Polling job encountered; will retry chunk {} after after {}s",
+					theStepExecutionDetails.getChunkId(),
+					ex.getNextPollDuration().get(ChronoUnit.SECONDS));
+			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
+			return false;
 		} catch (JobExecutionFailedException e) {
-			ourLog.error("Unrecoverable failure executing job {} step {}",
-				jobDefinitionId,
-				targetStepId,
-				e);
+			ourLog.error(
+					"Unrecoverable failure executing job {} step {} chunk {}",
+					jobDefinitionId,
+					targetStepId,
+					chunkId,
+					e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
+				myJobPersistence.onWorkChunkFailed(chunkId, e.toString());
 			}
 			return false;
 		} catch (Exception e) {
-			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
-				parameters.setChunkId(chunkId);
-				parameters.setErrorMsg(e.getMessage());
-				Optional<WorkChunk> updatedOp = myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(parameters);
-				if (updatedOp.isPresent()) {
-					WorkChunk chunk = updatedOp.get();
-
-					// see comments on MAX_CHUNK_ERROR_COUNT
-					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
-						String errorMsg = "Too many errors: "
-							+ chunk.getErrorCount()
-							+ ". Last error msg was "
-							+ e.getMessage();
-						myJobPersistence.markWorkChunkAsFailed(chunkId, errorMsg);
-						return false;
-					}
+				ourLog.info(
+						"Temporary problem executing job {} step {}, marking chunk {} as retriable ERRORED",
+						jobDefinitionId,
+						targetStepId,
+						chunkId);
+				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
+				WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
+				if (newStatus == WorkChunkStatusEnum.FAILED) {
+					ourLog.error(
+							"Exhausted retries:  Failure executing job {} step {}, marking chunk {} as ERRORED",
+							jobDefinitionId,
+							targetStepId,
+							chunkId,
+							e);
+					return false;
 				}
+			} else {
+				ourLog.error(
+						"Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
 			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {
 			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
+				myJobPersistence.onWorkChunkFailed(chunkId, t.toString());
 			}
 			return false;
 		}
@@ -104,11 +115,10 @@ public class StepExecutor {
 		if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
+			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(
+					chunkId, recordsProcessed, recoveredErrorCount, theDataSink.getRecoveredWarning());
 
-			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
-			if (recoveredErrorCount > 0) {
-				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
-			}
+			myJobPersistence.onWorkChunkCompletion(event);
 		}
 
 		return true;

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
@@ -95,7 +94,12 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					jdbcTemplate.setMaxRows(100000);
 
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getWhereClause();
-					logInfo(ourLog, "Finding up to {} rows in {} that requires calculations, using query: {}", myBatchSize, getTableName(), sql);
+					logInfo(
+							ourLog,
+							"Finding up to {} rows in {} that requires calculations, using query: {}",
+							myBatchSize,
+							getTableName(),
+							sql);
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();
@@ -114,10 +118,9 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					try {
 						next.get();
 					} catch (Exception e) {
-						throw new SQLException(Msg.code(69) + e);
+						throw new SQLException(Msg.code(69) + e, e);
 					}
 				}
-
 			}
 
 		} finally {
@@ -134,36 +137,40 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(maximumPoolSize);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("worker-" + "-%d")
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
+				.namingPattern("worker-" + "-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
 		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 			@Override
 			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				logInfo(ourLog, "Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				logInfo(
+						ourLog,
+						"Note: Executor queue is full ({} elements), waiting for a slot to become available!",
+						executorQueue.size());
 				StopWatch sw = new StopWatch();
 				try {
 					executorQueue.put(theRunnable);
 				} catch (InterruptedException theE) {
-					throw new RejectedExecutionException(Msg.code(70) + "Task " + theRunnable.toString() +
-						" rejected from " + theE.toString());
+					throw new RejectedExecutionException(
+							Msg.code(70) + "Task " + theRunnable.toString() + " rejected from " + theE.toString());
 				}
 				logInfo(ourLog, "Slot become available after {}ms", sw.getMillis());
 			}
 		};
 		myExecutor = new ThreadPoolExecutor(
-			1,
-			maximumPoolSize,
-			0L,
-			TimeUnit.MILLISECONDS,
-			executorQueue,
-			threadFactory,
-			rejectedExecutionHandler);
+				maximumPoolSize,
+				maximumPoolSize,
+				0L,
+				TimeUnit.MILLISECONDS,
+				executorQueue,
+				threadFactory,
+				rejectedExecutionHandler);
 	}
 
-	public void setPidColumnName(String thePidColumnName) {
+	public BaseColumnCalculatorTask setPidColumnName(String thePidColumnName) {
 		myPidColumnName = thePidColumnName;
+		return this;
 	}
 
 	private Future<?> updateRows(List<Map<String, Object>> theRows) {
@@ -179,9 +186,11 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					MandatoryKeyMap<String, Object> nextRowMandatoryKeyMap = new MandatoryKeyMap<>(nextRow);
 
 					// Apply calculators
-					for (Map.Entry<String, Function<MandatoryKeyMap<String, Object>, Object>> nextCalculatorEntry : myCalculators.entrySet()) {
+					for (Map.Entry<String, Function<MandatoryKeyMap<String, Object>, Object>> nextCalculatorEntry :
+							myCalculators.entrySet()) {
 						String nextColumn = nextCalculatorEntry.getKey();
-						Function<MandatoryKeyMap<String, Object>, Object> nextCalculator = nextCalculatorEntry.getValue();
+						Function<MandatoryKeyMap<String, Object>, Object> nextCalculator =
+								nextCalculatorEntry.getValue();
 						Object value = nextCalculator.apply(nextRowMandatoryKeyMap);
 						newValues.put(nextColumn, value);
 					}

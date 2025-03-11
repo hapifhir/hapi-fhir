@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 
 public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutcome> {
-	
+
 	/**
 	 * @since HAPI 0.9 / FHIR DSTU 2
 	 */
@@ -41,12 +40,11 @@ public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutc
 	ICreateTyped conditionalByUrl(String theSearchUrl);
 
 	/**
-	 * Add a <code>Prefer</code> header to the request, which requests that the server include 
+	 * Add a <code>Prefer</code> header to the request, which requests that the server include
 	 * or suppress the resource body as a part of the result. If a resource is returned by the server
 	 * it will be parsed an accessible to the client via {@link MethodOutcome#getResource()}
-	 * 
+	 *
 	 * @since HAPI 1.1
 	 */
 	ICreateTyped prefer(PreferReturnEnum theReturn);
-
 }

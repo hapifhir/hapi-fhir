@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.snomedct;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.snomedct;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.snomedct;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -26,70 +25,74 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public final class SctHandlerRelationship implements IZipContentsHandlerCsv {
-   private final Map<String, TermConcept> myCode2concept;
-   private final TermCodeSystemVersion myCodeSystemVersion;
-   private final Map<String, TermConcept> myRootConcepts;
+	private final Map<String, TermConcept> myCode2concept;
+	private final TermCodeSystemVersion myCodeSystemVersion;
+	private final Map<String, TermConcept> myRootConcepts;
 
-   public SctHandlerRelationship(TermCodeSystemVersion theCodeSystemVersion, HashMap<String, TermConcept> theRootConcepts, Map<String, TermConcept> theCode2concept) {
-      myCodeSystemVersion = theCodeSystemVersion;
-      myRootConcepts = theRootConcepts;
-      myCode2concept = theCode2concept;
-   }
+	public SctHandlerRelationship(
+			TermCodeSystemVersion theCodeSystemVersion,
+			HashMap<String, TermConcept> theRootConcepts,
+			Map<String, TermConcept> theCode2concept) {
+		myCodeSystemVersion = theCodeSystemVersion;
+		myRootConcepts = theRootConcepts;
+		myCode2concept = theCode2concept;
+	}
 
-   @Override
-   public void accept(CSVRecord theRecord) {
-      Set<String> ignoredTypes = new HashSet<String>();
-      ignoredTypes.add("Method (attribute)");
-      ignoredTypes.add("Direct device (attribute)");
-      ignoredTypes.add("Has focus (attribute)");
-      ignoredTypes.add("Access instrument");
-      ignoredTypes.add("Procedure site (attribute)");
-      ignoredTypes.add("Causative agent (attribute)");
-      ignoredTypes.add("Course (attribute)");
-      ignoredTypes.add("Finding site (attribute)");
-      ignoredTypes.add("Has definitional manifestation (attribute)");
+	@Override
+	public void accept(CSVRecord theRecord) {
+		Set<String> ignoredTypes = new HashSet<String>();
+		ignoredTypes.add("Method (attribute)");
+		ignoredTypes.add("Direct device (attribute)");
+		ignoredTypes.add("Has focus (attribute)");
+		ignoredTypes.add("Access instrument");
+		ignoredTypes.add("Procedure site (attribute)");
+		ignoredTypes.add("Causative agent (attribute)");
+		ignoredTypes.add("Course (attribute)");
+		ignoredTypes.add("Finding site (attribute)");
+		ignoredTypes.add("Has definitional manifestation (attribute)");
 
-      String sourceId = theRecord.get("sourceId");
-      String destinationId = theRecord.get("destinationId");
-      String typeId = theRecord.get("typeId");
-      boolean active = "1".equals(theRecord.get("active"));
+		String sourceId = theRecord.get("sourceId");
+		String destinationId = theRecord.get("destinationId");
+		String typeId = theRecord.get("typeId");
+		boolean active = "1".equals(theRecord.get("active"));
 
-      TermConcept typeConcept = myCode2concept.get(typeId);
-      TermConcept sourceConcept = myCode2concept.get(sourceId);
-      TermConcept targetConcept = myCode2concept.get(destinationId);
-      if (sourceConcept != null && targetConcept != null && typeConcept != null) {
-         if (typeConcept.getDisplay().equals("Is a (attribute)")) {
-            TermConceptParentChildLink.RelationshipTypeEnum relationshipType = TermConceptParentChildLink.RelationshipTypeEnum.ISA;
-            if (!sourceId.equals(destinationId)) {
-               if (active) {
-                  TermConceptParentChildLink link = new TermConceptParentChildLink();
-                  link.setChild(sourceConcept);
-                  link.setParent(targetConcept);
-                  link.setRelationshipType(relationshipType);
-                  link.setCodeSystem(myCodeSystemVersion);
+		TermConcept typeConcept = myCode2concept.get(typeId);
+		TermConcept sourceConcept = myCode2concept.get(sourceId);
+		TermConcept targetConcept = myCode2concept.get(destinationId);
+		if (sourceConcept != null && targetConcept != null && typeConcept != null) {
+			if (typeConcept.getDisplay().equals("Is a (attribute)")) {
+				TermConceptParentChildLink.RelationshipTypeEnum relationshipType =
+						TermConceptParentChildLink.RelationshipTypeEnum.ISA;
+				if (!sourceId.equals(destinationId)) {
+					if (active) {
+						TermConceptParentChildLink link = new TermConceptParentChildLink();
+						link.setChild(sourceConcept);
+						link.setParent(targetConcept);
+						link.setRelationshipType(relationshipType);
+						link.setCodeSystem(myCodeSystemVersion);
 
-                  targetConcept.addChild(sourceConcept, relationshipType);
-               } else {
-                  // not active, so we're removing any existing links
-                  for (TermConceptParentChildLink next : new ArrayList<TermConceptParentChildLink>(targetConcept.getChildren())) {
-                     if (next.getRelationshipType() == relationshipType) {
-                        if (next.getChild().getCode().equals(sourceConcept.getCode())) {
-                           next.getParent().getChildren().remove(next);
-                           next.getChild().getParents().remove(next);
-                        }
-                     }
-                  }
-               }
-            }
-         } else if (ignoredTypes.contains(typeConcept.getDisplay())) {
-            // ignore
-         } else {
-            // ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
-         }
-      }
-   }
-
+						targetConcept.addChild(sourceConcept, relationshipType);
+					} else {
+						// not active, so we're removing any existing links
+						for (TermConceptParentChildLink next :
+								new ArrayList<TermConceptParentChildLink>(targetConcept.getChildren())) {
+							if (next.getRelationshipType() == relationshipType) {
+								if (next.getChild().getCode().equals(sourceConcept.getCode())) {
+									next.getParent().getChildren().remove(next);
+									next.getChild().getParents().remove(next);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

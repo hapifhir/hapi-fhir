@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,17 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpPostClientInvocation extends BaseHttpClientInvocationWithContents {
-
 
 	public HttpPostClientInvocation(FhirContext theContext, IBaseResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
@@ -40,15 +37,18 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theResource, null);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public HttpPostClientInvocation(
+			FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
+	public HttpPostClientInvocation(
+			FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
 		super(theContext, theContents, theIsBundle, theUrlExtension);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
+	public HttpPostClientInvocation(
+			FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
 		super(theContext, theParams, theUrlExtension);
 	}
 
@@ -56,5 +56,4 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 	protected RequestTypeEnum getRequestType() {
 		return RequestTypeEnum.POST;
 	}
-
 }

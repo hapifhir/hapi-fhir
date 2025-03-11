@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,6 +19,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -28,11 +32,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
@@ -67,11 +69,76 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		Patient resultingResource = (Patient) outcome.getResource();
-		assertEquals(1, resultingResource.getIdentifier().size());
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
 
 		resultingResource = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, resultingResource.getIdentifier().size());
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
 	}
+
+	@Test
+	public void testFhirPatch_ContentionAware_Match() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		MethodOutcome outcome = myClient
+			.patch()
+			.withFhirPatch(patch)
+			.withId(pid1)
+			.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
+			.execute();
+		assertEquals("2", outcome.getId().getVersionIdPart());
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
+
+
+	@Test
+	public void testFhirPatch_ContentionAware_NoMatch() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			patient.setBirthDate(new Date());
+			myPatientDao.update(patient, mySrd);
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		try {
+			myClient
+				.patch()
+				.withFhirPatch(patch)
+				.withId(pid1)
+				.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
+				.execute();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
+	}
+
 
 	@Test
 	public void testFhirPatch_Transaction() throws Exception {
@@ -99,20 +166,102 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
 		assertEquals(false, newPt.getActive());
 	}
+
+	@Test
+	public void testFhirPatch_TransactionContentionAware_Match() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest()
+			.setUrl(pid1.getValue())
+			.setIfMatch("W/\"1\"")
+			.setMethod(Bundle.HTTPVerb.PATCH);
+
+		Bundle outcome = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("2", new IdType(outcome.getEntry().get(0).getResponse().getLocation()).getVersionIdPart());
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
+
+
+	@Test
+	public void testFhirPatch_TransactionContentionAware_NoMatch() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			patient.setBirthDate(new Date());
+			myPatientDao.update(patient, mySrd);
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		try {
+			Bundle input = new Bundle();
+			input.setType(Bundle.BundleType.TRANSACTION);
+			input.addEntry()
+				.setFullUrl(pid1.getValue())
+				.setResource(patch)
+				.getRequest()
+				.setUrl(pid1.getValue())
+				.setIfMatch("W/\"1\"")
+				.setMethod(Bundle.HTTPVerb.PATCH);
+
+			myClient
+				.transaction()
+				.withBundle(input)
+				.execute();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
+	}
+
 
 	@Test
 	public void testFhirPatch_TransactionWithSearchParameter() throws Exception {
@@ -156,7 +305,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		OperationOutcome delOutcome = (OperationOutcome) myClient.delete().resourceById(id).execute().getOperationOutcome();
-		assertTrue(delOutcome.getIssue().get(0).getDiagnostics().contains("Successfully deleted"));
+		assertThat(delOutcome.getIssue().get(0).getDiagnostics()).contains("Successfully deleted");
 
 		Parameters patch = new Parameters();
 		Parameters.ParametersParameterComponent operation = patch.addParameter();
@@ -215,7 +364,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"      } " +
 			"]";
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Observation/" + id.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Observation/" + id.getIdPart());
 		patch.setEntity(new StringEntity(patchText, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		patch.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
@@ -224,7 +373,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response:\n{}", responseString);
-			assertThat(responseString, containsString("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]"));
+			assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
 		}
 
 	}
@@ -241,15 +390,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -283,14 +432,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -311,15 +460,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?_id=" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?_id=" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -339,15 +488,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?_id=" + pid1.getIdPart()+"FOO");
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?_id=" + pid1.getIdPart()+"FOO");
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -372,15 +521,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?active=true");
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?active=true");
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("Failed to PATCH resource with match URL &quot;Patient?active=true&quot; because this search matched 2 resources"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("Failed to PATCH Patient with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
 		}
 
 	}
@@ -409,14 +558,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"    } ]";
 
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Observation/" + id.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Observation/" + id.getIdPart());
 		patch.setEntity(new StringEntity(patchText, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("was expecting double-quote to start field name"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("was expecting double-quote to start field name");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		}
 
@@ -434,15 +583,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader("If-Match", "W/\"9\"");
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(409, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -462,7 +611,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader("If-Match", "W/\"1\"");
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
@@ -470,8 +619,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -491,7 +640,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
@@ -499,8 +648,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
+			assertThat(responseString).contains("<OperationOutcome");
+			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -534,7 +683,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Encoded output: {}", encoded);
 
@@ -542,7 +691,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -576,12 +725,12 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Missing or invalid content type for PATCH operation"));
+			assertThat(responseString).contains("Missing or invalid content type for PATCH operation");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -614,12 +763,12 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Unable to determine PATCH body from request"));
+			assertThat(responseString).contains("Unable to determine PATCH body from request");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -653,12 +802,12 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Invalid Content-Type for PATCH operation: application/octet-stream"));
+			assertThat(responseString).contains("Invalid Content-Type for PATCH operation: application/octet-stream");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -691,12 +840,12 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource."));
+			assertThat(responseString).contains("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource.");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();

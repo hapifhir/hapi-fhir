@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364Dstu2.CustomResource364CustomDate;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -25,14 +26,10 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CustomTypeDstu2Test {
 
@@ -58,29 +55,32 @@ public class CustomTypeDstu2Test {
 		
 		String string = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
 		ourLog.info(string);
-		
+
+		String medicationUuid = UuidUtils.findFirstUUID(string);
+		assertNotNull(medicationUuid);
+
 		//@formatter:on
-		assertThat(string, stringContainsInOrder(
+		assertThat(string).containsSubsequence(
 				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
 				"   <contained>", 
-				"      <Medication xmlns=\"http://hl7.org/fhir\">", 
-				"         <id value=\"1\"/>", 
+				"      <Medication xmlns=\"http://hl7.org/fhir\">",
+				"         <id value=\"" + medicationUuid + "\"/>",
 				"         <code>", 
 				"            <text value=\"MED TEXT\"/>", 
 				"         </code>", 
 				"      </Medication>", 
 				"   </contained>", 
 				"   <medication>", 
-				"      <reference value=\"#1\"/>", 
+				"      <reference value=\"#" + medicationUuid + "\"/>",
 				"   </medication>", 
-				"</MedicationOrder>"));
+				"</MedicationOrder>");
 		//@formatter:on
 		
 		mo = ourCtx.newXmlParser().parseResource(CustomMedicationOrderDstu2.class, string);
 		
 		medication = (Medication) mo.getMedication().getResource();
 		assertNotNull(medication);
-		assertEquals("#1", medication.getId().getValue());
+		assertEquals("#" + medicationUuid, medication.getId().getValue());
 		assertEquals("MED TEXT", medication.getCode().getText());
 		
 	}
@@ -102,16 +102,16 @@ public class CustomTypeDstu2Test {
 		ourLog.info(xml);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSubsequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
 			"</CustomResource>"
-		));
+		);
 		//@formatter:on
 		
 		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
-		assertEquals("2016-05-13", ((CustomResource364CustomDate)parsedResource.getBaseValues()).getDate().getValueAsString());
+		assertEquals("2016-05-13", ((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString());
 	}
 
 	/**
@@ -128,16 +128,16 @@ public class CustomTypeDstu2Test {
 		String xml = parser.encodeResourceToString(resource);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSubsequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueString value=\"2016-05-13\"/>",
 			"</CustomResource>"
-		));
+		);
 		//@formatter:on
 		
 		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
-		assertEquals("2016-05-13", ((StringDt)parsedResource.getBaseValues()).getValueAsString());
+		assertEquals("2016-05-13", ((StringDt) parsedResource.getBaseValues()).getValueAsString());
 	}
 
 	@BeforeEach
@@ -235,16 +235,16 @@ public class CustomTypeDstu2Test {
 		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, input);
 
 		Patient res0 = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(0, res0.getMeta().getProfile().size());
+		assertThat(res0.getMeta().getProfile()).isEmpty();
 		List<ExtensionDt> exts = res0.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
+		assertThat(exts).hasSize(1);
 		assertEquals("185 cm", ((StringDt) exts.get(0).getValueAsPrimitive()).getValue());
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
-		assertEquals(1, res1.getMeta().getProfile().size());
+		assertThat(res1.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
+		assertThat(exts).isEmpty();
 		assertEquals("185 cm", res1.getWeight().getValue());
 	}
 
@@ -256,11 +256,11 @@ public class CustomTypeDstu2Test {
 		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
 
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertThat(parsed.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(0, exts.size());
+		assertThat(exts).isEmpty();
 
 		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
@@ -271,26 +271,26 @@ public class CustomTypeDstu2Test {
 
 		FhirContext ctx = FhirContext.forDstu2();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
-		assertEquals(1, parsed.getMeta().getProfile().size());
+		assertThat(parsed.getMeta().getProfile()).hasSize(1);
 		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
-		assertEquals(1, exts.size());
+		assertThat(exts).hasSize(1);
 		assertEquals("185 cm", ((StringDt) exts.get(0).getValueAsPrimitive()).getValue());
 	}
 
 	@Test
 	public void testAccessEmptyMetaLists() {
 		Patient p = new Patient();
-		assertThat(p.getMeta().getProfile(), empty());
-		assertThat(p.getMeta().getFormatCommentsPost(), empty());
-		assertThat(p.getMeta().getFormatCommentsPre(), empty());
-		assertThat(p.getMeta().getLastUpdated(), nullValue());
-		assertThat(p.getMeta().getSecurity(), empty());
-		assertThat(p.getMeta().getSecurity("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getTag(), empty());
-		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
-		assertThat(p.getMeta().getVersionId(), nullValue());
+		assertThat(p.getMeta().getProfile()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPost()).isEmpty();
+		assertThat(p.getMeta().getFormatCommentsPre()).isEmpty();
+		assertNull(p.getMeta().getLastUpdated());
+		assertThat(p.getMeta().getSecurity()).isEmpty();
+		assertNull(p.getMeta().getSecurity("foo", "bar"));
+		assertThat(p.getMeta().getTag()).isEmpty();
+		assertNull(p.getMeta().getTag("foo", "bar"));
+		assertNull(p.getMeta().getVersionId());
 
 	}
 
@@ -308,7 +308,7 @@ public class CustomTypeDstu2Test {
 		ourLog.info(out);
 
 		//@formatter:off
-		assertThat(out, stringContainsInOrder(
+		assertThat(out).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://foo/profile1\"/>", 
 			"<profile value=\"http://foo/profile2\"/>", 
@@ -330,7 +330,7 @@ public class CustomTypeDstu2Test {
 			"<system value=\"TAG_S2\"/>", 
 			"<display value=\"TAG_D2\"/>", 
 			"</tag>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 	}
@@ -348,7 +348,7 @@ public class CustomTypeDstu2Test {
 		String messageString = p.encodeResourceToString(patient);
 		ourLog.info(messageString);
 
-		assertThat(messageString, not(containsString("<profile")));
+		assertThat(messageString).doesNotContain("<profile");
 	}
 
 	@Test
@@ -374,18 +374,19 @@ public class CustomTypeDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
+		assertThat(messageString).doesNotContainPattern("(?s)" + ".*" +
+			"<meta>" + ".*" +
+			"<profile value=\"http://example.com/foo\"" + ".*" +
+			"/>" + ".*" +
+			"<profile value=\"http://example.com/foo\"/>" + ".*" +
+			"</meta>");
 		//@formatter:on
 	}
 
@@ -416,19 +417,20 @@ public class CustomTypeDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
+		assertThat(messageString).doesNotContainPattern("(?s)" + ".*" +
+			"<meta>" + ".*" +
+			"<profile value=\"http://example.com/foo\"" + ".*" +
+			"/>" + ".*" +
+			"<profile value=\"http://example.com/foo\"/>" + ".*" +
+			"</meta>");
 		//@formatter:on
 	}
 

@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4440
+title: "During testing, the bulk-import command line tool logs file contents.
+  This logging has been demoted to DEBUG level as bulk-import files may contain PHI."

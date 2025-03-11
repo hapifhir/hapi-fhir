@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,42 +17,49 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
 import java.util.Date;
 import java.util.List;
 
 @Entity()
-@Table(name = "NPM_PACKAGE_VER", uniqueConstraints = {
-}, indexes = {
-	@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
-})
+@Table(
+		name = "NPM_PACKAGE_VER",
+		uniqueConstraints = {},
+		indexes = {
+			@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true),
+			@Index(name = "FK_NPM_PKV_PKG", columnList = "PACKAGE_PID"),
+			@Index(name = "FK_NPM_PKV_RESID", columnList = "BINARY_RES_ID")
+		})
 public class NpmPackageVersionEntity {
 
 	public static final int VERSION_ID_LENGTH = 200;
-	public static final int PACKAGE_DESC_LENGTH = 200;
+	public static final int PACKAGE_DESC_LENGTH = 512;
 	public static final int FHIR_VERSION_LENGTH = 10;
 	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
@@ -63,36 +68,77 @@ public class NpmPackageVersionEntity {
 	@Id
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "PACKAGE_ID", length = NpmPackageEntity.PACKAGE_ID_LENGTH, nullable = false)
 	private String myPackageId;
+
 	@Column(name = "VERSION_ID", length = NpmPackageVersionEntity.VERSION_ID_LENGTH, nullable = false)
 	private String myVersionId;
+
 	@ManyToOne
 	@JoinColumn(name = "PACKAGE_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
 	private NpmPackageEntity myPackage;
-	@OneToOne
-	@JoinColumn(name = "BINARY_RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
+
+	@ManyToOne
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "BINARY_RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
 	private ResourceTable myPackageBinary;
+
+	@Column(name = "BINARY_RES_ID", nullable = false)
+	private Long myPackageBinaryResourceId;
+
+	@Column(name = "PARTITION_ID", nullable = true)
+	private Integer myPackageBinaryPartitionId;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
+
 	@Column(name = "PKG_DESC", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescription;
+
 	@Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
 	private String myDescriptionUpper;
+
+	@Column(name = "PKG_AUTHOR", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthor;
+
+	@Column(name = "AUTHOR_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myAuthorUpper;
+
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
+
 	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
+
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
+
 	@Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
 	private long myPackageSizeBytes;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myUpdatedTime;
+
 	@OneToMany(mappedBy = "myPackageVersion")
 	private List<NpmPackageVersionResourceEntity> myResources;
 
@@ -162,6 +208,8 @@ public class NpmPackageVersionEntity {
 
 	public void setPackageBinary(ResourceTable thePackageBinary) {
 		myPackageBinary = thePackageBinary;
+		myPackageBinaryResourceId = thePackageBinary.getId().getId();
+		myPackageBinaryPartitionId = thePackageBinary.getPersistentId().getPartitionId();
 	}
 
 	public void setSavedTime(Date theSavedTime) {
@@ -177,15 +225,24 @@ public class NpmPackageVersionEntity {
 		myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
 	}
 
+	public String getAuthor() {
+		return myAuthor;
+	}
+
+	public void setAuthor(String theAuthor) {
+		myAuthor = theAuthor;
+		myAuthorUpper = StringUtil.normalizeStringForSearchIndexing(theAuthor);
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myPackageId", myPackageId)
-			.append("myVersionId", myVersionId)
-			.append("myDescriptionUpper", myDescriptionUpper)
-			.append("myFhirVersionId", myFhirVersionId)
-			.toString();
+				.append("myId", myId)
+				.append("myPackageId", myPackageId)
+				.append("myVersionId", myVersionId)
+				.append("myDescriptionUpper", myDescriptionUpper)
+				.append("myFhirVersionId", myFhirVersionId)
+				.toString();
 	}
 
 	public List<NpmPackageVersionResourceEntity> getResources() {

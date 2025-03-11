@@ -1,46 +1,8 @@
-package ca.uhn.fhir.util;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.escape.Escaper;
-import com.google.common.net.PercentEscaper;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.annotation.Nonnull;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +17,46 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.escape.Escaper;
+import com.google.common.net.PercentEscaper;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.endsWith;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
 
@@ -65,8 +66,7 @@ public class UrlUtil {
 	/**
 	 * Non instantiable
 	 */
-	private UrlUtil() {
-	}
+	private UrlUtil() {}
 
 	/**
 	 * Cleans up a value that will be serialized as an HTTP header. This method:
@@ -100,7 +100,8 @@ public class UrlUtil {
 		try {
 			return new URL(new URL(theBase), theEndpoint).toString();
 		} catch (MalformedURLException e) {
-			ourLog.warn("Failed to resolve relative URL[" + theEndpoint + "] against absolute base[" + theBase + "]", e);
+			ourLog.warn(
+					"Failed to resolve relative URL[" + theEndpoint + "] against absolute base[" + theBase + "]", e);
 			return theEndpoint;
 		}
 	}
@@ -124,7 +125,9 @@ public class UrlUtil {
 			return theExtensionUrl;
 		}
 
-		if (!theParentExtensionUrl.substring(0, parentLastSlashIdx).equals(theExtensionUrl.substring(0, parentLastSlashIdx))) {
+		if (!theParentExtensionUrl
+				.substring(0, parentLastSlashIdx)
+				.equals(theExtensionUrl.substring(0, parentLastSlashIdx))) {
 			return theExtensionUrl;
 		}
 
@@ -133,6 +136,70 @@ public class UrlUtil {
 		}
 
 		return theExtensionUrl;
+	}
+
+	/**
+	 * Given a FHIR resource URL, extracts the associated resource type. Supported formats
+	 * include the following inputs, all of which will return {@literal Patient}. If no
+	 * resource type can be determined, {@literal null} will be returned.
+	 * <ul>
+	 * <li>Patient
+	 * <li>Patient?
+	 * <li>Patient?identifier=foo
+	 * <li>/Patient
+	 * <li>/Patient?
+	 * <li>/Patient?identifier=foo
+	 * <li>http://foo/base/Patient?identifier=foo
+	 * <li>http://foo/base/Patient/1
+	 * <li>http://foo/base/Patient/1/_history/2
+	 * <li>Patient/1
+	 * <li>Patient/1/_history/2
+	 * <li>/Patient/1
+	 * <li>/Patient/1/_history/2
+	 * </ul>
+	 */
+	@Nullable
+	public static String determineResourceTypeInResourceUrl(FhirContext theFhirContext, String theUrl) {
+		if (theUrl == null) {
+			return null;
+		}
+		if (theUrl.startsWith("urn:")) {
+			return null;
+		}
+
+		String resourceType = null;
+		int qmIndex = theUrl.indexOf("?");
+		if (qmIndex > 0) {
+			String urlResourceType = theUrl.substring(0, qmIndex);
+			int slashIdx = urlResourceType.lastIndexOf('/');
+			if (slashIdx != -1) {
+				urlResourceType = urlResourceType.substring(slashIdx + 1);
+			}
+			if (isNotBlank(urlResourceType)) {
+				resourceType = urlResourceType;
+			}
+		} else {
+			resourceType = theUrl;
+			int slashIdx = resourceType.indexOf('/');
+			if (slashIdx == 0) {
+				resourceType = resourceType.substring(1);
+			}
+
+			slashIdx = resourceType.indexOf('/');
+			if (slashIdx != -1) {
+				resourceType = new IdDt(resourceType).getResourceType();
+			}
+		}
+
+		try {
+			if (isNotBlank(resourceType)) {
+				theFhirContext.getResourceDefinition(resourceType);
+			}
+		} catch (DataFormatException e) {
+			return null;
+		}
+
+		return resourceType;
 	}
 
 	/**
@@ -158,10 +225,7 @@ public class UrlUtil {
 	 * values in a collection
 	 */
 	public static List<String> escapeUrlParams(@Nonnull Collection<String> theUnescaped) {
-		return theUnescaped
-			.stream()
-			.map(t -> PARAMETER_ESCAPER.escape(t))
-			.collect(Collectors.toList());
+		return theUnescaped.stream().map(t -> PARAMETER_ESCAPER.escape(t)).collect(Collectors.toList());
 	}
 
 	public static boolean isAbsolute(String theValue) {
@@ -230,7 +294,8 @@ public class UrlUtil {
 		return true;
 	}
 
-	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
+	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl)
+			throws DataFormatException {
 		String url = theUrl;
 		int paramIndex = url.indexOf('?');
 
@@ -247,6 +312,7 @@ public class UrlUtil {
 		return theCtx.getResourceDefinition(resourceName);
 	}
 
+	@Nonnull
 	public static Map<String, String[]> parseQueryString(String theQueryString) {
 		HashMap<String, List<String>> map = new HashMap<>();
 		parseQueryString(theQueryString, map);
@@ -258,7 +324,6 @@ public class UrlUtil {
 		if (query.startsWith("?")) {
 			query = query.substring(1);
 		}
-
 
 		StringTokenizer tok = new StringTokenizer(query, "&");
 		while (tok.hasMoreTokens()) {
@@ -382,7 +447,6 @@ public class UrlUtil {
 		}
 
 		return retVal;
-
 	}
 
 	/**
@@ -424,10 +488,10 @@ public class UrlUtil {
 
 				char nextChar = theString.charAt(j);
 				switch (nextChar) {
-					/*
-					 * NB: If you add a constant here, you also need to add it
-					 * to isNeedsSanitization()!!
-					 */
+						/*
+						 * NB: If you add a constant here, you also need to add it
+						 * to isNeedsSanitization()!!
+						 */
 					case '\'':
 						buffer.append("&apos;");
 						break;
@@ -452,7 +516,6 @@ public class UrlUtil {
 						}
 						break;
 				}
-
 			} // for build escaped string
 
 			return buffer.toString();
@@ -488,9 +551,12 @@ public class UrlUtil {
 		if (theString == null) {
 			return null;
 		}
+		// If the user passes "_outputFormat" as a GET request parameter directly in the URL:
+		final boolean shouldEscapePlus = !theString.startsWith("application/");
+
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
-			if (nextChar == '%' || nextChar == '+') {
+			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
 				try {
 					// Yes it would be nice to not use a string "UTF-8" but the equivalent
 					// method that takes Charset is JDK10+ only... sigh....
@@ -503,49 +569,37 @@ public class UrlUtil {
 		return theString;
 	}
 
-	public static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
-		List<NameValuePair> parameters;
-		String matchUrl = theMatchUrl;
-		int questionMarkIndex = matchUrl.indexOf('?');
-		if (questionMarkIndex != -1) {
-			matchUrl = matchUrl.substring(questionMarkIndex + 1);
-		}
-
-		final String[] searchList = new String[]{
-			"+",
-			"|",
-			"=>=",
-			"=<=",
-			"=>",
-			"=<"
-		};
-		final String[] replacementList = new String[]{
-			"%2B",
-			"%7C",
-			"=%3E%3D",
-			"=%3C%3D",
-			"=%3E",
-			"=%3C"
-		};
-		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
-		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
-		}
-
-		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
-
-		// One issue that has happened before is people putting a "+" sign into an email address in a match URL
-		// and having that turn into a " ". Since spaces are never appropriate for email addresses, let's just
-		// assume they really meant "+".
-		for (int i = 0; i < parameters.size(); i++) {
-			NameValuePair next = parameters.get(i);
-			if (next.getName().equals("email") && next.getValue().contains(" ")) {
-				BasicNameValuePair newPair = new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
-				parameters.set(i, newPair);
+	/**
+	 * Creates list of sub URIs candidates for search with :above modifier
+	 * Example input: http://[host]/[pathPart1]/[pathPart2]
+	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
+	 *
+	 * @param theUri String URI parameter
+	 * @return List of URI candidates
+	 */
+	public static List<String> getAboveUriCandidates(String theUri) {
+		try {
+			URI uri = new URI(theUri);
+			if (uri.getScheme() == null || uri.getHost() == null) {
+				throwInvalidRequestExceptionForNotValidUri(theUri, null);
 			}
+		} catch (URISyntaxException theCause) {
+			throwInvalidRequestExceptionForNotValidUri(theUri, theCause);
 		}
 
-		return parameters;
+		List<String> candidates = new ArrayList<>();
+		Path path = Paths.get(theUri);
+		candidates.add(path.toString().replace(":/", "://"));
+		while (path.getParent() != null && path.getParent().toString().contains("/")) {
+			candidates.add(path.getParent().toString().replace(":/", "://"));
+			path = path.getParent();
+		}
+		return candidates;
+	}
+
+	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
+		throw new InvalidRequestException(
+				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
 	}
 
 	public static class UrlParts {

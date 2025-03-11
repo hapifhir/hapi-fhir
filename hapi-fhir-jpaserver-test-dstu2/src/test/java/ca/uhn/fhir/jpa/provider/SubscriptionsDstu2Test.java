@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -8,8 +9,8 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,9 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
@@ -44,12 +43,12 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	public void beforeEnableScheduling() {
-		myDaoConfig.setSchedulingDisabled(false);
+		myStorageSettings.setSchedulingDisabled(false);
 	}
 
 
@@ -58,23 +57,24 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setEndpoint("http://localhost");
 		try {
-			ourClient.create().resource(subs).execute();
-			fail();
+			myClient.create().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 	@Test
@@ -86,16 +86,16 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
-			fail();
+			myClient.create().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
@@ -105,14 +105,15 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testCreateWithPopulatedButInvalidStatue() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.getChannel().setEndpoint("http://localhost");
 		subs.setCriteria("Observation?identifier=123");
 		subs.getStatusElement().setValue("aaaaa");
 
 		try {
-			ourClient.create().resource(subs).execute();
-			fail();
+			myClient.create().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).containsAnyOf("invalid value aaaaa", "Unknown SubscriptionStatus code 'aaaaa'");
 		}
 	}
 
@@ -124,24 +125,24 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
 		subs.getChannel().setEndpoint("http://example.com");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
 			subs.setStatus((SubscriptionStatusEnum) null);
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);
@@ -152,28 +153,29 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setEndpoint("http://localhost");
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
-		IIdType id = ourClient.create().resource(subs).execute().getId();
+		IIdType id = myClient.create().resource(subs).execute().getId();
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
 			subs.setStatus((SubscriptionStatusEnum) null);
-			ourClient.update().resource(subs).execute();
-			fail();
+			myClient.update().resource(subs).execute();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
 
 		subs.setStatus(SubscriptionStatusEnum.OFF);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 	public class BaseSocket {
@@ -187,7 +189,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket()
 	public class SimpleEchoSocket extends BaseSocket {
 
 		@SuppressWarnings("unused")
@@ -197,14 +199,14 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			mySubsId = theSubsId;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + mySubsId;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}
@@ -226,7 +228,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@WebSocket()
 	public class DynamicEchoSocket extends BaseSocket {
 
 		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
@@ -240,14 +242,14 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myEncoding = theEncoding;
 		}
 
-		@OnWebSocketConnect
+		@OnWebSocketOpen
 		public void onConnect(Session session) {
 			ourLog.info("Got connect: {}", session);
 			this.session = session;
 			try {
 				String sending = "bind " + myCriteria;
 				ourLog.info("Sending: {}", sending);
-				session.getRemote().sendString(sending);
+				session.sendText(sending, null);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 			}

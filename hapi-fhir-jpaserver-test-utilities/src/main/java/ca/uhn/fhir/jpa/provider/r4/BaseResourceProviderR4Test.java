@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider.r4;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
@@ -50,9 +49,9 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
@@ -88,17 +87,22 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static Server ourServer;
 	protected static JpaCapabilityStatementProvider ourCapabilityStatementProvider;
-	private static DatabaseBackedPagingProvider ourPagingProvider;
+	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	protected IGenericClient myClient;
+
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
+
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
 	@Autowired
 	protected IPartitionDao myPartitionDao;
+
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
+
 	@Autowired
 	private ReindexProvider myReindexProvider;
 
@@ -115,8 +119,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
+
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
@@ -134,7 +141,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
+			ourRestServer.registerProviders(
+					mySystemProvider, myTerminologyUploaderProvider, myDeleteExpungeProvider, myReindexProvider);
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(DiffProvider.class));
 			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
@@ -153,7 +161,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
+			proxyHandler
+					.getServletContext()
+					.setAttribute(
+							WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
 
 			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			// dispatcherServlet.setApplicationContext(webApplicationContext);
@@ -161,8 +172,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
-				ContextLoader.CONFIG_LOCATION_PARAM,
-				WebsocketDispatcherConfig.class.getName());
+					ContextLoader.CONFIG_LOCATION_PARAM, WebsocketDispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -184,7 +194,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(
+					ourRestServer, mySystemDao, myStorageSettings, ourSearchParamRegistry, validationSupport);
 			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 
@@ -193,14 +204,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourPort = JettyUtil.getPortForStartedServer(server);
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
+			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(
+					subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 
 			myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 			myFhirContext.getRestfulClientFactory().setSocketTimeout(400000);
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager =
+					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(10);
 			connectionManager.setDefaultMaxPerRoute(10);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -229,14 +242,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
+			String nextStr = nextPt.getName().size() > 0
+					? nextPt.getName().get(0).getGivenAsSingleString() + " "
+							+ nextPt.getName().get(0).getFamily()
+					: "";
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}
 		}
 		return names;
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {
@@ -283,7 +298,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return params;
 	}
 
-	public static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
+	public static ParametersParameterComponent getPartByName(
+			ParametersParameterComponent theParameter, String theName) {
 		for (ParametersParameterComponent part : theParameter.getPart()) {
 			if (part.getName().equals(theName)) {
 				return part;
@@ -302,5 +318,4 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		return false;
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,7 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IIdType;
+package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -31,6 +25,10 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 
@@ -46,7 +44,8 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		myContents = theContents;
 	}
 
-	public HttpPatchClientInvocation(FhirContext theContext, String theUrlPath, String theContentType, String theContents) {
+	public HttpPatchClientInvocation(
+			FhirContext theContext, String theUrlPath, String theContentType, String theContents) {
 		super(theContext);
 		myUrlPath = theUrlPath;
 		myContentType = theContentType;
@@ -54,7 +53,11 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	@Override
-	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
+	public IHttpRequest asHttpRequest(
+			String theUrlBase,
+			Map<String, List<String>> theExtraParams,
+			EncodingEnum theEncoding,
+			Boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {
@@ -65,16 +68,13 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-		
-		
 		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
 	}
 
 	@Override
 	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, getHeaders());
+		IHttpClient httpClient = getRestfulClientFactory()
+				.getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, getHeaders());
 		return httpClient.createByteRequest(getContext(), myContents, myContentType, null);
 	}
-
-	
 }

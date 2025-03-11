@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import com.google.common.base.Charsets;
@@ -40,7 +39,6 @@ import java.util.zip.ZipOutputStream;
 public class ZipCollectionBuilder {
 
 	public static final String ZIP_ENTRY_PREFIX = "SnomedCT_Release_INT_20160131_Full/Terminology/";
-
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
 	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
@@ -77,7 +75,8 @@ public class ZipCollectionBuilder {
 		addFileZip(theClasspathPrefix, theClasspathFileName, theClasspathFileName);
 	}
 
-	public void addFileZip(String theClasspathPrefix, String theClasspathFileName, String theOutputFilename) throws IOException {
+	public void addFileZip(String theClasspathPrefix, String theClasspathFileName, String theOutputFilename)
+			throws IOException {
 		ByteArrayOutputStream bos;
 		bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);

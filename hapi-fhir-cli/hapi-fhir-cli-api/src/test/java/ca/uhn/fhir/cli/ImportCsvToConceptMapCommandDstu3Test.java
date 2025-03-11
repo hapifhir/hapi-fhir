@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -22,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -40,11 +42,11 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	private String myFile;
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -144,7 +146,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
@@ -152,7 +154,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
 		assertEquals(VS_URL_2, conceptMap.getTargetUriType().getValueAsString());
 
-		assertEquals(3, conceptMap.getGroup().size());
+		assertThat(conceptMap.getGroup()).hasSize(3);
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
 		assertEquals(CS_URL_1, group.getSource());
@@ -160,13 +162,13 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(CS_URL_2, group.getTarget());
 		assertEquals("Version 2t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertThat(group.getElement()).hasSize(4);
 
 		SourceElementComponent source = group.getElement().get(0);
 		assertEquals("Code 1a", source.getCode());
 		assertEquals("Display 1a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		TargetElementComponent target = source.getTarget().get(0);
 		assertEquals("Code 2a", target.getCode());
@@ -178,7 +180,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1b", source.getCode());
 		assertEquals("Display 1b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2b", target.getCode());
@@ -190,7 +192,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1c", source.getCode());
 		assertEquals("Display 1c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2c", target.getCode());
@@ -202,7 +204,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1d", source.getCode());
 		assertEquals("Display 1d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 2d", target.getCode());
@@ -216,13 +218,13 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(CS_URL_3, group.getTarget());
 		assertEquals("Version 3t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertThat(group.getElement()).hasSize(4);
 
 		source = group.getElement().get(0);
 		assertEquals("Code 1a", source.getCode());
 		assertEquals("Display 1a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3a", target.getCode());
@@ -234,7 +236,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1b", source.getCode());
 		assertEquals("Display 1b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3b", target.getCode());
@@ -246,7 +248,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1c", source.getCode());
 		assertEquals("Display 1c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3c", target.getCode());
@@ -258,7 +260,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 1d", source.getCode());
 		assertEquals("Display 1d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3d", target.getCode());
@@ -272,13 +274,13 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(CS_URL_3, group.getTarget());
 		assertEquals("Version 3t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertEquals(5, group.getElement().size());
 
 		source = group.getElement().get(0);
 		assertEquals("Code 2a", source.getCode());
 		assertEquals("Display 2a", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3a", target.getCode());
@@ -290,7 +292,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 2b", source.getCode());
 		assertEquals("Display 2b", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3b", target.getCode());
@@ -302,7 +304,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 2c", source.getCode());
 		assertEquals("Display 2c", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3c", target.getCode());
@@ -314,13 +316,26 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("Code 2d", source.getCode());
 		assertEquals("Display 2d", source.getDisplay());
 
-		assertEquals(1, source.getTarget().size());
+		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
 		assertEquals("Code 3d", target.getCode());
 		assertEquals("Display 3d", target.getDisplay());
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
+
+		// ensure unmatched codes are handled correctly
+		source = group.getElement().get(4);
+		assertEquals("Code 2e", source.getCode());
+		assertEquals("Display 2e", source.getDisplay());
+
+		assertEquals(1, source.getTarget().size());
+
+		target = source.getTarget().get(0);
+		assertNull(target.getCode());
+		assertNull(target.getDisplay());
+		assertEquals(ConceptMapEquivalence.UNMATCHED, target.getEquivalence());
+		assertEquals("3e This is a comment.", target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{

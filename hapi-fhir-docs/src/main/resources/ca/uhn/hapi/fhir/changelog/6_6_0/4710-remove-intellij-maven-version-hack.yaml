@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4710
+title: "Removed maven configuration hack for IntelliJ now that Jetbrains supports different java versions in test and main (IDEA-85478)."

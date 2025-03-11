@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binstore;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,14 @@ package ca.uhn.fhir.jpa.binstore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.hash.HashingInputStream;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,8 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
-	private ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, byte[]> myDataMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, StoredDetails> myDetailsMap = new ConcurrentHashMap<>();
 
 	/**
 	 * Constructor
@@ -51,30 +52,39 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		super();
 	}
 
+	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
-		String id = super.provideIdForNewBlob(theBlobIdOrNull);
-		String key = toKey(theResourceId, id);
+	public StoredDetails storeBinaryContent(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails)
+			throws IOException {
 
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
 		byte[] bytes = IOUtils.toByteArray(countingIs);
+		String id = super.provideIdForNewBinaryContent(theBlobIdOrNull, bytes, theRequestDetails, theContentType);
+		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
-		StoredDetails storedDetails = new StoredDetails(id, countingIs.getCount(), theContentType, hashingIs, new Date());
+		StoredDetails storedDetails =
+				new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
 		myDetailsMap.put(key, storedDetails);
 		return storedDetails;
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		return myDetailsMap.get(key);
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException {
 		String key = toKey(theResourceId, theBlobId);
 		byte[] bytes = myDataMap.get(key);
 		if (bytes == null) {
@@ -85,14 +95,14 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+	public void expungeBinaryContent(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		myDataMap.remove(key);
 		myDetailsMap.remove(key);
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		return myDataMap.get(key);
 	}

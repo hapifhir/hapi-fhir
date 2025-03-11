@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
@@ -14,18 +14,16 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -45,6 +43,7 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationAdministration;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
@@ -62,6 +61,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -72,9 +72,11 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
@@ -105,8 +107,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -202,12 +202,12 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu2")
-	protected JpaSystemProviderDstu2 mySystemProvider;
+	protected JpaSystemProvider mySystemProvider;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
-	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -215,28 +215,27 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
 
+
+	@RegisterExtension
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+
 	@BeforeEach
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-	}
-
-	@AfterEach
-	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
 	@Override
@@ -249,17 +248,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return myTxManager;
 	}
 
-	@Override
-	public TransactionTemplate newTxTemplate() {
-		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		retVal.afterPropertiesSet();
-		return retVal;
-	}
-
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 
@@ -269,5 +259,17 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 		return retVal;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertThat(hasValidationErrors(theOperationOutcome)).as("Expected validation errors, found none").isTrue();
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertThat(hasValidationErrors(theOperationOutcome)).as("Expected no validation errors, found some").isFalse();
+	}
+
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream().anyMatch(t -> "error".equals(t.getSeverity()));
 	}
 }

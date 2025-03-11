@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.util;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.util;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -40,7 +39,7 @@ import java.util.function.Function;
  * This interceptor can be used for troubleshooting subscription processing. It provides very
  * detailed logging about the subscription processing pipeline.
  * <p>
- * This interceptor loges each step in the processing pipeline with a
+ * This interceptor logs each step in the processing pipeline with a
  * different event code, using the event codes itemized in
  * {@link EventCodeEnum}. By default these are each placed in a logger with
  * a different name (e.g. <code>ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor.SUBS20</code>
@@ -58,7 +57,8 @@ import java.util.function.Function;
 @Interceptor
 public class SubscriptionDebugLogInterceptor {
 
-	private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK = "SubscriptionDebugLogInterceptor_precheck";
+	private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK =
+			"SubscriptionDebugLogInterceptor_precheck";
 	private final Level myLevel;
 	private final EnumMap<EventCodeEnum, Logger> myLoggers;
 
@@ -89,7 +89,11 @@ public class SubscriptionDebugLogInterceptor {
 			// Delete operations have no payload
 			resourceId = theMessage.getId();
 		}
-		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", resourceId, theMessage.getOperationType());
+		log(
+				EventCodeEnum.SUBS1,
+				"Resource {} is starting the processing pipeline (op={})",
+				resourceId,
+				theMessage.getOperationType());
 	}
 
 	/*
@@ -104,12 +108,21 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED)
 	public void step20_beforeChecked(ResourceModifiedMessage theMessage) {
-		log(EventCodeEnum.SUBS2, "Checking resource {} (op={}) for matching subscriptions", theMessage.getPayloadId(), theMessage.getOperationType());
+		log(
+				EventCodeEnum.SUBS2,
+				"Checking resource {} (op={}) for matching subscriptions",
+				theMessage.getPayloadId(),
+				theMessage.getOperationType());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
 	public void step30_subscriptionMatched(ResourceDeliveryMessage theMessage, InMemoryMatchResult theResult) {
-		log(EventCodeEnum.SUBS3, "Resource {} matched by subscription {} (memory match={})", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theResult.isInMemory());
+		log(
+				EventCodeEnum.SUBS3,
+				"Resource {} matched by subscription {} (memory match={})",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theResult.isInMemory());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
@@ -119,7 +132,13 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY)
 	public void step40_beforeDelivery(ResourceDeliveryMessage theMessage) {
-		log(EventCodeEnum.SUBS5, "Delivering resource {} for subscription {} to channel of type {} to endpoint {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), theMessage.getSubscription().getEndpointUrl());
+		log(
+				EventCodeEnum.SUBS5,
+				"Delivering resource {} for subscription {} to channel of type {} to endpoint {}",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theMessage.getSubscription().getChannelType(),
+				theMessage.getSubscription().getEndpointUrl());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED)
@@ -138,19 +157,31 @@ public class SubscriptionDebugLogInterceptor {
 		if (theFailure != null) {
 			failureString = theFailure.toString();
 		}
-		log(EventCodeEnum.SUBS6, "Delivery of resource {} for subscription {} to channel of type {} - Failure: {}", payloadId, subscriptionId, channelType, failureString);
+		log(
+				EventCodeEnum.SUBS6,
+				"Delivery of resource {} for subscription {} to channel of type {} - Failure: {}",
+				payloadId,
+				subscriptionId,
+				channelType,
+				failureString);
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
 	public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
 		String processingTime = theMessage
-			.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
-			.map(Long::parseLong)
-			.map(Date::new)
-			.map(start -> new StopWatch(start).toString())
-			.orElse("(unknown)");
+				.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
+				.map(Long::parseLong)
+				.map(Date::new)
+				.map(start -> new StopWatch(start).toString())
+				.orElse("(unknown)");
 
-		log(EventCodeEnum.SUBS7, "Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), processingTime);
+		log(
+				EventCodeEnum.SUBS7,
+				"Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theMessage.getSubscription().getChannelType(),
+				processingTime);
 	}
 
 	protected void log(EventCodeEnum theEventCode, String theMessage, Object... theArguments) {
@@ -211,9 +242,7 @@ public class SubscriptionDebugLogInterceptor {
 		SUBS7
 	}
 
-
 	private static Function<EventCodeEnum, Logger> defaultLogFactory() {
 		return code -> LoggerFactory.getLogger(SubscriptionDebugLogInterceptor.class.getName() + "." + code.name());
 	}
-
 }

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4166
+title: "When storing a blob, the database blob binary storage service may store the blob size as being much smaller than the actual blob size.  This issue has been fixed."

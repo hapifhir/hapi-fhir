@@ -173,11 +173,18 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 
 HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/security/cors.html#cors_interceptor) for information on how to use this interceptor.
 
+# Security: Audit
+
+HAPI FHIR provides an interceptor that can be used to automatically generate and record AuditEvent resources based on user/client actions on the server. See [BALP Interceptor](../security/balp_interceptor.html) for more information.
+
 
 # Security: Authorization
 
-HAPI FHIR provides a powerful interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
+HAPI FHIR provides an interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
 
+# Security: Binary Resources
+
+HAPI FHIR provides an interceptor that can be used to secure access to Binary resources by using the `Binary.securityContext` element. See [Binary Security Interceptor](/docs/security/binary_security_interceptor.html) for more information.
 
 # Security: Consent
 
@@ -186,7 +193,7 @@ HAPI FHIR provides an interceptor that can be used to implement consent rules an
 
 # Security: Search Narrowing
 
-HAPI FHIR provides an interceptor that can be used to implement consent rules and directives. See [Consent Interceptor](/docs/security/consent_interceptor.html) for more information.
+HAPI FHIR provides an interceptor that can be used to implement consent rules and directives. See [Search Narrowing Interceptor](/docs/security/search_narrowing_interceptor.html) for more information.
 
 
 # Security: Rejecting Unsupported HTTP Verbs
@@ -298,7 +305,14 @@ The CascadingDeleteInterceptor allows clients to request deletes be cascaded to 
 The OverridePathBasedReferentialIntegrityForDeletesInterceptor can be registered and configured to allow resources to be deleted even if other resources have outgoing references to the deleted resource. While it is generally a bad idea to allow deletion of resources that are referred to from other resources, there are circumstances where it is desirable. For example, if you have Provenance or AuditEvent resources that refer to a Patient resource that was created in error, you might want to alow the Patient to be deleted while leaving the Provenance and AuditEvent resources intact (including the now-invalid outgoing references to that Patient).
 
 This interceptor uses FHIRPath expressions to indicate the resource paths that should not have referential integrity applied to them. For example, if this interceptor is configured with a path of `AuditEvent.agent.who`, a Patient resource would be allowed to be deleted even if one or more AuditEvents had references in that path to the given Patient (unless other resources also had references to the Patient).  
-  
+
+# JPA Server: Block Resource Updates Changing Patient Compartment   
+
+* [PatientCompartmentEnforcingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/interceptor/PatientCompartmentEnforcingInterceptor.java)
+
+The PatientCompartmentEnforcingInterceptor can be registered to block resource updates which would change the resource's patient compartment. This interceptor requires FHIR version R4 or later.
+
+If the JPA server has [partitioning](/docs/server_jpa_partitioning/partitioning.html) enabled, and [Tenant Identification Strategy](/docs/server_plain/multitenancy.html) is PATIENT_ID, the PatientCompartmentEnforcingInterceptor can be used to block resources to change partition as a consequence of updating a patient reference.
 
 # JPA Server: Retry on Version Conflicts
 

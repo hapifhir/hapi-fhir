@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,25 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
-
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class AuthorizingTesterUiClientFactory implements ITestingUiClientFactory {
 
-   @Override
-   public IGenericClient newClient(FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl) {
-      // Create a client
-      IGenericClient client = theFhirContext.newRestfulGenericClient(theServerBaseUrl);
-      
-      // Register an interceptor which adds credentials
-      client.registerInterceptor(new BasicAuthInterceptor("someusername", "somepassword"));
-      
-      return client;
-   }
+	@Override
+	public IGenericClient newClient(
+			FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl) {
+		// Create a client
+		IGenericClient client = theFhirContext.newRestfulGenericClient(theServerBaseUrl);
 
+		// Register an interceptor which adds credentials
+		client.registerInterceptor(new BasicAuthInterceptor("someusername", "somepassword"));
+
+		return client;
+	}
 }

@@ -6,7 +6,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -21,23 +22,84 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Needed for Testcontainers -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-tinder-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+		<dependency>
+			<groupId>com.github.jsqlparser</groupId>
+			<artifactId>jsqlparser</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+			<!-- Generate the DDL schema files -->
+			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
+				<executions><execution><id>generate-ddl</id>
+				<phase>generate-resources</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+				</execution></executions>
+						<configuration>
+							<databasePartitionMode>true</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/schema</outputDirectory>
+							<packageNames>
+								<packageName>ca.uhn.fhir.jpa.entity</packageName>
+								<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
+							</packageNames>
+							<dialects>
+								<dialect>
+									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
+									<targetFileName>postgres.sql</targetFileName>
+								</dialect>
+							</dialects>
+						</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-jpaserver-base</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-					<runOrder>alphabetical</runOrder>
-					<includes>
-						<include>**/*IT.java</include>
-					</includes>
-					<useModulePath>false</useModulePath>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -57,13 +119,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
-					<skip>${skipFailsafe}</skip>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -74,40 +129,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>NOPARALLEL</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>1</forkCount>
-							<excludes>
-								<exclude>**/stresstest/*</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>CI</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<forkCount>1</forkCount>
-							<runOrder>alphabetical</runOrder>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>

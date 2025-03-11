@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5083
+title: "The IFhirPath evaluator interface now has an additional overload of the
+   `evaluate` method which takes in a parsed expression returned by the
+   `parse` method. This can be used to improve performance in cases where the same
+   expression is being used repeatedly."

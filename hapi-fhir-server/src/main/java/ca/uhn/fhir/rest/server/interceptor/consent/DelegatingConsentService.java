@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -39,13 +38,21 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return myTarget.shouldProcessCanSeeResource(theRequestDetails, theContextServices);
+	}
+
+	@Override
+	public ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return myTarget.canSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
-	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myTarget.willSeeResource(theRequestDetails, theResource ,theContextServices);
+	public ConsentOutcome willSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.willSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
@@ -54,8 +61,15 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+	public void completeOperationFailure(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			IConsentContextServices theContextServices) {
 		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
+	}
+
+	public IConsentService getTarget() {
+		return myTarget;
 	}
 
 	public void setTarget(IConsentService theTarget) {

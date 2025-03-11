@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -28,10 +27,11 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
-
-public class DeleteCodeSystemVersionStep implements IJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, CodeSystemVersionPIDResult> {
+public class DeleteCodeSystemVersionStep
+		implements IJobStepWorker<
+				TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
@@ -42,14 +42,14 @@ public class DeleteCodeSystemVersionStep implements IJobStepWorker<TermCodeSyste
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		CodeSystemVersionPIDResult versionPidResult = theStepExecutionDetails.getData();
 
-		long versionId = versionPidResult.getCodeSystemVersionPID();
-
-		myITermCodeSystemSvc.deleteCodeSystemVersion(versionId);
+		myITermCodeSystemSvc.deleteCodeSystemVersion(versionPidResult.getCodeSystemVersionPID());
 
 		theDataSink.accept(versionPidResult);
 		return RunOutcome.SUCCESS;

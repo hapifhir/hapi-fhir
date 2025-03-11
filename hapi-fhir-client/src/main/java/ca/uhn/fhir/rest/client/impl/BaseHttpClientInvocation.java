@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.impl;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -50,7 +49,7 @@ public abstract class BaseHttpClientInvocation {
 
 	/**
 	 * Create an HTTP request out of this client request
-	 * 
+	 *
 	 * @param theUrlBase
 	 *            The FHIR server base url (with a trailing "/")
 	 * @param theExtraParams
@@ -59,21 +58,26 @@ public abstract class BaseHttpClientInvocation {
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
 	 */
-	public abstract IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint);
+	public abstract IHttpRequest asHttpRequest(
+			String theUrlBase,
+			Map<String, List<String>> theExtraParams,
+			EncodingEnum theEncoding,
+			Boolean thePrettyPrint);
 
 	/**
 	 * Create an HTTP request for the given url, encoding and request-type
-	 * 
+	 *
 	 * @param theUrl
 	 *            The complete FHIR url to which the http request will be sent
 	 * @param theEncoding
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
 	 * @param theRequestType
-	 *            the type of HTTP request (GET, DELETE, ..) 
-	 */	
+	 *            the type of HTTP request (GET, DELETE, ..)
+	 */
 	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
+		IHttpClient httpClient = getRestfulClientFactory()
+				.getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
 		return httpClient.createGetRequest(getContext(), theEncoding);
 	}
 
@@ -99,7 +103,8 @@ public abstract class BaseHttpClientInvocation {
 		return myContext.getRestfulClientFactory();
 	}
 
-	public static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
+	public static void appendExtraParamsWithQuestionMark(
+			Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		if (theExtraParams == null) {
 			return;
 		}
@@ -121,5 +126,4 @@ public abstract class BaseHttpClientInvocation {
 			}
 		}
 	}
-
 }

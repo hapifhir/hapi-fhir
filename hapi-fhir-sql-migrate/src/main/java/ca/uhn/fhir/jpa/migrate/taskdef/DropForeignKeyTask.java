@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,24 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -87,24 +89,26 @@ public class DropForeignKeyTask extends BaseTableTask {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myParentTableName));
 		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
-
 	}
 
 	@Override
 	public void doExecute() throws SQLException {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
-		if (!existing.contains(myConstraintName)) {
+		if (!existing.contains(myConstraintName.toUpperCase(Locale.US))) {
 			logInfo(ourLog, "Don't have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 
-		List<String> sqls = generateSql(getTableName(), myConstraintName, getDriverType());
-
-		for (String next : sqls) {
-			executeSql(getTableName(), next);
+		List<String> sqlStatements;
+		try (Connection connection = getConnectionProperties().getDataSource().getConnection()) {
+			String constraintName = JdbcUtils.massageIdentifier(connection.getMetaData(), myConstraintName);
+			sqlStatements = generateSql(getTableName(), constraintName, getDriverType());
 		}
 
+		for (@Language("SQL") String next : sqlStatements) {
+			executeSql(getTableName(), next);
+		}
 	}
 
 	@Override

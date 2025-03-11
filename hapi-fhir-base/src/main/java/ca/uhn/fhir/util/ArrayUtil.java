@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -39,10 +38,9 @@ public class ArrayUtil {
 	public static Set<String> commaSeparatedListToCleanSet(String theValueAsString) {
 		Set<String> resourceTypes;
 		resourceTypes = Arrays.stream(split(theValueAsString, ","))
-			.map(t->trim(t))
-			.filter(t->isNotBlank(t))
-			.collect(Collectors.toSet());
+				.map(t -> trim(t))
+				.filter(t -> isNotBlank(t))
+				.collect(Collectors.toSet());
 		return resourceTypes;
 	}
-
 }

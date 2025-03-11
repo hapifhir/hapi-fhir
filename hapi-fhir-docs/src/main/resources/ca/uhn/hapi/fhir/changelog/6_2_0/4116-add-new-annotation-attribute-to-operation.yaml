@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4116
+jira: SMILE-5055
+title: "Added new attribute for the @Operation annotation to define the operation's canonical URL. This canonical URL value will populate 
+the operation definition in the CapabilityStatement resource."

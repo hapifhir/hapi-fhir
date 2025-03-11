@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +17,49 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.FhirContextValidationSupportSvc;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class ValidationSupportConfig {
-	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport(FhirContext theFhirContext) {
-		return new DefaultProfileValidationSupport(theFhirContext);
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Bean
+	public FhirContextValidationSupportSvc fhirValidationSupportSvc() {
+		return new FhirContextValidationSupportSvc(myFhirContext);
 	}
 
-	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
-	public JpaValidationSupportChain jpaValidationSupportChain(FhirContext theFhirContext) {
-		return new JpaValidationSupportChain(theFhirContext);
+	@Bean(name = JpaConfig.DEFAULT_PROFILE_VALIDATION_SUPPORT)
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport(myFhirContext);
+	}
+
+	@Bean
+	public InMemoryTerminologyServerValidationSupport inMemoryTerminologyServerValidationSupport(
+			FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
+		InMemoryTerminologyServerValidationSupport retVal =
+				new InMemoryTerminologyServerValidationSupport(theFhirContext);
+		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+		return retVal;
 	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)
@@ -56,26 +68,21 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = "myInstanceValidator")
-	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain) {
-		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
-			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
-			val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
-			val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-			val.setValidationSupport(theCachingValidationSupport);
-			return val;
-		} else {
-			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
-			FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
-			retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-			return retVal;
-		}
+	public IInstanceValidatorModule instanceValidator(
+			FhirContext theFhirContext, IValidationSupport theValidationSupportChain, DaoRegistry theDaoRegistry) {
+		FhirInstanceValidator val = new FhirInstanceValidator(theValidationSupportChain);
+		val.setValidatorResourceFetcher(
+				jpaValidatorResourceFetcher(theFhirContext, theValidationSupportChain, theDaoRegistry));
+		val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
+		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		return val;
 	}
 
 	@Bean
 	@Lazy
-	public ValidatorResourceFetcher jpaValidatorResourceFetcher() {
-		return new ValidatorResourceFetcher();
+	public ValidatorResourceFetcher jpaValidatorResourceFetcher(
+			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+		return new ValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry);
 	}
 
 	@Bean
@@ -83,5 +90,4 @@ public class ValidationSupportConfig {
 	public ValidatorPolicyAdvisor jpaValidatorPolicyAdvisor() {
 		return new ValidatorPolicyAdvisor();
 	}
-
 }

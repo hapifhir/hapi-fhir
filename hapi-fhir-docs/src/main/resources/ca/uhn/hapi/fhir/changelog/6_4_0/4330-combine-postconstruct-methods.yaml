@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4330
+title: "When running HAPI FHIR-based applications from within IntelliJ, an arbitrary ordering
+  of PostConstruct methods in BaseHapiFhirResourceDao could cause a crash. This has been
+  fixed."

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4234
+jira: SMILE-4765
+title: "Fixed a bug which caused a failure when combining a Consent Interceptor with version conversion via the `Accept` header."
+

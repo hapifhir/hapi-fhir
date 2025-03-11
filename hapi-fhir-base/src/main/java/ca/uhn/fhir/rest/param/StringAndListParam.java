@@ -1,13 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +17,9 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
-
-public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
+public class StringAndListParam extends BaseAndListParam<StringOrListParam> {
 
 	@Override
 	StringOrListParam newInstance() {

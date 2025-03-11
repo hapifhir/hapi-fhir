@@ -4,7 +4,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -14,25 +15,10 @@
 	<name>HAPI FHIR - Minimal Dependency Test - Client</name>
 
 	<dependencies>
-		<!-- Use an older version of SLF4j -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.30</version><!--$NO-MVN-MAN-VER$ -->
-		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.6.0</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-
-		<!-- Use an old version of Gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -49,15 +35,11 @@
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
 					<groupId>com.fasterxml.woodstox</groupId>
 					<artifactId>woodstox-core</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>javax.servlet</groupId>
+					<groupId>jakarta.servlet</groupId>
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
 			</exclusions>
@@ -91,10 +73,10 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
 				<configuration>
-					<skip>true</skip>
+					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
 				</configuration>
 			</plugin>
 		</plugins>

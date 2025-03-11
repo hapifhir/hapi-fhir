@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +17,23 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.api;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface IBulkDataExportJobSchedulingHelper {
 
 	/**
 	 * invoked via scheduled task, purges any tasks which are past their cutoff point.
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	void purgeExpiredFiles();
 
 	/**
 	 * Stops all invoked jobs, and then purges them.
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
+	@Deprecated
 	void cancelAndPurgeAllJobs();
 }

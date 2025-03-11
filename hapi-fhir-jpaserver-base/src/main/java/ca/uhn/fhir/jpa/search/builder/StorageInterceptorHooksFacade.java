@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
  */
 public class StorageInterceptorHooksFacade {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	public StorageInterceptorHooksFacade(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
@@ -46,14 +46,24 @@ public class StorageInterceptorHooksFacade {
 	 * @param theRequestDetails
 	 * @param theParams
 	 * @param search
+	 * @param theRequestPartitionId
 	 */
-	public void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search) {
-		HookParams params = new HookParams()
-			.add(ICachedSearchDetails.class, search)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-			.add(SearchParameterMap.class, theParams);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+	public void callStoragePresearchRegistered(
+			RequestDetails theRequestDetails,
+			SearchParameterMap theParams,
+			Search search,
+			RequestPartitionId theRequestPartitionId) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED)) {
+			HookParams params = new HookParams()
+					.add(ICachedSearchDetails.class, search)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(SearchParameterMap.class, theParams)
+					.add(RequestPartitionId.class, theRequestPartitionId);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		}
 	}
-	//private IInterceptorBroadcaster myInterceptorBroadcaster;
+	// private IInterceptorBroadcaster myInterceptorBroadcaster;
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.data;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,18 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamCoordsDao extends JpaRepository<ResourceIndexedSearchParamCoords, Long>, IHapiFhirJpaRepository {
+public interface IResourceIndexedSearchParamCoordsDao
+		extends JpaRepository<ResourceIndexedSearchParamCoords, Long>, IHapiFhirJpaRepository {
 	@Modifying
-	@Query("delete from ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :resid")
-	void deleteByResourceId(@Param("resid") Long theResourcePid);
+	@Query("delete from ResourceIndexedSearchParamCoords t WHERE t.myResource.myPid = :resid")
+	void deleteByResourceId(@Param("resid") JpaPid theResourcePid);
 }

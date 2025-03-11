@@ -1,10 +1,8 @@
-package ca.uhn.hapi.fhir.docs;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +17,26 @@ package ca.uhn.hapi.fhir.docs;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import java.util.ArrayList;
 import java.util.List;
 
-//START SNIPPET: servlet
+// START SNIPPET: servlet
 
 /**
  * In this example, we are using Servlet 3.0 annotations to define
  * the URL pattern for this servlet, but we could also
  * define this in a web.xml file.
  */
-@WebServlet(urlPatterns= {"/fhir/*"}, displayName="FHIR Server")
+@WebServlet(
+		urlPatterns = {"/fhir/*"},
+		displayName = "FHIR Server")
 public class ExampleRestfulServlet extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
@@ -45,21 +46,17 @@ public class ExampleRestfulServlet extends RestfulServer {
 	 * be used to configure the servlet to define resource providers, or set up
 	 * configuration, interceptors, etc.
 	 */
-   @Override
-   protected void initialize() throws ServletException {
-      /*
-       * The servlet defines any number of resource providers, and
-       * configures itself to use them by calling
-       * setResourceProviders()
-       */
-      List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
-      resourceProviders.add(new RestfulPatientResourceProvider());
-      resourceProviders.add(new RestfulObservationResourceProvider());
-      setResourceProviders(resourceProviders);
-   }
-	
+	@Override
+	protected void initialize() throws ServletException {
+		/*
+		 * The servlet defines any number of resource providers, and
+		 * configures itself to use them by calling
+		 * setResourceProviders()
+		 */
+		List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+		resourceProviders.add(new RestfulPatientResourceProvider());
+		resourceProviders.add(new RestfulObservationResourceProvider());
+		setResourceProviders(resourceProviders);
+	}
 }
-//END SNIPPET: servlet
-
-
-
+// END SNIPPET: servlet

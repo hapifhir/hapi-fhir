@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -101,8 +99,8 @@ public class SchematronValidationR4QuestionnaireTest {
 
 		ValidationResult result = validateSchematron(resource);
 		assertFalse(result.isSuccessful());
-		assertEquals(1, result.getMessages().size());
-		assertThat(result.getMessages().get(0).getMessage(), containsString("que-7"));
+		assertThat(result.getMessages()).hasSize(1);
+		assertThat(result.getMessages().get(0).getMessage()).contains("que-7");
 	}
 
 	private QuestionnaireItemComponent createItem(QuestionnaireItemType type) {

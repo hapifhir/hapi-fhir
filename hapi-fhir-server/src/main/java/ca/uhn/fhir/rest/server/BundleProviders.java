@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,17 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Collections;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.util.CoverageIgnore;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Utility methods for working with {@link IBundleProvider}
@@ -39,7 +37,7 @@ public class BundleProviders {
 	/** Non instantiable */
 	@CoverageIgnore
 	private BundleProviders() {
-		//nothing
+		// nothing
 	}
 
 	/**
@@ -50,7 +48,8 @@ public class BundleProviders {
 		return new IBundleProvider() {
 			@Nonnull
 			@Override
-			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(
+					int theFromIndex, int theToIndex, ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 				return Collections.emptyList();
 			}
 

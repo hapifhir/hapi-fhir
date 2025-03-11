@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.migrate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +40,17 @@ public class MigrationTaskSkipper {
 			return;
 		}
 		Set<String> skippedVersionSet = Stream.of(theSkipVersions.split(","))
-			.map(String::trim)
-			// TODO KHS filter out all characters that aren't numbers, periods and underscores
-			.map(s -> s.replace("'", ""))
-			.map(s -> s.replace("\"", ""))
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toSet());
+				.map(String::trim)
+				// TODO KHS filter out all characters that aren't numbers, periods and underscores
+				.map(s -> s.replace("'", ""))
+				.map(s -> s.replace("\"", ""))
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toSet());
 
 		for (BaseTask task : theTasks) {
 			if (skippedVersionSet.contains(task.getMigrationVersion())) {
 				ourLog.info("Will skip {}: {}", task.getMigrationVersion(), task.getDescription());
-				task.setDoNothing(true);
+				task.addFlag(TaskFlagEnum.DO_NOTHING);
 			}
 		}
 	}

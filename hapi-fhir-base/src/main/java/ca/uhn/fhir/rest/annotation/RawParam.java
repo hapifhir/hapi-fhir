@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,15 +25,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * On a {@link Search} method, a parameter marked with this annotation 
- * will receive search parameters not captured by other parameters. 
+ * On a {@link Search} method, a parameter marked with this annotation
+ * will receive search parameters not captured by other parameters.
  * <p>
  * Parameters with this annotation must be of type
  * {@code Map<String, List<String>>}
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 public @interface RawParam {
 	// nothing
 }

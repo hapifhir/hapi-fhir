@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,67 +17,94 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.engine.backend.types.ObjectStructure;
+import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.IdentifierBridge;
+import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
+import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeFromDocumentIdentifierContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.IdentifierBridgeToDocumentIdentifierContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.r4.model.Coding;
 
-import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Indexed(routingBinder=@RoutingBinderRef(type =  DeferConceptIndexingRoutingBinder.class))
-@Table(name = "TRM_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
-}, indexes = {
-	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
-	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
-})
+@Indexed(routingBinder = @RoutingBinderRef(type = DeferConceptIndexingRoutingBinder.class))
+@Table(
+		name = "TRM_CONCEPT",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CONCEPT_CS_CODE",
+					columnNames = {"PARTITION_ID", "CODESYSTEM_PID", "CODEVAL"})
+		},
+		indexes = {
+			@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
+			@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
+		})
 public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
@@ -87,11 +112,18 @@ public class TermConcept implements Serializable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
+	@OneToMany(
+			fetch = FetchType.LAZY,
+			mappedBy = "myParent",
+			cascade = {})
 	private List<TermConceptParentChildLink> myChildren;
 
 	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
-	@FullTextField(name = "myCode", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "exactAnalyzer")
+	@FullTextField(
+			name = "myCode",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "exactAnalyzer")
 	private String myCode;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -99,52 +131,106 @@ public class TermConcept implements Serializable {
 	private Date myUpdated;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "CODESYSTEM_PID",
+						insertable = false,
+						updatable = false,
+						nullable = false,
+						referencedColumnName = "PID"),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	@Column(name = "CODESYSTEM_PID", insertable = true, updatable = false, nullable = false)
 	@GenericField(name = "myCodeSystemVersionPid")
-	private long myCodeSystemVersionPid;
+	private Long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
-	@FullTextField(name = "myDisplay", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myDisplayEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myDisplayWordEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteWordEdgeAnalyzer")
-	@FullTextField(name = "myDisplayNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myDisplayPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
+	@FullTextField(
+			name = "myDisplay",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "standardAnalyzer")
+	@FullTextField(
+			name = "myDisplayEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(
+			name = "myDisplayWordEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteWordEdgeAnalyzer")
+	@FullTextField(
+			name = "myDisplayNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(
+			name = "myDisplayPhonetic",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompletePhoneticAnalyzer")
 	private String myDisplay;
 
-	/**
-	 * IndexedEmbedded uses ObjectStructure.NESTED to be able to use hibernate search nested predicate queries.
-	 * @see "https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#search-dsl-predicate-nested"
-	 */
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-	@IndexedEmbedded(structure = ObjectStructure.NESTED)
+	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 
-	@Id
-	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
-	@Column(name = "PID")
-	@GenericField
-	private Long myId;
+	@EmbeddedId
+	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = TermConceptPkIdentifierBridge.class))
+	@GenericField(
+			name = "myId",
+			projectable = Projectable.YES,
+			valueBridge = @ValueBridgeRef(type = TermConceptPkValueBridge.class))
+	private TermConceptPk myId;
 
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
+
+	/**
+	 * See {@link EntityIndexStatusEnum} for values
+	 */
 	@Column(name = "INDEX_STATUS", nullable = true)
-	private Long myIndexStatus;
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
+	private EntityIndexStatusEnum myIndexStatus;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
-	@FullTextField(name = "myParentPids", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "conceptParentPidsAnalyzer")
 	private String myParentPids;
 
-	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
+	@FullTextField(
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
+	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
+	private String myParentPidsVc;
+
+	@OneToMany(
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myChild")
 	private List<TermConceptParentChildLink> myParents;
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
+
+	@Transient
+	private boolean mySupportLegacyLob = false;
 
 	public TermConcept() {
 		super();
@@ -188,7 +274,10 @@ public class TermConcept implements Serializable {
 		return designation;
 	}
 
-	private TermConceptProperty addProperty(@Nonnull TermConceptPropertyTypeEnum thePropertyType, @Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
+	private TermConceptProperty addProperty(
+			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
 
 		TermConceptProperty property = new TermConceptProperty();
@@ -204,10 +293,14 @@ public class TermConcept implements Serializable {
 		return property;
 	}
 
-	public TermConceptProperty addPropertyCoding(@Nonnull String thePropertyName, @Nonnull String thePropertyCodeSystem, @Nonnull String thePropertyCode, String theDisplayName) {
+	public TermConceptProperty addPropertyCoding(
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyCodeSystem,
+			@Nonnull String thePropertyCode,
+			String theDisplayName) {
 		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
-			.setCodeSystem(thePropertyCodeSystem)
-			.setDisplay(theDisplayName);
+				.setCodeSystem(thePropertyCodeSystem)
+				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
@@ -244,8 +337,8 @@ public class TermConcept implements Serializable {
 
 	public TermConcept setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCode, MAX_CODE_LENGTH, "Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -258,6 +351,9 @@ public class TermConcept implements Serializable {
 		myCodeSystem = theCodeSystemVersion;
 		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
+			assert myCodeSystemVersionPid != null;
+			myPartitionIdValue = theCodeSystemVersion.getPartitionId().getPartitionId();
+			getPid().myPartitionIdValue = myPartitionIdValue;
 		}
 		return this;
 	}
@@ -294,26 +390,33 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	public Long getId() {
+	public TermConceptPk getPid() {
+		if (myId == null) {
+			myId = new TermConceptPk();
+		}
 		return myId;
 	}
 
+	public Long getId() {
+		return getPid().myId;
+	}
+
 	public TermConcept setId(Long theId) {
-		myId = theId;
+		getPid().myId = theId;
 		return this;
 	}
 
-	public Long getIndexStatus() {
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 		return this;
 	}
 
 	public String getParentPidsAsString() {
-		return myParentPids;
+		return nonNull(myParentPidsVc) ? myParentPidsVc : myParentPids;
 	}
 
 	public List<TermConceptParentChildLink> getParents() {
@@ -393,13 +496,17 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		if (myParentPids == null) {
+		if (isNull(myParentPids) && isNull(myParentPidsVc)) {
 			Set<Long> parentPids = new HashSet<>();
 			TermConcept entity = this;
 			parentPids(entity, parentPids);
 			entity.setParentPids(parentPids);
 
 			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+		}
+
+		if (!mySupportLegacyLob) {
+			clearParentPidsLob();
 		}
 	}
 
@@ -420,6 +527,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setParentPids(String theParentPids) {
+		myParentPidsVc = theParentPids;
 		myParentPids = theParentPids;
 		return this;
 	}
@@ -437,28 +545,112 @@ public class TermConcept implements Serializable {
 		return b.build();
 	}
 
-	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
-		for (TermConceptProperty next : getProperties()) {
-			switch (next.getType()) {
-				case STRING:
-					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
-					break;
-				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
-					break;
-				default:
-					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
-			}
-		}
-		return retVal;
-	}
-
 	/**
 	 * Returns a view of {@link #getChildren()} but containing the actual child codes
 	 */
 	public List<TermConcept> getChildCodes() {
-		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
+		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
 	}
 
+	public void flagForLegacyLobSupport(boolean theSupportLegacyLob) {
+		mySupportLegacyLob = theSupportLegacyLob;
+	}
+
+	private void clearParentPidsLob() {
+		myParentPids = null;
+	}
+
+	@VisibleForTesting
+	public boolean hasParentPidsLobForTesting() {
+		return nonNull(myParentPids);
+	}
+
+	public PartitionablePartitionId getPartitionId() {
+		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
+	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {
+		@Override
+		public Long toIndexedValue(TermConceptPk value, ValueBridgeToIndexedValueContext context) {
+			return value.myId;
+		}
+	}
+
+	public static class TermConceptPkIdentifierBridge implements IdentifierBridge<TermConceptPk> {
+		@Override
+		public String toDocumentIdentifier(
+				TermConceptPk propertyValue, IdentifierBridgeToDocumentIdentifierContext context) {
+			return Long.toString(propertyValue.myId);
+		}
+
+		@Override
+		public TermConceptPk fromDocumentIdentifier(
+				String documentIdentifier, IdentifierBridgeFromDocumentIdentifierContext context) {
+			TermConceptPk retVal = new TermConceptPk();
+			retVal.myId = Long.parseLong(documentIdentifier);
+			return retVal;
+		}
+	}
+
+	@Embeddable
+	public static class TermConceptPk implements Serializable {
+		@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
+		@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
+		@Column(name = "PID")
+		@GenericField(projectable = Projectable.YES)
+		private Long myId;
+
+		@PartitionedIdProperty
+		@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = false)
+		private Integer myPartitionIdValue;
+
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk() {
+			super();
+		}
+
+		/**
+		 * Constructor
+		 */
+		public TermConceptPk(Long theId, Integer thePartitionId) {
+			myId = theId;
+			myPartitionIdValue = thePartitionId;
+		}
+
+		public Integer getPartitionIdValue() {
+			return myPartitionIdValue;
+		}
+
+		public void setPartitionIdValue(Integer thePartitionIdValue) {
+			myPartitionIdValue = thePartitionIdValue;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+			if (!(theO instanceof TermConceptPk)) {
+				return false;
+			}
+			TermConceptPk that = (TermConceptPk) theO;
+			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myId, myPartitionIdValue);
+		}
+
+		@Override
+		public String toString() {
+			return myPartitionIdValue + "/" + myId;
+		}
+
+		public Long getId() {
+			return myId;
+		}
+	}
 }

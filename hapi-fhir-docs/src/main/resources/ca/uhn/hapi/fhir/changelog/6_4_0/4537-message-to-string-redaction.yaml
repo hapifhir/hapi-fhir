@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4537
+title: "ResourceDeliveryMessage no longer includes the payload in toString().
+   This avoids leaking sensitive data to logs and other channels."

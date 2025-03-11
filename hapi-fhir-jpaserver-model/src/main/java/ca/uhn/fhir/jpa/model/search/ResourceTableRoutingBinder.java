@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.model.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.search;
 
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hibernate.search.mapper.pojo.bridge.RoutingBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.RoutingBindingContext;
@@ -37,8 +37,13 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 	private static class ResourceTableBridge implements RoutingBridge<ResourceTable> {
 
 		@Override
-		public void route(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
-			if (theResourceTable.getDeleted() == null && theResourceTable.getIndexStatus() != null ) {
+		public void route(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+			if (theResourceTable.getDeleted() == null
+					&& theResourceTable.getIndexStatus() == EntityIndexStatusEnum.INDEXED_ALL) {
 				theDocumentRoutes.addRoute();
 			} else {
 				theDocumentRoutes.notIndexed();
@@ -46,7 +51,11 @@ public class ResourceTableRoutingBinder implements RoutingBinder {
 		}
 
 		@Override
-		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, ResourceTable theResourceTable, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void previousRoutes(
+				DocumentRoutes theDocumentRoutes,
+				Object theO,
+				ResourceTable theResourceTable,
+				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			theDocumentRoutes.addRoute();
 		}
 	}

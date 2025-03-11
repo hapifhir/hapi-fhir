@@ -1,13 +1,8 @@
-package ca.uhn.fhir.context;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +17,18 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface IRuntimeDatatypeDefinition {
 
 	boolean isSpecialization();
-	
+
 	public Class<? extends IBaseDatatype> getProfileOf();
 
 	boolean isProfileOf(Class<? extends IBaseDatatype> theType);
-	
-	public Class<? extends IBase> getImplementingClass();
 
+	public Class<? extends IBase> getImplementingClass();
 }

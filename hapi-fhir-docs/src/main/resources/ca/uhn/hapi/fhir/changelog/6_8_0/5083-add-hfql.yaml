@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5083
+title: "A new SQL-like evaluator called the HAPI FHIR Query Language (HFQL)
+   has been added."

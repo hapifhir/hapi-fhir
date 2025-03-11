@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,48 +17,59 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashSet;
+import java.util.List;
 
 public final class OperationRuleTestUtil {
 	private OperationRuleTestUtil() {}
 
 	public static String getOperationName(IAuthRule theRule) {
-		return ((OperationRule)theRule).getOperationName();
+		return ((OperationRule) theRule).getOperationName();
 	}
 
 	public static boolean isAppliesToServer(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToServer();
+		return ((OperationRule) theRule).isAppliesToServer();
 	}
 
 	public static boolean isAppliesToAnyType(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToAnyType();
+		return ((OperationRule) theRule).isAppliesToAnyType();
 	}
 
 	public static boolean isAppliesToAnyInstance(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToAnyInstance();
+		return ((OperationRule) theRule).isAppliesToAnyInstance();
 	}
 
 	public static HashSet<Class<? extends IBaseResource>> getAppliesToTypes(IAuthRule theRule) {
-		return ((OperationRule)theRule).getAppliesToTypes();
+		return ((OperationRule) theRule).getAppliesToTypes();
 	}
 
 	public static HashSet<Class<? extends IBaseResource>> getAppliesToInstancesOfType(IAuthRule theRule) {
-		return ((OperationRule)theRule).getAppliesToInstancesOfType();
+		return ((OperationRule) theRule).getAppliesToInstancesOfType();
+	}
+
+	public static boolean isAllowResourceAccess(IAuthRule theRule) {
+		return ((OperationRule) theRule).isAllowAllResourcesAccess();
 	}
 
 	public static boolean isAllowAllResponses(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAllowAllResponses();
+		return ((OperationRule) theRule).isAllowAllResponses();
+	}
+
+	public static List<IIdType> getAppliesToIds(IAuthRule theRule) {
+		return ((OperationRule) theRule).getAppliesToIds();
 	}
 
 	public static String getGroupId(IAuthRule theRule) {
-		return ((RuleBulkExportImpl)theRule).getGroupId();
+		return ((RuleBulkExportImpl) theRule).getGroupId();
 	}
 
-	public static BulkDataExportOptions.ExportStyle getWantExportStyle(IAuthRule theRule) {
-		return ((RuleBulkExportImpl)theRule).getWantExportStyle();
+	public static BulkExportJobParameters.ExportStyle getWantExportStyle(IAuthRule theRule) {
+		return ((RuleBulkExportImpl) theRule).getWantExportStyle();
 	}
 }

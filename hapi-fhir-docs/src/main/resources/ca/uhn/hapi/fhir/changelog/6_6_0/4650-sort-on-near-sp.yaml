@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4650
+title: "When performing a search using the Location:near search parameter, it is now possible
+   to include this parameter in a `_sort` expression as well. This will result in locations being
+   sorted by their proximity to the coordinates in the parameter value. Thanks to
+   Jens Kristian Villadsen for the suggestion and algorithm design!"

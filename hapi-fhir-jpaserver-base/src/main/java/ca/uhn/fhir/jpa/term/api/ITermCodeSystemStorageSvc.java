@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -26,12 +25,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -41,41 +39,54 @@ public interface ITermCodeSystemStorageSvc {
 
 	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
 
-
 	/**
 	 * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
 	 */
 	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
-		return theRequestDetails == null ||
-			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+		return theRequestDetails == null
+				|| (boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
-	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
-		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
-		RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersion(
+			String theSystemUri,
+			String theSystemName,
+			String theSystemVersionId,
+			TermCodeSystemVersion theCodeSystemVersion,
+			ResourceTable theCodeSystemResourceTable,
+			RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
 	@Transactional
-	default void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
-			String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+	default void storeNewCodeSystemVersion(
+			String theSystemUri,
+			String theSystemName,
+			String theSystemVersionId,
+			TermCodeSystemVersion theCodeSystemVersion,
+			ResourceTable theCodeSystemResourceTable) {
 
-		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
-			theCodeSystemVersion, theCodeSystemResourceTable, null);
+		storeNewCodeSystemVersion(
+				theSystemUri,
+				theSystemName,
+				theSystemVersionId,
+				theCodeSystemVersion,
+				theCodeSystemResourceTable,
+				null);
 	}
-
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
-	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
-		TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
-		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+	IIdType storeNewCodeSystemVersion(
+			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+			TermCodeSystemVersion theCodeSystemVersion,
+			RequestDetails theRequestDetails,
+			List<ValueSet> theValueSets,
+			List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-
-
-	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersionIfNeeded(
+			CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
@@ -84,12 +95,9 @@ public interface ITermCodeSystemStorageSvc {
 		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
 	}
 
-
-
 	UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
 	UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
 	int saveConcept(TermConcept theNextConcept);
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,22 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-public class SearchBuilderFactory {
+public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType, myDaoConfig);
+	public SearchBuilderFactory() {}
+
+	public ISearchBuilder<T> newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return (ISearchBuilder<T>)
+				myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theResourceName, theResourceType);
 	}
-
 }

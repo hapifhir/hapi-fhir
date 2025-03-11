@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -59,6 +60,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -70,6 +76,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-sql-migrate</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -99,6 +110,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -124,12 +140,12 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-batch</artifactId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -152,6 +168,10 @@
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 		</dependency>
 
 		<dependency>
@@ -193,7 +213,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 		</dependency>
 
 		<dependency>
@@ -202,7 +222,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
+			<artifactId>thymeleaf-spring6</artifactId>
 		</dependency>
 
 		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
@@ -228,28 +248,12 @@
 			<artifactId>xml-patch</artifactId>
 		</dependency>
 
-		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
-
-		<!-- 
-		For some reason JavaDoc crashed during site generation unless we have this dependency
-		-->
-		<dependency>
-			<groupId>javax.interceptor</groupId>
-			<artifactId>javax.interceptor-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!--
 		Dependencies that need to be added since JDK9
 		-->
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -299,13 +303,8 @@
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
@@ -315,12 +314,12 @@
 		</dependency>
 		<!-- Hibernate Search -->
 		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<groupId>co.elastic.clients</groupId>
+			<artifactId>elasticsearch-java</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-api</artifactId>
+					<groupId>jakarta.json</groupId>
+					<artifactId>jakarta.json-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -337,17 +336,25 @@
 			<artifactId>hibernate-search-backend-elasticsearch-aws</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-phonetic</artifactId>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-envers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-envers</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-backward-codecs</artifactId>
+			<artifactId>lucene-analysis-phonetic</artifactId>
 		</dependency>
 		<!-- Misc -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -358,8 +365,21 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -370,6 +390,12 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -385,62 +411,10 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-	</dependencies>
-
-
-	<properties>
-		<jackson.version>2.7.1</jackson.version>
-	</properties>
+    </dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
-				<configuration>
-					<dialects>
-						<param>h2</param>
-						<param>derby_10_7</param>
-						<param>mysql57</param>
-						<param>mariadb</param>
-						<param>oracle12c</param>
-						<param>sqlserver2012</param>
-					</dialects>
-					<customDialects>
-						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
-						<customDialect>org.hibernate.dialect.CockroachDB201Dialect</customDialect>
-					</customDialects>
-					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
-					<packages>
-						<param>ca.uhn.fhir.jpa.entity</param>
-						<param>ca.uhn.fhir.jpa.model.entity</param>
-					</packages>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>gen-ddl</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<!--
-					These have been added as explicit dependencies
-					as JDK9 no longer includes them by default
-					-->
-					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>${jaxb_runtime_version}</version>
-					</dependency>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-jpaserver-model</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
@@ -455,12 +429,9 @@
 							<version>dstu2</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml
-							</targetResourceSpringBeansFile>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
 							<baseResourceNames/>
-							<excludeResourceNames>
-								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
-							</excludeResourceNames>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -472,11 +443,9 @@
 							<version>dstu3</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu3</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-							<excludeResourceNames>
-							</excludeResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu3.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -488,11 +457,23 @@
 							<version>r4</version>
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
-							</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-							<excludeResourceNames>
-							</excludeResourceNames>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_r4b</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>r4b</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.r4b</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml</targetResourceSpringBeansFile>
+							<baseResourceNames/>
+							<excludeResourceNames/>
 						</configuration>
 					</execution>
 					<execution>
@@ -510,7 +491,6 @@
 						</configuration>
 					</execution>
 				</executions>
-
 				<dependencies>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
@@ -527,7 +507,6 @@
 						<artifactId>hapi-fhir-structures-r4</artifactId>
 						<version>${project.version}</version>
 					</dependency>
-
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
@@ -535,6 +514,84 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
+			<!-- Generate the DDL schema files -->
+			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
+				<executions><execution><id>generate-ddl-legacy</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>false</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+					</configuration>
+				</execution>
+				<execution>
+					<id>generate-ddl-partitioned</id>
+					<phase>process-classes</phase>
+				<goals>
+					<goal>generate-ddl</goal>
+				</goals>
+					<configuration>
+						<databasePartitionMode>true</databasePartitionMode>
+						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+					</configuration>
+				</execution>
+				</executions>
+				<configuration>
+					<packageNames>
+						<packageName>ca.uhn.fhir.jpa.entity</packageName>
+						<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
+					</packageNames>
+					<dialects>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirDerbyDialect</className>
+							<targetFileName>derby.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect</className>
+							<targetFileName>mysql.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect</className>
+							<targetFileName>mariadb.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect</className>
+							<targetFileName>oracle.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect</className>
+							<targetFileName>sqlserver.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect</className>
+							<targetFileName>cockroachdb.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect</className>
+							<targetFileName>h2.sql</targetFileName>
+						</dialect>
+						<dialect>
+							<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
+							<targetFileName>postgres.sql</targetFileName>
+							<appendFile>classpath:ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql</appendFile>
+						</dialect>
+					</dialects>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-jpaserver-model</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>

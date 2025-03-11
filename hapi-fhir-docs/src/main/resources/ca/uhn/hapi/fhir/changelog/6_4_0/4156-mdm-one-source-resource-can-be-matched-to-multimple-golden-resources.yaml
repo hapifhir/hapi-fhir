@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4156
+title: "Before multiple MDM `POSSIBLE_MATCH` links pointing to different Golden Resources could be accepted (updated to `MATCH`). 
+   This has now been fixed, allowing only one MATCH."

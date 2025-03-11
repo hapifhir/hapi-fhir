@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3992
+title: "Previously when ValueSets were pre-expanded after loinc terminology upload, expansion was failing with an exception for each ValueSet
+   with more than 10,000 properties. This problem has been fixed.
+This fix changed some freetext mappings (definitions about how resources are freetext indexed) for terminology resources, which requires
+   reindexing those resources. To do this use the `reindex-terminology` command."

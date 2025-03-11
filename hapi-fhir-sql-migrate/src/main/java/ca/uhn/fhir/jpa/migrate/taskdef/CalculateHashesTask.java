@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.VersionEnum;
@@ -42,7 +41,8 @@ public class CalculateHashesTask extends BaseColumnCalculatorTask {
 		try {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			boolean shouldSkip = tableNames.contains("HFJ_RES_REINDEX_JOB");
-			// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether this
+			// This table was added shortly after hash indexes were added, so it is a reasonable indicator for whether
+			// this
 			// migration has already been run
 			if (shouldSkip) {
 				logInfo(ourLog, "The table HFJ_RES_REINDEX_JOB already exists.  Skipping calculate hashes task.");

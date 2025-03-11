@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4177
+title: "Support has been added for clustered database upgrades in the new (non-FlyWay) migrator codebase.  Only one database migration is permitted at once."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +17,32 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
+public abstract class BaseHasResource<T>
+		implements IBaseResourceEntity<T>, IBasePersistedResource<JpaPid>, Serializable {
+
+	public static final String RES_PUBLISHED = "RES_PUBLISHED";
+	public static final String RES_UPDATED = "RES_UPDATED";
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -47,6 +51,7 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private FhirVersionEnum myFhirVersion;
 
 	@Column(name = "HAS_TAGS", nullable = false)
@@ -54,31 +59,14 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	private boolean myHasTags;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "RES_PUBLISHED", nullable = false)
+	@Column(name = RES_PUBLISHED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myPublished;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "RES_UPDATED", nullable = false)
+	@Column(name = RES_UPDATED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
-
-	/**
-	 * This is stored as an optimization to avoid needing to query for this
-	 * after an update
-	 */
-	@Transient
-	private transient String myTransientForcedId;
-
-	public String getTransientForcedId() {
-		return myTransientForcedId;
-	}
-
-	public void setTransientForcedId(String theTransientForcedId) {
-		assert !defaultString(theTransientForcedId).contains("/") : "Forced ID should not include type: " + theTransientForcedId;
-		myTransientForcedId = theTransientForcedId;
-	}
-
 
 	public abstract BaseTag addTag(TagDefinition theDef);
 
@@ -95,15 +83,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
 		myFhirVersion = theFhirVersion;
 	}
-
-	abstract public ForcedId getForcedId();
-
-	abstract public void setForcedId(ForcedId theForcedId);
-
-	@Override
-	public abstract Long getId();
-
-
 
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;
@@ -130,12 +109,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		myPublished = thePublished.getValue();
 	}
 
-	@Override
-	public abstract Long getResourceId();
-
-	@Override
-	public abstract String getResourceType();
-
 	public abstract Collection<? extends BaseTag> getTags();
 
 	@Override
@@ -151,13 +124,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 	}
-
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
-	}
-
-	@Override
-	public abstract long getVersion();
 
 	@Override
 	public boolean isHasTags() {
@@ -175,5 +141,4 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 		}
 		return retVal;
 	}
-
 }

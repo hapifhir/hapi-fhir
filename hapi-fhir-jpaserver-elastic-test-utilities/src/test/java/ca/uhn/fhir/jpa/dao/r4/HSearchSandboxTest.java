@@ -18,6 +18,7 @@ import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.google.common.collect.Lists;
+import jakarta.persistence.EntityManager;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -42,13 +43,12 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -97,15 +97,11 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
 
-//	@BeforeEach
-//	public void beforePurgeDatabase() {
-//		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-//	}
 
 	@BeforeEach
 	public void enableContainsAndLucene() {
-		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAllowContainsSearches(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 
@@ -476,18 +472,6 @@ public class HSearchSandboxTest extends BaseJpaTest {
 
 			QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 			ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-
-//			if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
-//				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
-//				if (canonicalQty != null) {
-//					String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-//					setPrefixedQuantityPredicate(orQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
-//					orQuantityTerms.must(myPredicateFactory.match()
-//						.field(fieldPath + "." + QTY_CODE_NORM)
-//						.matching(canonicalQty.getUnits()));
-//					return orQuantityTerms;
-//				}
-//			}
 
 			// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
 			addQuantityTerms(theTopBool, theIsMust, activePrefix, qtyParam, fieldPath);

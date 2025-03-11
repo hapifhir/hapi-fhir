@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,17 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -37,47 +36,51 @@ import java.util.function.Supplier;
  * Figure out how we're going to run the query up front, and build a branchless strategy object.
  */
 public class SearchStrategyFactory {
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
+
 	@Nullable
 	private final IFulltextSearchSvc myFulltextSearchSvc;
 
-	public interface ISearchStrategy extends Supplier<IBundleProvider> {
-
-	}
+	public interface ISearchStrategy extends Supplier<IBundleProvider> {}
 
 	// someday
-//	public class DirectHSearch implements  ISearchStrategy {};
-//	public class JPAOffsetSearch implements  ISearchStrategy {};
-//	public class JPASavedSearch implements  ISearchStrategy {};
-//	public class JPAHybridHSearchSavedSearch implements  ISearchStrategy {};
-//	public class SavedSearchAdaptorStrategy implements  ISearchStrategy {};
+	//	public class DirectHSearch implements  ISearchStrategy {};
+	//	public class JPAOffsetSearch implements  ISearchStrategy {};
+	//	public class JPASavedSearch implements  ISearchStrategy {};
+	//	public class JPAHybridHSearchSavedSearch implements  ISearchStrategy {};
+	//	public class SavedSearchAdaptorStrategy implements  ISearchStrategy {};
 
-	public SearchStrategyFactory(DaoConfig theDaoConfig, @Nullable IFulltextSearchSvc theFulltextSearchSvc) {
-		myDaoConfig = theDaoConfig;
+	public SearchStrategyFactory(
+			JpaStorageSettings theStorageSettings, @Nullable IFulltextSearchSvc theFulltextSearchSvc) {
+		myStorageSettings = theStorageSettings;
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
 
-	public boolean isSupportsHSearchDirect(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-		return
-			myFulltextSearchSvc != null &&
-			myDaoConfig.isStoreResourceInHSearchIndex() &&
-			myDaoConfig.isAdvancedHSearchIndexing() &&
-			myFulltextSearchSvc.supportsAllOf(theParams) &&
-			theParams.getSummaryMode() == null &&
-			theParams.getSearchTotalMode() == null;
+	public boolean isSupportsHSearchDirect(
+			String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+		return myFulltextSearchSvc != null
+				&& myStorageSettings.isStoreResourceInHSearchIndex()
+				&& myStorageSettings.isAdvancedHSearchIndexing()
+				&& myFulltextSearchSvc.supportsAllOf(theParams)
+				&& theParams.getSummaryMode() == null
+				&& theParams.getSearchTotalMode() == null;
 	}
 
-	public ISearchStrategy makeDirectStrategy(String theSearchUUID, String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
+	public ISearchStrategy makeDirectStrategy(
+			String theSearchUUID,
+			String theResourceType,
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails) {
 		return () -> {
 			if (myFulltextSearchSvc == null) {
 				return new SimpleBundleProvider(Collections.emptyList(), theSearchUUID);
 			}
 
-			List<IBaseResource> resources = myFulltextSearchSvc.searchForResources(theResourceType, theParams);
+			List<IBaseResource> resources =
+					myFulltextSearchSvc.searchForResources(theResourceType, theParams, theRequestDetails);
 			SimpleBundleProvider result = new SimpleBundleProvider(resources, theSearchUUID);
 			result.setSize(resources.size());
 			return result;
 		};
 	}
-
 }

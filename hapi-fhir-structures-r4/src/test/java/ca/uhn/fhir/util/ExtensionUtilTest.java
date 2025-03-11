@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,7 +34,7 @@ class ExtensionUtilTest {
 		ExtensionUtil.setExtension(ourFhirContext, p1, EXT_URL, "integer", "1");
 
 		assertTrue(ExtensionUtil.hasExtension(p1, EXT_URL));
-		assertEquals(1, ExtensionUtil.getExtensionsByUrl(p1, EXT_URL).size());
+		assertThat(ExtensionUtil.getExtensionsByUrl(p1, EXT_URL)).hasSize(1);
 
 		IBaseDatatype ext = ExtensionUtil.getExtensionByUrl(p1, EXT_URL).getValue();
 		assertEquals("integer", ext.fhirType());
@@ -46,7 +47,7 @@ class ExtensionUtilTest {
 		assertNotNull(ExtensionUtil.addExtension(p));
 		assertNotNull(ExtensionUtil.addExtension(p, "myUrl"));
 
-		assertEquals(2, p.getExtension().size());
+		assertThat(p.getExtension()).hasSize(2);
 		assertEquals("myUrl", p.getExtension().get(1).getUrl());
 	}
 
@@ -67,12 +68,12 @@ class ExtensionUtilTest {
 
 		ExtensionUtil.clearExtensionsByUrl(p, "URL");
 
-		assertEquals(1, p.getExtension().size());
+		assertThat(p.getExtension()).hasSize(1);
 		assertFalse(ExtensionUtil.hasExtension(p, "URL"));
 		assertTrue(ExtensionUtil.hasExtension(p, "URL2"));
 
 		ExtensionUtil.clearAllExtensions(p);
 
-		assertEquals(0, p.getExtension().size());
+		assertThat(p.getExtension()).isEmpty();
 	}
 }

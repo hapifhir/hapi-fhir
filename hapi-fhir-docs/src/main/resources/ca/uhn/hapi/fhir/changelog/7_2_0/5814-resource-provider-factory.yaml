@@ -1,0 +1,5 @@
+---
+type: change
+issue: 5814
+title: "Extracted methods out of ResourceProviderFactory into ObservableSupplierSet so that functionality can be used by
+other services.  Unit tests revealed a cleanup bug in MdmProviderLoader that is fixed in this MR."

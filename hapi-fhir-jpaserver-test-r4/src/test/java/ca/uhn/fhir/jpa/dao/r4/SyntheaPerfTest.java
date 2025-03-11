@@ -1,15 +1,18 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
@@ -43,8 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -65,21 +67,22 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	@AfterEach
 	public void afterEach() {
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testLoadSynthea() throws Exception {
 		assertEquals(100, TestR4Config.getMaxThreads());
 
-		myDaoConfig.setResourceEncoding(ResourceEncodingEnum.JSON);
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setResourceEncoding(ResourceEncodingEnum.JSON);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
-		myDaoConfig.setInlineResourceTextBelowSize(4000);
+		myStorageSettings.setInlineResourceTextBelowSize(4000);
 
-		assertTrue(myDaoConfig.isMassIngestionMode());
+		assertTrue(myStorageSettings.isMassIngestionMode());
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
@@ -111,14 +114,14 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
-		System.setProperty("mass_ingestion_mode", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
+		HapiTestSystemProperties.enableMassIngestionMode();
 	}
 
 	@AfterAll
 	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
-		System.clearProperty("mass_ingestion_mode");
+		HapiTestSystemProperties.disableUnlimitedDbConnections();
+		HapiTestSystemProperties.disableMassIngestionMode();
 	}
 
 	private class Uploader {

@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4544
+title: "The HapiTransactionService (HAPI FHIR JPA Transaction Manager) has been improved
+   and used in a number of new places (replacing the @Transactional annotation). This
+   means that stack traces have much less transaction logic noise, and give a clear
+   indication of transaction boundaries."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Child;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 
@@ -62,7 +62,9 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract boolean isSummary();
 
-	abstract void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+	abstract void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
 
 	@Override
 	public String toString() {
@@ -75,6 +77,10 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
 		this.myReplacedParentDefinition = myReplacedParentDefinition;
+	}
+
+	public boolean isMultipleCardinality() {
+		return this.getMax() > 1 || this.getMax() == Child.MAX_UNLIMITED;
 	}
 
 	public interface IAccessor {
@@ -100,13 +106,15 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 	}
 
-	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next : theClassToElementDefinitions.entrySet()) {
+	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next :
+				theClassToElementDefinitions.entrySet()) {
 			if (IBaseReference.class.isAssignableFrom(next.getKey())) {
 				return next.getValue();
 			}
 		}
-		
+
 		// Shouldn't happen
 		throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
 	}

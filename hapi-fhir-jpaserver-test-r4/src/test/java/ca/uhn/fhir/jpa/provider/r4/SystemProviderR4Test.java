@@ -8,7 +8,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -55,9 +56,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -67,10 +68,10 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -96,15 +97,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
@@ -124,11 +122,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(new JpaStorageSettings().isDeleteExpungeEnabled());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -222,7 +220,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response).doesNotContain("_format");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -255,7 +253,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, containsString("_format=json"));
+			assertThat(response).contains("_format=json");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			http.close();
@@ -340,7 +338,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
+		assertThat(http.getFirstHeader("Content-Type").getValue()).contains("application/fhir+json");
 	}
 
 	@Test
@@ -355,12 +353,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_summary=count");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal());
-		assertEquals(0, respSub.getEntry().size());
+		assertThat(respSub.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -369,11 +367,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
 		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
 		assertEquals(1, resp1.getTotal());
 		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		assertEquals(1, resp2.getTotal());
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
 
 	@Test
@@ -390,7 +388,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertNull(resp.getEntry().get(0).getResource());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
 		// Prefer return=minimal
@@ -400,7 +398,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertNull(resp.getEntry().get(0).getResource());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
 		// Prefer return=representation
@@ -465,7 +463,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionDeleteWithDuplicateDeletes() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -488,10 +486,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
-			assertThat(encoded, containsString("transaction-response"));
+			assertThat(encoded).contains("transaction-response");
 
 			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
-			assertEquals(3, response.getEntry().size());
+			assertThat(response.getEntry()).hasSize(3);
 
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -565,12 +563,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
 		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
 		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
+		interceptor2.setNarrowConditionalUrls(true);
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
 			myClient.transaction().withBundle(input).execute();
 			assertEquals(1, counter0.get());
 			assertEquals(1, counter1.get());
-			assertEquals(5, counter2.get());
+			assertEquals(1, counter2.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
@@ -614,7 +613,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
-		assertEquals(2, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(2);
 		assertEquals("A", new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart());
 		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
 	}
@@ -658,24 +657,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		IdType id2_3 = new IdType(resp.getEntry().get(2).getResponse().getLocation());
 		IdType id2_4 = new IdType(resp.getEntry().get(3).getResponse().getLocation());
 
-		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
+		assertThat(id2_1.toVersionless()).isNotEqualTo(id1_1.toVersionless());
 		assertEquals("Provenance", id2_1.getResourceType());
 		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
 		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
 		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
-	}
-
-	/**
-	 * This is Gramahe's test transaction - it requires some set up in order to work
-	 */
-	@Test
-	@Disabled
-	public void testTransactionFromBundle3() throws Exception {
-
-		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
-		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
-		ourLog.info(response);
 	}
 
 	@Test
@@ -738,8 +724,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
-		// fail();
-		// } catch (InvalidRequestException e) {
+		// fail();		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());
@@ -758,15 +743,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals("self", respSub.getLink().get(0).getRelation());
 		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
 		assertEquals("next", respSub.getLink().get(1).getRelation());
-		assertThat(respSub.getLink().get(1).getUrl(), containsString("/fhir/context?_getpages"));
-		assertThat(respSub.getEntry().get(0).getFullUrl(), startsWith(ourServerBase + "/Patient/"));
+		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
+		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
 		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
 	}
 
@@ -783,13 +768,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.toString(), containsString("missing or invalid HTTP Verb"));
+			assertThat(e.toString()).contains("missing or invalid HTTP Verb");
 		}
 	}
 
 	@Test
 	public void testTransactionWithInlineConditionalUrl() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -838,7 +823,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(encoded);
 
-			assertThat(encoded, containsString("transaction-response"));
+			assertThat(encoded).contains("transaction-response");
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
@@ -849,7 +834,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Disabled
+	@Disabled("input file needs to be upgraded to R4 format")
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
@@ -871,7 +856,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				ourLog.info(encoded);
 
 				//@formatter:off
-				assertThat(encoded, containsString("Questionnaire/54127-6/_history/"));
+				assertThat(encoded).contains("Questionnaire/54127-6/_history/");
 				//@formatter:on
 
 				for (Header next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
@@ -925,9 +910,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteExpungeOperation() {
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
 		// setup
 		for (int i = 0; i < 12; ++i) {
@@ -968,7 +953,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Observation?subject.active=false");
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "DiagnosticReport?subject.active=false");
 		int batchSize = 2;
-		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
 
 		// execute
 
@@ -979,7 +964,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 
@@ -991,17 +976,20 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
 		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
-		assertThat(observations, hasSize(1));
+		assertThat(observations).hasSize(1);
 		assertEquals(oKeepId, observations.get(0).getIdElement());
 
 		Bundle diagBundle = getAllResourcesOfType("DiagnosticReport");
 		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
-		assertThat(diags, hasSize(1));
+		assertThat(diags).hasSize(1);
 		assertEquals(dKeepId, diags.get(0).getIdElement());
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
-		return myClient.search().forResource(theResourceName).cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
+		return myClient.search().forResource(theResourceName)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.cacheControl(new CacheControlDirective().setNoCache(true))
+			.returnBundle(Bundle.class).execute();
 	}
 
 	@AfterAll

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
@@ -44,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,54 +56,76 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class ParametersUtil {
 
-	public static Optional<String> getNamedParameterValueAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+	public static Optional<String> getNamedParameterValueAsString(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream().findFirst();
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper).stream()
+				.findFirst();
 	}
 
-	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+	public static List<String> getNamedParameterValuesAsString(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
-	public static List<Integer> getNamedParameterValuesAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+	public static List<Integer> getNamedParameterValuesAsInteger(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, Integer> mapper = t -> (Integer) t.getValue();
-		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
+		return extractNamedParameterValues(theCtx, theParameters, theParameterName, mapper);
 	}
 
-	public static Optional<Integer> getNamedParameterValueAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
-		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
+	public static Optional<Integer> getNamedParameterValueAsInteger(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream()
+				.findFirst();
 	}
 
-	public static Optional<IBase> getNamedParameter(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
-		return getNamedParameters(theCtx, theParameters, theParameterName).stream().findFirst();
+	/**
+	 * Returns the resource within a parameter.
+	 * @param theCtx thr FHIR context
+	 * @param theParameters the parameters instance where to look for the resource
+	 * @param theParameterName the parameter name
+	 * @return the resource
+	 */
+	public static Optional<IBaseResource> getNamedParameterResource(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		return extractNamedParameterResources(theCtx, theParameters, theParameterName).stream()
+				.findFirst();
 	}
 
-	public static List<IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
+	public static Optional<IBase> getNamedParameter(
+			FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
+		return getNamedParameters(theCtx, theParameters, theParameterName).stream()
+				.findFirst();
+	}
+
+	public static List<IBase> getNamedParameters(
+			FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
 		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
 		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
 
-		return parameterReps
-			.stream()
-			.filter(param -> {
-				BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(param.getClass());
-				BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
-				List<IBase> nameValues = nameChild.getAccessor().getValues(param);
-				Optional<? extends IPrimitiveType<?>> nameValue = nameValues
-					.stream()
-					.filter(t -> t instanceof IPrimitiveType<?>)
-					.map(t -> ((IPrimitiveType<?>) t))
-					.findFirst();
-				return nameValue.isPresent() && theParameterName.equals(nameValue.get().getValueAsString());
-			})
-			.collect(Collectors.toList());
-
+		return parameterReps.stream()
+				.filter(param -> {
+					BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+							(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(param.getClass());
+					BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
+					List<IBase> nameValues = nameChild.getAccessor().getValues(param);
+					Optional<? extends IPrimitiveType<?>> nameValue = nameValues.stream()
+							.filter(t -> t instanceof IPrimitiveType<?>)
+							.map(t -> ((IPrimitiveType<?>) t))
+							.findFirst();
+					return nameValue.isPresent()
+							&& theParameterName.equals(nameValue.get().getValueAsString());
+				})
+				.collect(Collectors.toList());
 	}
 
 	public static Optional<IBase> getParameterPart(FhirContext theCtx, IBase theParameter, String theParameterName) {
-		BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theParameter.getClass());
+		BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition valueChild = nextParameterDef.getChildByName("part");
 		List<IBase> parts = valueChild.getAccessor().getValues(theParameter);
 
@@ -117,7 +139,8 @@ public class ParametersUtil {
 		return Optional.empty();
 	}
 
-	public static Optional<IBase> getParameterPartValue(FhirContext theCtx, IBase theParameter, String theParameterName) {
+	public static Optional<IBase> getParameterPartValue(
+			FhirContext theCtx, IBase theParameter, String theParameterName) {
 		Optional<IBase> part = getParameterPart(theCtx, theParameter, theParameterName);
 		if (part.isPresent()) {
 			return theCtx.newTerser().getSingleValue(part.get(), "value[x]", IBase.class);
@@ -126,38 +149,81 @@ public class ParametersUtil {
 		}
 	}
 
-	public static String getParameterPartValueAsString(FhirContext theCtx, IBase theParameter, String theParameterName) {
-		return getParameterPartValue(theCtx, theParameter, theParameterName).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
+	public static String getParameterPartValueAsString(
+			FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+				.map(t -> (IPrimitiveType<?>) t)
+				.map(t -> t.getValueAsString())
+				.orElse(null);
 	}
 
-	private static <T> List<T> extractNamedParameters(FhirContext theCtx, IBaseParameters theParameters, String theParameterName, Function<IPrimitiveType<?>, T> theMapper) {
+	public static Optional<Integer> getParameterPartValueAsInteger(
+			FhirContext theCtx, IBase theParameter, String theParameterName) {
+		return getParameterPartValue(theCtx, theParameter, theParameterName)
+				.filter(t -> IPrimitiveType.class.isAssignableFrom(t.getClass()))
+				.map(t -> (IPrimitiveType<?>) t)
+				.map(IPrimitiveType::getValue)
+				.filter(t -> Integer.class.isAssignableFrom(t.getClass()))
+				.map(t -> (Integer) t);
+	}
+
+	private static <T> List<T> extractNamedParameterValues(
+			FhirContext theCtx,
+			IBaseParameters theParameters,
+			String theParameterName,
+			Function<IPrimitiveType<?>, T> theMapper) {
 		List<T> retVal = new ArrayList<>();
 
 		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
 		for (IBase nextParameter : namedParameters) {
-			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
 			BaseRuntimeChildDefinition valueChild = nextParameterDef.getChildByName("value[x]");
 			List<IBase> valueValues = valueChild.getAccessor().getValues(nextParameter);
-			valueValues
-				.stream()
-				.filter(t -> t instanceof IPrimitiveType<?>)
-				.map(t -> ((IPrimitiveType<?>) t))
-				.map(theMapper)
-				.filter(t -> t != null)
-				.forEach(retVal::add);
-
+			valueValues.stream()
+					.filter(t -> t instanceof IPrimitiveType<?>)
+					.map(t -> ((IPrimitiveType<?>) t))
+					.map(theMapper)
+					.filter(Objects::nonNull)
+					.forEach(retVal::add);
 		}
 		return retVal;
 	}
 
-	private static void addClientParameter(FhirContext theContext, Object theValue, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
+	private static List<IBaseResource> extractNamedParameterResources(
+			FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		List<IBaseResource> retVal = new ArrayList<>();
+
+		List<IBase> namedParameters = getNamedParameters(theCtx, theParameters, theParameterName);
+		for (IBase nextParameter : namedParameters) {
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeChildDefinition resourceChild = nextParameterDef.getChildByName("resource");
+			List<IBase> resourceValues = resourceChild.getAccessor().getValues(nextParameter);
+			resourceValues.stream()
+					.filter(IBaseResource.class::isInstance)
+					.map(t -> ((IBaseResource) t))
+					.forEach(retVal::add);
+		}
+		return retVal;
+	}
+
+	private static void addClientParameter(
+			FhirContext theContext,
+			Object theValue,
+			IBaseResource theTargetResource,
+			BaseRuntimeChildDefinition paramChild,
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem,
+			String theName) {
 		Validate.notNull(theValue, "theValue must not be null");
 
 		if (theValue instanceof IBaseResource) {
-			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
+			IBase parameter =
+					createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
 			paramChildElem.getChildByName("resource").getMutator().addValue(parameter, (IBaseResource) theValue);
 		} else if (theValue instanceof IBaseDatatype) {
-			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
+			IBase parameter =
+					createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem, theName);
 			paramChildElem.getChildByName("value[x]").getMutator().addValue(parameter, (IBaseDatatype) theValue);
 		} else if (theValue instanceof Collection) {
 			Collection<?> collection = (Collection<?>) theValue;
@@ -165,7 +231,8 @@ public class ParametersUtil {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException(Msg.code(1806) + "Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
+			throw new IllegalArgumentException(Msg.code(1806) + "Don't know how to handle value of type "
+					+ theValue.getClass() + " for parameter " + theName);
 		}
 	}
 
@@ -174,13 +241,15 @@ public class ParametersUtil {
 	 *
 	 * @param theContext    The FhirContext
 	 * @param theParameters The Parameters resource
-	 * @param theName       The parametr name
+	 * @param theName       The parameter name
 	 * @param theValue      The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
 	 */
-	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, Object theValue) {
+	public static void addParameterToParameters(
+			FhirContext theContext, IBaseParameters theParameters, String theName, Object theValue) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theParameters);
 		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+		BaseRuntimeElementCompositeDefinition<?> paramChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
 		addClientParameter(theContext, theValue, theParameters, paramChild, paramChildElem, theName);
 	}
@@ -194,7 +263,12 @@ public class ParametersUtil {
 	 * @param thePrimitiveDatatype The datatype, e.g. "string", or "uri"
 	 * @param theValue             The value
 	 */
-	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, String thePrimitiveDatatype, String theValue) {
+	public static void addParameterToParameters(
+			FhirContext theContext,
+			IBaseParameters theParameters,
+			String theName,
+			String thePrimitiveDatatype,
+			String theValue) {
 		Validate.notBlank(thePrimitiveDatatype, "thePrimitiveDatatype must not be null or empty");
 
 		BaseRuntimeElementDefinition<?> datatypeDef = theContext.getElementDefinition(thePrimitiveDatatype);
@@ -204,7 +278,12 @@ public class ParametersUtil {
 		addParameterToParameters(theContext, theParameters, theName, value);
 	}
 
-	private static IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
+	private static IBase createParameterRepetition(
+			FhirContext theContext,
+			IBase theTargetResource,
+			BaseRuntimeChildDefinition paramChild,
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem,
+			String theName) {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
 		IPrimitiveType<?> value;
@@ -216,7 +295,8 @@ public class ParametersUtil {
 	public static IPrimitiveType<?> createString(FhirContext theContext, String theValue) {
 		IPrimitiveType<?> value;
 		if (theContext.getVersion().getVersion().isRi()) {
-			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(theValue);
+			value = (IPrimitiveType<?>)
+					theContext.getElementDefinition("string").newInstance(theValue);
 		} else {
 			value = new StringDt(theValue);
 		}
@@ -224,12 +304,14 @@ public class ParametersUtil {
 	}
 
 	public static IPrimitiveType<?> createUri(FhirContext theContext, String theValue) {
-		IPrimitiveType<?> value = (IPrimitiveType<?>) theContext.getElementDefinition("uri").newInstance(theValue);
+		IPrimitiveType<?> value =
+				(IPrimitiveType<?>) theContext.getElementDefinition("uri").newInstance(theValue);
 		return value;
 	}
 
 	public static IPrimitiveType<?> createCode(FhirContext theContext, String theValue) {
-		IPrimitiveType<?> value = (IPrimitiveType<?>) theContext.getElementDefinition("code").newInstance(theValue);
+		IPrimitiveType<?> value =
+				(IPrimitiveType<?>) theContext.getElementDefinition("code").newInstance(theValue);
 		return value;
 	}
 
@@ -239,89 +321,108 @@ public class ParametersUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void addParameterToParametersBoolean(FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
+	public static void addParameterToParametersBoolean(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, boolean theValue) {
 		addParameterToParameters(theCtx, theParameters, theName, theCtx.getPrimitiveBoolean(theValue));
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void addParameterToParametersCode(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("code").newInstance();
+	public static void addParameterToParametersCode(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) theCtx.getElementDefinition("code").newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void addParameterToParametersInteger(FhirContext theCtx, IBaseParameters theParameters, String theName, int theValue) {
-		IPrimitiveType<Integer> count = (IPrimitiveType<Integer>) theCtx.getElementDefinition("integer").newInstance();
+	public static void addParameterToParametersInteger(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, int theValue) {
+		IPrimitiveType<Integer> count =
+				(IPrimitiveType<Integer>) theCtx.getElementDefinition("integer").newInstance();
 		count.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, count);
 	}
 
-	public static void addParameterToParametersLong(FhirContext theCtx, IBaseParameters theParameters, String theName, long theValue) {
+	public static void addParameterToParametersLong(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, long theValue) {
 		addParameterToParametersDecimal(theCtx, theParameters, theName, BigDecimal.valueOf(theValue));
 	}
 
-	public static void addParameterToParametersDecimal(FhirContext theCtx, IBaseParameters theParameters, String theName, BigDecimal theValue) {
-		IPrimitiveType<BigDecimal> count = (IPrimitiveType<BigDecimal>) theCtx.getElementDefinition("decimal").newInstance();
+	public static void addParameterToParametersDecimal(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, BigDecimal theValue) {
+		IPrimitiveType<BigDecimal> count = (IPrimitiveType<BigDecimal>)
+				theCtx.getElementDefinition("decimal").newInstance();
 		count.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, count);
 	}
 
-	public static void addParameterToParametersReference(FhirContext theCtx, IBaseParameters theParameters, String theName, String theReference) {
-		IBaseReference target = (IBaseReference) theCtx.getElementDefinition("reference").newInstance();
+	public static void addParameterToParametersReference(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, String theReference) {
+		IBaseReference target =
+				(IBaseReference) theCtx.getElementDefinition("reference").newInstance();
 		target.setReference(theReference);
 		addParameterToParameters(theCtx, theParameters, theName, target);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void addParameterToParametersString(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("string").newInstance();
+	public static void addParameterToParametersString(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) theCtx.getElementDefinition("string").newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void addParameterToParametersUri(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("uri").newInstance();
+	public static void addParameterToParametersUri(
+			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) theCtx.getElementDefinition("uri").newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
-
 	}
 
 	/**
 	 * Add a parameter with no value (typically because we'll be adding sub-parameters)
 	 */
-	public static IBase addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName) {
+	public static IBase addParameterToParameters(
+			FhirContext theContext, IBaseParameters theParameters, String theName) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theParameters);
 		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+		BaseRuntimeElementCompositeDefinition<?> paramChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
 		return createParameterRepetition(theContext, theParameters, paramChild, paramChildElem, theName);
 	}
 
 	public static void addPartCode(FhirContext theContext, IBase theParameter, String theName, String theCode) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("code").newInstance();
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) theContext.getElementDefinition("code").newInstance();
 		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartInteger(FhirContext theContext, IBase theParameter, String theName, Integer theInteger) {
-		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) theContext.getElementDefinition("integer").newInstance();
+		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>)
+				theContext.getElementDefinition("integer").newInstance();
 		value.setValue(theInteger);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartString(FhirContext theContext, IBase theParameter, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				theContext.getElementDefinition("string").newInstance();
 		value.setValue(theValue);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
 		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
@@ -332,16 +433,31 @@ public class ParametersUtil {
 	}
 
 	public static void addPartDecimal(FhirContext theContext, IBase theParameter, String theName, Double theValue) {
-		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>) theContext.getElementDefinition("decimal").newInstance();
-		value.setValue(theValue == null ? null : new BigDecimal(theValue));
-
+		IPrimitiveType<BigDecimal> value = (IPrimitiveType<BigDecimal>)
+				theContext.getElementDefinition("decimal").newInstance();
+		if (theValue == null) {
+			value.setValue(null);
+		} else {
+			BigDecimal decimalValue = BigDecimal.valueOf(theValue);
+			if (decimalValue.scale() < 0) {
+				decimalValue = decimalValue.setScale(0);
+			}
+			value.setValue(decimalValue);
+		}
 		addPart(theContext, theParameter, theName, value);
 	}
 
-	public static void addPartCoding(FhirContext theContext, IBase theParameter, String theName, String theSystem, String theCode, String theDisplay) {
+	public static void addPartCoding(
+			FhirContext theContext,
+			IBase theParameter,
+			String theName,
+			String theSystem,
+			String theCode,
+			String theDisplay) {
 		IBase coding = theContext.getElementDefinition("coding").newInstance();
 
-		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(coding.getClass());
+		BaseRuntimeElementCompositeDefinition<?> codingDef =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(coding.getClass());
 		codingDef.getChildByName("system").getMutator().addValue(coding, createUri(theContext, theSystem));
 		codingDef.getChildByName("code").getMutator().addValue(coding, createCode(theContext, theCode));
 		codingDef.getChildByName("display").getMutator().addValue(coding, createString(theContext, theDisplay));
@@ -349,52 +465,76 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, coding);
 	}
 
-	public static void addPart(FhirContext theContext, IBase theParameter, String theName, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
+	public static IBase addPart(FhirContext theContext, IBase theParameter, String theName, @Nullable IBase theValue) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
 
-		BaseRuntimeElementCompositeDefinition<?> partChildElem = (BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
 		IBase part = partChildElem.newInstance();
 		partChild.getMutator().addValue(theParameter, part);
 
-		IPrimitiveType<String> name = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
+		IPrimitiveType<String> name = (IPrimitiveType<String>)
+				theContext.getElementDefinition("string").newInstance();
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
-		if (theValue instanceof IBaseResource) {
-			partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
-		} else {
-			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+		if (theValue != null) {
+			if (theValue instanceof IBaseResource) {
+				partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
+			} else {
+				partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
+			}
 		}
+		return part;
 	}
 
-	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
+	public static IBase createPart(FhirContext theContext, IBase thePart, String theName) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(thePart.getClass());
 		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
 
-		BaseRuntimeElementCompositeDefinition<?> partChildElem = (BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
+
+		return createParameterRepetition(theContext, thePart, partChild, partChildElem, theName);
+	}
+
+	public static void addPartResource(
+			FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theParameter.getClass());
+		BaseRuntimeChildDefinition partChild = def.getChildByName("part");
+
+		BaseRuntimeElementCompositeDefinition<?> partChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) partChild.getChildByName("part");
 		IBase part = partChildElem.newInstance();
 		partChild.getMutator().addValue(theParameter, part);
 
-		IPrimitiveType<String> name = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
+		IPrimitiveType<String> name = (IPrimitiveType<String>)
+				theContext.getElementDefinition("string").newInstance();
 		name.setValue(theName);
 		partChildElem.getChildByName("name").getMutator().addValue(part, name);
 
 		partChildElem.getChildByName("resource").getMutator().addValue(part, theValue);
 	}
 
-	public static List<String> getNamedParameterPartAsString(FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
+	public static List<String> getNamedParameterPartAsString(
+			FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
 		return extractNamedParameterPartsAsString(theCtx, theParameters, thePartName, theParameterName);
 	}
 
 	// TODO KHS need to consolidate duplicated functionality that came in from different branches
-	private static List<String> extractNamedParameterPartsAsString(FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
+	private static List<String> extractNamedParameterPartsAsString(
+			FhirContext theCtx, IBaseParameters theParameters, String thePartName, String theParameterName) {
 		List<IBase> parameterReps = getParameterReps(theCtx, theParameters);
 
 		List<String> retVal = new ArrayList<>();
 
 		for (IBase nextParameter : parameterReps) {
-			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
 			Optional<? extends IPrimitiveType<?>> nameValue = getNameValue(nextParameter, nextParameterDef);
 			if (!nameValue.isPresent() || !thePartName.equals(nameValue.get().getValueAsString())) {
 				continue;
@@ -403,21 +543,21 @@ public class ParametersUtil {
 			BaseRuntimeChildDefinition partChild = nextParameterDef.getChildByName("part");
 			List<IBase> partValues = partChild.getAccessor().getValues(nextParameter);
 			for (IBase partValue : partValues) {
-				BaseRuntimeElementCompositeDefinition<?> partParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(partValue.getClass());
+				BaseRuntimeElementCompositeDefinition<?> partParameterDef =
+						(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(partValue.getClass());
 				Optional<? extends IPrimitiveType<?>> partNameValue = getNameValue(partValue, partParameterDef);
-				if (!partNameValue.isPresent() || !theParameterName.equals(partNameValue.get().getValueAsString())) {
+				if (!partNameValue.isPresent()
+						|| !theParameterName.equals(partNameValue.get().getValueAsString())) {
 					continue;
 				}
 				BaseRuntimeChildDefinition valueChild = partParameterDef.getChildByName("value[x]");
 				List<IBase> valueValues = valueChild.getAccessor().getValues(partValue);
-				valueValues
-					.stream()
-					.filter(t -> t instanceof IPrimitiveType<?>)
-					.map(t -> ((IPrimitiveType<String>) t))
-					.map(t -> defaultIfBlank(t.getValueAsString(), null))
-					.filter(t -> t != null)
-					.forEach(retVal::add);
-
+				valueValues.stream()
+						.filter(t -> t instanceof IPrimitiveType<?>)
+						.map(t -> ((IPrimitiveType<String>) t))
+						.map(t -> defaultIfBlank(t.getValueAsString(), null))
+						.filter(t -> t != null)
+						.forEach(retVal::add);
 			}
 		}
 		return retVal;
@@ -430,14 +570,14 @@ public class ParametersUtil {
 		return parameterChild.getAccessor().getValues(theParameters);
 	}
 
-	private static Optional<? extends IPrimitiveType<?>> getNameValue(IBase nextParameter, BaseRuntimeElementCompositeDefinition<?> theNextParameterDef) {
+	private static Optional<? extends IPrimitiveType<?>> getNameValue(
+			IBase nextParameter, BaseRuntimeElementCompositeDefinition<?> theNextParameterDef) {
 		BaseRuntimeChildDefinition nameChild = theNextParameterDef.getChildByName("name");
 		List<IBase> nameValues = nameChild.getAccessor().getValues(nextParameter);
-		return nameValues
-			.stream()
-			.filter(t -> t instanceof IPrimitiveType<?>)
-			.map(t -> ((IPrimitiveType<?>) t))
-			.findFirst();
+		return nameValues.stream()
+				.filter(t -> t instanceof IPrimitiveType<?>)
+				.map(t -> ((IPrimitiveType<?>) t))
+				.findFirst();
 	}
 
 	@Nullable
@@ -475,7 +615,7 @@ public class ParametersUtil {
 	public static String extractDescription(Annotation[] theParameterAnnotations) {
 		for (Annotation next : theParameterAnnotations) {
 			if (next instanceof Description) {
-				return extractDescription((Description)next);
+				return extractDescription((Description) next);
 			}
 		}
 		return null;

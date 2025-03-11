@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -45,7 +44,8 @@ public class LoadingValidationSupportR4 implements IValidationSupport {
 		try {
 			result = client.read(theClass, theUri);
 		} catch (BaseServerResponseException e) {
-			throw new CommandFailureException(Msg.code(1588) + "FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
+			throw new CommandFailureException(
+					Msg.code(1588) + "FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
 		}
 		ourLog.info("Successfully loaded resource");
 		return result;
@@ -55,6 +55,4 @@ public class LoadingValidationSupportR4 implements IValidationSupport {
 	public FhirContext getFhirContext() {
 		return myCtx;
 	}
-
-
 }

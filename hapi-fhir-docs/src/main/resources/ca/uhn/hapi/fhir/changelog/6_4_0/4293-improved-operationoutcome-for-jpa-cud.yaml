@@ -1,0 +1,11 @@
+---
+type: add
+issue: 4293
+title: "When performing create/update/patch/delete operations against the JPA server, the response
+   OperationOutcome will now include additional details about the outcome of the operation. This
+   includes:
+   <ul>
+   <li>For updates, the message will indicate the the update did not contain any changes (i.e. a No-op)</li>
+   <li>For conditional creates/updates/deletes, the message will indicate whether the conditional URL matched any existing resources and the outcome of the operation.</li>
+   <li>A new coding has been added to the <code>OperationOutcome.issue.details.coding</code> containing a machine processable equivalent to the outcome.</li>
+   </ul>"

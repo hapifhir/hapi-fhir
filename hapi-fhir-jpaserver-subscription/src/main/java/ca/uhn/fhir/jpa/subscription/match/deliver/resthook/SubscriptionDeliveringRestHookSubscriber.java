@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -27,15 +26,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -47,8 +43,11 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
-import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.text.StringSubstitutor;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -57,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
@@ -75,9 +72,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-
 	/**
 	 * Constructor
 	 */
@@ -85,17 +79,28 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		super();
 	}
 
-	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
+	protected void deliverPayload(
+			ResourceDeliveryMessage theMsg,
+			CanonicalSubscription theSubscription,
+			EncodingEnum thePayloadType,
+			IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
 
 		// Regardless of whether we have a payload, the rest-hook should be sent.
 		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
 	}
 
-	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
+	protected void doDelivery(
+			ResourceDeliveryMessage theMsg,
+			CanonicalSubscription theSubscription,
+			EncodingEnum thePayloadType,
+			IGenericClient theClient,
+			IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 
-		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+		if (theSubscription.isTopicSubscription()) {
+			operation = createDeliveryRequestTopic((IBaseBundle) thePayloadResource, theClient);
+		} else if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
@@ -111,7 +116,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			}
 
 			String payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
-			ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+			StopWatch sw = new StopWatch();
 
 			try {
 				operation.execute();
@@ -121,11 +126,22 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				throw e;
 			}
 
+			Logs.getSubscriptionTroubleshootingLog()
+					.debug(
+							"Delivered {} rest-hook payload {} for {} in {}",
+							theMsg.getOperationType(),
+							payloadId,
+							theSubscription
+									.getIdElement(myFhirContext)
+									.toUnqualifiedVersionless()
+									.getValue(),
+							sw);
 		}
 	}
 
 	@Nullable
-	private IClientExecutable<?, ?> createDeliveryRequestNormal(ResourceDeliveryMessage theMsg, IGenericClient theClient, IBaseResource thePayloadResource) {
+	private IClientExecutable<?, ?> createDeliveryRequestNormal(
+			ResourceDeliveryMessage theMsg, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -143,63 +159,90 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return operation;
 	}
 
-	private IClientExecutable<?, ?> createDeliveryRequestTransaction(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
-		IClientExecutable<?, ?> operation;
-		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
-
-		String payloadUrl = theSubscription.getPayloadSearchCriteria();
-		Map<String, String> valueMap = new HashMap<>(1);
-		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
-		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
-		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
-		payloadSearchMap.setLoadSynchronous(true);
-
-		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
-
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (IBaseResource next : searchResults.getAllResources()) {
-			builder.addTransactionUpdateEntry(next);
-		}
-
-		operation = theClient.transaction().withBundle(builder.getBundle());
-		return operation;
+	private IClientExecutable<?, ?> createDeliveryRequestTransaction(
+			CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
+		IBaseBundle bundle = createDeliveryBundleForPayloadSearchCriteria(theSubscription, thePayloadResource);
+		return theClient.transaction().withBundle(bundle);
 	}
 
-	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
+	private IClientExecutable<?, ?> createDeliveryRequestTopic(IBaseBundle theBundle, IGenericClient theClient) {
+		return theClient.transaction().withBundle(theBundle);
+	}
+
+	public IBaseResource getResource(IIdType thePayloadId, RequestPartitionId thePartitionId, boolean theDeletedOK)
+			throws ResourceGoneException {
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(thePayloadId.getResourceType());
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless(), systemRequestDetails, theDeletedOK);
+		return dao.read(thePayloadId.toVersionless(), systemRequestDetails, theDeletedOK);
 	}
 
-
-	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
+	/**
+	 * Perform operations on the payload based on various subscription extension settings such as deliver latest version,
+	 * delete and/or strip version id.
+	 * @param theMsg
+	 * @param theSubscription
+	 * @return
+	 */
+	protected IBaseResource getAndMassagePayload(
+			ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
-		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+		if (payloadResource instanceof IBaseBundle) {
+			return getAndMassageBundle(theMsg, (IBaseBundle) payloadResource, theSubscription);
+		} else {
+			return getAndMassageResource(theMsg, payloadResource, theSubscription);
+		}
+	}
 
+	private IBaseResource getAndMassageBundle(
+			ResourceDeliveryMessage theMsg, IBaseBundle theBundle, CanonicalSubscription theSubscription) {
+		BundleUtil.processEntries(myFhirContext, theBundle, entry -> {
+			IBaseResource entryResource = entry.getResource();
+			if (entryResource != null) {
+				// SubscriptionStatus is a "virtual" resource type that is not stored in the repository
+				if (!"SubscriptionStatus".equals(myFhirContext.getResourceType(entryResource))) {
+					IBaseResource updatedResource = getAndMassageResource(theMsg, entryResource, theSubscription);
+					entry.setFullUrl(updatedResource.getIdElement().getValue());
+					entry.setResource(updatedResource);
+				}
+			}
+		});
+		return theBundle;
+	}
+
+	private IBaseResource getAndMassageResource(
+			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource, CanonicalSubscription theSubscription) {
+		if (thePayloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+
+			IIdType payloadId = theMsg.getPayloadId(myFhirContext).toVersionless();
+			if (theSubscription.isTopicSubscription()) {
+				payloadId = thePayloadResource.getIdElement().toVersionless();
+			}
 			try {
 				if (payloadId != null) {
-					boolean deletedOK = theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
-					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId(), deletedOK);
+					boolean deletedOK =
+							theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
+					thePayloadResource = getResource(payloadId, theMsg.getRequestPartitionId(), deletedOK);
 				} else {
 					return null;
 				}
 			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
+				ourLog.warn(
+						"Resource {} is deleted, not going to deliver for subscription {}",
+						payloadId,
+						theSubscription.getIdElement(myFhirContext));
 				return null;
 			}
 		}
 
-		IIdType resourceId = payloadResource.getIdElement();
+		IIdType resourceId = thePayloadResource.getIdElement();
 		if (theSubscription.getRestHookDetails().isStripVersionId()) {
 			resourceId = resourceId.toVersionless();
-			payloadResource.setId(resourceId);
+			thePayloadResource.setId(resourceId);
+			thePayloadResource.getMeta().setVersionId(null);
 		}
-		return payloadResource;
+		return thePayloadResource;
 	}
 
 	@Override
@@ -208,8 +251,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, subscription)
-			.add(ResourceDeliveryMessage.class, theMessage);
+				.add(CanonicalSubscription.class, subscription)
+				.add(ResourceDeliveryMessage.class, theMessage);
 		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
 			return;
 		}
@@ -243,13 +286,12 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
 		params = new HookParams()
-			.add(CanonicalSubscription.class, subscription)
-			.add(ResourceDeliveryMessage.class, theMessage);
+				.add(CanonicalSubscription.class, subscription)
+				.add(ResourceDeliveryMessage.class, theMessage);
 		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}
-
 	}
 
 	/**
@@ -261,14 +303,16 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		List<Header> headers = parseHeadersFromSubscription(subscription);
 
 		StringBuilder url = new StringBuilder(subscription.getEndpointUrl());
-		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
+		IHttpClient client =
+				myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
 			IHttpResponse response = request.execute();
 			// close connection in order to return a possible cached connection to the connection pool
 			response.close();
 		} catch (IOException e) {
-			ourLog.error("Error trying to reach {}: {}", theMsg.getSubscription().getEndpointUrl(), e.toString());
+			ourLog.error(
+					"Error trying to reach {}: {}", theMsg.getSubscription().getEndpointUrl(), e.toString());
 			throw new ResourceNotFoundException(Msg.code(5) + e.getMessage());
 		}
 	}
@@ -299,5 +343,4 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		}
 		return headers;
 	}
-
 }

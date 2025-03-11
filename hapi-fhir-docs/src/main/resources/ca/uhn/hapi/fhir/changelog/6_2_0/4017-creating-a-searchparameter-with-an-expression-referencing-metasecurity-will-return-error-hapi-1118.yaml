@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4017
+jira: SMILE-5046
+title: "Previously, creating a DSTU3 SearchParameter with an expression that does not start with a resource type would throw an error. This has been corrected."

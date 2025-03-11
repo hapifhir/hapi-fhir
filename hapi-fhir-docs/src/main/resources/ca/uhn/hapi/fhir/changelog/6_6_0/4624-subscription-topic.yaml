@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4724
+title: "Preliminary support for R5 and R4B SubscriptionTopic matching has been added. This is not yet complete, but the
+simplest use cases now work.  Comments in the code with prefix 'WIP STR5' indicate areas that need to be extended."

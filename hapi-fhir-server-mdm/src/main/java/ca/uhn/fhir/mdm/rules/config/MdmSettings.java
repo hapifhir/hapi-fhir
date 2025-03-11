@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.config;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,19 @@ package ca.uhn.fhir.mdm.rules.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.config;
 
-import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
+import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
+import static ca.uhn.fhir.mdm.api.MdmModeEnum.MATCH_AND_LINK;
 
 @Component
 public class MdmSettings implements IMdmSettings {
@@ -42,6 +42,10 @@ public class MdmSettings implements IMdmSettings {
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
 	private boolean myPreventEidUpdates;
+	private String myGoldenResourcePartitionName;
+	private boolean mySearchAllPartitionForMatch = false;
+	private boolean myShouldAutoDeleteGoldenResources = true;
+	private MdmModeEnum myMdmMode = MATCH_AND_LINK;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -138,5 +142,44 @@ public class MdmSettings implements IMdmSettings {
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {
 		myCandidateSearchLimit = theCandidateSearchLimit;
+	}
+
+	@Override
+	public String getGoldenResourcePartitionName() {
+		return myGoldenResourcePartitionName;
+	}
+
+	@Override
+	public void setGoldenResourcePartitionName(String theGoldenResourcePartitionName) {
+		myGoldenResourcePartitionName = theGoldenResourcePartitionName;
+	}
+
+	@Override
+	public boolean getSearchAllPartitionForMatch() {
+		return mySearchAllPartitionForMatch;
+	}
+
+	@Override
+	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
+		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
+	}
+
+	@Override
+	public boolean isAutoExpungeGoldenResources() {
+		return myShouldAutoDeleteGoldenResources;
+	}
+
+	@Override
+	public void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
+		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
+	}
+
+	public void setMdmMode(MdmModeEnum theMdmMode) {
+		myMdmMode = theMdmMode;
+	}
+
+	@Override
+	public MdmModeEnum getMode() {
+		return myMdmMode;
 	}
 }

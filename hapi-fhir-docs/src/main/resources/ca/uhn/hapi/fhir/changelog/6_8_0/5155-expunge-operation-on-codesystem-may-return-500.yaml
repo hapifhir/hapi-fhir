@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5155
+title: "Previously, requesting an $expunge operation on CodeSystem resources while CS batch deletion is underway would return HTTP 500.
+ This has been fixed to return HTTP 412 (precondition failed)."

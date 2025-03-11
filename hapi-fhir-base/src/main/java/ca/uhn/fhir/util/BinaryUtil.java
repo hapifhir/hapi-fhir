@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -51,17 +50,12 @@ public class BinaryUtil {
 
 		BaseRuntimeChildDefinition entryChild = AttachmentUtil.getChild(theContext, theBinary, elementName);
 		List<IBase> entries = entryChild.getAccessor().getValues(theBinary);
-		return entries
-			.stream()
-			.map(t -> (IPrimitiveType<byte[]>) t)
-			.findFirst()
-			.orElseGet(() -> {
-				IPrimitiveType<byte[]> binary = AttachmentUtil.newPrimitive(theContext, "base64Binary", null);
-				entryChild.getMutator().setValue(theBinary, binary);
-				return binary;
-			});
+		return entries.stream().map(t -> (IPrimitiveType<byte[]>) t).findFirst().orElseGet(() -> {
+			IPrimitiveType<byte[]> binary = AttachmentUtil.newPrimitive(theContext, "base64Binary", null);
+			entryChild.getMutator().setValue(theBinary, binary);
+			return binary;
+		});
 	}
-
 
 	public static IBaseReference getSecurityContext(FhirContext theCtx, IBaseBinary theBinary) {
 		RuntimeResourceDefinition def = theCtx.getResourceDefinition("Binary");
@@ -97,16 +91,14 @@ public class BinaryUtil {
 		String elementName = "contentType";
 		BaseRuntimeChildDefinition entryChild = AttachmentUtil.getChild(theCtx, theBinary, elementName);
 		List<IBase> entries = entryChild.getAccessor().getValues(theBinary);
-		IPrimitiveType<String> contentTypeElement = entries
-			.stream()
-			.map(t -> (IPrimitiveType<String>) t)
-			.findFirst()
-			.orElseGet(() -> {
-				IPrimitiveType<String> stringType = AttachmentUtil.newPrimitive(theCtx, "code", null);
-				entryChild.getMutator().setValue(theBinary, stringType);
-				return stringType;
-			});
+		IPrimitiveType<String> contentTypeElement = entries.stream()
+				.map(t -> (IPrimitiveType<String>) t)
+				.findFirst()
+				.orElseGet(() -> {
+					IPrimitiveType<String> stringType = AttachmentUtil.newPrimitive(theCtx, "code", null);
+					entryChild.getMutator().setValue(theBinary, stringType);
+					return stringType;
+				});
 		contentTypeElement.setValue(theContentType);
-
 	}
 }

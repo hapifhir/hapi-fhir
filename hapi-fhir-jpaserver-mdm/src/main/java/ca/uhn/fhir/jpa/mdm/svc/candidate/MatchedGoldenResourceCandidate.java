@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +17,29 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class MatchedGoldenResourceCandidate {
 
-	private final ResourcePersistentId myCandidateGoldenResourcePid;
+	private final IResourcePersistentId myCandidateGoldenResourcePid;
 	private final MdmMatchOutcome myMdmMatchOutcome;
 
-	public MatchedGoldenResourceCandidate(ResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
+	public MatchedGoldenResourceCandidate(IResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
 		myCandidateGoldenResourcePid = theCandidate;
 		myMdmMatchOutcome = theMdmMatchOutcome;
 	}
 
-	public MatchedGoldenResourceCandidate(ResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
+	public MatchedGoldenResourceCandidate(IResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
 		myCandidateGoldenResourcePid = theGoldenResourcePid;
-		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
+		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore())
+				.setMatchResultEnum(theMdmLink.getMatchResult());
 	}
 
-	public ResourcePersistentId getCandidateGoldenResourcePid() {
+	public IResourcePersistentId getCandidateGoldenResourcePid() {
 		return myCandidateGoldenResourcePid;
 	}
 

@@ -1,0 +1,60 @@
+{
+  "resourceType": "CodeSystem",
+  "url": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
+  "status": "active",
+  "copyright": "Licensed under the terms of the Apache Software License 2.0.",
+  "author": [ {
+    "name": "HAPI FHIR"
+  } ],
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [ {
+    "code": "SUCCESSFUL_CREATE",
+    "display": "Create succeeded."
+  }, {
+    "code": "SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH",
+    "display": "Conditional create succeeded: no existing resource matched the conditional URL."
+  }, {
+    "code": "SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH",
+    "display": "Conditional create succeeded: an existing resource matched the conditional URL so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_UPDATE",
+    "display": "Update succeeded."
+  }, {
+    "code": "SUCCESSFUL_UPDATE_AS_CREATE",
+    "display": "Update as create succeeded."
+  }, {
+    "code": "SUCCESSFUL_UPDATE_NO_CHANGE",
+    "display": "Update succeeded: No changes were detected so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH",
+    "display": "Conditional update succeeded: no existing resource matched the conditional URL so a new resource was created."
+  }, {
+    "code": "SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH",
+    "display": "Conditional update succeeded: an existing resource matched the conditional URL and was updated."
+  }, {
+    "code": "SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE",
+    "display": "Conditional update succeeded: an existing resource matched the conditional URL and was updated, but no changes were detected so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_DELETE",
+    "display": "Delete succeeded."
+  }, {
+    "code": "SUCCESSFUL_DELETE_ALREADY_DELETED",
+    "display": "Delete succeeded: Resource was already deleted so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_DELETE_NOT_FOUND",
+    "display": "Delete succeeded: No existing resource was found so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_PATCH",
+    "display": "Patch succeeded."
+  }, {
+    "code": "SUCCESSFUL_PATCH_NO_CHANGE",
+    "display": "Patch succeeded: No changes were detected so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_CONDITIONAL_PATCH",
+    "display": "Conditional patch succeeded."
+  }, {
+    "code": "SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE",
+    "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+  } ]
+}

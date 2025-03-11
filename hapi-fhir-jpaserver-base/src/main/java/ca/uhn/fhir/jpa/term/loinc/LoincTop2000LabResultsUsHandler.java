@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -34,11 +33,20 @@ public class LoincTop2000LabResultsUsHandler extends BaseLoincTop2000LabResultsH
 	public static final String TOP_2000_US_VS_URI = "http://loinc.org/vs/top-2000-lab-observations-us";
 	public static final String TOP_2000_US_VS_NAME = "Top 2000 Lab Results US";
 
-	public LoincTop2000LabResultsUsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
-		super(theCode2concept, theValueSets, TOP_2000_US_VS_ID, TOP_2000_US_VS_URI, TOP_2000_US_VS_NAME,
-			theConceptMaps, theUploadProperties, theCopyrightStatement);
+	public LoincTop2000LabResultsUsHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
+		super(
+				theCode2concept,
+				theValueSets,
+				TOP_2000_US_VS_ID,
+				TOP_2000_US_VS_URI,
+				TOP_2000_US_VS_NAME,
+				theConceptMaps,
+				theUploadProperties,
+				theCopyrightStatement);
 	}
-
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -53,7 +52,6 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 		super();
 	}
 
-
 	/**
 	 * Initialize the beans that are used by this service.
 	 * <p>
@@ -71,19 +69,25 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	}
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	public IIdType createOrUpdateCodeSystem(
+			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		CodeSystem resourceToStore;
 		try {
-			resourceToStore = (CodeSystem) VersionConvertorFactory_30_40.convertResource(theCodeSystemResource, new BaseAdvisor_30_40(false));
+			resourceToStore = (CodeSystem)
+					VersionConvertorFactory_30_40.convertResource(theCodeSystemResource, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(879) + e);
 		}
 		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(resourceToStore, matchUrl, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(resourceToStore, matchUrl, theRequestDetails)
+					.getId();
 		} else {
-			return myCodeSystemResourceDao.update(resourceToStore, theRequestDetails).getId();
+			return myCodeSystemResourceDao
+					.update(resourceToStore, theRequestDetails)
+					.getId();
 		}
 	}
 
@@ -91,7 +95,8 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 		ConceptMap resourceToStore;
 		try {
-			resourceToStore = (ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap, new BaseAdvisor_30_40(false));
+			resourceToStore = (ConceptMap)
+					VersionConvertorFactory_30_40.convertResource(theConceptMap, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(880) + e);
 		}
@@ -107,7 +112,8 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		ValueSet valueSetDstu3;
 		try {
-			valueSetDstu3 = (ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet, new BaseAdvisor_30_40(false));
+			valueSetDstu3 =
+					(ValueSet) VersionConvertorFactory_30_40.convertResource(theValueSet, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(881) + e);
 		}
@@ -119,5 +125,4 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 			myValueSetResourceDao.update(valueSetDstu3);
 		}
 	}
-
 }

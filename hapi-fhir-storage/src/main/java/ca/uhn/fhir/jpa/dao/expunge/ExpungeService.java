@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.expunge;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,24 +37,44 @@ public class ExpungeService {
 
 	@Autowired
 	private IExpungeEverythingService myExpungeEverythingService;
+
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	protected ExpungeOperation getExpungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
+	protected ExpungeOperation getExpungeOperation(
+			String theResourceName,
+			IResourcePersistentId theResourceId,
+			ExpungeOptions theExpungeOptions,
+			RequestDetails theRequestDetails) {
+		return myApplicationContext.getBean(
+				ExpungeOperation.class, theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
-	public ExpungeOutcome expunge(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
-		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
-		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
+	public ExpungeOutcome expunge(
+			String theResourceName,
+			IResourcePersistentId theResourceId,
+			ExpungeOptions theExpungeOptions,
+			RequestDetails theRequest) {
+		ourLog.info(
+				"Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]",
+				theResourceName,
+				theResourceId != null ? theResourceId.getId() : null,
+				theResourceId != null ? theResourceId.getVersion() : null,
+				theExpungeOptions);
+		ExpungeOperation expungeOperation =
+				getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 
 		if (theExpungeOptions.getLimit() < 1) {
-			throw new InvalidRequestException(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
+			throw new InvalidRequestException(
+					Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit "
+							+ theExpungeOptions.getLimit() + ".");
 		}
 
-		if (theResourceName == null && (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
+		if (theResourceName == null
+				&& (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
 			if (theExpungeOptions.isExpungeEverything()) {
 				myExpungeEverythingService.expungeEverything(theRequest);
 				return new ExpungeOutcome().setDeletedCount(myExpungeEverythingService.getExpungeDeletedEntityCount());
@@ -65,7 +84,7 @@ public class ExpungeService {
 		return expungeOperation.call();
 	}
 
-	public void deleteAllSearchParams(ResourcePersistentId theResourceId) {
+	public void deleteAllSearchParams(IResourcePersistentId theResourceId) {
 		myExpungeDaoService.deleteAllSearchParams(theResourceId);
 	}
 }

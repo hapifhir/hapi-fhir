@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 6146
+jira: SMILE-8191
+title: "Previously, on MSSQL, two resources with IDs that are identical except for case 
+        (ex: Patient1 vs. patient1) would be considered to have the same ID because the database collation is 
+        case insensitive (SQL_Latin1_General_CP1_CI_AS).  Among other things, this would manifest
+        itself when trying to delete and re-create one of the resources.
+        This has been fixed with a migration step that makes the collation on the resource ID case sensitive
+        (SQL_Latin1_General_CP1_CS_AS)."

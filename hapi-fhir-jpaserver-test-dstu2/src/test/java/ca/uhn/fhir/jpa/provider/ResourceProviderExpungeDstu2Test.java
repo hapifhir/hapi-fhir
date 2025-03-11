@@ -1,21 +1,21 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2Test {
@@ -28,30 +28,21 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 
 	@AfterEach
 	public void afterDisableExpunge() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 	}
 
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 	}
 
-	private void assertGone(IIdType theId) {
-		try {
-			getDao(theId).read(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
 	private void assertStillThere(IIdType theId) {
-		getDao(theId).read(theId);
+		assertNotGone(theId);
 	}
 
 	@Override
@@ -106,8 +97,8 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -160,7 +151,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}

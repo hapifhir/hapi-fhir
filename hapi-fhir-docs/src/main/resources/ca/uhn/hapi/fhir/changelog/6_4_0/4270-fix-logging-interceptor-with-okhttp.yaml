@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4270
+title: "When using the client LoggingInterceptor with OkHttp clients, the request URL was not
+   correctly logged. Thanks to Roel Scholten for the pull request!"

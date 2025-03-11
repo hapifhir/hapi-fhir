@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +17,26 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
+
+import ca.uhn.fhir.model.api.IResource;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import ca.uhn.fhir.model.api.IResource;
-
 /**
  * RESTful method annotation to be used for the FHIR
  * <a href="http://hl7.org/implement/standards/fhir/http.html#update">update</a> method.
- * 
+ *
  * <p>
  * Update is used to save an update to an existing resource (using its ID and optionally
- * a version ID). It also may allow a client to save a new resource using an ID of its choosing. 
+ * a version ID). It also may allow a client to save a new resource using an ID of its choosing.
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
+@Target(value = ElementType.METHOD)
 public @interface Update {
 
 	/**
@@ -58,5 +57,4 @@ public @interface Update {
 	 * @since 5.4.0
 	 */
 	String typeName() default "";
-
 }

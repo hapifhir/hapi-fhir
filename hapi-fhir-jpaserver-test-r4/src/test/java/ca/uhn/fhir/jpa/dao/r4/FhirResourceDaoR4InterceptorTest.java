@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -17,7 +18,6 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -28,12 +28,9 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -46,20 +43,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4InterceptorTest.class);
 	private List<IIdType> myIds = new ArrayList<>();
+	private Object myServerOperationInterceptor;
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-	}
-
-	@BeforeEach
-	public void before() {
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		if (myServerOperationInterceptor != null) {
+			myInterceptorRegistry.unregisterInterceptor(myServerOperationInterceptor);
+		}
 	}
 
 	@Test
 	public void testJpaCreate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -93,6 +89,13 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	}
 
+	private IServerOperationInterceptor registerServerOperationInterceptor() {
+		assert myServerOperationInterceptor == null;
+		myServerOperationInterceptor = mock(IServerOperationInterceptor.class);
+		myInterceptorRegistry.registerInterceptor(myServerOperationInterceptor);
+		return (IServerOperationInterceptor) myServerOperationInterceptor;
+	}
+
 	/*
 	 * *****************************************************
 	 * Note that non JPA specific operations get tested in individual
@@ -102,8 +105,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testJpaDelete() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -124,8 +126,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testJpaUpdate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -168,8 +169,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		p = new Patient();
 		p.addName().setFamily("PATIENT3");
-		id2 = myPatientDao.update(p, "Patient?family=ZZZ", mySrd).getId().getIdPartAsLong();
-		assertNotEquals(id, id2);
+		id2 = myPatientDao.update(p, "Patient?family=PATIENT3", mySrd).getId().getIdPartAsLong();
+		assertThat(id2).isNotEqualTo(id);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
@@ -181,8 +182,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationCreate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		doAnswer(t -> {
 			IBaseResource res = (IBaseResource) t.getArguments()[1];
@@ -202,8 +202,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationDelete() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -228,10 +227,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationDeleteMulti() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -254,7 +252,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?name=PATIENT", mySrd);
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());
@@ -265,8 +263,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationTransactionCreate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -301,8 +298,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationTransactionDelete() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -339,10 +335,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationTransactionDeleteMulti() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -373,7 +368,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(oo);
-		assertThat(oo, containsString("deleted 2 resource(s)"));
+		assertThat(oo).contains("deleted 2 resource(s)");
 
 		verify(interceptor, times(2)).resourceDeleted(any(), any());
 		verify(interceptor, times(2)).resourceCreated(any(), any());
@@ -384,8 +379,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationTransactionUpdate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -431,8 +425,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRequestOperationUpdate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -463,8 +456,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testServerOperationCreate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
 
@@ -478,8 +470,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@Test
 	public void testServerOperationDelete() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
 		verify(interceptor, times(0)).resourceDeleted(Mockito.isNull(), any());
@@ -558,15 +549,13 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testServerOperationInterceptorCanModifyOnCreateForServerInterceptor() {
-
-		Object interceptor = new Object() {
+		myServerOperationInterceptor = new Object() {
 			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 			public void resourcePreCreate(IBaseResource theResource) {
 				((Patient) theResource).setActive(true);
 			}
 		};
-
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(myServerOperationInterceptor);
 
 		Patient p = new Patient();
 		p.setActive(false);
@@ -580,34 +569,33 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	@Test
 	public void testServerOperationInterceptorCanModifyOnUpdate() {
 
-		Object interceptor = new Object() {
+		myServerOperationInterceptor = new Object() {
 			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 			public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 				((Patient) theNewResource).setActive(true);
 			}
 		};
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(myServerOperationInterceptor);
 
 			Patient p = new Patient();
 			p.setActive(false);
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 			p = myPatientDao.read(id);
-			assertEquals(false, p.getActive());
+		assertEquals(false, p.getActive());
 
 			p.setId(p.getIdElement().toUnqualifiedVersionless());
 			p.addAddress().setCity("CITY");
 			myPatientDao.update(p, mySrd);
 
 			p = myPatientDao.read(id);
-			assertEquals(true, p.getActive());
+		assertEquals(true, p.getActive());
 
 	}
 
 	@Test
 	public void testServerOperationPreDelete() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		doAnswer(new MyOneResourceAnswer()).when(interceptor).resourcePreDelete(nullable(ServletRequestDetails.class), any(Patient.class));
 		doAnswer(new MyOneResourceAnswer()).when(interceptor).resourceDeleted(nullable(ServletRequestDetails.class), any(Patient.class));
@@ -634,8 +622,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testServerOperationUpdate() {
-		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
 		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
 		verify(interceptor, times(0)).resourceUpdated(Mockito.isNull(), any());

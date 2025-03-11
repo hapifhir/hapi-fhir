@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.dao.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -33,11 +32,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public class ExtendedHSearchResourceProjection {
 	public static final String RESOURCE_NOT_STORED_ERROR = "Resource not stored in search index: ";
 
-	final long myPid;
+	final JpaPid myPid;
 	final String myForcedId;
 	final String myResourceString;
 
-	public ExtendedHSearchResourceProjection(long thePid, String theForcedId, String theResourceString) {
+	public ExtendedHSearchResourceProjection(JpaPid thePid, String theForcedId, String theResourceString) {
 		if (StringUtils.isEmpty(theResourceString)) {
 			throw new ResourceNotFoundInIndexException(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + thePid);
 		}
@@ -53,7 +52,7 @@ public class ExtendedHSearchResourceProjection {
 		if (myForcedId != null) {
 			id = new IdDt(myForcedId);
 		} else {
-			id = new IdDt(myPid);
+			id = new IdDt(myPid.getId());
 		}
 		result.setId(id);
 
@@ -61,6 +60,6 @@ public class ExtendedHSearchResourceProjection {
 	}
 
 	public long getPid() {
-		return myPid;
+		return myPid.getId();
 	}
 }

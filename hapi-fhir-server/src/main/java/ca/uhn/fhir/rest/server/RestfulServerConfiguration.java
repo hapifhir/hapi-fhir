@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -34,6 +33,8 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,8 +43,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -122,7 +121,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return myResourceNameToSharedSupertype;
 	}
 
-	public RestfulServerConfiguration setNameToSharedSupertype(Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
+	public RestfulServerConfiguration setNameToSharedSupertype(
+			Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
 		this.myResourceNameToSharedSupertype = resourceNameToSharedSupertype;
 		return this;
 	}
@@ -248,10 +248,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		HashMap<String, List<OperationMethodBinding>> operationIdToBindings = new HashMap<>();
 
 		Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings();
-		List<BaseMethodBinding> methodBindings = resourceToMethods
-			.values()
-			.stream().flatMap(t -> t.stream())
-			.collect(Collectors.toList());
+		List<BaseMethodBinding> methodBindings =
+				resourceToMethods.values().stream().flatMap(t -> t.stream()).collect(Collectors.toList());
 		if (myGlobalBindings != null) {
 			methodBindings.addAll(myGlobalBindings);
 		}
@@ -328,7 +326,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 
 			String operationId = operationIdBuilder.toString();
 			operationIdToBindings.put(operationId, nextMethodBindings);
-			nextMethodBindings.forEach(t->operationBindingToId.put(t, operationId));
+			nextMethodBindings.forEach(t -> operationBindingToId.put(t, operationId));
 		}
 
 		for (BaseMethodBinding nextMethodBinding : methodBindings) {
@@ -349,7 +347,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			}
 		}
 
-		return new Bindings(namedSearchMethodBindingToName, searchNameToBindings, operationIdToBindings, operationBindingToId);
+		return new Bindings(
+				namedSearchMethodBindingToName, searchNameToBindings, operationIdToBindings, operationBindingToId);
 	}
 
 	public Map<String, List<BaseMethodBinding>> collectMethodBindings() {
@@ -392,21 +391,21 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	public void computeSharedSupertypeForResourcePerName(Collection<IResourceProvider> providers) {
 		Map<String, CommonResourceSupertypeScanner> resourceNameToScanner = new HashMap<>();
 
-		List<Class<? extends IBaseResource>> providedResourceClasses = providers.stream()
-			.map(provider -> provider.getResourceType())
-			.collect(Collectors.toList());
-		providedResourceClasses.stream()
-			.forEach(resourceClass -> {
-				RuntimeResourceDefinition baseDefinition = getFhirContext().getResourceDefinition(resourceClass).getBaseDefinition();
-				CommonResourceSupertypeScanner scanner = resourceNameToScanner.computeIfAbsent(baseDefinition.getName(), key -> new CommonResourceSupertypeScanner());
-				scanner.register(resourceClass);
-			});
+		List<Class<? extends IBaseResource>> providedResourceClasses =
+				providers.stream().map(provider -> provider.getResourceType()).collect(Collectors.toList());
+		providedResourceClasses.stream().forEach(resourceClass -> {
+			RuntimeResourceDefinition baseDefinition =
+					getFhirContext().getResourceDefinition(resourceClass).getBaseDefinition();
+			CommonResourceSupertypeScanner scanner = resourceNameToScanner.computeIfAbsent(
+					baseDefinition.getName(), key -> new CommonResourceSupertypeScanner());
+			scanner.register(resourceClass);
+		});
 
 		myResourceNameToSharedSupertype = resourceNameToScanner.entrySet().stream()
-			.filter(entry -> entry.getValue().getLowestCommonSuperclass().isPresent())
-			.collect(Collectors.toMap(
-				entry -> entry.getKey(),
-				entry -> entry.getValue().getLowestCommonSuperclass().get()));
+				.filter(entry -> entry.getValue().getLowestCommonSuperclass().isPresent())
+				.collect(Collectors.toMap(
+						entry -> entry.getKey(),
+						entry -> entry.getValue().getLowestCommonSuperclass().get()));
 	}
 
 	private String createNamedQueryName(SearchMethodBinding searchMethodBinding) {
@@ -421,43 +420,45 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-		return getActiveSearchParams(theResourceName).get(theParamName);
+	public RuntimeSearchParam getActiveSearchParam(
+			@Nonnull String theResourceName,
+			@Nonnull String theParamName,
+			@Nonnull SearchParamLookupContextEnum theContext) {
+		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 
 	@Override
-	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(
+			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
 		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 
-		collectMethodBindings()
-			.getOrDefault(theResourceName, Collections.emptyList())
-			.stream()
-			.filter(t -> theResourceName.equals(t.getResourceName()))
-			.filter(t -> t instanceof SearchMethodBinding)
-			.map(t -> (SearchMethodBinding) t)
-			.filter(t -> t.getQueryName() == null)
-			.forEach(t -> createRuntimeBinding(retval, t));
+		collectMethodBindings().getOrDefault(theResourceName, Collections.emptyList()).stream()
+				.filter(t -> theResourceName.equals(t.getResourceName()))
+				.filter(t -> t instanceof SearchMethodBinding)
+				.map(t -> (SearchMethodBinding) t)
+				.filter(t -> t.getQueryName() == null)
+				.forEach(t -> createRuntimeBinding(retval, t));
 
 		return retval;
 	}
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(
+			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(286));
 	}
 
-	private void createRuntimeBinding(ResourceSearchParams theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
+	private void createRuntimeBinding(
+			ResourceSearchParams theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
 
-		List<SearchParameter> parameters = theSearchMethodBinding
-			.getParameters()
-			.stream()
-			.filter(t -> t instanceof SearchParameter)
-			.map(t -> (SearchParameter) t)
-			.sorted(SearchParameterComparator.INSTANCE)
-			.collect(Collectors.toList());
+		List<SearchParameter> parameters = theSearchMethodBinding.getParameters().stream()
+				.filter(t -> t instanceof SearchParameter)
+				.map(t -> (SearchParameter) t)
+				.sorted(SearchParameterComparator.INSTANCE)
+				.collect(Collectors.toList());
 
 		for (SearchParameter nextParameter : parameters) {
 
@@ -474,7 +475,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			 * If the parameter has no description, default to the one from the resource
 			 */
 			if (StringUtils.isBlank(nextParamDescription)) {
-				RuntimeResourceDefinition def = getFhirContext().getResourceDefinition(theSearchMethodBinding.getResourceName());
+				RuntimeResourceDefinition def =
+						getFhirContext().getResourceDefinition(theSearchMethodBinding.getResourceName());
 				RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
 				if (paramDef != null) {
 					nextParamDescription = paramDef.getDescription();
@@ -485,20 +487,34 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				continue;
 			}
 
-			IIdType id = getFhirContext().getVersion().newIdType().setValue("SearchParameter/" + theSearchMethodBinding.getResourceName() + "-" + nextParamName);
+			IIdType id = getFhirContext()
+					.getVersion()
+					.newIdType()
+					.setValue("SearchParameter/" + theSearchMethodBinding.getResourceName() + "-" + nextParamName);
 			String uri = null;
 			String description = nextParamDescription;
 			String path = null;
 			RestSearchParameterTypeEnum type = nextParameter.getParamType();
 			Set<String> providesMembershipInCompartments = Collections.emptySet();
 			Set<String> targets = Collections.emptySet();
-			RuntimeSearchParam.RuntimeSearchParamStatusEnum status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
+			RuntimeSearchParam.RuntimeSearchParamStatusEnum status =
+					RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
 			Collection<String> base = Collections.singletonList(theSearchMethodBinding.getResourceName());
-			RuntimeSearchParam param = new RuntimeSearchParam(id, uri, nextParamName, description, path, type, providesMembershipInCompartments, targets, status, null, null, base);
+			RuntimeSearchParam param = new RuntimeSearchParam(
+					id,
+					uri,
+					nextParamName,
+					description,
+					path,
+					type,
+					providesMembershipInCompartments,
+					targets,
+					status,
+					null,
+					null,
+					base);
 			theMapToPopulate.put(nextParamName, param);
-
 		}
-
 	}
 
 	private static class SearchParameterComparator implements Comparator<SearchParameter> {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.channel.subscription;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,16 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 
 public class SubscriptionChannelFactory {
@@ -41,26 +40,32 @@ public class SubscriptionChannelFactory {
 		myChannelFactory = theChannelFactory;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+	public IChannelProducer newDeliverySendingChannel(
+			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelReceiver newDeliveryReceivingChannel(
+			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
+		IChannelReceiver channel =
+				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
+	public IChannelProducer newMatchingSendingChannel(
+			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelReceiver newMatchingReceivingChannel(
+			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
+		IChannelReceiver channel =
+				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
@@ -84,6 +89,7 @@ public class SubscriptionChannelFactory {
 		ChannelProducerSettings config = new ChannelProducerSettings();
 		if (theOptions != null) {
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 		}
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
@@ -93,6 +99,7 @@ public class SubscriptionChannelFactory {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		if (theOptions != null) {
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
 		}
 		return config;
@@ -109,5 +116,4 @@ public class SubscriptionChannelFactory {
 	public IChannelFactory getChannelFactory() {
 		return myChannelFactory;
 	}
-
 }

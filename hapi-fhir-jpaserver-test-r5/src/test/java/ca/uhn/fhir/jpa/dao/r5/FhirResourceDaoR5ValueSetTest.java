@@ -1,13 +1,20 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -25,12 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -38,17 +46,18 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5ValueSetTest.class);
 
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R5);
+
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
 	private IIdType myExtensionalVsId;
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
-
 
 	@BeforeEach
 	@Transactional
@@ -102,9 +111,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
 	}
 
 	@Test
@@ -138,7 +147,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -179,7 +188,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -210,19 +219,19 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 		/*
 		 * Filter with display name
@@ -232,11 +241,52 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
 
+	}
+
+	/**
+	 * See #4305
+	 */
+	@Test
+	public void testDeleteExpungePreExpandedValueSet() {
+		myStorageSettings.setExpungeEnabled(true);
+
+		// Create valueset
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
+		assertNotNull(vs);
+		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+
+		// Update valueset
+		vs.setName("Hello");
+		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
+		runInTransaction(() -> {
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertTrue(resource.isPresent());
+		});
+
+		// Precalculate
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSets();
+
+		// Delete
+		myValueSetDao.delete(id, mySrd);
+
+		// Verify it's deleted
+		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myValueSetDao.read(id, mySrd));
+
+		// Expunge
+		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
+
+		// Verify expunged
+		runInTransaction(() -> {
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertFalse(resource.isPresent());
+		});
 	}
 
 	@Test
@@ -247,7 +297,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
@@ -258,10 +308,46 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 	}
 
+	@Test
+	public void testPrecalculatedValueSet() {
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 10; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", codesToAdd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myValueSetDao.create(vs);
+
+		// Precalculate
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSets();
+		myValidationSupport.invalidateCaches();
+
+		// Validate code
+
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "CODE4", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
+
+		// Expand valueset
+
+		ValueSet outcomeVs = myValueSetDao.expand(vs, null);
+		String expansionMessage = myValueSetTestUtil.extractExpansionMessage(outcomeVs);
+		assertThat(expansionMessage).startsWith("ValueSet was expanded using an expansion that was pre-calculated");
+	}
 
 	@Test
 	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
@@ -274,7 +360,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());
-		assertTrue(result.isOk(), result.getMessage());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
 		assertEquals("Male", result.getDisplay());
 	}
 

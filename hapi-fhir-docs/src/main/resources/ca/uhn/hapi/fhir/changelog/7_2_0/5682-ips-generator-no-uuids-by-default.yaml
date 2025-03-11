@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5682
+title: "The IPS Generator will no longer replace resource IDs with placeholder IDs in the resulting
+  bundle by default, although this can be overridden in the generation strategy object."

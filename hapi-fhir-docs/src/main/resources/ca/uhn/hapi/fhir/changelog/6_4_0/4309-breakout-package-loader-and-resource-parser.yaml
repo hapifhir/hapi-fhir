@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4309
+title: "
+      Broke out services for loading npm packages
+      and parsing npm package resources that will
+      not be dependent on any the DAO layer.
+      "

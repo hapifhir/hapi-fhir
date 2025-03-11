@@ -5,7 +5,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.2.0-PRE12-SNAPSHOT</version>
+		<version>8.1.1-SNAPSHOT</version>
+
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -18,8 +19,7 @@
 		<dependency>
 			<groupId>com.puppycrawl.tools</groupId>
 			<artifactId>checkstyle</artifactId>
-			<!-- FIXME move version up -->
-			<version>8.43</version>
+			<version>${checkstyle_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -36,6 +36,30 @@
 		</dependency>
 	</dependencies>
 
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${checkstyle_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>hapi-fhir-checkstyle</artifactId>
+							<!-- Remember to bump this when you upgrade the version -->
+							<version>${project.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->
 		<profile>
@@ -71,6 +95,40 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>CHECKSTYLE</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<configuration>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<!--suppress UnresolvedMavenProperty -->
+							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<!--suppress UnresolvedMavenProperty -->
+							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<inputEncoding>UTF-8</inputEncoding>
+							<consoleOutput>true</consoleOutput>
+						</configuration>
+						<executions>
+							<execution>
+								<id>checkstyle-across-all-modules</id>
+								<phase>install</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>hapi-single-module-checkstyle</id>
+								<phase>none</phase>
 							</execution>
 						</executions>
 					</plugin>

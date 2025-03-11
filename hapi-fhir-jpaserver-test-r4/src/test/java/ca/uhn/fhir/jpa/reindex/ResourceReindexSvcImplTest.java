@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.reindex;
 
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -11,15 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
 public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
@@ -32,38 +28,36 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Setup
 
 		createPatient(withActiveFalse());
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 
 		Date start = new Date();
 
 		Long id0 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 		Long id1 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 		Date beforeLastInRange = new Date();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 		Long id2 = createObservation(withObservationCode("http://foo", "bar")).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 
 		Date end = new Date();
 
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 
 		createPatient(withActiveFalse());
 
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, null);
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, null);
 
 		// Verify
+		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
+		assertThat(typedPids).hasSize(3);
+		assertThat(typedPids).containsExactly(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2));
 
-		assertEquals(3, page.size());
-		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
-		assertTrue(page.getLastDate().after(beforeLastInRange));
-		assertTrue(page.getLastDate().before(end));
-
-		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -84,15 +78,14 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, null);
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, null);
 
 		// Verify
+		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
 
-		assertTrue(page.isEmpty());
-		assertEquals(0, page.size());
-		assertNull(page.getLastDate());
+		assertThat(typedPids).isEmpty();
 
-		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -107,42 +100,40 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Setup
 
-		createPatient(withActiveFalse());
-		sleepUntilTimeChanges();
+		final Long patientId0 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChange();
 
 		// Start of resources within range
 		Date start = new Date();
-		sleepUntilTimeChanges();
-		Long id0 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChange();
+		Long patientId1 = createPatient(withActiveFalse()).getIdPartAsLong();
 		createObservation(withObservationCode("http://foo", "bar"));
 		createObservation(withObservationCode("http://foo", "bar"));
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 		Date beforeLastInRange = new Date();
-		sleepUntilTimeChanges();
-		Long id1 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
+		Long patientId2 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChange();
 		Date end = new Date();
-		sleepUntilTimeChanges();
+		sleepUntilTimeChange();
 		// End of resources within range
 
 		createObservation(withObservationCode("http://foo", "bar"));
-		createPatient(withActiveFalse());
-		sleepUntilTimeChanges();
+		final Long patientId3 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChange();
 
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, DEFAULT_PAGE_SIZE, null, "Patient?active=false");
+		IResourcePidStream queryStream = mySvc.fetchResourceIdStream(start, end, null, "Patient?active=false");
 
 		// Verify
+		List<TypedResourcePid> typedResourcePids = queryStream.visitStream(Stream::toList);
 
-		assertEquals(2, page.size());
-		List<TypedResourcePid> typedResourcePids = page.getTypedResourcePids();
-		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1)));
-		assertTrue(page.getLastDate().after(beforeLastInRange));
-		assertTrue(page.getLastDate().before(end));
+		assertThat(typedResourcePids).hasSize(2);
+		assertThat(typedResourcePids).containsExactly(new TypedResourcePid("Patient", patientId1), new TypedResourcePid("Patient", patientId2));
 
-		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -150,6 +141,5 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
 	}
-
 
 }

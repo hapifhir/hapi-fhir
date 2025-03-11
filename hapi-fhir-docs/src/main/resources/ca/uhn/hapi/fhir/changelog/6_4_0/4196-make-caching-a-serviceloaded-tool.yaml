@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4196
+title: "In-memory caching provided by Caffeine has been refactored into using
+   s ServiceLoader pattern in order to improve Android compatibility. Thanks to
+   Vitor Pamplona for the pull request!"

@@ -1,12 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +17,9 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
+import org.apache.commons.lang3.Validate;
 
 public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 
@@ -29,12 +27,25 @@ public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 	DateOrListParam newInstance() {
 		return new DateOrListParam();
 	}
-	
-	@CoverageIgnore
+
 	@Override
 	public DateAndListParam addAnd(DateOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
 
+	/**
+	 * @param theValue The OR values
+	 * @return Returns a reference to this for convenient chaining
+	 * @since 7.4.0
+	 */
+	public DateAndListParam addAnd(DateParam... theValue) {
+		Validate.notNull(theValue, "theValue must not be null");
+		DateOrListParam orListParam = new DateOrListParam();
+		for (DateParam next : theValue) {
+			orListParam.add(next);
+		}
+		addValue(orListParam);
+		return this;
+	}
 }

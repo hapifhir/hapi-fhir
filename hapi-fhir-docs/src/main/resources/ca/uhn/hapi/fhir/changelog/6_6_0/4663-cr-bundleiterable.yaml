@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4663
+title: "Removing previous bundle provider to allow for iterableBundle provider, which will allow for paging resources instead of full consumption of patient resources at once"

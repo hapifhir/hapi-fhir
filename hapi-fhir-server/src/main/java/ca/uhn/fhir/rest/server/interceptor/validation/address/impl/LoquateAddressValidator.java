@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
@@ -30,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.entity.ContentType;
@@ -41,15 +41,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
 
 /**
  * For more details regarind the API refer to
@@ -66,21 +61,27 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	public static final String LOQUATE_AVC = "AVC";
 	public static final String LOQUATE_GEO_ACCURACY = "GeoAccuracy";
 
-	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"};
-	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT = "https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
+	protected static final String[] DUPLICATE_FIELDS_IN_ADDRESS_LINES = {"Locality", "AdministrativeArea", "PostalCode"
+	};
+	protected static final String DEFAULT_DATA_CLEANSE_ENDPOINT =
+			"https://api.addressy.com/Cleansing/International/Batch/v1.00/json4.ws";
 	protected static final int MAX_ADDRESS_LINES = 8;
 
 	private Pattern myCommaPattern = Pattern.compile("\\,(\\S)");
 
 	public LoquateAddressValidator(Properties theProperties) {
 		super(theProperties);
-		Validate.isTrue(theProperties.containsKey(PROPERTY_SERVICE_KEY) || theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT),
-			"Expected service key or custom service endpoint in the configuration, but got " + theProperties);
+		Validate.isTrue(
+				theProperties.containsKey(PROPERTY_SERVICE_KEY) || theProperties.containsKey(PROPERTY_SERVICE_ENDPOINT),
+				"Expected service key or custom service endpoint in the configuration, but got " + theProperties);
 	}
 
 	@Override
-	protected AddressValidationResult getValidationResult(AddressValidationResult theResult, JsonNode response, FhirContext theFhirContext) {
-		Validate.isTrue(response.isArray() && response.size() >= 1, "Invalid response - expected to get an array of validated addresses");
+	protected AddressValidationResult getValidationResult(
+			AddressValidationResult theResult, JsonNode response, FhirContext theFhirContext) {
+		Validate.isTrue(
+				response.isArray() && response.size() >= 1,
+				"Invalid response - expected to get an array of validated addresses");
 
 		JsonNode firstMatch = response.get(0);
 		Validate.isTrue(firstMatch.has("Matches"), "Invalid response - matches are unavailable");
@@ -92,7 +93,8 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		return toAddressValidationResult(theResult, match, theFhirContext);
 	}
 
-	private AddressValidationResult toAddressValidationResult(AddressValidationResult theResult, JsonNode theMatch, FhirContext theFhirContext) {
+	private AddressValidationResult toAddressValidationResult(
+			AddressValidationResult theResult, JsonNode theMatch, FhirContext theFhirContext) {
 		theResult.setValid(isValid(theMatch));
 
 		ourLog.debug("Address validation flag {}", theResult.isValid());
@@ -149,7 +151,12 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		return helper.getAddress();
 	}
 
-	private void addExtension(JsonNode theMatch, String theMatchField, String theExtUrl, AddressHelper theHelper, FhirContext theFhirContext) {
+	private void addExtension(
+			JsonNode theMatch,
+			String theMatchField,
+			String theExtUrl,
+			AddressHelper theHelper,
+			FhirContext theFhirContext) {
 		String addressQuality = getField(theMatch, theMatchField);
 		if (StringUtils.isEmpty(addressQuality)) {
 			ourLog.debug("{} is not found in {}", theMatchField, theMatch);
@@ -174,12 +181,16 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		IBaseExtension geolocation = ExtensionUtil.addExtension(address, FHIR_GEOCODE_EXTENSION_URL);
 
 		IBaseExtension latitude = ExtensionUtil.addExtension(geolocation, "latitude");
-		latitude.setValue(TerserUtil.newElement(theFhirContext, "decimal",
-			BigDecimal.valueOf(theMatch.get("Latitude").asDouble())));
+		latitude.setValue(TerserUtil.newElement(
+				theFhirContext,
+				"decimal",
+				BigDecimal.valueOf(theMatch.get("Latitude").asDouble())));
 
 		IBaseExtension longitude = ExtensionUtil.addExtension(geolocation, "longitude");
-		longitude.setValue(TerserUtil.newElement(theFhirContext, "decimal",
-			BigDecimal.valueOf(theMatch.get("Longitude").asDouble())));
+		longitude.setValue(TerserUtil.newElement(
+				theFhirContext,
+				"decimal",
+				BigDecimal.valueOf(theMatch.get("Longitude").asDouble())));
 	}
 
 	private void removeDuplicateAddressLines(JsonNode match, AddressHelper address) {

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,12 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.model.api.IModelJson;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
@@ -37,11 +35,12 @@ public class JobDefinitionStep<PT extends IModelJson, IT extends IModelJson, OT 
 
 	private final Class<OT> myOutputType;
 
-	public JobDefinitionStep(@Nonnull String theStepId,
-									 @Nonnull String theStepDescription,
-									 @Nonnull IJobStepWorker<PT, IT, OT> theJobStepWorker,
-									 @Nonnull Class<IT> theInputType,
-									 @Nonnull Class<OT> theOutputType) {
+	public JobDefinitionStep(
+			@Nonnull String theStepId,
+			@Nonnull String theStepDescription,
+			@Nonnull IJobStepWorker<PT, IT, OT> theJobStepWorker,
+			@Nonnull Class<IT> theInputType,
+			@Nonnull Class<OT> theOutputType) {
 		Validate.notBlank(theStepId, "No step ID specified");
 		Validate.isTrue(theStepId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theStepDescription);

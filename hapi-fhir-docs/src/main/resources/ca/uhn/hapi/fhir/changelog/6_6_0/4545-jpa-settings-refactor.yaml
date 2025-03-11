@@ -1,0 +1,6 @@
+---
+type: change
+issue: 4545
+title: "The settings beans for the JPA server have been renamed to better reflect their purpose. Specifically
+   the `ModelConfig` bean has been renamed to `StorageSettings` and the `DaoConfig` bean has been
+   renamed to `JpaStorageSettings`."

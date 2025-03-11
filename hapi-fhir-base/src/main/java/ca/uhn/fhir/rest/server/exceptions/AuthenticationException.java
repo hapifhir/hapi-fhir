@@ -1,13 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +17,21 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
- * Represents an <b>HTTP 401 Client Unauthorized</b> response, which 
- * means that the client needs to provide credentials, or has 
+ * Represents an <b>HTTP 401 Client Unauthorized</b> response, which
+ * means that the client needs to provide credentials, or has
  * provided invalid credentials.
  * <p>
  * For security failures, you should use
  * {@link AuthenticationException} if you want to indicate that the
- * user could not be authenticated (e.g. credential failures), also 
- * known as an <b>authentication</b> failure. 
- * You should use {@link ForbiddenOperationException} if you want to 
+ * user could not be authenticated (e.g. credential failures), also
+ * known as an <b>authentication</b> failure.
+ * You should use {@link ForbiddenOperationException} if you want to
  * indicate that the authenticated user does not have permission to
  * perform the requested operation, also known as an <b>authorization</b>
  * failure.
@@ -41,7 +40,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
  * </p>
- 
+ *
  */
 @CoverageIgnore
 public class AuthenticationException extends BaseServerResponseException {
@@ -61,16 +60,15 @@ public class AuthenticationException extends BaseServerResponseException {
 	public AuthenticationException(String theMessage, Throwable theCause) {
 		super(STATUS_CODE, theMessage, theCause);
 	}
-	
+
 	/**
 	 * Adds a <code>WWW-Authenticate</code> header to the response, of the form:<br/>
-	 * <code>WWW-Authenticate: Basic realm="theRealm"</code> 
-	 * 
+	 * <code>WWW-Authenticate: Basic realm="theRealm"</code>
+	 *
 	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 */
 	public AuthenticationException addAuthenticateHeaderForRealm(String theRealm) {
 		addResponseHeader("WWW-Authenticate", "Basic realm=\"" + theRealm + "\"");
 		return this;
 	}
-
 }

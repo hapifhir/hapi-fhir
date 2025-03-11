@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
@@ -34,9 +33,11 @@ public class MandatoryTransactionListener implements ProxyDataSourceBuilder.Sing
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			for (QueryInfo nextQuery : queryInfoList) {
 				String query = nextQuery.getQuery().toLowerCase(Locale.US);
-				if (query.contains("hfj_") || query.contains("trm_")) {
+				if (query.contains("hfj_") || query.contains("trm_") || query.contains("bt2_")) {
 					if (query.startsWith("select ") || query.startsWith("insert ") || query.startsWith("update ")) {
-						throw new IllegalStateException("No transaction active executing query: " + nextQuery.getQuery());
+						if (!query.contains("1=0")) {
+							throw new IllegalStateException("No transaction active executing query: " + nextQuery.getQuery());
+						}
 					}
 				}
 

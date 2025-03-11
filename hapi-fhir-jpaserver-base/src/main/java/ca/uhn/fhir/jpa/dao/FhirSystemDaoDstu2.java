@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,10 +50,16 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					retVal.addProfile(next.getCode());
 					break;
 				case SECURITY_LABEL:
-					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addSecurity()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 				case TAG:
-					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					retVal.addTag()
+							.setSystem(next.getSystem())
+							.setCode(next.getCode())
+							.setDisplay(next.getDisplay());
 					break;
 			}
 		}
@@ -63,7 +68,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	@Override
 	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+		return JpaResourceDao.throwProcessMessageNotImplemented();
 	}
-
 }

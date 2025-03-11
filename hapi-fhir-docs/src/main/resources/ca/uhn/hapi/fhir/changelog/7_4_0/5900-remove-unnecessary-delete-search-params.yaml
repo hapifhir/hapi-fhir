@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5900
+jira: SMILE-7435
+title: "Remove unnecessary call to deleteAllSearchParams when $expunge is called on an already-deleted resource."

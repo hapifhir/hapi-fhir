@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5994
+title: "Fixed a bug in the MdmSurvivorshipSvcImpl that caused resourceType/id
+        (as opposed to just id) to be passed on to the IIdHelperService.
+"

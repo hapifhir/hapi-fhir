@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4311
+title: "When a REST client performs a search with an unknown search parameter, the
+   resulting error message will now sort and deduplicate the list of allowable
+   search parameters. Thanks to GitHub user @granadacoder for the pull request!"

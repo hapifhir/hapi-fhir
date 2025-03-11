@@ -1,18 +1,18 @@
 package ca.uhn.fhir.rest.client.apache;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.impl.BaseClient;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.client.AuthenticationStrategy;
 import org.apache.http.client.UserTokenHandler;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpExecutionAware;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -26,9 +26,16 @@ import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
+import java.io.IOException;
+import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ApacheRestfulClientFactoryTest {
 
@@ -39,8 +46,7 @@ public class ApacheRestfulClientFactoryTest {
 		factory.setFhirContext(FhirContext.forDstu2());
 		try {
 			factory.setFhirContext(FhirContext.forDstu2());
-			fail();
-		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals("java.lang.IllegalStateException: " + Msg.code(1356) + "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.", e.toString());
 		}
 	}
@@ -53,8 +59,7 @@ public class ApacheRestfulClientFactoryTest {
 		factory.setConnectTimeout(1);
 		try {
 			factory.validateServerBase("http://127.0.0.1:22225", factory.getHttpClient("http://foo"), (BaseClient) ctx.newRestfulGenericClient("http://foo"));
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail();		} catch (FhirClientConnectionException e) {
 			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://127.0.0.1:22225metadata", e.getMessage());
 		}
 	}

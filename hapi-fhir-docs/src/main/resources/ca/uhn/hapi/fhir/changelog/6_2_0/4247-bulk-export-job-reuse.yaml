@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4247
+title: "Previously, Bulk Export jobs were always reused, even if completed. Now, jobs are only reused if an identical job is already running, and has not yet completed or failed."

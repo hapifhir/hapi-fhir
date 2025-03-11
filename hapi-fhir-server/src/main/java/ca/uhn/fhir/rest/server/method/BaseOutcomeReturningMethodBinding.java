@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,18 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
-
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,14 +36,17 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -49,12 +56,15 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 	private boolean myReturnVoid;
 
-	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
+	public BaseOutcomeReturningMethodBinding(
+			Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException(Msg.code(367) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException(Msg.code(367) + "Method " + theMethod.getName() + " in type "
+						+ theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName()
+						+ " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -76,7 +86,13 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	 */
 	protected abstract String getMatchingOperation();
 
-	private int getOperationStatus(MethodOutcome response) {
+	private int getOperationStatus(@Nullable MethodOutcome response) {
+
+		// if the response status code is set (i.e. from a custom Resource provider) it should be respected
+		if (response != null && response.isResponseStatusCodeSet()) {
+			return response.getResponseStatusCode();
+		}
+
 		switch (getRestOperationType()) {
 			case CREATE:
 				validateResponseNotNullIfItShouldntBe(response);
@@ -107,7 +123,9 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 	private void validateResponseNotNullIfItShouldntBe(MethodOutcome response) {
 		if (response == null && !isReturnVoid()) {
-			throw new InternalErrorException(Msg.code(368) + "Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+			throw new InternalErrorException(
+					Msg.code(368) + "Method " + getMethod().getName() + " in type "
+							+ getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 		}
 	}
 
@@ -142,7 +160,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+			throws BaseServerResponseException, IOException {
 
 		Object[] params = createParametersForServerRequest(theRequest);
 		addParametersForServerRequest(theRequest, params);
@@ -163,7 +182,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
 			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
-				throw new InternalErrorException(Msg.code(369) + "Server method returned invalid resource ID: " + response.getId().getValue());
+				throw new InternalErrorException(Msg.code(369) + "Server method returned invalid resource ID: "
+						+ response.getId().getValue());
 			}
 		}
 
@@ -178,7 +198,12 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
-	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome theMethodOutcome, IBaseResource theOriginalOutcome) throws IOException {
+	private Object returnResponse(
+			IRestfulServer<?> theServer,
+			RequestDetails theRequest,
+			MethodOutcome theMethodOutcome,
+			IBaseResource theOriginalOutcome)
+			throws IOException {
 		int operationStatus = getOperationStatus(theMethodOutcome);
 		IBaseResource outcome = theOriginalOutcome;
 
@@ -206,7 +231,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 					outcome = theOriginalOutcome;
 					break;
 			}
-
 		}
 
 		ResponseDetails responseDetails = new ResponseDetails();
@@ -219,27 +243,36 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 		IRestfulResponse restfulResponse = theRequest.getResponse();
 
+		IIdType responseId = null;
+		IPrimitiveType<Date> operationResourceLastUpdated = null;
 		if (theMethodOutcome != null) {
 			if (theMethodOutcome.getResource() != null) {
-				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(theMethodOutcome.getResource()));
+				operationResourceLastUpdated =
+						RestfulServerUtils.extractLastUpdatedFromResource(theMethodOutcome.getResource());
 			}
 
-			IIdType responseId = theMethodOutcome.getId();
+			responseId = theMethodOutcome.getId();
 			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
 				responseId = responseId.withResourceType(getResourceName());
 			}
 
 			if (responseId != null) {
 				String serverBase = theRequest.getFhirServerBase();
-				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, theMethodOutcome.getResource(), serverBase, responseId);
-				restfulResponse.setOperationResourceId(responseId);
+				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(
+						theServer, theMethodOutcome.getResource(), serverBase, responseId);
 			}
 		}
 
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
-
-		return restfulResponse.streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), true);
+		return RestfulServerUtils.streamResponseAsResource(
+				theServer,
+				responseDetails.getResponseResource(),
+				summaryMode,
+				responseDetails.getResponseCode(),
+				true,
+				theRequest.isRespondGzip(),
+				theRequest,
+				responseId,
+				operationResourceLastUpdated);
 	}
-
 }

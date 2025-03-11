@@ -18,7 +18,7 @@ import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGenerating
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.HEADER_PASSTHROUGH;
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.VERSION;
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.values;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,7 +32,7 @@ class BaseRequestGeneratingCommandTest {
 	@Test
 	void getOptions() {
 		Options options = tested.getOptions();
-		assertEquals(7, options.getOptions().size());
+		assertThat(options.getOptions()).hasSize(7);
 		assertTrue(options.hasShortOption(BaseCommand.FHIR_VERSION_PARAM));
 		assertTrue(options.hasShortOption(BaseCommand.BASE_URL_PARAM));
 		assertTrue(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM));
@@ -52,7 +52,7 @@ class BaseRequestGeneratingCommandTest {
 
 		// BASIC_AUTH exclusion excludes 2 options
 		int expectedSize = excludedOption == BASIC_AUTH ? 5 : 6;
-		assertEquals(expectedSize, options.getOptions().size());
+		assertThat(options.getOptions()).hasSize(expectedSize);
 
 		assertFalse(options.hasShortOption(getOptionForExcludedOption(excludedOption)));
 		if (excludedOption == BASIC_AUTH) {
@@ -98,7 +98,7 @@ class BaseRequestGeneratingCommandTest {
 	void getSomeOptionsExcludeTwo() {
 		Options options = tested.getSomeOptions(Lists.newArrayList(VERSION, HEADER_PASSTHROUGH));
 
-		assertEquals(5, options.getOptions().size());
+		assertThat(options.getOptions()).hasSize(5);
 		assertTrue(options.hasShortOption(BaseCommand.BASE_URL_PARAM));
 		assertTrue(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM));
 		assertTrue(options.hasShortOption(BaseCommand.BEARER_TOKEN_PARAM_NAME));

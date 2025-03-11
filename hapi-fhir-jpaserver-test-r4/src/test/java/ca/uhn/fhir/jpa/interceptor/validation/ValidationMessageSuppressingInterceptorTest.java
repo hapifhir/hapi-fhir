@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -24,10 +25,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidationMessageSuppressingInterceptorTest extends BaseResourceProviderR4Test {
@@ -54,12 +52,8 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		String input = loadResource("/r4/uscore/observation-pulseox.json");
 		Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 
-		try {
-			myObservationDao.validate(inputObs, null, input, null, null, null, null);
-			fail();
-		} catch (PreconditionFailedException e) {
-			// good
-		}
+		MethodOutcome result = myObservationDao.validate(inputObs, null, input, null, null, null, null);
+
 
 		ValidationMessageSuppressingInterceptor interceptor = new ValidationMessageSuppressingInterceptor();
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
@@ -67,9 +61,10 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		MethodOutcome validationOutcome = myObservationDao.validate(inputObs, null, input, null, null, null, null);
 		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		assertHasWarnings(oo);
 		String encode = encode(oo);
 		ourLog.info(encode);
-		assertThat(encode, containsString("All observations should have a performer"));
+		assertThat(encode).contains("In general, all observations should have a performer");
 	}
 
 	@Test
@@ -85,7 +80,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
 		requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestInterceptor.setValidator(validator);
-		ourRestServer.registerInterceptor(requestInterceptor);
+		myServer.registerInterceptor(requestInterceptor);
 
 
 		// Without suppression
@@ -97,18 +92,21 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			} catch (UnprocessableEntityException e) {
 				String encode = encode(e.getOperationOutcome());
 				ourLog.info(encode);
-				assertThat(encode, containsString("Unknown code 'http://loinc.org#59408-5'"));
+				assertThat(encode).contains("Slice 'Observation.code.coding:PulseOx': a matching slice is required, but not found");
 			}
 		}
 
 		// With suppression
 		ValidationMessageSuppressingInterceptor interceptor = new ValidationMessageSuppressingInterceptor();
-		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
+		interceptor.addMessageSuppressionPatterns("Unable to validate code http://loinc.org#not-a-real-code - Code is not found in CodeSystem: http://loinc.org",
+		"Slice 'Observation.code.coding:PulseOx': a matching slice is required, but not found (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry|3.1.1)",
+		"This element does not match any known slice defined in the profile http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry|3.1.1");
+
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		{
 			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			String id = myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
-			assertThat(id, matchesPattern("Observation/[0-9]+"));
+			assertThat(id).matches("Observation/[0-9]+");
 		}
 	}
 
@@ -136,7 +134,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		} catch (PreconditionFailedException e) {
 			String encode = encode(e.getOperationOutcome());
 			ourLog.info(encode);
-			assertThat(encode, containsString("Encounter.status: minimum required = 1"));
+			assertThat(encode).contains("Encounter.status: minimum required = 1");
 		}
 
 		// With suppression
@@ -148,7 +146,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference("Patient/A"));
 		IIdType id = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
-		assertThat(id.getValue(), matchesPattern("Encounter/[0-9]+"));
+		assertThat(id.getValue()).matches("Encounter/[0-9]+");
 
 	}
 

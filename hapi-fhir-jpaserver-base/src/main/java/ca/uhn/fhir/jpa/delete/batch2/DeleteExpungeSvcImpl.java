@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.delete.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,37 +17,41 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Transactional(propagation = Propagation.MANDATORY)
-public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
+public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
 
 	private final EntityManager myEntityManager;
 	private final DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilder;
 	private final IFulltextSearchSvc myFullTextSearchSvc;
 
-	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, IFulltextSearchSvc theFullTextSearchSvc) {
+	public DeleteExpungeSvcImpl(
+			EntityManager theEntityManager,
+			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
+			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;
 	}
 
 	@Override
-	public void deleteExpunge(List<ResourcePersistentId> thePersistentIds) {
-		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(thePersistentIds);
+	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
+				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
+		List<String> sqlList = sqlResult.getSqlStatements();
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;
@@ -59,22 +61,26 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 		}
 
 		ourLog.info("{} records deleted", totalDeleted);
-		clearHibernateSearchIndex(thePersistentIds);
-		
+		clearHibernateSearchIndex(theJpaPids);
+
 		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
+		return sqlResult.getRecordCount();
+	}
+
+	@Override
+	public boolean isCascadeSupported() {
+		return true;
 	}
 
 	/**
 	 * If we are running with HS enabled, the expunge operation will cause dangling documents because Hibernate Search is not aware of custom SQL queries that delete resources.
 	 * This method clears the Hibernate Search index for the given resources.
 	 */
-	private void clearHibernateSearchIndex(List<ResourcePersistentId> thePersistentIds) {
-		if (myFullTextSearchSvc != null) {
-			List<Object> objectIds = thePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
+		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
+			List<Object> objectIds = new ArrayList<>(thePersistentIds);
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}
 	}
-
-
 }

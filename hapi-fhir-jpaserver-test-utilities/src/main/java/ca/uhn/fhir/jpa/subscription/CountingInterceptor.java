@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +34,14 @@ public class CountingInterceptor implements ChannelInterceptor {
 	private List<String> mySent = new ArrayList<>();
 
 	public int getSentCount(String theContainingKeyword) {
-		return (int) mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
+		return (int)
+				mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
 	}
 
 	@Override
-	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
-		ourLog.info("Counting another instance: {}", theMessage);
+	public void afterSendCompletion(
+			Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
+		ourLog.info("Send complete for message: {}", theMessage);
 		if (theSent) {
 			mySent.add(theMessage.toString());
 		}

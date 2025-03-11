@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,15 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 /**
  * @see TermConceptProperty#getType()
- * @see TermConceptProperty#MAX_PROPTYPE_ENUM_LENGTH
  */
 public enum TermConceptPropertyTypeEnum {
-	/*
-	 * VALUES SHOULD BE <= 6 CHARS LONG!
-	 *
-	 * We store this in a DB column of that length
+	/**
+	 * Do not change order - the ordinal is used by hibernate in the column.
+	 * TermConceptProperty#getType()
 	 */
 
 	/**
@@ -38,5 +35,21 @@ public enum TermConceptPropertyTypeEnum {
 	/**
 	 * Coding
 	 */
-	CODING
+	CODING,
+	/**
+	 * Boolean values
+	 */
+	BOOLEAN,
+	/**
+	 * Integer values
+	 */
+	INTEGER,
+	/**
+	 * Decimal or float values.
+	 */
+	DECIMAL,
+	/**
+	 * Date and time values.
+	 */
+	DATETIME
 }

@@ -1,0 +1,4 @@
+type: change
+issue: 3439
+title: 'Previously, jobs were scheduled via a @PostConstruct annotated method.  This has been changed to an implementation
+of IJobScheduler interface so the job scheduler can schedule all the jobs after it has been started.'

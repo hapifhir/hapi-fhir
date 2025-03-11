@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -29,30 +28,35 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private SubscriptionSettings mySubscriptionSettings;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 	@Autowired
 	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	@Autowired
+	private IInterceptorService myInterceptorRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 
@@ -72,25 +76,38 @@ public class SubscriptionTestUtil {
 	}
 
 	public void registerEmailInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSubmitInterceptorLoader.start();
+	}
+
+	public void registerMessageInterceptor() {
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
-		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
+	// TODO KHS call in all subscription base tests
+	public void registerSubscriptionLoggingInterceptor() {
+		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+	}
+
+	public void unregisterSubscriptionLoggingInterceptor() {
+		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
+	}
 	public int getExecutorQueueSizeForUnitTests() {
 		return getExecutorQueueSize();
 	}

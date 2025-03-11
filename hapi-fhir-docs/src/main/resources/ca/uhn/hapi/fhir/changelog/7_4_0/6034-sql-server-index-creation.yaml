@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6034
+title: "Two indexes introduced in HAPI-FHIR 6.6.0, `IDX_SP_URI_HASH_IDENTITY_V2` and `IDX_SP_URI_HASH_URI_V2` were previously created as unique indexes. This has caused issues on SQL Server due to the way that a filtered index is created. The unique clause was not necessary to this index, and has been removed."

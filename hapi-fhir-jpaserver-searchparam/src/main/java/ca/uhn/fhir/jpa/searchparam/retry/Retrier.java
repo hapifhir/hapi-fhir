@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.retry;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.retry;
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -29,7 +29,6 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -54,7 +53,7 @@ public class Retrier<T> {
 		backOff.setMultiplier(2);
 		myRetryTemplate.setBackOffPolicy(backOff);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(){
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy() {
 			private static final long serialVersionUID = -4522467251787518700L;
 
 			@Override
@@ -69,14 +68,22 @@ public class Retrier<T> {
 		retryPolicy.setMaxAttempts(theMaxRetries);
 		myRetryTemplate.setRetryPolicy(retryPolicy);
 
-		RetryListener listener = new RetryListenerSupport() {
+		RetryListener listener = new RetryListener() {
 			@Override
-			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-				super.onError(context, callback, throwable);
-				if (throwable instanceof NullPointerException || throwable instanceof UnsupportedOperationException || "true".equals(System.getProperty("unit_test_mode"))) {
-					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage(), throwable);
+			public <TT, E extends Throwable> void onError(
+					RetryContext context, RetryCallback<TT, E> callback, Throwable throwable) {
+				if (throwable instanceof NullPointerException
+						|| throwable instanceof UnsupportedOperationException
+						|| HapiSystemProperties.isUnitTestModeEnabled()) {
+					ourLog.error(
+							"Retry failure {}/{}: {}",
+							context.getRetryCount(),
+							theMaxRetries,
+							throwable.getMessage(),
+							throwable);
 				} else {
-					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());
+					ourLog.error(
+							"Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());
 				}
 			}
 		};

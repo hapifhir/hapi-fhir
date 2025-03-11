@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -16,27 +17,24 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	@AfterEach
 	public void resetDefaultBehaviour() {
 		// Reset to default
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatBaseUrlsAsLocal(null);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setTreatBaseUrlsAsLocal(null);
 	}
-	
+
 	@Test
 	public void testInternalReferenceBlockedByDefault() {
 		Patient p = new Patient();
@@ -55,7 +53,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		org.setId("FOO");
 		org.setName("Org Name");
 		myOrganizationDao.update(org, mySrd);
-		
+
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		try {
@@ -73,19 +71,19 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		org.setName("Org Name");
 		myOrganizationDao.update(org, mySrd);
 
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://example.com/base/Organization/FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pid.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(pid.getValue());
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://example2.com/base/Organization/FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 	@Test
@@ -98,33 +96,33 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myDaoConfig.setTreatBaseUrlsAsLocal(urls);
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
 		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		p = myPatientDao.read(pid, mySrd);
 		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
-		
+
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://example.com/base/Organization/FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pid.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(pid.getValue());
 	}
 
 	@Test
 	public void testSearchForInvalidLocalReference() {
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization/FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
-		
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization/9999999999"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 	@Test
@@ -137,21 +135,21 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myDaoConfig.setTreatBaseUrlsAsLocal(urls);
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
 		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		p = myPatientDao.read(pid, mySrd);
 		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
-		
+
 		SearchParameterMap map;
 
 		// Different base
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://foo.com/base/Organization/FOO"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).isEmpty();
 	}
 
 }

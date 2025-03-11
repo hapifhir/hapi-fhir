@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging.json;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +25,8 @@ import org.springframework.messaging.MessageHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Objects.isNull;
 
 /**
  * This class is for holding headers for BaseJsonMessages. Any serializable data can be thrown into
@@ -40,8 +41,10 @@ public class HapiMessageHeaders implements IModelJson {
 
 	@JsonProperty(RETRY_COUNT_KEY)
 	private Integer myRetryCount = 0;
+
 	@JsonProperty(FIRST_FAILURE_KEY)
 	private Long myFirstFailureTimestamp;
+
 	@JsonProperty(LAST_FAILURE_KEY)
 	private Long myLastFailureTimestamp;
 
@@ -57,6 +60,9 @@ public class HapiMessageHeaders implements IModelJson {
 	}
 
 	public Integer getRetryCount() {
+		if (isNull(this.myRetryCount)) {
+			return 0;
+		}
 		return this.myRetryCount;
 	}
 
@@ -76,11 +82,9 @@ public class HapiMessageHeaders implements IModelJson {
 		this.myLastFailureTimestamp = theLastFailureTimestamp;
 	}
 
-
 	public void setFirstFailureTimestamp(Long theFirstFailureTimestamp) {
 		this.myFirstFailureTimestamp = theFirstFailureTimestamp;
 	}
-
 
 	public Map<String, Object> getCustomHeaders() {
 		if (this.headers == null) {
@@ -96,5 +100,4 @@ public class HapiMessageHeaders implements IModelJson {
 		returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
 		return new MessageHeaders(returnedHeaders);
 	}
-
 }

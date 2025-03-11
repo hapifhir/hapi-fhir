@@ -3,19 +3,19 @@ package ca.uhn.fhir.batch2.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StatusEnumTest {
 	@Test
 	public void testEndedStatuses() {
-		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED, StatusEnum.ERRORED));
+		assertThat(StatusEnum.getEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED);
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS));
+		assertThat(StatusEnum.getNotEndedStatuses()).containsExactlyInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE);
 	}
 
 	@ParameterizedTest
@@ -36,7 +36,7 @@ class StatusEnumTest {
 
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
-		"COMPLETED, COMPLETED, true",
+		"COMPLETED, COMPLETED, false",
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
@@ -44,14 +44,14 @@ class StatusEnumTest {
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
 		"CANCELLED, COMPLETED, false",
-		"CANCELLED, CANCELLED, true",
+		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
 
 		"ERRORED, QUEUED, false",
-		"ERRORED, IN_PROGRESS, false",
-		"ERRORED, COMPLETED, false",
-		"ERRORED, CANCELLED, false",
+		"ERRORED, IN_PROGRESS, true",
+		"ERRORED, COMPLETED, true",
+		"ERRORED, CANCELLED, true",
 		"ERRORED, ERRORED, true",
 		"ERRORED, FAILED, true",
 
@@ -61,13 +61,31 @@ class StatusEnumTest {
 		"FAILED, CANCELLED, false",
 		"FAILED, ERRORED, false",
 		"FAILED, FAILED, true",
+		"FINALIZE, COMPLETED, true",
+		"FINALIZE, IN_PROGRESS, false",
+		"FINALIZE, QUEUED, false",
+		"FINALIZE, FAILED, true",
+		"FINALIZE, ERRORED, true",
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
+		if (expected) {
+			assertThat(StatusEnum.ourFromStates.get(newStatus)).contains(origStatus);
+			assertThat(StatusEnum.ourToStates.get(origStatus)).contains(newStatus);
+		} else {
+			assertThat(StatusEnum.ourFromStates.get(newStatus)).doesNotContain(origStatus);
+			assertThat(StatusEnum.ourToStates.get(origStatus)).doesNotContain(newStatus);
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(StatusEnum.class)
+	public void testCancellableStates(StatusEnum theState) {
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
 	}
 
 	@Test
 	public void testEnumSize() {
-		assertEquals(6, StatusEnum.values().length, "Update testStateTransition() with new cases");
+		assertThat(StatusEnum.values().length).as("Update testStateTransition() with new cases").isEqualTo(7);
 	}
 }

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5183
+title: "The latest US Core IG includes two ValueSets with different contents, but the same FHIR Id and OID via two different included IGs (i.e. `2.16.840.1.113762.1.4.1010.9` via us.cdc.phinvads and us.nlm.vsac).  Ingesting these duplicates in US Core failed with a 500 error. This has been resolved by logging the error and allowing the rest of the ingestion to proceed."

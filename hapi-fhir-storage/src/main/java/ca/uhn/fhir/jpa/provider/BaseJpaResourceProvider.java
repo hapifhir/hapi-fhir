@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -55,21 +54,21 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Required;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
-public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
+public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
+		implements IResourceProvider {
 
 	private IFhirResourceDao<T> myDao;
 
@@ -82,10 +81,16 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		myDao = theDao;
 	}
 
+	protected IBaseParameters doExpunge(
+			IIdType theIdParam,
+			IPrimitiveType<? extends Integer> theLimit,
+			IPrimitiveType<? extends Boolean> theExpungeDeletedResources,
+			IPrimitiveType<? extends Boolean> theExpungeOldVersions,
+			IPrimitiveType<? extends Boolean> theExpungeEverything,
+			RequestDetails theRequest) {
 
-	protected IBaseParameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
-
-		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
+		ExpungeOptions options =
+				createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 
 		ExpungeOutcome outcome;
 		if (theIdParam != null) {
@@ -97,29 +102,30 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		return createExpungeResponse(outcome);
 	}
 
-
 	public IFhirResourceDao<T> getDao() {
 		return myDao;
 	}
 
-	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
 	}
 
 	@History
 	public IBundleProvider getHistoryForResourceInstance(
-		HttpServletRequest theRequest,
-		@Offset Integer theOffset,
-		@IdParam IIdType theId,
-		@Since Date theSince,
-		@At DateRangeParam theAt,
-		RequestDetails theRequestDetails) {
+			HttpServletRequest theRequest,
+			@Offset Integer theOffset,
+			@IdParam IIdType theId,
+			@Since Date theSince,
+			@At DateRangeParam theAt,
+			RequestDetails theRequestDetails) {
 
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(theId, new HistorySearchDateRangeParam(theRequestDetails.getParameters(), sinceOrAt, theOffset), theRequestDetails);
+			return myDao.history(
+					theId,
+					new HistorySearchDateRangeParam(theRequestDetails.getParameters(), sinceOrAt, theOffset),
+					theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -127,15 +133,19 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	@History
 	public IBundleProvider getHistoryForResourceType(
-		HttpServletRequest theRequest,
-		@Offset Integer theOffset,
-		@Since Date theSince,
-		@At DateRangeParam theAt,
-		RequestDetails theRequestDetails) {
+			HttpServletRequest theRequest,
+			@Offset Integer theOffset,
+			@Since Date theSince,
+			@At DateRangeParam theAt,
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theOffset, theRequestDetails);
+			return myDao.history(
+					sinceOrAt.getLowerBoundAsInstant(),
+					sinceOrAt.getUpperBoundAsInstant(),
+					theOffset,
+					theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
@@ -147,7 +157,14 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Patch
-	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType, @ResourceParam IBaseParameters theRequestBody) {
+	public DaoMethodOutcome patch(
+			HttpServletRequest theRequest,
+			@IdParam IIdType theId,
+			@ConditionalUrlParam String theConditionalUrl,
+			RequestDetails theRequestDetails,
+			@ResourceParam String theBody,
+			PatchTypeEnum thePatchType,
+			@ResourceParam IBaseParameters theRequestBody) {
 		startRequest(theRequest);
 		try {
 			return myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestBody, theRequestDetails);
@@ -167,7 +184,11 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Create
-	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource, @ConditionalUrlParam String theConditional, RequestDetails theRequestDetails) {
+	public MethodOutcome create(
+			HttpServletRequest theRequest,
+			@ResourceParam T theResource,
+			@ConditionalUrlParam String theConditional,
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -181,7 +202,11 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Delete()
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IIdType theResource, @ConditionalUrlParam(supportsMultiple = true) String theConditional, RequestDetails theRequestDetails) {
+	public MethodOutcome delete(
+			HttpServletRequest theRequest,
+			@IdParam IIdType theResource,
+			@ConditionalUrlParam(supportsMultiple = true) String theConditional,
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -194,33 +219,54 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		}
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
-	})
+	@Operation(
+			name = ProviderConstants.OPERATION_EXPUNGE,
+			idempotent = false,
+			returnParameters = {
+				@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
+			})
 	public IBaseParameters expunge(
-		@IdParam IIdType theIdParam,
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer") IPrimitiveType<Integer> theLimit,
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES, typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS, typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
-		RequestDetails theRequest) {
+			@IdParam IIdType theIdParam,
+			@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer")
+					IPrimitiveType<Integer> theLimit,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES,
+							typeName = "boolean")
+					IPrimitiveType<Boolean> theExpungeDeletedResources,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS,
+							typeName = "boolean")
+					IPrimitiveType<Boolean> theExpungeOldVersions,
+			RequestDetails theRequest) {
 		return doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
-	})
+	@Operation(
+			name = ProviderConstants.OPERATION_EXPUNGE,
+			idempotent = false,
+			returnParameters = {
+				@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, typeName = "integer")
+			})
 	public IBaseParameters expunge(
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer") IPrimitiveType<Integer> theLimit,
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES, typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
-		@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS, typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
-		RequestDetails theRequest) {
+			@OperationParam(name = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT, typeName = "integer")
+					IPrimitiveType<Integer> theLimit,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES,
+							typeName = "boolean")
+					IPrimitiveType<Boolean> theExpungeDeletedResources,
+			@OperationParam(
+							name = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS,
+							typeName = "boolean")
+					IPrimitiveType<Boolean> theExpungeOldVersions,
+			RequestDetails theRequest) {
 		return doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
 	}
 
 	@Description("Request a global list of tags, profiles, and security labels")
-	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
-		@OperationParam(name = "return", typeName = "Meta")
-	})
+	@Operation(
+			name = OPERATION_META,
+			idempotent = true,
+			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
 	public IBaseParameters meta(RequestDetails theRequestDetails) {
 		Class metaType = getContext().getElementDefinition("Meta").getImplementingClass();
 		IBaseMetaType metaGetOperation = getDao().metaGetOperation(metaType, theRequestDetails);
@@ -230,9 +276,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Description("Request a list of tags, profiles, and security labels for a specfic resource instance")
-	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
-		@OperationParam(name = "return", typeName = "Meta")
-	})
+	@Operation(
+			name = OPERATION_META,
+			idempotent = true,
+			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
 	public IBaseParameters meta(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		Class metaType = getContext().getElementDefinition("Meta").getImplementingClass();
 		IBaseMetaType metaGetOperation = getDao().metaGetOperation(metaType, theId, theRequestDetails);
@@ -243,10 +290,14 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Description("Add tags, profiles, and/or security labels to a resource")
-	@Operation(name = OPERATION_META_ADD, idempotent = false, returnParameters = {
-		@OperationParam(name = "return", typeName = "Meta")
-	})
-	public IBaseParameters metaAdd(@IdParam IIdType theId, @OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta, RequestDetails theRequestDetails) {
+	@Operation(
+			name = OPERATION_META_ADD,
+			idempotent = false,
+			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
+	public IBaseParameters metaAdd(
+			@IdParam IIdType theId,
+			@OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta,
+			RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(554) + "Input contains no parameter with name 'meta'");
 		}
@@ -257,10 +308,14 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Description("Delete tags, profiles, and/or security labels from a resource")
-	@Operation(name = OPERATION_META_DELETE, idempotent = false, returnParameters = {
-		@OperationParam(name = "return", typeName = "Meta")
-	})
-	public IBaseParameters metaDelete(@IdParam IIdType theId, @OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta, RequestDetails theRequestDetails) {
+	@Operation(
+			name = OPERATION_META_DELETE,
+			idempotent = false,
+			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
+	public IBaseParameters metaDelete(
+			@IdParam IIdType theId,
+			@OperationParam(name = "meta", typeName = "Meta") IBaseMetaType theMeta,
+			RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException(Msg.code(555) + "Input contains no parameter with name 'meta'");
 		}
@@ -271,7 +326,12 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Update
-	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IIdType theId, @ConditionalUrlParam String theConditional, RequestDetails theRequestDetails) {
+	public MethodOutcome update(
+			HttpServletRequest theRequest,
+			@ResourceParam T theResource,
+			@IdParam IIdType theId,
+			@ConditionalUrlParam String theConditional,
+			RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -285,15 +345,26 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Validate
-	public MethodOutcome validate(@ResourceParam T theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+	public MethodOutcome validate(
+			@ResourceParam T theResource,
+			@ResourceParam String theRawResource,
+			@ResourceParam EncodingEnum theEncoding,
+			@Validate.Mode ValidationModeEnum theMode,
+			@Validate.Profile String theProfile,
+			RequestDetails theRequestDetails) {
 		return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
 
 	@Validate
-	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IIdType theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
-		return getDao().validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
+	public MethodOutcome validate(
+			@ResourceParam T theResource,
+			@IdParam IIdType theId,
+			@ResourceParam String theRawResource,
+			@ResourceParam EncodingEnum theEncoding,
+			@Validate.Mode ValidationModeEnum theMode,
+			@Validate.Profile String theProfile,
+			RequestDetails theRequestDetails) {
+		return getDao().validate(
+						theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
-
 }

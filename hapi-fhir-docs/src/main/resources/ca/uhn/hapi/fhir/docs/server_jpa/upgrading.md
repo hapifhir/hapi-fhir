@@ -20,15 +20,36 @@ You may use the following command to get detailed help on the options:
 
 Note the arguments:
 
-* `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options
+* `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options.
+* `--enable-heavyweight-migrations` &ndash; If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.
+
+<a name="database-partition-mode"/>
+
+# Database Partition Mode
+
+If you are using [Database Partition Mode](../server_jpa_partitioning/db_partition_mode.md), add the flag `--flags database-partition-mode` to your command.
+
+With this flag added to the command line, the migrator will initialize an empty database with a schema suitable for Database Partition Mode, and will appropriately migrate an existing schema that was initialized with Database Partition Mode. This flag should not be used when migrating an existing schema that was not initially created in Database Partition Mode. It can not be used to convert an existing schema into one that is suitable for this new mode.    
+
+For example:
+
+```bash
+./hapi-fhir-cli migrate-database --flags database-partition-mode -d POSTGRES_9_4 -u "[url]" -n "[username]" -p "[password]"
+```
 
 # Oracle Support
 
 Note that the Oracle JDBC drivers are not distributed in the Maven Central repository, so they are not included in HAPI FHIR. In order to use this command with an Oracle database, you will need to invoke the CLI as follows:
 
 ```bash
-java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
+./hapi-fhir-cli migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
 ```
+
+# Oracle and Sql Server Locking Note
+
+Some versions of Oracle and Sql Server (e.g. Oracle Standard or Sql Server Standard) do NOT support adding or removing an index without locking the underlying table.
+If you run migrations while these systems are running,
+they will have unavoidable long pauses in activity during these changes.
 
 ## Migrating 3.4.0 to 3.5.0+
 
@@ -41,7 +62,7 @@ As a result, in HAPI FHIR JPA 3.6.0, an efficient way of upgrading existing data
 In order to perform a migration using this functionality, the following steps should be followed:
 
 * Stop your running HAPI FHIR JPA instance (and remember to make a backup of your database before proceeding with any changes!)
-* Modify your `DaoConfig` to specify that hash-based searches should not be used, using the following setting: `myDaoConfig.setDisableHashBasedSearches(true);`
+* Modify your `JpaStorageSettings` to specify that hash-based searches should not be used, using the following setting: `myStorageSettings.setDisableHashBasedSearches(true);`
 * Make sure that you have your JPA settings configured to not automatically create database indexes and columns using the following setting in your JPA Properties: `extraProperties.put("hibernate.hbm2ddl.auto", "none");`
 * Run the database migrator command, including the entry `-x no-migrate-350-hashes` on the command line. For example:
 
@@ -60,7 +81,7 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 
 * When this query no longer returns any rows, the reindexing process is complete.
 * At this time, HAPI FHIR should be stopped once again in order to convert it to using the hash based indexes.
-* Modify your `DaoConfig` to specify that hash-based searches are used, using the following setting (this is the default setting, so it could also simply be omitted): `myDaoConfig.setDisableHashBasedSearches(false);`
+* Modify your `JpaStorageSettings` to specify that hash-based searches are used, using the following setting (this is the default setting, so it could also simply be omitted): `myStorageSettings.setDisableHashBasedSearches(false);`
 * Execute the migrator tool again, this time omitting the flag option, e.g.
 
 ```bash

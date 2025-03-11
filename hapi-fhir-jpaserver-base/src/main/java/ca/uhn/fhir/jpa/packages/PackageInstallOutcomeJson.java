@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -34,7 +33,12 @@ import java.util.Map;
 
 @Schema(description = "Represents an NPM package installation response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageInstallOutcomeJson {
 
 	@JsonProperty("messages")
@@ -42,8 +46,6 @@ public class PackageInstallOutcomeJson {
 
 	@JsonProperty("resourcesInstalled")
 	private Map<String, Integer> myResourcesInstalled;
-
-
 
 	public List<String> getMessage() {
 		if (myMessage == null) {
@@ -71,8 +73,8 @@ public class PackageInstallOutcomeJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("message", myMessage)
-			.append("resourcesInstalled", myResourcesInstalled)
-			.toString();
+				.append("message", myMessage)
+				.append("resourcesInstalled", myResourcesInstalled)
+				.toString();
 	}
 }

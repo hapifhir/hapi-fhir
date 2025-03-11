@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
@@ -95,7 +94,8 @@ public class NoiseCharacters {
 		int upper = toInt(theUpperBound);
 
 		if (lower > upper) {
-			throw new IllegalArgumentException(Msg.code(352) + String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
+			throw new IllegalArgumentException(
+					Msg.code(352) + String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
 		}
 
 		if (upper - lower >= RANGE_THRESHOLD) {
@@ -116,5 +116,4 @@ public class NoiseCharacters {
 
 		return Integer.parseInt(theLiteral.substring(2), 16);
 	}
-
 }

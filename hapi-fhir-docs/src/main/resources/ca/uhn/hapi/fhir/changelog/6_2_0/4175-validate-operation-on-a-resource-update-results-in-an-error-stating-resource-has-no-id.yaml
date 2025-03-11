@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4175
+jira: SMILE-4872
+title: "Previously, performing $validate operation on resource update and sending the resource as a 
+         parameter in the request body would result in an error stating that the resource was missing id. 
+         This has been fixed by allowing the resource to be processed correctly when sent as a parameter."

@@ -1,5 +1,3 @@
-package org.hl7.fhir.dstu2016may.hapi.ctx;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -9,9 +7,9 @@ package org.hl7.fhir.dstu2016may.hapi.ctx;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,23 +17,26 @@ package org.hl7.fhir.dstu2016may.hapi.ctx;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.dstu2016may.hapi.ctx;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-
+import ca.uhn.fhir.model.api.IFhirVersion;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2016may.hapi.rest.server.Dstu2_1BundleFactory;
 import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.util.ReflectionUtil;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 public class FhirDstu2_1 implements IFhirVersion {
 
@@ -69,12 +70,14 @@ public class FhirDstu2_1 implements IFhirVersion {
 
 	@Override
 	public InputStream getFhirVersionPropertiesFile() {
-		InputStream str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
+		InputStream str =
+				FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		if (str == null) {
-			str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
+			str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException(Msg.code(467) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2016may/fhirversion.properties");
+			throw new ConfigurationException(Msg.code(467) + "Can not find model property file on classpath: "
+					+ "/org/hl7/fhir/dstu2016may/hapi/model/fhirversion.properties");
 		}
 		return str;
 	}
@@ -118,5 +121,4 @@ public class FhirDstu2_1 implements IFhirVersion {
 	public Object getServerVersion() {
 		return ReflectionUtil.newInstanceOfFhirServerType("org.hl7.fhir.dstu2016may.hapi.ctx.FhirServerDstu2_1");
 	}
-
 }

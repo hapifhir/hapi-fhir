@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
@@ -37,17 +36,16 @@ public class BasicDataSourceConnectionPoolInfoProvider implements IConnectionPoo
 
 	@Override
 	public Optional<Integer> getTotalConnectionSize() {
-		return Optional.of( myDataSource.getMaxTotal() );
+		return Optional.of(myDataSource.getMaxTotal());
 	}
 
 	@Override
 	public Optional<Integer> getActiveConnections() {
-		return Optional.of( myDataSource.getNumActive() );
+		return Optional.of(myDataSource.getNumActive());
 	}
 
 	@Override
 	public Optional<Long> getMaxWaitMillis() {
-		return Optional.of( myDataSource.getMaxWaitMillis() );
+		return Optional.of(myDataSource.getMaxWaitMillis());
 	}
 }
-

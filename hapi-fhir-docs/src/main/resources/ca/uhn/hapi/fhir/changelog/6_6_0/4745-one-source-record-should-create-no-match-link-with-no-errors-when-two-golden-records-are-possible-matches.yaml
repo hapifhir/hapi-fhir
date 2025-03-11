@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4745
+title: "Fixed an issue where a golden resource could not be chosen as no-match when another golden resource
+   was already chosen as a match."

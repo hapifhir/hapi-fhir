@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,21 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.*;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import java.net.URI;
 
@@ -42,6 +44,7 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketSubscribeCommand.class);
 
 	private boolean myQuit;
+	private Session mySession;
 
 	@Override
 	public String getCommandDescription() {
@@ -65,19 +68,19 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		String target = theCommandLine.getOptionValue("t");
 		if (isBlank(target) || (!target.startsWith("ws://") && !target.startsWith("wss://"))) {
-			throw new ParseException(Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
+			throw new ParseException(
+					Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
 		}
 
 		IdDt subsId = new IdDt(theCommandLine.getOptionValue("i"));
 
-		WebSocketClient client = new WebSocketClient();
 		SimpleEchoSocket socket = new SimpleEchoSocket(subsId.getIdPart());
 		try {
-			client.start();
 			URI echoUri = new URI(target);
-			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			ourLog.info("Connecting to : {}", echoUri);
-			client.connect(socket, echoUri, request);
+
+			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+			mySession = container.connectToServer(socket, echoUri);
 
 			while (!myQuit) {
 				Thread.sleep(500L);
@@ -88,7 +91,9 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 			throw new CommandFailureException(Msg.code(1537) + e);
 		} finally {
 			try {
-				client.stop();
+				if (mySession != null) {
+					mySession.close();
+				}
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 			}
@@ -98,7 +103,7 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	/**
 	 * Basic Echo Client Socket
 	 */
-	@WebSocket(maxTextMessageSize = 64 * 1024)
+	@ClientEndpoint
 	public class SimpleEchoSocket {
 
 		private String mySubsId;
@@ -106,45 +111,38 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 		@SuppressWarnings("unused")
 		private Session session;
 
-
 		public SimpleEchoSocket(String theSubsId) {
 			mySubsId = theSubsId;
 		}
 
-		@OnWebSocketClose
+		@OnClose
 		public void onClose(int statusCode, String reason) {
 			ourLog.info("Received CLOSE status={} reason={}", statusCode, reason);
 		}
 
-		@OnWebSocketConnect
+		@OnOpen
 		public void onConnect(Session theSession) {
 			ourLog.info("Successfully connected");
 			this.session = theSession;
 			try {
 				String sending = "bind " + mySubsId;
 				LOG_SEND.info("{}", sending);
-				theSession.getRemote().sendString(sending);
+				theSession.getBasicRemote().sendText(sending);
 			} catch (Throwable t) {
 				ourLog.error("Failure", t);
 				myQuit = true;
 			}
 		}
 
-		@OnWebSocketError
+		@OnError
 		public void onError(Throwable theError) {
 			ourLog.error("Websocket error: ", theError);
 			myQuit = true;
 		}
 
-		@OnWebSocketFrame
-		public void onFrame(Frame theFrame) {
-			ourLog.debug("Websocket frame: {}", theFrame);
-		}
-
-		@OnWebSocketMessage
+		@OnMessage
 		public void onMessage(String theMsg) {
 			LOG_RECV.info("{}", theMsg);
 		}
 	}
-
 }

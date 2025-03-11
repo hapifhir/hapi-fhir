@@ -8,8 +8,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class ExtendedPatientTest {
 
@@ -50,7 +50,7 @@ public class ExtendedPatientTest {
 
 		IBaseResource referencedHomer = parsedMarge.getLinkFirstRep().getOther().getResource();
 		assertNotNull(referencedHomer);
-		assertSame(parsedHomer, referencedHomer);
+		assertThat(referencedHomer).isSameAs(parsedHomer);
 	}
 
 }

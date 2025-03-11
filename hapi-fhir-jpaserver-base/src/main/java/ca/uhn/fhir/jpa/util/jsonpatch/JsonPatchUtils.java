@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util.jsonpatch;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,10 @@ package ca.uhn.fhir.jpa.util.jsonpatch;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util.jsonpatch;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -41,7 +40,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class JsonPatchUtils {
 
-	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, @Language("JSON") String thePatchBody) {
+	public static <T extends IBaseResource> T apply(
+			FhirContext theCtx, T theResourceToUpdate, @Language("JSON") String thePatchBody) {
 		// Parse the patch
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION, false);
@@ -54,7 +54,8 @@ public class JsonPatchUtils {
 			JsonNode jsonPatchNode = mapper.readTree(parser);
 			patch = JsonPatch.fromJson(jsonPatchNode);
 
-			JsonNode originalJsonDocument = mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+			JsonNode originalJsonDocument =
+					mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
 			JsonNode after = patch.apply(originalJsonDocument);
 
 			@SuppressWarnings("unchecked")
@@ -69,10 +70,14 @@ public class JsonPatchUtils {
 			try {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
 			} catch (DataFormatException e) {
-				String resourceId = theResourceToUpdate.getIdElement().toUnqualifiedVersionless().getValue();
+				String resourceId = theResourceToUpdate
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue();
 				String resourceType = theCtx.getResourceType(theResourceToUpdate);
 				resourceId = defaultString(resourceId, resourceType);
-				String msg = theCtx.getLocalizer().getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
+				String msg = theCtx.getLocalizer()
+						.getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
 				throw new InvalidRequestException(Msg.code(818) + msg);
 			}
 			return retVal;
@@ -80,7 +85,5 @@ public class JsonPatchUtils {
 		} catch (IOException | JsonPatchException theE) {
 			throw new InvalidRequestException(Msg.code(819) + theE.getMessage());
 		}
-
 	}
-
 }

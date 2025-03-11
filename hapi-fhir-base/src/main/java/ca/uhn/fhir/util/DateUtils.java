@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,10 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,11 +29,20 @@ import java.lang.ref.SoftReference;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -78,11 +87,7 @@ public final class DateUtils {
 
 	private static final String PATTERN_INTEGER_DATE = "yyyyMMdd";
 
-	private static final String[] DEFAULT_PATTERNS = new String[]{
-		PATTERN_RFC1123,
-		PATTERN_RFC1036,
-		PATTERN_ASCTIME
-	};
+	private static final String[] DEFAULT_PATTERNS = new String[] {PATTERN_RFC1123, PATTERN_RFC1036, PATTERN_ASCTIME};
 	private static final Date DEFAULT_TWO_DIGIT_YEAR_START;
 
 	static {
@@ -96,7 +101,89 @@ public final class DateUtils {
 	/**
 	 * This class should not be instantiated.
 	 */
-	private DateUtils() {
+	private DateUtils() {}
+
+	/**
+	 * Calculate a LocalDateTime with any missing date/time data points defaulting to the earliest values (ex 0 for hour)
+	 * from a TemporalAccessor or empty if it doesn't contain a year.
+	 *
+	 * @param theTemporalAccessor The TemporalAccessor containing date/time information
+	 * @return A LocalDateTime or empty
+	 */
+	public static Optional<LocalDateTime> extractLocalDateTimeForRangeStartOrEmpty(
+			TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
+			final int year = theTemporalAccessor.get(ChronoField.YEAR);
+			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 1));
+			final int day = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.DAY_OF_MONTH, 1);
+			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 0);
+			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 0);
+			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 0);
+
+			return Optional.of(LocalDateTime.of(year, month, day, hour, minute, seconds));
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * Calculate a LocalDateTime with any missing date/time data points defaulting to the latest values (ex 23 for hour)
+	 * from a TemporalAccessor or empty if it doesn't contain a year.
+	 *
+	 * @param theTemporalAccessor The TemporalAccessor containing date/time information
+	 * @return A LocalDateTime or empty
+	 */
+	public static Optional<LocalDateTime> extractLocalDateTimeForRangeEndOrEmpty(TemporalAccessor theTemporalAccessor) {
+		if (theTemporalAccessor.isSupported(ChronoField.YEAR)) {
+			final int year = theTemporalAccessor.get(ChronoField.YEAR);
+			final Month month = Month.of(getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MONTH_OF_YEAR, 12));
+			final int day = getTimeUnitIfSupported(
+					theTemporalAccessor,
+					ChronoField.DAY_OF_MONTH,
+					YearMonth.of(year, month).atEndOfMonth().getDayOfMonth());
+			final int hour = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.HOUR_OF_DAY, 23);
+			final int minute = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.MINUTE_OF_HOUR, 59);
+			final int seconds = getTimeUnitIfSupported(theTemporalAccessor, ChronoField.SECOND_OF_MINUTE, 59);
+
+			return Optional.of(LocalDateTime.of(year, month, day, hour, minute, seconds));
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * With the provided DateTimeFormatter, parse a date time String or return empty if the String doesn't correspond
+	 * to the formatter.
+	 *
+	 * @param theDateTimeString A date/time String in some date format
+	 * @param theSupportedDateTimeFormatter The DateTimeFormatter we expect corresponds to the String
+	 * @return The parsed TemporalAccessor or empty
+	 */
+	public static Optional<TemporalAccessor> parseDateTimeStringIfValid(
+			String theDateTimeString, DateTimeFormatter theSupportedDateTimeFormatter) {
+		Objects.requireNonNull(theSupportedDateTimeFormatter);
+		Preconditions.checkArgument(StringUtils.isNotBlank(theDateTimeString));
+
+		try {
+			return Optional.of(theSupportedDateTimeFormatter.parse(theDateTimeString));
+		} catch (Exception exception) {
+			return Optional.empty();
+		}
+	}
+
+	private static int getTimeUnitIfSupported(
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField, int theDefaultValue) {
+		return getTimeUnitIfSupportedOrEmpty(theTemporalAccessor, theTemporalField)
+				.orElse(theDefaultValue);
+	}
+
+	private static Optional<Integer> getTimeUnitIfSupportedOrEmpty(
+			TemporalAccessor theTemporalAccessor, TemporalField theTemporalField) {
+		if (theTemporalAccessor.isSupported(theTemporalField)) {
+			return Optional.of(theTemporalAccessor.get(theTemporalField));
+		}
+
+		return Optional.empty();
 	}
 
 	/**
@@ -104,9 +191,10 @@ public final class DateUtils {
 	 * threadlocal way because SimpleDateFormat is not thread safe as noted in
 	 * {@link SimpleDateFormat its javadoc}.
 	 */
-	final static class DateFormatHolder {
+	static final class DateFormatHolder {
 
-		private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS = ThreadLocal.withInitial(() -> new SoftReference<>(new HashMap<>()));
+		private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS =
+				ThreadLocal.withInitial(() -> new SoftReference<>(new HashMap<>()));
 
 		/**
 		 * creates a {@link SimpleDateFormat} for the requested format string.
@@ -124,8 +212,7 @@ public final class DateUtils {
 			Map<String, SimpleDateFormat> formats = ref.get();
 			if (formats == null) {
 				formats = new HashMap<>();
-				THREADLOCAL_FORMATS.set(
-					new SoftReference<>(formats));
+				THREADLOCAL_FORMATS.set(new SoftReference<>(formats));
 			}
 
 			SimpleDateFormat format = formats.get(pattern);
@@ -137,7 +224,6 @@ public final class DateUtils {
 
 			return format;
 		}
-
 	}
 
 	/**
@@ -227,12 +313,12 @@ public final class DateUtils {
 		}
 		return argument;
 	}
-		
+
 	/**
 	 * Convert an incomplete date e.g. 2020 or 2020-01 to a complete date with lower
 	 * bound to the first day of the year/month, and upper bound to the last day of
 	 * the year/month
-	 * 
+	 *
 	 *  e.g. 2020 to 2020-01-01 (left), 2020-12-31 (right)
 	 *  2020-02 to 2020-02-01 (left), 2020-02-29 (right)
 	 *
@@ -240,47 +326,45 @@ public final class DateUtils {
 	 * @return a pair of complete date, left is lower bound, and right is upper bound
 	 */
 	public static Pair<String, String> getCompletedDate(String theIncompleteDateStr) {
-		
-		if (StringUtils.isBlank(theIncompleteDateStr)) 
-			return new ImmutablePair<>(null, null);
-			
+
+		if (StringUtils.isBlank(theIncompleteDateStr)) return new ImmutablePair<>(null, null);
+
 		String lbStr, upStr;
 		// YYYY only, return the last day of the year
-		if (theIncompleteDateStr.length() == 4)  {
+		if (theIncompleteDateStr.length() == 4) {
 			lbStr = theIncompleteDateStr + "-01-01"; // first day of the year
 			upStr = theIncompleteDateStr + "-12-31"; // last day of the year
 			return new ImmutablePair<>(lbStr, upStr);
 		}
-		
+
 		// Not YYYY-MM, no change
-		if (theIncompleteDateStr.length() != 7)
-			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
-		
+		if (theIncompleteDateStr.length() != 7) return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
+
 		// YYYY-MM Only
 		Date lb;
 		try {
 			// first day of the month
-			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr+"-01");   
+			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr + "-01");
 		} catch (ParseException e) {
 			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
 		}
-		
+
 		// last day of the month
-	    Calendar calendar = Calendar.getInstance();  
-	    calendar.setTime(lb);  
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(lb);
 
-	    calendar.add(Calendar.MONTH, 1);  
-	    calendar.set(Calendar.DAY_OF_MONTH, 1);  
-	    calendar.add(Calendar.DATE, -1);  
+		calendar.add(Calendar.MONTH, 1);
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.add(Calendar.DATE, -1);
 
-	    Date ub = calendar.getTime();  
+		Date ub = calendar.getTime();
 
-	    lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);  
-	    upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);  
-		
+		lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);
+		upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);
+
 		return new ImmutablePair<>(lbStr, upStr);
 	}
-	
+
 	public static Date getEndOfDay(Date theDate) {
 
 		Calendar cal = Calendar.getInstance();

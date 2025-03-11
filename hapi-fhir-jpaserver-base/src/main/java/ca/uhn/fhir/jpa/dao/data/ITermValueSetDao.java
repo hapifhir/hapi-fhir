@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.data;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,12 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,10 +32,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHapiFhirJpaRepository {
+public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndPartitionId>, IHapiFhirJpaRepository {
 
-	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
-	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResource.myPid = :resource_pid")
+	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") JpaPid theResourcePid);
 
 	// Keeping for backwards compatibility but recommend using findTermValueSetByUrlAndNullVersion instead.
 	@Deprecated
@@ -42,23 +43,25 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHa
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
-	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+	Slice<TermValueSet> findByExpansionStatus(
+			Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
 
-	@Query(value="SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r.myId = vs.myResourcePid WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
+	@Query(
+			value =
+					"SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r = vs.myResource WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
 	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
 
 	/**
 	 * The current TermValueSet is not necessarily the last uploaded anymore, but the current VS resource
 	 * is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to current VS resource
 	 */
-	@Query(value="SELECT vs FROM ForcedId f, TermValueSet vs where f.myForcedId = :forcedId and vs.myResource = f.myResource")
+	@Query(value = "SELECT vs FROM TermValueSet vs where vs.myResource.myFhirId = :forcedId ")
 	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
 	Optional<TermValueSet> findTermValueSetByUrlAndNullVersion(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
-	Optional<TermValueSet> findTermValueSetByUrlAndVersion(@Param("url") String theUrl, @Param("version") String theVersion);
-
-
+	Optional<TermValueSet> findTermValueSetByUrlAndVersion(
+			@Param("url") String theUrl, @Param("version") String theVersion);
 }

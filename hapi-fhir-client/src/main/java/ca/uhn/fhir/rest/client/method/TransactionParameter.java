@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,22 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class TransactionParameter implements IParameter {
 
@@ -43,17 +45,25 @@ public class TransactionParameter implements IParameter {
 	}
 
 	private String createParameterTypeError(Method theMethod) {
-		return "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName()
-				+ " but is not of type List<" + IResource.class.getCanonicalName() + "> or Bundle";
+		return "Method '" + theMethod.getName() + "' in type '"
+				+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+				+ TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()
+				+ "> or Bundle";
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(1454) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+			throw new ConfigurationException(Msg.code(1454) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
 					+ TransactionParam.class.getName() + " but can not be a collection of collections");
 		}
-		if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
+		if (Modifier.isInterface(theParameterType.getModifiers()) == false
+				&& IBaseResource.class.isAssignableFrom(theParameterType)) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> parameterType = (Class<? extends IBaseResource>) theParameterType;
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(parameterType);
@@ -66,7 +76,8 @@ public class TransactionParameter implements IParameter {
 			if (theInnerCollectionType.equals(List.class) == false) {
 				throw new ConfigurationException(Msg.code(1456) + createParameterTypeError(theMethod));
 			}
-			if (theParameterType.equals(IResource.class) == false && theParameterType.equals(IBaseResource.class) == false) {
+			if (theParameterType.equals(IResource.class) == false
+					&& theParameterType.equals(IBaseResource.class) == false) {
 				throw new ConfigurationException(Msg.code(1457) + createParameterTypeError(theMethod));
 			}
 			myParamStyle = ParamStyle.RESOURCE_LIST;
@@ -74,7 +85,11 @@ public class TransactionParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
+	public void translateClientArgumentIntoQueryArgument(
+			FhirContext theContext,
+			Object theSourceClientArgument,
+			Map<String, List<String>> theTargetQueryArguments,
+			IBaseResource theTargetResource)
 			throws InternalErrorException {
 		// nothing
 
@@ -90,5 +105,4 @@ public class TransactionParameter implements IParameter {
 		/** List of resources */
 		RESOURCE_LIST
 	}
-
 }

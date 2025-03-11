@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.json;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,6 +32,7 @@ import java.util.List;
 public class MdmResourceSearchParamJson implements IModelJson, Iterable<String> {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
+
 	@JsonProperty(value = "searchParams", required = true)
 	List<String> mySearchParams;
 

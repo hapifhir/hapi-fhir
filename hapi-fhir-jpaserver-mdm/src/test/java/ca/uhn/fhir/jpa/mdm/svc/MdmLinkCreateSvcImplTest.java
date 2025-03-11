@@ -1,18 +1,22 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,10 +36,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MdmLinkCreateSvcImplTest {
+	@SuppressWarnings("unused")
 	@Spy
 	FhirContext myFhirContext = FhirContext.forR4();
+	@SuppressWarnings("rawtypes")
 	@Mock
 	IIdHelperService myIdHelperService;
+	@SuppressWarnings("rawtypes")
 	@Mock
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Mock
@@ -45,9 +52,16 @@ class MdmLinkCreateSvcImplTest {
 	@Mock
 	MdmPartitionHelper myMdmPartitionHelper;
 
+	@Mock
+	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Mock
+	IMdmModelConverterSvc myIMdmModelConverterSvc;
+
 	@InjectMocks
 	MdmLinkCreateSvcImpl myMdmLinkCreateSvc = new MdmLinkCreateSvcImpl();
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testCreateLink() {
 		ArgumentCaptor<IMdmLink> mdmLinkCaptor = ArgumentCaptor.forClass(IMdmLink.class);
@@ -61,7 +75,13 @@ class MdmLinkCreateSvcImplTest {
 		Patient sourcePatient = new Patient();
 		MdmTransactionContext ctx = new MdmTransactionContext();
 
-		myMdmLinkCreateSvc.createLink(goldenPatient, sourcePatient, MdmMatchResultEnum.MATCH, ctx);
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setGoldenResource(goldenPatient);
+		params.setSourceResource(sourcePatient);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+		params.setMdmContext(ctx);
+		params.setRequestDetails(new SystemRequestDetails());
+		myMdmLinkCreateSvc.createLink(params);
 
 		IMdmLink mdmLink = mdmLinkCaptor.getValue();
 
@@ -70,14 +90,15 @@ class MdmLinkCreateSvcImplTest {
 
 	}
 
+	@SuppressWarnings({"unchecked"})
 	@BeforeEach
-	private void setup() {
-		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
-		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
+	public void setup() {
+		JpaPid goldenId = JpaPid.fromId(1L);
+		JpaPid sourceId = JpaPid.fromId(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))
 			.thenReturn(goldenId, sourceId);
-		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(ResourcePersistentId.class), any(ResourcePersistentId.class))).thenReturn(Optional.empty());
-		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(ResourcePersistentId.class), any())).thenReturn(new ArrayList<>());
+		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(BaseResourcePersistentId.class), any(BaseResourcePersistentId.class))).thenReturn(Optional.empty());
+		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(BaseResourcePersistentId.class), any())).thenReturn(new ArrayList<>());
 
 		MdmLink resultMdmLink = new MdmLink();
 		resultMdmLink.setGoldenResourcePersistenceId(goldenId).setSourcePersistenceId(sourceId);

@@ -19,10 +19,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 
@@ -42,9 +43,11 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 	private EIDHelper myEidHelper;
 
+	@Override
 	@BeforeEach
 	public void before() {
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
+		super.before();
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Patient"), eq("identifier"), any()))
 			.thenReturn(new RuntimeSearchParam(null, null, "identifier", "Description", "identifier", RestSearchParameterTypeEnum.STRING, new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 
 		myMdmSettings = new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)) {
@@ -65,10 +68,10 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getHapiEid(patient);
 
-		assertThat(externalEid.isEmpty(), is(false));
-		assertThat(externalEid.get(0).getValue(), is(equalTo("simpletest")));
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(externalEid.get(0).getUse(), is(equalTo("secondary")));
+		assertEquals(false, externalEid.isEmpty());
+		assertEquals("simpletest", externalEid.get(0).getValue());
+		assertEquals(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, externalEid.get(0).getSystem());
+		assertEquals("secondary", externalEid.get(0).getUse());
 	}
 
 	@Test
@@ -82,9 +85,9 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.isEmpty(), is(false));
-		assertThat(externalEid.get(0).getValue(), is(equalTo(uniqueID)));
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(EXTERNAL_ID_SYSTEM_FOR_TEST)));
+		assertEquals(false, externalEid.isEmpty());
+		assertEquals(uniqueID, externalEid.get(0).getValue());
+		assertEquals(EXTERNAL_ID_SYSTEM_FOR_TEST, externalEid.get(0).getSystem());
 	}
 
 	@Test
@@ -92,8 +95,8 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		CanonicalEID internalEid = myEidHelper.createHapiEid();
 
-		assertThat(internalEid.getSystem(), is(equalTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
-		assertThat(internalEid.getValue().length(), is(equalTo(36)));
-		assertThat(internalEid.getUse(), is(nullValue()));
+		assertEquals(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, internalEid.getSystem());
+		assertThat(internalEid.getValue()).hasSize(36);
+		assertNull(internalEid.getUse());
 	}
 }

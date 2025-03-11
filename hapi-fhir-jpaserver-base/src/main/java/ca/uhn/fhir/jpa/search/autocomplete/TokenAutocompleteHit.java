@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,11 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.annotation.Nonnull;
 
 /**
  * A single autocomplete search hit.
@@ -31,6 +29,7 @@ import javax.annotation.Nonnull;
 class TokenAutocompleteHit {
 	@Nonnull
 	final String mySystemCode;
+
 	final String myDisplayText;
 
 	TokenAutocompleteHit(@Nonnull String theSystemCode, String theDisplayText) {
@@ -47,8 +46,8 @@ class TokenAutocompleteHit {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("mySystemCode", mySystemCode)
-			.append("myDisplayText", myDisplayText)
-			.toString();
+				.append("mySystemCode", mySystemCode)
+				.append("myDisplayText", myDisplayText)
+				.toString();
 	}
 }

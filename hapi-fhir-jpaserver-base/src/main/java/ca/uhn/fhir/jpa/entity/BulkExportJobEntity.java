@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +17,34 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
-
 
 /*
  * These classes are no longer needed.
@@ -58,47 +54,56 @@ import static org.apache.commons.lang3.StringUtils.left;
  * See the BulkExportAppCtx for job details
  */
 @Entity
-@Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
-		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
-}, indexes = {
-		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
-})
+@Table(
+		name = BulkExportJobEntity.HFJ_BLK_EXPORT_JOB,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")},
+		indexes = {@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")})
 @Deprecated
 public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 1024;
 	public static final int STATUS_MESSAGE_LEN = 500;
+	public static final String JOB_ID = "JOB_ID";
+	public static final String HFJ_BLK_EXPORT_JOB = "HFJ_BLK_EXPORT_JOB";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKEXJOB_PID", sequenceName = "SEQ_BLKEXJOB_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false)
+	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false)
 	private String myJobId;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private BulkExportJobStatusEnum myStatus;
+	private String myStatus;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
+
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob", orphanRemoval = false)
 	private Collection<BulkExportCollectionEntity> myCollections;
+
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_SINCE", nullable = true)
 	private Date mySince;
+
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
 
@@ -165,11 +170,11 @@ public class BulkExportJobEntity implements Serializable {
 		return b.toString();
 	}
 
-	public BulkExportJobStatusEnum getStatus() {
+	public String getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(BulkExportJobStatusEnum theStatus) {
+	public void setStatus(String theStatus) {
 		if (myStatus != theStatus) {
 			myStatusTime = new Date();
 			myStatus = theStatus;

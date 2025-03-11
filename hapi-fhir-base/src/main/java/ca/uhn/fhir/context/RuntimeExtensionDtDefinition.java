@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,27 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-
 public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefinition {
 
 	private List<BaseRuntimeChildDefinition> myChildren;
 
-	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public RuntimeExtensionDtDefinition(
+			DatatypeDef theDef,
+			Class<? extends ICompositeType> theImplementingClass,
+			boolean theStandardType,
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theDef, theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
 	}
 
@@ -48,14 +51,16 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
-		
+
 		/*
 		 * The "url" child is a weird child because it is not parsed and encoded in the normal way,
-		 * so we exclude it here 
+		 * so we exclude it here
 		 */
-		
+
 		List<BaseRuntimeChildDefinition> superChildren = super.getChildren();
 		ArrayList<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
 		for (BaseRuntimeChildDefinition baseRuntimeChildDefinition : superChildren) {
@@ -64,8 +69,7 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 			}
 			children.add(baseRuntimeChildDefinition);
 		}
-		
+
 		myChildren = Collections.unmodifiableList(children);
 	}
-
 }

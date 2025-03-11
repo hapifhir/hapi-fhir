@@ -1,0 +1,8 @@
+---
+type: add
+issue: 6464
+title: "A new experimental interceptor called the MdmReadVirtualizationInterceptor
+  has been added. This interceptor rewrites results when querying an MDM-enabled
+  JPA server in order to always include linked resources and rerwrites query results
+  to link to the MDM golden resource. This interceptor is still being developed
+  and should be used with caution."

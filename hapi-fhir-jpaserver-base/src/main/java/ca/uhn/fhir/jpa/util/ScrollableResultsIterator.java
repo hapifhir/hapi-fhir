@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollableResults;
@@ -40,7 +39,7 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		if (myNext == null) {
 			if (myScroll.next()) {
 				hasNext = true;
-				myNext = (T) myScroll.get(0);
+				myNext = (T) myScroll.get();
 			} else {
 				hasNext = false;
 			}
@@ -62,7 +61,6 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		return next;
 	}
 
-
 	@Override
 	public void close() {
 		if (myScroll != null) {
@@ -70,5 +68,4 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 			myScroll = null;
 		}
 	}
-
 }

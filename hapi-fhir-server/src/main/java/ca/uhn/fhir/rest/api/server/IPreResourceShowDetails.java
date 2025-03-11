@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api.server;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,11 @@ package ca.uhn.fhir.rest.api.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 /**
  * This interface is a parameter type for the {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESHOW_RESOURCES}
@@ -56,4 +57,16 @@ public interface IPreResourceShowDetails extends Iterable<IBaseResource> {
 	 */
 	void markResourceAtIndexAsSubset(int theIndex);
 
+	/**
+	 * Returns a {@link List} containing all resources that will be shown.
+	 * The returned list will have the same relative ordering as if the resources
+	 * were retrieved using {@link #getResource(int)}, but any {@literal null} entries
+	 * will be filtered out.
+	 * <p>
+	 * The returned List may not be modified. Use this method only if you are not
+	 * looking to make changes.
+	 *
+	 * @since 6.6.0
+	 */
+	List<IBaseResource> getAllResources();
 }

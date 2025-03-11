@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,21 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public enum ServerValidationModeEnum {
 
 	/**
-	 * Do not validate the server's conformance statement before attempting to 
+	 * Do not validate the server's conformance statement before attempting to
 	 * call it.
 	 */
 	NEVER,
-	
+
 	/**
 	 * Validate the server's conformance statement once (per base URL) and cache the
 	 * results for the lifetime of the {@link FhirContext}
 	 */
 	ONCE
-	
 }

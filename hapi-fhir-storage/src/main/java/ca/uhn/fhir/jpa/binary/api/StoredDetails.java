@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.binary.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +17,47 @@ package ca.uhn.fhir.jpa.binary.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.api;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.hash.HashingInputStream;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 
 public class StoredDetails implements IModelJson {
 
-	@JsonProperty("blobId")
+	@JsonProperty(value = "binaryContentId")
+	private String myBinaryContentId;
+
+	/**
+	 * This field exists to fix a break that changing this property name caused.
+	 * in 7.2.0 we went from blobId to binaryContentId. However this did not consider installations using filesystem
+	 * mode storage in which the data on disk was not updated, and needed to be Serialized/Deserialized at runtime.
+	 * Existing stored details used `blobId`. This causes Jackson deserialization failures which are tough to recover
+	 * from without manually modifying all those stored details
+	 * on disk.
+	 * This field is a relic to support old blobs post-upgrade to 7.2.0. It is not ever surfaced to the user, and is proxied
+	 * into `myBinaryContentId` when needed.
+	 */
+	@JsonProperty(value = "blobId")
 	private String myBlobId;
+
 	@JsonProperty("bytes")
 	private long myBytes;
+
 	@JsonProperty("contentType")
 	private String myContentType;
+
 	@JsonProperty("hash")
 	private String myHash;
+
 	@JsonProperty("published")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
@@ -58,8 +74,13 @@ public class StoredDetails implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public StoredDetails(@Nonnull String theBlobId, long theBytes, @Nonnull String theContentType, HashingInputStream theIs, Date thePublished) {
-		myBlobId = theBlobId;
+	public StoredDetails(
+			@Nonnull String theBinaryContentId,
+			long theBytes,
+			@Nonnull String theContentType,
+			HashingInputStream theIs,
+			Date thePublished) {
+		myBinaryContentId = theBinaryContentId;
 		myBytes = theBytes;
 		myContentType = theContentType;
 		myHash = theIs.hash().toString();
@@ -69,12 +90,12 @@ public class StoredDetails implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("blobId", myBlobId)
-			.append("bytes", myBytes)
-			.append("contentType", myContentType)
-			.append("hash", myHash)
-			.append("published", myPublished)
-			.toString();
+				.append("binaryContentId", getBinaryContentId())
+				.append("bytes", myBytes)
+				.append("contentType", myContentType)
+				.append("hash", myHash)
+				.append("published", myPublished)
+				.toString();
 	}
 
 	public String getHash() {
@@ -106,12 +127,16 @@ public class StoredDetails implements IModelJson {
 	}
 
 	@Nonnull
-	public String getBlobId() {
-		return myBlobId;
+	public String getBinaryContentId() {
+		if (myBinaryContentId == null && myBlobId != null) {
+			return myBlobId;
+		} else {
+			return myBinaryContentId;
+		}
 	}
 
-	public StoredDetails setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
+	public StoredDetails setBinaryContentId(String theBinaryContentId) {
+		myBinaryContentId = theBinaryContentId;
 		return this;
 	}
 
@@ -123,5 +148,4 @@ public class StoredDetails implements IModelJson {
 		myBytes = theBytes;
 		return this;
 	}
-
 }

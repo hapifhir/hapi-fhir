@@ -339,7 +339,8 @@
 			"lat": 18.5204,
 			"lon": 73.8567,
 			"added": "2020-06-18"
-},{
+		},
+		{
 			"title": "Grand Rounds, Inc.",
 			"description": "Our mission is to raise the standard of healthcare for everyone, everywhere.",
 			"link": "https://grandrounds.com",
@@ -437,6 +438,30 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		},
+			{
+			"title": "Eviden BSD R&D Spain (Atos)",
+			"description": "Use of HAPI-FHIR as the centralized data aggregation repository for clinical research studies.",
+			"company": "Eviden BSD R&D Spain (Atos)",
+			"contactName": "Alberto Acebes",
+			"contactEmail": "alberto.acebes@eviden.com",
+			"link": "https://booklet.evidenresearch.eu/",
+			"city": "Madrid",
+			"lat": 40.43486,
+			"lon": -3.63220,
+			"added": "2022-07-19"
+		},
+			{
+			"title": "Healthsoft",
+			"description": "Innovative software solutions for future-proof healthcare.",
+			"company": "Healthsoft B.V.",
+			"contactName": "Bart Embregts",
+			"contactEmail": "b.embregts@healthsoft.nl",
+			"link": "https://healthsoft.nl/",
+			"city": "Rotterdam",
+			"lat": 51.908779,
+			"lon": 4.477520,
+			"added": "2024-11-14"
 		}
 	]
 }

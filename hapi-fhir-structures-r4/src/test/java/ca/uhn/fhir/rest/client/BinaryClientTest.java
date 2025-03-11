@@ -30,9 +30,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import java.io.ByteArrayInputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -72,7 +70,7 @@ public class BinaryClientTest {
 		assertEquals("http://foo/Binary/123", get.getURI().toString());
 
 		assertEquals("foo/bar", resp.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, resp.getContent());
+		assertThat(resp.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	@Test
@@ -95,7 +93,7 @@ public class BinaryClientTest {
 		assertEquals("http://foo/Binary", post.getURI().toString());
 
 		assertEquals("text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, IOUtils.toByteArray(post.getEntity().getContent()));
+		assertThat(IOUtils.toByteArray(post.getEntity().getContent())).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
 
@@ -117,10 +115,11 @@ public class BinaryClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertEquals("http://foo/Binary", post.getURI().toString());
 
-		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue(), containsString(Constants.CT_FHIR_JSON_NEW));
+		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue()).contains(Constants.CT_FHIR_JSON_NEW);
 		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
 
 	}
+
 
 	private interface IClient extends IBasicClient {
 

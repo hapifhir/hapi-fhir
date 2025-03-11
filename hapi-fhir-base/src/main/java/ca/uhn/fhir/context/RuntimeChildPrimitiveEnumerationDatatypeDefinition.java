@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -32,7 +31,13 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 	private Object myBinder;
 	private Class<? extends Enum<?>> myEnumType;
 
-	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<? extends Enum<?>> theBinderType) {
+	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(
+			Field theField,
+			String theElementName,
+			Child theChildAnnotation,
+			Description theDescriptionAnnotation,
+			Class<? extends IBase> theDatatype,
+			Class<? extends Enum<?>> theBinderType) {
 		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
 		myEnumType = theBinderType;
@@ -65,5 +70,4 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 		}
 		return retVal;
 	}
-
 }

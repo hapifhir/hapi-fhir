@@ -1,10 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	 <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+	<parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>6.2.0-PRE12-SNAPSHOT</version>
+		 <version>8.1.1-SNAPSHOT</version>
+
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
 
@@ -13,11 +15,14 @@
 
 	<name>HAPI FHIR - Deployable Artifact Parent POM</name>
 
-	<dependencies>
-	</dependencies>
-
 	<build>
 		<plugins>
+			<!-- Anything deployable inherits the parent spotless configuration -->
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<inherited>true</inherited>
+			</plugin>
 			<plugin>
 				<groupId>org.basepom.maven</groupId>
 				<artifactId>duplicate-finder-maven-plugin</artifactId>
@@ -40,7 +45,6 @@
 					<checkRuntimeClasspath>false</checkRuntimeClasspath>
 					<checkTestClasspath>false</checkTestClasspath>
 					<skip>false</skip>
-					<quiet>false</quiet>
 					<preferLocal>true</preferLocal>
 					<useResultFile>true</useResultFile>
 					<resultFileMinClasspathCount>2</resultFileMinClasspathCount>
@@ -75,18 +79,6 @@
 							<artifactId>annotations</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbyclient</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbynet</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbyclient</artifactId>
-						</dependency>
-						<dependency>
 							<groupId>org.checkerframework</groupId>
 							<artifactId>checker-compat-qual</artifactId>
 						</dependency>
@@ -98,19 +90,12 @@
 							<groupId>net.bytebuddy</groupId>
 							<artifactId>byte-buddy</artifactId>
 						</dependency>
-						<dependency>
-							<groupId>javax.xml.bind</groupId>
-							<artifactId>jaxb-api</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>com.sun.xml.bind</groupId>
-							<artifactId>jaxb-impl</artifactId>
-						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>
+						<ignoredResource>classpath.index</ignoredResource>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
@@ -118,25 +103,6 @@
 						<ignoredResource>Log4j-charsets.properties</ignoredResource>
 					</ignoredResourcePatterns>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>checkstyle</goal>
-						</goals>
-						<configuration>
-							<failsOnError>true</failsOnError>
-							<enableRulesSummary>true</enableRulesSummary>
-							<enableSeveritySummary>true</enableSeveritySummary>
-							<consoleOutput>true</consoleOutput>
-							<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle.xml</configLocation>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -205,7 +171,6 @@
 							<execution>
 								<phase>package</phase>
 								<goals>
-									<!--<goal>aggregate-jar</goal>-->
 									<goal>jar</goal>
 								</goals>
 							</execution>
@@ -234,6 +199,7 @@
 								</goals>
 								<phase>process-sources</phase>
 								<configuration>
+									<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
@@ -249,5 +215,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>

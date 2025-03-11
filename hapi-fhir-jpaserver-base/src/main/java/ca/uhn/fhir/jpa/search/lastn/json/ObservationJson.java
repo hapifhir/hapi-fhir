@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.lastn.json;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +17,8 @@ package ca.uhn.fhir.jpa.search.lastn.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.lastn.json;
 
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,7 +28,12 @@ import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ObservationJson {
 
 	@JsonProperty(value = "identifier", required = true)
@@ -78,8 +81,7 @@ public class ObservationJson {
 	@JsonProperty(value = "resource")
 	private String myResource;
 
-	public ObservationJson() {
-	}
+	public ObservationJson() {}
 
 	public void setIdentifier(String theIdentifier) {
 		myIdentifier = theIdentifier;
@@ -143,7 +145,6 @@ public class ObservationJson {
 		myCode_coding_code = theCode.getCoding_code().get(0);
 		myCode_coding_display = theCode.getCoding_display().get(0);
 		myCode_coding_system = theCode.getCoding_system().get(0);
-
 	}
 
 	public CodeJson getCode() {

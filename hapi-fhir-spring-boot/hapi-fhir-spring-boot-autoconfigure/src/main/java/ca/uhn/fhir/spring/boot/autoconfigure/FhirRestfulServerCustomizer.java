@@ -1,10 +1,8 @@
-package ca.uhn.fhir.spring.boot.autoconfigure;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,16 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 @FunctionalInterface
 public interface FhirRestfulServerCustomizer {
 
-    /**
-     * Customize the server.
-     * @param server the server to customize
-     */
-    void customize(RestfulServer server);
+	/**
+	 * Customize the server.
+	 * @param server the server to customize
+	 */
+	void customize(RestfulServer server);
 }

@@ -1,15 +1,8 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +17,11 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 403 Forbidden</b> response, which generally indicates one of two conditions:
@@ -31,13 +29,13 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * <li>Authentication was provided, but the authenticated user is not permitted to perform the requested operation.</li>
  * <li>The operation is forbidden to all users. Repeating the request with authentication would serve no purpose.</li>
  * </ul>
- * 
+ *
  * <p>
  * For security failures, you should use
  * {@link AuthenticationException} if you want to indicate that the
- * user could not be authenticated (e.g. credential failures), also 
- * known as an <b>authentication</b> failure. 
- * You should use {@link ForbiddenOperationException} if you want to 
+ * user could not be authenticated (e.g. credential failures), also
+ * known as an <b>authentication</b> failure.
+ * You should use {@link ForbiddenOperationException} if you want to
  * indicate that the authenticated user does not have permission to
  * perform the requested operation, also known as an <b>authorization</b>
  * failure.
@@ -59,7 +57,7 @@ public class ForbiddenOperationException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 * @param theOperationOutcome
@@ -68,5 +66,4 @@ public class ForbiddenOperationException extends BaseServerResponseException {
 	public ForbiddenOperationException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 }

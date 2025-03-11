@@ -1,10 +1,8 @@
-package ca.uhn.fhir.parser.json;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
 
 public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 
@@ -26,7 +25,7 @@ public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 	public ValueType getJsonType() {
 		return ValueType.ARRAY;
 	}
-	
+
 	@Override
 	public ScalarType getDataType() {
 		return null;
@@ -47,7 +46,7 @@ public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 		return null;
 	}
 
-	public abstract int size ();
-	
-	public abstract BaseJsonLikeValue get (int index);
+	public abstract int size();
+
+	public abstract BaseJsonLikeValue get(int index);
 }

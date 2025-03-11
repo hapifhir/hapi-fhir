@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,20 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.CollectionUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This object supplies default configuration to all {@link IParser parser} instances
@@ -43,6 +46,8 @@ public class ParserOptions {
 	private Set<String> myDontStripVersionsFromReferencesAtPaths = Collections.emptySet();
 	private boolean myOverrideResourceIdWithBundleEntryFullUrl = true;
 	private boolean myAutoContainReferenceTargetsWithNoId = true;
+	private Set<String> myEncodeElementsForSummaryMode = null;
+	private Set<String> myDontEncodeElementsForSummaryMode = null;
 
 	/**
 	 * If set to {@literal true} (which is the default), contained resources may be specified by
@@ -124,6 +129,17 @@ public class ParserOptions {
 	}
 
 	/**
+	 * Returns a sub-collection of {@link #getDontStripVersionsFromReferencesAtPaths()} containing only paths
+	 * for the given resource type.
+	 */
+	public Set<String> getDontStripVersionsFromReferencesAtPathsByResourceType(String theResourceType) {
+		Validate.notEmpty(theResourceType, "theResourceType must not be null or empty");
+		return myDontStripVersionsFromReferencesAtPaths.stream()
+				.filter(referencePath -> referencePath.startsWith(theResourceType + "."))
+				.collect(Collectors.toSet());
+	}
+
+	/**
 	 * If supplied value(s), any resource references at the specified paths will have their
 	 * resource versions encoded instead of being automatically stripped during the encoding
 	 * process. This setting has no effect on the parsing process.
@@ -144,7 +160,7 @@ public class ParserOptions {
 		if (thePaths == null) {
 			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
 		} else {
-			setDontStripVersionsFromReferencesAtPaths(Arrays.asList(thePaths));
+			setDontStripVersionsFromReferencesAtPaths(CollectionUtil.newSet(thePaths));
 		}
 		return this;
 	}
@@ -201,9 +217,124 @@ public class ParserOptions {
 	 *                                                    Bundle.entry.fullUrl
 	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
-	public ParserOptions setOverrideResourceIdWithBundleEntryFullUrl(boolean theOverrideResourceIdWithBundleEntryFullUrl) {
+	public ParserOptions setOverrideResourceIdWithBundleEntryFullUrl(
+			boolean theOverrideResourceIdWithBundleEntryFullUrl) {
 		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
 		return this;
 	}
 
+	/**
+	 * This option specifies one or more elements that should be included when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is not
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.maritalStatus</b> - Encode the entire maritalStatus CodeableConcept, even though Patient.maritalStatus is not a summary element</li>
+	 * <li><b>Patient.maritalStatus.text</b> - Encode only the text component of the patient's maritalStatus</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
+	@SuppressWarnings({"UnusedReturnValue"})
+	@Nonnull
+	public ParserOptions setEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
+		return setEncodeElementsForSummaryMode(CollectionUtil.newSet(theEncodeElements));
+	}
+
+	/**
+	 * This option specifies one or more elements that should be included when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is not
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.maritalStatus</b> - Encode the entire maritalStatus CodeableConcept, even though Patient.maritalStatus is not a summary element</li>
+	 * <li><b>Patient.maritalStatus.text</b> - Encode only the text component of the patient's maritalStatus</li>
+	 * <li><b>*.text</b> - Encode the text element on any resource (only the very first position may contain a
+	 * wildcard)</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setEncodeElements(Set) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
+	@Nonnull
+	public ParserOptions setEncodeElementsForSummaryMode(@Nullable Collection<String> theEncodeElements) {
+		Set<String> encodeElements = null;
+		if (theEncodeElements != null && !theEncodeElements.isEmpty()) {
+			encodeElements = new HashSet<>(theEncodeElements);
+		}
+		myEncodeElementsForSummaryMode = encodeElements;
+		return this;
+	}
+
+	/**
+	 * @return Returns the values provided to {@link #setEncodeElementsForSummaryMode(Collection)}
+	 * or <code>null</code>
+	 *
+	 * @since 7.4.0
+	 */
+	@Nullable
+	public Set<String> getEncodeElementsForSummaryMode() {
+		return myEncodeElementsForSummaryMode;
+	}
+
+	/**
+	 * This option specifies one or more elements that should be excluded when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.name</b> - Do not include the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Do not include the patient's family name</li>
+	 * <li><b>*.name</b> - Do not include the name element on any resource type</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
+	@SuppressWarnings({"UnusedReturnValue"})
+	@Nonnull
+	public ParserOptions setDontEncodeElementsForSummaryMode(@Nonnull String... theEncodeElements) {
+		return setDontEncodeElementsForSummaryMode(CollectionUtil.newSet(theEncodeElements));
+	}
+
+	/**
+	 * This option specifies one or more elements that should be excluded when the parser is encoding
+	 * a resource in {@link IParser#setSummaryMode(boolean) summary mode}, even if the element is
+	 * a part of the base FHIR specification's list of summary elements. Examples of valid values
+	 * include:
+	 * <ul>
+	 * <li><b>Patient.name</b> - Do not include the patient's name</li>
+	 * <li><b>Patient.name.family</b> - Do not include the patient's family name</li>
+	 * <li><b>*.name</b> - Do not include the name element on any resource type</li>
+	 * </ul>
+	 *
+	 * @see IParser#setSummaryMode(boolean)
+	 * @see IParser#setDontEncodeElements(Collection) Can be used to specify these values for an individual parser instance.
+	 * @since 7.4.0
+	 */
+	@Nonnull
+	public ParserOptions setDontEncodeElementsForSummaryMode(@Nullable Collection<String> theDontEncodeElements) {
+		Set<String> dontEncodeElements = null;
+		if (theDontEncodeElements != null && !theDontEncodeElements.isEmpty()) {
+			dontEncodeElements = new HashSet<>(theDontEncodeElements);
+		}
+		myDontEncodeElementsForSummaryMode = dontEncodeElements;
+		return this;
+	}
+
+	/**
+	 * @return Returns the values provided to {@link #setDontEncodeElementsForSummaryMode(Collection)}
+	 * or <code>null</code>
+	 * @since 7.4.0
+	 */
+	@Nullable
+	public Set<String> getDontEncodeElementsForSummaryMode() {
+		return myDontEncodeElementsForSummaryMode;
+	}
 }

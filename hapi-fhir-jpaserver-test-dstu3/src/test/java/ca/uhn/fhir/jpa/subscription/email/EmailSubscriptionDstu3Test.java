@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -24,17 +26,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the rest-hook subscriptions
@@ -56,16 +57,16 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("**** Starting @AfterEach *****");
 
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
@@ -82,7 +83,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
 
-		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
+		mySubscriptionSettings.setEmailFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {
@@ -106,7 +107,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		int initialCount = mySubscriptionRegistry.getAll().size();
 
 		ourLog.info("About to create subscription...");
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -127,7 +128,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);
@@ -151,7 +152,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.get(0).getFrom().length);
@@ -162,7 +163,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as XML
-		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
+		Observation parsedObservation = (Observation) myClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
 		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
 		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
@@ -196,10 +197,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertEquals(1, received.size());
+		assertThat(received).hasSize(1);
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
@@ -209,7 +210,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as JSON
-		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
+		Observation parsedObservation = (Observation) myClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
 		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
 		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
@@ -247,7 +248,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertEquals(1, received.size());
+		assertThat(received).hasSize(1);
 		assertEquals(1, received.get(0).getFrom().length);
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
@@ -257,7 +258,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
-		Subscription subscription = ourClient.read().resource(Subscription.class).withId(sub1.getIdElement().toUnqualifiedVersionless()).execute();
+		Subscription subscription = myClient.read().resource(Subscription.class).withId(sub1.getIdElement().toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		assertEquals("2", subscription.getIdElement().getVersionIdPart());
 	}

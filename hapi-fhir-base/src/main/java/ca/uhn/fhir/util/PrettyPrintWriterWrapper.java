@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,15 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
@@ -39,7 +37,7 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	private int myInsidePre = 0;
 	private XMLStreamWriter myTarget;
-	private boolean myFirstIndent=true;
+	private boolean myFirstIndent = true;
 
 	public PrettyPrintWriterWrapper(XMLStreamWriter target) {
 		myTarget = target;
@@ -104,7 +102,8 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@CoverageIgnore
 	@Override
-	public void writeAttribute(String thePrefix, String theNamespaceURI, String theLocalName, String theValue) throws XMLStreamException {
+	public void writeAttribute(String thePrefix, String theNamespaceURI, String theLocalName, String theValue)
+			throws XMLStreamException {
 		myTarget.writeAttribute(thePrefix, theNamespaceURI, theLocalName, theValue);
 	}
 
@@ -161,7 +160,8 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@CoverageIgnore
 	@Override
-	public void writeEmptyElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
+	public void writeEmptyElement(String thePrefix, String theLocalName, String theNamespaceURI)
+			throws XMLStreamException {
 		indent();
 		myTarget.writeEmptyElement(thePrefix, theLocalName, theNamespaceURI);
 	}
@@ -181,7 +181,6 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 		decrementAndIndent();
 
 		myTarget.writeEndElement();
-
 	}
 
 	@CoverageIgnore
@@ -209,19 +208,19 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 
 	@Override
 	public void writeStartDocument() throws XMLStreamException {
-		myFirstIndent=true;
+		myFirstIndent = true;
 		myTarget.writeStartDocument();
 	}
 
 	@Override
 	public void writeStartDocument(String theVersion) throws XMLStreamException {
-		myFirstIndent=true;
+		myFirstIndent = true;
 		myTarget.writeStartDocument(theVersion);
 	}
 
 	@Override
 	public void writeStartDocument(String theEncoding, String theVersion) throws XMLStreamException {
-		myFirstIndent=true;
+		myFirstIndent = true;
 		myTarget.writeStartDocument(theEncoding, theVersion);
 	}
 
@@ -244,7 +243,8 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 	}
 
 	@Override
-	public void writeStartElement(String thePrefix, String theLocalName, String theNamespaceURI) throws XMLStreamException {
+	public void writeStartElement(String thePrefix, String theLocalName, String theNamespaceURI)
+			throws XMLStreamException {
 		indentAndAdd();
 		myTarget.writeStartElement(thePrefix, theLocalName, theNamespaceURI);
 		if (PRE.equals(theLocalName) || myInsidePre > 0) {
@@ -292,5 +292,4 @@ public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 	private String repeat(int d, String s) {
 		return StringUtils.repeat(s, d * 3);
 	}
-
 }

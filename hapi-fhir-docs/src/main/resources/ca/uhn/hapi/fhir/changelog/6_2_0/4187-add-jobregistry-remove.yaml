@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4187
+title: "A remove method has been added to the Batch2 job registry. This will allow for dynamic job registration
+  in the future."

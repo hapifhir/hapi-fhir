@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +17,39 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.util.LoggingEmailSender;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
+import jakarta.persistence.EntityManagerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
-
-import javax.persistence.EntityManagerFactory;
 
 @Configuration
 @Import({
@@ -55,11 +60,15 @@ import javax.persistence.EntityManagerFactory;
 	ThreadPoolFactoryConfig.class
 })
 public class TestJPAConfig {
-	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
 
-		if ("true".equals(System.getProperty("mass_ingestion_mode"))) {
+	@Value("${" + JpaConstants.HAPI_DATABASE_PARTITION_MODE + ":false}")
+	private boolean myIncludePartitionIdsInPks;
+
+	@Bean
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
+
+		if (HapiTestSystemProperties.isMassIngestionModeEnabled()) {
 			retVal.setMassIngestionMode(true);
 		}
 
@@ -67,14 +76,15 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public PartitionSettings partitionSettings() {
-		return new PartitionSettings();
+	public SubscriptionSettings subscriptionSettings() {
+		return new SubscriptionSettings();
 	}
 
 	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig config = daoConfig().getModelConfig();
-		return config;
+	public PartitionSettings partitionSettings() {
+		PartitionSettings retVal = new PartitionSettings();
+		retVal.setDatabasePartitionMode(myIncludePartitionIdsInPks);
+		return retVal;
 	}
 
 	@Bean
@@ -102,9 +112,24 @@ public class TestJPAConfig {
 		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
 	}
 
+	/**
+	 * Replace the HAPI FHIR bean of this type with a version that extends the built-in one
+	 * and adds manual failures for unit tests
+	 */
+	@Bean
+	@Primary
+	public ITermCodeSystemDeleteJobSvc termCodeSystemService() {
+		return new TermCodeSystemDeleteJobSvcWithUniTestFailures();
+	}
+
 	@Bean
 	@Lazy
 	public IBinaryStorageSvc binaryStorage() {
 		return new MemoryBinaryStorageSvcImpl();
+	}
+
+	@Bean
+	public IEmailSender emailSender(){
+		return new LoggingEmailSender();
 	}
 }

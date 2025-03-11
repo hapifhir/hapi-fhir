@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,14 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
-
-import javax.servlet.http.HttpServletRequest;
+package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * This interface isn't used by hapi-fhir-base, but is used by the 
+ * This interface isn't used by hapi-fhir-base, but is used by the
  * <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/web_testpage_overlay.html">Web Testing UI</a>
  */
 public interface ITestingUiClientFactory {
@@ -35,5 +33,4 @@ public interface ITestingUiClientFactory {
 	 * Instantiate a new client
 	 */
 	IGenericClient newClient(FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl);
-	
 }

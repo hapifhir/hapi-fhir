@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,13 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class MdmGoldenResourceFindingSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	private FindCandidateByEidSvc myFindCandidateByEidSvc;
@@ -57,27 +58,52 @@ public class MdmGoldenResourceFindingSvc {
 	 * 4. If none are found, attempt to find Golden Resources that are linked to sources that are similar to our incoming resource based on the MDM rules and
 	 * field matchers.
 	 *
-	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Golden Resources for.
+	 * @param theParams Params hold the {@link IBaseResource} for which we are attempting to find matching candidate Golden Resources,
+	 *                  as well as the mdm context.
 	 * @return A list of {@link MatchedGoldenResourceCandidate} indicating all potential Golden Resource matches.
 	 */
-	public CandidateList findGoldenResourceCandidates(IAnyResource theResource) {
-		CandidateList matchedGoldenResourceCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
+	public CandidateList findGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
+		IAnyResource resource = theParams.getResource();
 
-		if (matchedGoldenResourceCandidates.isEmpty()) {
-			matchedGoldenResourceCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
+		CandidateList eidGoldenResources = myFindCandidateByEidSvc.findCandidates(resource);
+
+		// if we have matches from eid, we'll return only these
+		if (!eidGoldenResources.isEmpty()) {
+			return eidGoldenResources;
 		}
 
-		if (matchedGoldenResourceCandidates.isEmpty()) {
-			//OK, so we have not found any links in the MdmLink table with us as a source. Next, let's find
-			//possible Golden Resources matches by following MDM rules.
-			matchedGoldenResourceCandidates = myFindCandidateByExampleSvc.findCandidates(theResource);
+		boolean isUpdate =
+				theParams.getContext().getRestOperation() == MdmTransactionContext.OperationType.UPDATE_RESOURCE;
+
+		// find MdmLinks that have theResource as the source
+		// (these are current golden resources matching this resource)
+		CandidateList linkGoldenResources = myFindCandidateByLinkSvc.findCandidates(resource);
+
+		if (!linkGoldenResources.isEmpty() && !isUpdate) {
+			return linkGoldenResources;
 		}
 
-		return matchedGoldenResourceCandidates;
+		// if we're updating, we might have existing resources that could *also* match
+		// find other golden resources that could be matching to this resource
+		// (we only need to do this for updates because otherwise they would already have matching resources
+		CandidateList anyGoldenResources = myFindCandidateByExampleSvc.findCandidates(resource);
+
+		if (linkGoldenResources.isEmpty()) {
+			// only other resources are available - we'll return this
+			return anyGoldenResources;
+		}
+
+		// else, we will combine the lists
+		CandidateList matches = new CandidateList(CandidateStrategyEnum.ANY);
+		matches.addAll(CandidateStrategyEnum.LINK, linkGoldenResources.getCandidates());
+		matches.addAll(CandidateStrategyEnum.SCORE, anyGoldenResources.getCandidates());
+
+		return matches;
 	}
 
-	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
-		ResourcePersistentId goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
+	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(
+			MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
+		IResourcePersistentId goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
 		return myMdmResourceDaoSvc.readGoldenResourceByPid(goldenResourcePid, theResourceType);
 	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.spring.boot.autoconfigure;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,16 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
@@ -48,6 +45,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.servlet.ServletException;
 import okhttp3.OkHttpClient;
 import org.apache.http.client.HttpClient;
 import org.springframework.beans.factory.ObjectProvider;
@@ -76,11 +75,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManagerFactory;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.sql.DataSource;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HAPI FHIR.
@@ -91,7 +88,6 @@ import java.util.concurrent.ScheduledExecutorService;
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @EnableConfigurationProperties(FhirProperties.class)
 public class FhirAutoConfiguration {
-
 
 	private final FhirProperties properties;
 
@@ -105,7 +101,6 @@ public class FhirAutoConfiguration {
 		FhirContext fhirContext = new FhirContext(properties.getVersion());
 		return fhirContext;
 	}
-
 
 	@Configuration
 	@ConditionalOnClass(AbstractJaxRsProvider.class)
@@ -125,12 +120,12 @@ public class FhirAutoConfiguration {
 		private final List<FhirRestfulServerCustomizer> customizers;
 
 		public FhirRestfulServerConfiguration(
-			FhirProperties properties,
-			FhirContext fhirContext,
-			ObjectProvider<List<IResourceProvider>> resourceProviders,
-			ObjectProvider<IPagingProvider> pagingProvider,
-			ObjectProvider<List<IServerInterceptor>> interceptors,
-			ObjectProvider<List<FhirRestfulServerCustomizer>> customizers) {
+				FhirProperties properties,
+				FhirContext fhirContext,
+				ObjectProvider<List<IResourceProvider>> resourceProviders,
+				ObjectProvider<IPagingProvider> pagingProvider,
+				ObjectProvider<List<IServerInterceptor>> interceptors,
+				ObjectProvider<List<FhirRestfulServerCustomizer>> customizers) {
 			this.properties = properties;
 			this.fhirContext = fhirContext;
 			this.resourceProviders = resourceProviders.getIfAvailable();
@@ -149,7 +144,8 @@ public class FhirAutoConfiguration {
 
 		@Bean
 		public ServletRegistrationBean fhirServerRegistrationBean() {
-			ServletRegistrationBean registration = new ServletRegistrationBean(this, this.properties.getServer().getPath());
+			ServletRegistrationBean registration = new ServletRegistrationBean(
+					this, this.properties.getServer().getPath());
 			registration.setLoadOnStartup(1);
 			return registration;
 		}
@@ -162,7 +158,8 @@ public class FhirAutoConfiguration {
 			setResourceProviders(this.resourceProviders);
 			setPagingProvider(this.pagingProvider);
 
-			setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getPath()));
+			setServerAddressStrategy(new HardcodedServerAddressStrategy(
+					this.properties.getServer().getPath()));
 
 			customize();
 		}
@@ -184,23 +181,22 @@ public class FhirAutoConfiguration {
 			SubscriptionSubmitterConfig.class,
 			SearchParamSubmitterConfig.class
 		})
-		static class FhirJpaDaoConfiguration {
+		static class FhirJpaStorageSettingsConfiguration {
 
 			@Autowired
 			private EntityManagerFactory emf;
 
 			@Bean
 			@Primary
-			public PlatformTransactionManager hapiTransactionManager() {
+			public PlatformTransactionManager transactionManager() {
 				return new JpaTransactionManager(emf);
 			}
 
 			@Bean
 			@ConditionalOnMissingBean
 			@ConfigurationProperties("hapi.fhir.jpa")
-			public DaoConfig fhirDaoConfig() {
-				DaoConfig fhirDaoConfig = new DaoConfig();
-				return fhirDaoConfig;
+			public JpaStorageSettings storageSettings() {
+				return new JpaStorageSettings();
 			}
 
 			@Bean
@@ -209,18 +205,10 @@ public class FhirAutoConfiguration {
 			public PartitionSettings partitionSettings() {
 				return new PartitionSettings();
 			}
-
-
-			@Bean
-			@ConditionalOnMissingBean
-			@ConfigurationProperties("hapi.fhir.jpa")
-			public ModelConfig fhirModelConfig() {
-				return fhirDaoConfig().getModelConfig();
-			}
 		}
 
 		@Configuration
-		@ConditionalOnBean({DaoConfig.class, RestfulServer.class})
+		@ConditionalOnBean({JpaStorageSettings.class, RestfulServer.class})
 		@SuppressWarnings("rawtypes")
 		static class RestfulServerCustomizer implements FhirRestfulServerCustomizer {
 
@@ -240,22 +228,19 @@ public class FhirAutoConfiguration {
 		@Import({JpaDstu3Config.class, HapiJpaConfig.class})
 		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU3")
-		static class Dstu3 {
-		}
+		static class Dstu3 {}
 
 		@Configuration
 		@Import({JpaDstu2Config.class, HapiJpaConfig.class})
 		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
-		static class Dstu2 {
-		}
+		static class Dstu2 {}
 
 		@Configuration
 		@Import({JpaR4Config.class, HapiJpaConfig.class})
 		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "R4")
-		static class R4 {
-		}
+		static class R4 {}
 	}
 
 	@Configuration
@@ -279,12 +264,13 @@ public class FhirAutoConfiguration {
 		static class SchemaAvailableCondition extends ResourceCondition {
 
 			SchemaAvailableCondition() {
-				super("ValidationSchema",
-					"hapi.fhir.validation",
-					"schema-location",
-					"classpath:/org/hl7/fhir/instance/model/schema",
-					"classpath:/org/hl7/fhir/dstu2016may/model/schema",
-					"classpath:/org/hl7/fhir/dstu3/model/schema");
+				super(
+						"ValidationSchema",
+						"hapi.fhir.validation",
+						"schema-location",
+						"classpath:/org/hl7/fhir/instance/model/schema",
+						"classpath:/org/hl7/fhir/dstu2016may/model/schema",
+						"classpath:/org/hl7/fhir/dstu3/model/schema");
 			}
 		}
 	}
@@ -298,7 +284,8 @@ public class FhirAutoConfiguration {
 
 		private final List<IClientInterceptor> clientInterceptors;
 
-		public FhirRestfulClientConfiguration(FhirProperties properties, ObjectProvider<List<IClientInterceptor>> clientInterceptors) {
+		public FhirRestfulClientConfiguration(
+				FhirProperties properties, ObjectProvider<List<IClientInterceptor>> clientInterceptors) {
 			this.properties = properties;
 			this.clientInterceptors = clientInterceptors.getIfAvailable();
 		}
@@ -306,7 +293,8 @@ public class FhirAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(IRestfulClientFactory.class)
 		public IGenericClient fhirClient(final IRestfulClientFactory clientFactory) {
-			IGenericClient fhirClient = clientFactory.newGenericClient(this.properties.getServer().getUrl());
+			IGenericClient fhirClient =
+					clientFactory.newGenericClient(this.properties.getServer().getUrl());
 			if (!CollectionUtils.isEmpty(this.clientInterceptors)) {
 				for (IClientInterceptor interceptor : this.clientInterceptors) {
 					fhirClient.registerInterceptor(interceptor);
@@ -354,5 +342,4 @@ public class FhirAutoConfiguration {
 			}
 		}
 	}
-
 }

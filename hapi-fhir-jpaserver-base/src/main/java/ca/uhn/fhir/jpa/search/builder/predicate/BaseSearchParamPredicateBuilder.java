@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -33,16 +32,13 @@ import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
-
-public abstract class BaseSearchParamPredicateBuilder
-	extends BaseJoiningPredicateBuilder
-	implements ICanMakeMissingParamPredicate {
+public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredicateBuilder
+		implements ICanMakeMissingParamPredicate {
 
 	private final DbColumn myColumnMissing;
 	private final DbColumn myColumnResType;
@@ -81,7 +77,8 @@ public abstract class BaseSearchParamPredicateBuilder
 		return myColumnResId;
 	}
 
-	public Condition combineWithHashIdentityPredicate(String theResourceName, String theParamName, Condition thePredicate) {
+	public Condition combineWithHashIdentityPredicate(
+			String theResourceName, String theParamName, Condition thePredicate) {
 		List<Condition> andPredicates = new ArrayList<>();
 
 		Condition hashIdentityPredicate = createHashIdentityPredicate(theResourceName, theParamName);
@@ -93,20 +90,29 @@ public abstract class BaseSearchParamPredicateBuilder
 
 	@Nonnull
 	public Condition createHashIdentityPredicate(String theResourceType, String theParamName) {
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
 		String hashIdentityVal = generatePlaceholder(hashIdentity);
 		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
 	}
 
-	public Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		ComboCondition condition = ComboCondition.and(
-			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
-			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
-		);
+	public Condition createPredicateParamMissingForNonReference(
+			String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
+
+		List<Condition> conditions = new ArrayList<>();
+		if (getStorageSettings().isIndexStorageOptimized()) {
+			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), getRequestPartitionId(), theResourceName, theParamName);
+			conditions.add(BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity)));
+		} else {
+			conditions.add(BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)));
+			conditions.add(BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)));
+		}
+		conditions.add(BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing)));
+
+		ComboCondition condition = ComboCondition.and(conditions.toArray());
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
 	}
-
 
 	@Override
 	public Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams) {
@@ -115,19 +121,16 @@ public abstract class BaseSearchParamPredicateBuilder
 		subquery.addFromTable(getTable());
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-			getPartitionSettings(),
-			theParams.getRequestPartitionId(),
-			theParams.getResourceTablePredicateBuilder().getResourceType(),
-			theParams.getParamName()
-		);
+				getPartitionSettings(),
+				theParams.getRequestPartitionId(),
+				theParams.getResourceTablePredicateBuilder().getResourceType(),
+				theParams.getParamName());
 
 		Condition subQueryCondition = ComboCondition.and(
-			BinaryCondition.equalTo(getResourceIdColumn(),
-				theParams.getResourceTablePredicateBuilder().getResourceIdColumn()
-			),
-			BinaryCondition.equalTo(getColumnHashIdentity(),
-				generatePlaceholder(hashIdentity))
-		);
+				BinaryCondition.equalTo(
+						getResourceIdColumn(),
+						theParams.getResourceTablePredicateBuilder().getResourceIdColumn()),
+				BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity)));
 
 		subquery.addCondition(subQueryCondition);
 
