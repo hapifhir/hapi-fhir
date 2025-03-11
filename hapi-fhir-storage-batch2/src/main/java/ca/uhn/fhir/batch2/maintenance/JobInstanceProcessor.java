@@ -319,15 +319,16 @@ public class JobInstanceProcessor {
 					theJobInstance.getInstanceId(),
 					theJobDefinition.getJobDefinitionId());
 
-			// Log warning if deadline is exceeded
+			// Log warning and exit if deadline is exceeded
 			if (System.currentTimeMillis() >= deadline) {
 				ourLog.warn(
 						"Deadline exceeded while processing job {} of type {}. Some chunks may not have been processed.",
 						theJobInstance.getInstanceId(),
 						theJobDefinition.getJobDefinitionId());
+				break;
 			}
 
-		} while (deadline > System.currentTimeMillis() && !done);
+		} while (!done);
 	}
 
 	/**
