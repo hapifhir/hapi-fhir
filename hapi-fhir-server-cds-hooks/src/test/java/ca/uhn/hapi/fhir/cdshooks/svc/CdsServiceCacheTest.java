@@ -29,7 +29,7 @@ class CdsServiceCacheTest {
 	private static final String HOOK_SERVICE_ID1 = "hook service id 1";
 	private static final String HOOK_SERVICE_ID2 = "hook service id 2";
 	private static final String HOOK_SERVICE_ID3 = "hook service id 3";
-	private static final String MODULE_ID = "module id";
+	private static final String SERVICE_GROUP_ID = "service group id";
 	@RegisterExtension
 	final LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
 	@InjectMocks
@@ -41,7 +41,7 @@ class CdsServiceCacheTest {
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = withFunction();
 		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
 		// execute
-		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, MODULE_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
 		// validate
 		assertThat(myFixture.myServiceMap).hasSize(1).containsKey(SERVICE_ID1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(SERVICE_ID1);
@@ -49,8 +49,8 @@ class CdsServiceCacheTest {
 		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1).contains(cdsServiceJson);
-		assertThat(myFixture.myGroups).hasSize(1).containsKey(MODULE_ID);
-		assertThat(myFixture.myGroups.get(MODULE_ID)).hasSize(1).contains(SERVICE_ID1);
+		assertThat(myFixture.myGroups).hasSize(1).containsKey(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).hasSize(1).contains(SERVICE_ID1);
 	}
 
 	@Test
@@ -60,10 +60,10 @@ class CdsServiceCacheTest {
 		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction2 = withFunction();
 		final CdsServiceJson cdsServiceJson2 = withCdsServiceJson(HOOK_SERVICE_ID2);
-		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 +" for moduleId: " + MODULE_ID + ", already exists. It will not be overwritten!";
+		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 +" for serviceGroupId: " + SERVICE_GROUP_ID + ", already exists. It will not be overwritten!";
 		// execute
-		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, MODULE_ID);
-		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction2, cdsServiceJson2, false, MODULE_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction2, cdsServiceJson2, false, SERVICE_GROUP_ID);
 		// validate
 		assertThat(myFixture.myServiceMap).hasSize(1).containsKey(SERVICE_ID1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(SERVICE_ID1);
@@ -71,8 +71,8 @@ class CdsServiceCacheTest {
 		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1).contains(cdsServiceJson);
-		assertThat(myFixture.myGroups).hasSize(1).containsKey(MODULE_ID);
-		assertThat(myFixture.myGroups.get(MODULE_ID)).hasSize(1).contains(SERVICE_ID1);
+		assertThat(myFixture.myGroups).hasSize(1).containsKey(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).hasSize(1).contains(SERVICE_ID1);
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
 	}
 
@@ -81,9 +81,9 @@ class CdsServiceCacheTest {
 		// setup
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = withFunction();
 		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
-		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, MODULE_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
 		// execute
-		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(SERVICE_ID1, MODULE_ID);
+		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(SERVICE_ID1, SERVICE_GROUP_ID);
 		// validate
 		assertThat(myFixture.myServiceMap).isEmpty();
 		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
@@ -95,9 +95,9 @@ class CdsServiceCacheTest {
 	@Test
 	void unregisterServiceMethodShouldReturnNullWhenServiceNotRegistered() {
 		// setup
-		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 + " for moduleId: " + MODULE_ID + ", is not registered. Nothing to remove!";
+		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 + " for serviceGroupId: " + SERVICE_GROUP_ID + ", is not registered. Nothing to remove!";
 		// execute
-		final ICdsMethod actual = myFixture.unregisterServiceMethod(SERVICE_ID1, MODULE_ID);
+		final ICdsMethod actual = myFixture.unregisterServiceMethod(SERVICE_ID1, SERVICE_GROUP_ID);
 		// validate
 		assertThat(actual).isNull();
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
@@ -110,24 +110,24 @@ class CdsServiceCacheTest {
 		final List<CdsServiceJson> cdsServiceJsons = withCdsServiceJsons();
 		final List<String> keys = List.of(SERVICE_ID1, SERVICE_ID2, SERVICE_ID3);
 		for (int i = 0; i < keys.size() ; i++) {
-			myFixture.registerDynamicService(keys.get(i), serviceFunctions.get(i), cdsServiceJsons.get(i), true, MODULE_ID);
+			myFixture.registerDynamicService(keys.get(i), serviceFunctions.get(i), cdsServiceJsons.get(i), true, SERVICE_GROUP_ID);
 		}
-		assertThat(myFixture.myGroups.keySet()).hasSize(1).containsExactly(MODULE_ID);
-		assertThat(myFixture.myGroups.get(MODULE_ID)).containsExactlyInAnyOrderElementsOf(keys);
+		assertThat(myFixture.myGroups.keySet()).hasSize(1).containsExactly(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).containsExactlyInAnyOrderElementsOf(keys);
 		// execute
-		myFixture.unregisterServices(MODULE_ID);
+		myFixture.unregisterServices(SERVICE_GROUP_ID);
 		// validate
 		assertThat(myFixture.myServiceMap).isEmpty();
 		assertThat(myFixture.myGroups).isEmpty();
 	}
 
 	@Test
-	void unregisterServicesWithInvalidModule() {
+	void unregisterServicesWithInvalidServiceGroupID() {
 		// execute
-		myFixture.unregisterServices(MODULE_ID);
+		myFixture.unregisterServices(SERVICE_GROUP_ID);
 		// validate
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
-			.hasErrorMessage("CDS services for moduleId: " + MODULE_ID + ", are not registered. Nothing to remove!");
+			.hasErrorMessage("CDS services for serviceGroupId: " + SERVICE_GROUP_ID + ", are not registered. Nothing to remove!");
 	}
 
 	@Nonnull

@@ -64,13 +64,13 @@ public class CdsServiceCache {
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theMethod,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theModuleId) {
-		if (!isCdsServiceAlreadyRegistered(theServiceId, theModuleId)) {
+			String theServiceGroupId) {
+		if (!isCdsServiceAlreadyRegistered(theServiceId, theServiceGroupId)) {
 			final CdsDynamicPrefetchableServiceMethod cdsDynamicPrefetchableServiceMethod =
 					new CdsDynamicPrefetchableServiceMethod(
 							theCdsServiceJson, theMethod, theAllowAutoFhirClientPrefetch);
 			myServiceMap.put(theServiceId, cdsDynamicPrefetchableServiceMethod);
-			myGroups.computeIfAbsent(theModuleId, k -> new HashSet<>()).add(theServiceId);
+			myGroups.computeIfAbsent(theServiceGroupId, k -> new HashSet<>()).add(theServiceId);
 			myCdsServiceJson.addService(theCdsServiceJson);
 		}
 	}
@@ -109,13 +109,13 @@ public class CdsServiceCache {
 		return myCdsServiceJson;
 	}
 
-	public ICdsMethod unregisterServiceMethod(String theServiceId, String theModuleId) {
+	public ICdsMethod unregisterServiceMethod(String theServiceId, String theServiceGroupId) {
 		if (myServiceMap.containsKey(theServiceId)) {
 			final ICdsMethod serviceMethod = myServiceMap.get(theServiceId);
 			myServiceMap.remove(theServiceId);
-			myGroups.computeIfAbsent(theModuleId, k -> new HashSet<>()).remove(theServiceId);
-			if (myGroups.get(theModuleId).isEmpty()) {
-				myGroups.remove(theModuleId);
+			myGroups.computeIfAbsent(theServiceGroupId, k -> new HashSet<>()).remove(theServiceId);
+			if (myGroups.get(theServiceGroupId).isEmpty()) {
+				myGroups.remove(theServiceGroupId);
 			}
 			if (serviceMethod instanceof ICdsServiceMethod) {
 				myCdsServiceJson.removeService(((ICdsServiceMethod) serviceMethod).getCdsServiceJson());
@@ -123,29 +123,29 @@ public class CdsServiceCache {
 			return serviceMethod;
 		} else {
 			ourLog.error(
-					"CDS service with serviceId: {} for moduleId: {}, is not registered. Nothing to remove!",
+					"CDS service with serviceId: {} for serviceGroupId: {}, is not registered. Nothing to remove!",
 					theServiceId,
-					theModuleId);
+					theServiceGroupId);
 			return null;
 		}
 	}
 
-	public void unregisterServices(String theModuleId) {
-		if (myGroups.containsKey(theModuleId)) {
-			new ArrayList<>(myGroups.get(theModuleId))
-					.forEach(serviceId -> unregisterServiceMethod(serviceId, theModuleId));
+	public void unregisterServices(String theServiceGroupId) {
+		if (myGroups.containsKey(theServiceGroupId)) {
+			new ArrayList<>(myGroups.get(theServiceGroupId))
+					.forEach(serviceId -> unregisterServiceMethod(serviceId, theServiceGroupId));
 		} else {
-			ourLog.error("CDS services for moduleId: {}, are not registered. Nothing to remove!", theModuleId);
+			ourLog.error("CDS services for serviceGroupId: {}, are not registered. Nothing to remove!", theServiceGroupId);
 		}
 	}
 
-	private boolean isCdsServiceAlreadyRegistered(String theServiceId, String theModuleId) {
+	private boolean isCdsServiceAlreadyRegistered(String theServiceId, String theServiceGroupId) {
 		boolean result = myServiceMap.containsKey(theServiceId);
 		if (result) {
 			ourLog.error(
-					"CDS service with serviceId: {} for moduleId: {}, already exists. It will not be overwritten!",
+					"CDS service with serviceId: {} for serviceGroupId: {}, already exists. It will not be overwritten!",
 					theServiceId,
-					theModuleId);
+					theServiceGroupId);
 		}
 		return result;
 	}

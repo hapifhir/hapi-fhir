@@ -109,12 +109,12 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theModuleId) {
+			String theServiceGroupId) {
 		if (theCdsServiceJson.getExtensionClass() == null) {
 			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
 		}
 		myServiceCache.registerDynamicService(
-				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
+				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
 	@Override
@@ -132,9 +132,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	 * @see ICdsServiceRegistry#unregisterService
 	 */
 	@Override
-	public void unregisterService(@Nonnull String theServiceId, String theModuleId) {
+	public void unregisterService(@Nonnull String theServiceId, String theServiceGroupId) {
 		Validate.notNull(theServiceId, "CDS Hook Service Id cannot be null");
-		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
+		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theServiceGroupId);
 		if (activeService != null) {
 			ourLog.info("Unregistered active service {}", theServiceId);
 		}
@@ -144,9 +144,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	 * @see ICdsServiceRegistry#unregisterServices
 	 */
 	@Override
-	public void unregisterServices(@Nonnull String theModuleId) {
-		Validate.notNull(theModuleId, "CDS Hook Module/Group Id cannot be null");
-		myServiceCache.unregisterServices(theModuleId);
+	public void unregisterServices(@Nonnull String theServiceGroupId) {
+		Validate.notNull(theServiceGroupId, "CDS Hook Service Group Id cannot be null");
+		myServiceCache.unregisterServices(theServiceGroupId);
 	}
 
 	@Override
