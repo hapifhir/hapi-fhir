@@ -995,8 +995,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpGetClientInvocation invocation =
-					HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt,myOffset);
+			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(
+					myContext, resourceName, id, mySince, myCount, myAt, myOffset);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
