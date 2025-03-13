@@ -941,6 +941,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class HistoryInternal extends BaseClientExecutable implements IHistory, IHistoryUntyped, IHistoryTyped {
 
 		private Integer myCount;
+		private Integer myOffset;
 		private IIdType myId;
 		private Class<? extends IBaseBundle> myReturnType;
 		private IPrimitiveType mySince;
@@ -972,6 +973,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IHistoryTyped offset(Integer theOffset) {
+			myOffset = theOffset;
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
@@ -989,7 +996,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			HttpGetClientInvocation invocation =
-					HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt);
+					HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt,myOffset);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));

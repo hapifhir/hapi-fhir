@@ -119,7 +119,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			String theId,
 			IPrimitiveType<Date> theSince,
 			Integer theLimit,
-			DateRangeParam theAt) {
+			DateRangeParam theAt,
+			Integer theOffset) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -142,6 +143,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			b.append(haveParam ? '&' : '?');
 			haveParam = true;
 			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
+		}
+		if (theOffset != null) {
+			b.append(haveParam ? '&' : '?');
+			haveParam = true;
+			b.append(Constants.PARAM_OFFSET).append('=').append(theOffset);
 		}
 		if (theAt != null) {
 			for (DateParam next : theAt.getValuesAsQueryTokens()) {
