@@ -125,7 +125,7 @@ public interface IBatch2WorkChunkRepository
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e "
 			+ "SET e.myStatus = :failed, "
-			+ "e.myErrorMessage = LEFT(CONCAT('Too many errors (', CAST(e.myErrorCount as string), '). Last err msg ', e.myErrorMessage), :maxErrorSize) "
+			+ "e.myErrorMessage = LEFT(CONCAT('Too many errors: ', CAST(e.myErrorCount as string), '. Last err msg ', e.myErrorMessage), :maxErrorSize) "
 			+ "WHERE e.myId = :chunkId and e.myErrorCount > :maxCount")
 	int updateChunkForTooManyErrors(
 			@Param("failed") WorkChunkStatusEnum theStatus,
