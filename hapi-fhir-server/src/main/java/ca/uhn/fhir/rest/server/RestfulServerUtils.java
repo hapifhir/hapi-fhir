@@ -1078,30 +1078,29 @@ public class RestfulServerUtils {
 	 * Determines whether we should stream out Binary resource content based on the content-type. Logic is:
 	 * - If the binary was externalized and has not been reinflated upstream, return false.
 	 * - If they request octet-stream, return true;
+	 * - If they request a FHIR content-type, return false (as per the specification);
 	 * - If the content-type happens to be a match, return true.
-	 * <p>
-	 * - Construct an EncodingEnum out of the contentType. If this matches the responseEncoding, return true.
 	 * - Otherwise, return false.
 	 *
 	 * @param theResponseEncoding the requested {@link EncodingEnum} determined by the incoming Content-Type header.
 	 * @param theBinary           the {@link IBaseBinary} resource to be streamed out.
 	 * @return True if response can be streamed as the requested encoding type, false otherwise.
 	 */
-	private static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
-		String contentType = theBinary.getContentType();
+	static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
+		final String binaryContentType = theBinary.getContentType();
 		if (theBinary.getContent() == null) {
 			return false;
-		}
-		if (theResponseEncoding == null) {
+		} else if (theResponseEncoding == null) {
 			return true;
-		}
-		if (isBlank(contentType)) {
+		} else if (isBlank(binaryContentType)) {
 			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
-		} else if (contentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
+		} else if (EncodingEnum.forContentTypeStrict(theResponseEncoding.getContentType()) != null) {
+			// If a FHIR content-type is explicitly requested, the Binary resource shall be returned
+			return false;
+		} else if (binaryContentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
 			return true;
-		} else {
-			return Objects.equals(EncodingEnum.forContentType(contentType), theResponseEncoding.getEncoding());
 		}
+		return false;
 	}
 
 	public static String createEtag(String theVersionId) {
