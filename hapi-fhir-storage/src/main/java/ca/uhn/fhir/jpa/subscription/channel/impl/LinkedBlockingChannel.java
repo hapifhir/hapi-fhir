@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import jakarta.annotation.Nonnull;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
+public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements ILegacyChannelProducer, ILegacyChannelReceiver {
 
 	private final String myName;
 	private final Supplier<Integer> myQueueSizeSupplier;

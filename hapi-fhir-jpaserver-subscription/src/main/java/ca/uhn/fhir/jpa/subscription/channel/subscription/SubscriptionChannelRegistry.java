@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -51,7 +51,7 @@ public class SubscriptionChannelRegistry {
 	// Key Channel Name, Value Subscription Id
 	private final Multimap<String, String> myActiveSubscriptionByChannelName = Multimaps.synchronizedMultimap(
 			MultimapBuilder.hashKeys().arrayListValues().build());
-	private final Map<String, IChannelProducer> myChannelNameToSender = new ConcurrentHashMap<>();
+	private final Map<String, ILegacyChannelProducer> myChannelNameToSender = new ConcurrentHashMap<>();
 
 	@Autowired
 	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
@@ -90,7 +90,7 @@ public class SubscriptionChannelRegistry {
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
-		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
+		ILegacyChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
 		Optional<MessageHandler> deliveryHandler =
 				mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
@@ -104,18 +104,18 @@ public class SubscriptionChannelRegistry {
 		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
 		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
 
-		IChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
+		ILegacyChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}
 
-	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
+	protected ILegacyChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings();
 		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
 		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(
 				theParameters.getChannelName(), settings);
 	}
 
-	protected IChannelProducer newSendingChannel(ProducingChannelParameters theParameters) {
+	protected ILegacyChannelProducer newSendingChannel(ProducingChannelParameters theParameters) {
 		ChannelProducerSettings settings = new ChannelProducerSettings();
 		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
 		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(), settings);

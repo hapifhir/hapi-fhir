@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.broker.api.IChannelNamer;
@@ -88,7 +88,7 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public IChannelFactory channelFactory(IChannelNamer theNamer) {
+		public ILegacyChannelFactory channelFactory(IChannelNamer theNamer) {
 			return new LinkedBlockingChannelFactory(theNamer, myRetryPolicyProvider);
 		}
 

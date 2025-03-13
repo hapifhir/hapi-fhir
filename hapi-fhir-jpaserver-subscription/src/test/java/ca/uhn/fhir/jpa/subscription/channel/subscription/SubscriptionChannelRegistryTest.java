@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 import ca.uhn.fhir.broker.api.BaseChannelSettings;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -58,8 +58,8 @@ public class SubscriptionChannelRegistryTest {
 
 		// mocks
 		MessageHandler messageHandler = mock(MessageHandler.class);
-		IChannelReceiver receiver = mock(IChannelReceiver.class);
-		IChannelProducer producer = mock(IChannelProducer.class);
+		ILegacyChannelReceiver receiver = mock(ILegacyChannelReceiver.class);
+		ILegacyChannelProducer producer = mock(ILegacyChannelProducer.class);
 
 		// when
 		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(

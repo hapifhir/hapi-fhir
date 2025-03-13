@@ -23,7 +23,7 @@ import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringSubscriber;
@@ -38,7 +38,7 @@ import org.springframework.core.annotation.Order;
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 public class MatchingQueueSubscriberLoader {
-	protected IChannelReceiver myMatchingChannel;
+	protected ILegacyChannelReceiver myMatchingChannel;
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
 
 	@Autowired

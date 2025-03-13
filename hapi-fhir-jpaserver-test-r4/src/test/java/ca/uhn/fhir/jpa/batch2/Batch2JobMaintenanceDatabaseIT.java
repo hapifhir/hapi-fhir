@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -66,7 +66,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	@Autowired
 	IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	private ILegacyChannelFactory myChannelFactory;
 
 	@Autowired
 	IJobPersistence myJobPersistence;

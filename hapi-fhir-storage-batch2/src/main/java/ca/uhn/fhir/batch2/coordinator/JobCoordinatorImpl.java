@@ -35,7 +35,7 @@ import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -62,7 +62,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-	private final IChannelReceiver myWorkChannelReceiver;
+	private final ILegacyChannelReceiver myWorkChannelReceiver;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler;
 	private final JobQuerySvc myJobQuerySvc;
@@ -74,7 +74,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 */
 	public JobCoordinatorImpl(
 			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull IChannelReceiver theWorkChannelReceiver,
+			@Nonnull ILegacyChannelReceiver theWorkChannelReceiver,
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull WorkChunkProcessor theExecutorSvc,

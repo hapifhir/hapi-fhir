@@ -21,50 +21,50 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 
 public class SubscriptionChannelFactory {
-	private final IChannelFactory myChannelFactory;
+	private final ILegacyChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
+	public SubscriptionChannelFactory(ILegacyChannelFactory theChannelFactory) {
 		Validate.notNull(theChannelFactory);
 		myChannelFactory = theChannelFactory;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(
+	public ILegacyChannelProducer newDeliverySendingChannel(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(
+	public ILegacyChannelReceiver newDeliveryReceivingChannel(
 			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		IChannelReceiver channel =
+		ILegacyChannelReceiver channel =
 				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(
+	public ILegacyChannelProducer newMatchingSendingChannel(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(
+	public ILegacyChannelReceiver newMatchingReceivingChannel(
 			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		IChannelReceiver channel =
+		ILegacyChannelReceiver channel =
 				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
@@ -113,7 +113,7 @@ public class SubscriptionChannelFactory {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 
-	public IChannelFactory getChannelFactory() {
+	public ILegacyChannelFactory getChannelFactory() {
 		return myChannelFactory;
 	}
 }

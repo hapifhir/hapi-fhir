@@ -40,9 +40,9 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +56,7 @@ public abstract class BaseBatch2Config {
 	IJobPersistence myPersistence;
 
 	@Autowired
-	IChannelFactory myChannelFactory;
+	ILegacyChannelFactory myChannelFactory;
 
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
@@ -120,14 +120,14 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IChannelProducer batch2ProcessingChannelProducer(IChannelFactory theChannelFactory) {
+	public ILegacyChannelProducer batch2ProcessingChannelProducer(ILegacyChannelFactory theChannelFactory) {
 		ChannelProducerSettings settings =
 				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
-	public IChannelReceiver batch2ProcessingChannelReceiver(IChannelFactory theChannelFactory) {
+	public ILegacyChannelReceiver batch2ProcessingChannelReceiver(ILegacyChannelFactory theChannelFactory) {
 		ChannelConsumerSettings settings =
 				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);

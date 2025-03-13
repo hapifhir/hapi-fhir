@@ -32,7 +32,7 @@ import ca.uhn.fhir.broker.api.IBrokerClient;
  * @deprecated Use {@link IBrokerClient} instead
  */
 @Deprecated
-public interface IChannelFactory {
+public interface ILegacyChannelFactory {
 
 	/**
 	 * Create a channel that is used to receive messages from the queue.
@@ -46,7 +46,7 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for subscribers.
 	 */
-	IChannelReceiver getOrCreateReceiver(
+	ILegacyChannelReceiver getOrCreateReceiver(
 			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
 
 	/**
@@ -61,7 +61,7 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for senders.
 	 */
-	IChannelProducer getOrCreateProducer(
+	ILegacyChannelProducer getOrCreateProducer(
 			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
 	/**

@@ -23,8 +23,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -47,12 +47,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
-	private final IChannelFactory myChannelFactory;
+	private final ILegacyChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageSubscriber(IChannelFactory theChannelFactory) {
+	public SubscriptionDeliveringMessageSubscriber(ILegacyChannelFactory theChannelFactory) {
 		super();
 		myChannelFactory = theChannelFactory;
 	}
@@ -60,7 +60,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	protected void doDelivery(
 			ResourceDeliveryMessage theSourceMessage,
 			CanonicalSubscription theSubscription,
-			IChannelProducer theChannelProducer,
+			ILegacyChannelProducer theChannelProducer,
 			ResourceModifiedJsonMessage theWrappedMessageToSend) {
 		String payloadId = theSourceMessage.getPayloadId();
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
@@ -125,7 +125,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		IChannelProducer channelProducer =
+		ILegacyChannelProducer channelProducer =
 				myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 
 		// Grab the payload type (encoding mimetype) from the subscription

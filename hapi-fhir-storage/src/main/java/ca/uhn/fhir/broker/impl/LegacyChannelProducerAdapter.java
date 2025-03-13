@@ -1,12 +1,13 @@
 package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 
 public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T, Boolean> {
-	private final ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer myLegacyProducer;
+	private final ILegacyChannelProducer myLegacyChannelProducer;
 
-	public LegacyChannelProducerAdapter(ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer theLegacyProducer) {
-		myLegacyProducer = theLegacyProducer;
+	public LegacyChannelProducerAdapter(ILegacyChannelProducer theLegacyChannelProducer) {
+		myLegacyChannelProducer = theLegacyChannelProducer;
 	}
 
 	@Override

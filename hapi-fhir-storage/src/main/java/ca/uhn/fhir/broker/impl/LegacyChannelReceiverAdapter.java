@@ -2,26 +2,39 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.Message;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import org.springframework.messaging.MessageHandler;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class LegacyChannelReceiverAdapter implements IChannelConsumer {
-	private final IChannelReceiver myLegacyReceiver;
+public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
+	private final ILegacyChannelReceiver myLegacyChannelReceiver;
+	private MessageHandler myMessageHandler;
 
-	public LegacyChannelReceiverAdapter(IChannelReceiver theLegacyReceiver) {
-		myLegacyReceiver = theLegacyReceiver;
+	public LegacyChannelReceiverAdapter(ILegacyChannelReceiver theLegacyChannelReceiver) {
+		myLegacyChannelReceiver = theLegacyChannelReceiver;
+	}
+
+	public void subscribe(MessageHandler theMessageHandler) {
+		if (myMessageHandler != null) {
+			throw new IllegalArgumentException("Only one subscriber allowed");
+		}
+		myMessageHandler = theMessageHandler;
+		myLegacyChannelReceiver.subscribe(theMessageHandler);
 	}
 
 	@Override
 	public void close() throws Exception {
-		myLegacyReceiver.destroy();
+		if (myMessageHandler != null) {
+			myLegacyChannelReceiver.unsubscribe(myMessageHandler);
+		}
+		myLegacyChannelReceiver.destroy();
 	}
 
 	@Override
 	public String getConsumerName() {
-		return myLegacyReceiver.getName();
+		return myLegacyChannelReceiver.getName();
 	}
 
 	@Override
@@ -37,20 +50,5 @@ public class LegacyChannelReceiverAdapter implements IChannelConsumer {
 	@Override
 	public void resume() {
 
-	}
-
-	@Override
-	public Message receive() {
-		return null;
-	}
-
-	@Override
-	public Message receive(int timeout, TimeUnit unit) {
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<Message> receiveAsync() {
-		return null;
 	}
 }

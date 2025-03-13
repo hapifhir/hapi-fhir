@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
@@ -123,7 +123,7 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	@Scope("prototype")
 	public SubscriptionDeliveringMessageSubscriber subscriptionDeliveringMessageSubscriber(
-			IChannelFactory theChannelFactory) {
+			ILegacyChannelFactory theChannelFactory) {
 		return new SubscriptionDeliveringMessageSubscriber(theChannelFactory);
 	}
 

@@ -19,7 +19,10 @@ public interface IBrokerClient<S> {
 	 * @param theChannelConsumerSettings Contains the configuration for subscribers.
 	 */
 	<T> IChannelConsumer<T> getOrCreateConsumer(
-		String theChannelName, Class<T> theMessageType, ChannelConsumerSettings theChannelConsumerSettings);
+		String theChannelName,
+		Class<T> theMessageType,
+		IMessageListener<T> theMessageListener,
+		ChannelConsumerSettings theChannelConsumerSettings);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.

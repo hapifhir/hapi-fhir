@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import org.apache.commons.lang3.Validate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -29,12 +29,12 @@ import org.springframework.messaging.support.ChannelInterceptor;
 
 import java.util.Set;
 
-public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements IChannelReceiver {
+public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements ILegacyChannelReceiver {
 
-	private final IChannelReceiver myWrappedChannel;
+	private final ILegacyChannelReceiver myWrappedChannel;
 	private final MessageHandler myHandler;
 
-	public BroadcastingSubscribableChannelWrapper(IChannelReceiver theChannel) {
+	public BroadcastingSubscribableChannelWrapper(ILegacyChannelReceiver theChannel) {
 		myHandler = message -> send(message);
 		theChannel.subscribe(myHandler);
 		myWrappedChannel = theChannel;

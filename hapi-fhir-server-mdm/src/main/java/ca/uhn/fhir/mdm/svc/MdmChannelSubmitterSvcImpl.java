@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
@@ -49,7 +49,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private final FhirContext myFhirContext;
 
-	private final IChannelFactory myChannelFactory;
+	private final ILegacyChannelFactory myChannelFactory;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -77,7 +77,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 	}
 
 	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
+	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, ILegacyChannelFactory theIChannelFactory) {
 		myFhirContext = theFhirContext;
 		myChannelFactory = theIChannelFactory;
 	}

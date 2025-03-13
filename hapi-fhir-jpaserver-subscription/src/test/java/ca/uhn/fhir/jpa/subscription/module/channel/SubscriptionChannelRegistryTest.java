@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
@@ -44,7 +44,7 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(ILegacyChannelProducer.class));
 
 		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);

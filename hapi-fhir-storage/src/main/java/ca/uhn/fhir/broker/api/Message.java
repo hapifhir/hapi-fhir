@@ -43,5 +43,7 @@ public interface Message<T> {
 	/**
 	 * @return the uncompressed message payload size in bytes.
 	 */
-	int size();
+	default int size() {
+		return getData().length;
+	}
 }

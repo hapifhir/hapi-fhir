@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.config;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.broker.api.IChannelNamer;
@@ -42,7 +42,7 @@ public class SubscriptionChannelConfig {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
+	public ILegacyChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
 		return new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
 	}
 
@@ -52,7 +52,7 @@ public class SubscriptionChannelConfig {
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
+	public SubscriptionChannelFactory subscriptionChannelFactory(ILegacyChannelFactory theQueueChannelFactory) {
 		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 

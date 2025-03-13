@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 class BroadcastingSubscribableChannelWrapperTest {
 
 	@Mock
-	private IChannelReceiver myReceiver;
+	private ILegacyChannelReceiver myReceiver;
 
 	@Test
 	public void testFailIfNoSubscribers() {

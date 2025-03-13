@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -215,8 +215,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		return channelProducerSettings;
 	}
 
-	public IChannelProducer getProcessingChannelForUnitTest() {
+	public ILegacyChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
-		return (IChannelProducer) myMatchingChannel;
+		return (ILegacyChannelProducer) myMatchingChannel;
 	}
 }

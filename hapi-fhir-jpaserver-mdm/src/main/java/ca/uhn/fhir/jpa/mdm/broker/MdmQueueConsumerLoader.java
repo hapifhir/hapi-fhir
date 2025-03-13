@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
@@ -35,14 +35,14 @@ import org.springframework.stereotype.Service;
 public class MdmQueueConsumerLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private final IChannelFactory myChannelFactory;
+	private final ILegacyChannelFactory myChannelFactory;
 	private final IMdmSettings myMdmSettings;
 	private final MdmMessageHandler myMdmMessageHandler;
 
-	protected IChannelReceiver myMdmChannel;
+	protected ILegacyChannelReceiver myMdmChannel;
 
 	public MdmQueueConsumerLoader(
-			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+		ILegacyChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		myChannelFactory = theChannelFactory;
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
@@ -93,7 +93,7 @@ public class MdmQueueConsumerLoader {
 	}
 
 	@VisibleForTesting
-	public IChannelReceiver getMdmChannelForUnitTest() {
+	public ILegacyChannelReceiver getMdmChannelForUnitTest() {
 		return myMdmChannel;
 	}
 }

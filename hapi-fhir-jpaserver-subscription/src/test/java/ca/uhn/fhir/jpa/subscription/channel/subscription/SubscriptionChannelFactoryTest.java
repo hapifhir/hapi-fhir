@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.IChannelNamer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +50,7 @@ public class SubscriptionChannelFactoryTest {
 	@Test
 	public void testInterceptorsOnChannelWrapperArePropagated() {
 
-		IChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME", null);
+		ILegacyChannelReceiver channel = mySvc.newDeliveryReceivingChannel("CHANNEL_NAME", null);
 		channel.subscribe(new NpeThrowingHandler());
 		channel.addInterceptor(myInterceptor);
 

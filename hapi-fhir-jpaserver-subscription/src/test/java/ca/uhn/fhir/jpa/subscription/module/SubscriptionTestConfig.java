@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.subscription.module;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.broker.api.IChannelNamer;
@@ -54,12 +54,12 @@ public class SubscriptionTestConfig {
 	}
 
 	@Bean
-	public IChannelFactory subscribableChannelFactory() {
+	public ILegacyChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, ILegacyChannelFactory theQueueChannelFactory) {
 		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
 

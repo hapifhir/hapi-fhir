@@ -10,8 +10,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
@@ -82,9 +82,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Mock
-	private IChannelFactory myChannelFactory;
+	private ILegacyChannelFactory myChannelFactory;
 	@Mock
-	private IChannelProducer myChannelProducer;
+	private ILegacyChannelProducer myChannelProducer;
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IRestfulClientFactory myRestfulClientFactory;

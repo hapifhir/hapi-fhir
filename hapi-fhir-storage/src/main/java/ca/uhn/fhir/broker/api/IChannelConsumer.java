@@ -29,22 +29,4 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 * Resume requesting messages from the broker.
 	 */
 	void resume();
-
-	/**
-	 * @return a single message
-	 */
-	Message<T> receive();
-
-	/**
-	 * @param timeout the maximum time to wait
-	 * @param unit    the time unit of the timeout argument
-	 * @return a single message or null if no message is received within the timeout period
-	 */
-	Message<T> receive(int timeout, TimeUnit unit);
-
-	/**
-	 * Retrieves a message when it will be available and completes CompletableFuture with received message.
-	 * @return future that will be completed when the message is received
-	 */
-	CompletableFuture<Message<T>> receiveAsync();
 }

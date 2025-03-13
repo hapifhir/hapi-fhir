@@ -19,7 +19,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -96,7 +96,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private JobMaintenanceServiceImpl mySvc;
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
-	private IChannelProducer myWorkChannelProducer;
+	private ILegacyChannelProducer myWorkChannelProducer;
 	@Mock
 	private PlatformTransactionManager myTransactionService;
 	@Captor
