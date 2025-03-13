@@ -17,26 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.channel.api;
+package ca.uhn.fhir.broker;
 
-public class ChannelConsumerSettings extends BaseChannelSettings {
-	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
+public interface IChannelSettings {
+	boolean isQualifyChannelName();
 
-	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
-
-	/**
-	 * Constructor
-	 */
-	public ChannelConsumerSettings() {
-		super();
-	}
-
-	public Integer getConcurrentConsumers() {
-		return myConcurrentConsumers;
-	}
-
-	public ChannelConsumerSettings setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
-		return this;
-	}
+	boolean isUseJacksonMessageConverter();
 }

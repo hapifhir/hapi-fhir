@@ -22,4 +22,8 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
+/**
+ * @deprecated Use {@link ca.uhn.fhir.broker.IChannelProducer} instead
+ */
+@Deprecated
 public interface IChannelProducer extends MessageChannel, InterceptableChannel {}

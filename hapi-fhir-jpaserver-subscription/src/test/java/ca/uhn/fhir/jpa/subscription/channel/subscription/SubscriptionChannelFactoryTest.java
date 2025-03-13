@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+import ca.uhn.fhir.broker.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;

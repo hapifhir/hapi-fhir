@@ -17,26 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.channel.api;
+package ca.uhn.fhir.broker;
 
-public class ChannelProducerSettings extends BaseChannelSettings {
-	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
-
-	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
-
+public interface IChannelNamer {
 	/**
-	 * Constructor
+	 * Channel factories call this service to qualify the channel name before sending it to the channel factory.
+	 *
+	 * @param theNameComponent   the component of the queue or topic name
+	 * @param theChannelSettings
+	 * @return the fully qualified the channel factory will use to name the queue or topic
 	 */
-	public ChannelProducerSettings() {
-		super();
-	}
-
-	public Integer getConcurrentConsumers() {
-		return myConcurrentConsumers;
-	}
-
-	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
-		return this;
-	}
+	String getChannelName(String theNameComponent, IChannelSettings theChannelSettings);
 }

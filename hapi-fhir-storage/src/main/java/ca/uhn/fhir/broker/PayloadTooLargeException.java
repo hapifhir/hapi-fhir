@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.channel.api;
+package ca.uhn.fhir.broker;
 
 /**
  * This exception represents the message payload exceeded the maximum message size of the broker. Used as a wrapper of

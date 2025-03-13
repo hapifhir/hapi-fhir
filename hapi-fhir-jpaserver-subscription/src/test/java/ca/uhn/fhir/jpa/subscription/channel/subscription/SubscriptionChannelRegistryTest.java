@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.BaseChannelSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.BaseChannelSettings;
+import ca.uhn.fhir.broker.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
