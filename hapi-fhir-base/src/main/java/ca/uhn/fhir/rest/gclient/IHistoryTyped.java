@@ -53,7 +53,7 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 
 	/**
 	 * Specifies the <code>_offset</code> parameter, which indicates to the server the offset of the history query. Use
-	 * with {@link #count(int)}.	 
+	 * with {@link #count(int)}. 
 	 */
 	IHistoryTyped<T> offset(Integer theOffset);
 }
