@@ -2022,7 +2022,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBundleProvider retVal = null;
 		try {
 			retVal = mySearchCoordinatorSvc.registerSearch(
-				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+					this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 		} catch (SQLGrammarException e) {
 			String trackingUUID = UUID.randomUUID().toString();
 			ourLog.error("SQLGrammarException during search, tracking uuid: {}", trackingUUID, e);
