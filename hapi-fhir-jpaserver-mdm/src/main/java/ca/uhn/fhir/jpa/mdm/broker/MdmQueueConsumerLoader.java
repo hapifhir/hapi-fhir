@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.broker;
 
-import ca.uhn.fhir.broker.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;

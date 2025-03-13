@@ -19,16 +19,17 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.api;
 
-import ca.uhn.fhir.broker.ChannelConsumerSettings;
-import ca.uhn.fhir.broker.ChannelProducerSettings;
-import ca.uhn.fhir.broker.IChannelNamer;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IBrokerClient;
 
 /**
  * This interface is the factory for Queue Channels, which are the low level abstraction over a
  * queue (e.g. memory queue, JMS queue, Kafka stream, etc.) for any purpose.
  */
 /**
- * @deprecated Use {@link ca.uhn.fhir.broker.IBrokerClient} instead
+ * @deprecated Use {@link IBrokerClient} instead
  */
 @Deprecated
 public interface IChannelFactory {

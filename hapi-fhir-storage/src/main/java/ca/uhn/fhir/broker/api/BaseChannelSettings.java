@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.broker;
+package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 

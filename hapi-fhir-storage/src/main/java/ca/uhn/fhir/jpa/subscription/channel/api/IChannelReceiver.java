@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.api;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.broker.IChannelConsumer} instead
+ * @deprecated Use {@link IChannelConsumer} instead
  */
 @Deprecated
 public interface IChannelReceiver extends SubscribableChannel, InterceptableChannel, DisposableBean {

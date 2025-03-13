@@ -23,7 +23,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.broker.IChannelProducer} instead
+ * @deprecated Use {@link ca.uhn.fhir.broker.api.IChannelProducer} instead
  */
 @Deprecated
 public interface IChannelProducer extends MessageChannel, InterceptableChannel {}

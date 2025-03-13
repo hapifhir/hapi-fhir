@@ -17,26 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.broker;
+package ca.uhn.fhir.broker.api;
 
-public class ChannelProducerSettings extends BaseChannelSettings {
-	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
+/**
+ * This exception represents the message payload exceeded the maximum message size of the broker. Used as a wrapper of
+ * similar exceptions specific to different message brokers, e.g. kafka.common.errors.RecordTooLargeException.
+ */
+public class PayloadTooLargeException extends RuntimeException {
 
-	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
-
-	/**
-	 * Constructor
-	 */
-	public ChannelProducerSettings() {
-		super();
+	public PayloadTooLargeException(String theMessage) {
+		super(theMessage);
 	}
 
-	public Integer getConcurrentConsumers() {
-		return myConcurrentConsumers;
-	}
-
-	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
-		return this;
+	public PayloadTooLargeException(String theMessage, Throwable theThrowable) {
+		super(theMessage, theThrowable);
 	}
 }
