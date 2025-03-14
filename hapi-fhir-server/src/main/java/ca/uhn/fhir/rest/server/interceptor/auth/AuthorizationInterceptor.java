@@ -91,6 +91,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
+	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY =
+			List.of(
+					RestOperationTypeEnum.SEARCH_TYPE,
+					RestOperationTypeEnum.SEARCH_SYSTEM,
+					RestOperationTypeEnum.GET_PAGE);
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
@@ -512,7 +517,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (alreadySeenMap.putIfAbsent(theResponseObject, Boolean.TRUE) != null) {
 			return;
 		}
-
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
 		List<IBaseResource> resources = Collections.emptyList();
 
@@ -529,7 +533,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainerUnlessStandalone(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainerUnlessStandalone(
+							theResponseObject, fhirContext, theRequestDetails);
 				}
 				break;
 			}
@@ -577,19 +582,35 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	protected static List<IBaseResource> toListOfResourcesAndExcludeContainerUnlessStandalone(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+			IBaseResource theResponseObject, FhirContext fhirContext, RequestDetails theRequestDetails) {
+
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
-		List<IBaseResource> retVal;
-
 		boolean shouldExamineChildResources = shouldExamineChildResources(theResponseObject, fhirContext);
 		if (!shouldExamineChildResources) {
-			return Collections.singletonList(theResponseObject);
+			return toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+					theResponseObject, theRequestDetails);
 		}
 
 		return toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+	}
+
+	private static List<IBaseResource> toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+			IBaseResource theResponseObject, RequestDetails theRequestDetails) {
+		List<IBaseResource> resources = new ArrayList<>();
+		RestOperationTypeEnum restOperationType = theRequestDetails.getRestOperationType();
+		String resourceName = theRequestDetails.getResourceName();
+		resources.add(theResponseObject);
+
+		if (resourceName != null
+				&& !resourceName.equals("OperationOutcome")
+				&& REST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY.contains(restOperationType)) {
+			resources.removeIf(t -> t instanceof IBaseOperationOutcome);
+		}
+
+		return resources;
 	}
 
 	@Nonnull
