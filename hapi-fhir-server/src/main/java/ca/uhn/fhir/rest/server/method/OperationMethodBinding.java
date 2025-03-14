@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -43,14 +44,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -58,10 +64,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
+
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
 	private final boolean myDeleteEnabled;
-	private final Integer myIdParamIndex;
+	private final OperationIdParamDetails myOperationIdParamDetails;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
@@ -144,7 +152,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					+ theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 					+ " but this annotation has no name defined");
 		}
-		if (theOperationName.startsWith("$") == false) {
+		if (!theOperationName.startsWith("$")) {
 			theOperationName = "$" + theOperationName;
 		}
 		myName = theOperationName;
@@ -152,7 +160,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		try {
 			if (theReturnTypeFromRp != null) {
 				setResourceName(theContext.getResourceType(theReturnTypeFromRp));
-			} else if (theOperationType != null && Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+			} else if (theOperationType != null && !Modifier.isAbstract(theOperationType.getModifiers())) {
 				setResourceName(theContext.getResourceType(theOperationType));
 			} else if (isNotBlank(theOperationTypeName)) {
 				setResourceName(theContext.getResourceType(theOperationTypeName));
@@ -170,25 +178,22 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		myOperationIdParamDetails = findIdParameterDetails(theMethod, getContext());
+
 		if (getResourceName() == null) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-			if (myIdParamIndex != null) {
+			if (myOperationIdParamDetails.isFound()) {
 				myCanOperateAtInstanceLevel = true;
 			} else {
 				myCanOperateAtServerLevel = true;
 			}
-		} else if (myIdParamIndex == null) {
+		} else if (!myOperationIdParamDetails.isFound()) {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 			myCanOperateAtTypeLevel = true;
 		} else {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			myCanOperateAtInstanceLevel = true;
-			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
-				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
-				}
-			}
+			myCanOperateAtTypeLevel = myOperationIdParamDetails.setOrReturnPreviousValue(myCanOperateAtTypeLevel);
 		}
 
 		myReturnParams = new ArrayList<>();
@@ -302,6 +307,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		boolean requestHasId = theRequest.getId() != null;
+		ourLog.trace(
+				"method: {} has myCanOperateAtInstanceLevel : {}, requestHasId: {}",
+				myName,
+				myCanOperateAtInstanceLevel,
+				requestHasId);
 		if (requestHasId) {
 			return myCanOperateAtInstanceLevel ? MethodMatchEnum.EXACT : MethodMatchEnum.NONE;
 		}
@@ -392,17 +402,16 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 					Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
+		ourLog.trace("invoking method: {} with params: {}", theRequest.getOperation(), theMethodParams);
 
-		Object response = invokeServerMethod(theRequest, theMethodParams);
+		final Object response = invokeServerMethod(
+				theRequest, myOperationIdParamDetails.alterMethodParamsIfNeeded(theRequest, theMethodParams));
+
 		if (myManualResponseMode) {
 			return null;
 		}
 
-		IBundleProvider retVal = toResourceList(response);
-		return retVal;
+		return toResourceList(response);
 	}
 
 	public boolean isCanOperateAtInstanceLevel() {
@@ -439,6 +448,89 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public String getCanonicalUrl() {
 		return myCanonicalUrl;
+	}
+
+	private OperationIdParamDetails findIdParameterDetails(Method theMethod, FhirContext theContext) {
+		final List<Class<?>> operationEmbeddedTypes =
+				EmbeddedOperationUtils.getMethodParamsAnnotatedWithEmbeddableOperationParams(theMethod);
+
+		if (!operationEmbeddedTypes.isEmpty()) {
+			return findIdParamIndexForTypeWithEmbeddedParams(theMethod, operationEmbeddedTypes, theContext);
+		}
+
+		return getIdParamAnnotationFromMethodParams(theMethod, theContext);
+	}
+
+	@Nonnull
+	private OperationIdParamDetails getIdParamAnnotationFromMethodParams(Method theMethod, FhirContext theContext) {
+		final Integer paramAnnotationIndex = ParameterUtil.findParamAnnotationIndex(theMethod, IdParam.class);
+		if (paramAnnotationIndex != null) {
+			final Optional<IdParam> optIdParam = findIdParam(theMethod, paramAnnotationIndex);
+			final Class<?> paramType = theMethod.getParameterTypes()[paramAnnotationIndex];
+			if (IIdType.class.equals(paramType)) {
+				return new OperationIdParamDetails(optIdParam.orElse(null), paramAnnotationIndex);
+			}
+
+			ParameterUtil.validateIdType(theMethod, theContext, paramType);
+
+			return new OperationIdParamDetails(optIdParam.orElse(null), paramAnnotationIndex);
+		}
+
+		return OperationIdParamDetails.EMPTY;
+	}
+
+	private Optional<IdParam> findIdParam(Method theMethod, int theParamIndex) {
+		return Arrays.stream(theMethod.getParameterAnnotations()[theParamIndex])
+				.filter(IdParam.class::isInstance)
+				.map(IdParam.class::cast)
+				.findFirst();
+	}
+
+	@Nonnull
+	private OperationIdParamDetails findIdParamIndexForTypeWithEmbeddedParams(
+			Method theMethod, List<Class<?>> theTypesWithEmbeddedParams, FhirContext theContext) {
+		for (Class<?> typeWithEmbeddedParams : theTypesWithEmbeddedParams) {
+			// LUKETODO:  skip anything else?
+			if (ParametersUtil.isOneOfEligibleTypes(
+					typeWithEmbeddedParams, RequestDetails.class, SystemRequestDetails.class)) {
+				// skip
+			} else {
+				final Constructor<?> constructor =
+						EmbeddedOperationUtils.validateAndGetConstructor(typeWithEmbeddedParams);
+
+				final Parameter[] constructorParams = constructor.getParameters();
+
+				int paramIndex = 0;
+				for (Parameter constructorParam : constructorParams) {
+					ParameterUtil.validateIdType(theMethod, theContext, constructorParam.getType());
+
+					final String constructorParamName = constructorParam.getName();
+					final Annotation[] fieldAnnotations = constructorParam.getAnnotations();
+
+					if (fieldAnnotations.length < 1) {
+						throw new ConfigurationException(String.format(
+								"%sNo annotations for constructor param: %s for method: %s",
+								Msg.code(126362643), constructorParamName, theMethod.getName()));
+					}
+
+					if (fieldAnnotations.length > 1) {
+						throw new ConfigurationException(String.format(
+								"%sMore than one annotation for constructor param: %s for method: %s",
+								Msg.code(195614846), constructorParamName, theMethod.getName()));
+					}
+
+					final Annotation fieldAnnotation = fieldAnnotations[0];
+
+					if (fieldAnnotation instanceof IdParam) {
+						return new OperationIdParamDetails((IdParam) fieldAnnotation, paramIndex);
+					}
+
+					paramIndex++;
+				}
+			}
+		}
+
+		return OperationIdParamDetails.EMPTY;
 	}
 
 	public static class ReturnType {

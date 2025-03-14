@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -120,21 +121,22 @@ public class ParameterUtil {
 			if (IIdType.class.equals(paramType)) {
 				return index;
 			}
-			boolean isRi = theContext.getVersion().getVersion().isRi();
-			boolean usesHapiId = IdDt.class.equals(paramType);
-			if (isRi == usesHapiId) {
-				throw new ConfigurationException(Msg.code(1936)
-						+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
-						+ theMethod.toString());
-			}
+			validateIdType(theMethod, theContext, paramType);
 		}
 		return index;
 	}
 
-	// public static Integer findSinceParameterIndex(Method theMethod) {
-	// return findParamIndex(theMethod, Since.class);
-	// }
+	public static void validateIdType(Method theMethod, FhirContext theContext, Class<?> paramType) {
+		boolean isRi = theContext.getVersion().getVersion().isRi();
+		boolean usesHapiId = IdDt.class.equals(paramType);
+		if (isRi == usesHapiId) {
+			throw new ConfigurationException(Msg.code(1936)
+					+ "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: "
+					+ theMethod.toString());
+		}
+	}
 
+	@Nullable
 	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
 		int paramIndex = 0;
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
@@ -149,6 +151,7 @@ public class ParameterUtil {
 		return null;
 	}
 
+	@Nullable
 	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
 		if (theArgument == null) {
 			return null;
