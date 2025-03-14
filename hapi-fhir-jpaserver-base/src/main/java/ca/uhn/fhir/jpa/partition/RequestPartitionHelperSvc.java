@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
@@ -36,6 +37,12 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	IPartitionLookupSvc myPartitionConfigSvc;
 
+	@Autowired
+	PartitionSettings myPartitionSettings;
+
+	public RequestPartitionHelperSvc() {}
+
+	//TODO C: Looks like this code here corrects the null partition and converts it into the actual default partition, but is this called everywhere?
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
