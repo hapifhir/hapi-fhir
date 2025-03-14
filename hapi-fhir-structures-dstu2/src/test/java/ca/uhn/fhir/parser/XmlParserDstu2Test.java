@@ -90,6 +90,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -221,7 +222,7 @@ public class XmlParserDstu2Test {
 	 */
 	@Test
 	public void testParseWovenContainedResources() throws IOException {
-		String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_woven_obs.xml"), StandardCharsets.UTF_8);
+		String string = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream("/bundle_with_woven_obs.xml")), StandardCharsets.UTF_8);
 
 		IParser parser = ourCtx.newXmlParser();
 		parser.setParserErrorHandler(new StrictErrorHandler());
@@ -229,10 +230,10 @@ public class XmlParserDstu2Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId().getValue());
+		assertEquals("2", obs.getId().getValue());
 		ResourceReferenceDt performerFirstRep = obs.getPerformer().get(0);
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId().getValue());
+		assertEquals("3", performer.getId().getValue());
 	}
 
 	@Test
@@ -301,13 +302,13 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testParseWithInvalidLocalRef() throws IOException {
 		try {
-			String string = IOUtils.toString(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml"), StandardCharsets.UTF_8);
+			String string = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream("/bundle_with_invalid_contained_ref.xml")), StandardCharsets.UTF_8);
 
 			IParser parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 			fail();		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [47,7]]: " + Msg.code(1826) + "Resource has invalid reference: #1", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [47,7]]: " + Msg.code(1826) + "Resource has invalid reference: 1", e.getMessage());
 		}
 	}
 
@@ -536,7 +537,7 @@ public class XmlParserDstu2Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getId().getValue());
+		assertEquals(organizationUuid, org.getId().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -565,6 +566,35 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
 		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
+
+	}
+
+	@Test
+	void testEncodeContainedResourceWithNoExplicitId() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		String organizationUuid = UUID.randomUUID().toString();
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getNameElement().setValue("Contained Test Organization");
+		org.setId(organizationUuid);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+
+		// Put the organization as a reference in the patient resource
+		patient.getManagingOrganization().setResource(org);
+
+
+		//patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((String) null);
+		String encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid +
+			"\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
+		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
+		assertThat(encoded).contains("<reference value=\"#" + organizationUuid + "\"/>");
 
 	}
 
@@ -2953,11 +2983,7 @@ public class XmlParserDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	public static void main(String[] args) {
-		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
-		// c.registerInterceptor(new LoggingInterceptor(true));
-		c.read().resource("Patient").withId("324").execute();
-	}
+
 
 	public static void compareXml(String content, String reEncoded) {
 		Diff d = DiffBuilder.compare(Input.fromString(content))

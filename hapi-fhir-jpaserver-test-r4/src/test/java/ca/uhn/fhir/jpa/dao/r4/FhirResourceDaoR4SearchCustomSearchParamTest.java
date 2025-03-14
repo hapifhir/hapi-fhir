@@ -1518,7 +1518,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 
 		Specimen specimen = new Specimen();
-		specimen.setId("#FOO");
+		specimen.setId("FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 		Observation o = new Observation();
 		o.setId("O1");
@@ -1529,7 +1529,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		myObservationDao.update(o);
 
 		specimen = new Specimen();
-		specimen.setId("#FOO");
+		specimen.setId("FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-03"));
 		o = new Observation();
 		o.setId("O2");
