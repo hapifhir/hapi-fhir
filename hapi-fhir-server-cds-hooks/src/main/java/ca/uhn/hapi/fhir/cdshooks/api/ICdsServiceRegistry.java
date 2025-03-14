@@ -63,37 +63,21 @@ public interface ICdsServiceRegistry {
 	 * @param theServiceFunction             the function that will be called to invoke the service
 	 * @param theCdsServiceJson              the service descriptor
 	 * @param theAllowAutoFhirClientPrefetch Whether to allow the server to automatically prefetch resources
-	 * @param theServiceGroupId              the serviceGroupId where the service is registered
+	 * @param theModuleId                    the moduleId where the service is registered
 	 */
 	void registerService(
 			String theServiceId,
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theServiceGroupId);
-
-	/**
-	 * Register a new Clinical Reasoning CDS Service with the endpoint.
-	 *
-	 * @param theServiceId the id of the service PlanDefinition
-	 * @return the service was registered
-	 */
-	boolean registerCrService(String theServiceId);
+			String theModuleId);
 
 	/**
 	 * Remove registered CDS service with the service ID, only removes dynamically registered service
 	 *
 	 * @param theServiceId the id of the service to be removed
-	 * @param theServiceGroupId the id of the group where the service is registered
 	 */
-	void unregisterService(String theServiceId, String theServiceGroupId);
-
-	/**
-	 * Remove registered CDS services with the Group ID, only removes dynamically registered services
-	 *
-	 * @param theServiceGroupId the id of the group where the services are registered
-	 */
-	void unregisterServices(String theServiceGroupId);
+	void unregisterService(String theServiceId, String theModuleId);
 
 	/**
 	 * Get registered CDS service with service ID
