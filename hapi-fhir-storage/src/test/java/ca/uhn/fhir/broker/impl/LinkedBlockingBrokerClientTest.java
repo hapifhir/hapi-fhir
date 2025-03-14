@@ -2,24 +2,30 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.HapiMessage;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.api.Message;
+import ca.uhn.fhir.broker.api.IMessage;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LinkedBlockingBrokerClientTest {
 	private static final String TEST_CHANNEL_NAME = "LinkedBlockingBrokerClientTest-TestChannel";
+	private static final String TEST_KEY = "LinkedBlockingBrokerClientTest-TestKey";
 	private IChannelNamer myChannelNamer = (theNameComponent, theChannelSettings) -> theNameComponent;
 	;
 	private RetryPolicyProvider myRetryPolicyProvider = new RetryPolicyProvider();
@@ -27,33 +33,83 @@ class LinkedBlockingBrokerClientTest {
 	private final LinkedBlockingBrokerClient myBrokerClient = new LinkedBlockingBrokerClient(myLinkedBlockingChannelFactory);
 
 	@Test
-	public void testSendReceiveSync() throws Exception {
-		try (IChannelProducer<MyTestMessageType, Boolean> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessageType.class, new ChannelProducerSettings())) {
-			MyTestMessageType message = new MyTestMessageType("Honda", "Civic");
-			MyMessageListener listener = new MyMessageListener();
-			try (IChannelConsumer<MyTestMessageType> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessageType.class, listener, new ChannelConsumerSettings())) {
-				producer.send(message);
-				assertEquals("Honda", message.make);
-				assertEquals("Civic", message.model);
-			}
+	public void testSendReceive() throws Exception {
+		IChannelProducer<MyTestMessageValue, Boolean> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessageValue.class, new ChannelProducerSettings());
+		MyMessageListener listener = new MyMessageListener();
+		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessageValue.class, listener, new ChannelConsumerSettings())) {
+			listener.setExpectedCount(1);
+			HapiMessage<MyTestMessageValue> message = buildMessage("Honda", "Civic");
+			producer.send(message);
+			List<HookParams> result = listener.awaitExpected();
+			assertThat(result).hasSize(1);
+			LegacyMessage<MyTestMessageValue> receivedMessage = (LegacyMessage<MyTestMessageValue>) result.get(0).get(LegacyMessage.class);
+			MyTestMessageValue receivedValue = receivedMessage.getValue();
+			assertEquals("Honda", receivedValue.make);
+			assertEquals("Civic", receivedValue.model);
 		}
 	}
 
-	private static class MyTestMessageType {
+	@Test
+	public void testSendReceiveTenMessages() throws Exception {
+		IChannelProducer<MyTestMessageValue, Boolean> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessageValue.class, new ChannelProducerSettings());
+		MyMessageListener listener = new MyMessageListener();
+		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessageValue.class, listener, new ChannelConsumerSettings())) {
+			listener.setExpectedCount(10);
+			for (int i = 0; i < 10; i++) {
+				HapiMessage<MyTestMessageValue> message = buildMessage("Honda", "Civic" + i);
+				producer.send(message);
+			}
+
+			List<HookParams> result = listener.awaitExpected();
+			assertThat(result).hasSize(10);
+			LegacyMessage<MyTestMessageValue> receivedMessage = (LegacyMessage<MyTestMessageValue>) result.get(5).get(LegacyMessage.class);
+			MyTestMessageValue receivedValue = receivedMessage.getValue();
+			assertEquals("Honda", receivedValue.make);
+			assertEquals("Civic5", receivedValue.model);
+		}
+	}
+
+	private static @NotNull HapiMessage<MyTestMessageValue> buildMessage(String theMake, String theModel) {
+		MyTestMessageValue value = new MyTestMessageValue(theMake, theModel);
+		HapiMessage<MyTestMessageValue> message = new HapiMessage<>(value);
+		return message;
+	}
+
+
+	private static class MyTestMessageValue implements IModelJson {
+		@JsonProperty
 		String make;
+
+		@JsonProperty
 		String model;
 
-		public MyTestMessageType(String theMake, String theModel) {
+		public MyTestMessageValue(String theMake, String theModel) {
 			make = theMake;
+			model = theModel;
+		}
+
+		public String getMake() {
+			return make;
+		}
+
+		public void setMake(String theMake) {
+			make = theMake;
+		}
+
+		public String getModel() {
+			return model;
+		}
+
+		public void setModel(String theModel) {
 			model = theModel;
 		}
 	}
 
-	private static class MyMessageListener implements IMessageListener<MyTestMessageType>, IPointcutLatch {
+	private static class MyMessageListener implements IMessageListener<MyTestMessageValue>, IPointcutLatch {
 		private final PointcutLatch myLatch = new PointcutLatch("MyMessageListener");
 
 		@Override
-		public void received(IChannelConsumer<MyTestMessageType> theChannelConsumer, Message<MyTestMessageType> theMessage) {
+		public void received(IChannelConsumer<MyTestMessageValue> theChannelConsumer, IMessage<MyTestMessageValue> theMessage) {
 			myLatch.call(theMessage);
 		}
 

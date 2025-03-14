@@ -1,19 +1,20 @@
 package ca.uhn.fhir.broker.impl;
 
 
-import ca.uhn.fhir.broker.api.Message;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.api.IMessage;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 
 import java.util.Map;
 
-public class LegacyMessageAdapter<T> implements Message<T> {
-	private final ILegacyChannelReceiver myLegacyChannelReceiver;
+public class LegacyMessage<T> implements IMessage<T> {
 	private final org.springframework.messaging.Message<T> myMessage;
 
-	public LegacyMessageAdapter(ILegacyChannelReceiver theLegacyChannelReceiver, org.springframework.messaging.Message<T> theMessage) {
-		myLegacyChannelReceiver = theLegacyChannelReceiver;
+	public LegacyMessage(org.springframework.messaging.Message<T> theMessage) {
 		myMessage = theMessage;
+	}
+
+	org.springframework.messaging.Message<T> getLegacyMessage() {
+		return myMessage;
 	}
 
 	@Override
@@ -39,11 +40,6 @@ public class LegacyMessageAdapter<T> implements Message<T> {
 	@Override
 	public String getHeader(String theHeaderName) {
 		return myMessage.getHeaders().get(theHeaderName) == null ? null : myMessage.getHeaders().get(theHeaderName).toString();
-	}
-
-	@Override
-	public String getChannelName() {
-		return myLegacyChannelReceiver.getName();
 	}
 
 	@Override

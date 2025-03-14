@@ -2,7 +2,7 @@ package ca.uhn.fhir.broker.api;
 
 import java.util.Map;
 
-public interface Message<T> {
+public interface IMessage<T> {
 	/**
 	 * @return the raw data of the message
 	 */
@@ -29,11 +29,6 @@ public interface Message<T> {
 	 * @return return a specific header
 	 */
 	String getHeader(String theHeaderName);
-
-	/**
-	 * @return the name of the channel this message was published to
-	 */
-	String getChannelName();
 
 	/**
 	 * @return the de-serialized value of the message

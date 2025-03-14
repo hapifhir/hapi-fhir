@@ -1,7 +1,9 @@
 package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IMessage;
 import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import org.springframework.messaging.Message;
 
 public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T, Boolean> {
 	private final ILegacyChannelProducer myLegacyChannelProducer;
@@ -21,12 +23,8 @@ public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T, Bool
 	}
 
 	@Override
-	public Boolean send(T theMessage) {
-		return null;
-	}
-
-	@Override
-	public void close() throws Exception {
-
+	public Boolean send(IMessage<T> theMessage) {
+		SpringMessageAdapter<T> springMessage = new SpringMessageAdapter<>(theMessage);
+		return myLegacyChannelProducer.send(springMessage);
 	}
 }

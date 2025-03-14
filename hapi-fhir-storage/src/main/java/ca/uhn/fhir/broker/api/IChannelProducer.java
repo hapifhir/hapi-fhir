@@ -4,7 +4,7 @@ package ca.uhn.fhir.broker.api;
  * @param <T> The type of messages sent by this producer
  * @param <S> The type of the result of sending a message
  */
-public interface IChannelProducer<T, S> extends AutoCloseable {
+public interface IChannelProducer<T, S> {
 	/**
 	 * @return the name of the consumer
 	 */
@@ -21,5 +21,5 @@ public interface IChannelProducer<T, S> extends AutoCloseable {
 	 * @param theMessage the message to send
 	 * @return the result of the send operation
 	 */
-	S send(T theMessage);
+	S send(IMessage<T> theMessage);
 }

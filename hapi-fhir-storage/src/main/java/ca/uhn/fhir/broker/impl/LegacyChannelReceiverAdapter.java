@@ -1,12 +1,8 @@
 package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
-import ca.uhn.fhir.broker.api.Message;
 import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
 import org.springframework.messaging.MessageHandler;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
 	private final ILegacyChannelReceiver myLegacyChannelReceiver;
@@ -34,12 +30,12 @@ public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public String getConsumerName() {
-		return myLegacyChannelReceiver.getName();
+		return "Legacy " + myLegacyChannelReceiver.getName() + " consumer";
 	}
 
 	@Override
 	public String getChannelName() {
-		return "";
+		return myLegacyChannelReceiver.getName();
 	}
 
 	@Override
