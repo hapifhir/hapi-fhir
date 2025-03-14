@@ -138,7 +138,7 @@ public class MetadataCapabilityStatementDstu3Test {
 	public void testHeadElements() throws Exception {
 
 		HttpRequestBase httpHead = new HttpHead(ourServer.getBaseUrl() + "/metadata?_elements=fhirVersion&_pretty=true");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpHead);
 		status.getAllHeaders();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
