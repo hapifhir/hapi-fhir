@@ -27,10 +27,17 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CdsPrefetchFhirClientSvc {
@@ -54,10 +61,46 @@ public class CdsPrefetchFhirClientSvc {
 		if (resourceId != null) {
 			return client.read().resource(resourceType).withId(resourceId).execute();
 		} else if (matchUrl != null) {
-			return client.search().byUrl(theUrl).execute();
+			return collectResourcesFromUrlFollowingNextLinks(client, theUrl);
 		} else {
 			throw new InvalidRequestException(
 					Msg.code(2384) + "Unable to translate url " + theUrl + " into a resource or a bundle.");
+		}
+	}
+
+	/**
+	 * Collect resources from a URL that returns a bundle. If the bundle has more than one page,
+	 * this paginates and collect all resources into a single bundle
+	 */
+	private IBaseBundle collectResourcesFromUrlFollowingNextLinks(IGenericClient theClient, String theUrl) {
+		IBaseBundle bundle = theClient.search().byUrl(theUrl).execute();
+
+		boolean hasNext = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, "next") != null;
+		if (!hasNext) {
+			return bundle;
+		}
+
+		// bundle has more than one page, paginate and collect all resources into a single bundle
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.setType(BundleUtil.getBundleType(myFhirContext, bundle));
+		addAllResourceOfBundleToBundleBuilder(bundleBuilder, bundle);
+
+		while (hasNext) {
+			bundle = theClient.loadPage().next(bundle).execute();
+			addAllResourceOfBundleToBundleBuilder(bundleBuilder, bundle);
+			hasNext = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, "next") != null;
+		}
+
+		return bundleBuilder.getBundle();
+	}
+
+	private void addAllResourceOfBundleToBundleBuilder(BundleBuilder theBundleBuilder, IBaseBundle theBundle) {
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
+
+		for (BundleEntryParts currentEntry : entries) {
+			IBase newEntry = theBundleBuilder.addEntry();
+			theBundleBuilder.addFullUrl(newEntry, currentEntry.getFullUrl());
+			theBundleBuilder.addToEntry(newEntry, "resource", currentEntry.getResource());
 		}
 	}
 
