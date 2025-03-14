@@ -32,34 +32,32 @@ import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class JobInstanceProcessor {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
-
-	// 10k; we want to get as many as we can
-	private static final int WORK_CHUNK_METADATA_BATCH_SIZE = 10000;
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
+	private final String myInstanceId;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
+	private final WorkChunkProcessingService myWorkChunkProcessingService;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
-	private final String myInstanceId;
-	private final JobDefinitionRegistry myJobDefinitionegistry;
+	private final HapiTransactionService myTxService;
 
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
@@ -67,16 +65,19 @@ public class JobInstanceProcessor {
 			String theInstanceId,
 			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			HapiTransactionService theTxService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
 		myProgressAccumulator = theProgressAccumulator;
 		myReductionStepExecutorService = theReductionStepExecutorService;
-		myJobDefinitionegistry = theJobDefinitionRegistry;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator =
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+		myTxService = theTxService;
+		myWorkChunkProcessingService = new WorkChunkProcessingService(theTxService);
 	}
 
 	public void process() {
@@ -95,7 +96,7 @@ public class JobInstanceProcessor {
 		}
 
 		JobDefinition<? extends IModelJson> jobDefinition =
-				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+				myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance);
 
 		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
@@ -124,7 +125,7 @@ public class JobInstanceProcessor {
 		}
 
 		// enqueue all READY chunks
-		enqueueReadyChunks(theInstance, jobDefinition);
+		processReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
@@ -142,6 +143,52 @@ public class JobInstanceProcessor {
 			});
 		}
 		return false;
+	}
+
+	public void processReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
+		AtomicInteger counter = new AtomicInteger(0);
+		try (final Stream<WorkChunkMetadata> chunks =
+				myWorkChunkProcessingService.getReadyChunks(theJobInstance.getInstanceId())) {
+			chunks.forEach(chunk -> {
+				updateChunkAndSendToQueue(chunk);
+				counter.incrementAndGet();
+			});
+		}
+		ourLog.debug(
+				"Encountered {} READY work chunks for job {} of type {}",
+				counter,
+				theJobInstance.getInstanceId(),
+				theJobDefinition.getJobDefinitionId());
+	}
+
+	private void updateChunkAndSendToQueue(WorkChunkMetadata theChunk) {
+		String chunkId = theChunk.getId();
+		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+			if (updated == 1) {
+				sendNotification(theChunk);
+			} else {
+				// means the work chunk is likely already gone...
+				// we'll log and skip it. If it's still in the DB, the next pass
+				// will pick it up. Otherwise, it's no longer important
+				ourLog.error(
+						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
+						theChunk.getInstanceId(),
+						theChunk.getId(),
+						updated);
+			}
+		});
+	}
+
+	private void sendNotification(WorkChunkMetadata theChunk) {
+		// send to the queue
+		// we use current step id because it has not been moved to the next step (yet)
+		JobWorkNotification workNotification = new JobWorkNotification(
+				theChunk.getJobDefinitionId(),
+				theChunk.getJobDefinitionVersion(),
+				theChunk.getInstanceId(),
+				theChunk.getTargetStepId(),
+				theChunk.getId());
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
 	private String buildCancelledMessage(JobInstance theInstance) {
@@ -266,17 +313,6 @@ public class JobInstanceProcessor {
 		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
-	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
-		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
-			Pageable pageable = Pageable.ofSize(batchsize).withPage(index);
-			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
-			for (WorkChunkMetadata metadata : results) {
-				consumer.accept(metadata);
-			}
-		});
-	}
-
 	/**
 	 * Trigger the reduction step for the given job instance. Reduction step chunks should never be queued.
 	 */
@@ -291,70 +327,6 @@ public class JobInstanceProcessor {
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
 	 * for processing.
 	 */
-	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
-		Iterator<WorkChunkMetadata> iter = getReadyChunks();
-
-		int counter = 0;
-		while (iter.hasNext()) {
-			WorkChunkMetadata metadata = iter.next();
-
-			/*
-			 * For each chunk id
-			 * * Move to QUEUE'd
-			 * * Send to topic
-			 * * flush changes
-			 * * commit
-			 */
-			updateChunkAndSendToQueue(metadata);
-			counter++;
-		}
-		ourLog.debug(
-				"Encountered {} READY work chunks for job {} of type {}",
-				counter,
-				theJobInstance.getInstanceId(),
-				theJobDefinition.getJobDefinitionId());
-	}
-
-	/**
-	 * Updates the Work Chunk and sends it to the queue.
-	 *
-	 * Because ReductionSteps are done inline by the maintenance pass,
-	 * those will not be sent to the queue (but they will still have their
-	 * status updated from READY -> QUEUED).
-	 *
-	 * Returns true after processing.
-	 */
-	private void updateChunkAndSendToQueue(WorkChunkMetadata theChunk) {
-		String chunkId = theChunk.getId();
-		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
-			ourLog.info("Updated {} workchunk with id {}", updated, chunkId);
-			if (updated == 1) {
-				sendNotification(theChunk);
-			} else {
-				// means the work chunk is likely already gone...
-				// we'll log and skip it. If it's still in the DB, the next pass
-				// will pick it up. Otherwise, it's no longer important
-				ourLog.error(
-						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
-						theChunk.getInstanceId(),
-						theChunk.getId(),
-						updated);
-			}
-		});
-	}
-
-	private void sendNotification(WorkChunkMetadata theChunk) {
-		// send to the queue
-		// we use current step id because it has not been moved to the next step (yet)
-		JobWorkNotification workNotification = new JobWorkNotification(
-				theChunk.getJobDefinitionId(),
-				theChunk.getJobDefinitionVersion(),
-				theChunk.getInstanceId(),
-				theChunk.getTargetStepId(),
-				theChunk.getId());
-		myBatchJobSender.sendWorkChannelMessage(workNotification);
-	}
-
 	private void processChunksForNextGatedSteps(
 			JobInstance theInstance, JobDefinition<?> theJobDefinition, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
