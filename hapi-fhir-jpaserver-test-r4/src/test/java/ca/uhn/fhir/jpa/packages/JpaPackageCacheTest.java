@@ -53,6 +53,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	@Test
 	public void testPackageWithProfiledDevice() throws IOException {
+		// See https://github.com/hapifhir/hapi-fhir/issues/5834 for details
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/cqf-ccc.tgz")) {
 			myPackageCacheManager.addPackageToCache("fhir.cqf.ccc", "0.1.0", stream, "basisprofil.de");
 		}
