@@ -85,7 +85,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread(), myCaptureQueriesListener.getInsertQueriesForCurrentThread().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1 + getSpIdentityInsertCount(), myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		patient = myPatientDao.read(new IdType("Patient/A"));
@@ -151,7 +151,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// because it executes in a transaction (calls executeInTransaction)
 		// we may want to change that in the future
 		int expectedCommitCount = partitionEnabled ? 2 : 1;
-		assertEquals(expectedCommitCount, myCaptureQueriesListener.countCommits());
+		assertEquals(expectedCommitCount + getSpIdentityInsertCount(), myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);

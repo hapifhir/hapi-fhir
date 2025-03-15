@@ -2070,9 +2070,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(3 + getSpIdentityInsertCount(), myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1 + getSpIdentitySelectCount(), myCaptureQueriesListener.countCommits());
 
 		observation = myObservationDao.read(new IdType("Observation/O0"), mySrd);
 		ourLog.info("Observation:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(observation));
@@ -4006,7 +4006,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		assertNotNull(myValidationSupport.fetchStructureDefinition("http://foo"));
 
-		assertEquals(1, myCaptureQueriesListener.countGetConnections());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections()); //
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
 		// Again (should use cache)
