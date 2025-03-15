@@ -63,7 +63,7 @@ public class DaoSearchParamSynchronizer {
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
 	@Autowired
-	private SearchParamIdentityCache mySearchParameterHashIdentityCache;
+	private SearchParamIdentityCache mySearchParamIdentityCache;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -105,6 +105,11 @@ public class DaoSearchParamSynchronizer {
 	@VisibleForTesting
 	public void setEntityManager(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
+	}
+
+	@VisibleForTesting
+	public void setSearchParamIdentityCache(SearchParamIdentityCache theSearchParamIdentityCache) {
+		mySearchParamIdentityCache = theSearchParamIdentityCache;
 	}
 
 	@VisibleForTesting
@@ -206,7 +211,7 @@ public class DaoSearchParamSynchronizer {
 	private <T extends BaseResourceIndex> void findOrCreateSearchParamIdentity(T theNewParam) {
 		if (theNewParam instanceof BaseResourceIndexedSearchParam) {
 			BaseResourceIndexedSearchParam indexedSearchParam = ((BaseResourceIndexedSearchParam) theNewParam);
-			mySearchParameterHashIdentityCache.findOrCreateSearchParamIdentity(
+			mySearchParamIdentityCache.findOrCreateSearchParamIdentity(
 					indexedSearchParam.getHashIdentity(),
 					indexedSearchParam.getParamName(),
 					indexedSearchParam.getResourceType());

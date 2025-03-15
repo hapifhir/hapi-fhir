@@ -35,7 +35,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.MAX_SP
 @Entity
 @Table(
 		name = "HFJ_SPIDX_IDENTITY",
-		uniqueConstraints = @UniqueConstraint(name = "HFJ_SPIDX_HASH_IDENTITY", columnNames = "HASH_IDENTITY"))
+		uniqueConstraints = @UniqueConstraint(name = "IDX_HASH_IDENTITY", columnNames = "HASH_IDENTITY"))
 public class IndexedSearchParamIdentity {
 
 	@Id

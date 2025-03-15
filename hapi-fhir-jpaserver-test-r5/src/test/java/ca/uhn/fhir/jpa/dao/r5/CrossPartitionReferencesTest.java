@@ -175,7 +175,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(2 + getSpIdentitySelectCount(), myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
