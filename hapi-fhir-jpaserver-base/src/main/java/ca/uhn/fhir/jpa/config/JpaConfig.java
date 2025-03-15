@@ -90,6 +90,7 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
@@ -587,8 +588,10 @@ public class JpaConfig {
 	@Bean
 	public SearchParamIdentityCache searchParameterHashIdentityCache(
 			@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
+			@Autowired ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
 			@Autowired PlatformTransactionManager theTxManager) {
-		return new SearchParamIdentityCache(theResourceIndexedSearchParamIdentityDao, theTxManager);
+		return new SearchParamIdentityCache(
+				theResourceIndexedSearchParamIdentityDao, theSearchParamHashIdentityRegistry, theTxManager);
 	}
 
 	/* **************************************************************** *

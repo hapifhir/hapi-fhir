@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
+import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +36,9 @@ public class SearchParamIdentityCacheTest {
 	@Mock
 	PlatformTransactionManager myTxManager;
 
+	@Mock
+	ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
+
 	@Test
 	public void findOrCreateSearchParamIdentity_identityExistsInCache_searchNotExecuted() {
 		Map<Long, Integer> hashIdentityToSearchParamIdMap = new HashMap<>();
@@ -62,7 +67,7 @@ public class SearchParamIdentityCacheTest {
 	@Test
 	public void findOrCreateSearchParamIdentity_missingInCacheThanCacheHit_findNotExecuted() {
 		// setup
-		// first map invocation returns null (cache miss), second invocation returns 1 (cache hit)
+		// first map invocation returns null (cache miss), second invocation returns 12345 (cache hit)
 		Map<Long, Integer> hashIdentityToSearchParamIdMap = new HashMap<>() {
 			private boolean firstCall = true;
 
@@ -108,7 +113,11 @@ public class SearchParamIdentityCacheTest {
 		IndexedSearchParamIdentity identity = new IndexedSearchParamIdentity();
 		identity.setSpIdentityId(12345);
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
-			.thenThrow(new DataIntegrityViolationException("Save Failed!")).thenReturn(identity);
+			.thenThrow(new DataIntegrityViolationException("Save Failed!")).thenAnswer(invocation -> {
+			IndexedSearchParamIdentity paramIdentity = invocation.getArgument(0);
+			paramIdentity.setSpIdentityId(12345);
+			return paramIdentity;
+		});;
 
 		// execute
 		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
@@ -171,6 +180,34 @@ public class SearchParamIdentityCacheTest {
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(myResourceIndexedSearchParamIdentityDao, times(0)).getSearchParameterIdByHashIdentity(anyLong());
 			verify(myResourceIndexedSearchParamIdentityDao, times(0)).save(any(IndexedSearchParamIdentity.class));
+		});
+	}
+
+	@Test
+	public void findOrCreateSearchParamIdentity_withInitCacheAndSpRegistryPreFill_saveExecutedOnce() {
+		// setup
+		Map<Long, IndexedSearchParam> searchParamRegistry = new HashMap<>();
+		searchParamRegistry.put(-7533943853970611242L, new IndexedSearchParam("given", "Patient"));
+		when(mySearchParamHashIdentityRegistry.getHashIdentityToIndexedSearchParamMap())
+			.thenReturn(searchParamRegistry);
+		// emulate assigning spIdentityId after save
+		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
+			.thenAnswer(invocation -> {
+				IndexedSearchParamIdentity paramIdentity = invocation.getArgument(0);
+				paramIdentity.setSpIdentityId(12345);
+				return paramIdentity;
+			});
+		mySearchParamIdentityCache.initCache();
+		waitOneSecond();
+
+		// execute
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+
+		// verify
+		waitOneSecond();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(myResourceIndexedSearchParamIdentityDao, times(1)).getSearchParameterIdByHashIdentity(anyLong());
+			verify(myResourceIndexedSearchParamIdentityDao, times(1)).save(any(IndexedSearchParamIdentity.class));
 		});
 	}
 

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
+import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -58,12 +58,15 @@ public class SearchParamIdentityCache {
 	private final IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
 	private final ExecutorService myThreadPool;
+	private final ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
 
 	public SearchParamIdentityCache(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
+			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
 			PlatformTransactionManager theTxManager) {
 		this.myResourceIndexedSearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
+		mySearchParamHashIdentityRegistry = theSearchParamHashIdentityRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		myThreadPool = createExecutor();
 	}
@@ -83,7 +86,7 @@ public class SearchParamIdentityCache {
 				TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<>(THREAD_POOL_QUEUE_SIZE),
 				threadFactory,
-				new BlockPolicy());
+				new ThreadPoolExecutor.DiscardPolicy());
 	}
 
 	@VisibleForTesting
@@ -102,9 +105,21 @@ public class SearchParamIdentityCache {
 	}
 
 	protected void initCache() {
+		// populate cache with IndexedSearchParamIdentities from database
 		Collection<Object[]> pids = Objects.requireNonNull(
 				myTxTemplate.execute(t -> myResourceIndexedSearchParamIdentityDao.getAllHashIdentities()));
 		myHashIdentityToSearchParamId = pids.stream().collect(Collectors.toMap(i -> (Long) i[0], i -> (Integer) i[1]));
+		// pre-fill cache with SearchParams from SearchParamRegistry
+		mySearchParamHashIdentityRegistry
+				.getHashIdentityToIndexedSearchParamMap()
+				.forEach((hashIdentity, indexedSearchParam) -> {
+					if (!myHashIdentityToSearchParamId.containsKey(hashIdentity)) {
+						myThreadPool.submit(new PersistSearchParameterIdentityTask(
+								hashIdentity,
+								indexedSearchParam.getParameterName(),
+								indexedSearchParam.getResourceType()));
+					}
+				});
 	}
 
 	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theParamName, String theResourceType) {
