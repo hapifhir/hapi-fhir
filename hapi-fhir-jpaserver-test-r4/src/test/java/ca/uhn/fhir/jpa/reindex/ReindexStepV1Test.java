@@ -223,12 +223,12 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(8 + getSpIdentitySelectCount(), myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(getSpIdentityInsertCount(), myCaptureQueriesListener.countInsertQueries());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1 + getSpIdentitySelectCount(), myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
 	}

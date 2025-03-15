@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -174,17 +175,17 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
+	}
+
+	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			@Nonnull String theResourceName,
 			@Nonnull Set<String> theParamNames,
 			@Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
-	}
-
-	@Override
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable

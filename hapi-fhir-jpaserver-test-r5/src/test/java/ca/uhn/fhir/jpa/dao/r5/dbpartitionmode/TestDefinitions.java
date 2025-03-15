@@ -264,12 +264,12 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getSelectSql(0)).startsWith("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0 WHERE (t0.HASH_SYS_AND_VALUE = '-2780914544385068076')");
 		}
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1 + getSpIdentitySelectCount(), myCaptureQueriesListener.countSelectQueries());
 
 		// Verify Insert Queries
 
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(5 + getSpIdentityInsertCount(), myCaptureQueriesListener.countInsertQueries());
 		assertEquals("HFJ_RESOURCE", parseInsertStatementTableName(getInsertSql(0)));
 		assertEquals("HFJ_RES_VER", parseInsertStatementTableName(getInsertSql(1)));
 		for (int i = 0; i < 4; i++) {
@@ -437,12 +437,12 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		} else {
 			assertThat(getSelectSql(0)).endsWith(" from HFJ_RESOURCE rt1_0 where rt1_0.RES_ID='" + idLong + "'");
 		}
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4 + getSpIdentitySelectCount(), myCaptureQueriesListener.countSelectQueries());
 
 		// Verify Insert
 		myCaptureQueriesListener.logInsertQueries();
 		assertThat(getInsertSql(0)).startsWith("insert into HFJ_RES_VER ");
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1 + getSpIdentityInsertCount(), myCaptureQueriesListener.countInsertQueries());
 
 		// Verify Update
 		myCaptureQueriesListener.logUpdateQueries();
@@ -853,7 +853,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		if (myIncludePartitionIdsInSql) {
 			assertThat(getSelectSql(0)).contains("t0.PARTITION_ID = '1'");
 		}
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2 + getSpIdentitySelectCount(), myCaptureQueriesListener.countSelectQueries());
 
 	}
 
@@ -1747,7 +1747,19 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			assertThat(getSelectSql(0)).endsWith(" where (rt1_0.RES_TYPE='Observation' and rt1_0.FHIR_ID='O')");
 			assertThat(getSelectSql(1)).endsWith(" where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')");
 		}
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2 + getSpIdentitySelectCount(), myCaptureQueriesListener.countSelectQueries());
+	}
+
+	private long getSpIdentitySelectCount() {
+		return myCaptureQueriesListener.getSelectQueries().stream()
+			.filter(q -> q.getSql(false, false).contains("HFJ_SPIDX_IDENTITY"))
+			.count();
+	}
+
+	private long getSpIdentityInsertCount() {
+		return myCaptureQueriesListener.getInsertQueries().stream()
+			.filter(q -> q.getSql(false, false).contains("insert into HFJ_SPIDX_IDENTITY"))
+			.count();
 	}
 
 	private SystemRequestDetails newRequest() {
@@ -1767,7 +1779,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 	@Language("SQL")
 	private String getSelectSql(int theIndex) {
-		return myCaptureQueriesListener.getSelectQueries().get(theIndex).getSql(true, false);
+		return myCaptureQueriesListener.getSelectQueries().stream()
+			.filter(sqlQuery -> !sqlQuery.getSql(true, false).contains("from HFJ_SPIDX_IDENTITY"))
+			.toList()
+			.get(theIndex).getSql(true, false);
 	}
 
 	@Language("SQL")
@@ -1782,7 +1797,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 
 	@Language("SQL")
 	private String getInsertSql(int theIndex) {
-		return myCaptureQueriesListener.getInsertQueries().get(theIndex).getSql(true, false);
+		return myCaptureQueriesListener.getInsertQueries().stream()
+			.filter(sqlQuery -> !sqlQuery.getSql(true, false).contains("insert into HFJ_SPIDX_IDENTITY"))
+			.toList()
+			.get(theIndex).getSql(true, false);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})

@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.model.search;
 
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 
-import java.util.Optional;
+import java.util.Map;
 
 public interface ISearchParamHashIdentityRegistry {
-	Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity);
+	Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap();
 }
