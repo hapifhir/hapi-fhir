@@ -18,8 +18,6 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
@@ -30,7 +28,6 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -147,6 +144,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourObservationListener.clear();
 		mySubscriptionResourceMatched.clear();
 		mySubscriptionResourceNotMatched.clear();
+		ourMatchingConsumer.close();
 		super.clearRegistry();
 	}
 
@@ -165,7 +163,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
-	protected Subscription sendSubscription(Subscription theSubscription, RequestPartitionId theRequestPartitionId, Boolean mockDao) throws InterruptedException {
+	protected Subscription sendSubscription(Subscription theSubscription, RequestPartitionId theRequestPartitionId) throws InterruptedException {
 		mySubscriptionResourceNotMatched.setExpectedCount(1);
 		mySubscriptionActivatedPost.setExpectedCount(1);
 		Subscription retVal = sendResource(theSubscription, theRequestPartitionId);

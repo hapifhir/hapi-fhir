@@ -81,9 +81,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -106,9 +106,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -129,7 +129,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		observation.setStatus(Observation.ObservationStatus.CORRECTED);
 
 		Subscription subscription = makeActiveSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
-		sendSubscription(subscription, null, false);
+		sendSubscription(subscription, null);
 
 		assertEquals(1, mySubscriptionRegistry.size());
 		ourObservationListener.setExpectedCount(1);
@@ -151,9 +151,9 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -179,11 +179,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria3 = "Observation?code=FOO"; // won't match
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 		Subscription subscription3 = makeActiveSubscription(criteria3, payload, ourListenerServerBase);
-		sendSubscription(subscription3, null, false);
+		sendSubscription(subscription3, null);
 
 		assertEquals(3, mySubscriptionRegistry.size());
 
@@ -209,7 +209,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
+		sendSubscription(subscription, requestPartitionId);
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -232,7 +232,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
+		sendSubscription(subscription, requestPartitionId);
 
 		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
 		if (theIsCrossPartitionEnabled) {
@@ -253,7 +253,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
+		sendSubscription(subscription, requestPartitionId);
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -277,7 +277,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
-		sendSubscription(subscription, requestPartitionId, true);
+		sendSubscription(subscription, requestPartitionId);
 
 		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(Collections.synchronizedList(Lists.newArrayList(0, 2))));
 
@@ -301,7 +301,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
-		sendSubscription(subscription, subscriptionPartitionId, true);
+		sendSubscription(subscription, subscriptionPartitionId);
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -324,7 +324,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
-		sendSubscription(subscription, subscriptionPartitionId, true);
+		sendSubscription(subscription, subscriptionPartitionId);
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -348,7 +348,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
-		sendSubscription(subscription, subscriptionPartitionId, true);
+		sendSubscription(subscription, subscriptionPartitionId);
 
 		ourObservationListener.setExpectedCount(2);
 		mySubscriptionResourceMatched.setExpectedCount(2);
