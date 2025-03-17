@@ -19,11 +19,14 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionConsumerWithListeners;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -31,9 +34,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -110,7 +110,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		void handleTextMessage(WebSocketSession theSession, TextMessage theMessage);
 	}
 
-	private class BoundStaticSubscriptionState implements IState, MessageHandler {
+	private class BoundStaticSubscriptionState implements IState, IMessageListener<ResourceDeliveryMessage> {
 
 		private final WebSocketSession mySession;
 		private final ActiveSubscription myActiveSubscription;
@@ -119,16 +119,18 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySession = theSession;
 			myActiveSubscription = theActiveSubscription;
 
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
-			subscriptionChannelWithHandlers.addHandler(this);
+			SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =
+					mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(
+							theActiveSubscription.getChannelName());
+			subscriptionConsumerWithListeners.addListener(this);
 		}
 
 		@Override
 		public void closing() {
-			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
-			subscriptionChannelWithHandlers.removeHandler(this);
+			SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =
+					mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(
+							myActiveSubscription.getChannelName());
+			subscriptionConsumerWithListeners.removeListener(this);
 		}
 
 		/**
@@ -149,16 +151,13 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 
 		@Override
-		public void handleMessage(Message<?> theMessage) {
-			if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
-				return;
-			}
-
+		public void handleMessage(IMessage<ResourceDeliveryMessage> theMessage) {
 			try {
-				ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+				ResourceDeliveryMessage msg = theMessage.getPayload();
 				handleSubscriptionPayload(msg);
 			} catch (Exception e) {
-				handleException(theMessage, e);
+				ourLog.error("Failure handling subscription payload", e);
+				throw new InternalErrorException(Msg.code(6) + "Failure handling subscription payload", e);
 			}
 		}
 
@@ -185,17 +184,6 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 			// Deliver the payload
 			deliver(payload);
-		}
-
-		/**
-		 * Handle the exception
-		 *
-		 * @param theMessage The message
-		 * @param e          The exception
-		 */
-		private void handleException(Message<?> theMessage, Exception e) {
-			ourLog.error("Failure handling subscription payload", e);
-			throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
 		}
 
 		/**

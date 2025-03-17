@@ -26,16 +26,14 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -43,14 +41,14 @@ import java.util.function.Supplier;
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
  */
-class WorkChannelMessageHandler implements MessageHandler {
+public class WorkChannelMessageListener implements IMessageListener<JobWorkNotification> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 	private final IHapiTransactionService myHapiTransactionService;
 
-	WorkChannelMessageHandler(
+	public WorkChannelMessageListener(
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull BatchJobSender theBatchJobSender,
@@ -69,8 +67,8 @@ class WorkChannelMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		handleWorkChannelMessage((JobWorkNotificationJsonMessage) theMessage);
+	public void handleMessage(IMessage<JobWorkNotification> theMessage) {
+		handleWorkChannelMessage(theMessage.getPayload());
 	}
 
 	/**
@@ -218,12 +216,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
+	private void handleWorkChannelMessage(JobWorkNotification theWorkNotification) {
 		try {
-			JobWorkNotification workNotification = theMessage.getPayload();
 			// Load the job instance and work chunk IDs into the logging MDC context
-			BatchJobTracingContext.setBatchJobIds(workNotification.getInstanceId(), workNotification.getChunkId());
-			ourLog.info("Received work notification for {}", workNotification);
+			BatchJobTracingContext.setBatchJobIds(
+					theWorkNotification.getInstanceId(), theWorkNotification.getChunkId());
+			ourLog.info("Received work notification for {}", theWorkNotification);
 
 			// There are three paths through this code:
 			// 1. Normal execution.  We validate, load, update statuses, all in a tx.  Then we process the chunk.
@@ -238,7 +236,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			Optional<MessageProcess> processingPreparation = executeInTxRollbackWhenEmpty(() ->
 
 					// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
-					Optional.of(new MessageProcess(workNotification))
+					Optional.of(new MessageProcess(theWorkNotification))
 							// validate and load info
 							.flatMap(MessageProcess::validateChunkId)
 							// no job definition should be retried - we must be a stale process encountering a new
@@ -257,7 +255,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 					process -> process.myStepExector.executeStep(),
 					() -> {
 						// discard the chunk
-						ourLog.debug("Discarding chunk notification {}", workNotification);
+						ourLog.debug("Discarding chunk notification {}", theWorkNotification);
 					});
 		} finally {
 			BatchJobTracingContext.clearBatchJobsIds();

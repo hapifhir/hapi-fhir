@@ -20,12 +20,13 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
-import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -39,12 +40,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 
-import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
+import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 /**
  * This service provides two distinct contexts in which it submits messages to the subscription pipeline.
@@ -60,7 +60,7 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetries {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
-	private volatile MessageChannel myMatchingChannel;
+	private volatile IChannelProducer<ResourceModifiedMessage> myMatchingChannel;
 
 	private final SubscriptionSettings mySubscriptionSettings;
 	private final SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -76,7 +76,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingProducer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}

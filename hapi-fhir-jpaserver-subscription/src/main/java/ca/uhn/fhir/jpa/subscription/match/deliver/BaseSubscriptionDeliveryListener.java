@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
@@ -44,8 +46,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
 import java.util.HashMap;
@@ -54,8 +54,8 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 
-public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
+public abstract class BaseSubscriptionDeliveryListener implements IMessageListener<ResourceDeliveryMessage> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliveryListener.class);
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -76,13 +76,8 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 	private MatchUrlService myMatchUrlService;
 
 	@Override
-	public void handleMessage(Message theMessage) throws MessagingException {
-		if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
-			ourLog.warn("Unexpected payload type: {}", theMessage.getPayload());
-			return;
-		}
-
-		ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+	public void handleMessage(IMessage<ResourceDeliveryMessage> theMessage) {
+		ResourceDeliveryMessage msg = theMessage.getPayload();
 		String subscriptionId = msg.getSubscriptionId(myFhirContext);
 		if (subscriptionId == null) {
 			ourLog.warn("Subscription has no ID, ignoring");

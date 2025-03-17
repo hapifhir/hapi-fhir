@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerHandler;
@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
@@ -62,7 +62,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@Autowired SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> myQueueConsumerHandler;
 
 	@Autowired
@@ -80,7 +80,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		ILegacyChannelReceiver receiver = myChannelFactory.newMatchingReceivingChannel("my-queue-name", new ChannelConsumerSettings());
+		ILegacyChannelReceiver receiver = myChannelFactory.newMatchingConsumer("my-queue-name", new ChannelConsumerSettings());
 		myQueueConsumerHandler = new TestQueueConsumerHandler();
 		receiver.subscribe(myQueueConsumerHandler);
 

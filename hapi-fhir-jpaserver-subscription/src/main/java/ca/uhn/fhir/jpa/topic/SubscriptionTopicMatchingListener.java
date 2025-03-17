@@ -19,33 +19,30 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
+public class SubscriptionTopicMatchingListener implements IMessageListener<ResourceModifiedMessage> {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	private final FhirContext myFhirContext;
@@ -70,21 +67,14 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 	private MemoryCacheService myMemoryCacheService;
 
-	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
+	public SubscriptionTopicMatchingListener(FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		myFhirContext = theFhirContext;
 		this.myMemoryCacheService = memoryCacheService;
 	}
 
 	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		ourLog.trace("Handling resource modified message: {}", theMessage);
-
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Unexpected message payload type: {}", theMessage);
-			return;
-		}
-
-		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
+		ResourceModifiedMessage msg = theMessage.getPayload();
 
 		if (msg.getPayload(myFhirContext) == null) {
 			// inflate the message and ignore any resource that cannot be found.

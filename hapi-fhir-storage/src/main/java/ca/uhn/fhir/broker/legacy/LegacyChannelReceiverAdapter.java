@@ -1,7 +1,7 @@
-package ca.uhn.fhir.broker.impl;
+package ca.uhn.fhir.broker.legacy;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.util.CloseUtil;
 import org.springframework.messaging.MessageHandler;
 
 public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
@@ -21,11 +21,12 @@ public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		if (myMessageHandler != null) {
 			myLegacyChannelReceiver.unsubscribe(myMessageHandler);
+			CloseUtil.close(myMessageHandler);
 		}
-		myLegacyChannelReceiver.destroy();
+		CloseUtil.close(myLegacyChannelReceiver);
 	}
 
 	@Override
@@ -39,12 +40,8 @@ public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
 	}
 
 	@Override
-	public void pause() {
-
-	}
+	public void pause() {}
 
 	@Override
-	public void resume() {
-
-	}
+	public void resume() {}
 }

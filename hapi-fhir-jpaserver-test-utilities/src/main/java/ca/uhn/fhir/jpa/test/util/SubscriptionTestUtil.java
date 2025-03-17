@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -114,8 +114,8 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
+		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(activeSubscription.getChannelName());
+		SubscriptionDeliveringEmailListener subscriber = (SubscriptionDeliveringEmailListener) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
 		subscriber.setEmailSender(theEmailSender);
 	}
 

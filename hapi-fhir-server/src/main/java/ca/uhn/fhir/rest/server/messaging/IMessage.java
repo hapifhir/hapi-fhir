@@ -1,44 +1,40 @@
-package ca.uhn.fhir.broker.api;
+package ca.uhn.fhir.rest.server.messaging;
 
 import java.util.Map;
 
 public interface IMessage<T> {
 	/**
-	 * @return the raw data of the message
-	 */
-	byte[] getData();
-
-	/**
 	 * @return whether the message has a key
 	 */
 	default boolean hasKey() {
-		return getKey() != null;
+		return getMessageKey() != null;
 	}
 
 	/**
 	 * @return the key of the message
 	 */
-	String getKey();
+	String getMessageKey();
 
 	/**
 	 * @return a map of message headers
 	 */
-	Map<String,String> getHeaders();
+	Map<String, Object> getHeaders();
 
 	/**
 	 * @return return a specific header
 	 */
-	String getHeader(String theHeaderName);
+	Object getHeader(String theHeaderName);
 
 	/**
 	 * @return the de-serialized value of the message
 	 */
-	T getValue();
+	T getPayload();
 
 	/**
 	 * @return the uncompressed message payload size in bytes.
 	 */
-	default int size() {
-		return getData().length;
-	}
+	// FIXME KHS
+	//	default int size() {
+	//		return getData().length;
+	//	}
 }

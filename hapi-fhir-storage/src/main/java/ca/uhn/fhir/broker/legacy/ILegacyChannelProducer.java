@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.channel.api;
+package ca.uhn.fhir.broker.legacy;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.InterceptableChannel;

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.subscription.channel.api;
+package ca.uhn.fhir.broker.legacy;
 
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import org.springframework.beans.factory.DisposableBean;

@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryListenerFactory;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -29,7 +29,7 @@ public class SubscriptionChannelRegistryTest {
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@MockBean
-	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+	SubscriptionDeliveryListenerFactory mySubscriptionDeliveryListenerFactory;
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@MockBean
@@ -44,16 +44,16 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(ILegacyChannelProducer.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliveryProducer(any(), any())).thenAnswer(t -> mock(ILegacyChannelProducer.class));
 
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
+		assertNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 	}
 
 	@Configuration

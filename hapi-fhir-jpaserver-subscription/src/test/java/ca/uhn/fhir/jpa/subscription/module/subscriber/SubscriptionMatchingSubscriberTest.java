@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -388,7 +388,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		@Mock
 		IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 		@InjectMocks
-		SubscriptionMatchingSubscriber subscriber;
+		SubscriptionMatchingListener subscriber;
 
 
 		@Test

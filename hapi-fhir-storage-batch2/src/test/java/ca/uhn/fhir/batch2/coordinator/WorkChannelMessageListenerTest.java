@@ -4,10 +4,11 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 
-import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler.*;
+import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.*;
 
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
@@ -16,10 +17,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import jakarta.annotation.Nonnull;
 
-import java.util.Collection;
-
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import ch.qos.logback.classic.Logger;
@@ -33,7 +31,9 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-class WorkChannelMessageHandlerTest extends BaseBatch2Test {
+class WorkChannelMessageListenerTest extends BaseBatch2Test {
+	@Mock
+	private IChannelConsumer<JobWorkNotification> myChannelConsumer;
 	@Mock
 	private BatchJobSender myBatchJobSender;
 	@Mock
@@ -61,8 +61,8 @@ class WorkChannelMessageHandlerTest extends BaseBatch2Test {
 		((Logger) Logs.getBatchTroubleshootingLog()).addAppender(myAppender);
 
 		// When
-		WorkChannelMessageHandler handler = new WorkChannelMessageHandler(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
-		handler.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
+		listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Then
 		verify(myAppender, atLeastOnce()).doAppend(myLoggingEvent.capture());

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -26,24 +27,20 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.SubscriptionUtil;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.util.Optional;
 
@@ -53,7 +50,7 @@ import java.util.Optional;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionActivatingSubscriber implements MessageHandler {
+public class SubscriptionActivatingSubscriber implements IMessageListener<ResourceModifiedMessage> {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 
 	@Autowired
@@ -78,13 +75,9 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	}
 
 	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Received message of unexpected type on matching channel: {}", theMessage);
-			return;
-		}
+	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
+		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		if (!payload.hasPayloadType(myFhirContext, "Subscription")) {
 			return;
 		}

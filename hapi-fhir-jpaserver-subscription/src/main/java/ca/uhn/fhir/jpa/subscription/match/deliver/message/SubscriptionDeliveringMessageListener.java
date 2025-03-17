@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.message;
 
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
-import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliveryListener;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -44,23 +44,23 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
-public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
+public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliveryListener {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageListener.class);
 
-	private final ILegacyChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageSubscriber(ILegacyChannelFactory theChannelFactory) {
+	public SubscriptionDeliveringMessageListener(IBrokerClient theBrokerClient) {
 		super();
-		myChannelFactory = theChannelFactory;
+		myBrokerClient = theBrokerClient;
 	}
 
 	protected void doDelivery(
 			ResourceDeliveryMessage theSourceMessage,
 			CanonicalSubscription theSubscription,
-			ILegacyChannelProducer theChannelProducer,
+			IChannelProducer<ResourceModifiedMessage> theChannelProducer,
 			ResourceModifiedJsonMessage theWrappedMessageToSend) {
 		String payloadId = theSourceMessage.getPayloadId();
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
@@ -125,8 +125,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		ILegacyChannelProducer channelProducer =
-				myChannelFactory.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
+		IChannelProducer<ResourceModifiedMessage> channelProducer =
+				myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedMessage.class, channelSettings);
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();

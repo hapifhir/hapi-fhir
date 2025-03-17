@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
-public class SubscriptionRegisteringSubscriberTest {
+public class SubscriptionRegisteringListenerTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -57,7 +57,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	@Mock
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
 	@InjectMocks
-	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
+	private SubscriptionRegisteringListener mySubscriptionRegisteringListener;
 	@Captor
 	private ArgumentCaptor<RequestDetails> requestDetailsCaptor;
 
@@ -77,14 +77,6 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageNonResourceModifiedJsonMessage(CapturedOutput output){
-		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
-		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
-		assertThat(output.getOut()).contains(expectedMessage);
-	}
-
-	@Test
 	public void testHandleMessageSubscriptionResourceGone(){
 		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
@@ -94,7 +86,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceMetadataKeyEnum.DELETED_AT.put(deletedSubscription, InstantType.withCurrentTime());
 		when(mySubscriptionDao.read(any(), any(), eq(true))).thenReturn(deletedSubscription);
 
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
+		mySubscriptionRegisteringListener.handleMessage(message);
 		verify(mySubscriptionRegistry, times(1)).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
 	}
@@ -108,7 +100,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		when(mySubscriptionDao.read(any(), any(), eq(true))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
+		mySubscriptionRegisteringListener.handleMessage(message);
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(any());
 	}
@@ -122,7 +114,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		when(mySubscriptionDao.read(any(), any(), eq(true))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ERROR.toCode());
 
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
+		mySubscriptionRegisteringListener.handleMessage(message);
 		verify(mySubscriptionRegistry, times(1)).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
 	}
@@ -142,7 +134,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
+		mySubscriptionRegisteringListener.handleMessage(message);
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions with list of names containing null use the default partition
@@ -163,7 +155,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
-		mySubscriptionRegisteringSubscriber.handleMessage(message);
+		mySubscriptionRegisteringListener.handleMessage(message);
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions that are null use the default partition

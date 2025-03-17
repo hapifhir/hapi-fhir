@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliveryListener;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -40,8 +40,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);
+public class SubscriptionDeliveringEmailListener extends BaseSubscriptionDeliveryListener {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailListener.class);
 
 	@Autowired
 	private SubscriptionSettings mySubscriptionSettings;
@@ -52,7 +52,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private IEmailSender myEmailSender;
 
 	@Autowired
-	public SubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
+	public SubscriptionDeliveringEmailListener(IEmailSender theEmailSender) {
 		myEmailSender = theEmailSender;
 	}
 

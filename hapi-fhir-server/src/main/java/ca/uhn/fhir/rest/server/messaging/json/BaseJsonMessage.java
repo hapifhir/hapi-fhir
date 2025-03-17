@@ -20,17 +20,17 @@
 package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
-public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
+public abstract class BaseJsonMessage<T> implements IMessage<T>, IModelJson {
 
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
@@ -50,8 +50,13 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	@Override
 	@Nonnull
-	public MessageHeaders getHeaders() {
+	public Map<String, Object> getHeaders() {
 		return myHeaders.toMessageHeaders();
+	}
+
+	@Override
+	public Object getHeader(String theHeaderName) {
+		return myHeaders.toMessageHeaders().get(theHeaderName);
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
@@ -65,15 +70,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		myHeaders = theHeaders;
 	}
 
-	@Deprecated
-	@Nullable
-	public String getMessageKeyOrNull() {
-		return getMessageKey();
-	}
-
 	@Nullable
 	public String getMessageKey() {
-		return null;
+		return this.getMessageKey();
 	}
 
 	/**
@@ -83,7 +82,7 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	 */
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return Objects.toString(getMessageKey(), getMessageKeyDefaultValue());
+		return Objects.toString(this.getMessageKey(), getMessageKeyDefaultValue());
 	}
 
 	/**

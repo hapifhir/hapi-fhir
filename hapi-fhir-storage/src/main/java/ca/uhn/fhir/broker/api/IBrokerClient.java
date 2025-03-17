@@ -1,11 +1,6 @@
 package ca.uhn.fhir.broker.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
-
-/**
- * @param <S> The type of the result of sending a message
- */
-public interface IBrokerClient<S> {
+public interface IBrokerClient {
 	/**
 	 * Create a channel that is used to receive messages from the queue.
 	 *
@@ -19,10 +14,10 @@ public interface IBrokerClient<S> {
 	 * @param theChannelConsumerSettings Contains the configuration for subscribers.
 	 */
 	<T> IChannelConsumer<T> getOrCreateConsumer(
-		String theChannelName,
-		Class<T> theMessageType,
-		IMessageListener<T> theMessageListener,
-		ChannelConsumerSettings theChannelConsumerSettings);
+			String theChannelName,
+			Class<T> theMessageType,
+			IMessageListener<T> theMessageListener,
+			ChannelConsumerSettings theChannelConsumerSettings);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
@@ -36,8 +31,8 @@ public interface IBrokerClient<S> {
 	 * @param theMessageType             The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelProducerSettings Contains the configuration for senders.
 	 */
-	<T> IChannelProducer<T, S> getOrCreateProducer(
-		String theChannelName, Class<T> theMessageType, ChannelProducerSettings theChannelProducerSettings);
+	<T> IChannelProducer<T> getOrCreateProducer(
+			String theChannelName, Class<T> theMessageType, ChannelProducerSettings theChannelProducerSettings);
 
 	/**
 	 * @return the IChannelNamer used by this factory

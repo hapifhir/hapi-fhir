@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -28,12 +27,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-class SubscriptionChannelCache {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
+// FIXME KHS remove this class
+class SubscriptionConsumerCache {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionConsumerCache.class);
 
-	private final Map<String, SubscriptionChannelWithHandlers> myCache = new ConcurrentHashMap<>();
+	private final Map<String, SubscriptionConsumerWithListeners> myCache = new ConcurrentHashMap<>();
 
-	public SubscriptionChannelWithHandlers get(String theChannelName) {
+	public SubscriptionConsumerWithListeners get(String theChannelName) {
 		return myCache.get(theChannelName);
 	}
 
@@ -41,14 +41,14 @@ class SubscriptionChannelCache {
 		return myCache.size();
 	}
 
-	public void put(String theChannelName, SubscriptionChannelWithHandlers theValue) {
+	public void put(String theChannelName, SubscriptionConsumerWithListeners theValue) {
 		myCache.put(theChannelName, theValue);
 	}
 
 	synchronized void closeAndRemove(String theChannelName) {
 		Validate.notBlank(theChannelName);
 
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = myCache.get(theChannelName);
+		SubscriptionConsumerWithListeners subscriptionChannelWithHandlers = myCache.get(theChannelName);
 		if (subscriptionChannelWithHandlers == null) {
 			return;
 		}
@@ -64,7 +64,7 @@ class SubscriptionChannelCache {
 	@VisibleForTesting
 	void logForUnitTest() {
 		for (String key : myCache.keySet()) {
-			ourLog.info("SubscriptionChannelCache: {}", key);
+			ourLog.info("SubscriptionConsumerCache: {}", key);
 		}
 	}
 }

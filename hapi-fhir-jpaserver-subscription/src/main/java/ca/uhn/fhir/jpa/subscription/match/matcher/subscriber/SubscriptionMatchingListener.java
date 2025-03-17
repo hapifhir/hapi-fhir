@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -28,18 +29,14 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -47,8 +44,8 @@ import java.util.Optional;
 import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+public class SubscriptionMatchingListener implements IMessageListener<ResourceModifiedMessage> {
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingListener.class);
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -72,20 +69,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	/**
 	 * Constructor
 	 */
-	public SubscriptionMatchingSubscriber() {
+	public SubscriptionMatchingListener() {
 		super();
 	}
 
 	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
+	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Unexpected message payload type: {}", theMessage);
-			return;
-		}
-
-		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+		ResourceModifiedMessage msg = theMessage.getPayload();
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
@@ -147,7 +139,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	/**
 	 * Returns true if subscription matched, and processing completed successfully, and the message was sent to the delivery channel. False otherwise.
-	 *
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {

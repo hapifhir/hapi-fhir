@@ -1,11 +1,5 @@
 package ca.uhn.fhir.broker.api;
 
-import ca.uhn.fhir.model.api.IModelJson;
-
-import java.io.Closeable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 /**
  * @param <T> The type of messages received by this consumer
  */
@@ -29,4 +23,9 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 * Resume requesting messages from the broker.
 	 */
 	void resume();
+
+	/**
+	 * Close the consumer and release any resources.
+	 */
+	void close();
 }

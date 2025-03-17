@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
-import ca.uhn.fhir.broker.api.IChannelSettings;
 import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelSettings;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.Nonnull;

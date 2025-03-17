@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import org.apache.commons.lang3.Validate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -29,7 +29,9 @@ import org.springframework.messaging.support.ChannelInterceptor;
 
 import java.util.Set;
 
-public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel implements ILegacyChannelReceiver {
+// FIXME KHS remove this class
+public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribableChannel
+		implements ILegacyChannelReceiver {
 
 	private final ILegacyChannelReceiver myWrappedChannel;
 	private final MessageHandler myHandler;

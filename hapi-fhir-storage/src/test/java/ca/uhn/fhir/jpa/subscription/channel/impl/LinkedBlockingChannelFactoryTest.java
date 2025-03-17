@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;

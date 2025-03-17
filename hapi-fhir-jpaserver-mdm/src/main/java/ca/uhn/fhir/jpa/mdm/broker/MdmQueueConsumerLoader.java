@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;

@@ -17,28 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.topic;
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.Logs;
-import jakarta.annotation.Nonnull;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 /**
  * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
@@ -46,14 +42,17 @@ import org.springframework.messaging.MessagingException;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
-	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+public class SubscriptionRegisteringListener implements IMessageListener<ResourceModifiedMessage> {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringListener.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	private SubscriptionRegistry mySubscriptionRegistry;
+
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -61,20 +60,15 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	/**
 	 * Constructor
 	 */
-	public SubscriptionTopicRegisteringSubscriber() {
+	public SubscriptionRegisteringListener() {
 		super();
 	}
 
 	@Override
-	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Received message of unexpected type on matching channel: {}", theMessage);
-			return;
-		}
+	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
+		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		ResourceModifiedMessage payload = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-
-		if (!payload.hasPayloadType(myFhirContext, "SubscriptionTopic")) {
+		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
 			return;
 		}
 
@@ -93,27 +87,24 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
 		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
 
-		IBaseResource payloadResource;
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
-		try {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
-			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
-			if (payloadResource == null) {
-				// Only for unit test
-				payloadResource = payload.getPayload(myFhirContext);
-			}
-		} catch (ResourceGoneException e) {
-			mySubscriptionTopicRegistry.unregister(payloadId.getIdPart());
+		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
+		if (payloadResource == null) {
+			// Only for unit test
+			payloadResource = payload.getPayload(myFhirContext);
+		}
+		if (payloadResource.isDeleted()) {
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic =
-				SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, payloadResource);
-		if (subscriptionTopic.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
-			mySubscriptionTopicRegistry.register(subscriptionTopic);
+		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
+		if ("active".equals(statusString)) {
+			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
 		} else {
-			mySubscriptionTopicRegistry.unregister(payloadId.getIdPart());
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 		}
 	}
 

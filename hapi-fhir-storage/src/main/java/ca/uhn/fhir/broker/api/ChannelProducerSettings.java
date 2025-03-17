@@ -35,6 +35,7 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 		return myConcurrentConsumers;
 	}
 
+	// FIXME KHS why does a producer have concurrent consumers?
 	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;

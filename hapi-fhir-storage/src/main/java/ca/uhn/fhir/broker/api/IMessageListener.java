@@ -1,10 +1,12 @@
 package ca.uhn.fhir.broker.api;
 
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+
 public interface IMessageListener<T> {
 	/**
 	 * This method is called whenever a new message is received.
-	 * @param theChannelConsumer the consumer that received the message
+	 *
 	 * @param theMessage the message that was received
 	 */
-	void received(IChannelConsumer<T> theChannelConsumer, IMessage<T> theMessage);
+	void handleMessage(IMessage<T> theMessage);
 }

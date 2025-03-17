@@ -21,52 +21,53 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 
 public class SubscriptionChannelFactory {
-	private final ILegacyChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionChannelFactory(ILegacyChannelFactory theChannelFactory) {
-		Validate.notNull(theChannelFactory);
-		myChannelFactory = theChannelFactory;
+	public SubscriptionChannelFactory(IBrokerClient theBrokerClient) {
+		Validate.notNull(theBrokerClient);
+		myBrokerClient = theBrokerClient;
 	}
 
-	public ILegacyChannelProducer newDeliverySendingChannel(
+	public IChannelProducer<ResourceDeliveryMessage> newDeliveryProducer(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceDeliveryMessage.class, config);
 	}
 
-	public ILegacyChannelReceiver newDeliveryReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(
+			String theChannelName,
+			IMessageListener<ResourceDeliveryMessage> theListener,
+			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		ILegacyChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
+		return myBrokerClient.getOrCreateConsumer(theChannelName, ResourceDeliveryMessage.class, theListener, config);
 	}
 
-	public ILegacyChannelProducer newMatchingSendingChannel(
+	public IChannelProducer<ResourceModifiedMessage> newMatchingProducer(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceModifiedMessage.class, config);
 	}
 
-	public ILegacyChannelReceiver newMatchingReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelConsumer<ResourceModifiedMessage> newMatchingConsumer(
+			String theChannelName,
+			IMessageListener<ResourceModifiedMessage> theListener,
+			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		ILegacyChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
+		return myBrokerClient.getOrCreateConsumer(theChannelName, ResourceModifiedMessage.class, theListener, config);
 	}
 
 	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
@@ -113,7 +114,7 @@ public class SubscriptionChannelFactory {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 
-	public ILegacyChannelFactory getChannelFactory() {
-		return myChannelFactory;
+	public IBrokerClient getBrokerClient() {
+		return myBrokerClient;
 	}
 }

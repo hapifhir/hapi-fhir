@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ILegacyChannelProducer;
+import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -69,7 +69,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
 		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
-		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
+		lenient().when(mySubscriptionChannelFactory.newMatchingProducer(anyString(), any())).thenReturn(myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
@@ -234,7 +234,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	private ChannelProducerSettings getCapturedChannelProducerSettings(){
-		verify(mySubscriptionChannelFactory).newMatchingSendingChannel(anyString(), myArgumentCaptor.capture());
+		verify(mySubscriptionChannelFactory).newMatchingProducer(anyString(), myArgumentCaptor.capture());
 		return myArgumentCaptor.getValue();
 	}
 
