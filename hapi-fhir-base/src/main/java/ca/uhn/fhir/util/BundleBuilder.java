@@ -420,7 +420,7 @@ public class BundleBuilder {
 		return id;
 	}
 
-	private void addFullUrl(IBase theEntry, String theFullUrl) {
+	public void addFullUrl(IBase theEntry, String theFullUrl) {
 		IPrimitiveType<?> fullUrl =
 				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		fullUrl.setValueAsString(theFullUrl);
