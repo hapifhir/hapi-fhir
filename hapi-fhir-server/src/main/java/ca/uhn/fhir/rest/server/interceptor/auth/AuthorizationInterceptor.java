@@ -91,11 +91,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
-	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME =
-			List.of(
-					RestOperationTypeEnum.SEARCH_TYPE,
-					RestOperationTypeEnum.SEARCH_SYSTEM,
-					RestOperationTypeEnum.GET_PAGE);
+	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME = List.of(
+			RestOperationTypeEnum.SEARCH_TYPE, RestOperationTypeEnum.SEARCH_SYSTEM, RestOperationTypeEnum.GET_PAGE);
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
