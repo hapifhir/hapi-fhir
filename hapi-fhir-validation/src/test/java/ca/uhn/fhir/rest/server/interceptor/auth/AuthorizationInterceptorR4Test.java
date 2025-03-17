@@ -4253,20 +4253,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 	@ParameterizedTest
 	@MethodSource("provideArgumentsForToListOfResourcesAndExcludeContainerUnlessStandalone")
-	public void testToListOfResourcesAndExcludeContainer_withREST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY_returnsNoOperationOutcome(
+	public void givenAsearchRequestWithOperationOutcomeIntheResponse_whenToListOfResourcesAndExcludeContainerUnlessStandalone_thenReturnNoOperationOutcome(
 		IBaseResource theResource, RequestDetails theRequestDetails, int theExpectedListSize
 	) {
-
-		RequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setResourceName("Patient");
-
 		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(theResource, ourCtx, theRequestDetails);
 		assertEquals(theExpectedListSize, resources.size());
 	}
 
 	private static Stream<Arguments> provideArgumentsForToListOfResourcesAndExcludeContainerUnlessStandalone() {
 		Stream.Builder<Arguments> retVal = Stream.builder();
-	AuthorizationInterceptor.REST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY.forEach((restOperationType)->{
+	AuthorizationInterceptor.REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME.forEach((restOperationType)->{
 		RequestDetails firstRequestDetails = new SystemRequestDetails();
 		RequestDetails secondRequestDetails = new SystemRequestDetails();
 		firstRequestDetails.setResourceName("Patient");

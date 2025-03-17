@@ -91,7 +91,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
-	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY =
+	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME =
 			List.of(
 					RestOperationTypeEnum.SEARCH_TYPE,
 					RestOperationTypeEnum.SEARCH_SYSTEM,
@@ -606,7 +606,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		if (resourceName != null
 				&& !resourceName.equals("OperationOutcome")
-				&& REST_OPERATIONS_TO_EXCLUDE_OPERATION_OUTCOME_FROM_SECURITY.contains(restOperationType)) {
+				&& REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME.contains(restOperationType)) {
 			resources.removeIf(t -> t instanceof IBaseOperationOutcome);
 		}
 
