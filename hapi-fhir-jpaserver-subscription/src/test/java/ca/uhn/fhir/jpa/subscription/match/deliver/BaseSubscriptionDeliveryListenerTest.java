@@ -71,9 +71,9 @@ import static org.mockito.Mockito.when;
 public class BaseSubscriptionDeliveryListenerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliveryListenerTest.class);
 
-	private SubscriptionDeliveringRestHookListener myRestHookListener;
-	private SubscriptionDeliveringMessageListener myMessageSubscriber;
-	private SubscriptionDeliveringEmailListener myEmailSubscriber;
+	private SubscriptionDeliveringRestHookListener mySubscriptionDeliveringRestHookListener;
+	private SubscriptionDeliveringMessageListener mySubscriptionDeliveringMessageListener;
+	private SubscriptionDeliveringEmailListener mySubscriptionDeliveringEmailListener;
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@Mock
@@ -83,9 +83,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	@Mock
 	private IBrokerClient myBrokerClient;
 	@Mock
-	private IChannelProducer<ResourceDeliveryMessage> myChannelProducer;
-	@Mock
-	private IChannelConsumer<ResourceDeliveryMessage> myChannelConsumer;
+	private IChannelProducer<ResourceModifiedMessage> myChannelProducer; // Producer for the subscription target channel
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IRestfulClientFactory myRestfulClientFactory;
@@ -109,26 +107,26 @@ public class BaseSubscriptionDeliveryListenerTest {
 
 	@BeforeEach
 	public void before() {
-		myRestHookListener = new SubscriptionDeliveringRestHookListener();
-		myRestHookListener.setFhirContextForUnitTest(myCtx);
-		myRestHookListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
-		myRestHookListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+		mySubscriptionDeliveringRestHookListener = new SubscriptionDeliveringRestHookListener();
+		mySubscriptionDeliveringRestHookListener.setFhirContextForUnitTest(myCtx);
+		mySubscriptionDeliveringRestHookListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySubscriptionDeliveringRestHookListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 
-		myMessageSubscriber = new SubscriptionDeliveringMessageListener(myBrokerClient);
-		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
-		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
-		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-		myMessageSubscriber.setDaoRegistryForUnitTest(myDaoRegistry);
-		myMessageSubscriber.setMatchUrlServiceForUnitTest(myMatchUrlService);
-		myMessageSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
+		mySubscriptionDeliveringMessageListener = new SubscriptionDeliveringMessageListener(myBrokerClient);
+		mySubscriptionDeliveringMessageListener.setFhirContextForUnitTest(myCtx);
+		mySubscriptionDeliveringMessageListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySubscriptionDeliveringMessageListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+		mySubscriptionDeliveringMessageListener.setDaoRegistryForUnitTest(myDaoRegistry);
+		mySubscriptionDeliveringMessageListener.setMatchUrlServiceForUnitTest(myMatchUrlService);
+		mySubscriptionDeliveringMessageListener.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
 
-		myEmailSubscriber = new SubscriptionDeliveringEmailListener(myEmailSender);
-		myEmailSubscriber.setFhirContextForUnitTest(myCtx);
-		myEmailSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
-		myEmailSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-		myEmailSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
+		mySubscriptionDeliveringEmailListener = new SubscriptionDeliveringEmailListener(myEmailSender);
+		mySubscriptionDeliveringEmailListener.setFhirContextForUnitTest(myCtx);
+		mySubscriptionDeliveringEmailListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		mySubscriptionDeliveringEmailListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+		mySubscriptionDeliveringEmailListener.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 	}
 
 	@Test
@@ -137,7 +135,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setSubscription(new CanonicalSubscription());
 
 		// Nothing should happen
-		myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+		mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 	}
 
 	@Test
@@ -153,7 +151,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
-		myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+		mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 
 		verify(myGenericClient, times(1)).update();
 	}
@@ -174,7 +172,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
 
 		try {
-			myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+			mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail("");
 		} catch (MessagingException e) {
 			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
@@ -201,7 +199,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
 
 		// This shouldn't throw an exception
-		myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+		mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 
 		verify(myGenericClient, times(1)).update();
 	}
@@ -228,14 +226,14 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
 		//When: We submit the message for delivery
-		myMessageSubscriber.handleMessage(payload);
+		mySubscriptionDeliveringMessageListener.handleMessage(payload);
 
 		//Then: The receiving channel should also receive the custom headers.
-		ArgumentCaptor<ResourceDeliveryJsonMessage> captor = ArgumentCaptor.forClass(ResourceDeliveryJsonMessage.class);
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
-		final List<ResourceDeliveryJsonMessage> messages = captor.getAllValues();
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
 		assertThat(messages).hasSize(1);
-		ResourceDeliveryJsonMessage receivedMessage = messages.get(0);
+		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
 		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
 
 		assertThat(foo).containsExactlyInAnyOrder("bar", "bar2");
@@ -263,14 +261,14 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
-		myMessageSubscriber.handleMessage(payload);
+		mySubscriptionDeliveringMessageListener.handleMessage(payload);
 
-		ArgumentCaptor<ResourceDeliveryJsonMessage> captor = ArgumentCaptor.forClass(ResourceDeliveryJsonMessage.class);
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
-		final List<ResourceDeliveryJsonMessage> messages = captor.getAllValues();
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
 		assertThat(messages).hasSize(1);
 
-		ResourceDeliveryMessage receivedMessage = messages.get(0).getPayload();
+		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
 		assertEquals(receivedMessage.getPayloadId(), "Bundle");
 
 		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
@@ -294,7 +292,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
-		myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+		mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 
 		verify(myGenericClient, times(0)).update();
 	}
@@ -365,13 +363,12 @@ public class BaseSubscriptionDeliveryListenerTest {
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		payload.setPartitionId(thePartitionId);
 
-		myMessageSubscriber.handleMessage(payload);
+		mySubscriptionDeliveringMessageListener.handleMessage(payload);
 		verify(myBrokerClient).getOrCreateProducer(any(), any(), any());
-		ArgumentCaptor<ResourceDeliveryJsonMessage> captor = ArgumentCaptor.forClass(ResourceDeliveryJsonMessage.class);
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
-		final List<ResourceDeliveryJsonMessage> params = captor.getAllValues();
-		// FIXME KHS
-//		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
+		final List<ResourceModifiedJsonMessage> params = captor.getAllValues();
+		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
 	}
 
 	@Test
@@ -404,7 +401,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
 
 		try {
-			myRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
+			mySubscriptionDeliveringRestHookListener.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail("");
 		} catch (MessagingException e) {
 			String messageExceptionAsString = e.toString();
@@ -436,9 +433,9 @@ public class BaseSubscriptionDeliveryListenerTest {
 		// execute & verify
         switch (theSubscriber) {
             case "message" ->
-                    assertThrows(MessagingException.class, () -> myMessageSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+                    assertThrows(MessagingException.class, () -> mySubscriptionDeliveringMessageListener.handleMessage(new ResourceDeliveryJsonMessage(payload)));
             case "email" ->
-                    assertThrows(MessagingException.class, () -> myEmailSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+                    assertThrows(MessagingException.class, () -> mySubscriptionDeliveringEmailListener.handleMessage(new ResourceDeliveryJsonMessage(payload)));
         }
 
 		verify(myResourceModifiedMessagePersistenceSvc, times(1)).inflatePersistedResourceModifiedMessageOrNull(any());
