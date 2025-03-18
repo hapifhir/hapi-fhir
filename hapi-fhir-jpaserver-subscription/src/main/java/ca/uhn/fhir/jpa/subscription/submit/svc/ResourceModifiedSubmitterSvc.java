@@ -23,12 +23,11 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
-import ca.uhn.fhir.broker.legacy.LegacyChannelProducerAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -219,6 +218,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	public ILegacyChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
-		return ((LegacyChannelProducerAdapter) myMatchingChannel).getLegacyProducer();
+		return ((SpringMessagingProducerAdapter) myMatchingChannel).getLegacyProducer();
 	}
 }

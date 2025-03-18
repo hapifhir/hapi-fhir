@@ -9,9 +9,9 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
-import ca.uhn.fhir.broker.legacy.LegacyChannelProducerAdapter;
-import ca.uhn.fhir.broker.legacy.LegacyChannelReceiverAdapter;
-import ca.uhn.fhir.broker.legacy.LegacyMessage;
+import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingReceiverAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
 import org.springframework.messaging.MessageHandler;
 
 public class LegacyBrokerClient implements IBrokerClient {
@@ -29,9 +29,9 @@ public class LegacyBrokerClient implements IBrokerClient {
 			ChannelConsumerSettings theChannelConsumerSettings) {
 		ILegacyChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
 				theChannelName, theMessageType, theChannelConsumerSettings);
-		LegacyChannelReceiverAdapter<T> retval = new LegacyChannelReceiverAdapter<>(legacyChannelReceiver);
+		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(legacyChannelReceiver);
 		MessageHandler handler = message -> theMessageListener.handleMessage(
-				new LegacyMessage<>((org.springframework.messaging.Message<T>) message));
+				new SpringMessagingMessage<>((org.springframework.messaging.Message<T>) message));
 		retval.subscribe(handler);
 		return retval;
 	}
@@ -39,7 +39,7 @@ public class LegacyBrokerClient implements IBrokerClient {
 	@Override
 	public <T> IChannelProducer<T> getOrCreateProducer(
 			String theChannelName, Class<T> theMessageType, ChannelProducerSettings theChannelProducerSettings) {
-		return new LegacyChannelProducerAdapter<>(myLinkedBlockingChannelFactory.getOrCreateProducer(
+		return new SpringMessagingProducerAdapter<>(myLinkedBlockingChannelFactory.getOrCreateProducer(
 				theChannelName, theMessageType, theChannelProducerSettings));
 	}
 

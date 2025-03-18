@@ -6,7 +6,7 @@ import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.LegacyBrokerClient;
-import ca.uhn.fhir.broker.legacy.LegacyChannelProducerAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
@@ -67,7 +67,7 @@ public class SubscriptionChannelFactoryTest {
 					return message;
 				}
 			};
-			((LegacyChannelProducerAdapter) producer).addInterceptor(channelInterceptor);
+			((SpringMessagingProducerAdapter) producer).addInterceptor(channelInterceptor);
 
 			ResourceDeliveryJsonMessage message = new ResourceDeliveryJsonMessage();
 

@@ -6,10 +6,10 @@ import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import java.util.Map;
 
 // FIXME KHS do we need this class?
-public class LegacyMessage<T> implements IMessage<T> {
+public class SpringMessagingMessage<T> implements IMessage<T> {
 	private final org.springframework.messaging.Message<T> myMessage;
 
-	public LegacyMessage(org.springframework.messaging.Message<T> theMessage) {
+	public SpringMessagingMessage(org.springframework.messaging.Message<T> theMessage) {
 		myMessage = theMessage;
 	}
 

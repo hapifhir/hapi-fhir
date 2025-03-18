@@ -4,11 +4,11 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import org.springframework.messaging.MessageHandler;
 
-public class LegacyChannelReceiverAdapter<T> implements IChannelConsumer<T> {
+public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private final ILegacyChannelReceiver myLegacyChannelReceiver;
 	private MessageHandler myMessageHandler;
 
-	public LegacyChannelReceiverAdapter(ILegacyChannelReceiver theLegacyChannelReceiver) {
+	public SpringMessagingReceiverAdapter(ILegacyChannelReceiver theLegacyChannelReceiver) {
 		myLegacyChannelReceiver = theLegacyChannelReceiver;
 	}
 

@@ -6,11 +6,11 @@ import org.springframework.messaging.MessageHeaders;
 
 import java.util.Map;
 
-public class SpringMessageAdapter<T> implements Message<T> {
+public class SpringMessagingMessageAdapter<T> implements Message<T> {
 	private final IMessage<T> myMessage;
 	private final MessageHeaders myHeaders;
 
-	public SpringMessageAdapter(IMessage<T> theMessage) {
+	public SpringMessagingMessageAdapter(IMessage<T> theMessage) {
 		myMessage = theMessage;
 		myHeaders = new MessageHeaders((Map<String, Object>) (Map<?, ?>) myMessage.getHeaders());
 	}

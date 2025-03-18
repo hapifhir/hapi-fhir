@@ -8,7 +8,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.broker.api.ISendResult;
-import ca.uhn.fhir.broker.legacy.LegacyMessage;
+import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
@@ -43,7 +43,7 @@ class LegacyBrokerClientTest {
 			sendMessage(producer, message);
 			List<HookParams> result = listener.awaitExpected();
 			assertThat(result).hasSize(1);
-			LegacyMessage<MyTestMessageValue> receivedMessage = (LegacyMessage<MyTestMessageValue>) result.get(0).get(LegacyMessage.class);
+			SpringMessagingMessage<MyTestMessageValue> receivedMessage = (SpringMessagingMessage<MyTestMessageValue>) result.get(0).get(SpringMessagingMessage.class);
 			MyTestMessageValue receivedValue = receivedMessage.getPayload();
 			assertEquals("Honda", receivedValue.make);
 			assertEquals("Civic", receivedValue.model);
@@ -68,7 +68,7 @@ class LegacyBrokerClientTest {
 
 			List<HookParams> result = listener.awaitExpected();
 			assertThat(result).hasSize(10);
-			LegacyMessage<MyTestMessageValue> receivedMessage = (LegacyMessage<MyTestMessageValue>) result.get(5).get(LegacyMessage.class);
+			SpringMessagingMessage<MyTestMessageValue> receivedMessage = (SpringMessagingMessage<MyTestMessageValue>) result.get(5).get(SpringMessagingMessage.class);
 			MyTestMessageValue receivedValue = receivedMessage.getPayload();
 			assertEquals("Honda", receivedValue.make);
 			assertEquals("Civic5", receivedValue.model);

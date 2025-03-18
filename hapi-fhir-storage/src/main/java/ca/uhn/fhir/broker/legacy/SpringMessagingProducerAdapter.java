@@ -6,10 +6,10 @@ import ca.uhn.fhir.broker.impl.SpringMessagingSendResult;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.support.ChannelInterceptor;
 
-public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T> {
+public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 	private final ILegacyChannelProducer myLegacyChannelProducer;
 
-	public LegacyChannelProducerAdapter(ILegacyChannelProducer theLegacyChannelProducer) {
+	public SpringMessagingProducerAdapter(ILegacyChannelProducer theLegacyChannelProducer) {
 		myLegacyChannelProducer = theLegacyChannelProducer;
 	}
 
@@ -25,7 +25,7 @@ public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T> {
 
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
-		SpringMessageAdapter<T> springMessage = new SpringMessageAdapter<>(theMessage);
+		SpringMessagingMessageAdapter<T> springMessage = new SpringMessagingMessageAdapter<>(theMessage);
 		return new SpringMessagingSendResult(myLegacyChannelProducer.send(springMessage));
 	}
 

@@ -22,8 +22,8 @@ import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.legacy.LegacyChannelProducerAdapter;
-import ca.uhn.fhir.broker.legacy.LegacyChannelReceiverAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
+import ca.uhn.fhir.broker.legacy.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -70,8 +70,8 @@ import static org.mockito.Mockito.when;
 // FIXME KHS run this
 public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private final LinkedBlockingChannel myLegacyChannel = LinkedBlockingChannel.newSynchronous("receiver", new RetryPolicyProvider());
-	private final IChannelConsumer<JobWorkNotification> myWorkChannelConsumer = new LegacyChannelReceiverAdapter<>(myLegacyChannel);
-	private final IChannelProducer<JobWorkNotification> myWorkChannelProducer = new LegacyChannelProducerAdapter<>(myLegacyChannel);
+	private final IChannelConsumer<JobWorkNotification> myWorkChannelConsumer = new SpringMessagingReceiverAdapter<>(myLegacyChannel);
+	private final IChannelProducer<JobWorkNotification> myWorkChannelProducer = new SpringMessagingProducerAdapter<>(myLegacyChannel);
 	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
 	private JobCoordinatorImpl mySvc;
 	@Mock
