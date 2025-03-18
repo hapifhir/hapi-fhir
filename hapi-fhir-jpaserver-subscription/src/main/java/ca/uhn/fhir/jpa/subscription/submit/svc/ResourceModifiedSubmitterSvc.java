@@ -218,6 +218,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	public ISpringMessagingChannelProducer getProcessingChannelForUnitTest() {
 		startIfNeeded();
-		return ((SpringMessagingProducerAdapter<ResourceModifiedMessage>) myMatchingChannel).getSpringMessagingProducer();
+		return ((SpringMessagingProducerAdapter<ResourceModifiedMessage>) myMatchingChannel)
+				.getSpringMessagingProducer();
 	}
 }
