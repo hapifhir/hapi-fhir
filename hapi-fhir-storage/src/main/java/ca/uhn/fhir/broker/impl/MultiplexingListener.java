@@ -31,4 +31,13 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 		mySubListeners.forEach(CloseUtil::close);
 		mySubListeners.clear();
 	}
+
+	public <L extends IMessageListener<T>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
+		for (IMessageListener<T> next : mySubListeners) {
+			if (theMessageListenerClass.isAssignableFrom(next.getClass())) {
+				return (L) next;
+			}
+		}
+		return null;
+	}
 }

@@ -32,4 +32,8 @@ public class LegacyChannelProducerAdapter<T> implements IChannelProducer<T> {
 	public void addInterceptor(ChannelInterceptor theInterceptor) {
 		myLegacyChannelProducer.addInterceptor(theInterceptor);
 	}
+
+	public ILegacyChannelProducer getLegacyProducer() {
+		return myLegacyChannelProducer;
+	}
 }

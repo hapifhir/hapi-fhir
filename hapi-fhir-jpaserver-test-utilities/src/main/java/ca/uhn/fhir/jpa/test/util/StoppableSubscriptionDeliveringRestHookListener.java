@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.test.util;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookListener;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -34,7 +35,7 @@ public class StoppableSubscriptionDeliveringRestHookListener extends Subscriptio
 	private CountDownLatch myCountDownLatch;
 
 	@Override
-	public void handleMessage(Message theMessage) throws MessagingException {
+	public void handleMessage(ResourceDeliveryMessage theMessage) {
 		if (myCountDownLatch != null) {
 			myCountDownLatch.countDown();
 		}
