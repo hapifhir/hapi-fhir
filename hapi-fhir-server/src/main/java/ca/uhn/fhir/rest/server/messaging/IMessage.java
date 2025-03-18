@@ -23,6 +23,7 @@ public interface IMessage<T> {
 	/**
 	 * @return return a specific header
 	 */
+	// FIXME KHS use optional
 	Object getHeader(String theHeaderName);
 
 	/**
