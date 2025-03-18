@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6781
+title: "CDS Hooks implementation now supports pagination when prefetching data for requests issued to the FHIR server
+ for missing prefetch keys. If a prefetch request to a FHIR server returns a paginated bundle, the prefetch service now 
+ paginates through the bundle, and collects all the data into a single bundle before passing it on to the CDS Hooks 
+ service."
