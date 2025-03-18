@@ -46,7 +46,8 @@ public class SubscriptionConsumerWithListeners implements AutoCloseable {
 		return myConsumer;
 	}
 
-	public <L extends IMessageListener<ResourceDeliveryMessage>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
+	public <L extends IMessageListener<ResourceDeliveryMessage>> L getListenerOfTypeOrNull(
+			Class<L> theMessageListenerClass) {
 		return myMultiplexingListener.getListenerOfTypeOrNull(theMessageListenerClass);
 	}
 }

@@ -42,7 +42,9 @@ public class MdmQueueConsumerLoader {
 	protected ILegacyChannelReceiver myMdmChannel;
 
 	public MdmQueueConsumerLoader(
-		ILegacyChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+			ILegacyChannelFactory theChannelFactory,
+			IMdmSettings theMdmSettings,
+			MdmMessageHandler theMdmMessageHandler) {
 		myChannelFactory = theChannelFactory;
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;

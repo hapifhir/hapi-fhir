@@ -9,9 +9,9 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
 import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.broker.legacy.SpringMessagingReceiverAdapter;
-import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
 import org.springframework.messaging.MessageHandler;
 
 public class LegacyBrokerClient implements IBrokerClient {
