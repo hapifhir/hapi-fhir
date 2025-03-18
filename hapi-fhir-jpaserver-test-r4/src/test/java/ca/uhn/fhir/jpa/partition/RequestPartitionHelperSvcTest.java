@@ -40,6 +40,8 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	static final int UNKNOWN_PARTITION_ID = 1_000_000;
 	static final String UNKNOWN_PARTITION_NAME = "UNKNOWN";
 
+//	static final int CUSTOM_DEFAULT_PARTITION_ID = 666;
+
 	@Autowired
 	IPartitionDao myPartitionDao;
 	@Autowired
@@ -52,6 +54,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before(){
 		myPartitionDao.deleteAll();
+		myPartitionSettings.setDefaultPartitionId(null);
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		myPatient = new Patient();
