@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -1507,16 +1508,7 @@ public class FhirTerser {
 		ContainedResources contained = new ContainedResources();
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
-		for (IBaseResource next : containedResources) {
-			String nextId = next.getIdElement().getValue();
-			if (StringUtils.isNotBlank(nextId)) {
-				if (!nextId.startsWith("#")) {
-					nextId = '#' + nextId;
-				}
-				next.getIdElement().setValue(nextId);
-			}
-			contained.addContained(next);
-		}
+		containedResources.forEach(contained::addContained);
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			containResourcesForEncoding(contained, theResource, modifyResource);
@@ -1810,9 +1802,11 @@ public class FhirTerser {
 				return existing;
 			}
 
-			IIdType newId = theResource.getIdElement();
+			IIdType newId = new IdDt(theResource.getIdElement());
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + UUID.randomUUID());
+				UUID randomUUID = UUID.randomUUID();
+				theResource.getIdElement().setValue(randomUUID.toString());
+				newId.setValue("#" + randomUUID);
 			}
 
 			getResourceToIdMap().put(theResource, newId);
