@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
 import jakarta.annotation.Nonnull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.messaging.MessageHandler;
@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel
-		implements ILegacyChannelProducer, ILegacyChannelReceiver {
+		implements ISpringMessagingChannelProducer, ISpringMessagingChannelReceiver {
 
 	private final String myName;
 	private final Supplier<Integer> myQueueSizeSupplier;
@@ -52,10 +52,12 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel
 		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
+	@VisibleForTesting
 	public int getQueueSizeForUnitTest() {
 		return defaultIfNull(myQueueSizeSupplier.get(), 0);
 	}
 
+	@VisibleForTesting
 	public void clearInterceptorsForUnitTest() {
 		setInterceptors(new ArrayList<>());
 	}

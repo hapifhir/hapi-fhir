@@ -6,22 +6,17 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import net.sf.saxon.s9api.MessageListener;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 

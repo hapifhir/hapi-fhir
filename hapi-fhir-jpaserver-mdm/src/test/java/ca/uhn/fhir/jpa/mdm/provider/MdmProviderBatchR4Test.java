@@ -52,9 +52,6 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected IAnyResource myGoldenMedication;
 	protected StringType myGoldenMedicationId;
 
-	@RegisterExtension
-	private LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) Logs.getMdmTroubleshootingLog());
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired

@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
@@ -136,11 +136,11 @@ class LinkedBlockingChannelFactoryTest {
 		myHandlerCanProceedLatch[theIndex].call("");
 	}
 
-	private ILegacyChannelProducer buildChannels(Runnable theCallback) {
+	private ISpringMessagingChannelProducer buildChannels(Runnable theCallback) {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setConcurrentConsumers(1);
-		ILegacyChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
-		ILegacyChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
+		ISpringMessagingChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
+		ISpringMessagingChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
 		reciever.subscribe(msg -> {
 			theCallback.run();
 			myReceivedPayloads.add((String) msg.getPayload());

@@ -24,4 +24,9 @@ public class SpringMessagingMessageAdapter<T> implements Message<T> {
 	public MessageHeaders getHeaders() {
 		return myHeaders;
 	}
+
+	@Override
+	public String toString() {
+		return getPayload().toString();
+	}
 }

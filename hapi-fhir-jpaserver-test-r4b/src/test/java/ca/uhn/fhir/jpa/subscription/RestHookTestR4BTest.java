@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -56,9 +55,6 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4BTest.class);
 
 	@Autowired
-	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
-
-	@Autowired
     StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
 
 	@AfterEach
@@ -68,8 +64,6 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
-
-
 
 	/**
 	 * Make sure that if we delete a subscription, then reinstate it with a criteria
@@ -455,7 +449,6 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(0);
 		Subscription subscription1 = createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(1);
-
 
 		ourLog.info("** About to send observation");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");

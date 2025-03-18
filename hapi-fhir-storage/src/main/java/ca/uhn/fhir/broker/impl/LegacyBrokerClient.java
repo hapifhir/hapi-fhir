@@ -8,7 +8,7 @@ import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
 import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.broker.legacy.SpringMessagingReceiverAdapter;
@@ -27,7 +27,7 @@ public class LegacyBrokerClient implements IBrokerClient {
 			Class<T> theMessageType,
 			IMessageListener<T> theMessageListener,
 			ChannelConsumerSettings theChannelConsumerSettings) {
-		ILegacyChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
+		ISpringMessagingChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
 				theChannelName, theMessageType, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(legacyChannelReceiver);
 		MessageHandler handler = message -> theMessageListener.handleMessage(

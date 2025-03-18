@@ -24,8 +24,8 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelSettings;
 import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelProducer;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.Nonnull;
@@ -49,13 +49,13 @@ public class LinkedBlockingChannelFactory implements ILegacyChannelFactory {
 	}
 
 	@Override
-	public ILegacyChannelReceiver getOrCreateReceiver(
+	public ISpringMessagingChannelReceiver getOrCreateReceiver(
 			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
 	@Override
-	public ILegacyChannelProducer getOrCreateProducer(
+	public ISpringMessagingChannelProducer getOrCreateProducer(
 			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}

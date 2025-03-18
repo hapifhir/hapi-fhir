@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.broker;
 
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -29,7 +30,6 @@ import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -39,19 +39,18 @@ import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MdmMessageHandler implements MessageHandler {
+public class MdmMessageListener implements IMessageListener<ResourceModifiedMessage> {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
@@ -74,15 +73,10 @@ public class MdmMessageHandler implements MessageHandler {
 	private IMdmModelConverterSvc myModelConverter;
 
 	@Override
-	public void handleMessage(Message<?> theMessage) throws MessagingException {
+	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
-		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
-			ourLog.warn("Unexpected message payload type: {}", theMessage);
-			return;
-		}
-
-		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
+		ResourceModifiedMessage msg = theMessage.getPayload();
 		try {
 			IBaseResource sourceResource = extractSourceResource(msg);
 

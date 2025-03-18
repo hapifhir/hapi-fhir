@@ -7,15 +7,10 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
-	private final ILegacyChannelProducer myLegacyChannelProducer;
+	private final ISpringMessagingChannelProducer mySpringMessagingChannelProducer;
 
-	public SpringMessagingProducerAdapter(ILegacyChannelProducer theLegacyChannelProducer) {
-		myLegacyChannelProducer = theLegacyChannelProducer;
-	}
-
-	@Override
-	public String getProducerName() {
-		return "Legacy consumer";
+	public SpringMessagingProducerAdapter(ISpringMessagingChannelProducer theSpringMessagingChannelProducer) {
+		mySpringMessagingChannelProducer = theSpringMessagingChannelProducer;
 	}
 
 	@Override
@@ -26,14 +21,14 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
 		SpringMessagingMessageAdapter<T> springMessage = new SpringMessagingMessageAdapter<>(theMessage);
-		return new SpringMessagingSendResult(myLegacyChannelProducer.send(springMessage));
+		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(springMessage));
 	}
 
 	public void addInterceptor(ChannelInterceptor theInterceptor) {
-		myLegacyChannelProducer.addInterceptor(theInterceptor);
+		mySpringMessagingChannelProducer.addInterceptor(theInterceptor);
 	}
 
-	public ILegacyChannelProducer getLegacyProducer() {
-		return myLegacyChannelProducer;
+	public ISpringMessagingChannelProducer getSpringMessagingProducer() {
+		return mySpringMessagingChannelProducer;
 	}
 }

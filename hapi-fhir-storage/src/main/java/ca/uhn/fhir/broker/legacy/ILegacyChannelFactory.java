@@ -32,6 +32,7 @@ import ca.uhn.fhir.broker.api.IChannelNamer;
  * @deprecated Use {@link IBrokerClient} instead
  */
 @Deprecated
+// FIXME KHS remove usages of this
 public interface ILegacyChannelFactory {
 
 	/**
@@ -46,7 +47,7 @@ public interface ILegacyChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for subscribers.
 	 */
-	ILegacyChannelReceiver getOrCreateReceiver(
+	ISpringMessagingChannelReceiver getOrCreateReceiver(
 			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
 
 	/**
@@ -61,7 +62,7 @@ public interface ILegacyChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for senders.
 	 */
-	ILegacyChannelProducer getOrCreateProducer(
+	ISpringMessagingChannelProducer getOrCreateProducer(
 			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
 	/**

@@ -6,10 +6,6 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
  * @param <T> The type of messages sent by this producer
  */
 public interface IChannelProducer<T> {
-	/**
-	 * @return the name of the consumer
-	 */
-	String getProducerName();
 
 	/**
 	 * @return the name of the topic or queue that this consumer is consuming from

@@ -105,7 +105,7 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 	}
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = (LinkedBlockingChannel) myMdmQueueConsumerLoader.getMdmChannelForUnitTest();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) myMdmQueueConsumerLoader.getMdmChannelConsumerForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 
