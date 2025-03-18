@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -61,7 +62,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
+	private TestQueueConsumerListener<ResourceModifiedMessage> myListener;
 
 	@Autowired
 	IResourceModifiedDao myResourceModifiedDao;
@@ -71,6 +72,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
+	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -78,6 +80,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myConsumer.close();
 	}
 
 	@Override
@@ -85,9 +88,15 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		ILegacyChannelReceiver receiver = myChannelFactory.newMatchingConsumer("my-queue-name", new ChannelConsumerSettings());
-		handler = new TestQueueConsumerHandler();
-		receiver.subscribe(handler);
+		myListener = new TestQueueConsumerListener<>();
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myListener, new ChannelConsumerSettings());
+	}
+
+	@Override
+	@AfterEach
+	public void afterUnregisterRestHookListener() {
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		myConsumer.close();
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
@@ -323,12 +332,11 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(handler.getMessages()).hasSize(1);
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
-		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
+		assertThat(myListener.getPayloads()).hasSize(1);
+		ResourceModifiedMessage payload = myListener.getPayloads().get(0);
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		handler.clearMessages();
+		myListener.clearMessages();
 		return (T) resource;
 	}
 

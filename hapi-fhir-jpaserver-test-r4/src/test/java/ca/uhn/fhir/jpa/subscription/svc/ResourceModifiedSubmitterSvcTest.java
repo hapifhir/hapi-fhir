@@ -69,7 +69,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
 		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
-		lenient().when(mySubscriptionChannelFactory.newMatchingProducer(anyString(), any())).thenReturn(myChannelProducer);
+		lenient().when(mySubscriptionChannelFactory.newMatchingProducer(anyString(), any())).thenAnswer(t -> myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(

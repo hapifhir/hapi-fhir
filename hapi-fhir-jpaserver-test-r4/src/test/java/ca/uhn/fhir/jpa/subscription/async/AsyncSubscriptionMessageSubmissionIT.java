@@ -1,22 +1,22 @@
 package ca.uhn.fhir.jpa.subscription.async;
 
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerHandler;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerListener;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -63,10 +63,11 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
-	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> myQueueConsumerHandler;
+	private TestQueueConsumerListener<ResourceModifiedMessage> myQueueConsumerListener;
 
 	@Autowired
 	private IResourceModifiedDao myResourceModifiedDao;
+	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
@@ -74,15 +75,15 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myConsumer.close();
 	}
 
 	@BeforeEach
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		ILegacyChannelReceiver receiver = myChannelFactory.newMatchingConsumer("my-queue-name", new ChannelConsumerSettings());
-		myQueueConsumerHandler = new TestQueueConsumerHandler();
-		receiver.subscribe(myQueueConsumerHandler);
+		myQueueConsumerListener = new TestQueueConsumerListener<>();
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myQueueConsumerListener, new ChannelConsumerSettings());
 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 	}
@@ -190,17 +191,16 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myQueueConsumerHandler.getMessages()).hasSize(1);
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage = myQueueConsumerHandler.getMessages().get(0);
-		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
+		assertThat(myQueueConsumerListener.getPayloads()).hasSize(1);
+		ResourceModifiedMessage payload = myQueueConsumerListener.getPayloads().get(0);
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myQueueConsumerHandler.clearMessages();
+		myQueueConsumerListener.clearMessages();
 		return resource;
 	}
 
 	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
-		assertThat(myQueueConsumerHandler.getMessages()).hasSize(expectedCount);
+		assertThat(myQueueConsumerListener.getPayloads()).hasSize(expectedCount);
 	}
 
 	@Configuration
