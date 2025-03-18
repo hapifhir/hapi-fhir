@@ -513,9 +513,6 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 					else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
 						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
 						return false;
-					} else if (t.getMessage().contains("When HL7 is publishing a resource, the owning committee must be stated using the http://hl7.org/fhir/StructureDefinition/structuredefinition-wg extension")) {
-						// DSTU3 resources predate this strict requirement
-						return false;
 					} else if (t.getMessage().equals("The nominated WG 'rcrim' is unknown")) {
 						//The rcrim workgroup is now brr http://www.hl7.org/Special/committees/rcrim/index.cfm
 						return false;

@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -2237,7 +2238,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				IBaseReference valueRef) {
 			IIdType nextId = valueRef.getReferenceElement();
 			if (nextId.isEmpty() && valueRef.getResource() != null) {
-				nextId = valueRef.getResource().getIdElement();
+				nextId = new IdDt("#" + valueRef.getResource().getIdElement());
 			}
 
 			if (nextId == null || nextId.isEmpty()) {

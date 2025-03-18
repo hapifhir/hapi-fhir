@@ -853,7 +853,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("Unable to find a match for profile Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]");
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encode(oo)).isEqualTo("Unable to find a match for profile Group/ABC (by type) among choices: ; [http://hl7.org/fhir/StructureDefinition/Patient]");
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));

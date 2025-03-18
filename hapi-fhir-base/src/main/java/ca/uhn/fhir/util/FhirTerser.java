@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -1428,6 +1429,25 @@ public class FhirTerser {
 		});
 	}
 
+	private boolean isInternalFragment(IBaseReference theReference) {
+		assert theReference.getResource() != null;
+		if (theReference.getResource().getIdElement().isEmpty()) {
+			return true;
+		}
+		// Check if the reference is an external reference
+		// TODO Fix Hack: ensure that this conforms to what FHIR considers (URLs, URNs, and more)
+		if (theReference.getResource().getIdElement().isAbsolute()
+				|| theReference.getResource().getIdElement().getValueAsString().startsWith("urn:")) {
+			return false;
+		}
+		// Check if the reference is a FHIR resource resolvable on the local server
+		// TODO Fix Hack: check for all resource types, not just Patient
+		if (theReference.getResource().getIdElement().getValueAsString().startsWith("Patient/")) {
+			return false;
+		}
+		return true;
+	}
+
 	private void containResourcesForEncoding(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
@@ -1456,7 +1476,7 @@ public class FhirTerser {
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
-				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
+				if (resource.getIdElement().isEmpty() || isInternalFragment(next)) {
 
 					IIdType id = theContained.addContained(resource);
 					if (id == null) {
@@ -1464,9 +1484,9 @@ public class FhirTerser {
 					}
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
-						next.setReference(id.getValue());
+						next.setReference("#" + id.getValue());
 					}
-					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
+					if (isInternalFragment(next) && theContained.hasExistingIdToContainedResource()) {
 						theContained
 								.getExistingIdToContainedResource()
 								.remove(resource.getIdElement().getValue());
@@ -1508,13 +1528,6 @@ public class FhirTerser {
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
 		for (IBaseResource next : containedResources) {
-			String nextId = next.getIdElement().getValue();
-			if (StringUtils.isNotBlank(nextId)) {
-				if (!nextId.startsWith("#")) {
-					nextId = '#' + nextId;
-				}
-				next.getIdElement().setValue(nextId);
-			}
 			contained.addContained(next);
 		}
 
@@ -1810,14 +1823,20 @@ public class FhirTerser {
 				return existing;
 			}
 
-			IIdType newId = theResource.getIdElement();
+			final IIdType newId = new IdDt(theResource.getIdElement());
 			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + UUID.randomUUID());
+				UUID randomUUID = UUID.randomUUID();
+				theResource.getIdElement().setValue(randomUUID.toString());
+				newId.setValue("#" + randomUUID);
+				// TODO put newId in resourceToIdMap ?
+				getResourceToIdMap().put(theResource, newId);
+			} else {
+				// TODO put new IdDt with # in resourceToIdMap ?
+				getResourceToIdMap().put(theResource, new IdDt("#" + newId.getIdPart()));
 			}
-
-			getResourceToIdMap().put(theResource, newId);
+			// getResourceToIdMap().put(theResource, newId);
 			getOrCreateResourceList().add(theResource);
-			return newId;
+			return theResource.getIdElement();
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
