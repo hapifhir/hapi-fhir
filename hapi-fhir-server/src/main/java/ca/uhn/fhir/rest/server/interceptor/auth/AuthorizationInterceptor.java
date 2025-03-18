@@ -594,6 +594,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		return toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
 	}
 
+	/**
+	 *
+	 * @param theResponseObject The resource to convert to a list.
+	 * @param theRequestDetails The request details.
+	 * @return The response object (a resource) as a list. If the REST operation type in the request details is a
+	 * search, and the search is for resources that aren't the OperationOutcome, any OperationOutcome resource is removed from the list.
+	 * e.g. A GET [base]/Patient?parameter(s) search may return a bundle containing an OperationOutcome. The OperationOutcome will be removed from the
+	 * list to exclude from security.
+	 */
 	private static List<IBaseResource> toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
 			IBaseResource theResponseObject, RequestDetails theRequestDetails) {
 		List<IBaseResource> resources = new ArrayList<>();
