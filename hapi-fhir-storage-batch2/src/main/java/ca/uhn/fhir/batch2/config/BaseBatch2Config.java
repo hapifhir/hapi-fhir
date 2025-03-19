@@ -80,10 +80,8 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(
-			JobDefinitionRegistry theJobDefinitionRegistry,
-			IHapiTransactionService theTransactionService) {
-		return new JobCoordinatorImpl(
-                myPersistence, theJobDefinitionRegistry, theTransactionService);
+			JobDefinitionRegistry theJobDefinitionRegistry, IHapiTransactionService theTransactionService) {
+		return new JobCoordinatorImpl(myPersistence, theJobDefinitionRegistry, theTransactionService);
 	}
 
 	@Bean
