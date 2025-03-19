@@ -90,13 +90,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myListener, new ChannelConsumerSettings());
 	}
 
-	@Override
-	@AfterEach
-	public void afterUnregisterRestHookListener() {
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		myConsumer.close();
-	}
-
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");

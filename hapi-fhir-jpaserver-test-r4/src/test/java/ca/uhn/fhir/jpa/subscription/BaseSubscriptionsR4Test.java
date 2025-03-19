@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -109,13 +112,13 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
 		}
 		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
-			processingChannel.addInterceptor(myCountingInterceptor);
+		if (matchingChannel != null) {
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 

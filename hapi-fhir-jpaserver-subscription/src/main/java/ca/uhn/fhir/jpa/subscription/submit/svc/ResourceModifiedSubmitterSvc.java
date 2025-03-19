@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
-import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
@@ -37,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -216,9 +215,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		return channelProducerSettings;
 	}
 
-	public ISpringMessagingChannelProducer getProcessingChannelForUnitTest() {
+	@VisibleForTesting
+	public IChannelProducer<ResourceModifiedMessage> getMatchingChannelProducerForUnitTest() {
 		startIfNeeded();
-		return ((SpringMessagingProducerAdapter<ResourceModifiedMessage>) myMatchingChannel)
-				.getSpringMessagingProducer();
+		return myMatchingChannel;
 	}
 }

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test.util;
 
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEm
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
@@ -56,8 +58,7 @@ public class SubscriptionTestUtil {
 	private IInterceptorService myInterceptorRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		return channel.getQueueSizeForUnitTest();
+		return getMatchingChannel().getQueueSizeForUnitTest();
 	}
 
 	// TODO KHS replace this and similar functions with CountdownLatch
@@ -123,4 +124,11 @@ public class SubscriptionTestUtil {
 		return mySubscriptionRegistry.size();
 	}
 
+	public LinkedBlockingChannel getMatchingChannel() {
+		SpringMessagingProducerAdapter<ResourceModifiedMessage> producer = (SpringMessagingProducerAdapter<ResourceModifiedMessage>)myResourceModifiedSubmitterSvc.getMatchingChannelProducerForUnitTest();
+		if (producer == null) {
+			return null;
+		}
+		return (LinkedBlockingChannel)producer.getSpringMessagingProducer();
+	}
 }

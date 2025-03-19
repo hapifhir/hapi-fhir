@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,11 +105,10 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 
 		myCountingInterceptor = new CountingInterceptor();
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
-			processingChannel.addInterceptor(myCountingInterceptor);
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 
