@@ -1202,6 +1202,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							ValueSet.ConceptReferenceComponent theIncludeConcept =
 									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
 							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+								// the valueSet concept.display property was populated and may be different from the
+								// codeSystem.concept.display.  Since 'concept' is a managed object, we need to tell the
+								// entityManager to ignore any changes to it before assigning the custom display value.
+								// If we don't, the modification will propagate to persistence during the flush() operation
+								// effectively corrupting the codeSystem.
+								myEntityManager.detach(concept);
 								concept.setDisplay(theIncludeConcept.getDisplay());
 							}
 						}
