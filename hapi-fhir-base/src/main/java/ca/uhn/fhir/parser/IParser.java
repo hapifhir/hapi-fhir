@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CollectionUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -538,9 +539,8 @@ public interface IParser {
 		try {
 			parseInto(new StringReader(theSource), theTarget);
 		} catch (IOException e) {
-			throw new Error(
-					// FIXME: new code
-					Msg.code(1) + "Encountered IOException during read from - This should not happen!", e);
+			throw new InternalErrorException(
+					Msg.code(2634) + "Encountered IOException during read from - This should not happen!", e);
 		}
 	}
 

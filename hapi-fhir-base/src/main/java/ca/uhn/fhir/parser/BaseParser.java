@@ -306,8 +306,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
-		// FIXME: new code
-		throw new InternalErrorException(Msg.code(1) + "This parser does not support parsing non-resource values");
+		throw new InternalErrorException(Msg.code(2633) + "This parser does not support parsing non-resource values");
 	}
 
 	protected void encodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext)
