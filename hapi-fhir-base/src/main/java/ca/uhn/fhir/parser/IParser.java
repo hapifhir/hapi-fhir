@@ -533,7 +533,7 @@ public interface IParser {
 	 *                  cleared automatically by the parser, so existing values will be
 	 *                  overwritten only if {@literal theSource} has a value for the
 	 *                  given element.
-	 * @since 7.2.0
+	 * @since 8.2.0
 	 */
 	default void parseInto(String theSource, IBase theTarget) {
 		try {
@@ -561,7 +561,7 @@ public interface IParser {
 	 *                  cleared automatically by the parser, so existing values will be
 	 *                  overwritten only if {@literal theSource} has a value for the
 	 *                  given element.
-	 * @since 7.2.0
+	 * @since 8.2.0
 	 */
 	void parseInto(Reader theSource, IBase theTarget) throws IOException;
 }
