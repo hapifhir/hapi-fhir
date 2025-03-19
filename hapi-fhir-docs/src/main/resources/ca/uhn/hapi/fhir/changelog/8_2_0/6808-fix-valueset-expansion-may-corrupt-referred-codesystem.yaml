@@ -2,6 +2,6 @@
 type: fix
 issue: 6808
 jira: SMILE-9953
-title: "Previously, expanding a valueSet may have caused modifications CodeSystem Concepts. The issue was encountered 
+title: "Previously, expanding a valueSet may have caused modifications to CodeSystem Concepts. The issue was encountered 
 when a `valueSet.compose.include.concept.display` differed from the referred `codeSystem.concept.display`. This has been 
 fixed."

@@ -2001,7 +2001,8 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			assertThat(termConcept.getCode()).isEqualTo(code);
 			assertThat(termConcept.getDisplay()).isNull();
 
-			// given a ValueSet including the code system concept and overwriting the display value
+			// given a ValueSet including the codeSystem concept and overwriting the display value with a more suiting
+			// description.
 			ValueSet vs = new ValueSet();
 			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
