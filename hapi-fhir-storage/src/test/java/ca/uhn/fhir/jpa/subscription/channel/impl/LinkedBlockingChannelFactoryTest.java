@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelProducer;
-import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;

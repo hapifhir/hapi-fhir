@@ -1,4 +1,4 @@
-package ca.uhn.fhir.broker.legacy;
+package ca.uhn.fhir.broker.jms;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;

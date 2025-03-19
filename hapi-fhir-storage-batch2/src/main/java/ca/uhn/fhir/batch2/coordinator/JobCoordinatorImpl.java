@@ -28,10 +28,8 @@ import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -41,7 +39,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -58,7 +55,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
-	private final IChannelConsumer<JobWorkNotification> myWorkChannelConsumer;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobQuerySvc myJobQuerySvc;
 	private final JobParameterJsonValidator myJobParameterJsonValidator;
@@ -68,14 +64,12 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 * Constructor
 	 */
 	public JobCoordinatorImpl(
-			@Nonnull IChannelConsumer<JobWorkNotification> theWorkChannelConsumer,
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
-		myWorkChannelConsumer = theWorkChannelConsumer;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
@@ -201,10 +195,5 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);
-	}
-
-	@PreDestroy
-	public void stop() {
-		myWorkChannelConsumer.close();
 	}
 }

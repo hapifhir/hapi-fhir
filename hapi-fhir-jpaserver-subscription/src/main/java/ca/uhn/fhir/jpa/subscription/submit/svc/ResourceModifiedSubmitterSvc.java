@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelProducer;
-import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;

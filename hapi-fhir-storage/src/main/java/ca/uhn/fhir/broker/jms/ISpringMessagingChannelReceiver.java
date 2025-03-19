@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.broker.legacy;
+package ca.uhn.fhir.broker.jms;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.SubscribableChannel;

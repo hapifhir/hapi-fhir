@@ -8,7 +8,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.broker.api.ISendResult;
-import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
+import ca.uhn.fhir.broker.jms.SpringMessagingMessage;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;

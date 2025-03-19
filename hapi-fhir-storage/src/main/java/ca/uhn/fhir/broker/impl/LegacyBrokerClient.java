@@ -7,13 +7,14 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.legacy.ILegacyChannelFactory;
-import ca.uhn.fhir.broker.legacy.ISpringMessagingChannelReceiver;
-import ca.uhn.fhir.broker.legacy.SpringMessagingMessage;
-import ca.uhn.fhir.broker.legacy.SpringMessagingProducerAdapter;
-import ca.uhn.fhir.broker.legacy.SpringMessagingReceiverAdapter;
+import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
+import ca.uhn.fhir.broker.jms.SpringMessagingMessage;
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
+import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import org.springframework.messaging.MessageHandler;
 
+// FIXME KHS delete this?
 public class LegacyBrokerClient implements IBrokerClient {
 	private final ILegacyChannelFactory myLinkedBlockingChannelFactory;
 
