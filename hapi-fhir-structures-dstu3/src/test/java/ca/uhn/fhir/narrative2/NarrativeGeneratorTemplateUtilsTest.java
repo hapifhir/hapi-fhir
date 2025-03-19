@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Procedure;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class NarrativeGeneratorTemplateUtilsTest {
@@ -110,5 +112,51 @@ class NarrativeGeneratorTemplateUtilsTest {
 		));
 		assertFalse(NarrativeGeneratorTemplateUtils.INSTANCE
 			 .bundleHasEntriesWithoutCode(bundle, "Observation", "http://loinc.org",  "456"));
+	}
+
+	@Test
+	void testNullSafeAccess_validPath() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Observation obs = new Observation();
+		obs.setCode(new CodeableConcept().addCoding(new Coding().setDisplay("Heart Rate")));
+
+		Object result = NarrativeGeneratorTemplateUtils.INSTANCE.nullSafeAccess(obs, "getCode", "getCodingFirstRep", "getDisplay");
+		assertEquals("Heart Rate", result);
+	}
+
+	@Test
+	void testNullSafeAccess_nullIntermediateValue() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Observation obs = new Observation();
+		obs.setCode(new CodeableConcept()); // No coding set
+
+		Object result = NarrativeGeneratorTemplateUtils.INSTANCE.nullSafeAccess(obs, "getCode", "getCodingFirstRep", "getDisplay");
+		assertNull(result, "Should return null when accessing missing properties");
+	}
+
+	@Test
+	void testNullSafeAccess_nullRootObject() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Object result = NarrativeGeneratorTemplateUtils.INSTANCE.nullSafeAccess(null, "getCode", "getCodingFirstRep", "getDisplay");
+		assertNull(result, "Should return null when the root object is null");
+	}
+
+	@Test
+	void testNullSafeAccess_partialPath() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Observation obs = new Observation();
+		obs.setCode(new CodeableConcept().addCoding(new Coding()));
+
+		Object result = NarrativeGeneratorTemplateUtils.INSTANCE.nullSafeAccess(obs, "getCode", "getCodingFirstRep");
+		assertNotNull(result, "Should return Coding object even if Display is missing");
+		assertInstanceOf(Coding.class, result, "Should return an instance of Coding");
+	}
+
+	@Test
+	void testNullSafeAccess_badMethodName() throws InvocationTargetException, IllegalAccessException {
+		Observation obs = new Observation();
+		NoSuchMethodException nsm = null;
+		try {
+			NarrativeGeneratorTemplateUtils.INSTANCE.nullSafeAccess(obs, "no-such-method-exists");
+		} catch (NoSuchMethodException e) {
+			nsm = e;
+		}
+		assertNotNull(nsm);
 	}
 }
