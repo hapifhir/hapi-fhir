@@ -90,6 +90,11 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 		}
 	}
 
+	@Override
+	public Class<ResourceModifiedMessage> getMessageType() {
+		return ResourceModifiedMessage.class;
+	}
+
 	private IBaseResource extractSourceResource(ResourceModifiedMessage theResourceModifiedMessage) {
 		IBaseResource sourceResource = theResourceModifiedMessage.getNewPayload(myFhirContext);
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5 && sourceResource instanceof IBaseBundle) {

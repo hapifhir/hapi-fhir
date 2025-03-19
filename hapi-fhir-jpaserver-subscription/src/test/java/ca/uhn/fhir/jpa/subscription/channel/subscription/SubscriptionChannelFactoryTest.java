@@ -90,5 +90,10 @@ public class SubscriptionChannelFactoryTest {
 		public void handleMessage(IMessage<ResourceDeliveryMessage> theMessage) {
 			throw new NullPointerException("THIS IS THE MESSAGE");
 		}
+
+		@Override
+		public Class<ResourceDeliveryMessage> getMessageType() {
+			return ResourceDeliveryMessage.class;
+		}
 	}
 }
