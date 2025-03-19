@@ -309,12 +309,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			Set<String> theAddedCodes,
 			TermConcept theConcept,
+			String theConceptDisplayValue,
 			boolean theAdd,
 			String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
 		String codeSystemVersion = theConcept.getCodeSystemVersion().getCodeSystemVersionId();
 		String code = theConcept.getCode();
-		String display = theConcept.getDisplay();
 		Long sourceConceptPid = theConcept.getId();
 		String directParentPids = "";
 
@@ -325,31 +325,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
+
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
-		} else {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
+			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
 		}
+
+		return addCodeIfNotAlreadyAdded(
+				theValueSetCodeAccumulator,
+				theAddedCodes,
+				designations,
+				theAdd,
+				codeSystem,
+				code,
+				theConceptDisplayValue,
+				sourceConceptPid,
+				directParentPids,
+				codeSystemVersion);
 	}
 
 	private boolean addCodeIfNotAlreadyAdded(
@@ -1198,17 +1189,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					for (TermConcept concept : termConcepts) {
 						count++;
 						countForBatch++;
+						String conceptDisplayValue = concept.getDisplay();
 						if (theAdd && searchProps.hasIncludeOrExcludeCodes()) {
 							ValueSet.ConceptReferenceComponent theIncludeConcept =
 									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
 							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
-								// the valueSet concept.display property was populated and may be different from the
-								// codeSystem.concept.display.  Since 'concept' is a managed object, we need to tell the
-								// entityManager to ignore any changes to it before assigning the custom display value.
-								// If we don't, the modification will propagate to persistence during the flush()
-								// operation effectively corrupting the codeSystem.concept.
-								myEntityManager.detach(concept);
-								concept.setDisplay(theIncludeConcept.getDisplay());
+								conceptDisplayValue = theIncludeConcept.getDisplay();
 							}
 						}
 						boolean added = addCodeIfNotAlreadyAdded(
@@ -1216,6 +1202,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 								theValueSetCodeAccumulator,
 								theAddedCodes,
 								concept,
+								conceptDisplayValue,
 								theAdd,
 								includeOrExcludeVersion);
 						if (added) {
