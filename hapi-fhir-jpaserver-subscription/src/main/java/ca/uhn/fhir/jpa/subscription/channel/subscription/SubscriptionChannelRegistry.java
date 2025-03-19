@@ -92,7 +92,8 @@ public class SubscriptionChannelRegistry {
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
-		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener = new MultiplexingListener<>(ResourceDeliveryMessage.class);
+		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
+				new MultiplexingListener<>(ResourceDeliveryMessage.class);
 		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =
 				newDeliveryConsumer(multiplexingListener, receivingParameters);
 		Optional<IMessageListener<ResourceDeliveryMessage>> oDeliveryListener =
