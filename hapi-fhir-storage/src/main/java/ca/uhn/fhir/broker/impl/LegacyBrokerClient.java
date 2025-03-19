@@ -31,7 +31,7 @@ public class LegacyBrokerClient implements IBrokerClient {
 		ISpringMessagingChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
 				theChannelName, theMessageType, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval =
-				new SpringMessagingReceiverAdapter<>(theMessageType, legacyChannelReceiver);
+				new SpringMessagingReceiverAdapter<>(theMessageType, legacyChannelReceiver, theMessageListener);
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter(theMessageListener);
 		retval.subscribe(handler);
 		return retval;

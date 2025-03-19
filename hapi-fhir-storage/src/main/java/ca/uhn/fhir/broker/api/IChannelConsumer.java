@@ -15,4 +15,6 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	void close();
 
 	Class<T> getMessageType();
+
+	IMessageListener<T> getMessageListener();
 }
