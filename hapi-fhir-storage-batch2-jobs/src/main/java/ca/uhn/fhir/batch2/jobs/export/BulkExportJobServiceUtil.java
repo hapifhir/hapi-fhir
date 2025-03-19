@@ -17,13 +17,13 @@ public class BulkExportJobServiceUtil {
 	 * which contains the polling location
 	 */
 	public static void writePollingLocationsToResponseHeaders(
-		@Nonnull ServletRequestDetails theRequestDetails, @Nonnull String theInstanceId) {
+			@Nonnull ServletRequestDetails theRequestDetails, @Nonnull String theInstanceId) {
 		String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
 		if (serverBase == null) {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
 		}
 		String pollLocation = serverBase + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
-			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theInstanceId;
+				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theInstanceId;
 		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
