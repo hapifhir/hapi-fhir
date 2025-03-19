@@ -120,6 +120,11 @@ class LegacyBrokerClientTest {
 		}
 
 		@Override
+		public Class<MyTestMessageValue> getMessageType() {
+			return MyTestMessageValue.class;
+		}
+
+		@Override
 		public void clear() {
 			myLatch.clear();
 		}
