@@ -38,6 +38,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -55,20 +57,22 @@ public class SearchParamIdentityCache {
 	private static final int THREAD_POOL_MAX_POOL_SIZE = 1000;
 	private static final int THREAD_POOL_QUEUE_SIZE = 1000;
 	private Map<Long, Integer> myHashIdentityToSearchParamId = new ConcurrentHashMap<>();
-	private final IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
+	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
 	private final ExecutorService myThreadPool;
 	private final ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
+	private final UniqueTaskExecutor uniqueTaskExecutor;
 
 	public SearchParamIdentityCache(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
 			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
 			PlatformTransactionManager theTxManager) {
-		this.myResourceIndexedSearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
+		this.mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
 		mySearchParamHashIdentityRegistry = theSearchParamHashIdentityRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		myThreadPool = createExecutor();
+		uniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool);
 	}
 
 	private ExecutorService createExecutor() {
@@ -106,43 +110,113 @@ public class SearchParamIdentityCache {
 
 	protected void initCache() {
 		// populate cache with IndexedSearchParamIdentities from database
-		Collection<Object[]> pids = Objects.requireNonNull(
-				myTxTemplate.execute(t -> myResourceIndexedSearchParamIdentityDao.getAllHashIdentities()));
+		Collection<Object[]> pids =
+				Objects.requireNonNull(myTxTemplate.execute(t -> mySearchParamIdentityDao.getAllHashIdentities()));
 		myHashIdentityToSearchParamId = pids.stream().collect(Collectors.toMap(i -> (Long) i[0], i -> (Integer) i[1]));
 		// pre-fill cache with SearchParams from SearchParamRegistry
 		mySearchParamHashIdentityRegistry
 				.getHashIdentityToIndexedSearchParamMap()
 				.forEach((hashIdentity, indexedSearchParam) -> {
 					if (!myHashIdentityToSearchParamId.containsKey(hashIdentity)) {
-						myThreadPool.submit(new PersistSearchParameterIdentityTask(
-								hashIdentity,
-								indexedSearchParam.getParameterName(),
-								indexedSearchParam.getResourceType()));
+						PersistSearchParameterIdentityTask persistSpIdentityTask =
+								new PersistSearchParameterIdentityTask.Builder()
+										.hashIdentity(hashIdentity)
+										.resourceType(indexedSearchParam.getResourceType())
+										.paramName(indexedSearchParam.getParameterName())
+										.hashIdentityToSearchParamId(myHashIdentityToSearchParamId)
+										.txTemplate(myTxTemplate)
+										.searchParamIdentityDao(mySearchParamIdentityDao)
+										.build();
+
+						uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 					}
 				});
 	}
 
-	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theParamName, String theResourceType) {
+	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName) {
 		// check if SearchParamIdentity is already in cache
 		Integer spIdentityId = myHashIdentityToSearchParamId.get(theHashIdentity);
 
 		if (spIdentityId != null) {
 			return;
 		}
-		// cache miss, create separate thread to update SearchParamIdentity
-		myThreadPool.submit(new PersistSearchParameterIdentityTask(theHashIdentity, theParamName, theResourceType));
+
+		// cache miss, create SearchParamIdentity in separate thread
+		PersistSearchParameterIdentityTask persistSpIdentityTask = new PersistSearchParameterIdentityTask.Builder()
+				.hashIdentity(theHashIdentity)
+				.resourceType(theResourceType)
+				.paramName(theParamName)
+				.hashIdentityToSearchParamId(myHashIdentityToSearchParamId)
+				.txTemplate(myTxTemplate)
+				.searchParamIdentityDao(mySearchParamIdentityDao)
+				.build();
+
+		uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 	}
 
-	private class PersistSearchParameterIdentityTask implements Callable<Void> {
+	public static class PersistSearchParameterIdentityTask implements Callable<Void> {
 
 		private final Long myHashIdentity;
-		private final String myParamName;
 		private final String myResourceType;
+		private final String myParamName;
+		private final TransactionTemplate myTxTemplate;
+		private final Map<Long, Integer> myHashIdentityToSearchParamId;
+		private final IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 
-		public PersistSearchParameterIdentityTask(Long theHashIdentity, String theParamName, String theResourceType) {
-			this.myHashIdentity = theHashIdentity;
-			this.myParamName = theParamName;
-			this.myResourceType = theResourceType;
+		private PersistSearchParameterIdentityTask(Builder theBuilder) {
+			this.myHashIdentity = theBuilder.myHashIdentity;
+			this.myResourceType = theBuilder.myResourceType;
+			this.myParamName = theBuilder.myParamName;
+			this.myTxTemplate = theBuilder.myTxTemplate;
+			this.myHashIdentityToSearchParamId = theBuilder.myHashIdentityToSearchParamId;
+			this.myResourceIndexedSearchParamIdentityDao = theBuilder.mySearchParamIdentityDao;
+		}
+
+		public Long getHashIdentity() {
+			return myHashIdentity;
+		}
+
+		public static class Builder {
+			private Long myHashIdentity;
+			private String myResourceType;
+			private String myParamName;
+			private TransactionTemplate myTxTemplate;
+			private Map<Long, Integer> myHashIdentityToSearchParamId;
+			private IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
+
+			public Builder hashIdentity(Long theHashIdentity) {
+				this.myHashIdentity = theHashIdentity;
+				return this;
+			}
+
+			public Builder resourceType(String theResourceType) {
+				this.myResourceType = theResourceType;
+				return this;
+			}
+
+			public Builder paramName(String theParamName) {
+				this.myParamName = theParamName;
+				return this;
+			}
+
+			public Builder txTemplate(TransactionTemplate theTxTemplate) {
+				this.myTxTemplate = theTxTemplate;
+				return this;
+			}
+
+			public Builder hashIdentityToSearchParamId(Map<Long, Integer> theHashIdentityToSearchParamId) {
+				this.myHashIdentityToSearchParamId = theHashIdentityToSearchParamId;
+				return this;
+			}
+
+			public Builder searchParamIdentityDao(IResourceIndexedSearchParamIdentityDao theSearchParamIdentityDao) {
+				this.mySearchParamIdentityDao = theSearchParamIdentityDao;
+				return this;
+			}
+
+			public PersistSearchParameterIdentityTask build() {
+				return new PersistSearchParameterIdentityTask(this);
+			}
 		}
 
 		@Override
@@ -210,6 +284,45 @@ public class SearchParamIdentityCache {
 						theParamName,
 						theResourceType);
 				return indexedSearchParamIdentity.getSpIdentityId();
+			});
+		}
+	}
+
+	/**
+	 * Ensures only one instance of the PersistSearchParameterIdentityTask is running per hash identity.
+	 * If a task is already in progress, it will not be scheduled again.
+	 */
+	private static class UniqueTaskExecutor {
+		private final ExecutorService myExecutor;
+		private final ConcurrentHashMap<Long, Future<Void>> myInFlightTasks = new ConcurrentHashMap<>();
+
+		public UniqueTaskExecutor(ExecutorService theExecutor) {
+			myExecutor = theExecutor;
+		}
+
+		public void submitIfAbsent(PersistSearchParameterIdentityTask theTask) {
+			Long key = theTask.getHashIdentity();
+
+			// If there's already a Future in flight, reuse it.
+			Future<?> existing = myInFlightTasks.get(key);
+			if (existing != null) {
+				return;
+			}
+
+			// Put FutureTask in the map. If another thread already put it - skip scheduling.
+			FutureTask<Void> futureTask = new FutureTask<>(theTask);
+			existing = myInFlightTasks.putIfAbsent(key, futureTask);
+			if (existing != null) {
+				return;
+			}
+
+			// Schedule FutureTask, remove it from the myInFlightTasks map once it's done or fails.
+			myExecutor.execute(() -> {
+				try {
+					futureTask.run();
+				} finally {
+					myInFlightTasks.remove(key, futureTask);
+				}
 			});
 		}
 	}

@@ -15,9 +15,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -46,7 +49,7 @@ public class SearchParamIdentityCacheTest {
 		mySearchParamIdentityCache.setHashIdentityToSearchParamIdMap(hashIdentityToSearchParamIdMap);
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -57,7 +60,7 @@ public class SearchParamIdentityCacheTest {
 	@Test
 	public void findOrCreateSearchParamIdentity_missingInCacheExistsInDb_saveNotExecuted() {
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() ->
@@ -83,7 +86,7 @@ public class SearchParamIdentityCacheTest {
 		mySearchParamIdentityCache.setHashIdentityToSearchParamIdMap(hashIdentityToSearchParamIdMap);
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -97,7 +100,7 @@ public class SearchParamIdentityCacheTest {
 			.thenThrow(new DataIntegrityViolationException("Entity Exists!"));
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -120,7 +123,7 @@ public class SearchParamIdentityCacheTest {
 		});;
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -136,7 +139,7 @@ public class SearchParamIdentityCacheTest {
 			.thenThrow(new RuntimeException("Save Failed!"));
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -155,7 +158,7 @@ public class SearchParamIdentityCacheTest {
 			.thenReturn(identity);
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -173,7 +176,7 @@ public class SearchParamIdentityCacheTest {
 		mySearchParamIdentityCache.initCache();
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -201,10 +204,27 @@ public class SearchParamIdentityCacheTest {
 		waitOneSecond();
 
 		// execute
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "given", "Patient");
+		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
 
 		// verify
 		waitOneSecond();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(myResourceIndexedSearchParamIdentityDao, times(1)).getSearchParameterIdByHashIdentity(anyLong());
+			verify(myResourceIndexedSearchParamIdentityDao, times(1)).save(any(IndexedSearchParamIdentity.class));
+		});
+	}
+
+	@Test
+	public void findOrCreateSearchParamIdentity_multipleThreadsCreateSameSearchParam_saveExecutedOnce() throws InterruptedException {
+		// execute findOrCreateSearchParamIdentity in 50 parallel threads
+		ExecutorService executor = Executors.newFixedThreadPool(50);
+		for (int i = 0; i < 50; i++) {
+			executor.submit(() -> mySearchParamIdentityCache.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given"));
+		}
+		executor.shutdown();
+
+		// verify
+		assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS)); // wait for all tasks to finish
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(myResourceIndexedSearchParamIdentityDao, times(1)).getSearchParameterIdByHashIdentity(anyLong());
 			verify(myResourceIndexedSearchParamIdentityDao, times(1)).save(any(IndexedSearchParamIdentity.class));

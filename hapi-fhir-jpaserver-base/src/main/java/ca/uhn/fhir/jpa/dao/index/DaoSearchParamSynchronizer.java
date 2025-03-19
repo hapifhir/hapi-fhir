@@ -213,8 +213,8 @@ public class DaoSearchParamSynchronizer {
 			BaseResourceIndexedSearchParam indexedSearchParam = ((BaseResourceIndexedSearchParam) theNewParam);
 			mySearchParamIdentityCache.findOrCreateSearchParamIdentity(
 					indexedSearchParam.getHashIdentity(),
-					indexedSearchParam.getParamName(),
-					indexedSearchParam.getResourceType());
+					indexedSearchParam.getResourceType(),
+					indexedSearchParam.getParamName());
 		}
 	}
 
