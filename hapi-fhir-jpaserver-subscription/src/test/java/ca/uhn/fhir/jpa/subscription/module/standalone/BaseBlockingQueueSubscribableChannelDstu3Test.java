@@ -122,7 +122,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		canonicalSubscription.setIdElement(new IdDt("test"));
 		canonicalSubscription.setChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		MultiplexingListener<ResourceModifiedMessage> multiplexingListener = new MultiplexingListener<>();
+		MultiplexingListener<ResourceModifiedMessage> multiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
 		multiplexingListener.addListener(mySubscriptionActivatingSubscriber);
 		multiplexingListener.addListener(subscriptionMatchingSubscriber);
 		multiplexingListener.addListener(subscriptionRegisteringSubscriber);

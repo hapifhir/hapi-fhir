@@ -9,7 +9,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
-import ca.uhn.fhir.broker.jms.SpringMessagingMessage;
+import ca.uhn.fhir.broker.jms.SpringMessagingMessageHandlerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import org.springframework.messaging.MessageHandler;
@@ -30,9 +30,9 @@ public class LegacyBrokerClient implements IBrokerClient {
 			ChannelConsumerSettings theChannelConsumerSettings) {
 		ISpringMessagingChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
 				theChannelName, theMessageType, theChannelConsumerSettings);
-		SpringMessagingReceiverAdapter<T> retval = new SpringMessagingReceiverAdapter<>(legacyChannelReceiver);
-		MessageHandler handler = message -> theMessageListener.handleMessage(
-				new SpringMessagingMessage<>((org.springframework.messaging.Message<T>) message));
+		SpringMessagingReceiverAdapter<T> retval =
+				new SpringMessagingReceiverAdapter<>(theMessageType, legacyChannelReceiver);
+		MessageHandler handler = new SpringMessagingMessageHandlerAdapter(theMessageListener);
 		retval.subscribe(handler);
 		return retval;
 	}

@@ -125,6 +125,10 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			subscriptionConsumerWithListeners.addListener(this);
 		}
 
+		public Class<ResourceDeliveryMessage> getMessageType() {
+			return ResourceDeliveryMessage.class;
+		}
+
 		@Override
 		public void closing() {
 			SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =

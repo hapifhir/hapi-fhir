@@ -56,6 +56,10 @@ public class SubscriptionDeliveringEmailListener extends BaseSubscriptionDeliver
 		myEmailSender = theEmailSender;
 	}
 
+	public Class<ResourceDeliveryMessage> getMessageType() {
+		return ResourceDeliveryMessage.class;
+	}
+
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws Exception {
 		CanonicalSubscription subscription = theMessage.getSubscription();

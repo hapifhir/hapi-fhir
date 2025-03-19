@@ -82,7 +82,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myQueueConsumerListener = new TestQueueConsumerListener<>();
+		myQueueConsumerListener = new TestQueueConsumerListener<>(ResourceModifiedMessage.class);
 		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myQueueConsumerListener, new ChannelConsumerSettings());
 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);

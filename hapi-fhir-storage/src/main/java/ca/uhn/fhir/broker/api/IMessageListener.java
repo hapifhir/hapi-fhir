@@ -9,4 +9,6 @@ public interface IMessageListener<T> {
 	 * @param theMessage the message that was received
 	 */
 	void handleMessage(IMessage<T> theMessage);
+
+	Class<T> getMessageType();
 }

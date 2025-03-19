@@ -74,6 +74,10 @@ public class SubscriptionActivatingSubscriber implements IMessageListener<Resour
 		super();
 	}
 
+	public Class<ResourceModifiedMessage> getMessageType() {
+		return ResourceModifiedMessage.class;
+	}
+
 	@Override
 	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();

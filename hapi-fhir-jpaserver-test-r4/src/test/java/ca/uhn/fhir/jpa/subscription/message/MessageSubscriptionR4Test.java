@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.subscription.message;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
@@ -63,9 +62,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private TestQueueConsumerListener<ResourceModifiedMessage> myListener;
 
 	@Autowired
-	IResourceModifiedDao myResourceModifiedDao;
-
-	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
@@ -86,7 +82,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myListener = new TestQueueConsumerListener<>();
+		myListener = new TestQueueConsumerListener<>(ResourceModifiedMessage.class);
 		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myListener, new ChannelConsumerSettings());
 	}
 

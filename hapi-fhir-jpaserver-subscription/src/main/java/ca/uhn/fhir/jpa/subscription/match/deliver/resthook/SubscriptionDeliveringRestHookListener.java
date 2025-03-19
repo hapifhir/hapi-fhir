@@ -79,6 +79,10 @@ public class SubscriptionDeliveringRestHookListener extends BaseSubscriptionDeli
 		super();
 	}
 
+	public Class<ResourceDeliveryMessage> getMessageType() {
+		return ResourceDeliveryMessage.class;
+	}
+
 	protected void deliverPayload(
 			ResourceDeliveryMessage theMsg,
 			CanonicalSubscription theSubscription,

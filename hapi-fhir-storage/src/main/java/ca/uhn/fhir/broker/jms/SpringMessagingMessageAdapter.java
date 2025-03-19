@@ -4,15 +4,13 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-import java.util.Map;
-
 public class SpringMessagingMessageAdapter<T> implements Message<T> {
 	private final IMessage<T> myMessage;
 	private final MessageHeaders myHeaders;
 
 	public SpringMessagingMessageAdapter(IMessage<T> theMessage) {
 		myMessage = theMessage;
-		myHeaders = new MessageHeaders((Map<String, Object>) (Map<?, ?>) myMessage.getHeaders());
+		myHeaders = new MessageHeaders(myMessage.getHeaders());
 	}
 
 	@Override

@@ -73,6 +73,10 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		super();
 	}
 
+	public Class<ResourceModifiedMessage> getMessageType() {
+		return ResourceModifiedMessage.class;
+	}
+
 	@Override
 	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
 		ourLog.trace("Handling resource modified message: {}", theMessage);

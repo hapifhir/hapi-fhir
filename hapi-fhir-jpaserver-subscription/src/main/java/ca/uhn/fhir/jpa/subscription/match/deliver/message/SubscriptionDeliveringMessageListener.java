@@ -57,6 +57,10 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		myBrokerClient = theBrokerClient;
 	}
 
+	public Class<ResourceDeliveryMessage> getMessageType() {
+		return ResourceDeliveryMessage.class;
+	}
+
 	protected void doDelivery(
 			ResourceDeliveryMessage theSourceMessage,
 			CanonicalSubscription theSubscription,

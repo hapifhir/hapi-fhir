@@ -66,6 +66,10 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theJobDefinitionRegistry);
 	}
 
+	public Class<JobWorkNotification> getMessageType() {
+		return JobWorkNotification.class;
+	}
+
 	@Override
 	public void handleMessage(IMessage<JobWorkNotification> theMessage) {
 		handleWorkChannelMessage(theMessage.getPayload());

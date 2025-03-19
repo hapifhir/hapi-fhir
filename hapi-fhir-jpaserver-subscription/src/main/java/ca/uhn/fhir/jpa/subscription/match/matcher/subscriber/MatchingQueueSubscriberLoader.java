@@ -26,6 +26,7 @@ import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringListener;
@@ -73,7 +74,7 @@ public class MatchingQueueSubscriberLoader {
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
 	public void subscribeToMatchingChannel() {
 		if (myMatchingConsumer == null) {
-			myMultiplexingListener = new MultiplexingListener<>();
+			myMultiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
 
 			myMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, myMultiplexingListener, getChannelConsumerSettings());
