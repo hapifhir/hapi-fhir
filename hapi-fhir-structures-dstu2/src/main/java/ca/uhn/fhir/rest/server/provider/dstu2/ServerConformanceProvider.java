@@ -506,6 +506,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					if (!inParams.add(nextParam.getName())) {
 						continue;
 					}
+					// LUKETODO:  how to handle multiple parameters?
 					Parameter param = op.addParameter();
 					param.setUse(OperationParameterUseEnum.IN);
 					if (nextParam.getParamType() != null) {

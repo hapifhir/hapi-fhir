@@ -74,6 +74,20 @@ public @interface OperationParam {
 	Class<? extends IBase> type() default IBase.class;
 
 	/**
+	 * The source type of the parameters if we're expecting to do a type conversion, such as String to ZonedDateTime.
+	 * Void indicates that we don't want to do a type conversion.
+	 *
+	 * @return the source type of the parameter
+	 */
+	Class<?> sourceType() default Void.class;
+
+	/**
+	 * @return The range type associated with any type conversion.  For instance, if we expect a start and end date.
+	 * NOT_APPLICABLE is the default and indicates range conversion is not applicable.
+	 */
+	OperationParameterRangeType rangeType() default OperationParameterRangeType.NOT_APPLICABLE;
+
+	/**
 	 * Optionally specifies the type of the parameter as a string, such as <code>Coding</code> or
 	 * <code>base64Binary</code>. This can be useful if you want to use a generic interface type
 	 * on the actual method,such as {@link org.hl7.fhir.instance.model.api.IPrimitiveType} or
