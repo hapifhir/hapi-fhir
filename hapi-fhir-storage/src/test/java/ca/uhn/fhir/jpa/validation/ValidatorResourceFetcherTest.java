@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.ValidatorSession;
+import org.hl7.fhir.validation.ValidatorSettings;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,8 @@ public class ValidatorResourceFetcherTest extends BaseTest {
             wrappedWorkerContext,
             new FhirInstanceValidator.NullEvaluationContext(),
             new XVerExtensionManager(null),
-            new ValidatorSession());
+            new ValidatorSession(),
+			new ValidatorSettings());
     RequestDetails r = new SystemRequestDetails();
     // test
     Element returnedResource = fetcher.fetch(v, r,"http://www.test-url-for-questionnaire.com/Questionnaire/test-id|1.0.0");
