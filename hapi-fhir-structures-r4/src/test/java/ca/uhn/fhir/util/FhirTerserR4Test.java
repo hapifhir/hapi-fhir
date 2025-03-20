@@ -8,6 +8,9 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
+
+import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
+
 import com.google.common.collect.Lists;
 import org.apache.jena.base.Sys;
 import org.hl7.fhir.instance.model.api.IBase;

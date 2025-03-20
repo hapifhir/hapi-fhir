@@ -523,7 +523,13 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 						//DSTU3 resources will not pass validation with this new business rule (2024-09-17) https://github.com/hapifhir/org.hl7.fhir.core/commit/7d05d38509895ddf8614b35ffb51b1f5363f394c
 					) {
 						return false;
-					} else if (t.getSeverity() == ResultSeverityEnum.WARNING
+					} else if(t.getMessage().contains("The constraint key 'inv-1' already exists at the location 'http://hl7.org/fhir/StructureDefinition/TestScript' with a different expression")) {
+						return false;
+					} else if(t.getMessage().contains("The element slicing is prohibited on the element DomainResource.extension") || t.getMessage().contains("The element slicing is prohibited on the element DomainResource.modifierExtension")) {
+						// Core 6.5.15 contains this new validation that let the test fail
+						return false;
+					}
+					else if (t.getSeverity() == ResultSeverityEnum.WARNING
 						&& ( "VALIDATION_HL7_PUBLISHER_MISMATCH".equals(t.getMessageId())
 						|| "VALIDATION_HL7_PUBLISHER_MISMATCH2".equals(t.getMessageId())
 						|| "VALIDATION_HL7_WG_URL".equals(t.getMessageId())
@@ -1236,14 +1242,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
 
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(fetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
 		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
-		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString(), any());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}
 

@@ -17,6 +17,9 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
+
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,6 +31,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -65,7 +69,7 @@ public class IncludeTest {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=baz");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			ourLog.info(responseContent);
 			assertThat(responseContent).contains("Invalid _include parameter value");
@@ -76,7 +80,7 @@ public class IncludeTest {
 	public void testIIncludedResourcesNonContained() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -102,7 +106,7 @@ public class IncludeTest {
 	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=declaredExtInclude&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -128,7 +132,7 @@ public class IncludeTest {
 	public void testIIncludedResourcesNonContainedInExtension() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -153,7 +157,7 @@ public class IncludeTest {
 	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true&_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -206,7 +210,7 @@ public class IncludeTest {
 	public void testNoIncludes() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -222,7 +226,7 @@ public class IncludeTest {
 	public void testOneInclude() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -239,7 +243,7 @@ public class IncludeTest {
 	public void testOneIncludeIterate() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&" + Constants.PARAM_INCLUDE_ITERATE + "=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -256,7 +260,7 @@ public class IncludeTest {
 	public void testTwoInclude() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=bar");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -278,7 +282,7 @@ public class IncludeTest {
 	public void testStringInclude() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=stringInclude&_include=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
