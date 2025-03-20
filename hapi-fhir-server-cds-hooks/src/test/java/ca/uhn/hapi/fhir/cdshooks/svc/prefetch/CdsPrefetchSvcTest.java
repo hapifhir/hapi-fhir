@@ -1,6 +1,10 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsPrefetchFailureMode;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import org.hl7.fhir.r4.model.Patient;
@@ -13,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CdsPrefetchSvcTest {
@@ -66,4 +72,29 @@ class CdsPrefetchSvcTest {
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
 		assertThat(result).containsExactly("bar");
 	}
+
+	@Test
+	void testAugmentRequest_PrefetchFailureMode() {
+		CdsServiceJson spec = new CdsServiceJson();
+		spec.addPrefetchFailureMode("patient", CdsPrefetchFailureMode.OPERATION_OUTCOME);
+		spec.addPrefetch("patient", "Patient/{{context.patientId}}");
+		spec.addSource("patient", CdsResolutionStrategyEnum.FHIR_CLIENT);
+		spec.setHook("test_failure_mode_hook");
+
+
+		CdsServiceRequestContextJson requestContext = new CdsServiceRequestContextJson();
+		requestContext.put("patientId", "123");
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.setHook("test_failure_mode_hook");
+		request.setFhirServer("http://example-fhir.com/fhir");
+		request.setHookInstance("test_failure_mode_hook_instance");
+		request.setContext(requestContext);
+
+		ICdsServiceMethod serviceMethodMock = mock(ICdsServiceMethod.class);
+		when(serviceMethodMock.getCdsServiceJson()).thenReturn(spec);
+		myCdsPrefetchSvc.augmentRequest(request, serviceMethodMock);
+
+
+	}
+
 }
