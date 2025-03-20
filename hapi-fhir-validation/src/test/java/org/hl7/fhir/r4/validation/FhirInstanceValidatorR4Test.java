@@ -1256,7 +1256,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(oo.getIssue()).hasSize(1);
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssue().get(0).getSeverity());
-		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Observation.subject.resolve().ofType(Patient).text: Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
 		assertThat(oo.getIssue().get(0).getLocation().stream().map(PrimitiveType::getValue).collect(Collectors.toList())).containsExactly("Observation.subject", "Line[1] Col[238]");
 	}
 
