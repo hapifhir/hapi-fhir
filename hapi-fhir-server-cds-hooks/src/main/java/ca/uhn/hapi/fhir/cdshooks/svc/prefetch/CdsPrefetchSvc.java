@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -26,12 +27,16 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsPrefetchFailureMode;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +52,8 @@ public class CdsPrefetchSvc {
 	private final CdsPrefetchDaoSvc myResourcePrefetchDao;
 	private final CdsPrefetchFhirClientSvc myResourcePrefetchFhirClient;
 	private final ICdsHooksDaoAuthorizationSvc myCdsHooksDaoAuthorizationSvc;
+	private final FhirContext myFhirContext;
+	private final CDSHooksVersion myCDSHooksVersion;
 
 	@Nullable
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -56,17 +63,27 @@ public class CdsPrefetchSvc {
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
 			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
-			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
+			FhirContext theFhirContext,
+			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster,
+			@Nullable CDSHooksVersion theCDSHooksVersion) {
 		myCdsResolutionStrategySvc = theCdsResolutionStrategySvc;
 		myResourcePrefetchDao = theResourcePrefetchDao;
 		myResourcePrefetchFhirClient = theResourcePrefetchFhirClient;
 		myCdsHooksDaoAuthorizationSvc = theCdsHooksDaoAuthorizationSvc;
+		myFhirContext = theFhirContext;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myCDSHooksVersion = CDSHooksVersion.getOrDefault(theCDSHooksVersion);
 	}
 
 	public void augmentRequest(CdsServiceRequestJson theCdsServiceRequestJson, ICdsServiceMethod theServiceMethod) {
 		CdsServiceJson serviceSpec = theServiceMethod.getCdsServiceJson();
 		Set<String> missingPrefetch = findMissingPrefetch(serviceSpec, theCdsServiceRequestJson);
+		// it is important to call handleOperationOutcomesSentByCdsClient after calculating the missing prefetches
+		// because
+		// in case the failure mode is OMIT, and if the client sends an OperationOutcome as a prefetch key, that
+		// prefetch will be cleared by
+		// handleOperationOutcomesSentByCdsClient
+		handleOperationOutcomesSentByCdsClient(serviceSpec, theCdsServiceRequestJson);
 		if (missingPrefetch.isEmpty()) {
 			return;
 		}
@@ -82,14 +99,41 @@ public class CdsPrefetchSvc {
 		}
 	}
 
+	private void handleOperationOutcomesSentByCdsClient(
+			CdsServiceJson theServiceSpec, CdsServiceRequestJson theCdsServiceRequestJson) {
+		Set<String> prefetchKeysToRemove = new HashSet<>();
+		for (String prefetchKey : theCdsServiceRequestJson.getPrefetchKeys()) {
+			IBaseResource resource = theCdsServiceRequestJson.getPrefetch(prefetchKey);
+			CdsPrefetchFailureMode failureMode = theServiceSpec.getPrefetchFailureMode(prefetchKey);
+			if (resource instanceof IBaseOperationOutcome) {
+				if (failureMode == CdsPrefetchFailureMode.FAIL) {
+					String message = String.format(
+							"The CDS service '%s' received an OperationOutcome resource for prefetch key '%s' "
+									+ "but the service isn't configured to handle OperationOutcomes",
+							theServiceSpec.getId(), prefetchKey);
+					throw new PreconditionFailedException(Msg.code(2635) + message);
+				} else if (failureMode == CdsPrefetchFailureMode.OMIT) {
+					prefetchKeysToRemove.add(prefetchKey);
+				}
+				// else the failure mode is OPERATION_OUTCOME, so we keep the OperationOutcome in the prefetch
+			}
+		}
+
+		for (String prefetchKey : prefetchKeysToRemove) {
+			theCdsServiceRequestJson.removePrefetch(prefetchKey);
+		}
+	}
+
 	private void fetchMissingPrefetchElements(
 			CdsServiceRequestJson theCdsServiceRequestJson,
 			CdsServiceJson theServiceSpec,
 			Set<String> theMissingPrefetch,
 			Set<CdsResolutionStrategyEnum> theStrategies) {
+
 		for (String key : theMissingPrefetch) {
 			String template = theServiceSpec.getPrefetch().get(key);
 			CdsResolutionStrategyEnum source = theServiceSpec.getSource().get(key);
+			CdsPrefetchFailureMode failureMode = theServiceSpec.getPrefetchFailureMode(key);
 			if (!theStrategies.contains(source)) {
 				throw new PreconditionFailedException(
 						Msg.code(2386) + "Unable to fetch missing resource(s) with source " + source);
@@ -125,23 +169,63 @@ public class CdsPrefetchSvc {
 			callCdsPrefetchRequestHooks(cdsHookPrefetchContext, theCdsServiceRequestJson);
 
 			try {
-				if (source == CdsResolutionStrategyEnum.FHIR_CLIENT) {
-					resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, url);
-				} else if (source == CdsResolutionStrategyEnum.DAO) {
-					resource = getResourceFromDaoWithPermissionCheck(url);
-				} else {
-					// should never happen
-					throw new IllegalStateException(Msg.code(2388) + "Unexpected strategy " + theStrategies);
-				}
+				resource = prefetchResource(theCdsServiceRequestJson, url, source, failureMode);
 			} catch (Exception e) {
 				callCdsPrefetchFailedHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, e);
 				throw e;
 			}
 
-			callCdsPrefetchResponseHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, resource);
-
-			theCdsServiceRequestJson.addPrefetch(key, resource);
+			if (resource != null) {
+				callCdsPrefetchResponseHooks(cdsHookPrefetchContext, theCdsServiceRequestJson, resource);
+				theCdsServiceRequestJson.addPrefetch(key, resource);
+			}
 		}
+	}
+
+	@Nullable
+	private IBaseResource prefetchResource(
+			CdsServiceRequestJson theCdsServiceRequestJson,
+			String url,
+			CdsResolutionStrategyEnum strategy,
+			CdsPrefetchFailureMode failureMode) {
+		IBaseResource resource;
+		try {
+			if (strategy == CdsResolutionStrategyEnum.FHIR_CLIENT) {
+				resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, url);
+			} else if (strategy == CdsResolutionStrategyEnum.DAO) {
+				resource = getResourceFromDaoWithPermissionCheck(url);
+			} else {
+				throw new IllegalStateException("Unexpected strategy: " + strategy);
+			}
+		} catch (Exception e) {
+			// create a switch to handle the failure mode
+			switch (failureMode) {
+				case OMIT:
+					resource = null;
+					break;
+				case OPERATION_OUTCOME:
+					resource = extractOrCreateOperationOutcomeFromException(e);
+					break;
+				case FAIL:
+				default:
+					throw e;
+			}
+		}
+		return resource;
+	}
+
+	private IBaseOperationOutcome extractOrCreateOperationOutcomeFromException(Exception e) {
+		IBaseOperationOutcome oo = null;
+		if (e instanceof BaseServerResponseException) {
+			BaseServerResponseException serverException = (BaseServerResponseException) e;
+			oo = serverException.getOperationOutcome();
+		}
+
+		if (oo == null) {
+			oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", e.getMessage(), null, "exception");
+		}
+		return oo;
 	}
 
 	private IBaseResource getResourceFromDaoWithPermissionCheck(String theUrl) {
