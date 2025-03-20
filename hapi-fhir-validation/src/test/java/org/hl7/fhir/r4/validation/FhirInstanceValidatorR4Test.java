@@ -1261,7 +1261,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testValidateResourceWithExampleBindingCodeValidationFailingNonLoinc() {
+	public void testValidateResourceWithExampleBindingCodeVAbstractIJobPersistenceSpecificationTestalidationFailingNonLoinc() {
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
