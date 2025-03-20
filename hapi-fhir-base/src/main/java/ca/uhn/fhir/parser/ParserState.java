@@ -73,6 +73,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -551,6 +552,11 @@ class ParserState<T> {
 		}
 	}
 
+	/**
+	 * This state represents the start of parsing an arbitrary fragment
+	 * of a FHIR resource. In other words, it is the initial state when
+	 * {@link IParser#parseInto(Reader, IBase)} is called.
+	 */
 	private class PreElementCompositeState extends BaseState {
 
 		private final String myElementName;
