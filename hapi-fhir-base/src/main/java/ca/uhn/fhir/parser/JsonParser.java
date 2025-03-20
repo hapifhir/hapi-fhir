@@ -1478,7 +1478,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		if (theValues == null) {
 			String parentElementName = getExtensionElementName(theIsModifier);
 			getErrorHandler()
-				.missingRequiredElement(new ParseLocation().setParentElementName(parentElementName), "url");
+					.missingRequiredElement(new ParseLocation().setParentElementName(parentElementName), "url");
 			return;
 		}
 
