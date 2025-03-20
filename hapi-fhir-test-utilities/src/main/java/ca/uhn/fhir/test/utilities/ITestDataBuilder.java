@@ -323,7 +323,11 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withEncounter(@Nullable String theEncounter) {
-		return withReference("encounter", new IdType(theEncounter));
+		return withEncounter(new IdType(theEncounter));
+	}
+
+	default ICreationArgument withEncounter(@Nullable IIdType theEncounter) {
+		return withReference("encounter", theEncounter);
 	}
 
 	@Nonnull

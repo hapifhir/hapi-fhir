@@ -102,8 +102,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		if (partitionEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setIncludePartitionInSearchHashes(true);
-			addCreatePartition(1);
-			addCreatePartition(1);
+			addNextTargetPartitionNTimesForCreate(1, 2);
 		}
 		Patient patient = new Patient();
 		patient.setId("A");
@@ -132,8 +131,8 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		myMemoryCacheService.invalidateAllCaches();
 		myCaptureQueriesListener.clear();
 		if (partitionEnabled) {
-			addReadPartition(1);
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
+			addNextTargetPartitionsForRead(1);
 			mySvc.storeResources(resources, myRequestPartitionId);
 		} else {
 			mySvc.storeResources(resources, null);

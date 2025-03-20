@@ -161,6 +161,36 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	 void testGroupBulkExportWithPatientParameter() {
+		// setup
+		// Create some resources
+		final String patient1Id = "InGroupAndPatientParameter";
+		final String patient2Id = "InGroupButNotInPatientParameter";
+		final String patient3Id = "NotInGroupButInPatientParameter";
+		final String patient4Id = "DoesNotExist";
+		myClient.update().resource(new Patient().setId(patient1Id)).execute();
+		myClient.update().resource(new Patient().setId(patient2Id)).execute();
+		myClient.update().resource(new Patient().setId(patient3Id)).execute();
+
+		final Group group = new Group();
+		group.setId("Group/Group1");
+		group.addMember().getEntity().setReference("Patient/" + patient1Id);
+		group.addMember().getEntity().setReference("Patient/" + patient2Id);
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		final List<String> exportForPatientId = List.of("Patient/" + patient1Id, "Patient/" + patient3Id, "Patient/" + patient4Id);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId("Group/Group1");
+		options.setPatientIds(exportForPatientId);
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		// execute & validate
+		verifyBulkExportResults(options, List.of("Patient/" + patient1Id), List.of("Patient/" + patient2Id, "Patient/" + patient3Id, "Patient/" + patient4Id));
+	}
+
+	@Test
 	public void testGroupBulkExportWithMissingObservationSearchParams() {
 		mySearchParameterDao.update(createDisabledObservationPatientSearchParameter(), mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -454,7 +484,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		String value = "value_";
 		options.setUserData(key, value);
 
-		List<String> valueSet = new ArrayList<>();
+		List<String> valueSet = Collections.synchronizedList(new ArrayList<>());
 		Object interceptor = new Object() {
 			@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
 			public void onExpandResources(IBaseResource theBaseResource, BulkExportJobParameters theParams) {
@@ -1121,11 +1151,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			}
 		}
 
-		for (String containedString : theContainedList) {
-			assertThat(foundIds).as("Didn't find expected ID " + containedString + " in IDS: " + foundIds).contains(containedString);
-		}
-		for (String excludedString : theExcludedList) {
-			assertThat(foundIds).as("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds).doesNotContain(excludedString);
+		assertThat(foundIds).containsAll(theContainedList);
+		if(!theExcludedList.isEmpty()) {
+			assertThat(foundIds).doesNotContainAnyElementsOf(theExcludedList);
 		}
 		return jobInstance;
 	}

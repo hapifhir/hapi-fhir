@@ -20,6 +20,9 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
@@ -74,7 +77,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -137,6 +139,9 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+
+	@Mock
+	private CacheTagDefinitionDao myCacheTagDefinitionDao;
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
@@ -383,6 +388,42 @@ class BaseHapiFhirResourceDaoTest {
 			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
 			Arguments.of(new SearchParameterMap(), 5000)
 		);
+	}
+
+	@Test
+	public void testUpdateTags_withDuplicateTags_willNotUpdateEntityTagList(){
+		RequestDetails sysRequest = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+		TagDefinition duplicateTagDefinition = createTagDefinition(2);
+
+		// given a patient resource with tags stored in the database
+		TagDefinition tagDefinition = createTagDefinition(1);
+		ResourceTable entity = new ResourceTable();
+		entity.setId(new JpaPid(null, 1l));
+		entity.addTag(tagDefinition);
+		entity.setHasTags(true);
+
+		// given a client update request on the patient resource that is stored in the database
+		Patient patient = new Patient();
+		patient.getMeta().addTag(tagDefinition.getSystem(), tagDefinition.getCode(), tagDefinition.getDisplay());
+
+		// when we search the database for existing tags, return a duplicate one.
+		when(myCacheTagDefinitionDao.getTagOrNull(any(), any(), any(), any(), any(), any(), any())).thenReturn(duplicateTagDefinition);
+
+		boolean updated = mySpiedSvc.updateTags(transactionDetails, sysRequest, patient, entity);
+
+		// assert that the entity was not updated with the duplicate tag
+		assertThat(updated).isFalse();
+		Collection<ResourceTag> entityTags = entity.getTags();
+		assertThat(entityTags).hasSize(1);
+		assertThat(entityTags.iterator().next().getTag().getId()).isEqualTo(tagDefinition.getId());
+	}
+
+	private TagDefinition createTagDefinition(int theId) {
+		TagDefinition tagDefinition = new TagDefinition(TagTypeEnum.TAG, "sytem", "code", null);
+		tagDefinition.setId((long) theId);
+
+		return tagDefinition;
 	}
 
 	@Nested

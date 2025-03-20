@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4129
+title: "When performing a version aware update using the FHIR client, the ETag
+  header did not specify a weak etag as required by the FHIR specification.
+  Thanks to Berkant Karduman for the contribution!"

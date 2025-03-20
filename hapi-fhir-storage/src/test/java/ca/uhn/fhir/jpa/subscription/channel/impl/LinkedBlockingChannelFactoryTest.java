@@ -28,7 +28,7 @@ class LinkedBlockingChannelFactoryTest {
 
 	private static final String TEST_CHANNEL_NAME = "test-channel-name";
 	private static final String TEST_PAYLOAD = "payload";
-	LinkedBlockingChannelFactory myChannelFactory = new LinkedBlockingChannelFactory((name, settings) -> name);
+	LinkedBlockingChannelFactory myChannelFactory = new LinkedBlockingChannelFactory((name, settings) -> name, new RetryPolicyProvider());
 	private List<String> myReceivedPayloads;
 	private PointcutLatch[] myHandlerCanProceedLatch = {
 		new PointcutLatch("first delivery"),
