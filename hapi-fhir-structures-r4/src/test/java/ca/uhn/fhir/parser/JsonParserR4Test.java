@@ -162,18 +162,18 @@ public class JsonParserR4Test extends BaseTest {
 	public void testNonDomainResourcesHaveIdResourceTypeParsed() {
 		//Test a non-domain resource
 		String binaryPayload = "{\n" +
-			 "  \"resourceType\": \"Binary\",\n" +
-			 "  \"id\": \"b123\"\n" +
-			 "}\n";
+			"  \"resourceType\": \"Binary\",\n" +
+			"  \"id\": \"b123\"\n" +
+			"}\n";
 		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
 		String resourceType = iBaseResource.getIdElement().getResourceType();
 		assertEquals("Binary", resourceType);
 
 		//Test a domain resource.
 		String observationPayload = "{\n" +
-			 "  \"resourceType\": \"Observation\",\n" +
-			 "  \"id\": \"o123\"\n" +
-			 "}\n";
+			"  \"resourceType\": \"Observation\",\n" +
+			"  \"id\": \"o123\"\n" +
+			"}\n";
 		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
 		resourceType = obs.getIdElement().getResourceType();
 		assertEquals("Observation", resourceType);
