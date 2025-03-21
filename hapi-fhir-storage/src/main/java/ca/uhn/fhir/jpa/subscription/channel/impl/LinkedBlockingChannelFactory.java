@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelSettings;
+import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.Nonnull;
@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LinkedBlockingChannelFactory implements IChannelFactory {
+public class LinkedBlockingChannelFactory implements ILegacyChannelFactory {
 
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
@@ -49,13 +49,13 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Override
-	public IChannelReceiver getOrCreateReceiver(
+	public ISpringMessagingChannelReceiver getOrCreateReceiver(
 			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
 	@Override
-	public IChannelProducer getOrCreateProducer(
+	public ISpringMessagingChannelProducer getOrCreateProducer(
 			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}

@@ -16,7 +16,7 @@ import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -56,7 +56,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;

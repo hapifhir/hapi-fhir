@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import jakarta.annotation.Nonnull;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
@@ -32,7 +33,8 @@ import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
+public class LinkedBlockingChannel extends ExecutorSubscribableChannel
+		implements ISpringMessagingChannelProducer, ISpringMessagingChannelReceiver {
 
 	private final String myName;
 	private final Supplier<Integer> myQueueSizeSupplier;
@@ -50,10 +52,12 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
+	@VisibleForTesting
 	public int getQueueSizeForUnitTest() {
 		return defaultIfNull(myQueueSizeSupplier.get(), 0);
 	}
 
+	@VisibleForTesting
 	public void clearInterceptorsForUnitTest() {
 		setInterceptors(new ArrayList<>());
 	}
@@ -93,6 +97,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	/**
 	 * Creates a synchronous channel, mostly intended for testing
 	 */
+	@VisibleForTesting
 	public static LinkedBlockingChannel newSynchronous(String theName, RetryPolicyProvider theRetryPolicyProvider) {
 		return new LinkedBlockingChannel(theName, null, () -> 0, theRetryPolicyProvider);
 	}

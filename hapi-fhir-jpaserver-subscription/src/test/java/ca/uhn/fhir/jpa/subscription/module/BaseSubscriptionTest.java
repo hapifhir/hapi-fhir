@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.broker.impl.LegacyBrokerClient;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
@@ -88,13 +89,14 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public IChannelFactory channelFactory(IChannelNamer theNamer) {
+		public ILegacyChannelFactory channelFactory(IChannelNamer theNamer) {
 			return new LinkedBlockingChannelFactory(theNamer, myRetryPolicyProvider);
 		}
 
 		@Bean
 		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
-			return new SubscriptionChannelFactory(new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider));
+			LinkedBlockingChannelFactory linkedBlockingChannelFactory = new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
+			return new SubscriptionChannelFactory(new LegacyBrokerClient(linkedBlockingChannelFactory));
 		}
 
 		@Bean

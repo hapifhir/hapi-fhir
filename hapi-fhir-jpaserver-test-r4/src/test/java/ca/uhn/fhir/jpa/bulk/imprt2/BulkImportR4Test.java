@@ -7,18 +7,19 @@ import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.Observation;
@@ -33,7 +34,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -63,15 +63,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Qualifier("batch2ProcessingChannelReceiver")
+	@Qualifier("batch2ProcessingChannelConsumer")
 	@Autowired
-	private IChannelReceiver myChannelReceiver;
+	private IChannelConsumer<JobWorkNotification> myChannelConsumer;
 
 	@AfterEach
 	public void afterEach() {
 		myBulkImportFileServlet.clearFiles();
-
-		LinkedBlockingChannel channel = ProxyUtil.getSingletonTarget(myChannelReceiver, LinkedBlockingChannel.class);
+		SpringMessagingReceiverAdapter<JobWorkNotification> springMessagingReceiver = (SpringMessagingReceiverAdapter<JobWorkNotification>) myChannelConsumer;
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) springMessagingReceiver.getSpringMessagingChannelReceiver();
 		await().until(() -> channel.getQueueSizeForUnitTest() == 0);
 	}
 
@@ -87,7 +87,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -135,7 +135,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -190,7 +190,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Execute
 
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
 			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
@@ -271,7 +271,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -315,7 +315,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		try {
 
 			// Execute
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
 			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
@@ -355,7 +355,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -378,7 +378,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -405,7 +405,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
