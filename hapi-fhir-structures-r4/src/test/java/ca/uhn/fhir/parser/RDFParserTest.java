@@ -21,6 +21,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.BaseTest;
 
 import org.apache.jena.graph.Graph;
@@ -38,9 +39,11 @@ import org.apache.jena.shex.ShexSchema;
 import org.apache.jena.shex.ShexValidator;
 import org.apache.jena.shex.ShapeMap;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -65,7 +68,9 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RDFParserTest extends BaseTest {
 
@@ -121,6 +126,18 @@ public class RDFParserTest extends BaseTest {
 			else
 				assertThat(viaTurtleJson).as(failMessage + "\nttl: " + turtleString).isEqualTo(referenceJson);
 		}
+	}
+
+	/**
+	 * {@link IParser#parseInto(String, IBase)} isn't currently supported by
+	 * the RDF parser.
+	 */
+	@Test
+	public void testParseInto() {
+		String input = "fhir:ActivityDefinition.code    [ fhir:CodeableConcept.coding  [ fhir:Coding.code    [ fhir:value  \"zika-virus-exposure-assessment\" ];";
+
+		InternalErrorException e = assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().parseInto(input, new CodeableConcept()));
+		assertEquals("HAPI-2633: This RDF parser does not support parsing non-resource values", e.getMessage());
 	}
 
 	private static Stream<String> getInputFiles() throws IOException {

@@ -1,6 +1,6 @@
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,9 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
-
-import ca.uhn.fhir.util.CoverageIgnore;
+package ca.uhn.fhir.util;
 
 public class LogicUtil {
 

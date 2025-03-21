@@ -161,16 +161,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 							.addAll(generatedR4b.getSnapshot().getElement());
 					break;
 				case R5:
-					org.hl7.fhir.r5.model.StructureDefinition generatedR5 = (org.hl7.fhir.r5.model.StructureDefinition)
-							myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
-					((org.hl7.fhir.r5.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r5.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR5.getSnapshot().getElement());
+					// nothing
 					break;
 				case DSTU2:
 				case DSTU2_HL7ORG:

@@ -32,7 +32,7 @@ import java.io.IOException;
 public class ResourceUtil {
 
 	private static final String ENCODING = "ENCODING_TYPE";
-	private static final String RAW_ = "RAW_%s";
+	private static final String RAW_ = "RAW_";
 
 	private ResourceUtil() {}
 
@@ -77,6 +77,6 @@ public class ResourceUtil {
 	}
 
 	private static String getRawUserDataKey(EncodingEnum theEncodingEnum) {
-		return String.format(RAW_, theEncodingEnum.name());
+		return RAW_ + theEncodingEnum.name();
 	}
 }

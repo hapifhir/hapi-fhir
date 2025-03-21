@@ -161,7 +161,9 @@ class BaseHapiFhirResourceDaoTest {
 		// have access to resourcetype/name
 		// the individual tests will have to start
 		// by calling setup themselves
+		mySvc.setResourceType(Patient.class);
 		mySvc.setContext(myFhirContext);
+		mySvc.start();
 		mySpiedSvc = spy(mySvc);
 	}
 
