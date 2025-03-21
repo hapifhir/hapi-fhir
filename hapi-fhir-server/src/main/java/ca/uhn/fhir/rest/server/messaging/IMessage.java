@@ -24,7 +24,9 @@ public interface IMessage<T> {
 	 * @return return a specific header
 	 */
 	// FIXME KHS use optional
-	Object getHeader(String theHeaderName);
+	default Object getHeader(String theHeaderName) {
+		return getHeaders().get(theHeaderName);
+	}
 
 	/**
 	 * @return the de-serialized value of the message

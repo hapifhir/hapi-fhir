@@ -54,11 +54,6 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, IModelJson {
 		return myHeaders.toMessageHeaders();
 	}
 
-	@Override
-	public Object getHeader(String theHeaderName) {
-		return myHeaders.toMessageHeaders().get(theHeaderName);
-	}
-
 	public HapiMessageHeaders getHapiHeaders() {
 		if (isNull(myHeaders)) {
 			setDefaultRetryHeaders();
