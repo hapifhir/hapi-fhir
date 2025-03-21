@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -107,7 +108,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				instanceId1,
 				new JobChunkProgressAccumulator(),
 				null,
-				jobDefinitionRegistry
+				jobDefinitionRegistry,
+				new HapiTransactionService()
 			).process();
 		});
 
