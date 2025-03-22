@@ -703,18 +703,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		return searchParamHashIdentities;
 	}
 
-	protected long getSpIdentitySelectCount() {
-		return myCaptureQueriesListener.getSelectQueries().stream()
-			.filter(q -> q.getSql(false, false).contains("HFJ_SPIDX_IDENTITY"))
-			.count();
-	}
-
-	protected long getSpIdentityInsertCount() {
-		return myCaptureQueriesListener.getInsertQueries().stream()
-			.filter(q -> q.getSql(false, false).contains("insert into HFJ_SPIDX_IDENTITY"))
-			.count();
-	}
-
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {
 			ourLog.info("Resource tags:\n * {}", myResourceTagDao.findAll().stream().map(ResourceTag::toString).collect(Collectors.joining("\n * ")));

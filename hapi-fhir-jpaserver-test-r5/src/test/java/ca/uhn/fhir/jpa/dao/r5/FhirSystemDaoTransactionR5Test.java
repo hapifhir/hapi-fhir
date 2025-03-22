@@ -124,7 +124,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(23, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1 + getSpIdentitySelectCount(), myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(4);
@@ -322,7 +322,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(theTargetAlreadyExists ? 20 : 24, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(4);
@@ -441,7 +441,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			}
 		}
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1 + getSpIdentitySelectCount(), myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(1);
