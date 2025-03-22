@@ -140,7 +140,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	private String getSqlForRestQuery(String theFhirRestQuery) {
 		myCaptureQueriesListener.clear();
 		myTestDaoSearch.searchForIds(theFhirRestQuery);
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		return myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 	}
 

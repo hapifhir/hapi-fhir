@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -30,21 +30,20 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -53,26 +52,28 @@ public class SearchParamIdentityCache {
 	private static final Logger ourLog = getLogger(SearchParamIdentityCache.class);
 
 	private static final int MAX_RETRY_COUNT = 20;
-	private static final String CACHE_THREAD_PREFIX = "searchparemeteridentity-cache-";
+	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
 	private static final int THREAD_POOL_MAX_POOL_SIZE = 1000;
 	private static final int THREAD_POOL_QUEUE_SIZE = 1000;
-	private Map<Long, Integer> myHashIdentityToSearchParamId = new ConcurrentHashMap<>();
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
 	private final ExecutorService myThreadPool;
 	private final ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
+	private final MemoryCacheService myMemoryCacheService;
 	private final UniqueTaskExecutor uniqueTaskExecutor;
 
 	public SearchParamIdentityCache(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
 			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
-			PlatformTransactionManager theTxManager) {
+			PlatformTransactionManager theTxManager,
+			MemoryCacheService theMemoryCacheService) {
 		this.mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
 		mySearchParamHashIdentityRegistry = theSearchParamHashIdentityRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		myThreadPool = createExecutor();
-		uniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool);
+		myMemoryCacheService = theMemoryCacheService;
+		uniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool, myMemoryCacheService);
 	}
 
 	private ExecutorService createExecutor() {
@@ -93,11 +94,6 @@ public class SearchParamIdentityCache {
 				new ThreadPoolExecutor.DiscardPolicy());
 	}
 
-	@VisibleForTesting
-	void setHashIdentityToSearchParamIdMap(Map<Long, Integer> theHashIdentityToSearchParamIdMap) {
-		myHashIdentityToSearchParamId = theHashIdentityToSearchParamIdMap;
-	}
-
 	@PostConstruct
 	public void start() {
 		initCache();
@@ -110,20 +106,22 @@ public class SearchParamIdentityCache {
 
 	protected void initCache() {
 		// populate cache with IndexedSearchParamIdentities from database
-		Collection<Object[]> pids =
+		Collection<Object[]> spIdentities =
 				Objects.requireNonNull(myTxTemplate.execute(t -> mySearchParamIdentityDao.getAllHashIdentities()));
-		myHashIdentityToSearchParamId = pids.stream().collect(Collectors.toMap(i -> (Long) i[0], i -> (Integer) i[1]));
+		spIdentities.forEach(
+				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Integer) i[1]));
+
 		// pre-fill cache with SearchParams from SearchParamRegistry
 		mySearchParamHashIdentityRegistry
 				.getHashIdentityToIndexedSearchParamMap()
 				.forEach((hashIdentity, indexedSearchParam) -> {
-					if (!myHashIdentityToSearchParamId.containsKey(hashIdentity)) {
+					if (CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, hashIdentity) == null) {
 						PersistSearchParameterIdentityTask persistSpIdentityTask =
 								new PersistSearchParameterIdentityTask.Builder()
 										.hashIdentity(hashIdentity)
 										.resourceType(indexedSearchParam.getResourceType())
 										.paramName(indexedSearchParam.getParameterName())
-										.hashIdentityToSearchParamId(myHashIdentityToSearchParamId)
+										.memoryCacheService(myMemoryCacheService)
 										.txTemplate(myTxTemplate)
 										.searchParamIdentityDao(mySearchParamIdentityDao)
 										.build();
@@ -135,23 +133,33 @@ public class SearchParamIdentityCache {
 
 	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName) {
 		// check if SearchParamIdentity is already in cache
-		Integer spIdentityId = myHashIdentityToSearchParamId.get(theHashIdentity);
+		Integer spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, theHashIdentity);
 
 		if (spIdentityId != null) {
 			return;
 		}
 
-		// cache miss, create SearchParamIdentity in separate thread
+		// cache miss, create PersistSearchParameterIdentityTask to execute it in separate thread
 		PersistSearchParameterIdentityTask persistSpIdentityTask = new PersistSearchParameterIdentityTask.Builder()
 				.hashIdentity(theHashIdentity)
 				.resourceType(theResourceType)
 				.paramName(theParamName)
-				.hashIdentityToSearchParamId(myHashIdentityToSearchParamId)
+				.memoryCacheService(myMemoryCacheService)
 				.txTemplate(myTxTemplate)
 				.searchParamIdentityDao(mySearchParamIdentityDao)
 				.build();
 
-		uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+		// submit PersistSearchParameterIdentityTask only if current transaction was commited
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+				}
+			});
+		} else {
+			uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+		}
 	}
 
 	public static class PersistSearchParameterIdentityTask implements Callable<Void> {
@@ -160,7 +168,7 @@ public class SearchParamIdentityCache {
 		private final String myResourceType;
 		private final String myParamName;
 		private final TransactionTemplate myTxTemplate;
-		private final Map<Long, Integer> myHashIdentityToSearchParamId;
+		private final MemoryCacheService myMemoryCacheService;
 		private final IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 
 		private PersistSearchParameterIdentityTask(Builder theBuilder) {
@@ -168,7 +176,7 @@ public class SearchParamIdentityCache {
 			this.myResourceType = theBuilder.myResourceType;
 			this.myParamName = theBuilder.myParamName;
 			this.myTxTemplate = theBuilder.myTxTemplate;
-			this.myHashIdentityToSearchParamId = theBuilder.myHashIdentityToSearchParamId;
+			this.myMemoryCacheService = theBuilder.myMemoryCacheService;
 			this.myResourceIndexedSearchParamIdentityDao = theBuilder.mySearchParamIdentityDao;
 		}
 
@@ -181,7 +189,7 @@ public class SearchParamIdentityCache {
 			private String myResourceType;
 			private String myParamName;
 			private TransactionTemplate myTxTemplate;
-			private Map<Long, Integer> myHashIdentityToSearchParamId;
+			private MemoryCacheService myMemoryCacheService;
 			private IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 
 			public Builder hashIdentity(Long theHashIdentity) {
@@ -204,8 +212,8 @@ public class SearchParamIdentityCache {
 				return this;
 			}
 
-			public Builder hashIdentityToSearchParamId(Map<Long, Integer> theHashIdentityToSearchParamId) {
-				this.myHashIdentityToSearchParamId = theHashIdentityToSearchParamId;
+			public Builder memoryCacheService(MemoryCacheService theMemoryCacheService) {
+				this.myMemoryCacheService = theMemoryCacheService;
 				return this;
 			}
 
@@ -224,7 +232,7 @@ public class SearchParamIdentityCache {
 			Integer spIdentityId;
 			int retry = 0;
 			while (retry++ < MAX_RETRY_COUNT) {
-				spIdentityId = myHashIdentityToSearchParamId.get(myHashIdentity);
+				spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, myHashIdentity);
 
 				if (spIdentityId != null) {
 					return null;
@@ -233,7 +241,7 @@ public class SearchParamIdentityCache {
 				try {
 					// try to retrieve search parameter identity from db, create if missing, update cache
 					spIdentityId = findOrCreateIndexedSearchParamIdentity(myHashIdentity, myParamName, myResourceType);
-					myHashIdentityToSearchParamId.put(myHashIdentity, spIdentityId);
+					CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, myHashIdentity, spIdentityId);
 					return null;
 				} catch (DataIntegrityViolationException theDataIntegrityViolationException) {
 					// retryable exception - unique search parameter identity or hash identity constraint violation
@@ -288,42 +296,96 @@ public class SearchParamIdentityCache {
 		}
 	}
 
+	public static class CacheUtils {
+		public static Integer getSearchParamIdentityFromCache(
+				MemoryCacheService memoryCacheService, Long hashIdentity) {
+			return memoryCacheService.getIfPresent(
+					MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY, hashIdentity);
+		}
+
+		public static void putSearchParamIdentityToCache(
+				MemoryCacheService memoryCacheService, Long theHashIdentity, Integer theSpIdentityId) {
+			memoryCacheService.put(
+					MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY,
+					theHashIdentity,
+					theSpIdentityId);
+		}
+	}
+
 	/**
 	 * Ensures only one instance of the PersistSearchParameterIdentityTask is running per hash identity.
 	 * If a task is already in progress, it will not be scheduled again.
 	 */
 	private static class UniqueTaskExecutor {
 		private final ExecutorService myExecutor;
-		private final ConcurrentHashMap<Long, Future<Void>> myInFlightTasks = new ConcurrentHashMap<>();
+		private final MemoryCacheService myMemoryCacheService;
 
-		public UniqueTaskExecutor(ExecutorService theExecutor) {
+		public UniqueTaskExecutor(ExecutorService theExecutor, MemoryCacheService theMemoryCacheService) {
 			myExecutor = theExecutor;
+			myMemoryCacheService = theMemoryCacheService;
 		}
 
 		public void submitIfAbsent(PersistSearchParameterIdentityTask theTask) {
-			Long key = theTask.getHashIdentity();
+			Long hashIdentity = theTask.getHashIdentity();
 
-			// If there's already a Future in flight, reuse it.
-			Future<?> existing = myInFlightTasks.get(key);
-			if (existing != null) {
+			FutureTask<Void> newFutureTask = new LoggingFutureTask(theTask);
+
+			FutureTask<Void> existingOrNewFutureTask = myMemoryCacheService.get(
+					MemoryCacheService.CacheEnum.PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS,
+					hashIdentity,
+					key -> newFutureTask);
+
+			if (!Objects.equals(existingOrNewFutureTask, newFutureTask)) {
+				// cache already have a task with same hashIdentity - skip scheduling
 				return;
 			}
 
-			// Put FutureTask in the map. If another thread already put it - skip scheduling.
-			FutureTask<Void> futureTask = new FutureTask<>(theTask);
-			existing = myInFlightTasks.putIfAbsent(key, futureTask);
-			if (existing != null) {
-				return;
-			}
-
-			// Schedule FutureTask, remove it from the myInFlightTasks map once it's done or fails.
 			myExecutor.execute(() -> {
 				try {
-					futureTask.run();
+					newFutureTask.run();
 				} finally {
-					myInFlightTasks.remove(key, futureTask);
+					// remove from the cache once done or failed
+					myMemoryCacheService.invalidate(
+							MemoryCacheService.CacheEnum.PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS, hashIdentity);
 				}
 			});
+		}
+	}
+
+	/**
+	 * A {@link FutureTask} implementation that logs any exception thrown
+	 * during execution of a {@link PersistSearchParameterIdentityTask}.
+	 * <p>
+	 * Since {@link PersistSearchParameterIdentityTask} runs asynchronously in a
+	 * separate thread, any exception it throws can only be observed by calling {@link #get()}.
+	 * <p>
+	 * This class overrides {@link #done()} to call {@code get()},
+	 * and log {@link ExecutionException} or {@link InterruptedException}.
+	 */
+	private static class LoggingFutureTask extends FutureTask<Void> {
+		private final Long myHashIdentity;
+
+		public LoggingFutureTask(PersistSearchParameterIdentityTask theTask) {
+			super(theTask);
+			this.myHashIdentity = theTask.getHashIdentity();
+		}
+
+		@Override
+		protected void done() {
+			try {
+				get();
+			} catch (ExecutionException theException) {
+				ourLog.error(
+						"PersistSearchParameterIdentityTask failed. Hash identity: {}",
+						myHashIdentity,
+					theException.getCause());
+			} catch (InterruptedException theInterruptedException) {
+				Thread.currentThread().interrupt();
+				ourLog.warn(
+						"PersistSearchParameterIdentityTask was interrupted. Hash identity: {}",
+						myHashIdentity,
+						theInterruptedException);
+			}
 		}
 	}
 }

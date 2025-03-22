@@ -589,9 +589,13 @@ public class JpaConfig {
 	public SearchParamIdentityCache searchParameterHashIdentityCache(
 			@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
 			@Autowired ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
-			@Autowired PlatformTransactionManager theTxManager) {
+			@Autowired PlatformTransactionManager theTxManager,
+			@Autowired MemoryCacheService theMemoryCacheService) {
 		return new SearchParamIdentityCache(
-				theResourceIndexedSearchParamIdentityDao, theSearchParamHashIdentityRegistry, theTxManager);
+				theResourceIndexedSearchParamIdentityDao,
+				theSearchParamHashIdentityRegistry,
+				theTxManager,
+				theMemoryCacheService);
 	}
 
 	/* **************************************************************** *

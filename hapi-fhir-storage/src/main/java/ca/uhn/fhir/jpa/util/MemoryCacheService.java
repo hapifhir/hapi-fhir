@@ -71,7 +71,15 @@ public class MemoryCacheService {
 			long timeoutSeconds;
 			int maximumSize;
 
+			Cache<Object, Object> nextCache;
 			switch (next) {
+				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
+					nextCache = CacheFactory.buildEternal(10_000, 1_000_000);
+					break;
+				case PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS:
+					timeoutSeconds = SECONDS.convert(1, MINUTES);
+					nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), 100);
+					break;
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
@@ -88,10 +96,9 @@ public class MemoryCacheService {
 						timeoutSeconds = SECONDS.convert(50, MINUTES);
 						maximumSize = 100000;
 					}
+					nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 					break;
 			}
-
-			Cache<Object, Object> nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 
 			myCaches.put(next, nextCache);
 		}
@@ -198,6 +205,10 @@ public class MemoryCacheService {
 		}
 	}
 
+	public <K> void invalidate(CacheEnum theCache, K key) {
+		getCache(theCache).invalidate(key);
+	}
+
 	public enum CacheEnum {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		/**
@@ -215,7 +226,9 @@ public class MemoryCacheService {
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
-		ID_TO_PARTITION(Integer.class);
+		ID_TO_PARTITION(Integer.class),
+		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
+		PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS(Long.class);
 
 		private final Class<?> myKeyType;
 
