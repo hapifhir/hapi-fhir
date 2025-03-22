@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -243,6 +244,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
+
+	@Autowired
+	private SearchParamIdentityCache mySearchParamIdentityCache;
 
 	/**
 	 * Constructor
@@ -2212,6 +2216,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 					myPartitionSettings, readPartition, type, "url");
+			mySearchParamIdentityCache.findOrCreateSearchParamIdentity(hashIdentity, type, "url");
 			hashIdentityValues.add(hashIdentity);
 		}
 

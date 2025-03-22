@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
@@ -46,6 +47,9 @@ public class DaoSearchParamSynchronizerTest {
 	@Mock
 	private EntityManager entityManager;
 
+	@Mock
+	private SearchParamIdentityCache searchParamIdentityCache;
+
 	private ResourceIndexedSearchParams existingParams;
 
 	@BeforeEach
@@ -67,6 +71,7 @@ public class DaoSearchParamSynchronizerTest {
 
 		subject.setEntityManager(entityManager);
 		subject.setStorageSettings(new JpaStorageSettings());
+		subject.setSearchParamIdentityCache(searchParamIdentityCache);
 	}
 
 	@Test

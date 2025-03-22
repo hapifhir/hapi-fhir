@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -86,9 +85,7 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
-			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
+			hashPredicate = createHashIdentityPredicate(theRequestPartitionId, theResourceName, theParamName);
 		}
 
 		SearchFilterParser.CompareOperation operation = theOperation;

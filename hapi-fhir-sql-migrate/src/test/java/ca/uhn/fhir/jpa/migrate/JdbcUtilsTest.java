@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.relational.QualifiedSequenceName;
+import org.hibernate.tool.schema.extract.spi.SequenceInformation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -15,10 +19,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +40,12 @@ public class JdbcUtilsTest {
 	DatabaseMetaData myDatabaseMetaData;
 	@Mock
 	ResultSet myResultSet;
+	@Mock
+	private DataSource dataSource;
+	@Mock
+	private DriverTypeEnum.ConnectionProperties connectionProperties;
+	@Mock
+	private TransactionTemplate txTemplate;
 
 	@Test
 	public void testGetColumnType_verifyTypeMappings() throws SQLException {
@@ -111,5 +123,56 @@ public class JdbcUtilsTest {
 		assertThat(indexNames).contains("IDX_1");
 		assertThat(indexNames).contains("IDX_2");
 		assertThat(indexNames).contains("IDX_3");
+	}
+
+	@Test
+	void testGetSequenceInformation() throws SQLException {
+		// setup
+		when(dataSource.getConnection()).thenReturn(myConnection);
+		when(connectionProperties.getDataSource()).thenReturn(dataSource);
+		when(connectionProperties.getTxTemplate()).thenReturn(txTemplate);
+
+		SequenceInformation sequenceInformation = mock(SequenceInformation.class);
+		List<SequenceInformation> sequenceInformationList = List.of(
+			sequenceInformation
+		);
+
+		when(txTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
+
+		// execute
+		List<SequenceInformation> sequenceInformationResult = JdbcUtils.getSequenceInformation(connectionProperties);
+
+		// verify
+		assertThat(sequenceInformationResult).hasSize(1);
+		assertEquals(sequenceInformation, sequenceInformationResult.get(0));
+	}
+
+	@Test
+	void testGetSequenceName() throws SQLException {
+		// setup
+		String expectedSequenceName = "TEST_SEQ";
+		when(dataSource.getConnection()).thenReturn(myConnection);
+		when(connectionProperties.getDataSource()).thenReturn(dataSource);
+		when(connectionProperties.getTxTemplate()).thenReturn(txTemplate);
+
+		SequenceInformation sequenceInformation = mock(SequenceInformation.class);
+		QualifiedSequenceName sequenceName = mock(QualifiedSequenceName.class);
+		Identifier identifier = mock(Identifier.class);
+		when(identifier.getText()).thenReturn(expectedSequenceName);
+		when(sequenceName.getSequenceName()).thenReturn(identifier);
+		when(sequenceInformation.getSequenceName()).thenReturn(sequenceName);
+
+		List<SequenceInformation> sequenceInformationList = List.of(
+			sequenceInformation
+		);
+
+		when(txTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
+
+		// execute
+		Set<String> sequenceNames= JdbcUtils.getSequenceNames(connectionProperties);
+
+		// verify
+		assertThat(sequenceNames).hasSize(1);
+		assertEquals(expectedSequenceName, sequenceNames.stream().findFirst().get());
 	}
 }

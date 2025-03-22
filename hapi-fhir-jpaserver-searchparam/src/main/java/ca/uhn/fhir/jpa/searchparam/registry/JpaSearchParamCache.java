@@ -122,6 +122,10 @@ public class JpaSearchParamCache {
 		return Optional.ofNullable(myHashIdentityToIndexedSearchParams.get(theHashIdentity));
 	}
 
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myHashIdentityToIndexedSearchParams;
+	}
+
 	void populateActiveSearchParams(
 			IInterceptorService theInterceptorBroadcaster,
 			IPhoneticEncoder theDefaultPhoneticEncoder,

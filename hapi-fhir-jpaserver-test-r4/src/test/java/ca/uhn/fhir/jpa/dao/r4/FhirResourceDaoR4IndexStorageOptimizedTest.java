@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.config.SearchConfig;
@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -57,8 +58,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -69,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * This test was added to check if changing {@link StorageSettings#isIndexStorageOptimized()} setting and performing
- * $reindex operation will correctly null/recover sp_name, res_type, sp_updated parameters
+ * $reindex operation will correctly null/recover sp_name, res_type parameters
  * of ResourceIndexedSearchParam entities.
  */
 public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
@@ -87,7 +90,8 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 
 		// We rely on this interceptor being in place, and it should be unless some cheeky other test
 		// has removed it
-		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream().filter(t -> t instanceof SearchParamValidatingInterceptor).count());
+		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream()
+			.filter(SearchParamValidatingInterceptor.class::isInstance).count());
 	}
 
 	@AfterEach
@@ -275,7 +279,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 			runInTransaction(() -> {
 				List<?> results = myEntityManager.createQuery("SELECT i FROM " + theIndexedSearchParamClass.getSimpleName() +
 						" i WHERE i.myResourcePid = " + theId.getIdPartAsLong() + " AND i.myResourceType = '" + theResourceType +
-						"' AND i.myParamName = '" + theSearchParam + "' AND i.myUpdated IS NOT NULL AND i.myHashIdentity = " + hash,
+						"' AND i.myParamName = '" + theSearchParam + "' AND i.myUpdated IS NULL AND i.myHashIdentity = " + hash,
 					theIndexedSearchParamClass).getResultList();
 				assertFalse(results.isEmpty());
 				assertEquals(repositorySearchParams.size(), results.size());
@@ -286,21 +290,33 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	private List<? extends BaseResourceIndexedSearchParam> getAndValidateIndexedSearchParamsRepository(
 		JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository,
 		IIdType theId, String theSearchParam, String theResourceType) {
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+			RequestPartitionId.defaultPartition(), theResourceType, theSearchParam);
+
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+				IndexedSearchParamIdentity spIdentity =  runInTransaction(() ->
+					myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(hashIdentity));
+				assertNotNull(spIdentity);
+				assertEquals(theSearchParam, spIdentity.getParamName());
+				assertEquals(theResourceType, spIdentity.getResourceType());
+			});
 
 		List<? extends BaseResourceIndexedSearchParam> repositorySearchParams = theIndexedSpRepository.findAll()
 			.stream()
 			.filter(sp -> sp.getResourcePid().equals(theId.getIdPartAsLong()))
-			.filter(sp -> theSearchParam.equals(sp.getParamName()))
+			.filter(sp -> sp.getHashIdentity().equals(hashIdentity))
 			.toList();
 		assertFalse(repositorySearchParams.isEmpty());
 
 		repositorySearchParams.forEach(sp -> {
-			assertEquals(theResourceType, sp.getResourceType());
 			if (myStorageSettings.isIndexStorageOptimized()) {
-				assertNull(sp.getUpdated());
+				assertNull(sp.getParamName());
+				assertNull(sp.getResourceType());
 			} else {
-				assertNotNull(sp.getUpdated());
+				assertEquals(theResourceType, sp.getResourceType());
+				assertEquals(theSearchParam, sp.getParamName());
 			}
+			assertNull(sp.getUpdated());
 		});
 
 		return repositorySearchParams;
