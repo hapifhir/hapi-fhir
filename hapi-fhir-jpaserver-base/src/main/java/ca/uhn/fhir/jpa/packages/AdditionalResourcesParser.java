@@ -16,7 +16,7 @@ import java.util.*;
 @Service
 public class AdditionalResourcesParser {
 
-	public IBaseBundle collectAdditionalResources(
+	public static IBaseBundle bundleAdditionalResources(
 			Set<String> additionalResources, PackageInstallationSpec packageInstallationSpec, FhirContext fhirContext) {
 		NpmPackage npmPackage;
 		try {
@@ -32,7 +32,7 @@ public class AdditionalResourcesParser {
 	}
 
 	@NotNull
-	public List<IBaseResource> getAdditionalResources(
+	public static List<IBaseResource> getAdditionalResources(
 			Set<String> folderNames, NpmPackage npmPackage, FhirContext fhirContext) {
 
 		var npmFolders = folderNames.stream()
