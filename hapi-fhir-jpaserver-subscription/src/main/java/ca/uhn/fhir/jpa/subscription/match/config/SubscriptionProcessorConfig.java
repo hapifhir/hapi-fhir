@@ -100,7 +100,7 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionDeliveryListenerFactory subscriptionDeliveryHandlerFactory(
+	public SubscriptionDeliveryListenerFactory SubscriptionDeliveryListenerFactory(
 			ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
 		return new SubscriptionDeliveryListenerFactory(theApplicationContext, theEmailSender);
 	}
