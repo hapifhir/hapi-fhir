@@ -15,9 +15,9 @@ public class SubscriptionConsumerWithListeners implements AutoCloseable {
 	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
 	public SubscriptionConsumerWithListeners(
-		String theChannelName,
-		IChannelConsumer<ResourceDeliveryMessage> theConsumer,
-		MultiplexingListener<ResourceDeliveryMessage> theMultiplexingListener) {
+			String theChannelName,
+			IChannelConsumer<ResourceDeliveryMessage> theConsumer,
+			MultiplexingListener<ResourceDeliveryMessage> theMultiplexingListener) {
 		myChannelName = theChannelName;
 		myConsumer = theConsumer;
 		myMultiplexingListener = theMultiplexingListener;
