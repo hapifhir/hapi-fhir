@@ -62,7 +62,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@Autowired SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
+	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	private TestQueueConsumerListener<ResourceModifiedMessage> myQueueConsumerListener;
 
 	@Autowired
@@ -70,9 +70,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myConsumer.close();

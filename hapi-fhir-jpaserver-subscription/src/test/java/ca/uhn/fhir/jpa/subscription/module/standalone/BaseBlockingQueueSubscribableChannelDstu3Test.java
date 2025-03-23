@@ -71,7 +71,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
 
-	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, subscriptionDeliveringRestHookSubscriber, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
+	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, SubscriptionDeliveringRestHookListener, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
 	protected static ObservationListener ourObservationListener;
 	protected static String ourListenerServerBase;
 	private static int ourListenerPort;

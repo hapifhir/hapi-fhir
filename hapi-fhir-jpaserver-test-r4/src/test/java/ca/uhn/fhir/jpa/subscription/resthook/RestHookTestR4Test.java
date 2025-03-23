@@ -71,17 +71,17 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	public static final String PATIENT_REFERENCE = "Patient/" + TEST_PATIENT_ID;
 
 	@Autowired
-    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired(required = false)
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
@@ -544,9 +544,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -561,7 +561,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -618,9 +618,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -635,7 +635,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());

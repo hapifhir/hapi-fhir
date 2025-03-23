@@ -103,7 +103,7 @@ public class TestJPAConfig {
 
 	@Bean
 	@Primary
-	public SubscriptionDeliveringRestHookListener stoppableSubscriptionDeliveringRestHookSubscriber() {
+	public SubscriptionDeliveringRestHookListener stoppableSubscriptionDeliveringRestHookListener() {
 		return new StoppableSubscriptionDeliveringRestHookListener();
 	}
 

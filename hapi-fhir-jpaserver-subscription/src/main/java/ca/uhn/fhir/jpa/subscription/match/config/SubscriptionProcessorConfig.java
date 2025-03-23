@@ -116,7 +116,7 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringRestHookListener subscriptionDeliveringRestHookSubscriber() {
+	public SubscriptionDeliveringRestHookListener SubscriptionDeliveringRestHookListener() {
 		return new SubscriptionDeliveringRestHookListener();
 	}
 

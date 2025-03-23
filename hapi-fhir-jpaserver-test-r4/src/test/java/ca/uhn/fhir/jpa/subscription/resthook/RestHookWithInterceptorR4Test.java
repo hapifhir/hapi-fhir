@@ -65,15 +65,15 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	Logger loggerMock;
 
 	@Autowired
-    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private MyTestInterceptor myTestInterceptor = new MyTestInterceptor();
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 	}
 
 	@AfterEach

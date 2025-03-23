@@ -56,7 +56,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
 	@Autowired
-    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
@@ -102,8 +102,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	@AfterEach
 	@Override
 	public void afterUnregisterRestHookListener() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
 		mySubscriptionSettings.setCrossPartitionSubscriptionEnabled(false);
