@@ -79,7 +79,7 @@ public class SubscriptionDeliveringRestHookListener extends BaseSubscriptionDeli
 		super();
 	}
 
-	public Class<ResourceDeliveryMessage> getMessageType() {
+	public Class<ResourceDeliveryMessage> getPayloadType() {
 		return ResourceDeliveryMessage.class;
 	}
 

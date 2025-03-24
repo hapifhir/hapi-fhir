@@ -94,7 +94,7 @@ public class SubscriptionChannelFactoryTest {
 		}
 
 		@Override
-		public Class<ResourceDeliveryMessage> getMessageType() {
+		public Class<ResourceDeliveryMessage> getPayloadType() {
 			return ResourceDeliveryMessage.class;
 		}
 	}

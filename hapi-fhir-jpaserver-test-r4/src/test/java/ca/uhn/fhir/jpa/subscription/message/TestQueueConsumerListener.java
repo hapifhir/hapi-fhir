@@ -13,10 +13,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class TestQueueConsumerListener<T> implements IMessageListener<T> {
 	private static final Logger ourLog = getLogger(TestQueueConsumerListener.class);
 	List<T> myPayloads;
-	private final Class<T> myMessageType;
+	private final Class<T> myPayloadType;
 
-	public TestQueueConsumerListener(Class<T> theMessageType) {
-		myMessageType = theMessageType;
+	public TestQueueConsumerListener(Class<T> thePayloadType) {
+		myPayloadType = thePayloadType;
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class TestQueueConsumerListener<T> implements IMessageListener<T> {
 	}
 
 	@Override
-	public Class<T> getMessageType() {
-		return myMessageType;
+	public Class<T> getPayloadType() {
+		return myPayloadType;
 	}
 }

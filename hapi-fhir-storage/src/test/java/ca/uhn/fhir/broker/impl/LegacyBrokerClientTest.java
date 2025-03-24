@@ -41,11 +41,11 @@ class LegacyBrokerClientTest {
 
 	@Test
 	public void testSendReceive() throws Exception {
-		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessageValue.class, new ChannelProducerSettings());
+		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, new ChannelProducerSettings());
 		MyMessageListener listener = new MyMessageListener();
-		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessageValue.class, listener, new ChannelConsumerSettings())) {
+		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessage.class, listener, new ChannelConsumerSettings())) {
 			listener.setExpectedCount(1);
-			TestMessage<MyTestMessageValue> message = buildMessage("Honda", "Civic");
+			MyTestMessage message = buildMessage("Honda", "Civic");
 			sendMessage(producer, message);
 			List<HookParams> result = listener.awaitExpected();
 			assertThat(result).hasSize(1);
@@ -56,19 +56,19 @@ class LegacyBrokerClientTest {
 		}
 	}
 
-	private static void sendMessage(IChannelProducer<MyTestMessageValue> producer, TestMessage<MyTestMessageValue> message) {
+	private static void sendMessage(IChannelProducer<MyTestMessageValue> producer, MyTestMessage message) {
 		ISendResult result = producer.send(message);
 		assertTrue(result.isSuccessful());
 	}
 
 	@Test
 	public void testSendReceiveTenMessages() throws Exception {
-		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessageValue.class, new ChannelProducerSettings());
+		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, new ChannelProducerSettings());
 		MyMessageListener listener = new MyMessageListener();
-		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessageValue.class, listener, new ChannelConsumerSettings())) {
+		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessage.class, listener, new ChannelConsumerSettings())) {
 			listener.setExpectedCount(10);
 			for (int i = 0; i < 10; i++) {
-				TestMessage<MyTestMessageValue> message = buildMessage("Honda", "Civic" + i);
+				MyTestMessage message = buildMessage("Honda", "Civic" + i);
 				sendMessage(producer, message);
 			}
 
@@ -81,12 +81,17 @@ class LegacyBrokerClientTest {
 		}
 	}
 
-	private static @NotNull TestMessage<MyTestMessageValue> buildMessage(String theMake, String theModel) {
+	private static @NotNull MyTestMessage buildMessage(String theMake, String theModel) {
 		MyTestMessageValue value = new MyTestMessageValue(theMake, theModel);
-		TestMessage<MyTestMessageValue> message = new TestMessage<>(value);
+		MyTestMessage message = new MyTestMessage(value);
 		return message;
 	}
 
+	private static class MyTestMessage extends TestMessage<MyTestMessageValue> {
+		public MyTestMessage(MyTestMessageValue thePayload) {
+			super(thePayload);
+		}
+	}
 
 	private static class MyTestMessageValue implements IModelJson {
 		@JsonProperty
@@ -126,7 +131,7 @@ class LegacyBrokerClientTest {
 		}
 
 		@Override
-		public Class<MyTestMessageValue> getMessageType() {
+		public Class<MyTestMessageValue> getPayloadType() {
 			return MyTestMessageValue.class;
 		}
 

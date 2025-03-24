@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IBrokerClient;
@@ -114,7 +115,7 @@ public abstract class BaseBatch2Config {
 	public IChannelProducer<JobWorkNotification> batch2ProcessingChannelProducer(IBrokerClient theBrokerClient) {
 		ChannelProducerSettings settings =
 				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
-		return theBrokerClient.getOrCreateProducer(CHANNEL_NAME, JobWorkNotification.class, settings);
+		return theBrokerClient.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
@@ -140,7 +141,7 @@ public abstract class BaseBatch2Config {
 		ChannelConsumerSettings settings =
 				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
 		return theBrokerClient.getOrCreateConsumer(
-				CHANNEL_NAME, JobWorkNotification.class, theWorkChannelMessageListener, settings);
+				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, theWorkChannelMessageListener, settings);
 	}
 
 	@Bean

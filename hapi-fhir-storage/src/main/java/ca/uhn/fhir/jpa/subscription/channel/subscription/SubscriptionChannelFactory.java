@@ -25,7 +25,9 @@ import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
@@ -45,7 +47,7 @@ public class SubscriptionChannelFactory {
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
-		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceDeliveryMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
 	public IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(
@@ -53,13 +55,14 @@ public class SubscriptionChannelFactory {
 			IMessageListener<ResourceDeliveryMessage> theListener,
 			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		return myBrokerClient.getOrCreateConsumer(theChannelName, ResourceDeliveryMessage.class, theListener, config);
+		return myBrokerClient.getOrCreateConsumer(
+				theChannelName, ResourceDeliveryJsonMessage.class, theListener, config);
 	}
 
 	public IChannelProducer<ResourceModifiedMessage> newMatchingProducer(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
-		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceModifiedMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
 	public IChannelConsumer<ResourceModifiedMessage> newMatchingConsumer(
@@ -67,7 +70,8 @@ public class SubscriptionChannelFactory {
 			IMessageListener<ResourceModifiedMessage> theListener,
 			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		return myBrokerClient.getOrCreateConsumer(theChannelName, ResourceModifiedMessage.class, theListener, config);
+		return myBrokerClient.getOrCreateConsumer(
+				theChannelName, ResourceModifiedJsonMessage.class, theListener, config);
 	}
 
 	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {

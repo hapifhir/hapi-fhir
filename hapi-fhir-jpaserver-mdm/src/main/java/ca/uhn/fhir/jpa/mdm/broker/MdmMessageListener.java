@@ -91,7 +91,7 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	}
 
 	@Override
-	public Class<ResourceModifiedMessage> getMessageType() {
+	public Class<ResourceModifiedMessage> getPayloadType() {
 		return ResourceModifiedMessage.class;
 	}
 

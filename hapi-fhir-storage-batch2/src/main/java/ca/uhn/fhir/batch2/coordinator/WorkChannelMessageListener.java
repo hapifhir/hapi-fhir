@@ -66,7 +66,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theJobDefinitionRegistry);
 	}
 
-	public Class<JobWorkNotification> getMessageType() {
+	public Class<JobWorkNotification> getPayloadType() {
 		return JobWorkNotification.class;
 	}
 

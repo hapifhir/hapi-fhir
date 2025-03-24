@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.DaoSubscriptionMatche
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscriberLoader;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringListener;
@@ -65,8 +65,8 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public SubscriptionActivatingSubscriber subscriptionActivatingSubscriber() {
-		return new SubscriptionActivatingSubscriber();
+	public SubscriptionActivatingListener subscriptionActivatingSubscriber() {
+		return new SubscriptionActivatingListener();
 	}
 
 	@Bean

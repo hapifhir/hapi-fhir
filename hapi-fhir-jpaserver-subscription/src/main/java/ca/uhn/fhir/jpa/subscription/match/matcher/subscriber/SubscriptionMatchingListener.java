@@ -73,7 +73,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		super();
 	}
 
-	public Class<ResourceModifiedMessage> getMessageType() {
+	public Class<ResourceModifiedMessage> getPayloadType() {
 		return ResourceModifiedMessage.class;
 	}
 

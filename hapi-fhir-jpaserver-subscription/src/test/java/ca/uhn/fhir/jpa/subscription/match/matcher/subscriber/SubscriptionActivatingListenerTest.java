@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -40,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class SubscriptionActivatingSubscriberTest {
+public class SubscriptionActivatingListenerTest {
 
 	private Logger ourLogger;
 
@@ -66,13 +65,13 @@ public class SubscriptionActivatingSubscriberTest {
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	@InjectMocks
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
+	private SubscriptionActivatingListener mySubscriptionActivatingListener;
 
 	private Level myStoredLogLevel;
 
 	@BeforeEach
 	public void init() {
-		ourLogger = (Logger) LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+		ourLogger = (Logger) LoggerFactory.getLogger(SubscriptionActivatingListener.class);
 
 		myStoredLogLevel = ourLogger.getLevel();
 		ourLogger.addAppender(myAppender);
@@ -108,7 +107,7 @@ public class SubscriptionActivatingSubscriberTest {
 			.thenThrow(new ResourceGoneException(exceptionMsg));
 
 		// test
-		boolean isActivated = mySubscriptionActivatingSubscriber.activateSubscriptionIfRequired(subscription);
+		boolean isActivated = mySubscriptionActivatingListener.activateSubscriptionIfRequired(subscription);
 
 		// verify
 		assertFalse(isActivated);

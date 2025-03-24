@@ -14,31 +14,31 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 	private static final Logger ourLog = LoggerFactory.getLogger(MultiplexingListener.class);
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
 
-	private final Class<T> myMessageType;
+	private final Class<T> myPayloadType;
 
-	public MultiplexingListener(Class<T> theMessageType) {
-		myMessageType = theMessageType;
+	public MultiplexingListener(Class<T> thePayloadType) {
+		myPayloadType = thePayloadType;
 	}
 
 	@Override
 	public void handleMessage(IMessage<T> theMessage) {
 		Class<?> messageClass = theMessage.getPayload().getClass();
-		if (!getMessageType().isAssignableFrom(messageClass)) {
-			throw new InternalErrorException("Expecting message of type " + getMessageType()
+		if (!getPayloadType().isAssignableFrom(messageClass)) {
+			throw new InternalErrorException("Expecting message of type " + getPayloadType()
 					+ ". But received message of type: " + messageClass);
 		}
 		mySubListeners.forEach(listener -> listener.handleMessage(theMessage));
 	}
 
 	@Override
-	public Class<T> getMessageType() {
-		return myMessageType;
+	public Class<T> getPayloadType() {
+		return myPayloadType;
 	}
 
 	public boolean addListener(IMessageListener<T> theListener) {
-		if (!getMessageType().isAssignableFrom(theListener.getMessageType())) {
-			throw new InternalErrorException("Expecting listener of type " + getMessageType()
-					+ ". But listener was for type: " + theListener.getMessageType());
+		if (!getPayloadType().isAssignableFrom(theListener.getPayloadType())) {
+			throw new InternalErrorException("Expecting listener of type " + getPayloadType()
+					+ ". But listener was for type: " + theListener.getPayloadType());
 		}
 		return mySubListeners.add(theListener);
 	}

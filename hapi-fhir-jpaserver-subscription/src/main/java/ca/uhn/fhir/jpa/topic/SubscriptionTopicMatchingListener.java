@@ -72,7 +72,7 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 		this.myMemoryCacheService = memoryCacheService;
 	}
 
-	public Class<ResourceModifiedMessage> getMessageType() {
+	public Class<ResourceModifiedMessage> getPayloadType() {
 		return ResourceModifiedMessage.class;
 	}
 

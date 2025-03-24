@@ -1,5 +1,7 @@
 package ca.uhn.fhir.broker.api;
 
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+
 /**
  * @param <T> The type of messages received by this consumer
  */
@@ -14,7 +16,7 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	void close();
 
-	Class<T> getMessageType();
+	Class<? extends IMessage<T>> getMessageType();
 
 	IMessageListener<T> getMessageListener();
 }

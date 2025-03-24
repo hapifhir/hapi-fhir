@@ -1,5 +1,7 @@
 package ca.uhn.fhir.broker.api;
 
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+
 public interface IBrokerClient {
 	/**
 	 * Create a channel that is used to receive messages from the queue.
@@ -15,7 +17,7 @@ public interface IBrokerClient {
 	 */
 	<T> IChannelConsumer<T> getOrCreateConsumer(
 			String theChannelName,
-			Class<T> theMessageType,
+			Class<? extends IMessage<T>> theMessageType,
 			IMessageListener<T> theMessageListener,
 			ChannelConsumerSettings theChannelConsumerSettings);
 
@@ -32,7 +34,9 @@ public interface IBrokerClient {
 	 * @param theChannelProducerSettings Contains the configuration for senders.
 	 */
 	<T> IChannelProducer<T> getOrCreateProducer(
-			String theChannelName, Class<T> theMessageType, ChannelProducerSettings theChannelProducerSettings);
+			String theChannelName,
+			Class<? extends IMessage<T>> theMessageType,
+			ChannelProducerSettings theChannelProducerSettings);
 
 	/**
 	 * @return the IChannelNamer used by this factory

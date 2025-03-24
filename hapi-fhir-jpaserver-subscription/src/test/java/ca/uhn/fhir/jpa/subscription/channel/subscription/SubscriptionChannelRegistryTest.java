@@ -58,7 +58,7 @@ public class SubscriptionChannelRegistryTest {
 
 		// mocks
 		IMessageListener<ResourceDeliveryMessage> messageListener = mock(IMessageListener.class);
-		when(messageListener.getMessageType()).thenReturn(ResourceDeliveryMessage.class);
+		when(messageListener.getPayloadType()).thenReturn(ResourceDeliveryMessage.class);
 		IChannelConsumer<ResourceDeliveryMessage> consumer = mock(IChannelConsumer.class);
 		IChannelProducer<ResourceDeliveryMessage> producer = mock(IChannelProducer.class);
 

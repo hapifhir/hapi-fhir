@@ -50,8 +50,8 @@ import java.util.Optional;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-public class SubscriptionActivatingSubscriber implements IMessageListener<ResourceModifiedMessage> {
-	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+public class SubscriptionActivatingListener implements IMessageListener<ResourceModifiedMessage> {
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingListener.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -70,11 +70,11 @@ public class SubscriptionActivatingSubscriber implements IMessageListener<Resour
 	/**
 	 * Constructor
 	 */
-	public SubscriptionActivatingSubscriber() {
+	public SubscriptionActivatingListener() {
 		super();
 	}
 
-	public Class<ResourceModifiedMessage> getMessageType() {
+	public Class<ResourceModifiedMessage> getPayloadType() {
 		return ResourceModifiedMessage.class;
 	}
 

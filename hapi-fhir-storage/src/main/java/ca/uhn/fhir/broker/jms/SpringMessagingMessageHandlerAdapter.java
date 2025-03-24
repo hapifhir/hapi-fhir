@@ -9,9 +9,12 @@ import org.springframework.messaging.MessagingException;
 
 public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 	private final IMessageListener<T> myMessageListener;
+	private final Class<? extends IMessage<T>> myMessageType;
 
-	public SpringMessagingMessageHandlerAdapter(IMessageListener<T> theMessageListener) {
+	public SpringMessagingMessageHandlerAdapter(
+			Class<? extends IMessage<T>> theMessageType, IMessageListener<T> theMessageListener) {
 		myMessageListener = theMessageListener;
+		myMessageType = theMessageType;
 	}
 
 	@Override
@@ -25,7 +28,7 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 		myMessageListener.handleMessage(message);
 	}
 
-	private Class<T> getMessageType() {
-		return myMessageListener.getMessageType();
+	private Class<? extends IMessage<T>> getMessageType() {
+		return myMessageType;
 	}
 }

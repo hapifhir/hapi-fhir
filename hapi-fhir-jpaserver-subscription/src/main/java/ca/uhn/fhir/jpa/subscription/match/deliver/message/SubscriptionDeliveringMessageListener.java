@@ -57,7 +57,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		myBrokerClient = theBrokerClient;
 	}
 
-	public Class<ResourceDeliveryMessage> getMessageType() {
+	public Class<ResourceDeliveryMessage> getPayloadType() {
 		return ResourceDeliveryMessage.class;
 	}
 
@@ -130,7 +130,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		channelSettings.setQualifyChannelName(false);
 
 		IChannelProducer<ResourceModifiedMessage> channelProducer =
-				myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedMessage.class, channelSettings);
+				myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();

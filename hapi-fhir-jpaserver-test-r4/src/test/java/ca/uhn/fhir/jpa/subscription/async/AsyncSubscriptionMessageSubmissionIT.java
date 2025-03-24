@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerListener;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
@@ -94,7 +95,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	}
 
 	@Test
-	public void runDeliveryPass_withManyResources_isBatchedAndKeepsResourceUsageDown() throws JsonProcessingException, InterruptedException {
+	public void runDeliveryPass_withManyResources_isBatchedAndKeepsResourceUsageDown() throws InterruptedException {
 		// setup
 		String resourceType = "Patient";
 		int factor = 5;
@@ -125,9 +126,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		waitForQueueToDrain();
 		assertCountOfResourcesNeedingSubmission(0);
 
-		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> {
-			return e.getLevel() == Level.DEBUG && e.getFormattedMessage().contains("Attempting to submit");
-		});
+		List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> e.getLevel() == Level.DEBUG && e.getFormattedMessage().contains("Attempting to submit"));
 		assertEquals(factor, events.size());
 	}
 

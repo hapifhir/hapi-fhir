@@ -12,6 +12,7 @@ import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.broker.jms.SpringMessagingMessageHandlerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 
@@ -27,21 +28,23 @@ public class LegacyBrokerClient implements IBrokerClient {
 	@Override
 	public <T> IChannelConsumer<T> getOrCreateConsumer(
 			String theChannelName,
-			Class<T> theMessageType,
+			Class<? extends IMessage<T>> theMessageType,
 			IMessageListener<T> theMessageListener,
 			ChannelConsumerSettings theChannelConsumerSettings) {
 		ISpringMessagingChannelReceiver legacyChannelReceiver = myLinkedBlockingChannelFactory.getOrCreateReceiver(
 				theChannelName, theMessageType, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval =
 				new SpringMessagingReceiverAdapter<>(theMessageType, legacyChannelReceiver, theMessageListener);
-		MessageHandler handler = new SpringMessagingMessageHandlerAdapter(theMessageListener);
+		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;
 	}
 
 	@Override
 	public <T> IChannelProducer<T> getOrCreateProducer(
-			String theChannelName, Class<T> theMessageType, ChannelProducerSettings theChannelProducerSettings) {
+			String theChannelName,
+			Class<? extends IMessage<T>> theMessageType,
+			ChannelProducerSettings theChannelProducerSettings) {
 		return new SpringMessagingProducerAdapter<>(myLinkedBlockingChannelFactory.getOrCreateProducer(
 				theChannelName, theMessageType, theChannelProducerSettings));
 	}

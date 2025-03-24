@@ -89,8 +89,8 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private void init() {
 		ChannelProducerSettings channelSettings = getChannelProducerSettings();
-		myMdmChannelProducer =
-				myBrokerClient.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedMessage.class, channelSettings);
+		myMdmChannelProducer = myBrokerClient.getOrCreateProducer(
+				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
 	private IChannelProducer<ResourceModifiedMessage> getMdmChannelProducer() {

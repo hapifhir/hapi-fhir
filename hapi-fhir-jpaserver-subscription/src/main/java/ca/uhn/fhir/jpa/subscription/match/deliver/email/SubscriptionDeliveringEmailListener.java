@@ -56,7 +56,7 @@ public class SubscriptionDeliveringEmailListener extends BaseSubscriptionDeliver
 		myEmailSender = theEmailSender;
 	}
 
-	public Class<ResourceDeliveryMessage> getMessageType() {
+	public Class<ResourceDeliveryMessage> getPayloadType() {
 		return ResourceDeliveryMessage.class;
 	}
 

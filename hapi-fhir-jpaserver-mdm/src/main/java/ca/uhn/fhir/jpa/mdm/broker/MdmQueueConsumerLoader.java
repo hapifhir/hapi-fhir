@@ -23,6 +23,7 @@ import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.util.CloseUtil;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
@@ -67,7 +68,7 @@ public class MdmQueueConsumerLoader {
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 
 			myMdmConsumer = myBrokerClient.getOrCreateConsumer(
-					IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedMessage.class, myMdmMessageListener, config);
+					IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, myMdmMessageListener, config);
 			if (myMdmConsumer == null) {
 				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
 			} else {

@@ -62,7 +62,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 		super();
 	}
 
-	public Class<ResourceModifiedMessage> getMessageType() {
+	public Class<ResourceModifiedMessage> getPayloadType() {
 		return ResourceModifiedMessage.class;
 	}
 

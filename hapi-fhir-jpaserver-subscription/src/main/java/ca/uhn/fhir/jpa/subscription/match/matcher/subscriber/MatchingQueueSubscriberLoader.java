@@ -23,7 +23,6 @@ import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -43,13 +42,10 @@ public class MatchingQueueSubscriberLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
 
 	@Autowired
-	FhirContext myFhirContext;
-
-	@Autowired
 	private SubscriptionMatchingListener mySubscriptionMatchingListener;
 
 	@Autowired
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
+	private SubscriptionActivatingListener mySubscriptionActivatingListener;
 
 	@Autowired(required = false)
 	private SubscriptionTopicMatchingListener mySubscriptionTopicMatchingListener;
@@ -78,7 +74,7 @@ public class MatchingQueueSubscriberLoader {
 			myMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, myMultiplexingListener, getChannelConsumerSettings());
 			myMultiplexingListener.addListener(mySubscriptionMatchingListener);
-			myMultiplexingListener.addListener(mySubscriptionActivatingSubscriber);
+			myMultiplexingListener.addListener(mySubscriptionActivatingListener);
 			myMultiplexingListener.addListener(mySubscriptionRegisteringListener);
 			if (mySubscriptionTopicMatchingListener != null) {
 				ourLog.info("Starting SubscriptionTopic Matching Subscriber");

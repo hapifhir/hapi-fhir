@@ -10,5 +10,5 @@ public interface IMessageListener<T> {
 	 */
 	void handleMessage(IMessage<T> theMessage);
 
-	Class<T> getMessageType();
+	Class<T> getPayloadType();
 }
