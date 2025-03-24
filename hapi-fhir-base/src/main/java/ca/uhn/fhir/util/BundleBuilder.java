@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -194,13 +195,26 @@ public class BundleBuilder {
 	 * @param theResource The resource to update
 	 */
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
+		return addTransactionUpdateEntry(theResource, null);
+	}
+
+	/**
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to update
+	 * @param theRequestUrl The url to attach to the Bundle.entry.request.url. If null, will default to the resource ID.
+	 */
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource, String theRequestUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IIdType id = getIdTypeForUpdate(theResource);
 
-		String requestUrl = id.toUnqualifiedVersionless().getValue();
 		String fullUrl = id.getValue();
 		String verb = "PUT";
+		String requestUrl = StringUtils.isBlank(theRequestUrl)
+				? id.toUnqualifiedVersionless().getValue()
+				: theRequestUrl;
 
 		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, fullUrl, requestUrl, verb);
 
@@ -215,10 +229,7 @@ public class BundleBuilder {
 		IBase request = addEntryAndReturnRequest(theResource, theFullUrl);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theRequestUrl);
-		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		IPrimitiveType<?> url = addRequestUrl(request, theRequestUrl);
 
 		// Bundle.entry.request.method
 		addRequestMethod(request, theHttpVerb);
@@ -409,18 +420,19 @@ public class BundleBuilder {
 		return id;
 	}
 
-	private void addFullUrl(IBase theEntry, String theFullUrl) {
+	public void addFullUrl(IBase theEntry, String theFullUrl) {
 		IPrimitiveType<?> fullUrl =
 				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		fullUrl.setValueAsString(theFullUrl);
 		myEntryFullUrlChild.getMutator().setValue(theEntry, fullUrl);
 	}
 
-	private void addRequestUrl(IBase request, String theRequestUrl) {
+	private IPrimitiveType<?> addRequestUrl(IBase request, String theRequestUrl) {
 		IPrimitiveType<?> url =
 				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(theRequestUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
+		return url;
 	}
 
 	private void addRequestMethod(IBase theRequest, String theMethod) {

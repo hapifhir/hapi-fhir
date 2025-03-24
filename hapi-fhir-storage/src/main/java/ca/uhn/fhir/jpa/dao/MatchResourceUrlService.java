@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -88,8 +89,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			String theMatchUrl,
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
-			RequestDetails theRequest) {
-		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null);
+			RequestDetails theRequest,
+			RequestPartitionId thePartitionId) {
+		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null, thePartitionId);
 	}
 
 	/**
@@ -100,7 +102,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequest,
-			IBaseResource theConditionalOperationTargetOrNull) {
+			IBaseResource theConditionalOperationTargetOrNull,
+			RequestPartitionId thePartitionId) {
 		Set<T> retVal = null;
 
 		String resourceType = myContext.getResourceType(theResourceType);
@@ -117,7 +120,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 		}
 
-		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl, thePartitionId);
+
 		ourLog.debug("Resolving match URL from cache {} found: {}", theMatchUrl, resolvedInCache);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
@@ -203,11 +207,18 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	}
 
 	@Nullable
-	public T processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
+	public T processMatchUrlUsingCacheOnly(
+			String theResourceType, String theMatchUrl, RequestPartitionId thePartitionId) {
 		T existing = null;
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
-			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
+			T potentialMatch = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
+			if (potentialMatch != null
+					&& (thePartitionId.isAllPartitions()
+							|| (thePartitionId.hasPartitionIds()
+									&& thePartitionId.hasPartitionId(potentialMatch.getPartitionId())))) {
+				existing = potentialMatch;
+			}
 		}
 		return existing;
 	}

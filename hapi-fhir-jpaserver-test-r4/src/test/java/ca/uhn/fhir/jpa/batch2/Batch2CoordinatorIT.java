@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -25,15 +21,19 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -51,9 +51,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.retry.RetryPolicy;
+import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.NoBackOffPolicy;
+import org.springframework.retry.policy.MaxAttemptsRetryPolicy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
@@ -73,19 +81,73 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 
 @ContextConfiguration(classes = {
-	Batch2FastSchedulerConfig.class
+	Batch2FastSchedulerConfig.class,
+	Batch2CoordinatorIT.RPConfig.class
 })
 @TestPropertySource(properties = {
 	// These tests require scheduling to work
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
 })
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
+
+	/***
+	 * Our internal configuration of Retry Mechanism is
+	 * with exponential backoff, and infinite retries.
+	 *
+	 * This isn't ideal for tests; so we will override
+	 * the retry mechanism for tests that require it to
+	 * make them run faster and more 'predictably'
+	 */
+	public static class RetryProviderOverride extends RetryPolicyProvider {
+
+		private RetryPolicy myRetryPolicy;
+
+		private BackOffPolicy myBackOffPolicy;
+
+		public void setPolicies(RetryPolicy theRetryPolicy, BackOffPolicy theBackOffPolicy) {
+			myRetryPolicy = theRetryPolicy;
+			myBackOffPolicy = theBackOffPolicy;
+		}
+
+		@Override
+		protected RetryPolicy retryPolicy() {
+			if (myRetryPolicy != null) {
+				return myRetryPolicy;
+			}
+			return super.retryPolicy();
+		}
+
+		@Override
+		protected BackOffPolicy backOffPolicy() {
+			if (myBackOffPolicy != null) {
+				return myBackOffPolicy;
+			}
+			return super.backOffPolicy();
+		}
+	}
+
+	@Configuration
+	public static class RPConfig {
+		@Primary
+		@Bean
+		public RetryPolicyProvider retryPolicyProvider() {
+			return new RetryProviderOverride();
+		}
+	}
+
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
 
 	public static final int TEST_JOB_VERSION = 1;
@@ -103,8 +165,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
+	@SpyBean
+	private IJobPersistence myJobPersistence;
+
 	@Autowired
-	IJobPersistence myJobPersistence;
+	private RetryPolicyProvider myRetryPolicyProvider;
 
 	@RegisterExtension
 	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
@@ -132,6 +197,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
+
+		// reset
+		if (myRetryPolicyProvider instanceof RetryProviderOverride rp) {
+			rp.setPolicies(null, null);
+		}
 	}
 
 	@AfterEach
@@ -590,6 +660,91 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void failingWorkChunks_withLargeErrorMsgs_shouldNotErrorOutTheJob() {
+		// setup
+		assertTrue(myRetryPolicyProvider instanceof RetryProviderOverride);
+
+		String jobId = getMethodNameForJobId();
+		AtomicInteger counter = new AtomicInteger();
+
+		// we want an error message larger than can be contained in the db
+		String errorMsg = RandomTextUtils.newSecureRandomAlphaNumericString(ERROR_MSG_MAX_LENGTH + 100);
+
+		// we want 1 more error than the allowed maximum
+		// otherwise we won't be updating the error chunk to have
+		// "Too many errors" error
+		int errorCount = MAX_CHUNK_ERROR_COUNT + 1;
+
+		MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy();
+		retryPolicy.setMaxAttempts(errorCount);
+		RetryProviderOverride overrideRetryProvider = (RetryProviderOverride) myRetryPolicyProvider;
+		overrideRetryProvider.setPolicies(retryPolicy, new NoBackOffPolicy());
+
+		// create a job that fails and throws a large error
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			counter.getAndIncrement();
+			throw new RuntimeException(errorMsg);
+		};
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> last = (step, sink) -> {
+			// we don't care; we'll never get here
+			return RunOutcome.SUCCESS;
+		};
+
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"First step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Final step",
+				last
+			)
+			.completionHandler(myCompletionHandler)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+
+		// test
+		JobInstanceStartRequest request = buildRequest(jobId);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		String instanceId = startResponse.getInstanceId();
+
+		// block deletion for the test
+		doNothing().when(myJobPersistence).deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
+
+		// waiting for the multitude of failures
+		await().until(() -> {
+			myJobMaintenanceService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			ourLog.info("Attempt " + counter.get() + " for "
+				+ instance.getInstanceId() + ". Status: " + instance.getStatus());
+			return counter.get() > errorCount - 1;
+		});
+
+		// verify
+		Iterator<WorkChunk> iterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, true);
+		List<WorkChunk> listOfChunks = new ArrayList<>();
+		iterator.forEachRemaining(listOfChunks::add);
+		assertEquals(1, listOfChunks.size());
+		WorkChunk workChunk = listOfChunks.get(0);
+		assertEquals(WorkChunkStatusEnum.FAILED, workChunk.getStatus());
+		// should contain some of the original error msg, but not all
+		assertTrue(workChunk.getErrorMessage().contains(errorMsg.substring(0, 100)));
+		assertTrue(workChunk.getErrorMessage().startsWith("Too many errors"));
+
+		// now we can delete the job/instance/work chunks
+		myJobDefinitionRegistry.removeJobDefinition(jd.getJobDefinitionId(), jd.getJobDefinitionVersion());
+		myJobPersistence.deleteInstanceAndChunks(instanceId);
+	}
+
+	@Test
 	public void testJobWithLongPollingStep() throws InterruptedException {
 		// create job definition
 		int callsToMake = 3;
@@ -745,7 +900,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				callLatch(myFirstStepLatch, step);
 				throw new RuntimeException("Expected Test Exception");
 			};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
+			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 			String jobDefId = getMethodNameForJobId();
 			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);

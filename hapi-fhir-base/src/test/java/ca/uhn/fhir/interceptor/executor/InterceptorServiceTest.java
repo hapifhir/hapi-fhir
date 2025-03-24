@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -712,5 +713,28 @@ public class InterceptorServiceTest {
 
 	}
 
+	static class BaseHook {
+		@Hook(Pointcut.JPA_PERFTRACE_INFO)
+		public void hook1() {
+		}
+	}
+
+	static class HookClass1 extends BaseHook {
+	}
+
+	@Test
+	void testHookDescription() {
+	    // given
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new HookClass1());
+
+	    // when
+		List<IBaseInterceptorBroadcaster.IInvoker> invokers = svc.getInvokersForPointcut(Pointcut.JPA_PERFTRACE_INFO);
+
+		// then
+		assertThat(invokers).hasSize(1);
+		assertThat(invokers.get(0).getHookDescription()).isEqualTo("ca.uhn.fhir.interceptor.executor.InterceptorServiceTest$HookClass1.hook1");
+	}
+	
 
 }
