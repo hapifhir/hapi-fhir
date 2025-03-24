@@ -115,7 +115,7 @@ class NarrativeGeneratorTemplateUtilsTest {
 	}
 
 	@Test
-	void testNullSafeAccess_validPath() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+	void testNullSafeAccess_validPath() throws NoSuchMethodException {
 		Observation obs = new Observation();
 		obs.setCode(new CodeableConcept().addCoding(new Coding().setDisplay("Heart Rate")));
 
@@ -124,7 +124,7 @@ class NarrativeGeneratorTemplateUtilsTest {
 	}
 
 	@Test
-	void testNullSafeAccess_nullIntermediateValue() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+	void testNullSafeAccess_nullIntermediateValue() throws NoSuchMethodException {
 		Observation obs = new Observation();
 		obs.setCode(new CodeableConcept()); // No coding set
 
@@ -139,7 +139,7 @@ class NarrativeGeneratorTemplateUtilsTest {
 	}
 
 	@Test
-	void testNullSafeAccess_partialPath() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+	void testNullSafeAccess_partialPath() throws NoSuchMethodException {
 		Observation obs = new Observation();
 		obs.setCode(new CodeableConcept().addCoding(new Coding()));
 
@@ -149,7 +149,7 @@ class NarrativeGeneratorTemplateUtilsTest {
 	}
 
 	@Test
-	void testNullSafeAccess_badMethodName() throws InvocationTargetException, IllegalAccessException {
+	void testNullSafeAccess_badMethodName() {
 		Observation obs = new Observation();
 		NoSuchMethodException nsm = null;
 		try {
