@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -50,6 +49,19 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+	}
+
+	@Test
+	public void testPackageWithProfiledDevice() throws IOException {
+		// See https://github.com/hapifhir/hapi-fhir/issues/5834 for details
+		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/cqf-ccc.tgz")) {
+			myPackageCacheManager.addPackageToCache("fhir.cqf.ccc", "0.1.0", stream, "basisprofil.de");
+		}
+
+		NpmPackage pkg;
+
+		pkg = myPackageCacheManager.loadPackage("fhir.cqf.ccc", null);
+		assertEquals("0.1.0", pkg.version());
 	}
 
 	@Test
