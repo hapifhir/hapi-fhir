@@ -82,7 +82,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
 		// Verify
-		assertEquals(theExpectedCommitCount, myCaptureQueriesListener.countCommits());
+		assertEquals(theExpectedCommitCount, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		Patient actualPatient = myPatientDao.read(id, mySrd);
@@ -104,7 +104,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
 		// Verify
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		assertEquals("2", id.getVersionIdPart());
@@ -143,7 +143,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
 		// Verify
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 		id = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		assertEquals("2", id.getVersionIdPart());

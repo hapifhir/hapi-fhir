@@ -238,7 +238,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new UriParam(code));
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);

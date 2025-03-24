@@ -228,6 +228,15 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getSelectQueries(Predicate<SqlQuery> theFilter) {
+		return getQueriesMatching(mySelectQueryInclusionCriteria).stream()
+				.filter(theFilter)
+				.collect(Collectors.toList());
+	}
+
+	/**
 	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getInsertQueries() {
@@ -330,12 +339,16 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	public int countGetConnectionsForCurrentThread() {
 		String threadName = Thread.currentThread().getName();
-		return myGetConnectionCounterPerThread.get(threadName).intValue();
+		return myGetConnectionCounterPerThread
+				.computeIfAbsent(threadName, k -> new AtomicInteger(0))
+				.intValue();
 	}
 
 	public int countCommitsForCurrentThread() {
 		String threadName = Thread.currentThread().getName();
-		return myCommitCounterPerThread.get(threadName).intValue();
+		return myCommitCounterPerThread
+				.computeIfAbsent(threadName, k -> new AtomicInteger(0))
+				.intValue();
 	}
 
 	/**

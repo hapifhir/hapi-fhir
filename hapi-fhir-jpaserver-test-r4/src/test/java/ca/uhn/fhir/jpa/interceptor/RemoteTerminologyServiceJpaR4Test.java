@@ -261,7 +261,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 
 		// Verify 1
 		myCaptureQueriesListener.logSelectQueries();
-		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
+		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 
@@ -273,7 +273,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		assertSuccess(outcome);
 
 		// Verify 2
-		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnections());
+		Assertions.assertEquals(0, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
 		assertThat(ourValueSetProvider.mySearchUrls).asList().isEmpty();
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().isEmpty();
 

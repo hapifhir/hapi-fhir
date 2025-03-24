@@ -378,7 +378,7 @@ public class SearchParamIdentityCache {
 				ourLog.error(
 						"PersistSearchParameterIdentityTask failed. Hash identity: {}",
 						myHashIdentity,
-					theException.getCause());
+						theException.getCause());
 			} catch (InterruptedException theInterruptedException) {
 				Thread.currentThread().interrupt();
 				ourLog.warn(
