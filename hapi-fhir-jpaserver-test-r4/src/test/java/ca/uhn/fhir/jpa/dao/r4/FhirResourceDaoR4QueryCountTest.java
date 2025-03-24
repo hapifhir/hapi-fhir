@@ -17,18 +17,21 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
@@ -46,6 +49,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -105,6 +109,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -115,6 +121,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -160,7 +167,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@RegisterExtension
 	@Order(1)
 	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
@@ -2240,6 +2247,64 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+
+	}
+
+	/**
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List)}
+	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
+	 * Others could potentially be optimized in the future so that they have a small number
+	 * of selects too, but this is tricky and may not be worth the effort.
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"SINGLE_TOKEN    ,     1",
+		"MULTIPLE_TOKEN  ,     10",
+		"STRING          ,     10",
+	})
+	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, int theExpectedSelectCount) {
+
+		Supplier<Bundle> input = () ->{
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			for (int i = 0; i < 10; i++) {
+				String identifier = Integer.toString(i);
+
+				Patient p = new Patient();
+				p.setActive(true);
+				p.addName().setFamily("FAM" + identifier);
+				p.addIdentifier().setSystem("http://foo").setValue(identifier);
+				p.addIdentifier().setSystem("http://bar").setValue(identifier);
+
+				String conditionalUrl = switch(theMatchMode) {
+					case "SINGLE_TOKEN" -> "Patient?identifier=http://foo|" + identifier;
+					case "MULTIPLE_TOKEN" -> "Patient?identifier=http://bar|" + identifier + "&active=true";
+					case "STRING" -> "Patient?name=FAM" + identifier;
+					default -> throw new IllegalStateException("Unexpected value: " + theMatchMode);
+				};
+				bb.addTransactionCreateEntry(p).conditional(conditionalUrl);
+			}
+
+			return bb.getBundleTyped();
+		};
+
+		// Run the first time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+
+		// Run the second time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+
+		// Run the third time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+
 
 	}
 

@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Meta;
@@ -117,6 +118,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -5172,5 +5174,50 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(status201, resp.getEntry().get(0).getResponse().getStatus());
 		assertEquals(status204, resp.getEntry().get(1).getResponse().getStatus());
 	}
+
+	/**
+	 * The transaction pre-fetch algorithms should work regardless of the
+	 * number and type of parameters in the conditional URL.
+	 */
+	@Test
+	public void testTransactionWithConditionalNonTokenUrls() {
+		Supplier<Bundle> input = ()->{
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Location location = new Location();
+			location.setName("LOCATION");
+			bb.addTransactionUpdateEntry(location).conditional("Location?name=LOCATION");
+
+			Encounter enc = new Encounter();
+			enc.addIdentifier().setValue("ENC");
+			enc.getPeriod().setStartElement(new DateTimeType("2021-01-01")).setEndElement(new DateTimeType("2021-01-02"));
+			bb.addTransactionUpdateEntry(enc).conditional("Encounter?identifier=ENC&date=lt2024");
+
+			CodeSystem cs = new CodeSystem();
+			cs.setUrl("http://foo");
+			bb.addTransactionUpdateEntry(cs).conditional("CodeSystem?url=http://foo");
+
+			return bb.getBundleTyped();
+		};
+
+
+		Bundle response = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeToString(response));
+		String location0 = response.getEntry().get(0).getResponse().getLocation();
+		String location1 = response.getEntry().get(1).getResponse().getLocation();
+		String location2 = response.getEntry().get(2).getResponse().getLocation();
+
+		logAllSearchUrls();
+
+		// Test, run the same transaction a second time
+		response = mySystemDao.transaction(mySrd, input.get());
+
+		// Verify - No new resources should be created
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeToString(response));
+		assertEquals(location0, response.getEntry().get(0).getResponse().getLocation());
+		assertEquals(location1, response.getEntry().get(1).getResponse().getLocation());
+		assertEquals(location2, response.getEntry().get(2).getResponse().getLocation());
+	}
+
 
 }

@@ -411,13 +411,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 *                                 pre-loaded (ie. fetch the actual resource body since we're presumably
 	 *                                 going to update it and will need to see its current state eventually)
 	 */
-	private void preFetchSearchParameterMaps(
+	@VisibleForTesting
+	public void preFetchSearchParameterMaps(
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
 			List<Long> theOutputPidsToLoadFully) {
+
+		/*
+		 * Note: This method currently only handles search parameter maps (i.e. conditional
+		 * URLs which have been converted into maps) with exactly one parameter of type token.
+		 * This is partly because it would be really hard to write an efficient prefetch that
+		 * sent a single query to the database which could handle multiple maps with multiple
+		 * AND-joined params each.
+		 *
+		 * The majority of real-world conditional URLs are [resourceType]?identifier=foo
+		 * so that means this should be good enough for most use cases. In the future though
+		 * it would certainly be possible to add additional kinds of support here (additional
+		 * SP types, multiple params support)
+		 */
+
 		Set<Long> systemAndValueHashes = new HashSet<>();
 		Set<Long> valueHashes = new HashSet<>();
+		List<MatchUrlToResolve> tokenInputParams = new ArrayList<>(theInputParameters.size());
+
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 			if (values.size() == 1) {
@@ -425,8 +442,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					buildHashPredicateFromTokenParam(
-							(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+					boolean added = buildHashPredicateFromTokenParam(
+						(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+					if (added) {
+						tokenInputParams.add(next);
+					}
 				}
 			}
 		}
@@ -448,7 +468,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		// For each SP Map which did not return a result, tag it as not found.
 		if (!valueHashes.isEmpty() || !systemAndValueHashes.isEmpty()) {
-			theInputParameters.stream()
+			tokenInputParams.stream()
 					// No matches
 					.filter(match -> !match.myResolved)
 					.forEach(match -> {
@@ -589,9 +609,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
+	 *
+	 * @return Returns {@literal true} if any predicates were added
 	 */
-	@Nullable
-	private void buildHashPredicateFromTokenParam(
+	private boolean buildHashPredicateFromTokenParam(
 			TokenParam theTokenParam,
 			RequestPartitionId theRequestPartitionId,
 			MatchUrlToResolve theMatchUrl,
@@ -606,6 +627,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTokenParam.getSystem(),
 					theTokenParam.getValue());
 			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
+			return true;
 		} else if (isNotBlank(theTokenParam.getValue())) {
 			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(
 					myPartitionSettings,
@@ -614,7 +636,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getValue());
 			theValuePredicates.add(theMatchUrl.myHashValue);
+			return true;
 		}
+
+		return false;
 	}
 
 	private ListMultimap<Long, MatchUrlToResolve> buildHashToSearchMap(

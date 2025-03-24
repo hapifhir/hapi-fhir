@@ -490,7 +490,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					});
 					Supplier<IIdType> idSupplier = () -> myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
-						if (!retVal.hasVersionIdPart()) {
+
+						// FIXME: add javadoc
+						if (!retVal.hasVersionIdPart() && isBlank(theMatchUrl)) {
 							Long version = myMemoryCacheService.getIfPresent(
 									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
 							if (version == null) {
