@@ -490,8 +490,10 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * statements with a single set of parameters this counts as a repeated
 	 * query.
 	 */
-	public int countInsertQueriesRepeated() {
-		return getInsertQueries(new DuplicateCheckingPredicate()).size();
+	public int countInsertQueriesRepeatedForCurrentThread() {
+		return (int) getInsertQueriesForCurrentThread().stream()
+				.filter(new DuplicateCheckingPredicate())
+				.count();
 	}
 
 	public int countUpdateQueries() {

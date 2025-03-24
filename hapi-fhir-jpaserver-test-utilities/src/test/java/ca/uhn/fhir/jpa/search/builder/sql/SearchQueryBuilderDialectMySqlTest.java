@@ -60,7 +60,9 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	private GeneratedSql buildSqlWithStringSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
-		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(new StringPredicateBuilder(searchQueryBuilder));
+		StringPredicateBuilder stringPredicateBuilder = new StringPredicateBuilder(searchQueryBuilder);
+		stringPredicateBuilder.setSearchParamIdentityCacheForUnitTest(mySearchParamIdentityCache);
+		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(stringPredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
 		StringPredicateBuilder sortPredicateBuilder = searchQueryBuilder.addStringPredicateBuilder(firstPredicateBuilder.getJoinColumns());
@@ -109,7 +111,9 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	private GeneratedSql buildSqlWithDateSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
-		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
+		DatePredicateBuilder datePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
+		datePredicateBuilder.setSearchParamIdentityCacheForUnitTest(mySearchParamIdentityCache);
+		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datePredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
 		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getJoinColumns());

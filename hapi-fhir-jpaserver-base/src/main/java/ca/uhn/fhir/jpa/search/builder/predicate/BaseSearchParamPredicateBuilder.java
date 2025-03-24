@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -50,6 +51,11 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 	@Autowired
 	private SearchParamIdentityCache mySearchParamIdentityCache;
+
+	@VisibleForTesting
+	public void setSearchParamIdentityCacheForUnitTest(SearchParamIdentityCache theSearchParamIdentityCache) {
+		mySearchParamIdentityCache = theSearchParamIdentityCache;
+	}
 
 	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);

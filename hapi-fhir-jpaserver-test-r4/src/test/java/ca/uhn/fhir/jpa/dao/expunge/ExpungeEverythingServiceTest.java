@@ -69,7 +69,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 		// validate precondition
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			runInTransaction(() -> {
-				// Patient.active, Patient.deceased
+				// Patient.active, Patient.deceased search parameter identities
 				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(-8972835394480303911L));
 				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(-2830809394128781005L));
 				assertEquals(2, myResourceIndexedSearchParamIdentityDao.count());
