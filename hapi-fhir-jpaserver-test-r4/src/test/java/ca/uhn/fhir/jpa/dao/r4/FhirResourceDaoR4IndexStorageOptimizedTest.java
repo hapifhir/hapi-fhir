@@ -294,12 +294,12 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 			RequestPartitionId.defaultPartition(), theResourceType, theSearchParam);
 
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-				IndexedSearchParamIdentity spIdentity =  runInTransaction(() ->
-					myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(hashIdentity));
-				assertNotNull(spIdentity);
-				assertEquals(theSearchParam, spIdentity.getParamName());
-				assertEquals(theResourceType, spIdentity.getResourceType());
-			});
+			IndexedSearchParamIdentity spIdentity = runInTransaction(() ->
+				myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(hashIdentity));
+			assertNotNull(spIdentity);
+			assertEquals(theSearchParam, spIdentity.getParamName());
+			assertEquals(theResourceType, spIdentity.getResourceType());
+		});
 
 		List<? extends BaseResourceIndexedSearchParam> repositorySearchParams = theIndexedSpRepository.findAll()
 			.stream()

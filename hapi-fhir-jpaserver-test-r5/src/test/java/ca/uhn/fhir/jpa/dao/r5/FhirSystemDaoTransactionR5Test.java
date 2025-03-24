@@ -180,7 +180,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(4);
@@ -359,7 +359,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(4);

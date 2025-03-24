@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -16,7 +15,6 @@ import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -171,11 +169,11 @@ public class SearchParameterDisabledForQueryingR5Test extends BaseResourceProvid
 			.add(Patient.SP_GENDER, new TokenParam( "male"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
-		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// Verify
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly("Patient/A");
-		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 
 		if (theEnabledForSearching == Boolean.FALSE) {
 			assertThat(sql).contains(ResourceIndexedSearchParamToken.HFJ_SPIDX_TOKEN);
