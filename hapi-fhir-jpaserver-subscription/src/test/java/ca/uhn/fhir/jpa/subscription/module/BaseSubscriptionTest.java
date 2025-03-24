@@ -96,7 +96,9 @@ public abstract class BaseSubscriptionTest {
 		@Bean
 		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
 			LinkedBlockingChannelFactory linkedBlockingChannelFactory = new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
-			return new SubscriptionChannelFactory(new LegacyBrokerClient(linkedBlockingChannelFactory));
+			LegacyBrokerClient brokerClient = new LegacyBrokerClient(theChannelNamer);
+			brokerClient.setLegacyChannelFactory(linkedBlockingChannelFactory);
+			return new SubscriptionChannelFactory(brokerClient);
 		}
 
 		@Bean

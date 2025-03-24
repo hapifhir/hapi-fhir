@@ -17,6 +17,7 @@ import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -31,7 +32,12 @@ class LegacyBrokerClientTest {
 	;
 	private RetryPolicyProvider myRetryPolicyProvider = new RetryPolicyProvider();
 	private final LinkedBlockingChannelFactory myLinkedBlockingChannelFactory = new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
-	private final LegacyBrokerClient myBrokerClient = new LegacyBrokerClient(myLinkedBlockingChannelFactory);
+	private final LegacyBrokerClient myBrokerClient = new LegacyBrokerClient(myChannelNamer);
+
+	@BeforeEach
+	public void before() {
+		myBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
+	}
 
 	@Test
 	public void testSendReceive() throws Exception {

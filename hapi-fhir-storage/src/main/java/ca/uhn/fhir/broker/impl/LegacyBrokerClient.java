@@ -12,14 +12,16 @@ import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.broker.jms.SpringMessagingMessageHandlerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 
 // FIXME KHS delete this?
 public class LegacyBrokerClient implements IBrokerClient {
-	private final ILegacyChannelFactory myLinkedBlockingChannelFactory;
+	private ILegacyChannelFactory myLinkedBlockingChannelFactory;
+	private final IChannelNamer myChannelNamer;
 
-	public LegacyBrokerClient(ILegacyChannelFactory theChannelFactory) {
-		myLinkedBlockingChannelFactory = theChannelFactory;
+	public LegacyBrokerClient(IChannelNamer theChannelNamer) {
+		myChannelNamer = theChannelNamer;
 	}
 
 	@Override
@@ -46,6 +48,11 @@ public class LegacyBrokerClient implements IBrokerClient {
 
 	@Override
 	public IChannelNamer getChannelNamer() {
-		return null;
+		return myChannelNamer;
+	}
+
+	@Autowired
+	public void setLegacyChannelFactory(ILegacyChannelFactory theLegacyChannelFactory) {
+		myLinkedBlockingChannelFactory = theLegacyChannelFactory;
 	}
 }

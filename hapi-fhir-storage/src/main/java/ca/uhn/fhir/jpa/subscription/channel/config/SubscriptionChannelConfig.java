@@ -48,8 +48,8 @@ public class SubscriptionChannelConfig {
 	}
 
 	@Bean
-	public IBrokerClient brokerClient(LinkedBlockingChannelFactory theLinkedBlockingChannelFactory) {
-		return new LegacyBrokerClient(theLinkedBlockingChannelFactory);
+	public IBrokerClient brokerClient(IChannelNamer theChannelNamer) {
+		return new LegacyBrokerClient(theChannelNamer);
 	}
 
 	@Bean

@@ -48,7 +48,9 @@ public class SubscriptionChannelFactoryTest {
 	public void before() {
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
 		myLinkedBlockingChannelFactory = new LinkedBlockingChannelFactory(myChannelNamer, new RetryPolicyProvider());
-		mySvc = new SubscriptionChannelFactory(new LegacyBrokerClient(myLinkedBlockingChannelFactory));
+		LegacyBrokerClient brokerClient = new LegacyBrokerClient(myChannelNamer);
+		brokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
+		mySvc = new SubscriptionChannelFactory(brokerClient);
 	}
 
 	/**
