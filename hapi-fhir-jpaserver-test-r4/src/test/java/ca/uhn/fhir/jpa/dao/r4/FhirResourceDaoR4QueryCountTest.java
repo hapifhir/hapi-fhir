@@ -2744,7 +2744,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run a second time (creates a new observation, reuses the patient, should use cache)
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, bundleCreator.get());
+		Bundle outcome = mySystemDao.transaction(mySrd, bundleCreator.get());
+		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
