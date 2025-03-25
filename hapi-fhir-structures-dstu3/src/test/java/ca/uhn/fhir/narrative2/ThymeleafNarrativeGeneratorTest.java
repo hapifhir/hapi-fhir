@@ -8,10 +8,12 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Composition;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationStatement;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -102,6 +104,35 @@ public class ThymeleafNarrativeGeneratorTest {
 		ourLog.info("Output:\n{}", output);
 
 		assertEquals("<html> This is some content <div> Fragment-1-content blah </div></html>", output);
+	}
+
+
+	@Test
+	public void testThymeleafSpelExpansionNullSafeNavigationWhenDataPresent() {
+		Patient patientWithId = new Patient();
+		patientWithId.setIdElement(new IdType("Patient/1"));
+//		patientWithId.addName().setFamily("zoop");
+
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-nullsafe-nav.properties");
+
+		String output = gen.generateResourceNarrative(ourCtx, patientWithId);
+		ourLog.info("Output:\n{}", output);
+
+		assertEquals("<div>Patient/1</div>", output);
+
+	}
+
+	@Test
+	public void testThymeleafSpelExpansionNullSafeNavigationWhenDataAbsent() {
+		Patient patientWithId = new Patient();
+
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-nullsafe-nav.properties");
+
+		String output = gen.generateResourceNarrative(ourCtx, patientWithId);
+		ourLog.info("Output:\n{}", output);
+
+		assertEquals("<div>default-empty</div>", output);
+
 	}
 
 	@Test

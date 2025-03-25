@@ -211,6 +211,11 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf-spring6</artifactId>
+			<scope>test</scope>
+		</dependency>
       <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-test-utilities</artifactId>

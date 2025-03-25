@@ -47,6 +47,8 @@ import org.thymeleaf.processor.IProcessor;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.spring6.dialect.SpringStandardDialect;
 import org.thymeleaf.standard.StandardDialect;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
@@ -83,13 +85,18 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 	}
 
 	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
-		TemplateEngine engine = new TemplateEngine();
 		ITemplateResolver resolver = new NarrativeTemplateResolver(theFhirContext);
+//		TemplateEngine engine = new TemplateEngine();
+		SpringTemplateEngine engine= new SpringTemplateEngine();
+//		engine.setTemplateResolver(resolver);
+		engine.setEnableSpringELCompiler(true);
+
 		engine.setTemplateResolver(resolver);
 		if (myMessageResolver != null) {
 			engine.setMessageResolver(myMessageResolver);
 		}
-		StandardDialect dialect = new StandardDialect() {
+//		StandardDialect dialect = new StandardDialect() {
+		StandardDialect dialect = new SpringStandardDialect() {
 			@Override
 			public Set<IProcessor> getProcessors(String theDialectPrefix) {
 				Set<IProcessor> retVal = super.getProcessors(theDialectPrefix);
@@ -98,8 +105,8 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 				return retVal;
 			}
 		};
+		// Set the SpEL expression evaluator as the standard expression evaluator
 		engine.setDialect(dialect);
-
 		engine.addDialect(new NarrativeGeneratorDialect(theFhirContext));
 		return engine;
 	}
