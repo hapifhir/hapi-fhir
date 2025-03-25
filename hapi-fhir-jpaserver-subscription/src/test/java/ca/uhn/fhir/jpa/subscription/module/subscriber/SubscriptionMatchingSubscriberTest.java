@@ -54,7 +54,7 @@ import static org.mockito.Mockito.when;
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
-public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
+public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
 	private final IFhirResourceDao<Subscription> myMockSubscriptionDao = Mockito.mock(IFhirResourceDao.class);
 
 	@Autowired

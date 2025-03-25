@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingListenerTest;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -69,9 +69,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingListenerTest.class);
 
-	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, SubscriptionDeliveringRestHookListener, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
+	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, SubscriptionDeliveringEmailListener, SubscriptionDeliveringRestHookListener, SubscriptionMatchingListener, subscriptionRegisteringSubscriber]
 	protected static ObservationListener ourObservationListener;
 	protected static String ourListenerServerBase;
 	private static int ourListenerPort;
@@ -102,8 +102,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@Qualifier("subscriptionRegisteringSubscriber")
 	IMessageListener<ResourceModifiedMessage> subscriptionRegisteringSubscriber;
 	@Autowired
-	@Qualifier("subscriptionMatchingSubscriber")
-	IMessageListener<ResourceModifiedMessage> subscriptionMatchingSubscriber;
+	@Qualifier("SubscriptionMatchingListener")
+	IMessageListener<ResourceModifiedMessage> SubscriptionMatchingListener;
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
@@ -124,7 +124,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		mySubscriptionRegistry.unregisterAllSubscriptions();
 		MultiplexingListener<ResourceModifiedMessage> multiplexingListener = new MultiplexingListener<>(ResourceModifiedMessage.class);
 		multiplexingListener.addListener(mySubscriptionActivatingSubscriber);
-		multiplexingListener.addListener(subscriptionMatchingSubscriber);
+		multiplexingListener.addListener(SubscriptionMatchingListener);
 		multiplexingListener.addListener(subscriptionRegisteringSubscriber);
 		ourMatchingConsumer = mySubscriptionChannelFactory.newMatchingConsumer(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), multiplexingListener, CONSUMER_OPTIONS);
 		ourMatchingProducer = mySubscriptionChannelFactory.newMatchingProducer(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), PRODUCER_OPTIONS);

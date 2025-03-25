@@ -60,7 +60,7 @@ import org.springframework.context.annotation.Scope;
 public class SubscriptionProcessorConfig {
 
 	@Bean
-	public SubscriptionMatchingListener subscriptionMatchingSubscriber() {
+	public SubscriptionMatchingListener SubscriptionMatchingListener() {
 		return new SubscriptionMatchingListener();
 	}
 
@@ -70,7 +70,7 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
-	public MatchingQueueSubscriberLoader subscriptionMatchingSubscriberLoader() {
+	public MatchingQueueSubscriberLoader SubscriptionMatchingListenerLoader() {
 		return new MatchingQueueSubscriberLoader();
 	}
 
@@ -129,7 +129,7 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringEmailListener subscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
+	public SubscriptionDeliveringEmailListener SubscriptionDeliveringEmailListener(IEmailSender theEmailSender) {
 		return new SubscriptionDeliveringEmailListener(theEmailSender);
 	}
 
