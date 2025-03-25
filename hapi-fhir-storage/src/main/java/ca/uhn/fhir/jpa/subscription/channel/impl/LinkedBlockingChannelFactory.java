@@ -41,7 +41,7 @@ public class LinkedBlockingChannelFactory implements ILegacyChannelFactory {
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
-	private RetryPolicyProvider myRetryPolicyProvider;
+	protected RetryPolicyProvider myRetryPolicyProvider;
 
 	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
 		myChannelNamer = theChannelNamer;
@@ -75,7 +75,7 @@ public class LinkedBlockingChannelFactory implements ILegacyChannelFactory {
 	}
 
 	@Nonnull
-	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
+	protected LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
 		String threadNamePrefix = theChannelName + "-";
 		ThreadPoolTaskExecutor threadPoolExecutor = ThreadPoolUtil.newThreadPool(
 				theConcurrentConsumers,
