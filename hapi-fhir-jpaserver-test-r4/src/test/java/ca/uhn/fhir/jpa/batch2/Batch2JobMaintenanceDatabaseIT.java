@@ -522,8 +522,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		@Override
 		public Message<?> preSend(@Nonnull Message<?> message, @Nonnull MessageChannel channel) {
 			ourLog.info("Sending message: {}", message);
-			SpringMessagingMessageAdapter<JobWorkNotification> springMessage = (SpringMessagingMessageAdapter<JobWorkNotification>) message;
-			JobWorkNotification notification = springMessage.getPayload();
+			SpringMessagingMessageAdapter<JobWorkNotificationJsonMessage> springMessage = (SpringMessagingMessageAdapter<JobWorkNotificationJsonMessage>) message;
+			JobWorkNotificationJsonMessage workMessage = springMessage.getPayload();
+			JobWorkNotification notification = workMessage.getPayload();
 			myReceivedChunkIds.add(notification.getChunkId());
 			myPointcutLatch.call(message);
 			return message;

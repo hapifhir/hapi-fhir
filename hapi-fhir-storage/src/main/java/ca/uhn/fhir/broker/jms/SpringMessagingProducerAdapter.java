@@ -20,7 +20,7 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
-		SpringMessagingMessageAdapter<T> springMessage = new SpringMessagingMessageAdapter<>(theMessage);
+		SpringMessagingMessageAdapter<IMessage<T>> springMessage = new SpringMessagingMessageAdapter<>(theMessage);
 		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(springMessage));
 	}
 

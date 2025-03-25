@@ -4,18 +4,18 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-public class SpringMessagingMessageAdapter<T> implements Message<T> {
-	private final IMessage<T> myMessage;
+public class SpringMessagingMessageAdapter<T extends IMessage<?>> implements Message<T> {
+	private final T myHapiMessage;
 	private final MessageHeaders myHeaders;
 
-	public SpringMessagingMessageAdapter(IMessage<T> theMessage) {
-		myMessage = theMessage;
-		myHeaders = new MessageHeaders(myMessage.getHeaders());
+	public SpringMessagingMessageAdapter(T theHapiMessage) {
+		myHapiMessage = theHapiMessage;
+		myHeaders = new MessageHeaders(myHapiMessage.getHeaders());
 	}
 
 	@Override
 	public T getPayload() {
-		return myMessage.getPayload();
+		return myHapiMessage;
 	}
 
 	@Override

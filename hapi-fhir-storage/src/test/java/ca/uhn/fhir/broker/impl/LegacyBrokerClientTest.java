@@ -6,13 +6,12 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.broker.api.ISendResult;
-import ca.uhn.fhir.broker.jms.SpringMessagingMessage;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +22,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LegacyBrokerClientTest {
 	private static final String TEST_CHANNEL_NAME = "LinkedBlockingBrokerClientTest-TestChannel";
@@ -39,6 +39,7 @@ class LegacyBrokerClientTest {
 		myBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
 	}
 
+	// FIXME KHS this changed?
 	@Test
 	public void testSendReceive() throws Exception {
 		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, new ChannelProducerSettings());
@@ -49,7 +50,7 @@ class LegacyBrokerClientTest {
 			sendMessage(producer, message);
 			List<HookParams> result = listener.awaitExpected();
 			assertThat(result).hasSize(1);
-			SpringMessagingMessage<MyTestMessageValue> receivedMessage = (SpringMessagingMessage<MyTestMessageValue>) result.get(0).get(SpringMessagingMessage.class);
+			MyTestMessage receivedMessage = result.get(0).get(MyTestMessage.class);
 			MyTestMessageValue receivedValue = receivedMessage.getPayload();
 			assertEquals("Honda", receivedValue.make);
 			assertEquals("Civic", receivedValue.model);
@@ -74,7 +75,7 @@ class LegacyBrokerClientTest {
 
 			List<HookParams> result = listener.awaitExpected();
 			assertThat(result).hasSize(10);
-			SpringMessagingMessage<MyTestMessageValue> receivedMessage = (SpringMessagingMessage<MyTestMessageValue>) result.get(5).get(SpringMessagingMessage.class);
+			MyTestMessage receivedMessage = result.get(5).get(MyTestMessage.class);
 			MyTestMessageValue receivedValue = receivedMessage.getPayload();
 			assertEquals("Honda", receivedValue.make);
 			assertEquals("Civic5", receivedValue.model);
