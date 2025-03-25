@@ -20,8 +20,7 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		SpringMessagingMessageAdapter springMessage = (SpringMessagingMessageAdapter) theMessage;
-		Class<?> messageClass =
-				springMessage.getPayload().getClass();
+		Class<?> messageClass = springMessage.getPayload().getClass();
 
 		if (!getMessageType().isAssignableFrom(messageClass)) {
 			throw new InternalErrorException("Expecting message of type " + getMessageType()
