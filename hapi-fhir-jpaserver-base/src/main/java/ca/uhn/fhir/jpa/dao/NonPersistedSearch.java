@@ -21,6 +21,15 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 
+/**
+ * This is an implementation of {@link ICachedSearchDetails} which is passed
+ * around in the case of a search that isn't saved anywhere. It can be used
+ * as an argument for interceptor hook methods for the
+ * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESEARCH_REGISTERED}
+ * pointcut.
+ *
+ * @since 8.2.0
+ */
 public class NonPersistedSearch implements ICachedSearchDetails {
 	private final String myResourceName;
 	private String myUuid;

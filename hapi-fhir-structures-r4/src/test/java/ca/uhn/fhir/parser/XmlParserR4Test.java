@@ -37,6 +37,7 @@ import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReference
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -270,6 +271,16 @@ public class XmlParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testParseIntoObject_InvalidValue() {
+		// Test
+		Patient target = new Patient();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newXmlParser().parseInto("2020-01-01", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Failed to parse XML content: Unexpected character '2'");
+	}
+
+	@Test
 	public void testParseIntoPrimitive() {
 		String expected = "2020-02-20T12:12:01.123-05:00";
 
@@ -281,6 +292,16 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals(expected, target.getValueAsString());
 		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
 		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
+	}
+
+	@Test
+	public void testParseIntoPrimitive_InvalidValue() {
+		// Test
+		DateTimeType target = new DateTimeType();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newXmlParser().parseInto("\"birthDate\":\"2020-01-01\"", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Invalid date/time");
 	}
 
 	/**

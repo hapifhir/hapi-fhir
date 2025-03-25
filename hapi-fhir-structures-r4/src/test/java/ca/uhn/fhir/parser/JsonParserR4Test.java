@@ -83,6 +83,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -1283,6 +1284,17 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testParseIntoObject_InvalidValue() {
+		// Test
+		Patient target = new Patient();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newJsonParser().parseInto("2020-01-01", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Failed to parse JSON encoded FHIR content");
+	}
+
+
+	@Test
 	public void testParseIntoPrimitive() {
 		String expected = "2020-02-20T12:12:01.123-05:00";
 
@@ -1295,6 +1307,18 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
 		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
 	}
+
+	@Test
+	public void testParseIntoPrimitive_InvalidValue() {
+		// Test
+		DateTimeType target = new DateTimeType();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newJsonParser().parseInto("\"birthDate\":\"2020-01-01\"", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Invalid date/time");
+	}
+
+
 
 
 	@Test

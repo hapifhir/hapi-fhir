@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 
 /**
- * facade over raw hook intererface
+ * facade over raw hook interface
  */
 public class StorageInterceptorHooksFacade {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -41,11 +41,6 @@ public class StorageInterceptorHooksFacade {
 
 	/**
 	 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
-	 *
-	 * @param theRequestDetails
-	 * @param theParams
-	 * @param theSearch
-	 * @param theRequestPartitionId
 	 */
 	public void callStoragePresearchRegistered(
 			RequestDetails theRequestDetails,
@@ -64,5 +59,4 @@ public class StorageInterceptorHooksFacade {
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 		}
 	}
-	// private IInterceptorBroadcaster myInterceptorBroadcaster;
 }

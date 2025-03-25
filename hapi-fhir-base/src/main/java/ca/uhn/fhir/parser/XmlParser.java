@@ -274,7 +274,7 @@ public class XmlParser extends BaseParser {
 			}
 			return parserState.getObject();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(Msg.code(1852) + e);
+			throw new DataFormatException(Msg.code(1852) + "Failed to parse XML content: " + e.getMessage());
 		}
 	}
 
