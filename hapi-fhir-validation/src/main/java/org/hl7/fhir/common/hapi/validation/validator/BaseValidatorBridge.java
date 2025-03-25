@@ -7,8 +7,8 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Base class for a bridge between the RI validation tools and HAPI
@@ -45,8 +45,10 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 					hapiMessage.setMessageId(riMessage.getMessageId());
 				}
 			}
-			if (riMessage.sliceText != null && riMessage.sliceText.length > 0) {
-				hapiMessage.setSliceMessages(Arrays.asList(riMessage.sliceText));
+			if (riMessage.hasSliceInfo()) {
+				hapiMessage.setSliceMessages(riMessage.getSliceInfo().stream()
+						.map(ValidationMessage::getMessage)
+						.collect(Collectors.toList()));
 			}
 			theCtx.addValidationMessage(hapiMessage);
 		}

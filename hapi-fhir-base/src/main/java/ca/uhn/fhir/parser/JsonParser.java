@@ -55,6 +55,7 @@ import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -1488,17 +1489,19 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
+		if (theValues == null) {
+			String parentElementName = getExtensionElementName(theIsModifier);
+			getErrorHandler()
+					.missingRequiredElement(new ParseLocation().setParentElementName(parentElementName), "url");
+			return;
+		}
+
 		for (int i = 0; i < theValues.size(); i++) {
 			BaseJsonLikeObject nextExtObj = BaseJsonLikeValue.asObject(theValues.get(i));
 			BaseJsonLikeValue jsonElement = nextExtObj.get("url");
 			String url;
 			if (null == jsonElement || !(jsonElement.isScalar())) {
-				String parentElementName;
-				if (theIsModifier) {
-					parentElementName = "modifierExtension";
-				} else {
-					parentElementName = "extension";
-				}
+				String parentElementName = getExtensionElementName(theIsModifier);
 				getErrorHandler()
 						.missingRequiredElement(new ParseLocation().setParentElementName(parentElementName), "url");
 				url = null;
@@ -1565,6 +1568,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			theState.endingElement();
 		}
+	}
+
+	@Nonnull
+	private static String getExtensionElementName(boolean theIsModifier) {
+		String parentElementName;
+		if (theIsModifier) {
+			parentElementName = "modifierExtension";
+		} else {
+			parentElementName = "extension";
+		}
+		return parentElementName;
 	}
 
 	private void parseFhirComments(BaseJsonLikeValue theObject, ParserState<?> theState) {

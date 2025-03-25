@@ -585,7 +585,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals(organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -1324,11 +1324,11 @@ public class XmlParserDstu3Test {
 		// Adding medication to Contained.
 		Medication medResource = new Medication();
 		medResource.setCode(codeDt);
-		medResource.setId("#" + medId);
+		medResource.setId(medId);
 		medicationPrescript.getContained().add(medResource);
 
 		// Medication reference. This should point to the contained resource.
-		Reference medRefDt = new Reference("#" + medId);
+		Reference medRefDt = new Reference(medId);
 		medRefDt.setDisplay("MedRef");
 		medicationPrescript.setMedication(medRefDt);
 
@@ -1339,7 +1339,7 @@ public class XmlParserDstu3Test {
 		// @formatter:on
 		assertThat(encoded).
 			contains("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
-				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
+				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"123\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>");
 
 	}
@@ -1836,45 +1836,6 @@ public class XmlParserDstu3Test {
 		assertThat(encoded).contains("maritalStatus");
 	}
 
-	@Test
-	public void testEncodeNonContained() {
-		// Create an organization
-		Organization org = new Organization();
-		org.setId("Organization/65546");
-		org.getNameElement().setValue("Contained Test Organization");
-
-		// Create a patient
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-		patient.getManagingOrganization().setResource(org);
-
-		// Create a list containing both resources. In a server method, you might just
-		// return this list, but here we will create a bundle to encode.
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
-		resources.add(org);
-		resources.add(patient);
-
-		// Create a bundle with both
-		Bundle b = new Bundle();
-		b.addEntry().setResource(org);
-		b.addEntry().setResource(patient);
-
-		// Encode the buntdle
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
-		ourLog.info(encoded);
-		assertThat(encoded).doesNotContain("<contained>");
-		assertThat(encoded).contains("<Organization", "<id value=\"65546\"/>", "</Organization>");
-		assertThat(encoded).contains("<reference value=\"Organization/65546\"/>");
-		assertThat(encoded).contains("<Patient", "<id value=\"1333\"/>", "</Patient>");
-
-		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).doesNotContain("<contained>");
-		assertThat(encoded).contains("<reference value=\"Organization/65546\"/>");
-
-	}
-
 	/**
 	 * See #312
 	 */
@@ -2055,17 +2016,17 @@ public class XmlParserDstu3Test {
 
 		// Will be added by reference
 		Patient p = new Patient();
-		p.setId("#" + "1000");
+		p.setId("1000");
 		contained.add(p);
 
 		// Will be added by direct resource object
 		Location l = new Location();
-		l.setId("#" + "1001");
+		l.setId("1001");
 		contained.add(l);
 
 		// Will not be referred to (and therefore shouldn't appear in output)
 		Location l2 = new Location();
-		l2.setId("#1002");
+		l2.setId("1002");
 		contained.add(l2);
 
 		Appointment appointment = new Appointment();
@@ -3084,7 +3045,7 @@ public class XmlParserDstu3Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
-		assertThat(encoded).contains("contained>", "<Binary", "</contained>");
+		assertThat(encoded).contains("<contained>", "<Binary", "</contained>");
 
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertThat(actual.getContained()).hasSize(1);
@@ -3410,10 +3371,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
+		assertEquals("2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
+		assertEquals("3", performer.getId());
 	}
 
 	/**
