@@ -54,6 +54,16 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!--
+		lombok is needed for some utility classes in org.hl7.fhir.dstu2
+		-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
+			<optional>true</optional>
+		</dependency>
+
 
 		<!-- Testing -->
 		<!-- <dependency> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir-structures-dstu</artifactId> <version>0.8</version> <scope>test</scope> </dependency> -->

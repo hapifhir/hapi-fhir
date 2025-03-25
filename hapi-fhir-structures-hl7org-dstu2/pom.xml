@@ -84,6 +84,16 @@
 		</dependency>
 
 		<!--
+		lombok is needed for some utility classes in org.hl7.fhir.dstu2
+		-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!--
 		Gson is needed for some utility classes in org.hl7.fhir.dstu2, so
 		this is necessary for the JavaDocs to build
 		-->
