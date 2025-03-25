@@ -1,7 +1,5 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import java.util.Arrays;
-
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
