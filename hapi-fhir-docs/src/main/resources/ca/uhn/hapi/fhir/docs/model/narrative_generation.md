@@ -148,6 +148,6 @@ For example:
 Thymeleaf doesn't have a built-in way to avoid `null` values, so the `nullSafeAccess` utility can be used as follows:
 
 ```html
-<td th:text="${narrativeUtil.nullSafeAccess(issue, 'getSeverityElement()', 'getValue')}" style="font-weight: bold;"></td>
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/snippet/null-safe-narrativeutil.html}}
 ```
 to optimistically access deeply nested values succinctly.
