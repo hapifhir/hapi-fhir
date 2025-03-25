@@ -44,15 +44,15 @@ public class IndexedSearchParamIdentity {
 	@Column(name = "SP_IDENTITY_ID")
 	private Integer mySpIdentityId;
 
-	@Column(name = "HASH_IDENTITY")
+	@Column(name = "HASH_IDENTITY", nullable = false)
 	private Long myHashIdentity;
 
 	@FullTextField
-	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
+	@Column(name = "RES_TYPE", nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@FullTextField
-	@Column(name = "SP_NAME", length = MAX_SP_NAME)
+	@Column(name = "SP_NAME", nullable = false, length = MAX_SP_NAME)
 	private String myParamName;
 
 	public Integer getSpIdentityId() {
