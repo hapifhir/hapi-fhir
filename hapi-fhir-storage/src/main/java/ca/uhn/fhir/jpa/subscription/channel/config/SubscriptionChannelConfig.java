@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.subscription.channel.config;
 
 import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.broker.api.IChannelNamer;
-import ca.uhn.fhir.broker.impl.SpringMessagingBrokerClient;
-import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -44,13 +43,13 @@ public class SubscriptionChannelConfig {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public SpringMessagingChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
+	public LinkedBlockingChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
 		return new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
 	}
 
 	@Bean
 	public IBrokerClient brokerClient(IChannelNamer theChannelNamer) {
-		return new SpringMessagingBrokerClient(theChannelNamer);
+		return new LinkedBlockingBrokerClient(theChannelNamer);
 	}
 
 	@Bean

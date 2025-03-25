@@ -24,10 +24,10 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -162,7 +162,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	@Autowired
-	private SpringMessagingChannelFactory myChannelFactory;
+	private LinkedBlockingChannelFactory myChannelFactory;
 
 	@SpyBean
 	private IJobPersistence myJobPersistence;
@@ -194,7 +194,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myCompletionHandler = details -> {
 		};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
 
 		// reset

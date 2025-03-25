@@ -23,9 +23,7 @@ import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelSettings;
-import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
-import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.Nonnull;
@@ -36,7 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LinkedBlockingChannelFactory implements SpringMessagingChannelFactory {
+public class LinkedBlockingChannelFactory {
 
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
@@ -48,19 +46,16 @@ public class LinkedBlockingChannelFactory implements SpringMessagingChannelFacto
 		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
-	@Override
-	public ISpringMessagingChannelReceiver getOrCreateReceiver(
-			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings) {
+	public LinkedBlockingChannel getOrCreateReceiver(
+			String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	@Override
 	public ISpringMessagingChannelProducer getOrCreateProducer(
-			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings) {
+			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		return getOrCreateChannel(theChannelName, theChannelSettings.getConcurrentConsumers(), theChannelSettings);
 	}
 
-	@Override
 	public IChannelNamer getChannelNamer() {
 		return myChannelNamer;
 	}

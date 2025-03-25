@@ -26,7 +26,7 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.impl.SpringMessagingBrokerClient;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -106,10 +106,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		IChannelNamer channelNamer = (name, settings) -> name;
 		SynchronousLinkedBlockingChannelFactory myLinkedBlockingChannelFactory = new SynchronousLinkedBlockingChannelFactory(channelNamer, new RetryPolicyProvider());
-		SpringMessagingBrokerClient mySpringMessagingBrokerClient = new SpringMessagingBrokerClient(channelNamer);
-		mySpringMessagingBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
+		LinkedBlockingBrokerClient myLinkedBlockingBrokerClient = new LinkedBlockingBrokerClient(channelNamer);
+		myLinkedBlockingBrokerClient.setLinkedBlockingChannelFactory(myLinkedBlockingChannelFactory);
 
-		myJobProducer = mySpringMessagingBrokerClient.getOrCreateProducer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
+		myJobProducer = myLinkedBlockingBrokerClient.getOrCreateProducer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
 
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
@@ -117,7 +117,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
 			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
 
-		myJobConsumer = mySpringMessagingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
+		myJobConsumer = myLinkedBlockingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
 
 		mySvc = new JobCoordinatorImpl(myJobInstancePersister, myJobDefinitionRegistry, myTransactionService);
 	}

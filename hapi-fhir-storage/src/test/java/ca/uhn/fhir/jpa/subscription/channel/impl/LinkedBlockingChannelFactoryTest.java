@@ -139,8 +139,8 @@ class LinkedBlockingChannelFactoryTest {
 	private ISpringMessagingChannelProducer buildChannels(Runnable theCallback) {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setConcurrentConsumers(1);
-		ISpringMessagingChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
-		ISpringMessagingChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
+		ISpringMessagingChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, channelSettings);
+		ISpringMessagingChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, new ChannelConsumerSettings());
 		reciever.subscribe(msg -> {
 			theCallback.run();
 			myReceivedPayloads.add((String) msg.getPayload());

@@ -8,7 +8,8 @@ import jakarta.annotation.Nonnull;
 
 public class SynchronousLinkedBlockingChannelFactory extends LinkedBlockingChannelFactory {
 
-	public SynchronousLinkedBlockingChannelFactory(IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
+	public SynchronousLinkedBlockingChannelFactory(
+			IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
 		super(theChannelNamer, theRetryPolicyProvider);
 	}
 

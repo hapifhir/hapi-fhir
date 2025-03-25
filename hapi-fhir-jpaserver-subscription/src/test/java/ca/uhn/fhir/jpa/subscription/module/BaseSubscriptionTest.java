@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.broker.impl.SpringMessagingBrokerClient;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.broker.api.IChannelNamer;
@@ -89,15 +88,15 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public SpringMessagingChannelFactory channelFactory(IChannelNamer theNamer) {
+		public LinkedBlockingChannelFactory channelFactory(IChannelNamer theNamer) {
 			return new LinkedBlockingChannelFactory(theNamer, myRetryPolicyProvider);
 		}
 
 		@Bean
 		public SubscriptionChannelFactory mySubscriptionChannelFactory(IChannelNamer theChannelNamer) {
 			LinkedBlockingChannelFactory linkedBlockingChannelFactory = new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
-			SpringMessagingBrokerClient brokerClient = new SpringMessagingBrokerClient(theChannelNamer);
-			brokerClient.setLegacyChannelFactory(linkedBlockingChannelFactory);
+			LinkedBlockingBrokerClient brokerClient = new LinkedBlockingBrokerClient(theChannelNamer);
+			brokerClient.setLinkedBlockingChannelFactory(linkedBlockingChannelFactory);
 			return new SubscriptionChannelFactory(brokerClient);
 		}
 
