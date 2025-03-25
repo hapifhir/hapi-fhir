@@ -36,6 +36,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 			CloseUtil.close(myMessageHandler);
 		}
 		CloseUtil.close(myLegacyChannelReceiver);
+		CloseUtil.close(myMessageListener);
 	}
 
 	@Override
