@@ -32,8 +32,7 @@ import ca.uhn.fhir.broker.api.IChannelNamer;
  * @deprecated Use {@link IBrokerClient} instead
  */
 @Deprecated
-// FIXME KHS remove usages of this
-public interface ILegacyChannelFactory {
+public interface SpringMessagingChannelFactory {
 
 	/**
 	 * Create a channel that is used to receive messages from the queue.

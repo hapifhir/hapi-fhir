@@ -5,7 +5,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.impl.LegacyBrokerClient;
+import ca.uhn.fhir.broker.impl.SpringMessagingBrokerClient;
 import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
@@ -48,7 +48,7 @@ public class SubscriptionChannelFactoryTest {
 	public void before() {
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("CHANNEL_NAME");
 		myLinkedBlockingChannelFactory = new LinkedBlockingChannelFactory(myChannelNamer, new RetryPolicyProvider());
-		LegacyBrokerClient brokerClient = new LegacyBrokerClient(myChannelNamer);
+		SpringMessagingBrokerClient brokerClient = new SpringMessagingBrokerClient(myChannelNamer);
 		brokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
 		mySvc = new SubscriptionChannelFactory(brokerClient);
 	}

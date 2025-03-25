@@ -26,12 +26,10 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
-import ca.uhn.fhir.broker.impl.LegacyBrokerClient;
+import ca.uhn.fhir.broker.impl.SpringMessagingBrokerClient;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -40,7 +38,6 @@ import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -109,10 +106,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		IChannelNamer channelNamer = (name, settings) -> name;
 		SynchronousLinkedBlockingChannelFactory myLinkedBlockingChannelFactory = new SynchronousLinkedBlockingChannelFactory(channelNamer, new RetryPolicyProvider());
-		LegacyBrokerClient myLegacyBrokerClient = new LegacyBrokerClient(channelNamer);
-		myLegacyBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
+		SpringMessagingBrokerClient mySpringMessagingBrokerClient = new SpringMessagingBrokerClient(channelNamer);
+		mySpringMessagingBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
 
-		myJobProducer = myLegacyBrokerClient.getOrCreateProducer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
+		myJobProducer = mySpringMessagingBrokerClient.getOrCreateProducer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
 
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
@@ -120,7 +117,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
 			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
 
-		myJobConsumer = myLegacyBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
+		myJobConsumer = mySpringMessagingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
 
 		mySvc = new JobCoordinatorImpl(myJobInstancePersister, myJobDefinitionRegistry, myTransactionService);
 	}

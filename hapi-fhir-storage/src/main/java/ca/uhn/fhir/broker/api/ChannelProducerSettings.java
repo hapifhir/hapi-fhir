@@ -35,7 +35,8 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 		return myConcurrentConsumers;
 	}
 
-	// FIXME KHS why does a producer have concurrent consumers?
+	// Spring Messaging Channels create the Consumer and Producer at the same time, so creating a producer
+	// also creates a consumer. This is why the producer has a concurrent consumer setting.
 	public ChannelProducerSettings setConcurrentConsumers(int theConcurrentConsumers) {
 		myConcurrentConsumers = theConcurrentConsumers;
 		return this;

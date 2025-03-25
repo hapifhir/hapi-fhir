@@ -23,7 +23,7 @@ import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelSettings;
-import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LinkedBlockingChannelFactory implements ILegacyChannelFactory {
+public class LinkedBlockingChannelFactory implements SpringMessagingChannelFactory {
 
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());

@@ -7,7 +7,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.fhir.broker.jms.SpringMessagingMessageHandlerAdapter;
 import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
@@ -16,12 +16,11 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 
-// FIXME KHS delete this?
-public class LegacyBrokerClient implements IBrokerClient {
-	private ILegacyChannelFactory myLinkedBlockingChannelFactory;
+public class SpringMessagingBrokerClient implements IBrokerClient {
+	private SpringMessagingChannelFactory myLinkedBlockingChannelFactory;
 	private final IChannelNamer myChannelNamer;
 
-	public LegacyBrokerClient(IChannelNamer theChannelNamer) {
+	public SpringMessagingBrokerClient(IChannelNamer theChannelNamer) {
 		myChannelNamer = theChannelNamer;
 	}
 
@@ -55,7 +54,7 @@ public class LegacyBrokerClient implements IBrokerClient {
 	}
 
 	@Autowired
-	public void setLegacyChannelFactory(ILegacyChannelFactory theLegacyChannelFactory) {
+	public void setLegacyChannelFactory(SpringMessagingChannelFactory theLegacyChannelFactory) {
 		myLinkedBlockingChannelFactory = theLegacyChannelFactory;
 	}
 }

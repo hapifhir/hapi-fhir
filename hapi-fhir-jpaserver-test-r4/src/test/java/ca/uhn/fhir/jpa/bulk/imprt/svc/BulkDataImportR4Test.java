@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
-import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -77,7 +77,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	@Autowired
-	private ILegacyChannelFactory myChannelFactory;
+	private SpringMessagingChannelFactory myChannelFactory;
 
 	private LinkedBlockingChannel myWorkChannel;
 

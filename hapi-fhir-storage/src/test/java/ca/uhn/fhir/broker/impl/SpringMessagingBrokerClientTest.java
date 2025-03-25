@@ -27,15 +27,15 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LegacyBrokerClientTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(LegacyBrokerClientTest.class);
+class SpringMessagingBrokerClientTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SpringMessagingBrokerClientTest.class);
 	private static final String TEST_CHANNEL_NAME = "LinkedBlockingBrokerClientTest-TestChannel";
 	private static final String TEST_KEY = "LinkedBlockingBrokerClientTest-TestKey";
 	private IChannelNamer myChannelNamer = (theNameComponent, theChannelSettings) -> theNameComponent;
 	;
 	private RetryPolicyProvider myRetryPolicyProvider = new RetryPolicyProvider();
 	private final LinkedBlockingChannelFactory myLinkedBlockingChannelFactory = new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
-	private final LegacyBrokerClient myBrokerClient = new LegacyBrokerClient(myChannelNamer);
+	private final SpringMessagingBrokerClient myBrokerClient = new SpringMessagingBrokerClient(myChannelNamer);
 
 	@BeforeEach
 	public void before() {

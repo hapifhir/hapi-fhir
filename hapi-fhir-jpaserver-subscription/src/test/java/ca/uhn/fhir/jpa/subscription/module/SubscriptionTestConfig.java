@@ -24,7 +24,7 @@ import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.broker.jms.ILegacyChannelFactory;
+import ca.uhn.fhir.broker.jms.SpringMessagingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.broker.api.IChannelNamer;
@@ -55,7 +55,7 @@ public class SubscriptionTestConfig {
 	}
 
 	@Bean
-	public ILegacyChannelFactory subscribableChannelFactory() {
+	public SpringMessagingChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
 	}
 
