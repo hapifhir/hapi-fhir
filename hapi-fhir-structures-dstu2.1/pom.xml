@@ -77,9 +77,7 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 
-		<!--
-		lombok is needed for some utility classes in org.hl7.fhir.dstu2
-		-->
+		<!--lombok is needed for some utility classes in org.hl7.fhir.dstu2-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
