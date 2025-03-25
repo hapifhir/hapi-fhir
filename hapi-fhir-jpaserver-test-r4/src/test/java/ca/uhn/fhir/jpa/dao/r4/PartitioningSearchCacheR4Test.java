@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.BundleBuilder;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -47,11 +48,13 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			addNextTargetPartitionsForRead(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
-			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "))) +
+			assertEquals(2, outcome.sizeOrThrowNpe(), () -> "Resources:\n * " + runInTransaction(() ->
+				myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "))) +
 				"\n\nActual IDs: " + toUnqualifiedVersionlessIdValues(outcome) +
-				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
+				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueriesForCurrentThread()
+				.stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
@@ -68,7 +71,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
@@ -85,7 +88,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
@@ -112,7 +115,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
@@ -129,7 +132,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
@@ -146,7 +149,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertThat(StringUtils.countMatches(searchSql, "from HFJ_SEARCH ")).as(searchSql).isEqualTo(1);
 			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);

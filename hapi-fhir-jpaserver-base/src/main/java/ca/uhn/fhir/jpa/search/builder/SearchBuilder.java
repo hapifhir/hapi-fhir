@@ -204,6 +204,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
 	private final JpaStorageSettings myStorageSettings;
+	private final SearchQueryProperties mySearchProperties;
+	private final IResourceHistoryTableDao myResourceHistoryTableDao;
+	private final IJpaStorageResourceParser myJpaStorageResourceParser;
+	private final SearchParamIdentityCache mySearchParamIdentityCache;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -223,18 +227,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 
-	private SearchQueryProperties mySearchProperties;
-
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	@Autowired(required = false)
 	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
-
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;
@@ -244,9 +242,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-
-	@Autowired
-	private SearchParamIdentityCache mySearchParamIdentityCache;
 
 	/**
 	 * Constructor
@@ -267,6 +262,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
+			SearchParamIdentityCache theSearchParamIdentityCache,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -284,6 +280,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
 		myJpaStorageResourceParser = theIJpaStorageResourceParser;
+		mySearchParamIdentityCache = theSearchParamIdentityCache;
 
 		mySearchProperties = new SearchQueryProperties();
 	}

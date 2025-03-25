@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -135,6 +136,9 @@ public class SearchConfig {
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
+	@Autowired
+	private SearchParamIdentityCache mySearchParamIdentityCache;
+
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
@@ -177,6 +181,7 @@ public class SearchConfig {
 				myIdHelperService,
 				myResourceHistoryTableDao,
 				myJpaStorageResourceParser,
+				mySearchParamIdentityCache,
 				theResourceType);
 	}
 

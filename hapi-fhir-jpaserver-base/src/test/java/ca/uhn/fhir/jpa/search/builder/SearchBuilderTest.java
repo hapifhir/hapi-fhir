@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search.builder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -67,6 +68,9 @@ class SearchBuilderTest {
 
 	@Mock
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Mock
+	private SearchParamIdentityCache mySearchParamIdentityCache;
 
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private DaoRegistry myDaoRegistry;
