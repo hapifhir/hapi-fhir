@@ -2258,11 +2258,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN    ,     1",
-		"MULTIPLE_TOKEN  ,     10",
-		"STRING          ,     10",
+		"SINGLE_TOKEN    ,     false,   11",
+		"SINGLE_TOKEN    ,     true,    1",
+		"MULTIPLE_TOKEN  ,     false,   10",
+		"MULTIPLE_TOKEN  ,     true,    10",
+		"STRING          ,     false,   10",
+		"STRING          ,     true,    10",
 	})
-	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, int theExpectedSelectCount) {
+	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, boolean theMassIngestionMode, int theExpectedSelectCount) {
+		myStorageSettings.setMassIngestionMode(theMassIngestionMode);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
