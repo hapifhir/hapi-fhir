@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LegacyBrokerClientTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(LegacyBrokerClientTest.class);
 	private static final String TEST_CHANNEL_NAME = "LinkedBlockingBrokerClientTest-TestChannel";
 	private static final String TEST_KEY = "LinkedBlockingBrokerClientTest-TestKey";
 	private IChannelNamer myChannelNamer = (theNameComponent, theChannelSettings) -> theNameComponent;
@@ -39,7 +42,6 @@ class LegacyBrokerClientTest {
 		myBrokerClient.setLegacyChannelFactory(myLinkedBlockingChannelFactory);
 	}
 
-	// FIXME KHS this changed?
 	@Test
 	public void testSendReceive() throws Exception {
 		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, new ChannelProducerSettings());
@@ -57,14 +59,17 @@ class LegacyBrokerClientTest {
 		}
 	}
 
-	private static void sendMessage(IChannelProducer<MyTestMessageValue> producer, MyTestMessage message) {
-		ISendResult result = producer.send(message);
+	private static void sendMessage(IChannelProducer<MyTestMessageValue> theProducer, MyTestMessage theMessage) {
+		ourLog.info("Sending {}", theMessage);
+		ISendResult result = theProducer.send(theMessage);
 		assertTrue(result.isSuccessful());
 	}
 
 	@Test
 	public void testSendReceiveTenMessages() throws Exception {
-		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, new ChannelProducerSettings());
+		ChannelProducerSettings channelProducerSettings = new ChannelProducerSettings();
+		channelProducerSettings.setConcurrentConsumers(1); // to guarantee order. It's unintuitive that you'd set the consumer count on the producer, but legacy channels create and cache the consumer and producer together
+		IChannelProducer<MyTestMessageValue> producer = myBrokerClient.getOrCreateProducer(TEST_CHANNEL_NAME, MyTestMessage.class, channelProducerSettings);
 		MyMessageListener listener = new MyMessageListener();
 		try (IChannelConsumer<MyTestMessageValue> consumer = myBrokerClient.getOrCreateConsumer(TEST_CHANNEL_NAME, MyTestMessage.class, listener, new ChannelConsumerSettings())) {
 			listener.setExpectedCount(10);
@@ -78,7 +83,7 @@ class LegacyBrokerClientTest {
 			MyTestMessage receivedMessage = result.get(5).get(MyTestMessage.class);
 			MyTestMessageValue receivedValue = receivedMessage.getPayload();
 			assertEquals("Honda", receivedValue.make);
-			assertEquals("Civic5", receivedValue.model);
+			assertEquals("Civic5", receivedValue.model, result.toString());
 		}
 	}
 
@@ -91,6 +96,11 @@ class LegacyBrokerClientTest {
 	private static class MyTestMessage extends TestMessage<MyTestMessageValue> {
 		public MyTestMessage(MyTestMessageValue thePayload) {
 			super(thePayload);
+		}
+
+		@Override
+		public String toString() {
+			return getPayload().toString();
 		}
 	}
 
@@ -121,6 +131,14 @@ class LegacyBrokerClientTest {
 		public void setModel(String theModel) {
 			model = theModel;
 		}
+
+		@Override
+		public String toString() {
+			return "MyTestMessageValue{" +
+				"make='" + make + '\'' +
+				", model='" + model + '\'' +
+				'}';
+		}
 	}
 
 	private static class MyMessageListener implements IMessageListener<MyTestMessageValue>, IPointcutLatch {
@@ -128,6 +146,7 @@ class LegacyBrokerClientTest {
 
 		@Override
 		public void handleMessage(IMessage<MyTestMessageValue> theMessage) {
+			ourLog.info("Received {}", theMessage);
 			myLatch.call(theMessage);
 		}
 
