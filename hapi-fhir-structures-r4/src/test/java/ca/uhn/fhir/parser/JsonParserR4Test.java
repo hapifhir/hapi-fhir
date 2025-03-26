@@ -650,7 +650,7 @@ public class JsonParserR4Test extends BaseTest {
 		Observation obs = new Observation();
 
 		Patient pt = new Patient();
-		pt.setId("1");
+		pt.setId("#1");
 		pt.addName().setFamily("FAM");
 		obs.getSubject().setReference("#1");
 		obs.getContained().add(pt);
@@ -663,8 +663,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(enc.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -683,7 +683,7 @@ public class JsonParserR4Test extends BaseTest {
 		obs.getSubject().setResource(pt);
 
 		Encounter enc = new Encounter();
-		enc.setId("1");
+		enc.setId("#1");
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		obs.getEncounter().setReference("#1");
 		obs.getContained().add(enc);
@@ -692,8 +692,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(pt.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -719,8 +719,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals(pract.getId(), "#" + mr.getContained().get(0).getId());
-		assertEquals(med.getId(), "#" + mr.getContained().get(1).getId());
+		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(med.getId(), mr.getContained().get(1).getId());
 
 	}
 
@@ -1229,8 +1229,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourLog.info("Input: {}", auditEvent);
 		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("A", ae.getContained().get(0).getId());
-		assertEquals("B", ae.getContained().get(1).getId());
+		assertEquals("#A", ae.getContained().get(0).getId());
+		assertEquals("#B", ae.getContained().get(1).getId());
 		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
 		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
 
