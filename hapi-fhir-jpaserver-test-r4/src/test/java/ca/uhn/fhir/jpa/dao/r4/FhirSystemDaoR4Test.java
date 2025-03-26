@@ -5191,7 +5191,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(resp.getEntry()).hasSize(2);
 		resp.getEntry().stream().map(bundleEntry -> bundleEntry.getResponse().getStatus()).forEach(statusMessage -> assertThat(statusMessage).isEqualTo("201 Created"));
 		List<String> createdResources = resp.getEntry().stream().map(b->b.getResponse().getLocation()).toList();
-		assertThat(createdResources).anyMatch(resourceLocation -> resourceLocation.contains("MessageHeader") || resourceLocation.contains("RequestGroup"));
+		assertThat(createdResources)
+			.hasSize(2)
+			.allMatch(resourceLocation -> resourceLocation.contains("MessageHeader") || resourceLocation.contains("RequestGroup"));
 	}
 
 }
