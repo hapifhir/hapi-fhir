@@ -52,6 +52,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.XmlUtil;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -72,6 +73,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -203,7 +205,7 @@ class ParserState<T> {
 	}
 
 	public ICompositeType newCompositeInstance(
-			BasePreResourceState thePreResourceState,
+			@Nullable BasePreResourceState thePreResourceState,
 			BaseRuntimeChildDefinition theChild,
 			BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal =
@@ -211,7 +213,9 @@ class ParserState<T> {
 		if (retVal instanceof IBaseReference) {
 			IBaseReference ref = (IBaseReference) retVal;
 			myGlobalReferences.add(ref);
-			thePreResourceState.getLocalReferences().add(ref);
+			if (thePreResourceState != null) {
+				thePreResourceState.getLocalReferences().add(ref);
+			}
 		}
 		return retVal;
 	}
@@ -549,6 +553,36 @@ class ParserState<T> {
 		@Override
 		protected IBase getCurrentElement() {
 			return myParentInstance;
+		}
+	}
+
+	/**
+	 * This state represents the start of parsing an arbitrary fragment
+	 * of a FHIR resource. In other words, it is the initial state when
+	 * {@link IParser#parseInto(Reader, IBase)} is called.
+	 */
+	private class PreElementCompositeState extends BaseState {
+
+		private final String myElementName;
+		private final BaseRuntimeElementCompositeDefinition<?> myDef;
+		private final IBase myInstance;
+
+		PreElementCompositeState(
+				String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
+			super(null);
+			myElementName = theElementName;
+			myDef = theDef;
+			myInstance = theInstance;
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
+			push(new ElementCompositeState(null, myElementName, myDef, myInstance));
+		}
+
+		@Override
+		public void endingElement() {
+			pop();
 		}
 	}
 
@@ -1769,6 +1803,21 @@ class ParserState<T> {
 		}
 	}
 
+	static ParserState<IBase> getComplexObjectState(
+			IParser theParser,
+			FhirContext theContext,
+			FhirContext theFhirContext,
+			boolean theJsonMode,
+			IBase theTarget,
+			IParserErrorHandler theErrorHandler) {
+		ParserState<IBase> retVal = new ParserState<>(theParser, theContext, theJsonMode, theErrorHandler);
+
+		BaseRuntimeElementCompositeDefinition<?> def =
+				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theTarget.getClass());
+		retVal.push(retVal.new PreElementCompositeState(def.getName(), def, theTarget));
+		return retVal;
+	}
+
 	/**
 	 * @param theResourceType May be null
 	 */
@@ -1779,7 +1828,7 @@ class ParserState<T> {
 			boolean theJsonMode,
 			IParserErrorHandler theErrorHandler)
 			throws DataFormatException {
-		ParserState<T> retVal = new ParserState<T>(theParser, theContext, theJsonMode, theErrorHandler);
+		ParserState<T> retVal = new ParserState<>(theParser, theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
 			if (theContext.getVersion().getVersion().isRi()) {
 				retVal.push(retVal.new PreResourceStateHl7Org(theResourceType));
