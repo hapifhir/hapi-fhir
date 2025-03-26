@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -207,7 +206,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final SearchQueryProperties mySearchProperties;
 	private final IResourceHistoryTableDao myResourceHistoryTableDao;
 	private final IJpaStorageResourceParser myJpaStorageResourceParser;
-	private final SearchParamIdentityCache mySearchParamIdentityCache;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -262,7 +260,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			IJpaStorageResourceParser theIJpaStorageResourceParser,
-			SearchParamIdentityCache theSearchParamIdentityCache,
 			Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
@@ -280,7 +277,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
 		myJpaStorageResourceParser = theIJpaStorageResourceParser;
-		mySearchParamIdentityCache = theSearchParamIdentityCache;
 
 		mySearchProperties = new SearchQueryProperties();
 	}
@@ -2213,7 +2209,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 					myPartitionSettings, readPartition, type, "url");
-			mySearchParamIdentityCache.findOrCreateSearchParamIdentity(hashIdentity, type, "url");
 			hashIdentityValues.add(hashIdentity);
 		}
 

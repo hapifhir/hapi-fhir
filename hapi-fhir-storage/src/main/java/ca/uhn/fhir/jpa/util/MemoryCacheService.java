@@ -205,8 +205,8 @@ public class MemoryCacheService {
 		}
 	}
 
-	public <K> void invalidate(CacheEnum theCache, K key) {
-		getCache(theCache).invalidate(key);
+	public <K> void invalidate(CacheEnum theCache, K theKey) {
+		getCache(theCache).invalidate(theKey);
 	}
 
 	public enum CacheEnum {

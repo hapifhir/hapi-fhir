@@ -32,7 +32,7 @@ public interface AddIdGeneratorTaskITTestSuite extends BaseMigrationTaskTestSuit
 
 		// verify
 		assertEquals(1, sequenceInformation.size());
-		assertEquals(sequenceName, sequenceInformation.get(0).getSequenceName().getSequenceName().getText());
+		assertEquals(sequenceName, sequenceInformation.get(0).getSequenceName().getSequenceName().getText().toLowerCase());
 		assertEquals(EXPECTED_DEFAULT_INCREMENT, sequenceInformation.get(0).getIncrementValue().intValue());
 	}
 
@@ -49,14 +49,14 @@ public interface AddIdGeneratorTaskITTestSuite extends BaseMigrationTaskTestSuit
 
 		// verify
 		assertEquals(1, sequenceInformation.size());
-		assertEquals(sequenceName, sequenceInformation.get(0).getSequenceName().getSequenceName().getText());
+		assertEquals(sequenceName, sequenceInformation.get(0).getSequenceName().getSequenceName().getText().toLowerCase());
 		assertEquals(theIncrement, sequenceInformation.get(0).getIncrementValue().intValue());
 	}
 
 	private List<SequenceInformation> getSequence(String theSequenceName) throws SQLException {
 		return JdbcUtils.getSequenceInformation(getSupport().getConnectionProperties())
 			.stream()
-			.filter(si -> theSequenceName.equals(si.getSequenceName().getSequenceName().getText()))
+			.filter(si -> theSequenceName.equalsIgnoreCase(si.getSequenceName().getSequenceName().getText()))
 			.toList();
 	}
 }

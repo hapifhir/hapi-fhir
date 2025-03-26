@@ -337,6 +337,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return joined;
 	}
 
+	/**
+	 * @return The number of times the connection pool was requested for a new connection by the current thread.
+	 */
 	public int countGetConnectionsForCurrentThread() {
 		String threadName = Thread.currentThread().getName();
 		return myGetConnectionCounterPerThread
@@ -344,6 +347,9 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 				.intValue();
 	}
 
+	/**
+	 * @return The number of database commits made using connections from the pool by the current thread.
+	 */
 	public int countCommitsForCurrentThread() {
 		String threadName = Thread.currentThread().getName();
 		return myCommitCounterPerThread

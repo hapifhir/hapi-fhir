@@ -135,9 +135,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V8_2_0);
 		// Add HFJ_SPIDX_IDENTITY table
 		{
-			version.addIdGenerator("20250313.1", "SEQ_SPIDX_IDENTITY", 1);
+			version.addIdGenerator("20250324.1", "SEQ_SPIDX_IDENTITY", 1);
 			Builder.BuilderAddTableByColumns spidxIdentity =
-					version.addTableByColumns("20250313.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
+					version.addTableByColumns("20250324.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
 
 			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
 			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
@@ -145,7 +145,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
 
 			spidxIdentity
-					.addIndex("20250313.3", "IDX_HASH_IDENTITY")
+					.addIndex("20250324.3", "IDX_HASH_IDENTITY")
 					.unique(true)
 					.withColumns("HASH_IDENTITY");
 		}
