@@ -89,7 +89,9 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 			boolean valid,
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
+		//TODO this has been reverted to emptyList()
 		return Collections.emptyList();
+//		return List.of();
 	}
 
 	@Override
