@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -234,6 +235,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
+
+	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
 
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
@@ -1513,6 +1516,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
+
+		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
+
 		super.start();
 	}
 
@@ -2118,6 +2124,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
+
+		myStorageInterceptorHooks.callStoragePresearchRegistered(
+				theRequest, theParams, new NonPersistedSearch(getResourceName()), requestPartitionId);
 
 		return myTransactionService
 				.withRequest(theRequest)
