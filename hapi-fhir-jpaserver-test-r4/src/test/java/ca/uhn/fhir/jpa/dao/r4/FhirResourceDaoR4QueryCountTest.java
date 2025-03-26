@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
@@ -1510,8 +1510,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 		// make sure Patient.active, Patient.deceased search parameter identities are cached
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-			assertNotNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
-			assertNotNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
 		});
 
 		SearchParameterMap map = new SearchParameterMap();

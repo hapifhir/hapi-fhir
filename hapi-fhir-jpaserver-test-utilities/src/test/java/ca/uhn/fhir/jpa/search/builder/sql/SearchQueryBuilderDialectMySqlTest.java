@@ -61,7 +61,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
 		StringPredicateBuilder stringPredicateBuilder = new StringPredicateBuilder(searchQueryBuilder);
-		stringPredicateBuilder.setSearchParamIdentityCacheForUnitTest(mySearchParamIdentityCache);
+		stringPredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(stringPredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
@@ -112,7 +112,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
 		DatePredicateBuilder datePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
-		datePredicateBuilder.setSearchParamIdentityCacheForUnitTest(mySearchParamIdentityCache);
+		datePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datePredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();

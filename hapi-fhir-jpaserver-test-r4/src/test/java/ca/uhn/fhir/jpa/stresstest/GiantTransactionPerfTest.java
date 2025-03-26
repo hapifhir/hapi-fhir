@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
+import ca.uhn.fhir.jpa.sp.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
@@ -126,7 +126,7 @@ public class GiantTransactionPerfTest {
 	private MockEntityManager myEntityManager;
 	private JpaStorageSettings myStorageSettings;
 	@Mock
-	private SearchParamIdentityCache searchParamIdentityCache;
+	private ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc;
 	private HapiTransactionService myHapiTransactionService;
 	private DaoRegistry myDaoRegistry;
 	private JpaResourceDao<ExplanationOfBenefit> myEobDao;
@@ -253,7 +253,7 @@ public class GiantTransactionPerfTest {
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
 		myDaoSearchParamSynchronizer.setStorageSettings(myStorageSettings);
-		myDaoSearchParamSynchronizer.setSearchParamIdentityCache(searchParamIdentityCache);
+		myDaoSearchParamSynchronizer.setSearchParamIdentityCacheSvc(searchParamIdentityCacheSvc);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);

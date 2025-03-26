@@ -20,10 +20,10 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.sp.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -50,11 +50,11 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	private final DbColumn myColumnHashIdentity;
 
 	@Autowired
-	private SearchParamIdentityCache mySearchParamIdentityCache;
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@VisibleForTesting
-	public void setSearchParamIdentityCacheForUnitTest(SearchParamIdentityCache theSearchParamIdentityCache) {
-		mySearchParamIdentityCache = theSearchParamIdentityCache;
+	public void setSearchParamIdentityCacheSvcForUnitTest(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {
+		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
 	}
 
 	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
@@ -108,7 +108,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 			RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 				getPartitionSettings(), theRequestPartitionId, theResourceType, theParamName);
-		mySearchParamIdentityCache.findOrCreateSearchParamIdentity(hashIdentity, theResourceType, theParamName);
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, theResourceType, theParamName);
 		return BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 	}
 

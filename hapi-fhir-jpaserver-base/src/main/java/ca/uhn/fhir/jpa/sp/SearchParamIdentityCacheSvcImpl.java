@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.cache;
+package ca.uhn.fhir.jpa.sp;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
@@ -48,8 +48,8 @@ import java.util.concurrent.TimeUnit;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public class SearchParamIdentityCache {
-	private static final Logger ourLog = getLogger(SearchParamIdentityCache.class);
+public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCacheSvc {
+	private static final Logger ourLog = getLogger(SearchParamIdentityCacheSvcImpl.class);
 
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
@@ -60,9 +60,9 @@ public class SearchParamIdentityCache {
 	private final ExecutorService myThreadPool;
 	private final ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
 	private final MemoryCacheService myMemoryCacheService;
-	private final UniqueTaskExecutor uniqueTaskExecutor;
+	private final UniqueTaskExecutor myUniqueTaskExecutor;
 
-	public SearchParamIdentityCache(
+	public SearchParamIdentityCacheSvcImpl(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
 			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
 			PlatformTransactionManager theTxManager,
@@ -73,9 +73,21 @@ public class SearchParamIdentityCache {
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		myThreadPool = createExecutor();
 		myMemoryCacheService = theMemoryCacheService;
-		uniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool, myMemoryCacheService);
+		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool, myMemoryCacheService);
 	}
 
+	/**
+	 * Creates a thread pool executor for asynchronously executing
+	 * {@link PersistSearchParameterIdentityTask} instances.
+	 * <p>
+	 * Uses a fixed core pool size of 1, a maximum pool size of 1000,
+	 * and a bounded queue with a capacity of 1000.
+	 * <p>
+	 * If the queue is full and all threads are busy, new tasks are silently
+	 * discarded using {@link ThreadPoolExecutor.DiscardPolicy}.
+	 *
+	 * @return a configured {@link ExecutorService} instance
+	 */
 	private ExecutorService createExecutor() {
 		ThreadFactory threadFactory = r -> {
 			Thread t = new Thread(r);
@@ -104,6 +116,10 @@ public class SearchParamIdentityCache {
 		myThreadPool.shutdown();
 	}
 
+	/**
+	 * Initializes the cache by preloading search parameter identities {@link IndexedSearchParamIdentity}
+	 * from the database and the search parameter registry {@link ISearchParamHashIdentityRegistry}.
+	 */
 	protected void initCache() {
 		// populate cache with IndexedSearchParamIdentities from database
 		Collection<Object[]> spIdentities =
@@ -111,7 +127,7 @@ public class SearchParamIdentityCache {
 		spIdentities.forEach(
 				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Integer) i[1]));
 
-		// pre-fill cache with SearchParams from SearchParamRegistry
+		// pre-fill cache with SearchParamIdentities from SearchParamRegistry
 		mySearchParamHashIdentityRegistry
 				.getHashIdentityToIndexedSearchParamMap()
 				.forEach((hashIdentity, indexedSearchParam) -> {
@@ -126,11 +142,26 @@ public class SearchParamIdentityCache {
 										.searchParamIdentityDao(mySearchParamIdentityDao)
 										.build();
 
-						uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+						myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 					}
 				});
 	}
 
+	/**
+	 * Asynchronously ensures that a {@link IndexedSearchParamIdentity} exists for the given
+	 * hash identity, parameter name, and resource type. If the identity is already present
+	 * in the in-memory cache, no action is taken.
+	 *
+	 * <p>If the identity is missing, a {@link PersistSearchParameterIdentityTask} is created
+	 * and submitted for asynchronous execution. To avoid modifying the cache during an
+	 * active transaction, task submission is deferred until after the transaction is committed.
+	 *
+	 * @param theHashIdentity The hash identity representing the search parameter.
+	 * @param theResourceType The resource type (e.g., "Patient", "Observation").
+	 * @param theParamName    The search parameter name.
+	 *
+	 * @see PersistSearchParameterIdentityTask
+	 */
 	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName) {
 		// check if SearchParamIdentity is already in cache
 		Integer spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, theHashIdentity);
@@ -154,14 +185,33 @@ public class SearchParamIdentityCache {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+					myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 				}
 			});
 		} else {
-			uniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+			myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 		}
 	}
 
+	/**
+	 * This class is responsible for ensuring that a unique {@link IndexedSearchParamIdentity}
+	 * exists for a given hash identity (parameter name and resource type). This task is
+	 * executed asynchronously to avoid blocking the main thread during persistence.
+	 *
+	 * <p>
+	 * This task checks the in-memory cache for the given hash identity and, if missing,
+	 * attempts to create or retrieve the corresponding {@link IndexedSearchParamIdentity}
+	 * from the database. The result is then added to the cache.
+	 *
+	 * <p>
+	 * Up to 20 retries are permitted in case of a {@link DataIntegrityViolationException},
+	 * which can occur due to concurrent insert attempts for the same identity. If all retries
+	 * fail, the {@link IndexedSearchParamIdentity} will not be saved during this execution,
+	 * but the task may be retried later when submitted again.
+	 *
+	 * @see IndexedSearchParamIdentity
+	 * @see MemoryCacheService
+	 */
 	public static class PersistSearchParameterIdentityTask implements Callable<Void> {
 
 		private final Long myHashIdentity;
@@ -182,6 +232,14 @@ public class SearchParamIdentityCache {
 
 		public Long getHashIdentity() {
 			return myHashIdentity;
+		}
+
+		public String getMyResourceType() {
+			return myResourceType;
+		}
+
+		public String getMyParamName() {
+			return myParamName;
 		}
 
 		public static class Builder {
@@ -245,7 +303,7 @@ public class SearchParamIdentityCache {
 					return null;
 				} catch (DataIntegrityViolationException theDataIntegrityViolationException) {
 					// retryable exception - unique search parameter identity or hash identity constraint violation
-					ourLog.debug(
+					ourLog.trace(
 							"Failed to save SearchParamIndexIdentity for search parameter with hash identity: {}, "
 									+ "paramName: {}, resourceType: {}, retrying attempt: {}",
 							myHashIdentity,
@@ -255,11 +313,10 @@ public class SearchParamIdentityCache {
 							theDataIntegrityViolationException);
 				}
 				ourLog.warn(
-						"Failed saving IndexedSearchParamIdentity with hash identity: {}, paramName: {}, "
-								+ "resourceType: {}",
+						"Failed saving IndexedSearchParamIdentity with hash identity: {}, paramName: {}, resourceType: {}",
 						myHashIdentity,
-						myParamName,
-						myResourceType);
+						myResourceType,
+						myParamName);
 			}
 			return null;
 		}
@@ -271,12 +328,11 @@ public class SearchParamIdentityCache {
 				IndexedSearchParamIdentity identity =
 						myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(theHashIdentity);
 				if (identity != null) {
-					ourLog.info(
-							"DB read success IndexedSearchParamIdentity with hash identity: {}, paramName: {}, "
-									+ "resourceType: {}",
+					ourLog.trace(
+							"DB read success IndexedSearchParamIdentity with hash identity: {}, resourceType: {}, paramName: {}",
 							theHashIdentity,
-							theParamName,
-							theResourceType);
+							theResourceType,
+							theParamName);
 					return identity.getSpIdentityId();
 				}
 
@@ -286,17 +342,21 @@ public class SearchParamIdentityCache {
 				indexedSearchParamIdentity.setResourceType(theResourceType);
 
 				myResourceIndexedSearchParamIdentityDao.save(indexedSearchParamIdentity);
-				ourLog.info(
-						"Write success search param identity {}, paramName: {}, resourceType: {}",
+				ourLog.trace(
+						"Write success IndexedSearchParamIdentity with hash identity: {}, resourceType: {}, paramName: {},",
 						theHashIdentity,
-						theParamName,
-						theResourceType);
+						theResourceType,
+						theParamName);
+
 				return indexedSearchParamIdentity.getSpIdentityId();
 			});
 		}
 	}
 
 	public static class CacheUtils {
+
+		private CacheUtils() {}
+
 		public static Integer getSearchParamIdentityFromCache(
 				MemoryCacheService memoryCacheService, Long hashIdentity) {
 			return memoryCacheService.getIfPresent(
@@ -364,10 +424,14 @@ public class SearchParamIdentityCache {
 	 */
 	private static class LoggingFutureTask extends FutureTask<Void> {
 		private final Long myHashIdentity;
+		private final String myResourceType;
+		private final String myParamName;
 
 		public LoggingFutureTask(PersistSearchParameterIdentityTask theTask) {
 			super(theTask);
 			this.myHashIdentity = theTask.getHashIdentity();
+			this.myResourceType = theTask.getMyResourceType();
+			this.myParamName = theTask.getMyParamName();
 		}
 
 		@Override
@@ -376,14 +440,18 @@ public class SearchParamIdentityCache {
 				get();
 			} catch (ExecutionException theException) {
 				ourLog.error(
-						"PersistSearchParameterIdentityTask failed. Hash identity: {}",
+						"PersistSearchParameterIdentityTask failed. Hash identity: {}, resourceType: {}, paramName: {}, ",
 						myHashIdentity,
+						myResourceType,
+						myParamName,
 						theException.getCause());
 			} catch (InterruptedException theInterruptedException) {
 				Thread.currentThread().interrupt();
 				ourLog.warn(
-						"PersistSearchParameterIdentityTask was interrupted. Hash identity: {}",
+						"PersistSearchParameterIdentityTask was interrupted. Hash identity: {}, resourceType: {}, paramName: {}, ",
 						myHashIdentity,
+						myResourceType,
+						myParamName,
 						theInterruptedException);
 			}
 		}

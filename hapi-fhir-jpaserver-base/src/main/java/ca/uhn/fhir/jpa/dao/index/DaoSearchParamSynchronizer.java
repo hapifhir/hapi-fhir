@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
@@ -32,6 +31,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.sp.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.annotations.VisibleForTesting;
@@ -63,7 +64,7 @@ public class DaoSearchParamSynchronizer {
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
 	@Autowired
-	private SearchParamIdentityCache mySearchParamIdentityCache;
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -108,8 +109,8 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	@VisibleForTesting
-	public void setSearchParamIdentityCache(SearchParamIdentityCache theSearchParamIdentityCache) {
-		mySearchParamIdentityCache = theSearchParamIdentityCache;
+	public void setSearchParamIdentityCacheSvc(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {
+		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
 	}
 
 	@VisibleForTesting
@@ -202,16 +203,17 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	/**
-	 * <p>
-	 * This method checks if {@link IndexedSearchParamIdentity} exists in {@link SearchParamIdentityCache},
-	 * If Identity does not exist, a new {@link IndexedSearchParamIdentity} will be created in separate thread.
-	 * </p>
-	 * For details, see: {@link SearchParamIdentityCache#findOrCreateSearchParamIdentity(Long hashIdentity,String paramName, String tesourceType)}
+	 * Checks whether the Indexed Search Parameter hash identity exists in the cache.
+	 * If the identity is missing, a new {@link IndexedSearchParamIdentity} will be
+	 * created asynchronously in a separate thread.
+	 *
+	 * <p>For details, see:
+	 * {@link SearchParamIdentityCacheSvcImpl#findOrCreateSearchParamIdentity(Long, String, String)}</p>
 	 */
 	private <T extends BaseResourceIndex> void findOrCreateSearchParamIdentity(T theNewParam) {
 		if (theNewParam instanceof BaseResourceIndexedSearchParam) {
 			BaseResourceIndexedSearchParam indexedSearchParam = ((BaseResourceIndexedSearchParam) theNewParam);
-			mySearchParamIdentityCache.findOrCreateSearchParamIdentity(
+			mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(
 					indexedSearchParam.getHashIdentity(),
 					indexedSearchParam.getResourceType(),
 					indexedSearchParam.getParamName());

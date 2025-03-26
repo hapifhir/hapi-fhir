@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
+import ca.uhn.fhir.jpa.sp.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -31,7 +31,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	@Mock
 	protected HibernatePropertiesProvider myHibernatePropertiesProvider;
 	@Mock
-	protected SearchParamIdentityCache mySearchParamIdentityCache;
+	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@BeforeEach
 	public void beforeInitMocks() {
@@ -50,7 +50,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
 		DatePredicateBuilder datetimePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
-		datetimePredicateBuilder.setSearchParamIdentityCacheForUnitTest(mySearchParamIdentityCache);
+		datetimePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datetimePredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();

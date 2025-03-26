@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.cache.SearchParamIdentityCache;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -74,8 +74,8 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(-2830809394128781005L));
 				assertEquals(2, myResourceIndexedSearchParamIdentityDao.count());
 			});
-			assertNotNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
-			assertNotNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
 		});
 
 		// execute
@@ -83,7 +83,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(0, myResourceIndexedSearchParamIdentityDao.count());
-		assertNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
-		assertNull(SearchParamIdentityCache.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
+		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
+		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
 	}
 }
