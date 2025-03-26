@@ -493,30 +493,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					});
 					Supplier<IIdType> idSupplier = () -> myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
-//						if (!retVal.hasVersionIdPart() && !myStorageSettings.isMassIngestionMode()) {
-//							Long version = myMemoryCacheService.getIfPresent(
-//								// FIXME: rename to PID_TO_CURRENT_VERSION?
-//									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
-//							if (version == null) {
-//								version = myResourceTableDao.findCurrentVersionByPid(pid);
-//								if (version != null) {
-//									myMemoryCacheService.putAfterCommit(
-//											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
-//											pid,
-//											version);
-//								}
-//							}
-//							if (version != null) {
-//								retVal = myFhirContext
-//										.getVersion()
-//										.newIdType()
-//										.setParts(
-//												retVal.getBaseUrl(),
-//												retVal.getResourceType(),
-//												retVal.getIdPart(),
-//												Long.toString(version));
-//							}
-//						}
+						if (!retVal.hasVersionIdPart()) {
+							Long version = pid.getVersion();
+							if (version == null) {
+								version = myMemoryCacheService.getIfPresent(
+										MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
+							}
+							if (version == null) {
+								version = myResourceTableDao.findCurrentVersionByPid(pid);
+								if (version != null) {
+									myMemoryCacheService.putAfterCommit(
+											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
+											pid,
+											version);
+								}
+							}
+							if (version != null) {
+								retVal = myFhirContext
+										.getVersion()
+										.newIdType()
+										.setParts(
+												retVal.getBaseUrl(),
+												retVal.getResourceType(),
+												retVal.getIdPart(),
+												Long.toString(version));
+							}
+						}
 						return retVal;
 					});
 

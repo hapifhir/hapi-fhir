@@ -2258,15 +2258,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN    ,     false,   11",
-		"SINGLE_TOKEN    ,     true,    1",
-		"MULTIPLE_TOKEN  ,     false,   10",
-		"MULTIPLE_TOKEN  ,     true,    10",
-		"STRING          ,     false,   10",
-		"STRING          ,     true,    10",
+		"SINGLE_TOKEN    ,     false, 1,   2,  2",
+		"SINGLE_TOKEN    ,     true,  1,   0,  0",
+		"MULTIPLE_TOKEN  ,     false, 10,  20, 10",
+		"MULTIPLE_TOKEN  ,     true,  10,  0,  0",
+		"STRING          ,     false, 10,  20, 10",
+		"STRING          ,     true,  10,  0,  0",
 	})
-	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, boolean theMassIngestionMode, int theExpectedSelectCount) {
-		myStorageSettings.setMassIngestionMode(theMassIngestionMode);
+	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -2295,19 +2295,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(theExpectedSelectCount0, myCaptureQueriesListener.countSelectQueries());
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(theExpectedSelectCount1, myCaptureQueriesListener.countSelectQueries());
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(theExpectedSelectCount2, myCaptureQueriesListener.countSelectQueries());
 
 
 	}
