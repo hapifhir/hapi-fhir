@@ -58,21 +58,21 @@ public class SubscriptionConstants {
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content";
 	public static final String SUBSCRIPTION_TOPIC_STATUS =
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription-status-r4";
-	
+
 	// R4 SubscriptionTopic extension URLs
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_URL =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.url";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_VERSION =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.version";
-	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_NAME = 
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_NAME =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.name";
-	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_TITLE = 
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_TITLE =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.title";
-	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DATE = 
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DATE =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.date";
-	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DESCRIPTION = 
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DESCRIPTION =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.description";
-	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_STATUS = 
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_STATUS =
 			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.status";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE_TRIGGER =
 			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.resourceTrigger";
@@ -80,7 +80,7 @@ public class SubscriptionConstants {
 			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.canFilterBy";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_NOTIFICATION_SHAPE =
 			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.notificationShape";
-	
+
 	// Nested extension URLs for SubscriptionTopic
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_DESCRIPTION = "description";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE = "resource";

@@ -59,8 +59,10 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	public SubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
+	public ISubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
 		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				return new R4SubscriptionTopicLoader();
 			case R5:
 			case R4B:
 				return new SubscriptionTopicLoader();

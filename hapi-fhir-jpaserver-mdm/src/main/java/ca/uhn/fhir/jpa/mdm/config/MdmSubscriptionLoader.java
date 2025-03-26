@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -73,7 +73,7 @@ public class MdmSubscriptionLoader {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired(required = false)
-	private SubscriptionTopicLoader mySubscriptionTopicLoader;
+	private ISubscriptionTopicLoader mySubscriptionTopicLoader;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +39,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer implements ISubscriptionTopicLoader {
+/**
+ * Specialized loader for R4 SubscriptionTopics, which are implemented as Basic resources
+ * with a code of "SubscriptionTopic".
+ */
+public class R4SubscriptionTopicLoader extends BaseResourceCacheSynchronizer implements ISubscriptionTopicLoader {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Autowired
@@ -56,14 +58,14 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer imple
 	/**
 	 * Constructor
 	 */
-	public SubscriptionTopicLoader() {
-		super("SubscriptionTopic");
+	public R4SubscriptionTopicLoader() {
+		super("Basic");
 	}
 
 	@Override
 	@EventListener(classes = ContextRefreshedEvent.class)
 	public void registerListener() {
-		if (!myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
+		if (myFhirContext.getVersion().getVersion() != FhirVersionEnum.R4) {
 			return;
 		}
 		super.registerListener();
@@ -74,11 +76,9 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer imple
 	public SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam(
-						"SubscriptionTopic", "status", ISearchParamRegistry.SearchParamLookupContextEnum.ALL)
-				!= null) {
-			map.add(SubscriptionTopic.SP_STATUS, new TokenParam(null, Enumerations.PublicationStatus.ACTIVE.toCode()));
-		}
+		// Add the search for Basic resources with code=SubscriptionTopic
+		map.add("code", new TokenParam("http://hl7.org/fhir/fhir-types", "SubscriptionTopic"));
+
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
 	}
@@ -108,18 +108,11 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer imple
 		}
 
 		mySubscriptionTopicRegistry.unregisterAllIdsNotInCollection(allIds);
-		ourLog.debug("Finished sync subscription topics - registered {}", registeredCount);
+		ourLog.debug("Finished sync R4 subscription topics - registered {}", registeredCount);
 		return registeredCount;
 	}
 
 	private SubscriptionTopic normalizeToR5(IBaseResource theResource) {
-		if (theResource instanceof SubscriptionTopic) {
-			return (SubscriptionTopic) theResource;
-		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
-			return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
-		} else {
-			throw new IllegalArgumentException(Msg.code(2332)
-					+ "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
-		}
+		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
 	}
 }

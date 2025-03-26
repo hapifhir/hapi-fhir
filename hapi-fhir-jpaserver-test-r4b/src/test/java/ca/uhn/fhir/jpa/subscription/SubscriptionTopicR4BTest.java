@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -31,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
@@ -38,7 +38,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
-	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected ISubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;

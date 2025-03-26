@@ -36,7 +36,7 @@ import org.hl7.fhir.r5.model.SubscriptionTopic.SubscriptionTopicResourceTriggerC
 
 public final class SubscriptionTopicCanonicalizer {
 	private static final FhirContext ourFhirContextR5 = FhirContext.forR5();
-	
+
 	private SubscriptionTopicCanonicalizer() {}
 
 	public static SubscriptionTopic canonicalizeTopic(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
@@ -46,8 +46,8 @@ public final class SubscriptionTopicCanonicalizer {
 					return canonicalizeR4BasicTopic((Basic) theSubscriptionTopic);
 				}
 				throw new UnsupportedOperationException(
-						Msg.code(2337) + "Unsupported R4 resource type for subscription topic: " + 
-						theSubscriptionTopic.getClass().getSimpleName());
+						Msg.code(2337) + "Unsupported R4 resource type for subscription topic: "
+								+ theSubscriptionTopic.getClass().getSimpleName());
 			case R4B:
 				return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource(
 						(org.hl7.fhir.r4b.model.SubscriptionTopic) theSubscriptionTopic);
@@ -59,17 +59,17 @@ public final class SubscriptionTopicCanonicalizer {
 								+ theFhirContext.getVersion().getVersion());
 		}
 	}
-	
+
 	private static SubscriptionTopic canonicalizeR4BasicTopic(Basic theBasicTopic) {
 		SubscriptionTopic retVal = new SubscriptionTopic();
-		
+
 		// Basic properties
 		retVal.setId(theBasicTopic.getIdElement().getIdPart());
-		
+
 		// Extract regular extensions
 		for (Extension extension : theBasicTopic.getExtension()) {
 			String url = extension.getUrl();
-			
+
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_URL.equals(url)) {
 				retVal.setUrl(extension.getValue().primitiveValue());
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_VERSION.equals(url)) {
@@ -90,26 +90,26 @@ public final class SubscriptionTopicCanonicalizer {
 				processNotificationShape(extension, retVal);
 			}
 		}
-		
+
 		// Extract modifier extensions (e.g., status)
 		for (Extension extension : theBasicTopic.getModifierExtension()) {
 			String url = extension.getUrl();
-			
+
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_STATUS.equals(url)) {
 				String statusCode = extension.getValue().primitiveValue();
 				retVal.setStatus(PublicationStatus.fromCode(statusCode));
 			}
 		}
-		
+
 		return retVal;
 	}
-	
+
 	private static void processResourceTrigger(Extension theExtension, SubscriptionTopic theTopic) {
 		SubscriptionTopicResourceTriggerComponent trigger = new SubscriptionTopicResourceTriggerComponent();
-		
+
 		for (Extension ext : theExtension.getExtension()) {
 			String url = ext.getUrl();
-			
+
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_DESCRIPTION.equals(url)) {
 				trigger.setDescription(ext.getValue().primitiveValue());
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE.equals(url)) {
@@ -121,16 +121,16 @@ public final class SubscriptionTopicCanonicalizer {
 				trigger.setFhirPathCriteria(ext.getValue().primitiveValue());
 			}
 		}
-		
+
 		theTopic.addResourceTrigger(trigger);
 	}
-	
+
 	private static void processCanFilterBy(Extension theExtension, SubscriptionTopic theTopic) {
 		SubscriptionTopicCanFilterByComponent filterBy = new SubscriptionTopicCanFilterByComponent();
-		
+
 		for (Extension ext : theExtension.getExtension()) {
 			String url = ext.getUrl();
-			
+
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_DESCRIPTION.equals(url)) {
 				filterBy.setDescription(ext.getValue().primitiveValue());
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE.equals(url)) {
@@ -139,16 +139,16 @@ public final class SubscriptionTopicCanonicalizer {
 				filterBy.setFilterParameter(ext.getValue().primitiveValue());
 			}
 		}
-		
+
 		theTopic.addCanFilterBy(filterBy);
 	}
-	
+
 	private static void processNotificationShape(Extension theExtension, SubscriptionTopic theTopic) {
 		SubscriptionTopicNotificationShapeComponent shape = new SubscriptionTopicNotificationShapeComponent();
-		
+
 		for (Extension ext : theExtension.getExtension()) {
 			String url = ext.getUrl();
-			
+
 			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE.equals(url)) {
 				shape.setResource(ext.getValue().primitiveValue());
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_INCLUDE.equals(url)) {
@@ -157,7 +157,7 @@ public final class SubscriptionTopicCanonicalizer {
 				shape.addRevInclude(ext.getValue().primitiveValue());
 			}
 		}
-		
+
 		theTopic.addNotificationShape(shape);
 	}
 }

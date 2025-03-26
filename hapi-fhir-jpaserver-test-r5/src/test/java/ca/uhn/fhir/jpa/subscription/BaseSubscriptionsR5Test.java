@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -15,7 +14,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -25,11 +24,14 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -45,9 +47,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -59,6 +58,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
@@ -82,7 +82,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
-	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected ISubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();
