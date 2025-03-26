@@ -11,8 +11,9 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -21,12 +22,6 @@ import java.util.List;
  * done within the core libraries, as without a default, it will ignore some validation operations.
  */
 public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
-
-	@Override
-	public ReferenceValidationPolicy policyForReference(
-			IResourceValidator validator, Object appContext, String path, String url) {
-		return ReferenceValidationPolicy.IGNORE;
-	}
 
 	@Override
 	public EnumSet<ResourceValidationAction> policyForResource(
@@ -73,6 +68,17 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
+	public SpecialValidationAction policyForSpecialValidation(
+			IResourceValidator iResourceValidator,
+			Object o,
+			SpecialValidationRule specialValidationRule,
+			String s,
+			Element element,
+			Element element1) {
+		return null;
+	}
+
+	@Override
 	public List<StructureDefinition> getImpliedProfilesForResource(
 			IResourceValidator validator,
 			Object appContext,
@@ -83,12 +89,34 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 			boolean valid,
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
-		return Arrays.asList();
+		// TODO this has been reverted to emptyList()
+		return Collections.emptyList();
+		//		return List.of();
 	}
 
 	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
 		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator iResourceValidator,
+			Object o,
+			String s,
+			String s1,
+			ReferenceDestinationType referenceDestinationType) {
+		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor getPolicyAdvisor() {
+		return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+	}
+
+	@Override
+	public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor iValidationPolicyAdvisor) {
+		return this;
 	}
 
 	@Override

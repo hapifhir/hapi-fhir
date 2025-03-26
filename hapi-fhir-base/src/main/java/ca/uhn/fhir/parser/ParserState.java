@@ -400,6 +400,8 @@ class ParserState<T> {
 			} else {
 				if (!res.getId().isLocal()) {
 					res.setId(new IdDt('#' + res.getId().getIdPart()));
+					// TODO rolled back this local ref prefix change
+					//					res.setId(new IdDt(res.getId().getIdPart()));
 				}
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
@@ -440,6 +442,8 @@ class ParserState<T> {
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
+				// TODO rolled back this local ref prefix change
+				//				res.getIdElement().setValue(res.getIdElement().getIdPart());
 				getPreResourceState()
 						.getContainedResources()
 						.put(res.getIdElement().getValue(), res);
@@ -1239,6 +1243,9 @@ class ParserState<T> {
 				if (isNotBlank(ref)) {
 					if (ref.startsWith("#") && ref.length() > 1) {
 						IBaseResource target = myContainedResources.get(ref);
+						// TODO rolled back this local ref prefix change
+						//						String refId = ref.substring(1);
+						//						IBaseResource target = myContainedResources.get(refId);
 						if (target != null) {
 							ourLog.debug("Resource contains local ref {}", ref);
 							nextRef.setResource(target);
@@ -1285,13 +1292,11 @@ class ParserState<T> {
 			super.wereBack();
 
 			IResource nextResource = (IResource) getCurrentElement();
+			// for DSTU2, we cannot use directly "nextResource.getId().getVersionIdPart();"
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 			String resourceName = myContext.getResourceType(nextResource);
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
-				// if (isNotBlank(entryBaseUrl)) {
-				// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-				// } else {
 				IdDt previousId = nextResource.getId();
 				nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
 				// Copy extensions
@@ -1300,7 +1305,6 @@ class ParserState<T> {
 						nextResource.getId().addUndeclaredExtension(ext);
 					}
 				}
-				// }
 			}
 		}
 	}
