@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicBuilder;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -15,9 +16,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionNotificationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,8 +99,8 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
 		assertThat(resources).hasSize(2);
 
-		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
-		validateSubscriptionStatus(subscription, sentEncounter, ss);
+		Parameters parameters = (Parameters) resources.get(0);
+		validateSubscriptionStatus(subscription, sentEncounter, parameters);
 
 		Encounter encounter = (Encounter) resources.get(1);
 		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
@@ -124,8 +130,8 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
 		assertThat(resources).hasSize(2);
 
-		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
-		validateSubscriptionStatus(subscription, sentEncounter, ss);
+		Parameters parameters = (Parameters) resources.get(0);
+		validateSubscriptionStatus(subscription, sentEncounter, parameters);
 
 		Encounter encounter = (Encounter) resources.get(1);
 		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
@@ -133,19 +139,36 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
-	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
-		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
-		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
-		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, Parameters parameters) {
+		// Get status parameter
+		String status = ((CodeType)parameters.getParameter("status")).getCode();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE.toCode(), status);
+		
+		// Get type parameter
+		String type = ((CodeType)parameters.getParameter("type")).getCode();
+		assertEquals(SubscriptionNotificationType.EVENTNOTIFICATION.toCode(), type);
+		
+		// Get events-since-subscription-start parameter
+		String eventsSinceStart = parameters.getParameter("events-since-subscription-start").toString();
+		assertEquals("1", eventsSinceStart);
 
-		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertThat(notificationEvents).hasSize(1);
-		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
-		assertEquals("1", notificationEvent.getEventNumber());
-		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
+		// Get notification-event parameter
+		Parameters.ParametersParameterComponent notificationEvent = parameters.getParameter("notification-event");
+		assertThat(notificationEvent).isNotNull();
+		String eventNumber = notificationEvent.getPart("event-number").getValue().toString();
+		assertEquals("1", eventNumber);
+		
+		// Check focus reference
+		Reference focus = (Reference)notificationEvent.getPart("focus").getValue();
+		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), focus.getReferenceElement());
 
-		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
-		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
+		// Check subscription reference
+		Reference subscriptionRef = (Reference)parameters.getParameter("subscription");
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), subscriptionRef.getReferenceElement());
+		
+		// Check topic URL
+		String topic = parameters.getParameter("topic").toString();
+		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, topic);
 	}
 
 	private Subscription createTopicSubscription() throws InterruptedException {
@@ -173,20 +196,27 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private void createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
-		SubscriptionTopic retval = new SubscriptionTopic();
-		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
-		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = retval.addResourceTrigger();
-		trigger.setResource("Encounter");
+		R4SubscriptionTopicBuilder builder = new R4SubscriptionTopicBuilder()
+			.setUrl(SUBSCRIPTION_TOPIC_TEST_URL)
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.addResourceTrigger()
+			.setResourceTriggerResource("Encounter");
+			
+		// Add the interaction triggers
 		for (SubscriptionTopic.InteractionTrigger interactionTrigger : theInteractionTriggers) {
-			trigger.addSupportedInteraction(interactionTrigger);
+			builder.addResourceTriggerSupportedInteraction(interactionTrigger.toCode());
 		}
-		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
-		queryCriteria.setPrevious("Encounter?status=" + Encounter.EncounterStatus.PLANNED.toCode());
-		queryCriteria.setCurrent("Encounter?status=" + Encounter.EncounterStatus.FINISHED.toCode());
-		queryCriteria.setRequireBoth(true);
+		
+		// Set up the query criteria
+		builder.addResourceTriggerQueryCriteria()
+			.setResourceTriggerQueryCriteriaPrevious("Encounter?status=" + Encounter.EncounterStatus.PLANNED.toCode())
+			.setResourceTriggerQueryCriteriaCurrent("Encounter?status=" + Encounter.EncounterStatus.FINISHED.toCode())
+			.setResourceTriggerQueryCriteriaRequireBoth(true);
+		
+		// Create the topic
+		Basic topicResource = builder.build();
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		myBasicDao.create(retval, mySrd);
+		myBasicDao.create(topicResource, mySrd);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 	}
 
