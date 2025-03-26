@@ -77,6 +77,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -213,7 +214,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId theRequestPartitionId) {
 		Set<String> foundIds = new HashSet<>();
 		List<JpaPid> idsToPreFetchBodiesFor = new ArrayList<>();
-		List<JpaPid> idsToPreFetchVersionsFor = new ArrayList<>();
+		Set<JpaPid> idsToPreFetchVersionsFor = new HashSet<>();
 
 		/*
 		 * Pre-Fetch any resources that are referred to normally by ID, e.g.
@@ -257,8 +258,18 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * Given a collection of {@link JpaPid}, loads the current version associated with
 	 * each PID and puts it into the {@link JpaPid#setVersion(Long)} field.
 	 */
-	private void preFetchResourceVersions(List<JpaPid> theIds) {
+	private void preFetchResourceVersions(Set<JpaPid> theIds) {
 		ourLog.trace("Versions to fetch: {}", theIds);
+
+		for (Iterator<JpaPid> it = theIds.iterator(); it.hasNext(); ) {
+			JpaPid pid = it.next();
+			Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
+			if (version != null) {
+				it.remove();
+				pid.setVersion(version);
+			}
+		}
+
 		if (!theIds.isEmpty()) {
 			Map<JpaPid, JpaPid> idMap = theIds.stream().collect(Collectors.toMap(t -> t, t -> t));
 
@@ -275,6 +286,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					JpaPid pid = tuple.get(0, JpaPid.class);
 					Long version = tuple.get(1, Long.class);
 					idMap.get(pid).setVersion(version);
+
+					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid, version);
 				}
 			});
 		}
@@ -397,7 +410,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
 			List<JpaPid> theIdsToPreFetchBodiesFor,
-			List<JpaPid> theIdsToPreFetchVersionsFor) {
+			Set<JpaPid> theIdsToPreFetchVersionsFor) {
 
 		List<MatchUrlToResolve> searchParameterMapsToResolve = new ArrayList<>();
 		for (IBase nextEntry : theEntries) {
@@ -416,6 +429,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							resourceType,
 							requestUrl,
 							true,
+							false,
 							theIdsToPreFetchBodiesFor,
 							searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
@@ -424,6 +438,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							resourceType,
 							requestIfNoneExist,
 							false,
+							true,
 							theIdsToPreFetchBodiesFor,
 							searchParameterMapsToResolve);
 				}
@@ -441,6 +456,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 									theRequestPartitionId,
 									refResourceType,
 									referenceUrl,
+									false,
 									false,
 									theIdsToPreFetchBodiesFor,
 									searchParameterMapsToResolve);
@@ -475,7 +491,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
 			List<JpaPid> thePidsToLoadBodiesFor,
-			List<JpaPid> thePidsToLoadVersionsFor) {
+			Set<JpaPid> thePidsToLoadVersionsFor) {
 
 		/*
 		 * Note: This method currently only handles search parameter maps (i.e. conditional
@@ -554,7 +570,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
 			List<JpaPid> theOutputPidsToLoadFully,
-			List<JpaPid> theOutputPidsToLoadVersionsFor) {
+			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
 		if (!theHashesForIndexColumn.isEmpty()) {
 			ListMultimap<Long, MatchUrlToResolve> hashToSearchMap =
 					buildHashToSearchMap(theInputParameters, theIndexColumnName);
@@ -615,7 +631,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
 					if (matchUrl.myShouldPreFetchResourceBody) {
 						theOutputPidsToLoadFully.add(pid);
-					} else {
+					}
+					if (matchUrl.myShouldPreFetchResourceVersion) {
 						theOutputPidsToLoadVersionsFor.add(pid);
 					}
 					myMatchResourceUrlService.matchUrlResolved(
@@ -657,6 +674,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			String theResourceType,
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
+			boolean theShouldPreFetchResourceVersion,
 			List<JpaPid> theOutputIdsToPreFetchBodiesFor,
 			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
 		JpaPid cachedId =
@@ -670,7 +688,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
-					theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody));
+					theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody, theShouldPreFetchResourceVersion));
 		}
 	}
 
@@ -775,19 +793,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private final SearchParameterMap myMatchUrlSearchMap;
 		private final RuntimeResourceDefinition myResourceDefinition;
 		private final boolean myShouldPreFetchResourceBody;
+		private final boolean myShouldPreFetchResourceVersion;
 		public boolean myResolved;
 		private Long myHashValue;
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
-				String theRequestUrl,
-				SearchParameterMap theMatchUrlSearchMap,
-				RuntimeResourceDefinition theResourceDefinition,
-				boolean theShouldPreFetchResourceBody) {
+			String theRequestUrl,
+			SearchParameterMap theMatchUrlSearchMap,
+			RuntimeResourceDefinition theResourceDefinition,
+			boolean theShouldPreFetchResourceBody, boolean theShouldPreFetchResourceVersion) {
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
 			myShouldPreFetchResourceBody = theShouldPreFetchResourceBody;
+			myShouldPreFetchResourceVersion = theShouldPreFetchResourceVersion;
 		}
 
 		public void setResolved(boolean theResolved) {

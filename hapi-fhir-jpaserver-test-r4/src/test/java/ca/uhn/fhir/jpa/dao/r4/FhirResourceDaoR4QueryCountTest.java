@@ -2251,21 +2251,21 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
-	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List)}
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List, List)}
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN    ,     false, 1,   2,  2",
+		"SINGLE_TOKEN    ,     false, 1,   2,  1",
 		"SINGLE_TOKEN    ,     true,  1,   0,  0",
 		"MULTIPLE_TOKEN  ,     false, 10,  20, 10",
 		"MULTIPLE_TOKEN  ,     true,  10,  0,  0",
 		"STRING          ,     false, 10,  20, 10",
 		"STRING          ,     true,  10,  0,  0",
 	})
-	public void testTransactionWithMultipleConditionalUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
+	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
 		Supplier<Bundle> input = () ->{
@@ -2286,6 +2286,69 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 					default -> throw new IllegalStateException("Unexpected value: " + theMatchMode);
 				};
 				bb.addTransactionCreateEntry(p).conditional(conditionalUrl);
+			}
+
+			return bb.getBundleTyped();
+		};
+
+		// Run the first time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount0, myCaptureQueriesListener.countSelectQueries());
+
+		// Run the second time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount1, myCaptureQueriesListener.countSelectQueries());
+
+		// Run the third time
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(theExpectedSelectCount2, myCaptureQueriesListener.countSelectQueries());
+
+
+	}
+
+	/**
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List, List)}
+	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
+	 * Others could potentially be optimized in the future so that they have a small number
+	 * of selects too, but this is tricky and may not be worth the effort.
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"SINGLE_TOKEN    ,     false, 1,   4,  4",
+		"SINGLE_TOKEN    ,     true,  1,   3,  3",
+		"MULTIPLE_TOKEN  ,     false, 10,  50, 50",
+		"MULTIPLE_TOKEN  ,     true,  10,  3,  3",
+		"STRING          ,     false, 10,  50, 50",
+		"STRING          ,     true,  10,  3,  3",
+	})
+	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+
+		Supplier<Bundle> input = () ->{
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			for (int i = 0; i < 10; i++) {
+				String identifier = Integer.toString(i);
+
+				Patient p = new Patient();
+				p.setActive(true);
+				p.addName().setFamily(UUID.randomUUID().toString());
+				p.addName().setFamily("FAM" + identifier);
+				p.addIdentifier().setSystem("http://foo").setValue(identifier);
+				p.addIdentifier().setSystem("http://bar").setValue(identifier);
+
+				String conditionalUrl = switch(theMatchMode) {
+					case "SINGLE_TOKEN" -> "Patient?identifier=http://foo|" + identifier;
+					case "MULTIPLE_TOKEN" -> "Patient?identifier=http://bar|" + identifier + "&active=true";
+					case "STRING" -> "Patient?name=FAM" + identifier;
+					default -> throw new IllegalStateException("Unexpected value: " + theMatchMode);
+				};
+				bb.addTransactionUpdateEntry(p).conditional(conditionalUrl);
 			}
 
 			return bb.getBundleTyped();
@@ -3272,7 +3335,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
