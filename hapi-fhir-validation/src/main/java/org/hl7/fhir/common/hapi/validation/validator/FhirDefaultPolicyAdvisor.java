@@ -13,6 +13,7 @@ import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -88,7 +89,9 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 			boolean valid,
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
-		return List.of();
+		// TODO this has been reverted to emptyList()
+		return Collections.emptyList();
+		//		return List.of();
 	}
 
 	@Override
