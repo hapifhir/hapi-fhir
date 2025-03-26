@@ -536,7 +536,7 @@ public class XmlParserDstu2Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals(organizationUuid, org.getId().getValue());
+		assertEquals("#" + organizationUuid, org.getId().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
