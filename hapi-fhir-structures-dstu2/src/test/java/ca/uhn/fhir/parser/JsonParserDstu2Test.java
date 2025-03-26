@@ -1400,7 +1400,7 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) ((ResourceReferenceDt) p.getMedication()).getResource();
 		assertNotNull(m);
-		assertEquals("med", m.getId().getValue());
+		assertEquals("#med", m.getId().getValue());
 		assertThat(p.getContained().getContainedResources()).hasSize(1);
 		assertThat(p.getContained().getContainedResources().get(0)).isSameAs(m);
 
@@ -1418,9 +1418,9 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 		ourLog.info("Parsed Content \n{}", content);
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
 		assertThat(parsed.getResourceMetadata()).containsEntry(ResourceMetadataKeyEnum.VERSION, "1");
 		assertEquals("1", parsed.getId().getVersionIdPart());
-		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getTypeElement().getValue());
 		assertEquals(3, parsed.getTotal().intValue());

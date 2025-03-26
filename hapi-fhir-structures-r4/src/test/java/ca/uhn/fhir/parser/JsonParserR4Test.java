@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -67,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -81,6 +83,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -647,7 +650,7 @@ public class JsonParserR4Test extends BaseTest {
 		Observation obs = new Observation();
 
 		Patient pt = new Patient();
-		pt.setId("1");
+		pt.setId("#1");
 		pt.addName().setFamily("FAM");
 		obs.getSubject().setReference("#1");
 		obs.getContained().add(pt);
@@ -660,8 +663,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(enc.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -680,7 +683,7 @@ public class JsonParserR4Test extends BaseTest {
 		obs.getSubject().setResource(pt);
 
 		Encounter enc = new Encounter();
-		enc.setId("1");
+		enc.setId("#1");
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		obs.getEncounter().setReference("#1");
 		obs.getContained().add(enc);
@@ -689,8 +692,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("1", obs.getContained().get(0).getId());
-		assertEquals(pt.getId(), "#" + obs.getContained().get(1).getId());
+		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
@@ -716,8 +719,8 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals(pract.getId(), "#" + mr.getContained().get(0).getId());
-		assertEquals(med.getId(), "#" + mr.getContained().get(1).getId());
+		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(med.getId(), mr.getContained().get(1).getId());
 
 	}
 
@@ -1226,8 +1229,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourLog.info("Input: {}", auditEvent);
 		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("A", ae.getContained().get(0).getId());
-		assertEquals("B", ae.getContained().get(1).getId());
+		assertEquals("#A", ae.getContained().get(0).getId());
+		assertEquals("#B", ae.getContained().get(1).getId());
 		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
 		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
 
@@ -1265,6 +1268,58 @@ public class JsonParserR4Test extends BaseTest {
 		String actual = ourCtx.newJsonParser().encodeToString(p);
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testParseIntoObject() {
+		String expected = "{\"system\":\"http://system.org\",\"value\":\"123\",\"assigner\":{\"reference\":\"Organization/1\"}}";
+
+		// Test
+		Identifier target = new Identifier();
+		ourCtx.newJsonParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals("http://system.org", target.getSystem());
+		assertEquals("123", target.getValue());
+		assertEquals("Organization/1", target.getAssigner().getReference());
+	}
+
+	@Test
+	public void testParseIntoObject_InvalidValue() {
+		// Test
+		Patient target = new Patient();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newJsonParser().parseInto("2020-01-01", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Failed to parse JSON encoded FHIR content");
+	}
+
+
+	@Test
+	public void testParseIntoPrimitive() {
+		String expected = "2020-02-20T12:12:01.123-05:00";
+
+		// Test
+		DateTimeType target = new DateTimeType();
+		ourCtx.newJsonParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals(expected, target.getValueAsString());
+		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
+		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
+	}
+
+	@Test
+	public void testParseIntoPrimitive_InvalidValue() {
+		// Test
+		DateTimeType target = new DateTimeType();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newJsonParser().parseInto("\"birthDate\":\"2020-01-01\"", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Invalid date/time");
+	}
+
+
+
 
 	@Test
 	public void testObjectWithBothPrimitiverAndArrayAlternatives() {
