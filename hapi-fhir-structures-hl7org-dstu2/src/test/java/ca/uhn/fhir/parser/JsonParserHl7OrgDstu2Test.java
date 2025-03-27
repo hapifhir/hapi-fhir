@@ -430,7 +430,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals(organizationUuid, org.getIdElement().getValue());
+		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 		
 		// And re-encode a second time
