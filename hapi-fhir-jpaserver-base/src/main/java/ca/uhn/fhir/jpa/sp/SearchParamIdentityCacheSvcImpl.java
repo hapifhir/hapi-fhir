@@ -53,7 +53,6 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
-	private static final int THREAD_POOL_MAX_POOL_SIZE = 1000;
 	private static final int THREAD_POOL_QUEUE_SIZE = 1000;
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
@@ -80,13 +79,10 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 * Creates a thread pool executor for asynchronously executing
 	 * {@link PersistSearchParameterIdentityTask} instances.
 	 * <p>
-	 * Uses a fixed core pool size of 1, a maximum pool size of 1000,
-	 * and a bounded queue with a capacity of 1000.
+	 * Uses a fixed pool size of 1 and a bounded queue with a capacity of 1000.
 	 * <p>
 	 * If the queue is full and all threads are busy, new tasks are silently
 	 * discarded using {@link ThreadPoolExecutor.DiscardPolicy}.
-	 *
-	 * @return a configured {@link ExecutorService} instance
 	 */
 	private ExecutorService createExecutor() {
 		ThreadFactory threadFactory = r -> {
@@ -98,7 +94,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 		return new ThreadPoolExecutor(
 				1,
-				THREAD_POOL_MAX_POOL_SIZE,
+				1,
 				0L,
 				TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<>(THREAD_POOL_QUEUE_SIZE),

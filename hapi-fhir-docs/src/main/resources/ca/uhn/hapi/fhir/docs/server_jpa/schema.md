@@ -922,6 +922,67 @@ Note: This table has the columns listed below, but it also has all common column
     </tbody>
 </table>
 
+# HFJ_SPIDX_IDENTITY: Search Parameter Identities
+
+The `HFJ_SPIDX_IDENTITY` table stores hash identities representing unique combinations of search parameter name and resource type of
+non-reference [FHIR Search Datatypes](http://hl7.org/fhir/search.html): Date, Number, Quantity, String, Token, and URI.
+
+While not currently used in search execution, this table provides metadata to interpret hash identities in the `HFJ_SPIDX_xxx` tables.
+When the server is configured to omit writing `SP_NAME` and `RES_TYPE` to the `HFJ_SPIDX_xxx` tables, the `HFJ_SPIDX_IDENTITY` table can be used 
+to reconstruct the `SP_NAME` and `RES_TYPE` values for the stored hash identities. 
+See [Enabling Index Storage Optimization](/docs/server_jpa/performance.html#enabling-index-storage-optimization) for more information.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SP_IDENTITY_ID</td>
+            <td></td>
+            <td>Integer</td>
+            <td></td>
+            <td>
+                This is the persistent ID of the Search Parameter Identity.
+            </td>
+        </tr>
+        <tr>
+            <td>HASH_IDENTITY</td>
+            <td></td>
+            <td>Long</td>
+            <td></td>
+            <td>
+                A hash of SP_NAME and RES_TYPE. Used in the HFJ_SPIDX_xxx tables to narrow results to a specific SearchParameter during sorting and certain queries.
+            </td>
+        </tr>
+        <tr>
+            <td>RES_TYPE</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The FHIR resource type associated with this search parameter.
+            </td>
+        </tr>
+        <tr>
+            <td>SP_NAME</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                The name of the FHIR search parameter associated with this identity.
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 # HFJ_IDX_CMB_TOK_NU: Combo Non-Unique Search Param
 
