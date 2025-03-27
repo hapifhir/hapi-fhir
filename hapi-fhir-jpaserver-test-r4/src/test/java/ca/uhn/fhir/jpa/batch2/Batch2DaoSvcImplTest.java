@@ -120,12 +120,13 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 						new TypedResourcePid("Patient", patientId1),
 						new TypedResourcePid("Patient", patientId2));
 
-		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
 	@ParameterizedTest
@@ -195,12 +196,13 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 						new TypedResourcePid("Patient", id1),
 						new TypedResourcePid("Observation", id2));
 
-		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
 	@ParameterizedTest

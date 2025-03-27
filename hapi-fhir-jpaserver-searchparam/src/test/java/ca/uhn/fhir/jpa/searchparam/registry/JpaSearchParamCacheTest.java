@@ -145,7 +145,7 @@ public class JpaSearchParamCacheTest {
 		IndexedSearchParam indexedSearchParam = indexedSearchParamMap.get(hashIdentity);
 
 		// validate
-		assertNotNull(indexedSearchParam, "No IndexedSearchParam found for search param with " + theSpType);
+		assertNotNull(indexedSearchParam);
 		assertEquals(theResourceType, indexedSearchParam.getResourceType());
 		assertEquals(theExpectedSpName, indexedSearchParam.getParameterName());
 	}

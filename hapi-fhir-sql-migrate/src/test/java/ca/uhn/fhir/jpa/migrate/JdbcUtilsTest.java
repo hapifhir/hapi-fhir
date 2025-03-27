@@ -41,11 +41,9 @@ public class JdbcUtilsTest {
 	@Mock
 	ResultSet myResultSet;
 	@Mock
-	private DataSource dataSource;
+	DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	@Mock
-	private DriverTypeEnum.ConnectionProperties connectionProperties;
-	@Mock
-	private TransactionTemplate txTemplate;
+	TransactionTemplate myTxTemplate;
 
 	@Test
 	public void testGetColumnType_verifyTypeMappings() throws SQLException {
@@ -128,19 +126,19 @@ public class JdbcUtilsTest {
 	@Test
 	void testGetSequenceInformation() throws SQLException {
 		// setup
-		when(dataSource.getConnection()).thenReturn(myConnection);
-		when(connectionProperties.getDataSource()).thenReturn(dataSource);
-		when(connectionProperties.getTxTemplate()).thenReturn(txTemplate);
+		when(myDataSource.getConnection()).thenReturn(myConnection);
+		when(myConnectionProperties.getDataSource()).thenReturn(myDataSource);
+		when(myConnectionProperties.getTxTemplate()).thenReturn(myTxTemplate);
 
 		SequenceInformation sequenceInformation = mock(SequenceInformation.class);
 		List<SequenceInformation> sequenceInformationList = List.of(
 			sequenceInformation
 		);
 
-		when(txTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
+		when(myTxTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
 
 		// execute
-		List<SequenceInformation> sequenceInformationResult = JdbcUtils.getSequenceInformation(connectionProperties);
+		List<SequenceInformation> sequenceInformationResult = JdbcUtils.getSequenceInformation(myConnectionProperties);
 
 		// verify
 		assertThat(sequenceInformationResult).hasSize(1);
@@ -151,9 +149,9 @@ public class JdbcUtilsTest {
 	void testGetSequenceName() throws SQLException {
 		// setup
 		String expectedSequenceName = "TEST_SEQ";
-		when(dataSource.getConnection()).thenReturn(myConnection);
-		when(connectionProperties.getDataSource()).thenReturn(dataSource);
-		when(connectionProperties.getTxTemplate()).thenReturn(txTemplate);
+		when(myDataSource.getConnection()).thenReturn(myConnection);
+		when(myConnectionProperties.getDataSource()).thenReturn(myDataSource);
+		when(myConnectionProperties.getTxTemplate()).thenReturn(myTxTemplate);
 
 		SequenceInformation sequenceInformation = mock(SequenceInformation.class);
 		QualifiedSequenceName sequenceName = mock(QualifiedSequenceName.class);
@@ -166,10 +164,10 @@ public class JdbcUtilsTest {
 			sequenceInformation
 		);
 
-		when(txTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
+		when(myTxTemplate.execute(any())).thenAnswer(invocation -> sequenceInformationList);
 
 		// execute
-		Set<String> sequenceNames= JdbcUtils.getSequenceNames(connectionProperties);
+		Set<String> sequenceNames= JdbcUtils.getSequenceNames(myConnectionProperties);
 
 		// verify
 		assertThat(sequenceNames).hasSize(1);

@@ -423,7 +423,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		myCaptureQueriesListener.clear();
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
-		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 
 		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(2, values.size());

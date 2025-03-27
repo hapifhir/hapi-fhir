@@ -531,7 +531,7 @@ The following columns are common to **all HFJ_SPIDX_xxx tables**.
             <td>SP_UPDATED</td>
             <td></td>
             <td>Timestamp</td>
-            <td></td>
+            <td>Nullable</td>
             <td>
                 This is the time that this row was last updated.
             </td>        

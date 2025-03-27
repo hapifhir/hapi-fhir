@@ -185,7 +185,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(1);
 
-		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(sql).satisfiesAnyOf(
 				s -> assertThat(s).contains("where rt1_0.PARTITION_ID is null and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')"),
 				s -> assertThat(s).contains("where rt1_0.PARTITION_ID is null and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B')")

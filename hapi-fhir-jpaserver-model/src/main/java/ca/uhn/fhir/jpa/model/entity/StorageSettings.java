@@ -136,7 +136,7 @@ public class StorageSettings {
 	private boolean myValidateResourceStatusForPackageUpload = true;
 
 	/**
-	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE</code>
 	 * columns for all HFJ_SPIDX tables.
 	 *
 	 * @since 7.4.0

@@ -644,17 +644,17 @@ public class JdbcUtils {
 
 	private static class EmptyExtractionContext extends ExtractionContext.EmptyExtractionContext {
 
-		private final Connection connection;
-		private final Dialect dialect;
+		private final Connection myConnection;
+		private final Dialect myDialect;
 
 		public EmptyExtractionContext(Connection theConnection, Dialect theDialect) {
-			this.connection = theConnection;
-			this.dialect = theDialect;
+			this.myConnection = theConnection;
+			this.myDialect = theDialect;
 		}
 
 		@Override
 		public Connection getJdbcConnection() {
-			return connection;
+			return myConnection;
 		}
 
 		@Override
@@ -668,7 +668,7 @@ public class JdbcUtils {
 
 				@Override
 				public Dialect getDialect() {
-					return dialect;
+					return myDialect;
 				}
 
 				@Override

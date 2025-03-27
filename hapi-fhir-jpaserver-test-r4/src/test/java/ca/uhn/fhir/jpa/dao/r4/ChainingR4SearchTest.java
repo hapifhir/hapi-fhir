@@ -327,7 +327,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
 			myCaptureQueriesListener.clear();
 			myObservationDao.create(new Observation(), mySrd);
-			myCaptureQueriesListener.logInsertQueries();
+			myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		}
 
 		String url = "/Observation?subject.name=Smith";
@@ -1349,7 +1349,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			myCaptureQueriesListener.logInsertQueries();
+			myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 
 			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
 			myObservationDao.create(new Observation(), mySrd);

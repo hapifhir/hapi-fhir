@@ -275,7 +275,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 				assertEquals(repositorySearchParams.size(), results.size());
 			});
 		} else {
-			// validated sp_name, res_type, sp_updated columns are not null in DB
+			// validated sp_name, res_type columns are not null in DB, sp_updated is null
 			runInTransaction(() -> {
 				List<?> results = myEntityManager.createQuery("SELECT i FROM " + theIndexedSearchParamClass.getSimpleName() +
 						" i WHERE i.myResourcePid = " + theId.getIdPartAsLong() + " AND i.myResourceType = '" + theResourceType +

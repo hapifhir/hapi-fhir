@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -62,20 +66,24 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testExpungeEverythingInvalidatesSearchParameterCache() {
+	public void testExpungeEverythingInvalidatesSearchParameterIdentityCache() {
 		// setup
 		createPatient(withActiveTrue());
+		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_ACTIVE);
+		long patientDeceasedHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_DECEASED);
 
 		// validate precondition
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			runInTransaction(() -> {
 				// Patient.active, Patient.deceased search parameter identities
-				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(-8972835394480303911L));
-				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(-2830809394128781005L));
+				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(patientActiveHashIdentity));
+				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(patientDeceasedHashIdentity));
 				assertEquals(2, myResourceIndexedSearchParamIdentityDao.count());
 			});
-			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
-			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientActiveHashIdentity));
+			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientDeceasedHashIdentity));
 		});
 
 		// execute
@@ -83,7 +91,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(0, myResourceIndexedSearchParamIdentityDao.count());
-		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -8972835394480303911L));
-		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, -2830809394128781005L));
+		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientActiveHashIdentity));
+		assertNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientDeceasedHashIdentity));
 	}
 }
