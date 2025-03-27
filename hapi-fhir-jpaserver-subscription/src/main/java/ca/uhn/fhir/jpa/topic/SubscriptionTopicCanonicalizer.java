@@ -35,8 +35,6 @@ import org.hl7.fhir.r5.model.SubscriptionTopic.SubscriptionTopicNotificationShap
 import org.hl7.fhir.r5.model.SubscriptionTopic.SubscriptionTopicResourceTriggerComponent;
 
 public final class SubscriptionTopicCanonicalizer {
-	private static final FhirContext ourFhirContextR5 = FhirContext.forR5();
-
 	private SubscriptionTopicCanonicalizer() {}
 
 	public static SubscriptionTopic canonicalizeTopic(FhirContext theFhirContext, IBaseResource theSubscriptionTopic) {
@@ -143,7 +141,7 @@ public final class SubscriptionTopicCanonicalizer {
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT.equals(url)) {
 				queryCriteria.setCurrent(ext.getValue().primitiveValue());
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH.equals(url)) {
-				queryCriteria.setRequireBoth(Boolean.valueOf(ext.getValue().primitiveValue()));
+				queryCriteria.setRequireBoth(Boolean.parseBoolean(ext.getValue().primitiveValue()));
 			}
 		}
 

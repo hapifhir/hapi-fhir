@@ -115,13 +115,13 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
-	private boolean resourceDaoExists() {
-		return myDaoRegistry != null && myDaoRegistry.isResourceTypeSupported(myResourceName);
+	private boolean noDaoAvailable() {
+		return myDaoRegistry == null || !myDaoRegistry.isResourceTypeSupported(myResourceName);
 	}
 
 	@Override
 	public void syncDatabaseToCache() {
-		if (!resourceDaoExists()) {
+		if (noDaoAvailable()) {
 			return;
 		}
 		if (!mySyncResourcesSemaphore.tryAcquire()) {
@@ -203,7 +203,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
-		if (!resourceDaoExists()) {
+		if (noDaoAvailable()) {
 			ourLog.warn(
 					"The resource type {} is enabled on this server, but there is no {} DAO configured.",
 					myResourceName,

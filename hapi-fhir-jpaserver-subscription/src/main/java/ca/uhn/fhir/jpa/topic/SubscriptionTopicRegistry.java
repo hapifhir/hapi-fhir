@@ -28,8 +28,6 @@ import java.util.Set;
 public class SubscriptionTopicRegistry {
 	private final ActiveSubscriptionTopicCache myActiveSubscriptionTopicCache = new ActiveSubscriptionTopicCache();
 
-	public SubscriptionTopicRegistry() {}
-
 	public int size() {
 		return myActiveSubscriptionTopicCache.size();
 	}

@@ -25,16 +25,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
+class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	@Test
-	public void testSubscriptionTopicRegistryBean() {
+	void testSubscriptionTopicRegistryBean() {
 		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
-	public void testFilteredTopicSubscription() throws Exception {
+	void testFilteredTopicSubscription() throws Exception {
 		//setup
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
@@ -64,7 +64,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	}
 	
 	@Test
-	public void testSubscriptionTopicShapeWithIncludeAndRevInclude() throws Exception {
+	void testSubscriptionTopicShapeWithIncludeAndRevInclude() throws Exception {
 		// Create organization, patient, and observations
 		Organization organization = new Organization();
 		organization.setName("Test Organization");
@@ -135,22 +135,22 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		assertThat(resourceTypes).contains("Patient", "Organization", "Observation");
 		
 		// Verify the specific resources
-		assertThat(resources.stream().filter(r -> r instanceof Patient).count()).isEqualTo(1);
-		assertThat(resources.stream().filter(r -> r instanceof Organization).count()).isEqualTo(1);
-		assertThat(resources.stream().filter(r -> r instanceof Observation).count()).isEqualTo(2);
+		assertThat(resources.stream().filter(Patient.class::isInstance).count()).isEqualTo(1);
+		assertThat(resources.stream().filter(Organization.class::isInstance).count()).isEqualTo(1);
+		assertThat(resources.stream().filter(Observation.class::isInstance).count()).isEqualTo(2);
 		
 		// Verify the references match expected values
-		Patient bundlePatient = (Patient) resources.stream().filter(r -> r instanceof Patient).findFirst().orElse(null);
+		Patient bundlePatient = (Patient) resources.stream().filter(Patient.class::isInstance).findFirst().orElse(null);
 		assertThat(bundlePatient).isNotNull();
 		assertThat(bundlePatient.getIdElement().getIdPart()).isEqualTo(patientId.getIdPart());
 		
-		Organization bundleOrg = (Organization) resources.stream().filter(r -> r instanceof Organization).findFirst().orElse(null);
+		Organization bundleOrg = (Organization) resources.stream().filter(Organization.class::isInstance).findFirst().orElse(null);
 		assertThat(bundleOrg).isNotNull();
 		assertThat(bundleOrg.getIdElement().getIdPart()).isEqualTo(orgId.getIdPart());
 		
 		// Check that the observations in the bundle have the correct subject references
 		Set<Observation> bundleObservations = resources.stream()
-			.filter(r -> r instanceof Observation)
+			.filter(Observation.class::isInstance)
 			.map(r -> (Observation)r)
 			.collect(java.util.stream.Collectors.toSet());
 		

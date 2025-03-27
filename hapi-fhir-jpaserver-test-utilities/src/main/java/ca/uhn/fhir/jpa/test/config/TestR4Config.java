@@ -56,6 +56,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -112,8 +113,6 @@ public class TestR4Config {
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -191,7 +190,9 @@ public class TestR4Config {
 		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
-		DataSource dataSource = ProxyDataSourceBuilder
+		//			.logQueryBySlf4j(level)
+
+		return ProxyDataSourceBuilder
 			.create(retVal)
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
@@ -202,15 +203,13 @@ public class TestR4Config {
 			.countQuery(singleQueryCountHolder())
 			.afterMethod(captureQueriesListener())
 			.build();
-
-		return dataSource;
 	}
 
 
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
 		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
-		theDataSource.setMaxWaitMillis(30000);
+		theDataSource.setMaxWait(Duration.ofSeconds(30));
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");
 		theDataSource.setMaxTotal(ourMaxThreads);

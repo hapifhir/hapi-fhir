@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -39,8 +38,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.ObjectUtils;
@@ -78,9 +75,6 @@ public class SubscriptionTopicPayloadBuilder {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -180,16 +174,16 @@ public class SubscriptionTopicPayloadBuilder {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 
 		for (IBaseResource resource : theResourcesOfThisType) {
-			String query = theResourceType + "?" + PARAM_ID + "="
-					+ resource.getIdElement().getIdPart();
+			StringBuilder query = new StringBuilder(theResourceType + "?" + PARAM_ID + "="
+				+ resource.getIdElement().getIdPart());
 			for (StringType include : theIncludes) {
-				query += "&" + PARAM_INCLUDE + "=" + include.getValue();
+				query.append("&" + PARAM_INCLUDE + "=").append(include.getValue());
 			}
 			for (StringType revInclude : theRevIncludes) {
-				query += "&" + PARAM_REVINCLUDE + "=" + revInclude.getValue();
+				query.append("&" + PARAM_REVINCLUDE + "=").append(revInclude.getValue());
 			}
 			ResourceSearch resourceSearch =
-					myMatchUrlService.getResourceSearchForUrlAndFlags(query, MatchUrlService.processIncludes());
+					myMatchUrlService.getResourceSearchWithIncludesAndRevIncludes(query.toString());
 			SearchParameterMap map = resourceSearch.getSearchParameterMap();
 			map.setLoadSynchronous(true);
 			SystemRequestDetails systemRequestDetails = buildSystemRequestDetails(resource);
@@ -210,19 +204,12 @@ public class SubscriptionTopicPayloadBuilder {
 		// TODO KHS might need to check cross-partition subscription settings here
 		RequestPartitionId requestPartitionId =
 				(RequestPartitionId) resource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (requestPartitionId != null) {
-			systemRequestDetails.setRequestPartitionId(requestPartitionId);
-		} else {
+		if (requestPartitionId == null) {
 			systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
+		} else {
+			systemRequestDetails.setRequestPartitionId(requestPartitionId);
 		}
 		return systemRequestDetails;
-	}
-
-	@Nonnull
-	private ReferenceOrListParam makeReferenceOrListParam(@Nonnull List<String> thePatientIds) {
-		final ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-		thePatientIds.forEach(patientId -> referenceOrListParam.addOr(new ReferenceParam(patientId)));
-		return referenceOrListParam;
 	}
 
 	private void addResources(
@@ -235,14 +222,15 @@ public class SubscriptionTopicPayloadBuilder {
 				ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
 
 		switch (content) {
-			case EMPTY:
-				// skip adding resource to the Bundle
-				break;
 			case IDONLY:
 				addIdOnly(theBundleBuilder, theResources, theRestOperationType);
 				break;
 			case FULLRESOURCE:
 				addFullResources(theBundleBuilder, theResources, theRestOperationType);
+				break;
+			case EMPTY:
+			default:
+				// skip adding resource to the Bundle
 				break;
 		}
 	}
@@ -260,6 +248,8 @@ public class SubscriptionTopicPayloadBuilder {
 				case DELETE:
 					bundleBuilder.addTransactionDeleteEntry(resource);
 					break;
+				default:
+					break;
 			}
 		}
 	}
@@ -276,6 +266,8 @@ public class SubscriptionTopicPayloadBuilder {
 					break;
 				case DELETE:
 					bundleBuilder.addTransactionDeleteEntry(resource);
+					break;
+				default:
 					break;
 			}
 		}

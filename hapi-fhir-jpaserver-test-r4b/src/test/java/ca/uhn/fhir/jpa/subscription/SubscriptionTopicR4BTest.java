@@ -71,12 +71,12 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	}
 
 	@Test
-	public void testSubscriptionTopicRegistryBean() {
+	void testSubscriptionTopicRegistryBean() {
 		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
-	public void testCreate() throws Exception {
+	void testCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE);
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
@@ -103,7 +103,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	}
 
 	@Test
-	public void testUpdate() throws Exception {
+	void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();

@@ -20,7 +20,7 @@ class SubscriptionTopicCanonicalizerTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	@Test
-	public void testCanonicalizeR4BTopic() {
+	void testCanonicalizeR4BTopic() {
 		org.hl7.fhir.r4b.model.SubscriptionTopic topic = new org.hl7.fhir.r4b.model.SubscriptionTopic();
 		topic.setId("123");
 		topic.setStatus(org.hl7.fhir.r4b.model.Enumerations.PublicationStatus.ACTIVE);
@@ -30,7 +30,7 @@ class SubscriptionTopicCanonicalizerTest {
 	}
 
 	@Test
-	public void testCanonicalizeR4Topic() {
+	void testCanonicalizeR4Topic() {
 		String basicResourceString = ClasspathUtil.loadResource("R4SubscriptionTopic.json");
 		FhirContext fhirContext = FhirContext.forR4Cached();
 		org.hl7.fhir.r4.model.Basic topic = fhirContext.newJsonParser().parseResource(org.hl7.fhir.r4.model.Basic.class, basicResourceString);
@@ -76,7 +76,7 @@ class SubscriptionTopicCanonicalizerTest {
 	}
 
 	@Test
-	public void testCanonicalizeR4TopicBuiltWithBuilder() throws ParseException {
+	void testCanonicalizeR4TopicBuiltWithBuilder() throws ParseException {
 		// Create a SubscriptionTopic using the R4SubscriptionTopicBuilder
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		

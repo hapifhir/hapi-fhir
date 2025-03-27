@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.subscription;
 
-public class SubscriptionConstants {
+public final class SubscriptionConstants {
+	private SubscriptionConstants() {}
 
 	/**
 	 * The number of threads used in subscription channel processing

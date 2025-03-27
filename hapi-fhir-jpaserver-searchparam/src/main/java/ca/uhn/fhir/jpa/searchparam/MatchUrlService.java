@@ -235,8 +235,13 @@ public class MatchUrlService {
 		return getResourceSearch(theUrl, null);
 	}
 
-	public ResourceSearch getResourceSearchForUrlAndFlags(String theUrl, Flag... theFlags) {
-		return getResourceSearch(theUrl, null, theFlags);
+	/**
+	 * Parse a URL that contains _include or _revinclude parameters and return a {@link ResourceSearch} object
+	 * @param theUrl
+	 * @return the ResourceSearch object that can be used to create a SearchParameterMap
+	 */
+	public ResourceSearch getResourceSearchWithIncludesAndRevIncludes(String theUrl) {
+		return getResourceSearch(theUrl, null, MatchUrlService.processIncludes());
 	}
 
 	public interface Flag {

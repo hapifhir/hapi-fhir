@@ -35,7 +35,7 @@ import java.util.Date;
 
 /**
  * Builder class for creating and configuring FHIR R4 SubscriptionTopic resources.
- *
+ * <p/>
  * In R4, SubscriptionTopic is represented as a Basic resource with extensions,
  * following the pattern outlined in the FHIR Subscriptions Backport implementation guide.
  * This builder provides a fluent API to create these resources without needing to
