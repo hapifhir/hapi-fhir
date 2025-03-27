@@ -16,19 +16,24 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionNotificationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR4Test.class);
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
 
 	@Autowired
@@ -87,11 +93,11 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
-		Subscription subscription = createTopicSubscription();
+		Subscription subscription = createTopicSubscription("Encounter?participant-type=PRPF");
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
-		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED, true);
+		Encounter sentEncounter = sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus.FINISHED, "PRPF", true);
 
 		assertEquals(1, ourTestSystemProvider.getCount());
 
@@ -109,16 +115,15 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testUpdate() throws Exception {
-		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
 		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
-		Subscription subscription = createTopicSubscription();
+		Subscription subscription = createTopicSubscription("Encounter?participant-type=PRPF");
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
-		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.PLANNED, false);
+		Encounter sentEncounter = sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus.PLANNED, "PRPF", false);
 		assertEquals(0, ourTestSystemProvider.getCount());
 
 		sentEncounter.setStatus(Encounter.EncounterStatus.FINISHED);
@@ -127,6 +132,7 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(1, ourTestSystemProvider.getCount());
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedBundle));
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
 		assertThat(resources).hasSize(2);
 
@@ -138,44 +144,53 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
-
 	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, Parameters parameters) {
 		// Get status parameter
-		String status = ((CodeType)parameters.getParameter("status")).getCode();
-		assertEquals(Subscription.SubscriptionStatus.ACTIVE.toCode(), status);
+		CodeType status = (CodeType) parameters.getParameter("status").getValue();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE.toCode(), status.getCode());
 		
 		// Get type parameter
-		String type = ((CodeType)parameters.getParameter("type")).getCode();
-		assertEquals(SubscriptionNotificationType.EVENTNOTIFICATION.toCode(), type);
+		CodeType type = (CodeType) parameters.getParameter("type").getValue();
+		assertEquals(SubscriptionNotificationType.EVENTNOTIFICATION.toCode(), type.getCode());
 		
 		// Get events-since-subscription-start parameter
-		String eventsSinceStart = parameters.getParameter("events-since-subscription-start").toString();
+		String eventsSinceStart = parameters.getParameter("events-since-subscription-start").getValue().toString();
 		assertEquals("1", eventsSinceStart);
 
 		// Get notification-event parameter
 		Parameters.ParametersParameterComponent notificationEvent = parameters.getParameter("notification-event");
 		assertThat(notificationEvent).isNotNull();
-		String eventNumber = notificationEvent.getPart("event-number").getValue().toString();
-		assertEquals("1", eventNumber);
 		
-		// Check focus reference
-		Reference focus = (Reference)notificationEvent.getPart("focus").getValue();
+		// Navigate through notification-event parts
+		String eventNumber = null;
+		Reference focus = null;
+		for (Parameters.ParametersParameterComponent part : notificationEvent.getPart()) {
+			if ("event-number".equals(part.getName())) {
+				eventNumber = part.getValue().toString();
+			} else if ("focus".equals(part.getName())) {
+				focus = (Reference) part.getValue();
+			}
+		}
+		
+		assertEquals("1", eventNumber);
+		assertThat(focus).isNotNull();
 		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), focus.getReferenceElement());
 
 		// Check subscription reference
-		Reference subscriptionRef = (Reference)parameters.getParameter("subscription");
-		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), subscriptionRef.getReferenceElement());
+		Reference subscriptionRef = (Reference) parameters.getParameter("subscription").getValue();
+		assertEquals(subscription.getId(), subscriptionRef.getReferenceElement().getIdPart());
 		
 		// Check topic URL
-		String topic = parameters.getParameter("topic").toString();
-		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, topic);
+		CanonicalType topic = (CanonicalType) parameters.getParameter("topic").getValue();
+		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, topic.getValue());
 	}
 
-	private Subscription createTopicSubscription() throws InterruptedException {
+	private Subscription createTopicSubscription(String theFilter) throws InterruptedException {
 		Subscription subscription = newSubscription(SubscriptionTopicR4Test.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
 		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(theFilter));
 
-		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(2);
 		Subscription retval = postOrPutSubscription(subscription);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 
@@ -215,14 +230,16 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		
 		// Create the topic
 		Basic topicResource = builder.build();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(topicResource));
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		myBasicDao.create(topicResource, mySrd);
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 	}
 
-	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
+	private Encounter sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus theStatus, String theParticipantType, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
+		encounter.addParticipant().addType().addCoding().setCode(theParticipantType);
 
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(1);

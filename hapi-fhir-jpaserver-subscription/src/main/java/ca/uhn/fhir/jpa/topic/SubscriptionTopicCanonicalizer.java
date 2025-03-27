@@ -119,10 +119,36 @@ public final class SubscriptionTopicCanonicalizer {
 						InteractionTrigger.fromCode(ext.getValue().primitiveValue()));
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_FHIRPATH_CRITERIA.equals(url)) {
 				trigger.setFhirPathCriteria(ext.getValue().primitiveValue());
+			} else if ("queryCriteria".equals(url)) {
+				// Process the queryCriteria extension
+				processQueryCriteria(ext, trigger);
 			}
 		}
 
 		theTopic.addResourceTrigger(trigger);
+	}
+
+	private static void processQueryCriteria(
+			Extension theQueryCriteriaExtension, SubscriptionTopicResourceTriggerComponent theTrigger) {
+		// Create a queryCriteria backbone component for the ResourceTrigger
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
+				new SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent();
+
+		// Process each nested extension within the queryCriteria extension
+		for (Extension ext : theQueryCriteriaExtension.getExtension()) {
+			String url = ext.getUrl();
+
+			if ("previous".equals(url)) {
+				queryCriteria.setPrevious(ext.getValue().primitiveValue());
+			} else if ("current".equals(url)) {
+				queryCriteria.setCurrent(ext.getValue().primitiveValue());
+			} else if ("requireBoth".equals(url)) {
+				queryCriteria.setRequireBoth(Boolean.valueOf(ext.getValue().primitiveValue()));
+			}
+		}
+
+		// Set the queryCriteria component on the trigger
+		theTrigger.setQueryCriteria(queryCriteria);
 	}
 
 	private static void processCanFilterBy(Extension theExtension, SubscriptionTopic theTopic) {

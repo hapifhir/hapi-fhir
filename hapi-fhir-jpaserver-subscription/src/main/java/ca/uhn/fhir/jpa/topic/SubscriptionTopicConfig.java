@@ -37,6 +37,7 @@ public class SubscriptionTopicConfig {
 	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
 			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
 			case R5:
 			case R4B:
 				return new SubscriptionTopicMatchingSubscriber(theFhirContext, memoryCacheService);
