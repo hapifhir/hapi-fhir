@@ -91,7 +91,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
-	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
+	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
@@ -188,7 +188,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 			if (requestPartitionId != null) {
-				preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -208,6 +208,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	private void preFetch(
+		RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
@@ -232,6 +233,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * Pre-resolve any conditional URLs we can
 		 */
 		preFetchConditionalUrls(
+			theRequestDetails,
 				theTransactionDetails,
 				theEntries,
 				theVersionAdapter,
@@ -405,6 +407,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	private void preFetchConditionalUrls(
+		RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
@@ -470,6 +473,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				searchParameterMapsToResolve,
 				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
 				map -> preFetchSearchParameterMaps(
+					theRequestDetails,
 						theTransactionDetails,
 						theRequestPartitionId,
 						map,
@@ -487,6 +491,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 */
 	@VisibleForTesting
 	public void preFetchSearchParameterMaps(
+		RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
@@ -508,21 +513,26 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		Set<Long> systemAndValueHashes = new HashSet<>();
 		Set<Long> valueHashes = new HashSet<>();
-		List<MatchUrlToResolve> tokenInputParams = new ArrayList<>(theInputParameters.size());
 
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
+
+			boolean isSingleToken = false;
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					boolean added = buildHashPredicateFromTokenParam(
+					buildHashPredicateFromTokenParam(
 							(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
-					if (added) {
-						tokenInputParams.add(next);
-					}
+					isSingleToken = true;
 				}
+			}
+
+			if (!isSingleToken) {
+				SearchParameterMap map = next.myMatchUrlSearchMap;
+				Set<JpaPid> outcome = myMatchResourceUrlService.search(map, next.myResourceDefinition.getImplementingClass(), theRequestDetails, null);
+				outcome.forEach(pid -> handleFoundPreFetchResourceId(theTransactionDetails, thePidsToLoadBodiesFor, thePidsToLoadVersionsFor, next, pid));
 			}
 		}
 
@@ -544,8 +554,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				thePidsToLoadVersionsFor);
 
 		// For each SP Map which did not return a result, tag it as not found.
-		if (!valueHashes.isEmpty() || !systemAndValueHashes.isEmpty()) {
-			tokenInputParams.stream()
+			theInputParameters.stream()
 					// No matches
 					.filter(match -> !match.myResolved)
 					.forEach(match -> {
@@ -553,7 +562,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						theTransactionDetails.addResolvedMatchUrl(
 								myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
 					});
-		}
 	}
 
 	/**
@@ -563,7 +571,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * Note that we do a tuple query for only 2 columns in order to ensure that we can get by with only
 	 * the data in the index (ie no need to load the actual table rows).
 	 */
-	private void preFetchSearchParameterMapsToken(
+	public void preFetchSearchParameterMapsToken(
 			String theIndexColumnName,
 			Set<Long> theHashesForIndexColumn,
 			TransactionDetails theTransactionDetails,
@@ -629,19 +637,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
 					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
-					if (matchUrl.myShouldPreFetchResourceBody) {
-						theOutputPidsToLoadFully.add(pid);
-					}
-					if (matchUrl.myShouldPreFetchResourceVersion) {
-						theOutputPidsToLoadVersionsFor.add(pid);
-					}
-					myMatchResourceUrlService.matchUrlResolved(
-							theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, pid);
-					theTransactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl.myRequestUrl, pid);
-					matchUrl.setResolved(true);
+					handleFoundPreFetchResourceId(theTransactionDetails, theOutputPidsToLoadFully, theOutputPidsToLoadVersionsFor, matchUrl, pid);
 				});
 			}
 		}
+	}
+
+	private void handleFoundPreFetchResourceId(TransactionDetails theTransactionDetails, List<JpaPid> theOutputPidsToLoadFully, Set<JpaPid> theOutputPidsToLoadVersionsFor, MatchUrlToResolve theMatchUrl, JpaPid theFoundPid) {
+		if (theMatchUrl.myShouldPreFetchResourceBody) {
+			theOutputPidsToLoadFully.add(theFoundPid);
+		}
+		if (theMatchUrl.myShouldPreFetchResourceVersion) {
+			theOutputPidsToLoadVersionsFor.add(theFoundPid);
+		}
+		myMatchResourceUrlService.matchUrlResolved(
+			theTransactionDetails, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myRequestUrl, theFoundPid);
+		theTransactionDetails.addResolvedMatchUrl(myFhirContext, theMatchUrl.myRequestUrl, theFoundPid);
+		theMatchUrl.setResolved(true);
 	}
 
 	/**
@@ -683,7 +695,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetchBodiesFor.add(cachedId);
 			}
-		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(theRequestUrl).matches()) {
+		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(theRequestUrl).find()) {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
@@ -695,10 +707,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
-	 *
-	 * @return Returns {@literal true} if any predicates were added
 	 */
-	private boolean buildHashPredicateFromTokenParam(
+	private void buildHashPredicateFromTokenParam(
 			TokenParam theTokenParam,
 			RequestPartitionId theRequestPartitionId,
 			MatchUrlToResolve theMatchUrl,
@@ -713,7 +723,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTokenParam.getSystem(),
 					theTokenParam.getValue());
 			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
-			return true;
 		} else if (isNotBlank(theTokenParam.getValue())) {
 			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(
 					myPartitionSettings,
@@ -722,10 +731,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getValue());
 			theValuePredicates.add(theMatchUrl.myHashValue);
-			return true;
 		}
-
-		return false;
 	}
 
 	private ListMultimap<Long, MatchUrlToResolve> buildHashToSearchMap(

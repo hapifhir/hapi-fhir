@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -2251,19 +2252,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
-	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List, List)}
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMapsToken(String, Set, TransactionDetails, RequestPartitionId, List, List, Set)}
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN    ,     false, 1,   2,  1",
-		"SINGLE_TOKEN    ,     true,  1,   0,  0",
-		"MULTIPLE_TOKEN  ,     false, 10,  20, 10",
-		"MULTIPLE_TOKEN  ,     true,  10,  0,  0",
-		"STRING          ,     false, 10,  20, 10",
-		"STRING          ,     true,  10,  0,  0",
+		"SINGLE_TOKEN   , false, 1,   2,  1",
+		"SINGLE_TOKEN   , true,  1,   0,  0",
+		"MULTIPLE_TOKEN , false, 10,  11, 10",
+		"MULTIPLE_TOKEN , true,  10,  0,  0",
+		"STRING         , false, 10,  11, 10",
+		"STRING         , true,  10,  0,  0",
 	})
 	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
@@ -2313,19 +2314,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
-	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(TransactionDetails, RequestPartitionId, List, List, List)}
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(RequestDetails, TransactionDetails, RequestPartitionId, List, List, Set)}
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN    ,     false, 1,   4,  4",
-		"SINGLE_TOKEN    ,     true,  1,   3,  3",
-		"MULTIPLE_TOKEN  ,     false, 10,  50, 50",
-		"MULTIPLE_TOKEN  ,     true,  10,  3,  3",
-		"STRING          ,     false, 10,  50, 50",
-		"STRING          ,     true,  10,  3,  3",
+		"SINGLE_TOKEN   , false, 1,   4,  4",
+		"SINGLE_TOKEN   , true,  1,   3,  3",
+		"MULTIPLE_TOKEN , false, 10,  13, 13",
+		"MULTIPLE_TOKEN , true,  10,  3,  3",
+		"STRING         , false, 10,  13, 13",
+		"STRING         , true,  10,  3,  3",
 	})
 	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
