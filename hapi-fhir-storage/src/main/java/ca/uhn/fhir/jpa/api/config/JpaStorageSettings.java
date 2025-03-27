@@ -427,6 +427,11 @@ public class JpaStorageSettings extends StorageSettings {
 	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
+	 * @since 8.2.0
+	 */
+	private boolean myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -694,6 +699,23 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setEnforceReferenceTargetTypes(boolean theEnforceReferenceTargetTypes) {
 		myEnforceReferenceTargetTypes = theEnforceReferenceTargetTypes;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), when evaluating
+	 * conditional URLs (e.g. the URL used in a conditional create, conditional delete,
+	 * etc.) the system will treat the evaluation as a resource access. This means that
+	 * if a client specifies
+	 *
+	 * @since 8.2.0
+	 */
+	public void setAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls(boolean theAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls) {
+		// FIXME: remove?
+		myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls = theAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
+	}
+
+	public boolean isAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls() {
+		return myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
 	}
 
 	/**

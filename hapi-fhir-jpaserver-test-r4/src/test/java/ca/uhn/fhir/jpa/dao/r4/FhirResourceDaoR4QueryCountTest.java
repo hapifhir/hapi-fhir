@@ -2267,6 +2267,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		"STRING         , true,  10,  0,  0",
 	})
 	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
+		// FIXME: register auth and consent interceptors here
+
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
 		Supplier<Bundle> input = () ->{
