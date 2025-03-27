@@ -138,7 +138,7 @@ public class SubscriptionTopicPayloadBuilder {
 
 		Set<IBaseResource> resultResources = new HashSet<>();
 
-		if (theResources.isEmpty()) {
+		if (theResources.isEmpty() || mySubscriptionTopicRegistry == null) {
 			return Set.of();
 		}
 
