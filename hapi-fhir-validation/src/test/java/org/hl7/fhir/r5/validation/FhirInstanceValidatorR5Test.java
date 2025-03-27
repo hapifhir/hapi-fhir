@@ -344,20 +344,16 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 
 		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
 		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-
 		/* The number of policyForReference invocations is subject to changes in org.hl7.fhir.core InstanceValidator.
 		The minimum and maximum invocations are based on this test's history and deviations should be investigated.
 		*/
-		verify(policyAdvisor, atLeast(4)).policyForReference(any(), any(), anyString(), anyString());
-		verify(policyAdvisor, atMost(8)).policyForReference(any(), any(), anyString(), anyString());
-
-		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
+		verify(policyAdvisor, atLeast(4)).policyForReference(any(), any(), anyString(), anyString(), any());
+		verify(policyAdvisor, atMost(8)).policyForReference(any(), any(), anyString(), anyString(), any());
 	}
 
 	@Test

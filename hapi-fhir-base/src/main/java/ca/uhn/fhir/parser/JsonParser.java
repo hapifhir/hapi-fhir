@@ -237,6 +237,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	@Override
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		JsonLikeStructure jsonStructure = new JacksonStructure();
+		jsonStructure.load(theSource);
+
+		ParserState<IBase> state =
+				ParserState.getComplexObjectState(this, getContext(), getContext(), true, theTarget, getErrorHandler());
+		state.enteringNewElement(null, null);
+
+		parseChildren(jsonStructure.getRootObject(), state);
+
+		state.endingElement();
+	}
+
+	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
 		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(theReader);

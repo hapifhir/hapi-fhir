@@ -58,7 +58,6 @@ import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -144,7 +143,7 @@ public class XmlParser extends BaseParser {
 
 	@Override
 	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext)
-			throws IOException, DataFormatException {
+			throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = createXmlWriter(theWriter);
@@ -163,6 +162,16 @@ public class XmlParser extends BaseParser {
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException(Msg.code(2365) + "Failed to initialize STaX event factory", e);
 		}
+	}
+
+	@Override
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		XMLEventReader streamReader = createStreamReader(theSource);
+
+		ParserState<IBase> state = ParserState.getComplexObjectState(
+				this, getContext(), getContext(), false, theTarget, getErrorHandler());
+
+		doXmlLoop(streamReader, state);
 	}
 
 	@Override
@@ -265,7 +274,7 @@ public class XmlParser extends BaseParser {
 			}
 			return parserState.getObject();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(Msg.code(1852) + e);
+			throw new DataFormatException(Msg.code(1852) + "Failed to parse XML content: " + e.getMessage());
 		}
 	}
 

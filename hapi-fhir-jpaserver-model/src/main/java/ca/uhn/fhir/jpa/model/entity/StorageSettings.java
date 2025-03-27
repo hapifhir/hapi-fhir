@@ -1144,7 +1144,7 @@ public class StorageSettings {
 	/**
 	 * If this is disabled by setting this to {@literal false} (default is {@literal true}),
 	 * the server will not automatically implement and support search parameters that
-	 * are not explcitly created in the repository.
+	 * are not explicitly created in the repository.
 	 * <p>
 	 * Disabling this can have a dramatic improvement on performance (especially write performance)
 	 * in servers that only need to support a small number of search parameters, or no search parameters at all.
@@ -1158,7 +1158,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @return Should the {@literal _language} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 * @since 7.0.0
 	 */
 	public boolean isLanguageSearchParameterEnabled() {
@@ -1166,7 +1166,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * Should the {@literal _language} SearchParameter be supported on this server? Defaults to {@literal false}.
 	 *
 	 * @since 7.0.0
 	 */

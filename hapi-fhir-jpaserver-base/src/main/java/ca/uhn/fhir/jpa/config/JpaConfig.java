@@ -468,7 +468,7 @@ public class JpaConfig {
 
 	@Bean
 	public IInterceptorService jpaInterceptorService() {
-		return new InterceptorService("JPA");
+		return new InterceptorService();
 	}
 
 	@Bean
