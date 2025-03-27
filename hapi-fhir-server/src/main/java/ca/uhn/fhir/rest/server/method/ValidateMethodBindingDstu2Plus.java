@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -76,7 +77,9 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 								0,
 								1,
 								description,
-								examples);
+								examples,
+								Void.class,
+								OperationParameterRangeType.NOT_APPLICABLE);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
