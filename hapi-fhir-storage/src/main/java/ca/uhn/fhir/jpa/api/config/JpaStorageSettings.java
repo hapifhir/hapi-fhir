@@ -429,7 +429,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * @since 8.2.0
 	 */
-	private boolean myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
+	private boolean myInvokePreShowInterceptorsOnConditionalUrlEvaluation;
 
 	/**
 	 * Constructor
@@ -705,17 +705,20 @@ public class JpaStorageSettings extends StorageSettings {
 	 * If set to <code>true</code> (default is <code>false</code>), when evaluating
 	 * conditional URLs (e.g. the URL used in a conditional create, conditional delete,
 	 * etc.) the system will treat the evaluation as a resource access. This means that
-	 * if a client specifies
+	 * if a client specifies a conditional create in a FHIR transaction, and the system
+	 * is configured with an {@link ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor}
+	 * or
 	 *
 	 * @since 8.2.0
 	 */
-	public void setAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls(boolean theAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls) {
+	public void setInvokePreShowInterceptorsOnConditionalUrlEvaluation(
+			boolean theInvokePreShowInterceptorsOnConditionalUrlEvaluation) {
 		// FIXME: remove?
-		myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls = theAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
+		myInvokePreShowInterceptorsOnConditionalUrlEvaluation = theInvokePreShowInterceptorsOnConditionalUrlEvaluation;
 	}
 
-	public boolean isAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls() {
-		return myAlwaysFullyLoadResourcesWhenEvaluatingConditionalUrls;
+	public boolean isInvokePreShowInterceptorsOnConditionalUrlEvaluation() {
+		return myInvokePreShowInterceptorsOnConditionalUrlEvaluation;
 	}
 
 	/**

@@ -33,9 +33,11 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -139,6 +141,23 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 		}
 
+		if (myStorageSettings.isInvokePreShowInterceptorsOnConditionalUrlEvaluation()) {
+			retVal = invokePreShowInterceptorForMatchUrlResults(theResourceType, theRequest, retVal, matchUrl);
+		}
+
+		if (retVal.size() == 1) {
+			T pid = retVal.iterator().next();
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
+			if (myStorageSettings.isMatchUrlCacheEnabled()) {
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			}
+		}
+
+		return retVal;
+	}
+
+	private <R extends IBaseResource> Set<T> invokePreShowInterceptorForMatchUrlResults(
+			Class<R> theResourceType, RequestDetails theRequest, Set<T> retVal, String matchUrl) {
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
@@ -152,9 +171,16 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+
+			RequestDetails subRequest = null;
+			if (theRequest != null) {
+				subRequest = new SystemRequestDetails(theRequest);
+				subRequest.setRestOperationType(RestOperationTypeEnum.SEARCH_TYPE);
+			}
+
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
+					.add(RequestDetails.class, subRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 
 			try {
@@ -174,15 +200,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 				retVal = new HashSet<>();
 			}
 		}
-
-		if (retVal.size() == 1) {
-			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
-			if (myStorageSettings.isMatchUrlCacheEnabled()) {
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
-			}
-		}
-
 		return retVal;
 	}
 

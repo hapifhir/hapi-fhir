@@ -208,7 +208,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	private void preFetch(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
@@ -233,7 +233,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * Pre-resolve any conditional URLs we can
 		 */
 		preFetchConditionalUrls(
-			theRequestDetails,
+				theRequestDetails,
 				theTransactionDetails,
 				theEntries,
 				theVersionAdapter,
@@ -265,7 +265,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		for (Iterator<JpaPid> it = theIds.iterator(); it.hasNext(); ) {
 			JpaPid pid = it.next();
-			Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
+			Long version = myMemoryCacheService.getIfPresent(
+					MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
 			if (version != null) {
 				it.remove();
 				pid.setVersion(version);
@@ -289,7 +290,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					Long version = tuple.get(1, Long.class);
 					idMap.get(pid).setVersion(version);
 
-					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid, version);
+					myMemoryCacheService.putAfterCommit(
+							MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid, version);
 				}
 			});
 		}
@@ -407,7 +409,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	private void preFetchConditionalUrls(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
@@ -473,7 +475,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				searchParameterMapsToResolve,
 				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
 				map -> preFetchSearchParameterMaps(
-					theRequestDetails,
+						theRequestDetails,
 						theTransactionDetails,
 						theRequestPartitionId,
 						map,
@@ -491,7 +493,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 */
 	@VisibleForTesting
 	public void preFetchSearchParameterMaps(
-		RequestDetails theRequestDetails,
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
@@ -517,22 +519,27 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
-			boolean isSingleToken = false;
-			if (values.size() == 1) {
+			boolean canBeHandledInAggregateQuery = false;
+			if (values.size() == 1 && !myStorageSettings.isInvokePreShowInterceptorsOnConditionalUrlEvaluation()) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
 					buildHashPredicateFromTokenParam(
 							(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
-					isSingleToken = true;
+					canBeHandledInAggregateQuery = true;
 				}
 			}
 
-			if (!isSingleToken) {
-				SearchParameterMap map = next.myMatchUrlSearchMap;
-				Set<JpaPid> outcome = myMatchResourceUrlService.search(map, next.myResourceDefinition.getImplementingClass(), theRequestDetails, null);
-				outcome.forEach(pid -> handleFoundPreFetchResourceId(theTransactionDetails, thePidsToLoadBodiesFor, thePidsToLoadVersionsFor, next, pid));
+			if (!canBeHandledInAggregateQuery) {
+				Set<JpaPid> outcome = myMatchResourceUrlService.processMatchUrl(
+						next.myRequestUrl,
+						next.myResourceDefinition.getImplementingClass(),
+						theTransactionDetails,
+						theRequestDetails,
+						theRequestPartitionId);
+				outcome.forEach(pid -> handleFoundPreFetchResourceId(
+						theTransactionDetails, thePidsToLoadBodiesFor, thePidsToLoadVersionsFor, next, pid));
 			}
 		}
 
@@ -554,14 +561,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				thePidsToLoadVersionsFor);
 
 		// For each SP Map which did not return a result, tag it as not found.
-			theInputParameters.stream()
-					// No matches
-					.filter(match -> !match.myResolved)
-					.forEach(match -> {
-						ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
-						theTransactionDetails.addResolvedMatchUrl(
-								myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
-					});
+		theInputParameters.stream()
+				// No matches
+				.filter(match -> !match.myResolved)
+				.forEach(match -> {
+					ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
+					theTransactionDetails.addResolvedMatchUrl(
+							myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
+				});
 	}
 
 	/**
@@ -637,13 +644,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
 					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
-					handleFoundPreFetchResourceId(theTransactionDetails, theOutputPidsToLoadFully, theOutputPidsToLoadVersionsFor, matchUrl, pid);
+					handleFoundPreFetchResourceId(
+							theTransactionDetails,
+							theOutputPidsToLoadFully,
+							theOutputPidsToLoadVersionsFor,
+							matchUrl,
+							pid);
 				});
 			}
 		}
 	}
 
-	private void handleFoundPreFetchResourceId(TransactionDetails theTransactionDetails, List<JpaPid> theOutputPidsToLoadFully, Set<JpaPid> theOutputPidsToLoadVersionsFor, MatchUrlToResolve theMatchUrl, JpaPid theFoundPid) {
+	private void handleFoundPreFetchResourceId(
+			TransactionDetails theTransactionDetails,
+			List<JpaPid> theOutputPidsToLoadFully,
+			Set<JpaPid> theOutputPidsToLoadVersionsFor,
+			MatchUrlToResolve theMatchUrl,
+			JpaPid theFoundPid) {
 		if (theMatchUrl.myShouldPreFetchResourceBody) {
 			theOutputPidsToLoadFully.add(theFoundPid);
 		}
@@ -651,7 +668,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			theOutputPidsToLoadVersionsFor.add(theFoundPid);
 		}
 		myMatchResourceUrlService.matchUrlResolved(
-			theTransactionDetails, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myRequestUrl, theFoundPid);
+				theTransactionDetails,
+				theMatchUrl.myResourceDefinition.getName(),
+				theMatchUrl.myRequestUrl,
+				theFoundPid);
 		theTransactionDetails.addResolvedMatchUrl(myFhirContext, theMatchUrl.myRequestUrl, theFoundPid);
 		theMatchUrl.setResolved(true);
 	}
@@ -700,7 +720,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
-					theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody, theShouldPreFetchResourceVersion));
+					theRequestUrl,
+					matchUrlSearchMap,
+					resourceDefinition,
+					theShouldPreFetchResourceBody,
+					theShouldPreFetchResourceVersion));
 		}
 	}
 
@@ -805,10 +829,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		private Long myHashSystemAndValue;
 
 		public MatchUrlToResolve(
-			String theRequestUrl,
-			SearchParameterMap theMatchUrlSearchMap,
-			RuntimeResourceDefinition theResourceDefinition,
-			boolean theShouldPreFetchResourceBody, boolean theShouldPreFetchResourceVersion) {
+				String theRequestUrl,
+				SearchParameterMap theMatchUrlSearchMap,
+				RuntimeResourceDefinition theResourceDefinition,
+				boolean theShouldPreFetchResourceBody,
+				boolean theShouldPreFetchResourceVersion) {
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;

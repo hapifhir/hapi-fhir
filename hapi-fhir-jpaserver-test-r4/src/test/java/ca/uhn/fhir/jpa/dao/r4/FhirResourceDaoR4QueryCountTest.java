@@ -57,7 +57,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
@@ -186,6 +190,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private WorkChunk myMockWorkChunk;
 	@Mock
 	private IJobDataSink<ReindexResults> myMockJobDataSinkReindexResults;
+	private AuthorizationInterceptor myAuthInterceptor;
+	private ConsentInterceptor myConsentInterceptor;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -211,6 +217,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		if (myAuthInterceptor != null) {
+			myInterceptorRegistry.unregisterInterceptor(myAuthInterceptor);
+		}
+		if (myConsentInterceptor != null) {
+			myInterceptorRegistry.unregisterInterceptor(myConsentInterceptor);
+		}
 	}
 
 	@Override
@@ -2173,6 +2186,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@Test
 	public void testTransactionWithMultipleUpdates_ResourcesHaveTags() {
+		registerNoOpAuthorizationAndConsentInterceptors();
 
 		AtomicInteger counter = new AtomicInteger(0);
 		Supplier<Bundle> input = () -> {
@@ -2259,17 +2273,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, 1,   2,  1",
-		"SINGLE_TOKEN   , true,  1,   0,  0",
-		"MULTIPLE_TOKEN , false, 10,  11, 10",
-		"MULTIPLE_TOKEN , true,  10,  0,  0",
-		"STRING         , false, 10,  11, 10",
-		"STRING         , true,  10,  0,  0",
+		"SINGLE_TOKEN   , false, false, 1  2  1",
+		"SINGLE_TOKEN   , true,  false, 1  0  0",
+		"SINGLE_TOKEN   , false, true,  10 31 30",
+		"SINGLE_TOKEN   , true,  true,  10 20 20",
+		"MULTIPLE_TOKEN , false, false, 10 11 10",
+		"MULTIPLE_TOKEN , true,  false, 10 0  0",
+		"MULTIPLE_TOKEN , false, true,  10 31 30",
+		"MULTIPLE_TOKEN , true,  true,  10 20 20",
+		"STRING         , false, false, 10 11 10",
+		"STRING         , true,  false, 10 0  0",
+		"STRING         , false, true,  10 31 30",
+		"STRING         , true,  true,  10 20 20",
 	})
-	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
-		// FIXME: register auth and consent interceptors here
+	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, boolean theInvokePreShowInterceptorsOnConditionalUrlEvaluation, String theExpectedCounts) {
+		registerNoOpAuthorizationAndConsentInterceptors();
 
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+		myStorageSettings.setInvokePreShowInterceptorsOnConditionalUrlEvaluation(theInvokePreShowInterceptorsOnConditionalUrlEvaluation);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -2294,25 +2315,27 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return bb.getBundleTyped();
 		};
 
+		String selectCounts = "";
+
 		// Run the first time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input.get());
+		mySystemDao.transaction(new SystemRequestDetails(), input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount0, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += myCaptureQueriesListener.countSelectQueries();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input.get());
+		mySystemDao.transaction(new SystemRequestDetails(), input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount1, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input.get());
+		mySystemDao.transaction(new SystemRequestDetails(), input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount2, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
-
+		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
 
 	/**
@@ -2323,15 +2346,22 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, 1,   4,  4",
-		"SINGLE_TOKEN   , true,  1,   3,  3",
-		"MULTIPLE_TOKEN , false, 10,  13, 13",
-		"MULTIPLE_TOKEN , true,  10,  3,  3",
-		"STRING         , false, 10,  13, 13",
-		"STRING         , true,  10,  3,  3",
+		"SINGLE_TOKEN   , false, false, 1  4  4",
+		"SINGLE_TOKEN   , true,  false, 1  3  3",
+		"SINGLE_TOKEN   , false, true,  10 13 13",
+		"SINGLE_TOKEN   , true,  true,  10 3  3",
+		"MULTIPLE_TOKEN , false, false, 10 13 13",
+		"MULTIPLE_TOKEN , true,  false, 10 3  3",
+		"MULTIPLE_TOKEN , false, true,  10 13 13",
+		"MULTIPLE_TOKEN , true,  true,  10 3  3",
+		"STRING         , false, false, 10 13 13",
+		"STRING         , true,  false, 10 3  3",
+		"STRING         , false, true,  10 13 13",
+		"STRING         , true,  true,  10 3  3",
 	})
-	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectedSelectCount0, int theExpectedSelectCount1, int theExpectedSelectCount2) {
+	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, boolean theInvokePreShowInterceptorsOnConditionalUrlEvaluation, String theExpectedCounts) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+		myStorageSettings.setInvokePreShowInterceptorsOnConditionalUrlEvaluation(theInvokePreShowInterceptorsOnConditionalUrlEvaluation);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -2357,25 +2387,27 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return bb.getBundleTyped();
 		};
 
+		String selectCounts = "";
+
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount0, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += myCaptureQueriesListener.countSelectQueries();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount1, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(theExpectedSelectCount2, myCaptureQueriesListener.countSelectQueries());
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
-
+		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
 
 	/**
@@ -2472,7 +2504,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myCaptureQueriesListener.clear();
 			mySystemDao.transaction(mySrd, input);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 			assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(authorizationInterceptor);
@@ -4361,6 +4393,23 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			p.addIdentifier().setSystem("urn:system").setValue("2");
 			return myPatientDao.create(p, mySrd).getId().toUnqualified();
 		});
+	}
+
+	/**
+	 * Register an {@link AuthorizationInterceptor} and a {@link ConsentInterceptor}
+	 * since these will cause the {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESHOW_RESOURCES}
+	 * and other pointcuts to be registered, which can cause additional DB logic to happen.
+	 */
+	private void registerNoOpAuthorizationAndConsentInterceptors() {
+		myAuthInterceptor = new AuthorizationInterceptor() {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder().allowAll().build();
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(myAuthInterceptor);
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
+		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
 	}
 
 }
