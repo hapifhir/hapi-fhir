@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -38,7 +38,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
-	protected ISubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;

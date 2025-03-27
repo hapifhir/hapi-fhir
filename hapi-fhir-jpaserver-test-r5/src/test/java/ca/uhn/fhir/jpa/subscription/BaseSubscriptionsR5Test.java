@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -82,7 +82,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
-	protected ISubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();

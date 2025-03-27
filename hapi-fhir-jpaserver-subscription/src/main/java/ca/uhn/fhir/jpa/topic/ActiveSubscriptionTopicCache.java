@@ -69,9 +69,9 @@ public class ActiveSubscriptionTopicCache {
 		myCache.remove(theSubscriptionTopicId);
 	}
 
-    public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
+	public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
 		return myCache.values().stream()
-			.filter(t -> t.getUrl().equals(theTopicUrl))
-			.findFirst();
-    }
+				.filter(t -> t.getUrl().equals(theTopicUrl))
+				.findFirst();
+	}
 }

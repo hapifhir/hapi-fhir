@@ -224,7 +224,7 @@ public class MatchUrlService {
 		return ReflectionUtil.newInstance(clazz);
 	}
 
-	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId, Flag...theFlags) {
+	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId, Flag... theFlags) {
 		RuntimeResourceDefinition resourceDefinition;
 		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);
 		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition, theFlags);
@@ -235,7 +235,7 @@ public class MatchUrlService {
 		return getResourceSearch(theUrl, null);
 	}
 
-	public ResourceSearch getResourceSearch(String theUrl, Flag... theFlags) {
+	public ResourceSearch getResourceSearchForUrlAndFlags(String theUrl, Flag... theFlags) {
 		return getResourceSearch(theUrl, null, theFlags);
 	}
 

@@ -119,7 +119,7 @@ public final class SubscriptionTopicCanonicalizer {
 						InteractionTrigger.fromCode(ext.getValue().primitiveValue()));
 			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_FHIRPATH_CRITERIA.equals(url)) {
 				trigger.setFhirPathCriteria(ext.getValue().primitiveValue());
-			} else if ("queryCriteria".equals(url)) {
+			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA.equals(url)) {
 				// Process the queryCriteria extension
 				processQueryCriteria(ext, trigger);
 			}
@@ -138,11 +138,11 @@ public final class SubscriptionTopicCanonicalizer {
 		for (Extension ext : theQueryCriteriaExtension.getExtension()) {
 			String url = ext.getUrl();
 
-			if ("previous".equals(url)) {
+			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS.equals(url)) {
 				queryCriteria.setPrevious(ext.getValue().primitiveValue());
-			} else if ("current".equals(url)) {
+			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT.equals(url)) {
 				queryCriteria.setCurrent(ext.getValue().primitiveValue());
-			} else if ("requireBoth".equals(url)) {
+			} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH.equals(url)) {
 				queryCriteria.setRequireBoth(Boolean.valueOf(ext.getValue().primitiveValue()));
 			}
 		}

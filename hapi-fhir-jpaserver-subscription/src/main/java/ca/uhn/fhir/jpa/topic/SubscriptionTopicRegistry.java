@@ -50,7 +50,7 @@ public class SubscriptionTopicRegistry {
 		myActiveSubscriptionTopicCache.remove(theSubscriptionTopicId);
 	}
 
-    public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
+	public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
 		return myActiveSubscriptionTopicCache.findSubscriptionTopicByUrl(theTopicUrl);
-    }
+	}
 }

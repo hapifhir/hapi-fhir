@@ -22,13 +22,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -56,19 +55,19 @@ class MdmSubscriptionLoaderR5Test {
     MdmSubscriptionLoader mySvc = new MdmSubscriptionLoader();
 
     @AfterEach
-    public void after() {
+	void after() {
         verifyNoMoreInteractions(mySubscriptionTopicDao);
     }
 
 	@Test
-	public void testDaoUpdateMdmSubscriptions_withR5FhirContext_createsCorrectSubscriptions() {
+	void testDaoUpdateMdmSubscriptions_withR5FhirContext_createsCorrectSubscriptions() {
 		// setup
 		MdmRulesJson mdmRulesJson = new MdmRulesJson();
-		mdmRulesJson.setMdmTypes(Arrays.asList("Patient"));
+		mdmRulesJson.setMdmTypes(List.of("Patient"));
 		when(myMdmSettings.getMdmRules()).thenReturn(mdmRulesJson);
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("Test");
-		when(myDaoRegistry.getResourceDao(eq("Subscription"))).thenReturn(mySubscriptionDao);
-        when(myDaoRegistry.getResourceDao(eq("SubscriptionTopic"))).thenReturn(mySubscriptionTopicDao);
+		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
+        when(myDaoRegistry.getResourceDao("SubscriptionTopic")).thenReturn(mySubscriptionTopicDao);
 		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 
 		// execute

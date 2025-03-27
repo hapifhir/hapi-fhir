@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
@@ -24,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();

@@ -85,12 +85,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
-	@Test
-	public void testSubscriptionTopicRegistryBean() {
-		// This bean should not exist in R4
-		assertNull(mySubscriptionTopicRegistry);
-	}
-
 	/**
 	 * Make sure that if we delete a subscription, then reinstate it with a criteria
 	 * that changes the database mode we don't store both versioning modes

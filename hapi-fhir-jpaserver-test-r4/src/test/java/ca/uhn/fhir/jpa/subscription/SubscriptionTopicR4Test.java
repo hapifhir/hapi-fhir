@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicBuilder;
+import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -24,8 +24,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.hl7.fhir.r5.model.SubscriptionStatus.SubscriptionNotificationType;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,7 +48,7 @@ public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
-	protected ISubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected R4SubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	protected IFhirResourceDao<Basic> myBasicDao;

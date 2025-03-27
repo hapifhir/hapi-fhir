@@ -193,7 +193,7 @@ public class R4SubscriptionTopicBuilder {
 	 */
 	public R4SubscriptionTopicBuilder addResourceTriggerQueryCriteria() {
 		checkCurrentResourceTrigger();
-		Extension queryCriteria = new Extension().setUrl("queryCriteria");
+		Extension queryCriteria = new Extension().setUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA);
 		myCurrentResourceTrigger.addExtension(queryCriteria);
 		return this;
 	}
@@ -204,7 +204,7 @@ public class R4SubscriptionTopicBuilder {
 	public R4SubscriptionTopicBuilder setResourceTriggerQueryCriteriaPrevious(String thePreviousQuery) {
 		checkCurrentResourceTrigger();
 		Extension queryCriteria = getOrCreateQueryCriteriaExtension();
-		queryCriteria.addExtension(new Extension().setUrl("previous").setValue(new StringType(thePreviousQuery)));
+		queryCriteria.addExtension(new Extension().setUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS).setValue(new StringType(thePreviousQuery)));
 		return this;
 	}
 
@@ -214,7 +214,7 @@ public class R4SubscriptionTopicBuilder {
 	public R4SubscriptionTopicBuilder setResourceTriggerQueryCriteriaCurrent(String theCurrentQuery) {
 		checkCurrentResourceTrigger();
 		Extension queryCriteria = getOrCreateQueryCriteriaExtension();
-		queryCriteria.addExtension(new Extension().setUrl("current").setValue(new StringType(theCurrentQuery)));
+		queryCriteria.addExtension(new Extension().setUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT).setValue(new StringType(theCurrentQuery)));
 		return this;
 	}
 
@@ -224,7 +224,7 @@ public class R4SubscriptionTopicBuilder {
 	public R4SubscriptionTopicBuilder setResourceTriggerQueryCriteriaRequireBoth(boolean theRequireBoth) {
 		checkCurrentResourceTrigger();
 		Extension queryCriteria = getOrCreateQueryCriteriaExtension();
-		queryCriteria.addExtension(new Extension().setUrl("requireBoth").setValue(new BooleanType(theRequireBoth)));
+		queryCriteria.addExtension(new Extension().setUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH).setValue(new BooleanType(theRequireBoth)));
 		return this;
 	}
 
@@ -349,11 +349,11 @@ public class R4SubscriptionTopicBuilder {
 
 	private Extension getOrCreateQueryCriteriaExtension() {
 		for (Extension extension : myCurrentResourceTrigger.getExtension()) {
-			if ("queryCriteria".equals(extension.getUrl())) {
+			if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA.equals(extension.getUrl())) {
 				return extension;
 			}
 		}
-		Extension queryCriteria = new Extension().setUrl("queryCriteria");
+		Extension queryCriteria = new Extension().setUrl(SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA);
 		myCurrentResourceTrigger.addExtension(queryCriteria);
 		return queryCriteria;
 	}

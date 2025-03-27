@@ -90,6 +90,12 @@ public class SubscriptionConstants {
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_INCLUDE = "include";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_REVINCLUDE = "revInclude";
 
+	// Query criteria related constants
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA = "queryCriteria";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS = "previous";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT = "current";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH = "requireBoth";
+
 	public static final int ORDER_SUBSCRIPTION_VALIDATING = 100;
 	public static final int ORDER_SUBSCRIPTION_ACTIVATING = 200;
 }

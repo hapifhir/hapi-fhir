@@ -76,7 +76,6 @@ public class MdmSubscriptionLoader {
 	private ISubscriptionTopicLoader mySubscriptionTopicLoader;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
-	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
 	public synchronized void daoUpdateMdmSubscriptions() {
 		List<IBaseResource> subscriptions;
@@ -112,7 +111,7 @@ public class MdmSubscriptionLoader {
 			updateIfNotPresent(subscription);
 		}
 		// After loading all the subscriptions, sync the subscriptions to the registry.
-		if (subscriptions != null && subscriptions.size() > 0) {
+		if (!subscriptions.isEmpty()) {
 			mySubscriptionLoader.syncDatabaseToCache();
 		}
 	}
@@ -121,14 +120,14 @@ public class MdmSubscriptionLoader {
 		try {
 			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
-			ourLog.info("Creating subscription " + theSubscription.getIdElement());
+			ourLog.info("Creating subscription {}", theSubscription.getIdElement());
 			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
 		}
 	}
 
 	synchronized void updateSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) {
-		mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
+		IFhirResourceDao<SubscriptionTopic> subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		subscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
 	}
 
 	protected ChannelProducerSettings getChannelProducerSettings() {

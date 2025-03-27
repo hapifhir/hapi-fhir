@@ -38,4 +38,9 @@ public interface IResourceChangeListener {
 	 * Called by the {@link IResourceChangeListenerRegistry} when matching resource changes are detected
 	 */
 	void handleChange(IResourceChangeEvent theResourceChangeEvent);
+
+	/**
+	 * Update the cache to ensure it contains all the required resources from the database
+	 */
+	void syncDatabaseToCache();
 }
