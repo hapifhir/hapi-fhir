@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
+
+import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.RequestGroup;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -5171,6 +5175,25 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(resp.getEntry()).hasSize(expectedEntries);
 		assertEquals(status201, resp.getEntry().get(0).getResponse().getStatus());
 		assertEquals(status204, resp.getEntry().get(1).getResponse().getStatus());
+	}
+
+	@Test
+	public void testTransaction_withPlaceholderIdReferences_referencesResolveSuccessfully() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.setId("A123");
+		myPatientDao.update(p, mySrd);
+
+		String bundleString = ClasspathUtil.loadResource("/transaction-bundles/transaction-bundle.json");
+		Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		Bundle resp = mySystemDao.transaction(null, input);
+		assertThat(resp.getEntry()).hasSize(2);
+		resp.getEntry().stream().map(bundleEntry -> bundleEntry.getResponse().getStatus()).forEach(statusMessage -> assertThat(statusMessage).isEqualTo("201 Created"));
+		List<String> createdResources = resp.getEntry().stream().map(b->b.getResponse().getLocation()).toList();
+		assertThat(createdResources)
+			.hasSize(2)
+			.allMatch(resourceLocation -> resourceLocation.contains("MessageHeader") || resourceLocation.contains("RequestGroup"));
 	}
 
 }
