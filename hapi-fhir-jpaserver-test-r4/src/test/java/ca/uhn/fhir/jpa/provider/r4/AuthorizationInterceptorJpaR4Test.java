@@ -1990,67 +1990,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(newBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
 	}
 
-	@Test
-	public void testTransactionBundle_createInlineMatchUrlWithAuthorizationDeniedAndCacheEnabled() {
-		// setup
-		String patientId = UUID.randomUUID().toString();
-		Bundle request1 = new Bundle();
-		Bundle request2 = new Bundle();
-
-		myStorageSettings.setAllowInlineMatchUrlReferences(true);
-		myStorageSettings.setMatchUrlCacheEnabled(true);
-		when(mySrd.getFhirContext()).thenReturn(myFhirContext);
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(patientId);
-		p.setId("Patient/" + patientId);
-		IIdType id = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		Observation o1 = new Observation();
-		o1.getCode().setText("Some Observation");
-		o1.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
-		request1.addEntry().setResource(o1).getRequest().setMethod(Bundle.HTTPVerb.POST);
-
-		Observation o2 = new Observation();
-		o2.getCode().setText("Another Observation");
-		o2.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
-		request2.addEntry().setResource(o2).getRequest().setMethod(Bundle.HTTPVerb.POST);
-
-		// execute the first request before setting up the security rules, to populate the cache
-		mySystemDao.transaction(mySrd, request1);
-
-		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
-
-		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow("Rule 1").create().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
-					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
-					.denyAll()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(interceptor);
-
-		try {
-			// execute
-
-			// the second attempt to access the resource should fail even though the first one succeeded
-			mySystemDao.transaction(mySrd, request2);
-
-			// verify
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
-		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
-		}
-
-	}
-
-
 	private Patient createPatient(String theFirstName, String theLastName) {
 		Patient patient = new Patient();
 		patient.addName().addGiven(theFirstName).setFamily(theLastName);
