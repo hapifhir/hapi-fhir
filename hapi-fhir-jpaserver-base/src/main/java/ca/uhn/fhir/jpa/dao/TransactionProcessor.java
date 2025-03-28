@@ -92,7 +92,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
-	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
+	public static final Pattern MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
@@ -527,7 +527,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
 			boolean canBeHandledInAggregateQuery = false;
-			if (values.size() == 1) {
+			if (values.size() == 1 && (myStorageSettings.isMatchUrlCacheEnabled() || myStorageSettings.isMassIngestionMode())) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
@@ -722,7 +722,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetchBodiesFor.add(cachedId);
 			}
-		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(theRequestUrl).find()) {
+		} else if (MATCH_URL_PATTERN.matcher(theRequestUrl).find()) {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);

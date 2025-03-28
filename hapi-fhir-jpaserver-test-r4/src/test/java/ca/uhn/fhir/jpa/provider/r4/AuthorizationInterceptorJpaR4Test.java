@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperation;
@@ -26,6 +27,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleBuilder;
@@ -86,12 +88,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -1985,6 +1989,67 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Patient savedPatient = (Patient) allPatients.get(0);
 		assertEquals(newBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
 	}
+
+	@Test
+	public void testTransactionBundle_createInlineMatchUrlWithAuthorizationDeniedAndCacheEnabled() {
+		// setup
+		String patientId = UUID.randomUUID().toString();
+		Bundle request1 = new Bundle();
+		Bundle request2 = new Bundle();
+
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(false);
+		when(mySrd.getFhirContext()).thenReturn(myFhirContext);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(patientId);
+		p.setId("Patient/" + patientId);
+		IIdType id = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Observation o1 = new Observation();
+		o1.getCode().setText("Some Observation");
+		o1.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request1.addEntry().setResource(o1).getRequest().setMethod(Bundle.HTTPVerb.POST);
+
+		Observation o2 = new Observation();
+		o2.getCode().setText("Another Observation");
+		o2.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
+		request2.addEntry().setResource(o2).getRequest().setMethod(Bundle.HTTPVerb.POST);
+
+		// execute the first request before setting up the security rules, to populate the cache
+		mySystemDao.transaction(mySrd, request1);
+
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
+					.denyAll()
+					.build();
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		try {
+			// execute
+
+			// the second attempt to access the resource should fail even though the first one succeeded
+			mySystemDao.transaction(mySrd, request2);
+
+			// verify
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+
+	}
+
 
 	private Patient createPatient(String theFirstName, String theLastName) {
 		Patient patient = new Patient();
