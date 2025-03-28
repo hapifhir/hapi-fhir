@@ -34,12 +34,12 @@ import org.springframework.context.annotation.Lazy;
 @Import(SubscriptionConfig.class)
 public class SubscriptionTopicConfig {
 	@Bean
-	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
+	public SubscriptionTopicMatchingListener subscriptionTopicMatchingSubscriber(
 			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
-				return new SubscriptionTopicMatchingSubscriber(theFhirContext, memoryCacheService);
+				return new SubscriptionTopicMatchingListener(theFhirContext, memoryCacheService);
 			default:
 				return null;
 		}
@@ -70,11 +70,11 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	public SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
+	public SubscriptionTopicRegisteringListener subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R5:
 			case R4B:
-				return new SubscriptionTopicRegisteringSubscriber();
+				return new SubscriptionTopicRegisteringListener();
 			default:
 				return null;
 		}

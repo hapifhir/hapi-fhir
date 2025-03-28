@@ -35,6 +35,15 @@ public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotif
 		super();
 	}
 
+	@Override
+	@Nonnull
+	public String getMessageKey() {
+		// We assume that preserving chunk order does not matter, so we want to spread work as much across the cluster
+		// as possible even if it means chunks are processed out of order. If we wanted to preserve order, we would
+		// use instanceId instead. This may need to change by job type in the future...
+		return myPayload.getChunkId();
+	}
+
 	/**
 	 * Constructor
 	 */

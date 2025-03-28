@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -46,7 +46,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	@Autowired
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
+	private SubscriptionActivatingListener mySubscriptionActivatingInterceptor;
 
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;

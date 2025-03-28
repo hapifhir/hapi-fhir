@@ -93,7 +93,7 @@ public class HapiMessageHeaders implements IModelJson {
 		return this.headers;
 	}
 
-	public MessageHeaders toMessageHeaders() {
+	public Map<String, Object> toMessageHeaders() {
 		Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
 		returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
 		returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
