@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.sp;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +36,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SearchParamIdentityCacheSvcImplTest {
+class SearchParamIdentityCacheSvcImplTest {
+
+	private static final Long PATIENT_GIVEN_HASH_IDENTITY = BaseResourceIndexedSearchParam
+		.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", "given");
 
 	@InjectMocks
 	SearchParamIdentityCacheSvcImpl mySearchParamIdentityCacheSvc;
@@ -45,19 +51,19 @@ public class SearchParamIdentityCacheSvcImplTest {
 	PlatformTransactionManager myTxManager;
 
 	@Mock
-	ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
+	ISearchParamRegistry mySearchParamRegistry;
 
 	@Spy
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
 
 	@Test
-	public void findOrCreateSearchParamIdentity_identityExistsInCache_searchNotExecuted() {
+	void findOrCreateSearchParamIdentity_identityExistsInCache_searchNotExecuted() {
 		// setup
 		doReturn(12345).when(myMemoryCacheService)
 			.getIfPresent(eq(MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY), anyLong());
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -66,12 +72,12 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_missingInCacheMissingInDb_saveExecutedOnce() {
+	void findOrCreateSearchParamIdentity_missingInCacheMissingInDb_saveExecutedOnce() {
 		// setup
 		mockSearchParamIdentitySave();
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -81,13 +87,13 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_missingInCacheThanCacheHit_findNotExecuted() {
+	void findOrCreateSearchParamIdentity_missingInCacheThanCacheHit_findNotExecuted() {
 		// setup - first cache invocation returns null (cache miss), second invocation returns 12345 (cache hit)
 		doReturn(null).doReturn(12345).when(myMemoryCacheService)
 			.getIfPresent(eq(MemoryCacheService.CacheEnum.HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY), anyLong());
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -96,13 +102,13 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_missingInDbSaveFailedRetryable_saveRetried() {
+	void findOrCreateSearchParamIdentity_missingInDbSaveFailedRetryable_saveRetried() {
 		// setup
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
 			.thenThrow(new DataIntegrityViolationException("Entity Exists!"));
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -113,7 +119,7 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_missingInDbSaveFailedThanSucceed_saveRetriedOnce() {
+	void findOrCreateSearchParamIdentity_missingInDbSaveFailedThanSucceed_saveRetriedOnce() {
 		// setup
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
 			.thenThrow(new DataIntegrityViolationException("Save Failed!")).thenAnswer(invocation -> {
@@ -123,7 +129,7 @@ public class SearchParamIdentityCacheSvcImplTest {
 			});
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -134,13 +140,13 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_missingInDbSaveFailedNonRetryable_saveNotRetried() {
+	void findOrCreateSearchParamIdentity_missingInDbSaveFailedNonRetryable_saveNotRetried() {
 		// setup
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
 			.thenThrow(new RuntimeException("Save Failed!"));
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -151,7 +157,7 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_existsInDb_saveNotExecuted() {
+	void findOrCreateSearchParamIdentity_existsInDb_saveNotExecuted() {
 		// setup
 		IndexedSearchParamIdentity identity = new IndexedSearchParamIdentity();
 		identity.setSpIdentityId(12345);
@@ -159,7 +165,7 @@ public class SearchParamIdentityCacheSvcImplTest {
 			.thenReturn(identity);
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -170,14 +176,14 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_withInitCache_findNotExecuted() {
+	void findOrCreateSearchParamIdentity_withInitCache_findNotExecuted() {
 		// setup
 		when(myResourceIndexedSearchParamIdentityDao.getAllHashIdentities())
-			.thenReturn(Collections.singletonList(new Object[]{-7533943853970611242L, 12345}));
+			.thenReturn(Collections.singletonList(new Object[]{PATIENT_GIVEN_HASH_IDENTITY, 12345}));
 		mySearchParamIdentityCacheSvc.initCache();
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -188,18 +194,18 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_withInitCacheAndSpRegistryPreFill_saveExecutedOnce() {
+	void findOrCreateSearchParamIdentity_withInitCacheAndSpRegistryPreFill_saveExecutedOnce() {
 		// setup
 		Map<Long, IndexedSearchParam> searchParamRegistry = new HashMap<>();
-		searchParamRegistry.put(-7533943853970611242L, new IndexedSearchParam("given", "Patient"));
-		when(mySearchParamHashIdentityRegistry.getHashIdentityToIndexedSearchParamMap())
-			.thenReturn(searchParamRegistry);
+		searchParamRegistry.put(PATIENT_GIVEN_HASH_IDENTITY, new IndexedSearchParam("given", "Patient"));
+		when(mySearchParamRegistry.isInitialized()).thenReturn(true);
+		when(mySearchParamRegistry.getHashIdentityToIndexedSearchParamMap()).thenReturn(searchParamRegistry);
 		mockSearchParamIdentitySave();
 		mySearchParamIdentityCacheSvc.initCache();
 		waitOneSecond();
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given");
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify
 		waitOneSecond();
@@ -210,14 +216,37 @@ public class SearchParamIdentityCacheSvcImplTest {
 	}
 
 	@Test
-	public void findOrCreateSearchParamIdentity_multipleThreadsCreateSameSearchParam_saveExecutedOnce() throws InterruptedException {
+	void findOrCreateSearchParamIdentity_withInitCacheAndDatabasePreFill_saveExecutedOnce() {
+		// setup
+		when(myResourceIndexedSearchParamIdentityDao.getAllHashIdentities())
+			.thenReturn(Collections.singletonList(new Object[]{PATIENT_GIVEN_HASH_IDENTITY, 12345}));
+		Map<Long, IndexedSearchParam> searchParamRegistry = new HashMap<>();
+		searchParamRegistry.put(PATIENT_GIVEN_HASH_IDENTITY, new IndexedSearchParam("given", "Patient"));
+		when(mySearchParamRegistry.isInitialized()).thenReturn(true);
+		when(mySearchParamRegistry.getHashIdentityToIndexedSearchParamMap()).thenReturn(searchParamRegistry);
+
+		// execute
+		mySearchParamIdentityCacheSvc.initCache();
+		waitOneSecond();
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
+
+		// verify
+		waitOneSecond();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(myResourceIndexedSearchParamIdentityDao, times(0)).getSearchParameterIdByHashIdentity(anyLong());
+			verify(myResourceIndexedSearchParamIdentityDao, times(0)).save(any(IndexedSearchParamIdentity.class));
+		});
+	}
+
+	@Test
+	void findOrCreateSearchParamIdentity_multipleThreadsCreateSameSearchParam_saveExecutedOnce() throws InterruptedException {
 		// setup
 		mockSearchParamIdentitySave();
 
 		// execute
 		ExecutorService executor = Executors.newFixedThreadPool(50);
 		for (int i = 0; i < 50; i++) {
-			executor.submit(() -> mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(-7533943853970611242L, "Patient", "given"));
+			executor.submit(() -> mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given"));
 		}
 		executor.shutdown();
 

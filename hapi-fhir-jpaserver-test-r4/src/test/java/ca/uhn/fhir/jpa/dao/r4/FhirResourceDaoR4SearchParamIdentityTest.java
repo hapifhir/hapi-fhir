@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * This test verifies that IndexedSearchParamIdentities are created after reading from or writing to the HFJ_SPIDX_* tables.
  */
-public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
+class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 
 	@AfterEach
 	void cleanUp() {
@@ -50,7 +50,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_createPatientInTransaction_searchParamIdentityCreatedAfterCommit() {
+	void createSearchParamIdentity_createPatientInTransaction_searchParamIdentityCreatedAfterCommit() {
 		runInTransaction(() -> {
 			// setup
 			Patient p = new Patient();
@@ -75,7 +75,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_createPatient_searchParamIdentityCreated() {
+	void createSearchParamIdentity_createPatient_searchParamIdentityCreated() {
 		// setup
 		Patient p = new Patient();
 		p.setBirthDateElement(new DateType("2021-02-22"));
@@ -88,7 +88,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_withSetIncludeHashIdentityForTokenSearches_searchParamIdentityCreated() {
+	void createSearchParamIdentity_withSetIncludeHashIdentityForTokenSearches_searchParamIdentityCreated() {
 		// setup
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(true);
 
@@ -104,7 +104,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 
 
 	@Test
-	public void testSearchParamIdentity_stringFilterSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_stringFilterSearch_searchParamIdentityCreated() {
 		// setup
 		myStorageSettings.setFilterParameterEnabled(true);
 		SearchParameterMap map = new SearchParameterMap();
@@ -120,7 +120,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		"DISABLED, false",
 		"ENABLED , true"
 	})
-	public void testSearchParamIdentity_missingSearch_searchParamIdentityCreated(
+	void createSearchParamIdentity_missingSearch_searchParamIdentityCreated(
 		StorageSettings.IndexEnabledEnum theIndexEnabled,
 		boolean theIndexStorageOptimized) {
 		// setup
@@ -138,7 +138,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_uriBelowSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_uriBelowSearch_searchParamIdentityCreated() {
 		// setup
 		SearchParameterMap map = new SearchParameterMap();
 		UriParam param = new UriParam();
@@ -152,7 +152,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_coordsSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_coordsSearch_searchParamIdentityCreated() {
 		SearchParameterMap map = new SearchParameterMap();
 		SpecialParam param = new SpecialParam();
 		param.setValue("43.7|79.4");
@@ -164,7 +164,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_dateSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_dateSearch_searchParamIdentityCreated() {
 		SearchParameterMap map = new SearchParameterMap();
 		DateParam param = new DateParam("2021-02-22");
 		map.add(Patient.SP_BIRTHDATE, param);
@@ -175,7 +175,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_numberSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_numberSearch_searchParamIdentityCreated() {
 		SearchParameterMap map = new SearchParameterMap();
 		NumberParam param = new NumberParam(15);
 		map.add(RiskAssessment.SP_PROBABILITY, param);
@@ -186,7 +186,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_quantitySearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_quantitySearch_searchParamIdentityCreated() {
 		SearchParameterMap map = new SearchParameterMap();
 		QuantityParam param = new QuantityParam(123);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
@@ -197,7 +197,7 @@ public class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamIdentity_tokenSortSearch_searchParamIdentityCreated() {
+	void createSearchParamIdentity_tokenSortSearch_searchParamIdentityCreated() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender"));
 

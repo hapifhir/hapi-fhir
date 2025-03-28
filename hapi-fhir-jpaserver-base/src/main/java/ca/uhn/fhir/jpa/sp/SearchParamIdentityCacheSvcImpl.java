@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.sp;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -38,12 +40,12 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -54,25 +56,29 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
 	private static final int THREAD_POOL_QUEUE_SIZE = 1000;
+	private static final int MAX_PRE_FILL_ATTEMPTS = 10;
+	private final AtomicInteger myPreFillAttempts = new AtomicInteger(0);
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
-	private final ExecutorService myThreadPool;
-	private final ISearchParamHashIdentityRegistry mySearchParamHashIdentityRegistry;
+	private final ThreadPoolTaskExecutor myThreadPoolTaskExecutor;
+	private final ScheduledExecutorService myPreFillTaskExecutor;
+	private final ISearchParamRegistry mySearchParamRegistry;
 	private final MemoryCacheService myMemoryCacheService;
 	private final UniqueTaskExecutor myUniqueTaskExecutor;
 
 	public SearchParamIdentityCacheSvcImpl(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
-			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
+			ISearchParamRegistry theSearchParamRegistry,
 			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
 		mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
-		mySearchParamHashIdentityRegistry = theSearchParamHashIdentityRegistry;
+		mySearchParamRegistry = theSearchParamRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		myThreadPool = createExecutor();
+		myThreadPoolTaskExecutor = createExecutor();
+		myPreFillTaskExecutor = Executors.newSingleThreadScheduledExecutor();
 		myMemoryCacheService = theMemoryCacheService;
-		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPool, myMemoryCacheService);
+		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPoolTaskExecutor, myMemoryCacheService);
 	}
 
 	/**
@@ -84,22 +90,9 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 * If the queue is full and all threads are busy, new tasks are silently
 	 * discarded using {@link ThreadPoolExecutor.DiscardPolicy}.
 	 */
-	private ExecutorService createExecutor() {
-		ThreadFactory threadFactory = r -> {
-			Thread t = new Thread(r);
-			t.setName(CACHE_THREAD_PREFIX + t.getId());
-			t.setDaemon(false);
-			return t;
-		};
-
-		return new ThreadPoolExecutor(
-				1,
-				1,
-				0L,
-				TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<>(THREAD_POOL_QUEUE_SIZE),
-				threadFactory,
-				new ThreadPoolExecutor.DiscardPolicy());
+	private ThreadPoolTaskExecutor createExecutor() {
+		return ThreadPoolUtil.newThreadPool(
+				1, 1, CACHE_THREAD_PREFIX, THREAD_POOL_QUEUE_SIZE, new ThreadPoolExecutor.DiscardPolicy());
 	}
 
 	@PostConstruct
@@ -109,12 +102,13 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 	@PreDestroy
 	public void preDestroy() {
-		myThreadPool.shutdown();
+		myThreadPoolTaskExecutor.shutdown();
+		myPreFillTaskExecutor.shutdown();
 	}
 
 	/**
 	 * Initializes the cache by preloading search parameter identities {@link IndexedSearchParamIdentity}
-	 * from the database and the search parameter registry {@link ISearchParamHashIdentityRegistry}.
+	 * from the database and the search parameter registry {@link ISearchParamRegistry}.
 	 */
 	protected void initCache() {
 		// populate cache with IndexedSearchParamIdentities from database
@@ -123,24 +117,55 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 		spIdentities.forEach(
 				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Integer) i[1]));
 
-		// pre-fill cache with SearchParamIdentities from SearchParamRegistry
-		mySearchParamHashIdentityRegistry
-				.getHashIdentityToIndexedSearchParamMap()
-				.forEach((hashIdentity, indexedSearchParam) -> {
-					if (CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, hashIdentity) == null) {
-						PersistSearchParameterIdentityTask persistSpIdentityTask =
-								new PersistSearchParameterIdentityTask.Builder()
-										.hashIdentity(hashIdentity)
-										.resourceType(indexedSearchParam.getResourceType())
-										.paramName(indexedSearchParam.getParameterName())
-										.memoryCacheService(myMemoryCacheService)
-										.txTemplate(myTxTemplate)
-										.searchParamIdentityDao(mySearchParamIdentityDao)
-										.build();
+		// schedule cache pre-fill with SearchParamIdentities from SearchParamRegistry
+		myPreFillTaskExecutor.scheduleAtFixedRate(
+				this::preFillSearchParameterIdentitiesFromRegistry, 0, 10, TimeUnit.SECONDS);
+		preFillSearchParameterIdentitiesFromRegistry();
+	}
 
-						myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
-					}
-				});
+	/**
+	 * Pre-fills the cache with Search Parameter Identities from the SearchParamRegistry.
+	 * <p>
+	 * Scheduled with a 10-second delay to allow the SearchParamRegistry to initialize.
+	 * If the registry is not initialized after 10 attempts, the pre-fill is skipped.
+	 */
+	private void preFillSearchParameterIdentitiesFromRegistry() {
+		if (!mySearchParamRegistry.isInitialized()) {
+			int attempts = myPreFillAttempts.incrementAndGet();
+			if (attempts >= MAX_PRE_FILL_ATTEMPTS) {
+				myPreFillTaskExecutor.shutdown();
+			}
+			return;
+		}
+
+		try {
+			mySearchParamRegistry
+					.getHashIdentityToIndexedSearchParamMap()
+					.forEach((hashIdentity, indexedSearchParam) -> {
+						if (CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, hashIdentity) == null) {
+							submitPersistSearchParameterIdentityTask(
+									hashIdentity,
+									indexedSearchParam.getResourceType(),
+									indexedSearchParam.getParameterName());
+						}
+					});
+		} finally {
+			myPreFillTaskExecutor.shutdown();
+		}
+	}
+
+	private void submitPersistSearchParameterIdentityTask(
+			Long hashIdentity, String theResourceType, String theSearchParamName) {
+		PersistSearchParameterIdentityTask persistSpIdentityTask = new PersistSearchParameterIdentityTask.Builder()
+				.hashIdentity(hashIdentity)
+				.resourceType(theResourceType)
+				.paramName(theSearchParamName)
+				.memoryCacheService(myMemoryCacheService)
+				.txTemplate(myTxTemplate)
+				.searchParamIdentityDao(mySearchParamIdentityDao)
+				.build();
+
+		myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
 	}
 
 	/**
@@ -166,26 +191,16 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 			return;
 		}
 
-		// cache miss, create PersistSearchParameterIdentityTask to execute it in separate thread
-		PersistSearchParameterIdentityTask persistSpIdentityTask = new PersistSearchParameterIdentityTask.Builder()
-				.hashIdentity(theHashIdentity)
-				.resourceType(theResourceType)
-				.paramName(theParamName)
-				.memoryCacheService(myMemoryCacheService)
-				.txTemplate(myTxTemplate)
-				.searchParamIdentityDao(mySearchParamIdentityDao)
-				.build();
-
-		// submit PersistSearchParameterIdentityTask only if current transaction was commited
+		// cache miss, submit PersistSearchParameterIdentityTask to execute it in separate thread
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+					submitPersistSearchParameterIdentityTask(theHashIdentity, theResourceType, theParamName);
 				}
 			});
 		} else {
-			myUniqueTaskExecutor.submitIfAbsent(persistSpIdentityTask);
+			submitPersistSearchParameterIdentityTask(theHashIdentity, theResourceType, theParamName);
 		}
 	}
 
@@ -373,11 +388,11 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 * If a task is already in progress, it will not be scheduled again.
 	 */
 	private static class UniqueTaskExecutor {
-		private final ExecutorService myExecutor;
+		private final ThreadPoolTaskExecutor myTaskExecutor;
 		private final MemoryCacheService myMemoryCacheService;
 
-		public UniqueTaskExecutor(ExecutorService theExecutor, MemoryCacheService theMemoryCacheService) {
-			myExecutor = theExecutor;
+		public UniqueTaskExecutor(ThreadPoolTaskExecutor theTaskExecutor, MemoryCacheService theMemoryCacheService) {
+			myTaskExecutor = theTaskExecutor;
 			myMemoryCacheService = theMemoryCacheService;
 		}
 
@@ -396,7 +411,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 				return;
 			}
 
-			myExecutor.execute(() -> {
+			myTaskExecutor.execute(() -> {
 				try {
 					newFutureTask.run();
 				} finally {

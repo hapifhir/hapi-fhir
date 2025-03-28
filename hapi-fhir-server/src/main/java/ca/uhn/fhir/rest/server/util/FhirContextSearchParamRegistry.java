@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -111,6 +112,11 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2068));
+	}
+
+	@Override
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		throw new UnsupportedOperationException(Msg.code(2631));
 	}
 
 	@Override

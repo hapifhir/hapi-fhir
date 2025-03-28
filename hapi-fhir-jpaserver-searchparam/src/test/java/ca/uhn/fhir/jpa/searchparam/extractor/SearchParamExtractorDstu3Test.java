@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -293,6 +295,11 @@ public class SearchParamExtractorDstu3Test {
 
 		@Override
 		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
 			throw new UnsupportedOperationException();
 		}
 
