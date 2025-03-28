@@ -119,7 +119,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return myDaoRegistry == null || !myDaoRegistry.isResourceTypeSupported(myResourceName);
 	}
 
-	@Override
 	public void syncDatabaseToCache() {
 		if (daoNotAvailable()) {
 			return;
