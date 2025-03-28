@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -87,7 +87,7 @@ class LinkedBlockingBrokerClientTest {
 		}
 	}
 
-	private static @NotNull MyTestMessage buildMessage(String theMake, String theModel) {
+	private static @Nonnull MyTestMessage buildMessage(String theMake, String theModel) {
 		MyTestMessageValue value = new MyTestMessageValue(theMake, theModel);
 		MyTestMessage message = new MyTestMessage(value);
 		return message;

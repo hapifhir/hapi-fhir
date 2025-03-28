@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
 import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
