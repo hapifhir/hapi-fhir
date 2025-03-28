@@ -1527,7 +1527,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
 		// setup
-		myStorageSettings.setInvokePreShowInterceptorsOnConditionalUrlEvaluation(true);
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		// Let's create a sensitive observation - Nobody must know we caught COVID!

@@ -141,7 +141,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 		}
 
-		if (myStorageSettings.isInvokePreShowInterceptorsOnConditionalUrlEvaluation()) {
+		if (!myStorageSettings.isMassIngestionMode() && !myStorageSettings.isMatchUrlCacheEnabled()) {
 			retVal = invokePreShowInterceptorForMatchUrlResults(theResourceType, theRequest, retVal, matchUrl);
 		}
 

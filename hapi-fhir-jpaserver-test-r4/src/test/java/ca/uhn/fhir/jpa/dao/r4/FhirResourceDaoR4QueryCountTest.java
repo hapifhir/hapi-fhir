@@ -2273,24 +2273,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, false, 1  2  1",
-		"SINGLE_TOKEN   , true,  false, 1  0  0",
-		"SINGLE_TOKEN   , false, true,  10 31 30",
-		"SINGLE_TOKEN   , true,  true,  10 20 20",
-		"MULTIPLE_TOKEN , false, false, 10 11 10",
-		"MULTIPLE_TOKEN , true,  false, 10 0  0",
-		"MULTIPLE_TOKEN , false, true,  10 31 30",
-		"MULTIPLE_TOKEN , true,  true,  10 20 20",
-		"STRING         , false, false, 10 11 10",
-		"STRING         , true,  false, 10 0  0",
-		"STRING         , false, true,  10 31 30",
-		"STRING         , true,  true,  10 20 20",
+		"SINGLE_TOKEN   , false, 1  2  1",
+		"SINGLE_TOKEN   , true,  1  0  0",
+		"MULTIPLE_TOKEN , false, 10 31 30",
+		"MULTIPLE_TOKEN , true,  10 0  0",
+		"STRING         , false, 10 31 30",
+		"STRING         , true,  10 0  0",
 	})
-	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, boolean theInvokePreShowInterceptorsOnConditionalUrlEvaluation, String theExpectedCounts) {
+	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
 		registerNoOpAuthorizationAndConsentInterceptors();
 
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
-		myStorageSettings.setInvokePreShowInterceptorsOnConditionalUrlEvaluation(theInvokePreShowInterceptorsOnConditionalUrlEvaluation);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -2346,22 +2339,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, false, 1  4  4",
-		"SINGLE_TOKEN   , true,  false, 1  3  3",
-		"SINGLE_TOKEN   , false, true,  10 13 13",
-		"SINGLE_TOKEN   , true,  true,  10 3  3",
-		"MULTIPLE_TOKEN , false, false, 10 13 13",
-		"MULTIPLE_TOKEN , true,  false, 10 3  3",
-		"MULTIPLE_TOKEN , false, true,  10 13 13",
-		"MULTIPLE_TOKEN , true,  true,  10 3  3",
-		"STRING         , false, false, 10 13 13",
-		"STRING         , true,  false, 10 3  3",
-		"STRING         , false, true,  10 13 13",
-		"STRING         , true,  true,  10 3  3",
+		"SINGLE_TOKEN   , false, 1  4  4",
+		"SINGLE_TOKEN   , true,  1  3  3",
+		"MULTIPLE_TOKEN , false, 10 13 13",
+		"MULTIPLE_TOKEN , true,  10 3  3",
+		"STRING         , false, 10 13 13",
+		"STRING         , true,  10 3  3",
 	})
-	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, boolean theInvokePreShowInterceptorsOnConditionalUrlEvaluation, String theExpectedCounts) {
+	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
-		myStorageSettings.setInvokePreShowInterceptorsOnConditionalUrlEvaluation(theInvokePreShowInterceptorsOnConditionalUrlEvaluation);
 
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);

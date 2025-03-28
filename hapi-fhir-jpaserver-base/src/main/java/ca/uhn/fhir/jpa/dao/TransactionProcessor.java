@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -125,6 +126,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
 	}
@@ -207,6 +211,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void preFetch(
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
@@ -307,6 +312,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void preFetchResourcesById(
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
@@ -408,6 +414,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		myEntityManager.flush();
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void preFetchConditionalUrls(
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
@@ -425,7 +432,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 				String requestIfNoneExist = theVersionAdapter.getEntryIfNoneExist(nextEntry);
 				String resourceType = determineResourceTypeInResourceUrl(myFhirContext, requestUrl);
-				if (resourceType == null && resource != null) {
+				if (resourceType == null) {
 					resourceType = myFhirContext.getResourceType(resource);
 				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
@@ -487,8 +494,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theTransactionDetails    The active transaction details
 	 * @param theRequestPartitionId    The active partition
 	 * @param theInputParameters       These are the search parameter maps that will actually be resolved
-	 * @param thePidsToLoadBodiesFor This list will be added to with any resource PIDs that need to be fully
-	 *                                 pre-loaded (ie. fetch the actual resource body since we're presumably
+	 * @param thePidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
+	 *                                 preloaded (i.e. fetch the actual resource body since we're presumably
 	 *                                 going to update it and will need to see its current state eventually)
 	 */
 	@VisibleForTesting
@@ -520,7 +527,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
 			boolean canBeHandledInAggregateQuery = false;
-			if (values.size() == 1 && !myStorageSettings.isInvokePreShowInterceptorsOnConditionalUrlEvaluation()) {
+			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
@@ -605,7 +612,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (theRequestPartitionId.isDefaultPartition()) {
+				if (myRequestPartitionHelperSvc.isDefaultPartition(theRequestPartitionId) && myPartitionSettings.getDefaultPartitionId() == null) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
@@ -697,7 +704,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param thePartitionId                        The partition ID of the associated resource (can be null)
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
-	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it. See the method javadoc above for some context.
+	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it? See the method javadoc above for some context.
 	 * @param theOutputIdsToPreFetchBodiesFor       This will be populated with any resource PIDs that need to be pre-fetched
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
@@ -808,7 +815,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@VisibleForTesting
-	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+	public void setIdHelperServiceForUnitTest(IIdHelperService<JpaPid> theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
 
