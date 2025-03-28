@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicBuilder;
 import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
@@ -11,7 +10,7 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Basic;
@@ -20,7 +19,10 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -34,7 +36,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -51,11 +55,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 	protected R4SubscriptionTopicLoader mySubscriptionTopicLoader;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	protected IFhirResourceDao<Basic> myBasicDao;
 	private static final TestSystemProvider ourTestSystemProvider = new TestSystemProvider();
-
-	private final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
-	private final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@Override
 	@BeforeEach
@@ -63,7 +63,6 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		super.before();
 		ourRestfulServer.unregisterProvider(mySystemProvider);
 		ourRestfulServer.registerProvider(ourTestSystemProvider);
-		myBasicDao = myDaoRegistry.getResourceDao(Basic.class);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
 	}
@@ -96,7 +95,9 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
-		Encounter sentEncounter = sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus.FINISHED, "PRPF", true);
+		Encounter sentEncounter = buildEncounter(Encounter.EncounterStatus.FINISHED, "PRPF");
+
+		IIdType sentEncounterId = createResource(sentEncounter, true);
 
 		assertEquals(1, ourTestSystemProvider.getCount());
 
@@ -109,7 +110,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 
 		Encounter encounter = (Encounter) resources.get(1);
 		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
-		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+		assertEquals(sentEncounterId, encounter.getIdElement());
 	}
 
 	@Test
@@ -122,7 +123,9 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
-		Encounter sentEncounter = sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus.PLANNED, "PRPF", false);
+		Encounter sentEncounter = buildEncounter(Encounter.EncounterStatus.PLANNED, "PRPF");
+
+		createResource(sentEncounter, false);
 		assertEquals(0, ourTestSystemProvider.getCount());
 
 		sentEncounter.setStatus(Encounter.EncounterStatus.FINISHED);
@@ -142,8 +145,111 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
+	
+	@Test
+	void testSubscriptionTopicShapeWithIncludeAndRevInclude() throws Exception {
+		// Create organization, patient, and observations
+		Organization organization = new Organization();
+		organization.setName("Test Organization");
+		IIdType orgId = createResource(organization, false);
+		
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(orgId));
+		IIdType patientId = createResource(patient, false);
+		
+		// Create multiple observations linked to the patient
+		Observation obs1 = new Observation();
+		obs1.setSubject(new Reference(patientId));
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.getCode().setText("Observation 1");
+		IIdType obs1Id = createResource(obs1, false);
+		
+		Observation obs2 = new Observation();
+		obs2.setSubject(new Reference(patientId));
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.getCode().setText("Observation 2");
+		IIdType obs2Id = createResource(obs2, false);
+		
+		// Create subscription topic that triggers on Patient updates
+		R4SubscriptionTopicBuilder builder = new R4SubscriptionTopicBuilder()
+			.setUrl(SUBSCRIPTION_TOPIC_TEST_URL)
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.addResourceTrigger()
+			.setResourceTriggerResource("Patient")
+			.addResourceTriggerSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE.toCode());
+		
+		// Add notification shape to include Organization and revInclude Observations
+		builder.addNotificationShape()
+			.setNotificationShapeResource("Patient")
+			.addNotificationShapeInclude("Patient:organization")
+			.addNotificationShapeRevInclude("Observation:subject");
+		
+		// Create the topic
+		Basic topicResource = builder.build();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(topicResource));
+		createResource(topicResource, false);
 
-	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, Parameters parameters) {
+		// Sync the topic
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
+		waitForRegisteredSubscriptionTopicCount();
+		
+		// Create the subscription
+		Subscription subscription = createTopicSubscription("Patient?_id=" + patientId.getIdPart());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+		waitForActivatedSubscriptionCount(1);
+		
+		// Update the patient to trigger the subscription
+		patient.setId(patientId);
+		patient.addName().setFamily("Updated");
+		updateResource(patient, true);
+
+		// Verify the subscription bundle
+		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedBundle));
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, receivedBundle);
+		
+		// Should have 5 resources: Parameters + Patient + Organization + 2 Observations
+		assertThat(resources).hasSize(5);
+		
+		// First resource should be the Parameters
+		Parameters parameters = (Parameters) resources.get(0);
+		validateSubscriptionStatus(subscription, patient, parameters);
+		
+		// Verify that the bundle contains the patient, organization, and observations
+		Set<String> resourceTypes = resources.stream()
+			.skip(1) // Skip the Parameters
+			.map(r -> r.getClass().getSimpleName())
+			.collect(Collectors.toSet());
+		
+		assertThat(resourceTypes).contains("Patient", "Organization", "Observation");
+		
+		// Verify the specific resources
+		assertThat(resources.stream().filter(r -> r instanceof Patient).count()).isEqualTo(1);
+		assertThat(resources.stream().filter(r -> r instanceof Organization).count()).isEqualTo(1);
+		assertThat(resources.stream().filter(r -> r instanceof Observation).count()).isEqualTo(2);
+		
+		// Verify the references match expected values
+		Patient bundlePatient = (Patient) resources.stream().filter(r -> r instanceof Patient).findFirst().orElse(null);
+		assertThat(bundlePatient).isNotNull();
+		assertThat(bundlePatient.getIdElement().getIdPart()).isEqualTo(patientId.getIdPart());
+		
+		Organization bundleOrg = (Organization) resources.stream().filter(r -> r instanceof Organization).findFirst().orElse(null);
+		assertThat(bundleOrg).isNotNull();
+		assertThat(bundleOrg.getIdElement().getIdPart()).isEqualTo(orgId.getIdPart());
+		
+		// Check that the observations in the bundle have the correct subject references
+		List<Observation> bundleObservations = resources.stream()
+			.filter(r -> r instanceof Observation)
+			.map(r -> (Observation)r)
+			.collect(Collectors.toList());
+		
+		assertThat(bundleObservations).hasSize(2);
+		for (Observation bundleObs : bundleObservations) {
+			assertThat(bundleObs.getSubject().getReferenceElement().getIdPart()).isEqualTo(patientId.getIdPart());
+		}
+	}
+
+	private static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, Parameters parameters) {
 		// Get status parameter
 		CodeType status = (CodeType) parameters.getParameter("status").getValue();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE.toCode(), status.getCode());
@@ -173,7 +279,7 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		
 		assertEquals("1", eventNumber);
 		assertThat(focus).isNotNull();
-		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), focus.getReferenceElement());
+		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), focus.getReferenceElement());
 
 		// Check subscription reference
 		Reference subscriptionRef = (Reference) parameters.getParameter("subscription").getValue();
@@ -230,26 +336,14 @@ class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 		// Create the topic
 		Basic topicResource = builder.build();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(topicResource));
-		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		myBasicDao.create(topicResource, mySrd);
-		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		createResource(topicResource, false);
 	}
 
-	private Encounter sendEncounterWithStatusAndParticipantType(Encounter.EncounterStatus theStatus, String theParticipantType, boolean theExpectDelivery) throws InterruptedException {
+	@Nonnull
+	private static Encounter buildEncounter(Encounter.EncounterStatus theStatus, String theParticipantType) {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 		encounter.addParticipant().addType().addCoding().setCode(theParticipantType);
-
-		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.setExpectedCount(1);
-		}
-		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		IIdType id = myEncounterDao.create(encounter, mySrd).getId();
-		mySubscriptionTopicsCheckedLatch.awaitExpected();
-		if (theExpectDelivery) {
-			mySubscriptionDeliveredLatch.awaitExpected();
-		}
-		encounter.setId(id);
 		return encounter;
 	}
 
