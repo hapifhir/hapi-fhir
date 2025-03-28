@@ -612,7 +612,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (myRequestPartitionHelperSvc.isDefaultPartition(theRequestPartitionId) && myPartitionSettings.getDefaultPartitionId() == null) {
+				if (myRequestPartitionHelperSvc.isDefaultPartition(theRequestPartitionId)
+						&& myPartitionSettings.getDefaultPartitionId() == null) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
