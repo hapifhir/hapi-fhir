@@ -566,6 +566,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		int versionSeparator = canonicalUrl.lastIndexOf('|');
 		Slice<NpmPackageVersionResourceEntity> slice;
+		final List<NpmPackageVersionResourceEntity> all = myPackageVersionResourceDao.findAll();
 		if (versionSeparator != -1) {
 			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
 			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
