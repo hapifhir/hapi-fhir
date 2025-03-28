@@ -2285,6 +2285,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
+		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
+		when(mySrd.getFhirContext()).thenReturn(myFhirContext);
+
 		Supplier<Bundle> input = () ->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			for (int i = 0; i < 10; i++) {
@@ -2312,19 +2315,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Run the first time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), input.get());
+		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
 		selectCounts += myCaptureQueriesListener.countSelectQueries();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), input.get());
+		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
 		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(new SystemRequestDetails(), input.get());
+		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
 		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 

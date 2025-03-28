@@ -172,15 +172,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
 
-			RequestDetails subRequest = null;
-			if (theRequest != null) {
-				subRequest = new SystemRequestDetails(theRequest);
-				subRequest.setRestOperationType(RestOperationTypeEnum.SEARCH_TYPE);
-			}
-
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, accessDetails)
-					.add(RequestDetails.class, subRequest)
+					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 
 			try {
