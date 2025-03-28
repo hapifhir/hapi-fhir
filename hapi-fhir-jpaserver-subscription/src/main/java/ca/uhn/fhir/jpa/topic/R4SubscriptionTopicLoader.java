@@ -19,56 +19,25 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Specialized loader for R4 SubscriptionTopics, which are implemented as Basic resources
  * with a code of "SubscriptionTopic".
  */
-public class R4SubscriptionTopicLoader extends BaseResourceCacheSynchronizer implements ISubscriptionTopicLoader {
-	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
-
-	@Autowired
-	private FhirContext myFhirContext;
-
-	@Autowired
-	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
-
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
+public class R4SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 
 	/**
 	 * Constructor
 	 */
 	public R4SubscriptionTopicLoader() {
 		super("Basic");
-	}
-
-	@Override
-	@EventListener(classes = ContextRefreshedEvent.class)
-	public void registerListener() {
-		if (myFhirContext.getVersion().getVersion() != FhirVersionEnum.R4) {
-			return;
-		}
-		super.registerListener();
 	}
 
 	@Override
@@ -84,35 +53,7 @@ public class R4SubscriptionTopicLoader extends BaseResourceCacheSynchronizer imp
 	}
 
 	@Override
-	public void handleInit(@Nonnull List<IBaseResource> resourceList) {
-		updateSubscriptionTopicRegistry(resourceList);
-	}
-
-	@Override
-	public int syncResourcesIntoCache(@Nonnull List<IBaseResource> resourceList) {
-		return updateSubscriptionTopicRegistry(resourceList);
-	}
-
-	private int updateSubscriptionTopicRegistry(List<IBaseResource> theResourceList) {
-		Set<String> allIds = new HashSet<>();
-		int registeredCount = 0;
-
-		for (IBaseResource resource : theResourceList) {
-			String nextId = resource.getIdElement().getIdPart();
-			allIds.add(nextId);
-
-			boolean registered = mySubscriptionTopicRegistry.register(normalizeToR5(resource));
-			if (registered) {
-				registeredCount++;
-			}
-		}
-
-		mySubscriptionTopicRegistry.unregisterAllIdsNotInCollection(allIds);
-		ourLog.debug("Finished sync R4 subscription topics - registered {}", registeredCount);
-		return registeredCount;
-	}
-
-	private SubscriptionTopic normalizeToR5(IBaseResource theResource) {
+	protected SubscriptionTopic normalizeToR5(IBaseResource theResource) {
 		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
 	}
 }
