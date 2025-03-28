@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -96,6 +97,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
 	private final IReductionStepExecutorService myReductionStepExecutorService;
+	private final HapiTransactionService myTransactionService;
 
 	private boolean myEnabledBool = true;
 
@@ -109,7 +111,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
-			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
+			@Nonnull HapiTransactionService theTransactionService) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -122,6 +125,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
+		myTransactionService = theTransactionService;
 	}
 
 	@Override
@@ -243,7 +247,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								instanceId,
 								progressAccumulator,
 								myReductionStepExecutorService,
-								myJobDefinitionRegistry);
+								myJobDefinitionRegistry,
+								myTransactionService);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,

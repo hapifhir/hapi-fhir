@@ -170,6 +170,14 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
 	/**
+	 * Fetches a stream that retrieves WorkChunkMetaData from the db
+	 * @param theInstanceId instance id of job of interest
+	 * @param theStates states of interest
+	 * @return  a stream for the workchunks
+	 */
+	Stream<WorkChunkMetadata> streamAllWorkChunkMetadataForJobInStates(
+			String theInstanceId, Set<WorkChunkStatusEnum> theStates);
+	/**
 	 * Callback to update a JobInstance within a locked transaction.
 	 * Return true from the callback if the record write should continue, or false if
 	 * the change should be discarded.

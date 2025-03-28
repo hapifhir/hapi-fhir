@@ -535,6 +535,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public Stream<WorkChunkMetadata> streamAllWorkChunkMetadataForJobInStates(
+			String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
+		Stream<Batch2WorkChunkMetadataView> workChunks =
+				myWorkChunkMetadataViewRepo.streamWorkChunkMetadataForJobInStates(theInstanceId, theStates);
+		return workChunks.map(Batch2WorkChunkMetadataView::toChunkMetadata);
+	}
+
+	@Override
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		/*
 		 * We may already have a copy of the entity in the L1 cache, and it may be
