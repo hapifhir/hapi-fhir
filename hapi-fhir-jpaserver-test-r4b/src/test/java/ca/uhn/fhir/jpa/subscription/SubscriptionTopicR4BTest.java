@@ -32,7 +32,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
+class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
 
 	@Autowired

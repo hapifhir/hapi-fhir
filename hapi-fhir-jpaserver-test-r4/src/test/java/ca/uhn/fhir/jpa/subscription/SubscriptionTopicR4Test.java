@@ -41,7 +41,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
+class SubscriptionTopicR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR4Test.class);
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "https://example.com/topic/test";
 

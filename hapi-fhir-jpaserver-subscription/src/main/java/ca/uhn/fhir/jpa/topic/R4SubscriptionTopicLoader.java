@@ -84,12 +84,12 @@ public class R4SubscriptionTopicLoader extends BaseResourceCacheSynchronizer imp
 	}
 
 	@Override
-	public void handleInit(List<IBaseResource> resourceList) {
+	public void handleInit(@Nonnull List<IBaseResource> resourceList) {
 		updateSubscriptionTopicRegistry(resourceList);
 	}
 
 	@Override
-	public int syncResourcesIntoCache(List<IBaseResource> resourceList) {
+	public int syncResourcesIntoCache(@Nonnull List<IBaseResource> resourceList) {
 		return updateSubscriptionTopicRegistry(resourceList);
 	}
 

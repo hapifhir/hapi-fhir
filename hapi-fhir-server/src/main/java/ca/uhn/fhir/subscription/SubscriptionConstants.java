@@ -82,7 +82,7 @@ public final class SubscriptionConstants {
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_NOTIFICATION_SHAPE =
 			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.notificationShape";
 
-	// Nested extension URLs for SubscriptionTopic
+	// R4 SubscriptionTopic extension URL Nested extensions
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_DESCRIPTION = "description";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE = "resource";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_SUPPORTED_INTERACTION = "supportedInteraction";
@@ -91,7 +91,7 @@ public final class SubscriptionConstants {
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_INCLUDE = "include";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_REVINCLUDE = "revInclude";
 
-	// Query criteria related constants
+	// R4 SubscriptionTopic query criteria
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA = "queryCriteria";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS = "previous";
 	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT = "current";
