@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.JpaResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.JpaResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -12,6 +16,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import com.github.dnault.xmlpatch.repackaged.org.jaxen.util.SingletonList;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -26,6 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Nonnull;
+import org.springframework.retry.annotation.Retryable;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +56,9 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private static final CodeSystem CODE_SYSTEM = createCodeSystem();
 	private static final NpmPackage PACKAGE = createPackage();
 	private static final SystemRequestDetails REQUEST_DETAILS = new SystemRequestDetails();
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Autowired
 	private ITermValueSetDao myTermValueSetDao;
@@ -273,9 +285,12 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	public void testIdClashBetweenPackages() throws IOException {
 		String packageIdA = "org.testA";
 		String packageIdB = "org.testB";
+		String urlA = "http://url/aCode";
+		String urlB = "http://url/bCode";
 		String packageVersion = "1.0.0";
-		NpmPackage pkgA = createPackage(new CodeSystem().setUrl("http://url/aCode").setId("1"), "CodeSystem", packageIdA);
-		NpmPackage pkgB = createPackage(new CodeSystem().setUrl("http://url/bCode").setId("1"), "CodeSystem", packageIdB);
+		String id = "1";
+		NpmPackage pkgA = createPackage(new CodeSystem().setUrl("http://url/aCode").setId(id), "CodeSystem", packageIdA);
+		NpmPackage pkgB = createPackage(new CodeSystem().setUrl("http://url/bCode").setId(id), "CodeSystem", packageIdB);
 		ByteArrayOutputStream originA = new ByteArrayOutputStream();
 		ByteArrayOutputStream originB = new ByteArrayOutputStream();
 		pkgA.save(originA);
@@ -283,6 +298,12 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		mySvc.install(new PackageInstallationSpec().setName(packageIdA).setVersion(packageVersion).setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(originA.toByteArray()));
 		mySvc.install(new PackageInstallationSpec().setName(packageIdB).setVersion(packageVersion).setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(originB.toByteArray()));
+
+		IBundleProvider result = myDaoRegistry.getResourceDao(CodeSystem.class).search(SearchParameterMap.newSynchronous().add("url", new UriAndListParam().addAnd(new UriOrListParam().addOr(new UriParam(urlA)).addOr(new UriParam(urlB)))));
+		assertThat(result.size()).isEqualTo(1);
+		assertThat(((CodeSystem)result.getAllResources().get(0)).getUrl()).isEqualTo(urlA);
+
+
 	}
 
 
