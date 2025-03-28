@@ -18,6 +18,7 @@ public class BulkExportJobServiceUtil {
 	 */
 	public static void writePollingLocationsToResponseHeaders(
 			@Nonnull ServletRequestDetails theRequestDetails, @Nonnull String theInstanceId) {
+
 		String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
 		if (serverBase == null) {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
