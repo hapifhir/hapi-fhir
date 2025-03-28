@@ -8,6 +8,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SubscriptionTopicCanonicalizerTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicCanonicalizerTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	@Test
@@ -121,7 +124,7 @@ class SubscriptionTopicCanonicalizerTest {
 		
 		// Output the JSON for debugging
 		String json = ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(builtTopic);
-		System.out.println("Built Topic JSON:\n" + json);
+		ourLog.info("Built Topic JSON:\n{}", json);
 		
 		// Canonicalize the topic
 		SubscriptionTopic canonicalized = SubscriptionTopicCanonicalizer.canonicalizeTopic(ourFhirContext, builtTopic);
