@@ -133,8 +133,10 @@ public class SearchParamRegistryImpl
 		// Can still be null in unit test scenarios
 		if (myActiveSearchParams != null) {
 			RuntimeSearchParam param = myActiveSearchParams.get(theResourceName, theParamName);
-			if (param != null && isAllowedForContext(param, theContext)) {
-				return param;
+			if (param != null) {
+				if (isAllowedForContext(param, theContext)) {
+					return param;
+				}
 			}
 		}
 
@@ -467,11 +469,6 @@ public class SearchParamRegistryImpl
 			}
 		}
 		initializeActiveSearchParams(searchParams);
-	}
-
-	@Override
-	public void syncDatabaseToCache() {
-		requestRefresh();
 	}
 
 	@Override
