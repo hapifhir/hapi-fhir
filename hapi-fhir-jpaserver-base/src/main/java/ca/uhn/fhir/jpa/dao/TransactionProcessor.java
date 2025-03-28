@@ -527,7 +527,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
 			boolean canBeHandledInAggregateQuery = false;
-			if (values.size() == 1 && (myStorageSettings.isMatchUrlCacheEnabled() || myStorageSettings.isMassIngestionMode())) {
+			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
