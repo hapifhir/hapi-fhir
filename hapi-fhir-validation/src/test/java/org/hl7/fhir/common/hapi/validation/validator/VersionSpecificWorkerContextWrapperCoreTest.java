@@ -8,6 +8,9 @@ import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
+
+import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -185,7 +188,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 	}
 
 	public static Stream<Arguments> argumentSource() throws IOException {
-		TxTestData data = TxTestData.loadTestDataFromDefaultClassPath();
+		TxTestData data = TxTestData.loadTestDataFromPackage(VersionSpecificWorkerContextWrapperCoreTest.class.getPackage().toString());
 
 		return data.getTestData().stream()
 			.filter( entry -> {
@@ -227,10 +230,21 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 			fo.delete();
 		}
 		 if (setup.getTest().asString("operation").equals("validate-code")) {
-			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, false);
+      String diff =
+          TxServiceTestHelper.getDiffForValidation(
+              setup.getTest().str("name"),
+              wrapper,
+              setup.getTest().asString("name"),
+              req,
+              resp,
+              setup.getTest().asString("Content-Language"),
+              fp,
+              ext,
+              false,
+              Set.of());
 			assertNull(diff, diff);
 		} else if (setup.getTest().asString("operation").equals("cs-validate-code")) {
-			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true);
+			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
 			assertNull(diff, diff);
 		}
 	}

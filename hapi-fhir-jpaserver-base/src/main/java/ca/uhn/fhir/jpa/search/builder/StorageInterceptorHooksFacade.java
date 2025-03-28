@@ -23,7 +23,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -31,7 +30,7 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 
 /**
- * facade over raw hook intererface
+ * facade over raw hook interface
  */
 public class StorageInterceptorHooksFacade {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -42,22 +41,17 @@ public class StorageInterceptorHooksFacade {
 
 	/**
 	 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
-	 *
-	 * @param theRequestDetails
-	 * @param theParams
-	 * @param search
-	 * @param theRequestPartitionId
 	 */
 	public void callStoragePresearchRegistered(
 			RequestDetails theRequestDetails,
 			SearchParameterMap theParams,
-			Search search,
+			ICachedSearchDetails theSearch,
 			RequestPartitionId theRequestPartitionId) {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED)) {
 			HookParams params = new HookParams()
-					.add(ICachedSearchDetails.class, search)
+					.add(ICachedSearchDetails.class, theSearch)
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(SearchParameterMap.class, theParams)
@@ -65,5 +59,4 @@ public class StorageInterceptorHooksFacade {
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 		}
 	}
-	// private IInterceptorBroadcaster myInterceptorBroadcaster;
 }
