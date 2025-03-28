@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6818
+title: "When performing a conditional create/update/etc in a FHIR transaction, if the conditional
+   URL had parameters with a type other than `token`, the transaction processor could fail with
+   a constraint error if the target already existed. This has been corrected. Thanks to
+   Brian Lind for reporting!"

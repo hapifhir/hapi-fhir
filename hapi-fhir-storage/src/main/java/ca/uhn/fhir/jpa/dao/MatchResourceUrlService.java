@@ -139,6 +139,23 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 		}
 
+		if (!myStorageSettings.isMassIngestionMode() && !myStorageSettings.isMatchUrlCacheEnabled()) {
+			retVal = invokePreShowInterceptorForMatchUrlResults(theResourceType, theRequest, retVal, matchUrl);
+		}
+
+		if (retVal.size() == 1) {
+			T pid = retVal.iterator().next();
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
+			if (myStorageSettings.isMatchUrlCacheEnabled()) {
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			}
+		}
+
+		return retVal;
+	}
+
+	private <R extends IBaseResource> Set<T> invokePreShowInterceptorForMatchUrlResults(
+			Class<R> theResourceType, RequestDetails theRequest, Set<T> retVal, String matchUrl) {
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
@@ -152,6 +169,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
@@ -174,15 +192,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 				retVal = new HashSet<>();
 			}
 		}
-
-		if (retVal.size() == 1) {
-			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
-			if (myStorageSettings.isMatchUrlCacheEnabled()) {
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
-			}
-		}
-
 		return retVal;
 	}
 

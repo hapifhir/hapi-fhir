@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -83,6 +84,8 @@ public class TransactionProcessorTest {
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@MockBean
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+	@MockBean
+	private MemoryCacheService myMemoryCacheService;
 
 	@BeforeEach
 	public void before() {

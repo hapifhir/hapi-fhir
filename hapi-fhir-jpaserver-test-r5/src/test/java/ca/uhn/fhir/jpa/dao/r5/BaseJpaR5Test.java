@@ -64,7 +64,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -94,6 +93,7 @@ import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Group;
+import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
 import org.hl7.fhir.r5.model.Location;
@@ -292,6 +292,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myPatientDaoR5")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	protected IFhirResourceDao<HealthcareService> myHealthcareServiceDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired

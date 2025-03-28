@@ -506,7 +506,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		List<JpaPid> remainingPids =
 				theResourceIds.stream().filter(t -> !retVal.containsKey(t)).collect(Collectors.toList());
 
-		new QueryChunker<JpaPid>().chunk(remainingPids, t -> {
+		QueryChunker.chunk(remainingPids, t -> {
 			List<ResourceTable> resourceEntities = myResourceTableDao.findAllById(t);
 
 			for (ResourceTable nextResourceEntity : resourceEntities) {

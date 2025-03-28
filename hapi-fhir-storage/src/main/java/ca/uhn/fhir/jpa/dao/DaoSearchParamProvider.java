@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class DaoSearchParamProvider implements ISearchParamProvider {
 
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {
-		return getSearchParamDao().search(theParams);
+		return getSearchParamDao().search(theParams, new SystemRequestDetails());
 	}
 
 	private IFhirResourceDao getSearchParamDao() {
@@ -45,6 +46,6 @@ public class DaoSearchParamProvider implements ISearchParamProvider {
 
 	@Override
 	public IBaseResource read(IIdType theSearchParamId) {
-		return getSearchParamDao().read(theSearchParamId);
+		return getSearchParamDao().read(theSearchParamId, new SystemRequestDetails());
 	}
 }

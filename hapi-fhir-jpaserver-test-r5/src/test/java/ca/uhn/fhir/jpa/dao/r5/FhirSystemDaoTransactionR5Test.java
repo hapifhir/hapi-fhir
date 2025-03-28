@@ -421,11 +421,11 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 		if (theTargetAlreadyExists) {
 			if (theResourceChanges) {
-				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
