@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
