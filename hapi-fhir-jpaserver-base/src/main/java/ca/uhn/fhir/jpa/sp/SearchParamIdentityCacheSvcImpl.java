@@ -66,7 +66,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 			ISearchParamHashIdentityRegistry theSearchParamHashIdentityRegistry,
 			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
-		this.mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
+		mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
 		mySearchParamHashIdentityRegistry = theSearchParamHashIdentityRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);

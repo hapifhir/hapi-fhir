@@ -78,7 +78,7 @@ public class MemoryCacheService {
 					break;
 				case PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
-					nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), 100);
+					nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), 1000);
 					break;
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
