@@ -491,12 +491,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	/**
+	 * This method attempts to resolve a collection of conditional URLs that were found
+	 * in a FHIR transaction bundle being processed.
+	 *
+	 * @param theRequestDetails        The active request
 	 * @param theTransactionDetails    The active transaction details
 	 * @param theRequestPartitionId    The active partition
-	 * @param theInputParameters       These are the search parameter maps that will actually be resolved
-	 * @param thePidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
+	 * @param theInputParameters       These are the conditional URLs that will actually be resolved
+	 * @param theOutputPidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
 	 *                                 preloaded (i.e. fetch the actual resource body since we're presumably
 	 *                                 going to update it and will need to see its current state eventually)
+	 * @param theOutputPidsToLoadVersionsFor This list will be added to with any resource PIDs that need to have
+	 *                                 their current version resolved. This is used for conditional creates,
+	 *                                 where we don't actually care about the body of the resource, only
+	 *                                 the version it has (since the version is returned in the response,
+	 *                                 and potentially used if we're auto-versioning references).
 	 */
 	@VisibleForTesting
 	public void preFetchSearchParameterMaps(
@@ -504,21 +513,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
-			List<JpaPid> thePidsToLoadBodiesFor,
-			Set<JpaPid> thePidsToLoadVersionsFor) {
-
-		/*
-		 * Note: This method currently only handles search parameter maps (i.e. conditional
-		 * URLs which have been converted into maps) with exactly one parameter of type token.
-		 * This is partly because it would be really hard to write an efficient prefetch that
-		 * sent a single query to the database which could handle multiple maps with multiple
-		 * AND-joined params each.
-		 *
-		 * The majority of real-world conditional URLs are [resourceType]?identifier=foo
-		 * so that means this should be good enough for most use cases. In the future though
-		 * it would certainly be possible to add additional kinds of support here (additional
-		 * SP types, multiple params support)
-		 */
+			List<JpaPid> theOutputPidsToLoadBodiesFor,
+			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
 
 		Set<Long> systemAndValueHashes = new HashSet<>();
 		Set<Long> valueHashes = new HashSet<>();
@@ -526,27 +522,44 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 
+			/*
+			 * Any conditional URLs that consist of a single token parameter are batched
+			 * up into a single query against the HFJ_SPIDX_TOKEN table so that we only
+			 * perform one SQL query for all of them.
+			 *
+			 * We could potentially add other patterns in the future, but it's much more
+			 * tricky to implement this when there are multiple parameters, and non-token
+			 * parameter types aren't often used on their own in conditional URLs. So for
+			 * now we handle single-token only, and that's probably good enough.
+			 */
 			boolean canBeHandledInAggregateQuery = false;
+
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					buildHashPredicateFromTokenParam(
-							(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
-					canBeHandledInAggregateQuery = true;
+					TokenParam tokenParam = (TokenParam) param;
+					canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
+							tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
 				}
 			}
 
 			if (!canBeHandledInAggregateQuery) {
-				Set<JpaPid> outcome = myMatchResourceUrlService.processMatchUrl(
+				Set<JpaPid> matchUrlResults = myMatchResourceUrlService.processMatchUrl(
 						next.myRequestUrl,
 						next.myResourceDefinition.getImplementingClass(),
 						theTransactionDetails,
 						theRequestDetails,
 						theRequestPartitionId);
-				outcome.forEach(pid -> handleFoundPreFetchResourceId(
-						theTransactionDetails, thePidsToLoadBodiesFor, thePidsToLoadVersionsFor, next, pid));
+				for (JpaPid matchUrlResult : matchUrlResults) {
+					handleFoundPreFetchResourceId(
+							theTransactionDetails,
+							theOutputPidsToLoadBodiesFor,
+							theOutputPidsToLoadVersionsFor,
+							next,
+							matchUrlResult);
+				}
 			}
 		}
 
@@ -556,16 +569,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theTransactionDetails,
 				theRequestPartitionId,
 				theInputParameters,
-				thePidsToLoadBodiesFor,
-				thePidsToLoadVersionsFor);
+				theOutputPidsToLoadBodiesFor,
+				theOutputPidsToLoadVersionsFor);
 		preFetchSearchParameterMapsToken(
 				"myHashValue",
 				valueHashes,
 				theTransactionDetails,
 				theRequestPartitionId,
 				theInputParameters,
-				thePidsToLoadBodiesFor,
-				thePidsToLoadVersionsFor);
+				theOutputPidsToLoadBodiesFor,
+				theOutputPidsToLoadVersionsFor);
 
 		// For each SP Map which did not return a result, tag it as not found.
 		theInputParameters.stream()
@@ -739,13 +752,15 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
+	 *
+	 * @return Returns {@literal true} if the param was added to one of the output lists
 	 */
-	private void buildHashPredicateFromTokenParam(
+	private boolean buildHashPredicateFromTokenParam(
 			TokenParam theTokenParam,
 			RequestPartitionId theRequestPartitionId,
 			MatchUrlToResolve theMatchUrl,
-			Set<Long> theSysAndValuePredicates,
-			Set<Long> theValuePredicates) {
+			Set<Long> theOutputSysAndValuePredicates,
+			Set<Long> theOutputValuePredicates) {
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 					myPartitionSettings,
@@ -754,7 +769,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getSystem(),
 					theTokenParam.getValue());
-			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
+			theOutputSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
+			return true;
 		} else if (isNotBlank(theTokenParam.getValue())) {
 			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(
 					myPartitionSettings,
@@ -762,8 +778,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myResourceDefinition.getName(),
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getValue());
-			theValuePredicates.add(theMatchUrl.myHashValue);
+			theOutputValuePredicates.add(theMatchUrl.myHashValue);
+			return true;
 		}
+
+		return false;
 	}
 
 	private ListMultimap<Long, MatchUrlToResolve> buildHashToSearchMap(
