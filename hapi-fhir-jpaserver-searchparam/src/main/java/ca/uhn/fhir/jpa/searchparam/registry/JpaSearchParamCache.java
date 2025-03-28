@@ -118,10 +118,6 @@ public class JpaSearchParamCache {
 		return Collections.unmodifiableList(retVal);
 	}
 
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return Optional.ofNullable(myHashIdentityToIndexedSearchParams.get(theHashIdentity));
-	}
-
 	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
 		return myHashIdentityToIndexedSearchParams;
 	}

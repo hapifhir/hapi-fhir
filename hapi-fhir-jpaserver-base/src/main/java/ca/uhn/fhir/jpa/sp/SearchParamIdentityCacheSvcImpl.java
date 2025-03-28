@@ -55,7 +55,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
-	private static final int THREAD_POOL_QUEUE_SIZE = 1000;
+	private static final int THREAD_POOL_QUEUE_SIZE = 5000;
 	private static final int MAX_PRE_FILL_ATTEMPTS = 10;
 	private final AtomicInteger myPreFillAttempts = new AtomicInteger(0);
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
@@ -119,14 +119,13 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 
 		// schedule cache pre-fill with SearchParamIdentities from SearchParamRegistry
 		myPreFillTaskExecutor.scheduleAtFixedRate(
-				this::preFillSearchParameterIdentitiesFromRegistry, 0, 10, TimeUnit.SECONDS);
-		preFillSearchParameterIdentitiesFromRegistry();
+				this::preFillSearchParameterIdentitiesFromRegistry, 0, 60, TimeUnit.SECONDS);
 	}
 
 	/**
 	 * Pre-fills the cache with Search Parameter Identities from the SearchParamRegistry.
 	 * <p>
-	 * Scheduled with a 10-second delay to allow the SearchParamRegistry to initialize.
+	 * Scheduled with a 1-minute delay to allow the SearchParamRegistry to initialize.
 	 * If the registry is not initialized after 10 attempts, the pre-fill is skipped.
 	 */
 	private void preFillSearchParameterIdentitiesFromRegistry() {
