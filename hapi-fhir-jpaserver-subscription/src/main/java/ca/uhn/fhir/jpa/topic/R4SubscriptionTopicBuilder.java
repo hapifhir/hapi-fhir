@@ -359,14 +359,14 @@ public class R4SubscriptionTopicBuilder {
 
 		// Try to find existing extension
 		return myCurrentResourceTrigger.getExtension().stream()
-			.filter(extension -> queryExtensionUrl.equals(extension.getUrl()))
-			.findFirst()
-			.orElseGet(() -> {
-				// Create and add new extension if none exists
-				Extension queryCriteria = new Extension().setUrl(queryExtensionUrl);
-				myCurrentResourceTrigger.addExtension(queryCriteria);
-				return queryCriteria;
-			});
+				.filter(extension -> queryExtensionUrl.equals(extension.getUrl()))
+				.findFirst()
+				.orElseGet(() -> {
+					// Create and add new extension if none exists
+					Extension queryCriteria = new Extension().setUrl(queryExtensionUrl);
+					myCurrentResourceTrigger.addExtension(queryCriteria);
+					return queryCriteria;
+				});
 	}
 
 	private void addExtension(String theUrl, org.hl7.fhir.r4.model.Type theValue) {
