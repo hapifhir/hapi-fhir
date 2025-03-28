@@ -1998,7 +1998,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Bundle request2 = new Bundle();
 
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
-		myStorageSettings.setMatchUrlCacheEnabled(false);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 		when(mySrd.getFhirContext()).thenReturn(myFhirContext);
 
 		Patient p = new Patient();
@@ -2026,7 +2026,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allow("Rule 1").create().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
 					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
 					.denyAll()
 					.build();
