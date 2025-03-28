@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Extension;
@@ -176,7 +177,7 @@ class SubscriptionTopicCanonicalizerTest {
 		for (Extension extension : builtTopic.getExtension()) {
 			if (extension.getUrl().contains("resourceTrigger")) {
 				for (Extension resourceTriggerExt : extension.getExtension()) {
-					if ("queryCriteria".equals(resourceTriggerExt.getUrl())) {
+					if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA.equals(resourceTriggerExt.getUrl())) {
 						queryCriteriaFound = true;
 						
 						// Verify the query criteria extension contents
@@ -185,13 +186,13 @@ class SubscriptionTopicCanonicalizerTest {
 						boolean requireBothExtFound = false;
 						
 						for (Extension queryCriteriaExt : resourceTriggerExt.getExtension()) {
-							if ("previous".equals(queryCriteriaExt.getUrl())) {
+							if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS.equals(queryCriteriaExt.getUrl())) {
 								assertEquals("Patient?active=false", queryCriteriaExt.getValue().primitiveValue());
 								previousExtFound = true;
-							} else if ("current".equals(queryCriteriaExt.getUrl())) {
+							} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT.equals(queryCriteriaExt.getUrl())) {
 								assertEquals("Patient?active=true", queryCriteriaExt.getValue().primitiveValue());
 								currentExtFound = true;
-							} else if ("requireBoth".equals(queryCriteriaExt.getUrl())) {
+							} else if (SubscriptionConstants.SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH.equals(queryCriteriaExt.getUrl())) {
 								assertEquals("true", queryCriteriaExt.getValue().primitiveValue());
 								requireBothExtFound = true;
 							}

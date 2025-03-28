@@ -5,5 +5,4 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 /**
  * Tag interface for Subscription Resource Change Listeners
  */
-public interface ISubscriptionTopicLoader extends IResourceChangeListener {
-}
+public interface ISubscriptionTopicLoader extends IResourceChangeListener {}
