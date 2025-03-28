@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 @Schema(name = "PackageInstallationSpec", description = "Defines a set of instructions for package installation")
@@ -39,7 +40,8 @@ import java.util.function.Supplier;
 	"installMode",
 	"installResourceTypes",
 	"validationMode",
-	"reloadExisting"
+	"reloadExisting",
+	"additionalResourceFolders"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -89,6 +91,12 @@ public class PackageInstallationSpec {
 			description =
 					"Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
 	private List<String> myDependencyExcludes;
+
+	@Schema(
+			description =
+					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources and installed.")
+	@JsonProperty("additionalResourceFolders")
+	private Set<String> additionalResourceFolders;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -175,6 +183,14 @@ public class PackageInstallationSpec {
 
 	public void setReloadExisting(boolean reloadExisting) {
 		this.myReloadExisting = reloadExisting;
+	}
+
+	public Set<String> getAdditionalResourceFolders() {
+		return additionalResourceFolders;
+	}
+
+	public void setAdditionalResourceFolders(Set<String> additionalResourceFolders) {
+		this.additionalResourceFolders = additionalResourceFolders;
 	}
 
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {
