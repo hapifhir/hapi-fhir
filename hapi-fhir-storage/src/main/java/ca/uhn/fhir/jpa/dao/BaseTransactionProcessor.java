@@ -1851,7 +1851,10 @@ public abstract class BaseTransactionProcessor {
 					} else {
 						// we will add the looked up info to the transaction
 						// for later
-						theTransactionDetails.addResolvedResourceId(id, resourceVersionMap.getResourcePersistentId(id));
+						if (resourceVersionMap.containsKey(id)) {
+							theTransactionDetails.addResolvedResourceId(
+									id, resourceVersionMap.getResourcePersistentId(id));
+						}
 					}
 				}
 

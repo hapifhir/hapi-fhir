@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -102,7 +103,8 @@ public class CdsHooksConfig {
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			@Nullable CDSHooksVersion theCDSHooksVersion) {
 		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
 				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
@@ -111,7 +113,8 @@ public class CdsHooksConfig {
 				theObjectMapper,
 				theCdsCrServiceFactory,
 				theCrDiscoveryServiceFactory,
-				cdsServiceRequestJsonDeserializer);
+				cdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.getOrDefault(theCDSHooksVersion));
 	}
 
 	@Bean
