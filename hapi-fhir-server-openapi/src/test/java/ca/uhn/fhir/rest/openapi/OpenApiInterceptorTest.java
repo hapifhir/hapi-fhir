@@ -16,9 +16,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -29,6 +31,8 @@ import ca.uhn.fhir.util.ExtensionConstants;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.MediaType;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
@@ -243,6 +247,16 @@ public class OpenApiInterceptorTest {
 			assertEquals("LastN Short", lastNPath.getGet().getSummary());
 			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
 			assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
+
+			final MediaType readObservationMediaType = parsed.getPaths().get("/Observation/{id}").getGet().getResponses().get("200").getContent().get(Constants.CT_FHIR_JSON_NEW);
+			assertNotNull(readObservationMediaType);
+			assertThat(readObservationMediaType.getExample()).isInstanceOf(String.class);
+			assertThat((String) readObservationMediaType.getExample()).contains("\"resourceType\": \"Observation\"");
+
+			final MediaType searchObservationMediaType = parsed.getPaths().get("/Observation").getGet().getResponses().get("200").getContent().get(Constants.CT_FHIR_JSON_NEW);
+			assertNotNull(searchObservationMediaType);
+			assertThat(searchObservationMediaType.getExample()).isInstanceOf(String.class);
+			assertThat((String) searchObservationMediaType.getExample()).contains("\"resourceType\": \"Bundle\"");
 		}
 
 		@Test
@@ -378,6 +392,52 @@ public class OpenApiInterceptorTest {
 			}
 		}
 
+		@Test
+		public void testInterceptorSubclass() throws IOException {
+			myServer.getRestfulServer().registerInterceptor(new CustomOpenApiInterceptor());
+
+			String resp;
+			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
+			try (CloseableHttpResponse response = myClient.execute(get)) {
+				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				ourLog.info("CapabilityStatement: {}", resp);
+			}
+
+			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
+			try (CloseableHttpResponse response = myClient.execute(get)) {
+				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				ourLog.info("Response: {}", response.getStatusLine());
+				ourLog.debug("Response: {}", resp);
+			}
+
+			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
+			assertThat(parsed).isNotNull().isInstanceOf(OpenAPI.class);
+			assertThat(parsed.getInfo()).isNotNull().isInstanceOf(Info.class);
+			assertThat(parsed.getInfo().getDescription()).isEqualTo("This is my custom description for my application!");
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction SEARCH_TYPE");
+				assertThat(item.getPost().getDeprecated()).isTrue();
+				assertThat(item.getPost().getDescription()).isEqualTo("Custom description for resource Patient interaction CREATE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction READ");
+				assertThat(item.getPatch().getDeprecated()).isTrue();
+				assertThat(item.getPatch().getDescription()).isEqualTo("Custom description for resource Patient interaction PATCH");
+				assertThat(item.getPut().getDeprecated()).isTrue();
+				assertThat(item.getPut().getDescription()).isEqualTo("Custom description for resource Patient interaction UPDATE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}/_history", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction HISTORY_INSTANCE");
+			});
+			assertThat(parsed.getPaths()).hasEntrySatisfying("/Patient/{id}/_history/{version_id}", item -> {
+				assertThat(item.getGet().getDeprecated()).isTrue();
+				assertThat(item.getGet().getDescription()).isEqualTo("Custom description for resource Patient interaction VREAD");
+			});
+		}
+
 		protected String fetchSwaggerUi(String url) throws IOException {
 			String resp;
 			HttpGet get = new HttpGet(url);
@@ -505,6 +565,26 @@ public class OpenApiInterceptorTest {
 			return null;
 		}
 
+	}
+
+	static class CustomOpenApiInterceptor extends OpenApiInterceptor {
+		@Override
+		protected void customizeOperation(OpenAPI openApi, io.swagger.v3.oas.models.Operation operation, BaseMethodBinding baseMethodBinding) {
+			operation.setDeprecated(true);
+			RestOperationTypeEnum type = baseMethodBinding.getRestOperationType();
+			if (RestOperationTypeEnum.VREAD.equals(type) &&
+					operation.getParameters().stream().noneMatch(param -> "version_id".equals(param.getName()))) {
+				type = RestOperationTypeEnum.READ;
+			}
+			operation.setDescription("Custom description for resource " + baseMethodBinding.getResourceName() + " interaction " + type);
+		}
+		@Override
+		protected void customizeOpenApi(OpenAPI openApi, ServletRequestDetails requestDetails) {
+			if (openApi.getInfo() == null) {
+				openApi.setInfo(new Info());
+			}
+			openApi.getInfo().setDescription("This is my custom description for my application!");
+		}
 	}
 
 }
