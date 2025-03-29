@@ -83,7 +83,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		this(theFhirContext, theBaseUrl, new DefaultClientProvider(theFhirContext));
 	}
 
-	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl, IClientProvider theClientProvider) {
+	public RemoteTerminologyServiceValidationSupport(
+			FhirContext theFhirContext, String theBaseUrl, IClientProvider theClientProvider) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
 		myClientProvider = theClientProvider;
