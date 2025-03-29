@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -62,6 +61,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -71,10 +71,7 @@ import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForCont
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry,
-				IResourceChangeListener,
-				ISearchParamRegistryController,
-				ISearchParamHashIdentityRegistry {
+		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
 			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));
@@ -174,17 +171,17 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
+	}
+
+	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			@Nonnull String theResourceName,
 			@Nonnull Set<String> theParamNames,
 			@Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
-	}
-
-	@Override
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable

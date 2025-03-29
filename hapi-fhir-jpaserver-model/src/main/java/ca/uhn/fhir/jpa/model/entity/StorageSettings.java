@@ -136,7 +136,7 @@ public class StorageSettings {
 	private boolean myValidateResourceStatusForPackageUpload = true;
 
 	/**
-	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code>
+	 * If set to <code>true</code>, the server will not write data to the <code>SP_NAME, RES_TYPE</code>
 	 * columns for all HFJ_SPIDX tables.
 	 *
 	 * @since 7.4.0
@@ -288,7 +288,7 @@ public class StorageSettings {
 
 	/**
 	 * If set to <code>true</code> (default is false), the server will not write data
-	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * to the <code>SP_NAME, RES_TYPE</code> columns for all HFJ_SPIDX tables.
 	 * <p>
 	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
 	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
@@ -314,7 +314,7 @@ public class StorageSettings {
 
 	/**
 	 * If set to <code>true</code> (default is false), the server will not write data
-	 * to the <code>SP_NAME, RES_TYPE, SP_UPDATED</code> columns for all HFJ_SPIDX tables.
+	 * to the <code>SP_NAME, RES_TYPE</code> columns for all HFJ_SPIDX tables.
 	 * <p>
 	 * This feature may be enabled on servers where HFJ_SPIDX tables are expected
 	 * to have a large amount of data (millions of rows) in order to reduce overall storage size.
@@ -328,7 +328,7 @@ public class StorageSettings {
 	 * If this setting is enabled, {@link PartitionSettings#isIncludePartitionInSearchHashes()} should be set to <code>false</code>.
 	 * </p>
 	 * <p>
-	 * If {@link StorageSettings#getIndexMissingFields()} ()} is enabled, the following index may need to be added
+	 * If {@link StorageSettings#getIndexMissingFields()} is enabled, the following index may need to be added
 	 * into the HFJ_SPIDX tables to improve the search performance: <code>HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID</code>
 	 * </p>
 	 *

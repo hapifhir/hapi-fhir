@@ -836,7 +836,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
-		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -1052,7 +1052,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
-		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -1185,7 +1185,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
-		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 
 		// Original value should be in Quantity index, no normalized should be in normalized table
 		runInTransaction(() -> {

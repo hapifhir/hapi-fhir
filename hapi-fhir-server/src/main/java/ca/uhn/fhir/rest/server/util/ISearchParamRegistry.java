@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -130,6 +131,10 @@ public interface ISearchParamRegistry {
 			@Nonnull Set<String> theParamNames,
 			@Nonnull SearchParamLookupContextEnum theContext) {
 		return Collections.emptyList();
+	}
+
+	default Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return Collections.emptyMap();
 	}
 
 	/**

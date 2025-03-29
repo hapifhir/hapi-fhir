@@ -76,13 +76,14 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
 	@Test
@@ -111,12 +112,12 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(7, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
 
@@ -151,13 +152,13 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		// name, family, phonetic, deceased, active
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
 	@Test
@@ -223,12 +224,12 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
 	}

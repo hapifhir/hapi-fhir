@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
@@ -157,7 +158,9 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.sp.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessagePersistenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
@@ -580,6 +583,16 @@ public class JpaConfig {
 	@Bean
 	public IResourceVersionSvc resourceVersionSvc() {
 		return new ResourceVersionSvcDaoImpl();
+	}
+
+	@Bean
+	public ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc(
+			@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
+			@Autowired ISearchParamRegistry theSearchParamRegistry,
+			@Autowired PlatformTransactionManager theTxManager,
+			@Autowired MemoryCacheService theMemoryCacheService) {
+		return new SearchParamIdentityCacheSvcImpl(
+				theResourceIndexedSearchParamIdentityDao, theSearchParamRegistry, theTxManager, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *
