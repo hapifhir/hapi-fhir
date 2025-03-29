@@ -139,7 +139,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForActivatedSubscriptionCount(1);
 
-		Observation observation = createBaseObservation(code, "SNOMED-CT");
+		Observation observation = buildBaseObservation(code, "SNOMED-CT");
 		myDaoRegistry.getResourceDao("Observation").create(observation, mySrd);
 
 		// Should see 1 subscription notification
@@ -199,11 +199,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		//Given: We store a resource in partition 2
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
 		final IFhirResourceDao observation = myDaoRegistry.getResourceDao("Observation");
-		IIdType observationIdPartitionTwo = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		IIdType observationIdPartitionTwo = observation.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We store a similar resource in partition 1
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
-		IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		IIdType observationIdPartitionOne = observation.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We create a subscription on partition 1
 		Subscription subscription = newSubscription(criteria1, payload);
@@ -236,11 +236,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		//Given: We store a resource in partition 2
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
 		final IFhirResourceDao observation = myDaoRegistry.getResourceDao("Observation");
-		IIdType observationIdPartitionTwo = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		IIdType observationIdPartitionTwo = observation.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We store a similar resource in partition 1
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
-		IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		IIdType observationIdPartitionOne = observation.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We create a subscription on the default partition
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_DEFAULT);
@@ -274,11 +274,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		//Given: We store a resource in partition 2
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
-		myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		myDaoRegistry.getResourceDao("Observation").create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We store a similar resource in partition 1
 		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
-		myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		myDaoRegistry.getResourceDao("Observation").create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
 		//Given: We create a subscription on default partition
 		Subscription theResource = newSubscription(criteria1, payload);
@@ -306,7 +306,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Create the resource first
-		DaoMethodOutcome observationOutcome = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd);
+		DaoMethodOutcome observationOutcome = myDaoRegistry.getResourceDao("Observation").create(buildBaseObservation(code, "SNOMED-CT"), mySrd);
 
 		Observation observation = (Observation) observationOutcome.getResource();
 

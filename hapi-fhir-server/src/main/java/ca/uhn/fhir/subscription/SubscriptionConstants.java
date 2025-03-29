@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.subscription;
 
-public class SubscriptionConstants {
+public final class SubscriptionConstants {
+	private SubscriptionConstants() {}
 
 	/**
 	 * The number of threads used in subscription channel processing
@@ -58,6 +59,43 @@ public class SubscriptionConstants {
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content";
 	public static final String SUBSCRIPTION_TOPIC_STATUS =
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription-status-r4";
+
+	// R4 SubscriptionTopic extension URLs
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_URL =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.url";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_VERSION =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.version";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_NAME =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.name";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_TITLE =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.title";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DATE =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.date";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_DESCRIPTION =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.description";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_TOPIC_STATUS =
+			"http://hl7.org/fhir/5.0/StructureDefinition/extension-SubscriptionTopic.status";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE_TRIGGER =
+			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.resourceTrigger";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_CAN_FILTER_BY =
+			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.canFilterBy";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_NOTIFICATION_SHAPE =
+			"http://hl7.org/fhir/4.3/StructureDefinition/extension-SubscriptionTopic.notificationShape";
+
+	// R4 SubscriptionTopic extension URL Nested extensions
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_DESCRIPTION = "description";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_RESOURCE = "resource";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_SUPPORTED_INTERACTION = "supportedInteraction";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_FHIRPATH_CRITERIA = "fhirPathCriteria";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_FILTER_PARAMETER = "filterParameter";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_INCLUDE = "include";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_REVINCLUDE = "revInclude";
+
+	// R4 SubscriptionTopic query criteria
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA = "queryCriteria";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_PREVIOUS = "previous";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_CURRENT = "current";
+	public static final String SUBSCRIPTION_TOPIC_R4_EXT_QUERY_CRITERIA_REQUIRE_BOTH = "requireBoth";
 
 	public static final int ORDER_SUBSCRIPTION_VALIDATING = 100;
 	public static final int ORDER_SUBSCRIPTION_ACTIVATING = 200;

@@ -115,15 +115,12 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
-	private boolean resourceDaoExists() {
-		return myDaoRegistry != null && myDaoRegistry.isResourceTypeSupported(myResourceName);
+	private boolean daoNotAvailable() {
+		return myDaoRegistry == null || !myDaoRegistry.isResourceTypeSupported(myResourceName);
 	}
 
-	/**
-	 * Read the existing resources from the database
-	 */
 	public void syncDatabaseToCache() {
-		if (!resourceDaoExists()) {
+		if (daoNotAvailable()) {
 			return;
 		}
 		if (!mySyncResourcesSemaphore.tryAcquire()) {
@@ -183,7 +180,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		}
 	}
 
-	protected abstract int syncResourcesIntoCache(List<IBaseResource> resourceList);
+	protected abstract int syncResourcesIntoCache(@Nonnull List<IBaseResource> resourceList);
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
@@ -204,8 +201,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	@Override
-	public void handleInit(Collection<IIdType> theResourceIds) {
-		if (!resourceDaoExists()) {
+	public void handleInit(@Nonnull Collection<IIdType> theResourceIds) {
+		if (daoNotAvailable()) {
 			ourLog.warn(
 					"The resource type {} is enabled on this server, but there is no {} DAO configured.",
 					myResourceName,
@@ -220,10 +217,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		handleInit(resourceList);
 	}
 
-	protected abstract void handleInit(List<IBaseResource> resourceList);
+	protected abstract void handleInit(@Nonnull List<IBaseResource> resourceList);
 
 	@Override
-	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+	public void handleChange(@Nonnull IResourceChangeEvent theResourceChangeEvent) {
 		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based
 		// on
 		// known resources that have been created, updated & deleted

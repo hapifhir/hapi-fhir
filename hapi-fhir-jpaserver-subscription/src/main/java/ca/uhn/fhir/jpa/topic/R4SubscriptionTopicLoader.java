@@ -19,23 +19,24 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
-public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
+/**
+ * Specialized loader for R4 SubscriptionTopics, which are implemented as Basic resources
+ * with a code of "SubscriptionTopic".
+ */
+public class R4SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionTopicLoader() {
-		super("SubscriptionTopic");
+	public R4SubscriptionTopicLoader() {
+		super("Basic");
 	}
 
 	@Override
@@ -43,24 +44,15 @@ public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 	public SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam(
-						"SubscriptionTopic", "status", ISearchParamRegistry.SearchParamLookupContextEnum.ALL)
-				!= null) {
-			map.add(SubscriptionTopic.SP_STATUS, new TokenParam(null, Enumerations.PublicationStatus.ACTIVE.toCode()));
-		}
+		// Add the search for Basic resources with code=SubscriptionTopic
+		map.add("code", new TokenParam("http://hl7.org/fhir/fhir-types", "SubscriptionTopic"));
+
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
 	}
 
 	@Override
 	protected SubscriptionTopic normalizeToR5(IBaseResource theResource) {
-		if (theResource instanceof SubscriptionTopic) {
-			return (SubscriptionTopic) theResource;
-		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
-			return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
-		} else {
-			throw new IllegalArgumentException(Msg.code(2332)
-					+ "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
-		}
+		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
 	}
 }
