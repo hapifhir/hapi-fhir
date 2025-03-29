@@ -11,6 +11,8 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClientProvider;
+import ca.uhn.fhir.rest.client.impl.FhirContextGenericClientProvider;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -66,6 +68,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
+	private final IGenericClientProvider myClientProvider;
 
 	/**
 	 * Constructor
@@ -73,12 +76,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 * @param theFhirContext The FhirContext object to use
 	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext) {
-		super(theFhirContext);
+		this(theFhirContext, null);
 	}
 
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
+		this(theFhirContext, theBaseUrl, new FhirContextGenericClientProvider(theFhirContext));
+	}
+
+	public RemoteTerminologyServiceValidationSupport(
+			FhirContext theFhirContext, String theBaseUrl, IGenericClientProvider theClientProvider) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
+		myClientProvider = theClientProvider;
 	}
 
 	@Override
@@ -572,7 +581,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private IGenericClient provideClient() {
-		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		IGenericClient retVal = myClientProvider.newRestfulGenericClient(myBaseUrl);
 		for (Object next : myClientInterceptors) {
 			retVal.registerInterceptor(next);
 		}
