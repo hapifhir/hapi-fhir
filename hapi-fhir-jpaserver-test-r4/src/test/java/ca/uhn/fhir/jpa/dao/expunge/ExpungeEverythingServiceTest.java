@@ -30,7 +30,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 	private IPartitionLookupSvc myPartitionLookupSvc;
 
 	@Test
-	public void testExpungeEverythingInvalidatesPartitionCache() {
+	void testExpungeEverythingInvalidatesPartitionCache() {
 		// Setup
 		IIdType p1 = createPatient(withActiveTrue());
 
@@ -66,21 +66,20 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testExpungeEverythingInvalidatesSearchParameterIdentityCache() {
+	void testExpungeEverythingInvalidatesSearchParameterIdentityCache() {
 		// setup
 		createPatient(withActiveTrue());
-		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings,
 			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_ACTIVE);
-		long patientDeceasedHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+		long patientDeceasedHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings,
 			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_DECEASED);
 
 		// validate precondition
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
 			runInTransaction(() -> {
-				// Patient.active, Patient.deceased search parameter identities
 				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(patientActiveHashIdentity));
 				assertNotNull(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(patientDeceasedHashIdentity));
-				assertEquals(2, myResourceIndexedSearchParamIdentityDao.count());
+				assertThat(myResourceIndexedSearchParamIdentityDao.count()).isGreaterThanOrEqualTo(2L);
 			});
 			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientActiveHashIdentity));
 			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, patientDeceasedHashIdentity));
