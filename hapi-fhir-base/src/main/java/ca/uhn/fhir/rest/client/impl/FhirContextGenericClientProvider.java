@@ -1,14 +1,14 @@
 package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IClientProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClientProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
-public class DefaultClientProvider implements IClientProvider {
+public class FhirContextGenericClientProvider implements IGenericClientProvider {
 
 	private final FhirContext myFhirContext;
 
-	public DefaultClientProvider(FhirContext theFhirContext) {
+	public FhirContextGenericClientProvider(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
 

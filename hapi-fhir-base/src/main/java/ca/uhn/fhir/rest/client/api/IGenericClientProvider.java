@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.client.api;
 
-public interface IClientProvider {
+public interface IGenericClientProvider {
 
 	IGenericClient newRestfulGenericClient(String theBaseUrl);
 }
