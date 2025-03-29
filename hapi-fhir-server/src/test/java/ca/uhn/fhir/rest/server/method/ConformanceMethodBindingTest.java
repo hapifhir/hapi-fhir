@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -12,12 +13,15 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -104,6 +108,21 @@ public class ConformanceMethodBindingTest {
 		verify(provider, times(1)).getServerConformance(any(), any());
 		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
 		verify(provider, times(2)).getServerConformance(any(), any());
+	}
+
+
+	@ParameterizedTest
+	@EnumSource(
+		value = RequestTypeEnum.class,
+		names = {"GET", "HEAD"})
+	public void invokeServer_metadata(RequestTypeEnum requestTypeEnum) throws NoSuchMethodException {
+		init(new TestResourceProvider());
+
+		RequestDetails requestDetails = mySrd;
+		when(requestDetails.getOperation()).thenReturn("metadata");
+		when(requestDetails.getRequestType()).thenReturn(requestTypeEnum);
+		assertEquals(conformanceMethodBinding.incomingServerRequestMatchesMethod(requestDetails), MethodMatchEnum.EXACT);
+
 	}
 
 	@SuppressWarnings("unused")
