@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClientProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClientProvider;
 
 public class FhirContextGenericClientProvider implements IGenericClientProvider {
 
