@@ -22,6 +22,7 @@ jobs:
       -  uses: mshick/add-pr-comment@v2
          if: always()
          with:
+            proxy-url: https://slack-bots.azure.smilecdr.com/robogary/github
             message-success: |
                Formatting check succeeded!
             message-failure: |
