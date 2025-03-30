@@ -133,7 +133,11 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		BundleBuilder bb = new BundleBuilder(myCtx);
 
 		for (var resource : theResources) {
-			bb.addTransactionUpdateEntry(resource);
+			if (resource.getIdElement().hasIdPart()) {
+				bb.addTransactionUpdateEntry(resource);
+			} else {
+				bb.addTransactionCreateEntry(resource);
+			}
 		}
 
 		IBaseBundle bundle = bb.getBundleTyped();
