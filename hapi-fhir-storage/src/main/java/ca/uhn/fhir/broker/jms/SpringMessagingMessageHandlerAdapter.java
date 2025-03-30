@@ -24,14 +24,12 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 					+ ". But received message of type: " + theMessage.getClass());
 		}
 
-		IMessage<?> message = (IMessage<?>) theMessage;
-		Class<?> messageClass = message.getPayload().getClass();
-
-		if (!getMessageType().isAssignableFrom(messageClass)) {
+		if (!getMessageType().isAssignableFrom(theMessage.getClass())) {
 			throw new InternalErrorException("Expecting message payload of type " + getMessageType()
-					+ ". But received message of type: " + messageClass);
+				+ ". But received message of type: " + theMessage.getClass());
 		}
-		;
+
+		IMessage<?> message = (IMessage<?>) theMessage;
 		myMessageListener.handleMessage((IMessage<T>) message);
 	}
 
