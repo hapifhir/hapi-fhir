@@ -24,13 +24,14 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
-public abstract class BaseJsonMessage<T> implements IMessage<T>, IModelJson {
+public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson {
 
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
@@ -50,7 +51,7 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, IModelJson {
 
 	@Override
 	@Nonnull
-	public Map<String, Object> getHeaders() {
+	public MessageHeaders getHeaders() {
 		return myHeaders.toMessageHeaders();
 	}
 

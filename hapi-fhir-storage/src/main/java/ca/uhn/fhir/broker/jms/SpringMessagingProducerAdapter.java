@@ -4,6 +4,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.broker.impl.SpringMessagingSendResult;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
@@ -20,8 +21,13 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
-		SpringMessagingMessageAdapter<IMessage<T>> springMessage = new SpringMessagingMessageAdapter<>(theMessage);
-		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(springMessage));
+		if (!Message.class.isAssignableFrom(theMessage.getClass())) {
+			throw new IllegalArgumentException("Expecting message of type " + Message.class
+					+ ". But received message of type: " + theMessage.getClass());
+		}
+		Message<?> message = (Message<?>) theMessage;
+
+		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(message));
 	}
 
 	public void addInterceptor(ChannelInterceptor theInterceptor) {

@@ -19,15 +19,20 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
-		SpringMessagingMessageAdapter springMessage = (SpringMessagingMessageAdapter) theMessage;
-		Class<?> messageClass = springMessage.getPayload().getClass();
+		if (!IMessage.class.isAssignableFrom(theMessage.getClass())) {
+			throw new InternalErrorException("Expecting message of type " + IMessage.class
+				+ ". But received message of type: " + theMessage.getClass());
+		}
+
+		IMessage<?> message = (IMessage<?>) theMessage;
+		Class<?> messageClass = message.getPayload().getClass();
 
 		if (!getMessageType().isAssignableFrom(messageClass)) {
-			throw new InternalErrorException("Expecting message of type " + getMessageType()
+			throw new InternalErrorException("Expecting message payload of type " + getMessageType()
 					+ ". But received message of type: " + messageClass);
 		}
 		;
-		myMessageListener.handleMessage(springMessage.getPayload());
+		myMessageListener.handleMessage((IMessage<T>) message);
 	}
 
 	private Class<? extends IMessage<T>> getMessageType() {

@@ -15,7 +15,6 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
-import ca.uhn.fhir.broker.jms.SpringMessagingMessageAdapter;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -522,9 +521,8 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		@Override
 		public Message<?> preSend(@Nonnull Message<?> message, @Nonnull MessageChannel channel) {
 			ourLog.info("Sending message: {}", message);
-			SpringMessagingMessageAdapter<JobWorkNotificationJsonMessage> springMessage = (SpringMessagingMessageAdapter<JobWorkNotificationJsonMessage>) message;
-			JobWorkNotificationJsonMessage workMessage = springMessage.getPayload();
-			JobWorkNotification notification = workMessage.getPayload();
+			JobWorkNotificationJsonMessage jsonMessage = (JobWorkNotificationJsonMessage) message;
+			JobWorkNotification notification = jsonMessage.getPayload();
 			myReceivedChunkIds.add(notification.getChunkId());
 			myPointcutLatch.call(message);
 			return message;
