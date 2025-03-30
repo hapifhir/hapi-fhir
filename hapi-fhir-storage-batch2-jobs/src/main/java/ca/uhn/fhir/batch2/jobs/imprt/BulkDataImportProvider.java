@@ -72,6 +72,7 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_URL = "url";
 	public static final String PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC = "credentialHttpBasic";
 	public static final String PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT = "maxBatchResourceCount";
+	public static final String PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME = "groupByCompartmentName";
 
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
@@ -153,6 +154,12 @@ public class BulkDataImportProvider {
 					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT);
 			if (isNotBlank(maximumBatchResourceCount)) {
 				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
+			}
+
+			String groupByCompartmentName = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME);
+			if (isNotBlank(groupByCompartmentName)) {
+				jobParameters.setGroupByCompartmentName(groupByCompartmentName);
 			}
 		}
 

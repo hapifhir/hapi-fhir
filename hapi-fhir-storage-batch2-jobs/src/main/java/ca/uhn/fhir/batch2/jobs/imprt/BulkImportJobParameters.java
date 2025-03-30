@@ -61,6 +61,20 @@ public class BulkImportJobParameters implements IModelJson {
 	@Nullable
 	private RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "groupByCompartmentName", required = false)
+	@Nullable
+	private String myGroupByCompartmentName;
+
+	@Nullable
+	public String getGroupByCompartmentName() {
+		return myGroupByCompartmentName;
+	}
+
+	public BulkImportJobParameters setGroupByCompartmentName(@Nullable String theGroupByCompartmentName) {
+		myGroupByCompartmentName = theGroupByCompartmentName;
+		return this;
+	}
+
 	public List<String> getNdJsonUrls() {
 		if (myNdJsonUrls == null) {
 			myNdJsonUrls = new ArrayList<>();

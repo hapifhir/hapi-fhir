@@ -78,6 +78,7 @@ public class BulkImportCommand extends BaseCommand {
 	public static final String TARGET_BASE = "target-base";
 	public static final String PORT = "port";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
+	public static final String GROUP_BY_COMPARTMENT_NAME = "group-by-compartment-name";
 	private static volatile boolean ourEndNow;
 	private BulkImportFileServlet myServlet;
 	private Server myServer;
@@ -118,6 +119,12 @@ public class BulkImportCommand extends BaseCommand {
 				SOURCE_DIRECTORY,
 				"directory",
 				"The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
+		addOptionalOption(
+			options,
+			null,
+			GROUP_BY_COMPARTMENT_NAME,
+			"compartment name",
+			"If specified, requests that the process attempt to group resources in the same compartment. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;

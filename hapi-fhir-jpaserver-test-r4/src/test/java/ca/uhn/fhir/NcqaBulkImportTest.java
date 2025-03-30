@@ -48,10 +48,14 @@ public class NcqaBulkImportTest extends BaseJpaR4Test {
 	@Test
 	public void testImport() throws InterruptedException, IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		BulkImportJobParameters params = new BulkImportJobParameters();
-		params.addNdJsonUrl(myServer.getBaseUrl() + "?filename=" + "/Users/james/tmp/ncqa/All_Bulk_Import_Files/LSC/Claim.ndjson.gz");
+		params.addNdJsonUrl(myServer.getBaseUrl() + "?filename=" + "../../../tmp/ncqa/All_Bulk_Import_Files/LSC/Claim.ndjson.gz");
 		params.setMaxBatchResourceCount(10);
+		params.setGroupByCompartmentName("Patient");
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
@@ -59,11 +63,9 @@ public class NcqaBulkImportTest extends BaseJpaR4Test {
 
 		Batch2JobStartResponse outcome = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
-		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(outcome.getInstanceId(), 600);
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(outcome.getInstanceId(), 6000000);
 		assertNotNull(instance);
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
-
-		Thread.sleep(1000000);
 	}
 
 

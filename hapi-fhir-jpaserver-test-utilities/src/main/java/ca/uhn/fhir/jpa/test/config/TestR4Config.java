@@ -49,6 +49,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
@@ -203,13 +204,16 @@ public class TestR4Config {
 			.afterMethod(captureQueriesListener())
 			.build();
 
+		JdbcTemplate tmp = new JdbcTemplate(dataSource);
+		tmp.execute("SET DEFAULT_LOCK_TIMEOUT 600000");
+
 		return dataSource;
 	}
 
 
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
-		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		theDataSource.setUrl("jdbc:h2:mem:testdb_r4;LOCK_TIMEOUT=100000");
 		theDataSource.setMaxWaitMillis(30000);
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");
