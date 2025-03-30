@@ -93,9 +93,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 
 		Map<String, FileBuffer> groupToBuffer = new HashMap<>();
 
-		String groupByCompartmentName = theStepExecutionDetails
-			.getParameters()
-			.getGroupByCompartmentName();
+		String groupByCompartmentName = theStepExecutionDetails.getParameters().getGroupByCompartmentName();
 		if (isNotBlank(groupByCompartmentName)) {
 			ourLog.info("Will group resources by compartment: {}", groupByCompartmentName);
 		}
@@ -145,13 +143,10 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 									lineCount++;
 
 									if (isNotBlank(groupByCompartmentName)) {
-										groupName = determineCompartmentGroup(
-											groupByCompartmentName,
-												nextLine);
+										groupName = determineCompartmentGroup(groupByCompartmentName, nextLine);
 									}
 
-									FileBuffer buffer =
-											groupToBuffer.computeIfAbsent(groupName, p -> new FileBuffer());
+									FileBuffer buffer = groupToBuffer.computeIfAbsent(groupName, p -> new FileBuffer());
 									buffer.addResource(nextLine);
 
 									int batchSizeChars = (int) (2 * FileUtils.ONE_MB);
