@@ -21,7 +21,7 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		if (!IMessage.class.isAssignableFrom(theMessage.getClass())) {
 			throw new InternalErrorException("Expecting message of type " + IMessage.class
-				+ ". But received message of type: " + theMessage.getClass());
+					+ ". But received message of type: " + theMessage.getClass());
 		}
 
 		IMessage<?> message = (IMessage<?>) theMessage;
