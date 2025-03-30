@@ -79,6 +79,7 @@ public class BulkImportCommand extends BaseCommand {
 	public static final String PORT = "port";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
 	public static final String GROUP_BY_COMPARTMENT_NAME = "group-by-compartment-name";
+	public static final String BATCH_SIZE = "batch-size";
 	private static volatile boolean ourEndNow;
 	private BulkImportFileServlet myServlet;
 	private Server myServer;
@@ -113,6 +114,12 @@ public class BulkImportCommand extends BaseCommand {
 				SOURCE_BASE,
 				"base url",
 				"The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
+		addOptionalOption(
+				options,
+				null,
+				BATCH_SIZE,
+				"batch size",
+				"If set, specifies the number of resources to process in a single work chunk. Smaller numbers can avoid timeouts, larger numbers can give better throughput. Always measure the effect of different settings.");
 		addRequiredOption(
 				options,
 				null,
@@ -120,11 +127,11 @@ public class BulkImportCommand extends BaseCommand {
 				"directory",
 				"The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
 		addOptionalOption(
-			options,
-			null,
-			GROUP_BY_COMPARTMENT_NAME,
-			"compartment name",
-			"If specified, requests that the process attempt to group resources in the same compartment. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction.");
+				options,
+				null,
+				GROUP_BY_COMPARTMENT_NAME,
+				"compartment name",
+				"If specified, requests that the process attempt to group resources in the same compartment. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;
@@ -157,7 +164,12 @@ public class BulkImportCommand extends BaseCommand {
 				theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 		client.registerInterceptor(new LoggingInterceptor(false));
 
-		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);
+		Integer batchSize = null;
+		if (theCommandLine.hasOption(BATCH_SIZE)) {
+			batchSize = getAndParsePositiveIntegerParam(theCommandLine, BATCH_SIZE);
+		}
+
+		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes, batchSize);
 		IBaseResource outcome = client.operation()
 				.onServer()
 				.named(JpaConstants.OPERATION_IMPORT)
@@ -212,7 +224,8 @@ public class BulkImportCommand extends BaseCommand {
 	}
 
 	@Nonnull
-	private IBaseParameters createRequest(String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes) {
+	private IBaseParameters createRequest(
+			String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes, Integer theBatchSize) {
 
 		FhirContext ctx = getFhirContext();
 		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
@@ -229,6 +242,14 @@ public class BulkImportCommand extends BaseCommand {
 				storageDetail,
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE,
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
+
+		if (theBatchSize != null) {
+			ParametersUtil.addPartInteger(
+					ctx,
+					storageDetail,
+					BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT,
+					theBatchSize);
+		}
 
 		for (int i = 0; i < theIndexes.size(); i++) {
 			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT);
