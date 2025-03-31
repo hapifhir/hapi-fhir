@@ -29,8 +29,8 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 					+ ". But received message of type: " + theMessage.getClass());
 		}
 
-		IMessage<?> message = (IMessage<?>) theMessage;
-		myMessageListener.handleMessage((IMessage<T>) message);
+		IMessage<T> message = (IMessage<T>) theMessage;
+		myMessageListener.handleMessage(message);
 	}
 
 	private Class<? extends IMessage<T>> getMessageType() {

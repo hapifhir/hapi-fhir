@@ -19,4 +19,18 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	Class<? extends IMessage<T>> getMessageType();
 
 	IMessageListener<T> getMessageListener();
+
+	/*
+	 * Stop requesting new messages from the broker until resume() is called.
+	 */
+	default void pause() {
+		throw new UnsupportedOperationException();
+	}
+
+	/*
+	 * Resume requesting messages from the broker.
+	 */
+	default void resume() {
+		throw new UnsupportedOperationException();
+	}
 }

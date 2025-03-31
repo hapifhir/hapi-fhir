@@ -57,4 +57,14 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	public IMessageListener<T> getMessageListener() {
 		return myMessageListener;
 	}
+
+	@Override
+	public void pause() {
+		myLegacyChannelReceiver.stop();
+	}
+
+	@Override
+	public void resume() {
+		myLegacyChannelReceiver.start();
+	}
 }

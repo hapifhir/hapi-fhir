@@ -25,4 +25,13 @@ import org.springframework.messaging.support.InterceptableChannel;
 
 public interface ISpringMessagingChannelReceiver extends SubscribableChannel, InterceptableChannel, DisposableBean {
 	String getName();
+
+	// FIXME KHS javadoc
+    default void stop() {
+		throw new UnsupportedOperationException();
+	}
+
+	default void start() {
+		throw new UnsupportedOperationException();
+	}
 }
