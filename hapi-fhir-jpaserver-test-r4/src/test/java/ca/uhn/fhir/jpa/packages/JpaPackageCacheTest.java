@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -207,4 +210,46 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	void duplicateResourceAmongMultiplePackages() throws IOException {
+		final String version_0_1 = "0.1";
+		final String version_0_5 = "0.5";
+		final String simpleAlphaPackage = "simple-alpha";
+		final String simpleAlphaDupePackage = "simple-alpha-dupe";
+		final String measureUrl = "http://example.com/Measure/simple-alpha";
+
+		myPackageCacheManager.installPackage(new PackageInstallationSpec()
+			.setName(simpleAlphaPackage)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
+			.setVersion(version_0_1)
+			.setPackageUrl("classpath://packages/simple-alpha.tgz"));
+
+		myPackageCacheManager.installPackage(new PackageInstallationSpec()
+			.setName(simpleAlphaDupePackage)
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
+			.setVersion(version_0_5)
+			.setPackageUrl("classpath://packages/simple-alpha-dupe.tgz"));
+
+		final List<NpmFhirIdPackageIdAndVersionJson> jsons =
+			myPackageCacheManager.loadResourcePackageInfosByUrl(FhirVersionEnum.R4, measureUrl);
+
+		assertThat(jsons).isNotNull().isNotEmpty().hasSize(2);
+
+		final NpmFhirIdPackageIdAndVersionJson json1 = jsons.get(0);
+		final NpmFhirIdPackageIdAndVersionJson json2 = jsons.get(1);
+
+		assertThat(json1.getPackageId()).isEqualTo(simpleAlphaPackage);
+		assertThat(json1.getFhirVersion()).isEqualTo(FhirVersionEnum.R4);
+		assertThat(json1.getVersion()).isEqualTo(version_0_1);
+		assertThat(json1.getCanonicalUrl()).isEqualTo(measureUrl);
+
+		assertThat(json2.getPackageId()).isEqualTo(simpleAlphaDupePackage);
+		assertThat(json2.getFhirVersion()).isEqualTo(FhirVersionEnum.R4);
+		assertThat(json2.getVersion()).isEqualTo(version_0_5);
+		assertThat(json2.getCanonicalUrl()).isEqualTo(measureUrl);
+
+		final IBaseResource iBaseResource = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, measureUrl);
+
+		assertThat(iBaseResource).isNotNull();
+	}
 }
