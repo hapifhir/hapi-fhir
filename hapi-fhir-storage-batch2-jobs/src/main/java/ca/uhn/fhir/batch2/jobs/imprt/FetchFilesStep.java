@@ -105,23 +105,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 
 			for (String nextUrl : urls) {
 
-				ourLog.info("Fetching URL (pass 1 for analysis): {}", nextUrl);
-				int lineCountTotal = 0;
-				try (CloseableHttpResponse response = httpClient.execute(new HttpGet(nextUrl))) {
-					validateStatusCodeAndContentType(nextUrl, response);
-
-					try (InputStream inputStream = response.getEntity().getContent()) {
-						try (LineIterator lineIterator =
-								new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-							while (lineIterator.hasNext()) {
-								String next = lineIterator.next();
-								if (isNotBlank(next)) {
-									lineCountTotal++;
-								}
-							}
-						}
-					}
-				}
+				int lineCountTotal = fetchAllFilesAndCountLines(nextUrl, httpClient);
 
 				ourLog.info("Fetching URL (pass 2 for processing): {}", nextUrl);
 				StopWatch urlSw = new StopWatch();
@@ -179,6 +163,27 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(2054) + e.getMessage(), e);
 		}
+	}
+
+	private static int fetchAllFilesAndCountLines(String nextUrl, CloseableHttpClient httpClient) throws IOException {
+		ourLog.info("Fetching URL (pass 1 for analysis): {}", nextUrl);
+		int lineCountTotal = 0;
+		try (CloseableHttpResponse response = httpClient.execute(new HttpGet(nextUrl))) {
+			validateStatusCodeAndContentType(nextUrl, response);
+
+			try (InputStream inputStream = response.getEntity().getContent()) {
+				try (LineIterator lineIterator =
+						new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+					while (lineIterator.hasNext()) {
+						String next = lineIterator.next();
+						if (isNotBlank(next)) {
+							lineCountTotal++;
+						}
+					}
+				}
+			}
+		}
+		return lineCountTotal;
 	}
 
 	/**
@@ -312,6 +317,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		NdJsonFileJson data = new NdJsonFileJson();
 		data.setNdJsonText(buffer.toString());
 		data.setSourceName(nextUrl);
+		data.setBatchLineCount(theLineCount);
+		data.setBatchLineCountTotal(theLineCount);
 		theDataSink.accept(data);
 
 		buffer.clear();

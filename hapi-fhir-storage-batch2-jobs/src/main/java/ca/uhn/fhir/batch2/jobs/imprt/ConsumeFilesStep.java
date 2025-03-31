@@ -116,19 +116,12 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		} else {
 			requestDetails.setRequestPartitionId(thePartitionId);
 		}
-		TransactionDetails transactionDetails = new TransactionDetails();
-		storeResourcesInsideTransaction(resources, requestDetails, transactionDetails);
-
-		//		myHapiTransactionService.execute(
-		//			requestDetails,
-		//			transactionDetails,
-		//			tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
+		storeResourcesInsideTransaction(resources, requestDetails);
 	}
 
 	private Void storeResourcesInsideTransaction(
 			List<IBaseResource> theResources,
-			SystemRequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails) {
+			SystemRequestDetails theRequestDetails) {
 
 		BundleBuilder bb = new BundleBuilder(myCtx);
 

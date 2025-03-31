@@ -86,7 +86,7 @@ public class FetchFilesStepTest {
 
 		// Verify
 
-		assertThat(myHttpServletExtension.getRequestHeaders()).hasSize(1);
+		assertThat(myHttpServletExtension.getRequestHeaders()).hasSize(2);
 
 		String expectedAuthHeader = "Authorization: Basic " + Base64.getEncoder().encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
 		assertThat(myHttpServletExtension.getRequestHeaders().get(0)).as(myHttpServletExtension.toString()).contains(expectedAuthHeader);
