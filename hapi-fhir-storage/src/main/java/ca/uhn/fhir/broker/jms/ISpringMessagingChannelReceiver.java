@@ -27,7 +27,7 @@ public interface ISpringMessagingChannelReceiver extends SubscribableChannel, In
 	String getName();
 
 	// FIXME KHS javadoc
-    default void stop() {
+	default void stop() {
 		throw new UnsupportedOperationException();
 	}
 
