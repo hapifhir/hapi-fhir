@@ -1,5 +1,6 @@
 package ca.uhn.fhir.broker.impl;
 
+import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -15,6 +16,7 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
 
 	private final Class<T> myPayloadType;
+	private boolean myClosed = false;
 
 	public MultiplexingListener(Class<T> thePayloadType) {
 		myPayloadType = thePayloadType;
@@ -22,6 +24,8 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 
 	@Override
 	public void handleMessage(IMessage<T> theMessage) {
+		validateNotClosed();
+
 		Class<?> messageClass = theMessage.getPayload().getClass();
 		if (!getPayloadType().isAssignableFrom(messageClass)) {
 			throw new InternalErrorException("Expecting message of type " + getPayloadType()
@@ -30,12 +34,20 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 		mySubListeners.forEach(listener -> listener.handleMessage(theMessage));
 	}
 
+	private void validateNotClosed() {
+		if (myClosed) {
+			throw new BrokerListenerClosedException("Attempted to use a closed MultiplexingListener.");
+		}
+	}
+
 	@Override
 	public Class<T> getPayloadType() {
 		return myPayloadType;
 	}
 
 	public boolean addListener(IMessageListener<T> theListener) {
+		validateNotClosed();
+
 		if (!getPayloadType().isAssignableFrom(theListener.getPayloadType())) {
 			throw new InternalErrorException("Expecting listener of type " + getPayloadType()
 					+ ". But listener was for type: " + theListener.getPayloadType());
@@ -51,6 +63,7 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 	public void close() {
 		mySubListeners.forEach(CloseUtil::close);
 		mySubListeners.clear();
+		myClosed = true;
 	}
 
 	public <L extends IMessageListener<T>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
