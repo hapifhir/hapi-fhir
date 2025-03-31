@@ -177,7 +177,7 @@ public class SubscriptionTopicPayloadBuilder {
 			StringBuilder query = new StringBuilder(theResourceType + "?" + PARAM_ID + "="
 					+ resource.getIdElement().getIdPart());
 			for (StringType include : theIncludes) {
-				query.append("&" + PARAM_INCLUDE + "=").append(include.getValue());
+				query.append("&" + PARAM_INCLUDE + "=").append(ParameterUtil.escapeAndUrlEncode(include.getValue()));
 			}
 			for (StringType revInclude : theRevIncludes) {
 				query.append("&" + PARAM_REVINCLUDE + "=").append(revInclude.getValue());
