@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 6826
-title: "The _offset query param can be used when constructing a history request via the GenericClient API."
+title: "The `_offset` query parameter can now be used when constructing a history request via the IGenericClient API."
