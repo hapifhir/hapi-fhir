@@ -95,7 +95,7 @@ public class SubscriptionLoaderTest {
 	}
 
 	@Test
-	public void syncSubscriptions_withInactiveSubscriptionFailing_Syncs() {
+	public void refreshCache_withInactiveSubscriptionFailing_Syncs() {
 		// setup
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
@@ -118,7 +118,7 @@ public class SubscriptionLoaderTest {
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 
 		// test
-		mySubscriptionLoader.syncDatabaseToCache();
+		mySubscriptionLoader.requestRefresh();
 
 		// verify
 		verify(mySubscriptionDao)

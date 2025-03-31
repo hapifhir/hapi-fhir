@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 
 /**
- * Tag interface for Subscription Resource Change Listeners
+ * Tag interface for Subscription Topic Loaders
  */
-public interface ISubscriptionTopicLoader extends IResourceChangeListener {
-	/**
-	 * Update the cache to ensure it contains all the subscription topics currently in the database
-	 */
-	void syncDatabaseToCache();
-}
+public interface ISubscriptionTopicLoader extends IResourceChangeListener, IResourceRepositoryCache {}

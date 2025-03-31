@@ -97,7 +97,7 @@ public class MdmSubscriptionLoader {
 				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
 				updateSubscriptionTopic(subscriptionTopic);
 				// After loading subscriptionTopic, sync subscriptionTopic to the registry.
-				mySubscriptionTopicLoader.syncDatabaseToCache();
+				mySubscriptionTopicLoader.requestRefresh();
 
 				subscriptions = buildMdmSubscriptionR5(subscriptionTopic);
 				break;
@@ -112,7 +112,7 @@ public class MdmSubscriptionLoader {
 		}
 		// After loading all the subscriptions, sync the subscriptions to the registry.
 		if (!subscriptions.isEmpty()) {
-			mySubscriptionLoader.syncDatabaseToCache();
+			mySubscriptionLoader.requestRefresh();
 		}
 	}
 

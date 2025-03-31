@@ -20,6 +20,7 @@
 package ca.uhn.fhir.cache;
 
 import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -29,6 +30,8 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PreDestroy;
@@ -47,12 +50,14 @@ import org.springframework.core.annotation.Order;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener {
+public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener, IResourceRepositoryCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
 	public static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	public static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	private static final long FORCE_REFRESH_TIMEOUT_SECONDS = 300;
 	private final String myResourceName;
 
 	@Autowired
@@ -119,7 +124,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		return myDaoRegistry == null || !myDaoRegistry.isResourceTypeSupported(myResourceName);
 	}
 
-	public void syncDatabaseToCache() {
+	@Override
+	public void requestRefresh() {
 		if (daoNotAvailable()) {
 			return;
 		}
@@ -128,6 +134,30 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		}
 		try {
 			doSyncResourcesWithRetry();
+		} finally {
+			mySyncResourcesSemaphore.release();
+		}
+	}
+
+	@VisibleForTesting
+	@Override
+	public void forceRefresh() {
+		if (daoNotAvailable()) {
+			throw new ConfigurationException("Attempt to force refresh without a dao");
+		}
+		try {
+			if (mySyncResourcesSemaphore.tryAcquire(FORCE_REFRESH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+				doSyncResourcesWithRetry();
+			} else {
+				String errorMessage = String.format(
+						"Timed out waiting %s %s to refresh %s cache",
+						FORCE_REFRESH_TIMEOUT_SECONDS, "seconds", myResourceName);
+				ourLog.error(errorMessage);
+				throw new ConfigurationException(errorMessage);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new InternalErrorException(e);
 		} finally {
 			mySyncResourcesSemaphore.release();
 		}
@@ -224,7 +254,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based
 		// on
 		// known resources that have been created, updated & deleted
-		syncDatabaseToCache();
+		requestRefresh();
 	}
 
 	@Nonnull

@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ca.uhn.hapi.converters.canonical.SubscriptionTopicCanonicalizer;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
@@ -35,8 +34,8 @@ public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 	/**
 	 * Constructor
 	 */
-	public SubscriptionTopicLoader() {
-		super("SubscriptionTopic");
+	public SubscriptionTopicLoader(VersionCanonicalizer theVersionCanonicalizer, SubscriptionTopicRegistry theSubscriptionTopicRegistry, ISearchParamRegistry theSearchParamRegistry) {
+		super(theVersionCanonicalizer, "SubscriptionTopic", theSubscriptionTopicRegistry, theSearchParamRegistry);
 	}
 
 	@Override
