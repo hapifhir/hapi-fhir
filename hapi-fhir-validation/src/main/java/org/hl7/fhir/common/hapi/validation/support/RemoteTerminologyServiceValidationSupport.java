@@ -11,8 +11,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IGenericClientProvider;
-import ca.uhn.fhir.rest.client.impl.FhirContextGenericClientProvider;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -68,26 +67,41 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
-	private final IGenericClientProvider myClientProvider;
+
+	@Nullable
+	private final IRestfulClientFactory myRestfulClientFactory;
 
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext The FhirContext object to use
+	 * @param theFhirContext The FhirContext. Will be used to create a FHIR client for remote terminology requests.
 	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext) {
 		this(theFhirContext, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theFhirContext The FhirContext. Will be used to create a FHIR client for remote terminology requests.
+	 * @param theBaseUrl The url used for the remote terminology FHIR client.
+	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
-		this(theFhirContext, theBaseUrl, new FhirContextGenericClientProvider(theFhirContext));
+		this(theFhirContext, theBaseUrl, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theFhirContext The FhirContext.
+	 * @param theBaseUrl The url used for the remote terminology FHIR client.
+	 * @param theRestfulClientFactory Used to create the remote terminology FHIR client. If this is not supplied, a client will be created from the FhirContext
+	 */
 	public RemoteTerminologyServiceValidationSupport(
-			FhirContext theFhirContext, String theBaseUrl, IGenericClientProvider theClientProvider) {
+			FhirContext theFhirContext, String theBaseUrl, @Nullable IRestfulClientFactory theRestfulClientFactory) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
-		myClientProvider = theClientProvider;
+		myRestfulClientFactory = theRestfulClientFactory;
 	}
 
 	@Override
@@ -581,7 +595,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private IGenericClient provideClient() {
-		IGenericClient retVal = myClientProvider.newRestfulGenericClient(myBaseUrl);
+		IGenericClient retVal;
+		if (myRestfulClientFactory != null) {
+			retVal = myRestfulClientFactory.newGenericClient(myBaseUrl);
+		} else {
+			retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		}
 		for (Object next : myClientInterceptors) {
 			retVal.registerInterceptor(next);
 		}
