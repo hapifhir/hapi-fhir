@@ -50,9 +50,4 @@ public class R4SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
 	}
-
-	@Override
-	protected SubscriptionTopic normalizeToR5(IBaseResource theResource) {
-		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
-	}
 }

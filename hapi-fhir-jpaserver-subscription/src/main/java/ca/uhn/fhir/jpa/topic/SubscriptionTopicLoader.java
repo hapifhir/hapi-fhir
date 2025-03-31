@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.hapi.converters.canonical.SubscriptionTopicCanonicalizer;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -50,17 +51,5 @@ public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 		}
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
-	}
-
-	@Override
-	protected SubscriptionTopic normalizeToR5(IBaseResource theResource) {
-		if (theResource instanceof SubscriptionTopic) {
-			return (SubscriptionTopic) theResource;
-		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
-			return SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
-		} else {
-			throw new IllegalArgumentException(Msg.code(2332)
-					+ "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
-		}
 	}
 }

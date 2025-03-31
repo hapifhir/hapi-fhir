@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.hapi.converters.canonical.SubscriptionTopicCanonicalizer;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;

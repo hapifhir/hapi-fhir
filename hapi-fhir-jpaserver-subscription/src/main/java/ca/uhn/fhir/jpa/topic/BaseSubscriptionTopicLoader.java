@@ -23,6 +23,7 @@ import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
@@ -46,11 +47,14 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 
+	private final VersionCanonicalizer myVersionCanonicalizer;
+
 	/**
 	 * Constructor
 	 */
 	public BaseSubscriptionTopicLoader(String theResourceName) {
 		super(theResourceName);
+		myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
-			boolean registered = mySubscriptionTopicRegistry.register(normalizeToR5(resource));
+			boolean registered = mySubscriptionTopicRegistry.register(myVersionCanonicalizer.subscriptionTopicToCanonical(resource));
 			if (registered) {
 				registeredCount++;
 			}
@@ -81,9 +85,4 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 		ourLog.debug("Finished syncing Subscription Topics - registered {}", registeredCount);
 		return registeredCount;
 	}
-
-	/**
-	 * Convert the resource to an R5 SubscriptionTopic
-	 */
-	protected abstract SubscriptionTopic normalizeToR5(IBaseResource theResource);
 }

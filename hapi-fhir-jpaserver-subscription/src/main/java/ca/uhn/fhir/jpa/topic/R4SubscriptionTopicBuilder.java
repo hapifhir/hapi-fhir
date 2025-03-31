@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.hapi.converters.canonical.SubscriptionTopicCanonicalizer;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
