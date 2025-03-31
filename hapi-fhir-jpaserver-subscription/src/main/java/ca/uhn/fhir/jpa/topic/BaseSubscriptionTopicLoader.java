@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.Logs;
@@ -28,7 +27,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +45,11 @@ public abstract class BaseSubscriptionTopicLoader extends BaseResourceCacheSynch
 	/**
 	 * Constructor
 	 */
-	public BaseSubscriptionTopicLoader(VersionCanonicalizer theVersionCanonicalizer, String theResourceName, SubscriptionTopicRegistry theSubscriptionTopicRegistry, ISearchParamRegistry theSearchParamRegistry) {
+	public BaseSubscriptionTopicLoader(
+			VersionCanonicalizer theVersionCanonicalizer,
+			String theResourceName,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			ISearchParamRegistry theSearchParamRegistry) {
 		super(theResourceName);
 		myVersionCanonicalizer = theVersionCanonicalizer;
 		mySubscriptionTopicRegistry = theSubscriptionTopicRegistry;

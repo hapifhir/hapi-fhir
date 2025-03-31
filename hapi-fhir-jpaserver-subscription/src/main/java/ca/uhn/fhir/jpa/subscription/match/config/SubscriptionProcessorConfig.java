@@ -156,12 +156,17 @@ public class SubscriptionProcessorConfig {
 
 	@Lazy
 	@Bean
-	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SubscriptionTopicRegistry theSubscriptionTopicRegistry, MatchUrlService theMatchUrlService) {
+	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			MatchUrlService theMatchUrlService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
 			case R4B:
 			case R5:
-				return new SubscriptionTopicPayloadBuilder(theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
+				return new SubscriptionTopicPayloadBuilder(
+						theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
 			default:
 				return null;
 		}

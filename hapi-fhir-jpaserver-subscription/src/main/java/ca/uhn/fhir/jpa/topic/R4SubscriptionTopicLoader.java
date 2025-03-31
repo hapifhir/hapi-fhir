@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -36,7 +35,10 @@ public class R4SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 	/**
 	 * Constructor
 	 */
-	public R4SubscriptionTopicLoader(VersionCanonicalizer theVersionCanonicalizer, SubscriptionTopicRegistry theSubscriptionTopicRegistry, ISearchParamRegistry theSearchParamRegistry) {
+	public R4SubscriptionTopicLoader(
+			VersionCanonicalizer theVersionCanonicalizer,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			ISearchParamRegistry theSearchParamRegistry) {
 		super(theVersionCanonicalizer, "Basic", theSubscriptionTopicRegistry, theSearchParamRegistry);
 	}
 

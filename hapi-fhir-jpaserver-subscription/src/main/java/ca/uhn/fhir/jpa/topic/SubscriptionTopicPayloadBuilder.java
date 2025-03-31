@@ -49,7 +49,6 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +74,11 @@ public class SubscriptionTopicPayloadBuilder {
 
 	private final MatchUrlService myMatchUrlService;
 
-	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SubscriptionTopicRegistry theSubscriptionTopicRegistry, MatchUrlService theMatchUrlService) {
+	public SubscriptionTopicPayloadBuilder(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			MatchUrlService theMatchUrlService) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		mySubscriptionTopicRegistry = theSubscriptionTopicRegistry;
@@ -98,14 +101,14 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	public IBaseBundle buildPayload(
-		List<IBaseResource> theResources,
-		ActiveSubscription theActiveSubscription,
-		String theTopicUrl,
-		RestOperationTypeEnum theRestOperationType) {
+			List<IBaseResource> theResources,
+			ActiveSubscription theActiveSubscription,
+			String theTopicUrl,
+			RestOperationTypeEnum theRestOperationType) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
 		IBaseResource notificationStatus =
-			myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
+				myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		bundleBuilder.addCollectionEntry(notificationStatus);
 
 		addResources(theResources, theActiveSubscription.getSubscription(), theRestOperationType, bundleBuilder);
@@ -148,14 +151,17 @@ public class SubscriptionTopicPayloadBuilder {
 			String resourceType = shape.getResource();
 
 			if (resourceType == null) {
-				ourLog.warn("Notification Shape on SubscriptionTopic/{} (with url {}) is missing mandatory resource.", topic.getId(), topic.getUrl());
+				ourLog.warn(
+						"Notification Shape on SubscriptionTopic/{} (with url {}) is missing mandatory resource.",
+						topic.getId(),
+						topic.getUrl());
 				continue;
 			}
 
 			// If the resourceType doesn't match any of our resources, skip it
 			List<IBaseResource> resourcesOfThisType = theResources.stream()
-				.filter(r -> myFhirContext.getResourceType(r).equals(resourceType))
-				.collect(Collectors.toList());
+					.filter(r -> myFhirContext.getResourceType(r).equals(resourceType))
+					.collect(Collectors.toList());
 
 			if (resourcesOfThisType.isEmpty()) {
 				continue;
@@ -165,7 +171,7 @@ public class SubscriptionTopicPayloadBuilder {
 			List<StringType> revInclude = shape.getRevInclude();
 
 			Set<IBaseResource> includedResources =
-				getIncludedResources(resourceType, resourcesOfThisType, include, revInclude);
+					getIncludedResources(resourceType, resourcesOfThisType, include, revInclude);
 			resultResources.addAll(includedResources);
 		}
 
@@ -173,24 +179,25 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	private Set<IBaseResource> getIncludedResources(
-		String theResourceType,
-		List<IBaseResource> theResourcesOfThisType,
-		List<StringType> theIncludes,
-		List<StringType> theRevIncludes) {
+			String theResourceType,
+			List<IBaseResource> theResourcesOfThisType,
+			List<StringType> theIncludes,
+			List<StringType> theRevIncludes) {
 		Set<IBaseResource> resultResources = new HashSet<>();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 
 		for (IBaseResource resource : theResourcesOfThisType) {
 			StringBuilder query = new StringBuilder(theResourceType + "?" + PARAM_ID + "="
-				+ resource.getIdElement().getIdPart());
+					+ resource.getIdElement().getIdPart());
 			for (StringType include : theIncludes) {
 				query.append("&" + PARAM_INCLUDE + "=").append(ParameterUtil.escapeAndUrlEncode(include.getValue()));
 			}
 			for (StringType revInclude : theRevIncludes) {
-				query.append("&" + PARAM_REVINCLUDE + "=").append(ParameterUtil.escapeAndUrlEncode(revInclude.getValue()));
+				query.append("&" + PARAM_REVINCLUDE + "=")
+						.append(ParameterUtil.escapeAndUrlEncode(revInclude.getValue()));
 			}
 			ResourceSearch resourceSearch =
-				myMatchUrlService.getResourceSearchWithIncludesAndRevIncludes(query.toString());
+					myMatchUrlService.getResourceSearchWithIncludesAndRevIncludes(query.toString());
 			SearchParameterMap map = resourceSearch.getSearchParameterMap();
 			map.setLoadSynchronousUpTo(MAX_INCLUDES);
 			SystemRequestDetails systemRequestDetails = buildSystemRequestDetails(resource);
@@ -198,13 +205,16 @@ public class SubscriptionTopicPayloadBuilder {
 
 			Integer size = result.size();
 			if (size != null && size >= MAX_INCLUDES) {
-				ourLog.warn("More than {} include/revincluded resources found. Number of include/revincluded resources limited to {}", MAX_INCLUDES, MAX_INCLUDES);
+				ourLog.warn(
+						"More than {} include/revincluded resources found. Number of include/revincluded resources limited to {}",
+						MAX_INCLUDES,
+						MAX_INCLUDES);
 			}
 			result.getAllResources().stream()
-				.filter(r -> !r.getIdElement()
-					.toUnqualifiedVersionless()
-					.equals(resource.getIdElement().toUnqualifiedVersionless()))
-				.forEach(resultResources::add);
+					.filter(r -> !r.getIdElement()
+							.toUnqualifiedVersionless()
+							.equals(resource.getIdElement().toUnqualifiedVersionless()))
+					.forEach(resultResources::add);
 		}
 
 		return resultResources;
@@ -215,7 +225,7 @@ public class SubscriptionTopicPayloadBuilder {
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		// TODO KHS might need to check cross-partition subscription settings here
 		RequestPartitionId requestPartitionId =
-			(RequestPartitionId) resource.getUserData(Constants.RESOURCE_PARTITION_ID);
+				(RequestPartitionId) resource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (requestPartitionId == null) {
 			systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
 		} else {
@@ -225,13 +235,13 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	private void addResources(
-		List<IBaseResource> theResources,
-		CanonicalSubscription theCanonicalSubscription,
-		RestOperationTypeEnum theRestOperationType,
-		BundleBuilder theBundleBuilder) {
+			List<IBaseResource> theResources,
+			CanonicalSubscription theCanonicalSubscription,
+			RestOperationTypeEnum theRestOperationType,
+			BundleBuilder theBundleBuilder) {
 
 		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent content =
-			ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
+				ObjectUtils.defaultIfNull(theCanonicalSubscription.getContent(), FULLRESOURCE);
 
 		switch (content) {
 			case IDONLY:
@@ -248,7 +258,7 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	private void addIdOnly(
-		BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
+			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
 			switch (theRestOperationType) {
 				case CREATE:
@@ -267,7 +277,7 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	private void addFullResources(
-		BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
+			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
 			switch (theRestOperationType) {
 				case CREATE:
@@ -301,6 +311,6 @@ public class SubscriptionTopicPayloadBuilder {
 
 	private IllegalStateException unsupportedFhirVersionException() {
 		return new IllegalStateException(
-			Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + myFhirVersion);
+				Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + myFhirVersion);
 	}
 }

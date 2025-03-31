@@ -62,14 +62,19 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	public ISubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext, SubscriptionTopicRegistry theSubscriptionTopicRegistry, ISearchParamRegistry theSearchParamRegistry) {
+	public ISubscriptionTopicLoader subscriptionTopicLoader(
+			FhirContext theFhirContext,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			ISearchParamRegistry theSearchParamRegistry) {
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
-				return new R4SubscriptionTopicLoader(versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+				return new R4SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
 			case R5:
 			case R4B:
-				return new SubscriptionTopicLoader(versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+				return new SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
 			default:
 				return null;
 		}
