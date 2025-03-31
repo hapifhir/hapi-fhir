@@ -67,17 +67,17 @@ public class SubscriptionTopicPayloadBuilder {
 	private final FhirVersionEnum myFhirVersion;
 	private final INotificationStatusBuilder<? extends IBaseResource> myNotificationStatusBuilder;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	private final SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+	private final MatchUrlService myMatchUrlService;
 
-	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
+	public SubscriptionTopicPayloadBuilder(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SubscriptionTopicRegistry theSubscriptionTopicRegistry, MatchUrlService theMatchUrlService) {
 		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
+		mySubscriptionTopicRegistry = theSubscriptionTopicRegistry;
+		myMatchUrlService = theMatchUrlService;
 		myFhirVersion = myFhirContext.getVersion().getVersion();
 
 		switch (myFhirVersion) {
@@ -136,7 +136,7 @@ public class SubscriptionTopicPayloadBuilder {
 		// Get the topic from the registry
 		Optional<SubscriptionTopic> oTopic = mySubscriptionTopicRegistry.findSubscriptionTopicByUrl(theTopicUrl);
 		if (oTopic.isEmpty()) {
-			ourLog.debug("No subscription topic found for URL: {}", theTopicUrl);
+			ourLog.warn("No subscription topic found for URL: {}", theTopicUrl);
 			return Set.of();
 		}
 		SubscriptionTopic topic = oTopic.get();
