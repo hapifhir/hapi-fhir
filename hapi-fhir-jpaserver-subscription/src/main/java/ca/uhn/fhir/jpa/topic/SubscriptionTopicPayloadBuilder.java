@@ -180,7 +180,7 @@ public class SubscriptionTopicPayloadBuilder {
 				query.append("&" + PARAM_INCLUDE + "=").append(ParameterUtil.escapeAndUrlEncode(include.getValue()));
 			}
 			for (StringType revInclude : theRevIncludes) {
-				query.append("&" + PARAM_REVINCLUDE + "=").append(revInclude.getValue());
+				query.append("&" + PARAM_REVINCLUDE + "=").append(ParameterUtil.escapeAndUrlEncode(revInclude.getValue()));
 			}
 			ResourceSearch resourceSearch =
 					myMatchUrlService.getResourceSearchWithIncludesAndRevIncludes(query.toString());
