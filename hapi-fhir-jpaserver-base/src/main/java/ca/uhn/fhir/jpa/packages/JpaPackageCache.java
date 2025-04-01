@@ -632,8 +632,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Transactional(readOnly = true)
 	public List<NpmFhirIdPackageIdAndVersionJson> loadResourcePackageInfosByUrl(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
-		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
-				theFhirVersion, theCanonicalUrl, 20, null, null);
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
+				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 20, null, null);
 
 		return npmPackageVersionResourceEntities.stream()
 				.map(entity -> new NpmFhirIdPackageIdAndVersionJson(
