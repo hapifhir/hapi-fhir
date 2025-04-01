@@ -232,8 +232,14 @@ public class BulkImportCommand extends BaseCommand {
 				String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, oo);
 				if (isNotBlank(diagnostics)) {
 					ourLog.info("Output:\n{}", diagnostics);
+				} else {
+					ourLog.info("No diagnostics response received from bulk import URL: {}", url);
 				}
+			} else {
+				ourLog.info("No OperationOutcome response received from bulk import URL: {}", url);
 			}
+		} else {
+			ourLog.info("No response received from bulk import URL: {}", url);
 		}
 
 	}
