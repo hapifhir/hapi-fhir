@@ -103,7 +103,6 @@ import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-// LUKETODO: new tests
 public class JpaPackageCache extends BasePackageCacheManager implements IHapiPackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCache.class);
@@ -629,13 +628,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 	}
 
-	// LUKETODO:  test this:
 	@Override
 	@Transactional(readOnly = true)
 	public List<NpmFhirIdPackageIdAndVersionJson> loadResourcePackageInfosByUrl(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
-				theFhirVersion, theCanonicalUrl, 20, null, null); // LUKETODO:  larger or smaller page size?
+				theFhirVersion, theCanonicalUrl, 20, null, null);
 
 		return npmPackageVersionResourceEntities.stream()
 				.map(entity -> new NpmFhirIdPackageIdAndVersionJson(
