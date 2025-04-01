@@ -225,8 +225,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		PT parameters =
 				instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
+
+		// Clone the worker so that we start with no built-up state
+		reductionStepWorker = reductionStepWorker.newInstance();
 
 		instance.setStatus(FINALIZE);
 

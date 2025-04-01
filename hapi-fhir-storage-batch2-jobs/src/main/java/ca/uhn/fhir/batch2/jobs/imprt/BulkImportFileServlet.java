@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,8 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +43,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -133,13 +137,13 @@ public class BulkImportFileServlet extends HttpServlet {
 		}
 
 		if (ourLog.isDebugEnabled()) {
-			try (Reader reader = new InputStreamReader(supplier.get())) {
+			try (Reader reader = new InputStreamReader(supplier.openStream())) {
 				String string = IOUtils.toString(reader);
 				ourLog.debug("file content: {}", string);
 			}
 		}
 
-		try (InputStream reader = supplier.get()) {
+		try (InputStream reader = supplier.openStream()) {
 			IOUtils.copy(reader, theResponse.getOutputStream());
 		}
 	}
@@ -156,7 +160,12 @@ public class BulkImportFileServlet extends HttpServlet {
 	 * Registers a file, and returns the index descriptor
 	 */
 	public String registerFile(IFileSupplier theFile) {
-		String index = UUID.randomUUID().toString();
+		String indexPrefix = "";
+		if (theFile.getName() != null) {
+			indexPrefix = theFile.getName().replaceAll("^[^a-zA-Z0-9._-]", "") + "-";
+		}
+
+		String index = indexPrefix + UUID.randomUUID();
 		myFileIds.put(index, theFile);
 		return index;
 	}
@@ -166,6 +175,14 @@ public class BulkImportFileServlet extends HttpServlet {
 	 * using raw file contents.
 	 */
 	public String registerFileByContents(String theFileContents) {
+		return registerFileByContents(theFileContents, null);
+	}
+
+	/**
+	 * Mostly intended for unit tests, registers a file
+	 * using raw file contents.
+	 */
+	public String registerFileByContents(String theFileContents, String theSourceName) {
 		return registerFile(new IFileSupplier() {
 			@Override
 			public boolean isGzip() {
@@ -173,8 +190,37 @@ public class BulkImportFileServlet extends HttpServlet {
 			}
 
 			@Override
-			public InputStream get() {
-				return new ReaderInputStream(new StringReader(theFileContents), StandardCharsets.UTF_8);
+			public InputStream openStream() throws IOException {
+				return ReaderInputStream
+					.builder()
+					.setReader(new StringReader(theFileContents))
+					.setCharset(StandardCharsets.UTF_8)
+					.get();
+			}
+
+			@Nullable
+			@Override
+			public String getName() {
+				return theSourceName;
+			}
+		});
+	}
+
+	public String registerFile(File theFile) {
+		return registerFile(new IFileSupplier() {
+			@Override
+			public boolean isGzip() {
+				return theFile.getName().toLowerCase(Locale.ROOT).endsWith(".gz");
+			}
+
+			@Override
+			public InputStream openStream() throws IOException {
+				return new FileInputStream(theFile);
+			}
+
+			@Override
+			public String getName() {
+				return theFile.getName();
 			}
 		});
 	}
@@ -183,6 +229,10 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		boolean isGzip();
 
-		InputStream get() throws IOException;
+		InputStream openStream() throws IOException;
+
+		@Nullable
+		String getName();
+
 	}
 }

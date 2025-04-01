@@ -2,11 +2,13 @@ package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -18,6 +20,7 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -757,6 +760,30 @@ public class BundleUtilTest {
 		assertEquals("Patient/A123", ((Observation)output.getEntry().get(1).getResource()).getSubject().getReference());
 		assertEquals(Observation.ObservationStatus.AMENDED, ((Observation)output.getEntry().get(1).getResource()).getStatus());
 	}
+
+	@Test
+	public void testToTransactionResponse() {
+		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(ourCtx);
+		String detailSystem = StorageResponseCodeEnum.SYSTEM;
+		String detailCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.getCode();
+		String detailDescription = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.getDisplay();
+		OperationOutcomeUtil.addIssue(
+			 ourCtx, oo, "information", "Success", null, "informational", detailSystem, detailCode, detailDescription);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		bundle.addEntry().getResponse().setOutcome(oo).setLocation("http://foo.com/Patient/123");
+
+		// Test
+		List<BundleUtil.StorageOutcome> outcomes = BundleUtil.toTransactionResponse(ourCtx, bundle).getStorageOutcomes();
+
+		// Verify
+		assertEquals(1, outcomes.size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH ,outcomes.get(0).getStorageResponseCode());
+		assertEquals("http://foo.com/Patient/123" ,outcomes.get(0).getTargetId().getValue());
+		assertNull(outcomes.get(0).getSourceId());
+	}
+
 
 	private static @Nonnull Bundle createBundleWithPatientAndObservation() {
 		Bundle input = new Bundle();

@@ -103,17 +103,20 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 			StopWatch outerSw = new StopWatch();
 			List<String> urls = theStepExecutionDetails.getParameters().getNdJsonUrls();
 
-			for (String nextUrl : urls) {
+			int lineCountOverallTotal = 0;
+			int lineCountOverallProgress = 0;
+			for (String url : urls) {
+				lineCountOverallTotal += fetchAllFilesAndCountLines(url, httpClient);
+			}
 
-				int lineCountTotal = fetchAllFilesAndCountLines(nextUrl, httpClient);
+			for (String url : urls) {
 
-				ourLog.info("Fetching URL (pass 2 for processing): {}", nextUrl);
+				ourLog.info("Fetching URL (pass 2 for processing): {}", url);
 				StopWatch urlSw = new StopWatch();
 				int chunkCount = 0;
-				int lineCount = 0;
 
-				try (CloseableHttpResponse response = httpClient.execute(new HttpGet(nextUrl))) {
-					validateStatusCodeAndContentType(nextUrl, response);
+				try (CloseableHttpResponse response = httpClient.execute(new HttpGet(url))) {
+					validateStatusCodeAndContentType(url, response);
 
 					try (InputStream inputStream = response.getEntity().getContent()) {
 						try (LineIterator lineIterator =
@@ -124,7 +127,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 								String groupName = "";
 								String nextLine = lineIterator.nextLine();
 								if (isNotBlank(nextLine)) {
-									lineCount++;
+									lineCountOverallProgress++;
 
 									if (isNotBlank(groupByCompartmentName)) {
 										groupName = determineCompartmentGroup(groupByCompartmentName, nextLine);
@@ -137,7 +140,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 									if (buffer.getResourceCount() >= maxBatchResourceCount
 											|| buffer.getFileSize() >= batchSizeChars) {
 										transmitBuffer(
-												theDataSink, nextUrl, chunkCount, buffer, lineCount, lineCountTotal);
+												theDataSink, url, chunkCount, buffer, lineCountOverallProgress, lineCountOverallTotal);
 										chunkCount++;
 									}
 								}
@@ -149,7 +152,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 				// Send any lingering data in buffers
 				for (FileBuffer buffer : groupToBuffer.values()) {
 					if (buffer.getResourceCount() > 0) {
-						transmitBuffer(theDataSink, nextUrl, chunkCount, buffer, lineCount, lineCountTotal);
+						transmitBuffer(theDataSink, url, chunkCount, buffer, lineCountOverallProgress, lineCountOverallTotal);
 					}
 				}
 
@@ -305,7 +308,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		int linePercentage = (int) (100.0 * ((double) theLineCount / theLineCountTotal));
 
 		ourLog.info(
-				"Loaded chunk {} of {} NDJSON file (current index {}% line {} / {}) with {} resources from URL: {}",
+				"Loaded chunk {} of {} NDJSON file (overall progress {}% line {} / {}) with {} resources from URL: {}",
 				chunkCount,
 				FileUtil.formatFileSize(buffer.getFileSize()),
 				linePercentage,

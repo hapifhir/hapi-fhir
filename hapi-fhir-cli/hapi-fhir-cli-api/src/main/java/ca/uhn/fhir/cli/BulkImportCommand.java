@@ -272,19 +272,7 @@ public class BulkImportCommand extends BaseCommand {
 
 		myServlet = new BulkImportFileServlet();
 		for (File t : files) {
-
-			BulkImportFileServlet.IFileSupplier fileSupplier = new BulkImportFileServlet.IFileSupplier() {
-				@Override
-				public boolean isGzip() {
-					return t.getName().toLowerCase(Locale.ROOT).endsWith(".gz");
-				}
-
-				@Override
-				public InputStream get() throws IOException {
-					return new FileInputStream(t);
-				}
-			};
-			indexes.add(myServlet.registerFile(fileSupplier));
+			indexes.add(myServlet.registerFile(t));
 		}
 
 		ServletHolder servletHolder = new ServletHolder(myServlet);

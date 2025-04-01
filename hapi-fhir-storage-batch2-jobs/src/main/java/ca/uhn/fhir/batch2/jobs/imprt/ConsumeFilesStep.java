@@ -20,27 +20,19 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
@@ -54,11 +46,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static java.util.Objects.requireNonNullElseGet;
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
+public class ConsumeFilesStep implements IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, ConsumeFilesOutcomeJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
 
@@ -69,20 +64,15 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
-
-	@Autowired
-	private IIdHelperService<?> myIdHelperService;
-
-	@Autowired
 	private IFhirSystemDao mySystemDao;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
 			@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
-			@Nonnull IJobDataSink<VoidModel> theDataSink) {
+			@Nonnull IJobDataSink<ConsumeFilesOutcomeJson> theDataSink) {
 
+		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
 		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
 		String sourceName = theStepExecutionDetails.getData().getSourceName();
 
@@ -104,28 +94,39 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		storeResources(resources, theStepExecutionDetails.getParameters().getPartitionId());
+		BundleUtil.TransactionResponse response = storeResources(resources, partitionId);
+
+		ConsumeFilesOutcomeJson outcome = new ConsumeFilesOutcomeJson();
+		outcome.setSourceName(sourceName);
+		for (BundleUtil.StorageOutcome entry : response.getStorageOutcomes()) {
+			if (entry.getStorageResponseCode() != null) {
+				outcome.addOutcome(entry.getStorageResponseCode());
+			}
+			if (isNotBlank(entry.getErrorMessage())) {
+				outcome.addError(entry.getErrorMessage());
+			}
+		}
+		theDataSink.accept(outcome);
 
 		return new RunOutcome(resources.size());
 	}
 
-	public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
+	public BundleUtil.TransactionResponse storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		if (thePartitionId == null) {
-			requestDetails.setRequestPartitionId(RequestPartitionId.defaultPartition());
-		} else {
-			requestDetails.setRequestPartitionId(thePartitionId);
-		}
-		storeResourcesInsideTransaction(resources, requestDetails);
-	}
+		requestDetails.setRequestPartitionId(requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
 
-	private Void storeResourcesInsideTransaction(
-			List<IBaseResource> theResources,
-			SystemRequestDetails theRequestDetails) {
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader
+			.newBuilder()
+			.withFinalRetryAsBatch(true)
+			.withRetryCount(2)
+			.withMinRetryDelay(500)
+			.withMaxRetryDelay(1000)
+			.build();
+		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, transactionSemantics.toHeaderValue());
 
 		BundleBuilder bb = new BundleBuilder(myCtx);
 
-		for (var resource : theResources) {
+		for (var resource : resources) {
 			if (resource.getIdElement().hasIdPart()) {
 				bb.addTransactionUpdateEntry(resource);
 			} else {
@@ -133,77 +134,10 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 			}
 		}
 
-		IBaseBundle bundle = bb.getBundleTyped();
-		for (int i = 1; ; i++) {
-			try {
-				mySystemDao.transaction(theRequestDetails, bundle);
-				break;
-			} catch (Exception e) {
-				if (i <= 5) {
-					if (i == 5) {
-						ourLog.warn("Failure during bulk import transaction execution (attempt " + i + " / " + 5
-								+ "). Going to retry as batch: " + e.getMessage());
-						BundleUtil.setBundleType(myCtx, bundle, "batch");
-					} else {
-						ourLog.warn("Failure during bulk import transaction execution (attempt " + i + " / " + 5 + "): "
-								+ e.getMessage());
-					}
-					sleepAtLeast(1000);
-				} else {
-					throw new InternalErrorException(e);
-				}
-			}
-		}
+		IBaseBundle requestBundle = bb.getBundleTyped();
+		IBaseBundle responseBundle = (IBaseBundle) mySystemDao.transaction(requestDetails, requestBundle);
 
-		//		Map<IIdType, IBaseResource> ids = new HashMap<>();
-		//		for (IBaseResource next : theResources) {
-		//			if (!next.getIdElement().hasIdPart()) {
-		//				continue;
-		//			}
-		//
-		//			IIdType id = next.getIdElement();
-		//			if (!id.hasResourceType()) {
-		//				id.setParts(null, myCtx.getResourceType(next), id.getIdPart(), id.getVersionIdPart());
-		//			}
-		//			ids.put(id, next);
-		//		}
-		//
-		//		for (IIdType next : ids.keySet()) {
-		//			theTransactionDetails.addResolvedResourceId(next, null);
-		//		}
-		//
-		//		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		//		Map<IIdType, ? extends IResourceLookup<?>> resolvedIdentities = myIdHelperService.resolveResourceIdentities(
-		//				theRequestDetails.getRequestPartitionId(),
-		//				idsList,
-		//				ResolveIdentityMode.includeDeleted().cacheOk());
-		//		List<IResourcePersistentId<?>> resolvedIds = new ArrayList<>(resolvedIdentities.size());
-		//		for (Map.Entry<IIdType, ? extends IResourceLookup<?>> next : resolvedIdentities.entrySet()) {
-		//			IIdType resId = next.getKey();
-		//			IResourcePersistentId<?> persistentId = next.getValue().getPersistentId();
-		//			resolvedIds.add(persistentId);
-		//			theTransactionDetails.addResolvedResourceId(resId, persistentId);
-		//			ids.remove(resId);
-		//		}
-		//
-		//		mySystemDao.preFetchResources(resolvedIds, true);
-		//
-		//		for (IBaseResource next : theResources) {
-		//			updateResource(theRequestDetails, theTransactionDetails, next);
-		//		}
-
-		return null;
+		return BundleUtil.toTransactionResponse(myCtx, responseBundle);
 	}
 
-	private <T extends IBaseResource> void updateResource(
-			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
-		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theResource);
-		try {
-			dao.update(theResource, null, true, false, theRequestDetails, theTransactionDetails);
-		} catch (InvalidRequestException | PreconditionFailedException e) {
-			String msg = "Failure during bulk import: " + e;
-			ourLog.error(msg);
-			throw new JobExecutionFailedException(Msg.code(2053) + msg, e);
-		}
-	}
 }

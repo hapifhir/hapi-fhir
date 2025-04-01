@@ -52,6 +52,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -81,6 +82,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -91,7 +93,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -114,6 +118,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,6 +143,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -219,7 +225,62 @@ public abstract class BaseTransactionProcessor {
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
-		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
+
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.DEFAULT;
+		if (theRequestDetails != null) {
+			String transactionSemanticsString = theRequestDetails.getHeader("X-Transaction-Semantics");
+			if (transactionSemanticsString != null) {
+				transactionSemantics = TransactionSemanticsHeader.parse(transactionSemanticsString);
+			}
+		}
+
+		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
+		boolean switchedToBatch = false;
+
+		IBaseBundle response;
+		for (int i = 1; ; i++) {
+			try {
+				response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
+				break;
+			} catch (BaseServerResponseException e) {
+				if (i > totalAttempts || theNestedMode) {
+					throw e;
+				}
+
+				int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
+				int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+				maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
+
+				// Don't let the user request a crazy delay, this could be used
+				// as a DOS attack
+				maxRetryDelay = Math.min(maxRetryDelay, 10000);
+
+				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
+				String sleepMessage = "";
+				if (delay > 0) {
+					sleepMessage = "Sleeping for " + delay + " ms. ";
+				}
+
+				String switchedToBatchMessage = "";
+				if (switchedToBatch) {
+					switchedToBatchMessage = " (as batch)";
+				}
+
+				String switchingToBatchMessage = "";
+				if (i + 1 == totalAttempts && transactionSemantics.isFinalRetryAsBatch()) {
+					switchingToBatchMessage = "Performing final retry using batch semantics. ";
+					switchedToBatch = true;
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+				}
+
+				ourLog.warn("Transaction processing attempt{} {}/{} failed. {}{}", switchedToBatchMessage, i, totalAttempts, sleepMessage, switchingToBatchMessage);
+
+				if (delay > 0) {
+					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
+				}
+			}
+		}
+
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {
