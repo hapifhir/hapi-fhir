@@ -55,18 +55,21 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class BulkImportFileServlet extends HttpServlet {
 
 	public static final String INDEX_PARAM = "index";
-	private static final long serialVersionUID = 8302513561762436076L;
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
-	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
-
 	public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
-
+	private static final long serialVersionUID = 8302513561762436076L;
+	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
+	private Logger myLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
 	private String myBasicAuth;
 
-	public BulkImportFileServlet() {}
+	public BulkImportFileServlet() {
+	}
 
 	public BulkImportFileServlet(String theBasicAuthUsername, String theBasicAuthPassword) {
 		setBasicAuth(theBasicAuthUsername, theBasicAuthPassword);
+	}
+
+	public void setLog(Logger theLog) {
+		myLog = theLog;
 	}
 
 	public void setBasicAuth(String username, String password) {
@@ -76,7 +79,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	}
 
 	public void checkBasicAuthAndMaybeThrow403(HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+		throws IOException {
 		// Check if the myBasicAuth variable is set, ignore if not.
 		if (myBasicAuth == null || myBasicAuth.isEmpty()) {
 			return;
@@ -104,7 +107,7 @@ public class BulkImportFileServlet extends HttpServlet {
 
 			throw new ResourceNotFoundException(Msg.code(2049) + "Invalid request path: " + requestPath);
 		} catch (Exception e) {
-			ourLog.warn("Failure serving file", e);
+			myLog.warn("Failure serving file", e);
 			int responseCode = 500;
 			if (e instanceof BaseServerResponseException) {
 				responseCode = ((BaseServerResponseException) e).getStatusCode();
@@ -124,10 +127,10 @@ public class BulkImportFileServlet extends HttpServlet {
 		}
 		if (!myFileIds.containsKey(indexParam)) {
 			throw new ResourceNotFoundException(
-					Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
+				Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
 		}
 
-		ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
+		myLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
 
 		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, getHeaderContentType());
 
@@ -136,10 +139,10 @@ public class BulkImportFileServlet extends HttpServlet {
 			theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 		}
 
-		if (ourLog.isDebugEnabled()) {
+		if (myLog.isDebugEnabled()) {
 			try (Reader reader = new InputStreamReader(supplier.openStream())) {
 				String string = IOUtils.toString(reader);
-				ourLog.debug("file content: {}", string);
+				myLog.debug("file content: {}", string);
 			}
 		}
 
@@ -192,9 +195,9 @@ public class BulkImportFileServlet extends HttpServlet {
 			@Override
 			public InputStream openStream() throws IOException {
 				return ReaderInputStream.builder()
-						.setReader(new StringReader(theFileContents))
-						.setCharset(StandardCharsets.UTF_8)
-						.get();
+					.setReader(new StringReader(theFileContents))
+					.setCharset(StandardCharsets.UTF_8)
+					.get();
 			}
 
 			@Nullable

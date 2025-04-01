@@ -275,7 +275,7 @@ public class BulkDataImportProvider {
 			}
 			case COMPLETED: {
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
-				String msg = "Job is complete.";
+				String msg = instance.getReport();
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
@@ -48,6 +49,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -69,6 +71,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkImportCommand extends BaseCommand {
 
@@ -151,7 +155,7 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Found {} files", files.size());
 
 		ourLog.info("Starting server on port: {}", myPort);
-		List<String> indexes = startServer(myPort, files);
+		List<String> indexes = startServer(files);
 		String sourceBaseUrl = "http://localhost:" + myPort;
 		if (theCommandLine.hasOption(SOURCE_BASE)) {
 			sourceBaseUrl = theCommandLine.getOptionValue(SOURCE_BASE);
@@ -190,8 +194,8 @@ public class BulkImportCommand extends BaseCommand {
 	private void checkJobComplete(String url, IGenericClient client) {
 		String jobId = url.substring(url.indexOf("=") + 1);
 
+		MethodOutcome response = null;
 		while (true) {
-			MethodOutcome response;
 			// handle NullPointerException
 			if (jobId == null) {
 				ourLog.error("The jobId cannot be null.");
@@ -221,6 +225,17 @@ public class BulkImportCommand extends BaseCommand {
 						Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
 			}
 		}
+
+		if (response != null) {
+			IBaseOperationOutcome oo = response.getOperationOutcome();
+			if (oo != null) {
+				String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, oo);
+				if (isNotBlank(diagnostics)) {
+					ourLog.info("Output:\n{}", diagnostics);
+				}
+			}
+		}
+
 	}
 
 	@Nonnull
@@ -261,7 +276,7 @@ public class BulkImportCommand extends BaseCommand {
 		return retVal;
 	}
 
-	private List<String> startServer(int thePort, List<File> files) {
+	private List<String> startServer(List<File> files) {
 		List<String> indexes = new ArrayList<>();
 
 		myServer = new Server();
@@ -271,6 +286,11 @@ public class BulkImportCommand extends BaseCommand {
 		myServer.setConnectors(new Connector[] {connector});
 
 		myServlet = new BulkImportFileServlet();
+
+		// The logback used by the CLI tool only allows loggers in this package
+		// to emit log lines, and the servlet's logs are useful.
+		myServlet.setLog(ourLog);
+
 		for (File t : files) {
 			indexes.add(myServlet.registerFile(t));
 		}

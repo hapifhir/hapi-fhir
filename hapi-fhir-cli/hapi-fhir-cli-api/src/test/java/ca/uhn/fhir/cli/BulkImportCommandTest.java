@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -24,6 +25,7 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
@@ -102,6 +104,13 @@ public class BulkImportCommandTest {
 	@Test
 	public void testBulkImport() throws IOException {
 
+		JobInstance jobInfo = new JobInstance()
+			.setStatus(StatusEnum.COMPLETED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
+			.setReport("Bulk Import Report\n-------------------\nThis is the text!");
+		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
+
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
 		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
@@ -111,17 +120,17 @@ public class BulkImportCommandTest {
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
+		App.main(new String[]{
 			BulkImportCommand.BULK_IMPORT,
 			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
 			"--" + BulkImportCommand.PORT, "0",
 			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
 			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		});
 
-		ourLog.info("Waiting for initiation requests");
-		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
-		ourLog.info("Initiation requests complete");
+		assertThat(myRestfulServerExtension.getRequestContentTypes()).containsExactly(
+			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
+		);
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
 
