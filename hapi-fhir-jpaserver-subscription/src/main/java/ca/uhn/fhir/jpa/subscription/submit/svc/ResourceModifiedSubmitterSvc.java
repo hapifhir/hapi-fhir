@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
@@ -93,14 +94,13 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
-	 * @inheritDoc
-	 * Submit a message to the broker without retries.
-	 *
-	 * Implementation of the {@link IResourceModifiedConsumer}
-	 *
-	 */
+     * @return
+     * @inheritDoc Submit a message to the broker without retries.
+     * <p>
+     * Implementation of the {@link IResourceModifiedConsumer}
+     */
 	@Override
-	public void submitResourceModified(ResourceModifiedMessage theMsg) {
+	public ISendResult submitResourceModified(ResourceModifiedMessage theMsg) {
 		startIfNeeded();
 
 		ourLog.trace("Sending resource modified message to processing channel");
@@ -108,6 +108,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				myMatchingChannel,
 				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
+		return null;
 	}
 
 	/**
