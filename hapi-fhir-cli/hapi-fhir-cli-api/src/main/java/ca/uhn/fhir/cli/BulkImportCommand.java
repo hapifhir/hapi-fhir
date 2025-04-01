@@ -226,22 +226,20 @@ public class BulkImportCommand extends BaseCommand {
 			}
 		}
 
-		if (response != null) {
-			IBaseOperationOutcome oo = response.getOperationOutcome();
-			if (oo != null) {
-				String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, oo);
-				if (isNotBlank(diagnostics)) {
-					ourLog.info("Output:\n{}", diagnostics);
-				} else {
-					ourLog.info("No diagnostics response received from bulk import URL: {}", url);
-				}
-			} else {
-				ourLog.info("No OperationOutcome response received from bulk import URL: {}", url);
-			}
-		} else {
-			ourLog.info("No response received from bulk import URL: {}", url);
-		}
+		// Poll once more to get the response body
+		IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
+			.onServer()
+			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+			.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+			.returnResourceType(myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+			.execute();
 
+		String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
+		if (isNotBlank(diagnostics)) {
+			ourLog.info("Output:\n{}", diagnostics);
+		} else {
+			ourLog.info("No diagnostics response received from bulk import URL: {}", url);
+		}
 	}
 
 	@Nonnull
