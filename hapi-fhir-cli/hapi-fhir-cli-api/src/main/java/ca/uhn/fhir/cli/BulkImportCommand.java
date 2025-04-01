@@ -227,6 +227,7 @@ public class BulkImportCommand extends BaseCommand {
 		}
 
 		// Poll once more to get the response body
+		client.registerInterceptor(new LoggingInterceptor(true));
 		IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
 			.onServer()
 			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
