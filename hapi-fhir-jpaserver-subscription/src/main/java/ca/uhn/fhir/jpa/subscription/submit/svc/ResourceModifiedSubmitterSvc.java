@@ -94,11 +94,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
-     * @return
-     * @inheritDoc Submit a message to the broker without retries.
-     * <p>
-     * Implementation of the {@link IResourceModifiedConsumer}
-     */
+	 * @return
+	 * @inheritDoc Submit a message to the broker without retries.
+	 * <p>
+	 * Implementation of the {@link IResourceModifiedConsumer}
+	 */
 	@Override
 	public ISendResult submitResourceModified(ResourceModifiedMessage theMsg) {
 		startIfNeeded();
