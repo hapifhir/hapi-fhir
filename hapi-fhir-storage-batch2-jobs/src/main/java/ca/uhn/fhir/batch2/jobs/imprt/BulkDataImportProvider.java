@@ -248,7 +248,10 @@ public class BulkDataImportProvider {
 						Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
-		IBaseOperationOutcome oo;
+
+		// FIXME: make debug
+		ourLog.info("Client is polling for $import status: {}", instance.getStatus());
+
 		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -259,6 +262,7 @@ public class BulkDataImportProvider {
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}
+			case FINALIZE:
 			case ERRORED:
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);

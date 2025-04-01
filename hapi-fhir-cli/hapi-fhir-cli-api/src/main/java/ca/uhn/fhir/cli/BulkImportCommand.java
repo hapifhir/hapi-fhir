@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -42,6 +44,7 @@ import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -65,6 +68,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -166,7 +170,6 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
 		IGenericClient client = newClient(
 				theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
-		client.registerInterceptor(new LoggingInterceptor(false));
 
 		Integer batchSize = null;
 		if (theCommandLine.hasOption(BATCH_SIZE)) {
@@ -219,7 +222,7 @@ public class BulkImportCommand extends BaseCommand {
 				break;
 			} else if (response.getResponseStatusCode() == 202) {
 				// still in progress
-				continue;
+				ThreadUtils.sleepQuietly(Duration.ofSeconds(5));
 			} else {
 				throw new InternalErrorException(
 						Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
@@ -237,7 +240,8 @@ public class BulkImportCommand extends BaseCommand {
 
 		String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
 		if (isNotBlank(diagnostics)) {
-			ourLog.info("Output:\n{}", diagnostics);
+			BulkImportReportJson report = JsonUtil.deserialize(diagnostics, BulkImportReportJson.class);
+			ourLog.info("Output:\n{}", report.getReportMsg());
 		} else {
 			ourLog.info("No diagnostics response received from bulk import URL: {}", url);
 		}
