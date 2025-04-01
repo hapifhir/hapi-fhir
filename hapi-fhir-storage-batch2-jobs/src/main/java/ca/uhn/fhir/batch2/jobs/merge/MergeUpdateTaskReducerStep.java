@@ -43,7 +43,8 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	}
 
 	@Override
-	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> newInstance() {
+	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson>
+			newInstance() {
 		return new MergeUpdateTaskReducerStep(myDaoRegistry, myHapiTransactionService);
 	}
 

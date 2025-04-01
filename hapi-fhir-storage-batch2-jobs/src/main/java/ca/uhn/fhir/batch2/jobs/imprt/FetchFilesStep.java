@@ -140,7 +140,12 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 									if (buffer.getResourceCount() >= maxBatchResourceCount
 											|| buffer.getFileSize() >= batchSizeChars) {
 										transmitBuffer(
-												theDataSink, url, chunkCount, buffer, lineCountOverallProgress, lineCountOverallTotal);
+												theDataSink,
+												url,
+												chunkCount,
+												buffer,
+												lineCountOverallProgress,
+												lineCountOverallTotal);
 										chunkCount++;
 									}
 								}
@@ -152,7 +157,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 				// Send any lingering data in buffers
 				for (FileBuffer buffer : groupToBuffer.values()) {
 					if (buffer.getResourceCount() > 0) {
-						transmitBuffer(theDataSink, url, chunkCount, buffer, lineCountOverallProgress, lineCountOverallTotal);
+						transmitBuffer(
+								theDataSink, url, chunkCount, buffer, lineCountOverallProgress, lineCountOverallTotal);
 					}
 				}
 

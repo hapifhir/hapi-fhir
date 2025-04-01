@@ -273,14 +273,19 @@ public abstract class BaseTransactionProcessor {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 				}
 
-				ourLog.warn("Transaction processing attempt{} {}/{} failed. {}{}", switchedToBatchMessage, i, totalAttempts, sleepMessage, switchingToBatchMessage);
+				ourLog.warn(
+						"Transaction processing attempt{} {}/{} failed. {}{}",
+						switchedToBatchMessage,
+						i,
+						totalAttempts,
+						sleepMessage,
+						switchingToBatchMessage);
 
 				if (delay > 0) {
 					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
 				}
 			}
 		}
-
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {

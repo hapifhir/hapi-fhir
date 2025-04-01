@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * hapi-fhir-storage-batch2-jobs
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 /*
@@ -24,14 +43,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-public class GenerateReportReductionStep implements IReductionStepWorker<BulkImportJobParameters, ConsumeFilesOutcomeJson, BulkImportReportJson> {
+public class GenerateReportReductionStep
+		implements IReductionStepWorker<BulkImportJobParameters, ConsumeFilesOutcomeJson, BulkImportReportJson> {
 
 	private Map<String, ConsumeFilesOutcomeJson> myOutcomes = new HashMap<>();
 	private int myOutcomeCount = 0;
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(ChunkExecutionDetails<BulkImportJobParameters, ConsumeFilesOutcomeJson> theChunkDetails) {
+	public ChunkOutcome consume(
+			ChunkExecutionDetails<BulkImportJobParameters, ConsumeFilesOutcomeJson> theChunkDetails) {
 		ConsumeFilesOutcomeJson data = theChunkDetails.getData();
 
 		ConsumeFilesOutcomeJson existing = myOutcomes.get(data.getSourceName());
@@ -57,7 +78,10 @@ public class GenerateReportReductionStep implements IReductionStepWorker<BulkImp
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, ConsumeFilesOutcomeJson> theStepExecutionDetails, @Nonnull IJobDataSink<BulkImportReportJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<BulkImportJobParameters, ConsumeFilesOutcomeJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkImportReportJson> theDataSink)
+			throws JobExecutionFailedException {
 		Date startTime = theStepExecutionDetails.getInstance().getStartTime();
 		long elapsedMillis = System.currentTimeMillis() - startTime.getTime();
 		long throughputPerSecond = (long) StopWatch.getThroughput(myOutcomeCount, elapsedMillis, TimeUnit.SECONDS);
@@ -65,9 +89,18 @@ public class GenerateReportReductionStep implements IReductionStepWorker<BulkImp
 		StringBuilder report = new StringBuilder();
 		report.append("Bulk Import Report\n");
 		report.append("------------------------------------------\n");
-		report.append("Start Time      : ").append(new InstantType(startTime).getValue()).append('\n');
-		report.append("Duration        : ").append(StopWatch.formatMillis(elapsedMillis)).append('\n');
-		report.append("Storage Actions : ").append(myOutcomeCount).append(" (").append(throughputPerSecond).append("/sec)").append('\n');
+		report.append("Start Time      : ")
+				.append(new InstantType(startTime).getValue())
+				.append('\n');
+		report.append("Duration        : ")
+				.append(StopWatch.formatMillis(elapsedMillis))
+				.append('\n');
+		report.append("Storage Actions : ")
+				.append(myOutcomeCount)
+				.append(" (")
+				.append(throughputPerSecond)
+				.append("/sec)")
+				.append('\n');
 		report.append("------------------------------------------\n");
 
 		for (String source : new TreeSet<>(myOutcomes.keySet())) {
@@ -77,7 +110,11 @@ public class GenerateReportReductionStep implements IReductionStepWorker<BulkImp
 			if (outcomes.hasOutcomes()) {
 				report.append("  Outcomes:\n");
 				for (var outcomeCount : new TreeMap<>(outcomes.getOutcomeCount()).entrySet()) {
-					report.append("    * ").append(outcomeCount.getKey()).append(": ").append(outcomeCount.getValue()).append('\n');
+					report.append("    * ")
+							.append(outcomeCount.getKey())
+							.append(": ")
+							.append(outcomeCount.getValue())
+							.append('\n');
 				}
 			}
 

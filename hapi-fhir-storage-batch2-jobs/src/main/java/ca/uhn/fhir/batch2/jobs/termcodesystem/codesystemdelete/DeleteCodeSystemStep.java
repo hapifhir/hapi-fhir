@@ -75,7 +75,8 @@ public class DeleteCodeSystemStep
 	}
 
 	@Override
-	public IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> newInstance() {
+	public IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel>
+			newInstance() {
 		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
 	}
 }

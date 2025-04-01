@@ -46,14 +46,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static java.util.Objects.requireNonNullElseGet;
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ConsumeFilesStep implements IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, ConsumeFilesOutcomeJson> {
+public class ConsumeFilesStep
+		implements IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, ConsumeFilesOutcomeJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
 
@@ -111,17 +109,18 @@ public class ConsumeFilesStep implements IJobStepWorker<BulkImportJobParameters,
 		return new RunOutcome(resources.size());
 	}
 
-	public BundleUtil.TransactionResponse storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
+	public BundleUtil.TransactionResponse storeResources(
+			List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
+		requestDetails.setRequestPartitionId(
+				requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
 
-		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader
-			.newBuilder()
-			.withFinalRetryAsBatch(true)
-			.withRetryCount(2)
-			.withMinRetryDelay(500)
-			.withMaxRetryDelay(1000)
-			.build();
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
+				.withFinalRetryAsBatch(true)
+				.withRetryCount(2)
+				.withMinRetryDelay(500)
+				.withMaxRetryDelay(1000)
+				.build();
 		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, transactionSemantics.toHeaderValue());
 
 		BundleBuilder bb = new BundleBuilder(myCtx);
@@ -139,5 +138,4 @@ public class ConsumeFilesStep implements IJobStepWorker<BulkImportJobParameters,
 
 		return BundleUtil.toTransactionResponse(myCtx, responseBundle);
 	}
-
 }

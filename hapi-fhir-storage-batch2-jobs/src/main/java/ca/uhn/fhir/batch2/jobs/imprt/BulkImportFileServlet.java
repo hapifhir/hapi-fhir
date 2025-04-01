@@ -191,11 +191,10 @@ public class BulkImportFileServlet extends HttpServlet {
 
 			@Override
 			public InputStream openStream() throws IOException {
-				return ReaderInputStream
-					.builder()
-					.setReader(new StringReader(theFileContents))
-					.setCharset(StandardCharsets.UTF_8)
-					.get();
+				return ReaderInputStream.builder()
+						.setReader(new StringReader(theFileContents))
+						.setCharset(StandardCharsets.UTF_8)
+						.get();
 			}
 
 			@Nullable
@@ -233,6 +232,5 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		@Nullable
 		String getName();
-
 	}
 }

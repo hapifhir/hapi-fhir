@@ -37,13 +37,13 @@ public class BulkImportAppCtx {
 	@Bean
 	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinition() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
-			.setJobDescription("FHIR Bulk Import using pull-based data source")
-			.setJobDefinitionVersion(1)
-			.setParametersType(BulkImportJobParameters.class)
-			.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
-			.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
-			.build();
+				.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
+				.setJobDescription("FHIR Bulk Import using pull-based data source")
+				.setJobDefinitionVersion(1)
+				.setParametersType(BulkImportJobParameters.class)
+				.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
+				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
+				.build();
 	}
 
 	/**
@@ -52,15 +52,20 @@ public class BulkImportAppCtx {
 	@Bean
 	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinitionV2() {
 		return JobDefinition.newBuilder()
-			.gatedExecution()
-			.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
-			.setJobDescription("FHIR Bulk Import using pull-based data source")
-			.setJobDefinitionVersion(2)
-			.setParametersType(BulkImportJobParameters.class)
-			.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
-			.addIntermediateStep("process-files", "Process files", ConsumeFilesOutcomeJson.class, bulkImport2ConsumeFiles())
-			.addFinalReducerStep("generate-report", "Generate outcome report", BulkImportReportJson.class, generateOutcomeReportReducerStep())
-			.build();
+				.gatedExecution()
+				.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
+				.setJobDescription("FHIR Bulk Import using pull-based data source")
+				.setJobDefinitionVersion(2)
+				.setParametersType(BulkImportJobParameters.class)
+				.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
+				.addIntermediateStep(
+						"process-files", "Process files", ConsumeFilesOutcomeJson.class, bulkImport2ConsumeFiles())
+				.addFinalReducerStep(
+						"generate-report",
+						"Generate outcome report",
+						BulkImportReportJson.class,
+						generateOutcomeReportReducerStep())
+				.build();
 	}
 
 	@Bean

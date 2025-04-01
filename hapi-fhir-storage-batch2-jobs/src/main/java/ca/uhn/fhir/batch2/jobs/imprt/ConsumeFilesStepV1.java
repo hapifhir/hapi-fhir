@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * hapi-fhir-storage-batch2-jobs
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -62,8 +81,8 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink) {
+			@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink) {
 
 		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
 		String sourceName = theStepExecutionDetails.getData().getSourceName();
@@ -100,15 +119,15 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 		}
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(
-			requestDetails,
-			transactionDetails,
-			tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
+				requestDetails,
+				transactionDetails,
+				tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
 	}
 
 	private Void storeResourcesInsideTransaction(
-		List<IBaseResource> theResources,
-		SystemRequestDetails theRequestDetails,
-		TransactionDetails theTransactionDetails) {
+			List<IBaseResource> theResources,
+			SystemRequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		Map<IIdType, IBaseResource> ids = new HashMap<>();
 		for (IBaseResource next : theResources) {
 			if (!next.getIdElement().hasIdPart()) {
@@ -128,9 +147,9 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 
 		List<IIdType> idsList = new ArrayList<>(ids.keySet());
 		Map<IIdType, ? extends IResourceLookup<?>> resolvedIdentities = myIdHelperService.resolveResourceIdentities(
-			theRequestDetails.getRequestPartitionId(),
-			idsList,
-			ResolveIdentityMode.includeDeleted().cacheOk());
+				theRequestDetails.getRequestPartitionId(),
+				idsList,
+				ResolveIdentityMode.includeDeleted().cacheOk());
 		List<IResourcePersistentId<?>> resolvedIds = new ArrayList<>(resolvedIdentities.size());
 		for (Map.Entry<IIdType, ? extends IResourceLookup<?>> next : resolvedIdentities.entrySet()) {
 			IIdType resId = next.getKey();
@@ -150,7 +169,7 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 	}
 
 	private <T extends IBaseResource> void updateResource(
-		RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
+			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
 		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theResource);
 		try {
 			dao.update(theResource, null, true, false, theRequestDetails, theTransactionDetails);
@@ -161,4 +180,3 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 		}
 	}
 }
-
