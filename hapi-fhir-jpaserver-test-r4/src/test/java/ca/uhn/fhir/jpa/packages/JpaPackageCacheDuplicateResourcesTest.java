@@ -80,7 +80,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 
-	private static Stream<Arguments> loadResourcePackageInfosByUrlAndPackageIdVersion_duplicateResourcesParams() {
+	private static Stream<Arguments> loadResourceByUrlAndPackageIdVersion_duplicateResourcesParams() {
 		return Stream.of(
 			Arguments.of(SIMPLE_ALPHA_PACKAGE, null),
 			Arguments.of(SIMPLE_ALPHA_DUPE_PACKAGE, null),
@@ -90,10 +90,10 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@MethodSource("loadResourcePackageInfosByUrlAndPackageIdVersion_duplicateResourcesParams")
-	void loadResourcePackageInfosByUrlAndPackageIdVersion_duplicateResources(String thePackageId, @Nullable String theVersionId) {
+	@MethodSource("loadResourceByUrlAndPackageIdVersion_duplicateResourcesParams")
+	void loadResourceByUrlAndPackageIdVersion_duplicateResources(String thePackageId, @Nullable String theVersionId) {
 
-		final IBaseResource resource = myPackageCacheManager.loadResourcePackageInfosByUrlAndPackageIdVersion(FhirVersionEnum.R4, MEASURE_URL, thePackageId, theVersionId);
+		final IBaseResource resource = myPackageCacheManager.loadResourceByUrlAndPackageIdVersion(FhirVersionEnum.R4, MEASURE_URL, thePackageId, theVersionId);
 
 		assertThat(resource).isNotNull().isInstanceOf(Measure.class);
 
