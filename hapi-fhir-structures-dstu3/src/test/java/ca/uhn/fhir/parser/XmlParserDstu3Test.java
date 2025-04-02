@@ -597,8 +597,10 @@ public class XmlParserDstu3Test {
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
+		patient.getManagingOrganization().getResource().setId((String)null);
 		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
+		organizationUuid = UuidUtils.findFirstUUID(encoded);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid + "\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
 		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
@@ -607,7 +609,8 @@ public class XmlParserDstu3Test {
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
 		patient.getManagingOrganization().setReference(null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
+		patient.getManagingOrganization().setResource(org);
+		org.setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));

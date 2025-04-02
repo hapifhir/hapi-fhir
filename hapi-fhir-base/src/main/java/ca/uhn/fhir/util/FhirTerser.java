@@ -1462,7 +1462,13 @@ public class FhirTerser {
 						continue;
 					}
 					getContainedResourceList(theResource).add(resource);
-					next.setReference("#" + id.getValue());
+
+					String idString = id.getValue();
+					if (!idString.startsWith("#")) {
+						idString = "#" + idString;
+					}
+
+					next.setReference(idString);
 					next.setResource(null);
 					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
 						theContained
