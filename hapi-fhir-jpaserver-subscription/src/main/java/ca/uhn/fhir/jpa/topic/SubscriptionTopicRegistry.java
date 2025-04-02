@@ -22,12 +22,11 @@ package ca.uhn.fhir.jpa.topic;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 public class SubscriptionTopicRegistry {
 	private final ActiveSubscriptionTopicCache myActiveSubscriptionTopicCache = new ActiveSubscriptionTopicCache();
-
-	public SubscriptionTopicRegistry() {}
 
 	public int size() {
 		return myActiveSubscriptionTopicCache.size();
@@ -47,5 +46,9 @@ public class SubscriptionTopicRegistry {
 
 	public void unregister(String theSubscriptionTopicId) {
 		myActiveSubscriptionTopicCache.remove(theSubscriptionTopicId);
+	}
+
+	public Optional<SubscriptionTopic> findSubscriptionTopicByUrl(String theTopicUrl) {
+		return myActiveSubscriptionTopicCache.findSubscriptionTopicByUrl(theTopicUrl);
 	}
 }
