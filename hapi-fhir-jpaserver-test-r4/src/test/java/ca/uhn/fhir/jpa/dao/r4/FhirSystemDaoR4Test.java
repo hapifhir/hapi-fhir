@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.RequestGroup;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
@@ -2838,23 +2841,69 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	/**
+	 * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
+	 * be ignored anyhow.
+	 */
+	@Test
+	public void testTransactionSucceedsWithDuplicateIdsWhenUsingPost() {
+		Bundle request = new Bundle();
+
+		Patient patient1 = new Patient();
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		Patient patient2 = new Patient();
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		assertDoesNotThrow(() -> mySystemDao.transaction(mySrd, request));
+	}
+
 	@Test
 	public void testTransactionFailsWithDuplicateIds() {
 		Bundle request = new Bundle();
 
 		Patient patient1 = new Patient();
-		patient1.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
 		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
 
 		Patient patient2 = new Patient();
-		patient2.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
-		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
 
-		assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> {
-			mySystemDao.transaction(mySrd, request);
-		});
+		InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(mySrd, request));
+		assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDuplicateIds", e.getMessage());
+	}
+
+	@Test
+	public void testTransactionFailsWithDuplicateIds_AutoRetryEnabled() {
+		Bundle request = new Bundle();
+
+		Patient patient1 = new Patient();
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		Patient patient2 = new Patient();
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		String header = TransactionSemanticsHeader.newBuilder()
+			.withRetryCount(1)
+			.build()
+			.toHeaderValue();
+		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, header);
+
+		InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(requestDetails, request));
+		assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDuplicateIds", e.getMessage());
 	}
 
 	@Test

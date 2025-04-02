@@ -243,7 +243,7 @@ public abstract class BaseTransactionProcessor {
 				response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 				break;
 			} catch (BaseServerResponseException e) {
-				if (i > totalAttempts || theNestedMode) {
+				if (i >= totalAttempts || theNestedMode) {
 					throw e;
 				}
 
@@ -1096,10 +1096,11 @@ public abstract class BaseTransactionProcessor {
 	 * @param theBaseResource - base resource
 	 * @param theNextReqEntry - next request entry
 	 * @param theAllIds       - set of all IIdType values
+	 * @param theVerb
 	 * @return
 	 */
 	private IIdType getNextResourceIdFromBaseResource(
-			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds) {
+		IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
 		IIdType nextResourceId = null;
 		if (theBaseResource != null) {
 			nextResourceId = theBaseResource.getIdElement();
@@ -1146,7 +1147,7 @@ public abstract class BaseTransactionProcessor {
 											"transactionContainsMultipleWithDuplicateId",
 											nextResourceId));
 				}
-			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart() && !"POST".equals(theVerb)) {
 				IIdType nextId = nextResourceId.toUnqualifiedVersionless();
 				if (!theAllIds.add(nextId)) {
 					throw new InvalidRequestException(Msg.code(535)
@@ -1212,13 +1213,13 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 
-				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
-
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
 				}
 				previousVerb = verb;
+
+				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
 
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);

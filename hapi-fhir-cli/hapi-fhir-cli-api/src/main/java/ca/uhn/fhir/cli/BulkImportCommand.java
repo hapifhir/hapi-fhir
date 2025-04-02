@@ -243,7 +243,7 @@ public class BulkImportCommand extends BaseCommand {
 			.execute();
 
 		String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
-		if (isNotBlank(diagnostics)) {
+		if (isNotBlank(diagnostics) && diagnostics.startsWith("{")) {
 			BulkImportReportJson report = JsonUtil.deserialize(diagnostics, BulkImportReportJson.class);
 			ourLog.info("Output:\n{}", report.getReportMsg());
 		} else {
