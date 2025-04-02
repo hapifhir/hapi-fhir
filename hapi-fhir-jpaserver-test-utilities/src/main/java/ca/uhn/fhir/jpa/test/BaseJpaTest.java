@@ -300,6 +300,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
+	@Autowired
+	protected IResourceSearchUrlDao mySearchUrlDao;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -626,6 +628,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+    protected void logAllSearchUrls() {
+        runInTransaction(() -> {
+            ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+    
 	protected void logAllTokenIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {

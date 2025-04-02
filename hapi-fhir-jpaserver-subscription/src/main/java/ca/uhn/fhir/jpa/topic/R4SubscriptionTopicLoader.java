@@ -25,19 +25,21 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SubscriptionTopic;
 
-public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
+/**
+ * Specialized loader for R4 SubscriptionTopics, which are implemented as Basic resources
+ * with a code of "SubscriptionTopic".
+ */
+public class R4SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionTopicLoader(
+	public R4SubscriptionTopicLoader(
 			VersionCanonicalizer theVersionCanonicalizer,
 			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
 			ISearchParamRegistry theSearchParamRegistry) {
-		super(theVersionCanonicalizer, "SubscriptionTopic", theSubscriptionTopicRegistry, theSearchParamRegistry);
+		super(theVersionCanonicalizer, "Basic", theSubscriptionTopicRegistry, theSearchParamRegistry);
 	}
 
 	@Override
@@ -45,11 +47,9 @@ public class SubscriptionTopicLoader extends BaseSubscriptionTopicLoader {
 	public SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam(
-						"SubscriptionTopic", "status", ISearchParamRegistry.SearchParamLookupContextEnum.ALL)
-				!= null) {
-			map.add(SubscriptionTopic.SP_STATUS, new TokenParam(null, Enumerations.PublicationStatus.ACTIVE.toCode()));
-		}
+		// Add the search for Basic resources with code=SubscriptionTopic
+		map.add("code", new TokenParam("http://hl7.org/fhir/fhir-types", "SubscriptionTopic"));
+
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
 	}

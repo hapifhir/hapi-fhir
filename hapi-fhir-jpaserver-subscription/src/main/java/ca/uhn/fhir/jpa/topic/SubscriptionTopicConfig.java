@@ -25,6 +25,8 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -37,6 +39,7 @@ public class SubscriptionTopicConfig {
 	public SubscriptionTopicMatchingListener subscriptionTopicMatchingSubscriber(
 			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
 		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
 			case R5:
 			case R4B:
 				return new SubscriptionTopicMatchingListener(theFhirContext, memoryCacheService);
@@ -59,11 +62,19 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	public SubscriptionTopicLoader subscriptionTopicLoader(FhirContext theFhirContext) {
+	public ISubscriptionTopicLoader subscriptionTopicLoader(
+			FhirContext theFhirContext,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			ISearchParamRegistry theSearchParamRegistry) {
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				return new R4SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
 			case R5:
 			case R4B:
-				return new SubscriptionTopicLoader();
+				return new SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
 			default:
 				return null;
 		}

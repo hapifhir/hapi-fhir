@@ -171,8 +171,4 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 				theSubscription.getIdElement().getIdPart(),
 				(StringUtils.isBlank(error) ? "" : "Error: " + error));
 	}
-
-	public void syncSubscriptions() {
-		super.syncDatabaseToCache();
-	}
 }
