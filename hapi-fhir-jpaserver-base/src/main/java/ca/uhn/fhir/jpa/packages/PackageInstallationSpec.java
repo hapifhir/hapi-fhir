@@ -94,7 +94,7 @@ public class PackageInstallationSpec {
 
 	@Schema(
 			description =
-					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources and installed.")
+					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources which will be installed as part of package installation.")
 	@JsonProperty("additionalResourceFolders")
 	private Set<String> additionalResourceFolders;
 
