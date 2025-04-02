@@ -139,6 +139,34 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 		}
 
+		/*
+		 * We don't invoke the STORAGE_PRE_SHOW_RESOURCES hooks if we're either in mass ingestion mode,
+		 * or the match URL cache is enabled. This is a performance optimization with the following
+		 * justification:
+		 * Invoking this hook can be good since it means the AuthorizationInterceptor and ConsentInterceptor
+		 * are able to block actions where conditional URLs might reveal existence of a resource. But
+		 * it is bad because it means we need to fetch and parse the body associated with the resource
+		 * ID which can really hurt performance if we're doing a lot of conditional operations, and
+		 * most people don't need to defend against things being revealed by conditional URL
+		 * evaluation.
+		 */
+		if (!myStorageSettings.isMassIngestionMode() && !myStorageSettings.isMatchUrlCacheEnabled()) {
+			retVal = invokePreShowInterceptorForMatchUrlResults(theResourceType, theRequest, retVal, matchUrl);
+		}
+
+		if (retVal.size() == 1) {
+			T pid = retVal.iterator().next();
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
+			if (myStorageSettings.isMatchUrlCacheEnabled()) {
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			}
+		}
+
+		return retVal;
+	}
+
+	private <R extends IBaseResource> Set<T> invokePreShowInterceptorForMatchUrlResults(
+			Class<R> theResourceType, RequestDetails theRequest, Set<T> retVal, String matchUrl) {
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
@@ -152,6 +180,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
@@ -174,15 +203,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 				retVal = new HashSet<>();
 			}
 		}
-
-		if (retVal.size() == 1) {
-			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
-			if (myStorageSettings.isMatchUrlCacheEnabled()) {
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
-			}
-		}
-
 		return retVal;
 	}
 
