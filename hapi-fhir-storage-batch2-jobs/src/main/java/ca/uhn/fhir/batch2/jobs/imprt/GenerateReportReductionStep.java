@@ -55,7 +55,8 @@ public class GenerateReportReductionStep
 			ChunkExecutionDetails<BulkImportJobParameters, ConsumeFilesOutcomeJson> theChunkDetails) {
 		ConsumeFilesOutcomeJson data = theChunkDetails.getData();
 
-		for (Integer nextOutcomeCount : theChunkDetails.getData().getOutcomeCount().values()) {
+		for (Integer nextOutcomeCount :
+				theChunkDetails.getData().getOutcomeCount().values()) {
 			myOutcomeCount += nextOutcomeCount;
 		}
 

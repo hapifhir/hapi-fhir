@@ -61,8 +61,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	private Logger myLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
 	private String myBasicAuth;
 
-	public BulkImportFileServlet() {
-	}
+	public BulkImportFileServlet() {}
 
 	public BulkImportFileServlet(String theBasicAuthUsername, String theBasicAuthPassword) {
 		setBasicAuth(theBasicAuthUsername, theBasicAuthPassword);
@@ -79,7 +78,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	}
 
 	public void checkBasicAuthAndMaybeThrow403(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+			throws IOException {
 		// Check if the myBasicAuth variable is set, ignore if not.
 		if (myBasicAuth == null || myBasicAuth.isEmpty()) {
 			return;
@@ -127,7 +126,7 @@ public class BulkImportFileServlet extends HttpServlet {
 		}
 		if (!myFileIds.containsKey(indexParam)) {
 			throw new ResourceNotFoundException(
-				Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
+					Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
 		}
 
 		myLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
@@ -195,9 +194,9 @@ public class BulkImportFileServlet extends HttpServlet {
 			@Override
 			public InputStream openStream() throws IOException {
 				return ReaderInputStream.builder()
-					.setReader(new StringReader(theFileContents))
-					.setCharset(StandardCharsets.UTF_8)
-					.get();
+						.setReader(new StringReader(theFileContents))
+						.setCharset(StandardCharsets.UTF_8)
+						.get();
 			}
 
 			@Nullable

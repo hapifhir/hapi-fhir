@@ -247,6 +247,11 @@ public abstract class BaseTransactionProcessor {
 					throw e;
 				}
 
+				// Some exceptions have no chance of ever succeeding so there's no point in retrying
+				if (e instanceof InvalidRequestException || e instanceof PreconditionFailedException) {
+					throw e;
+				}
+
 				int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
 				int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
 				maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
@@ -1100,7 +1105,7 @@ public abstract class BaseTransactionProcessor {
 	 * @return
 	 */
 	private IIdType getNextResourceIdFromBaseResource(
-		IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
+			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
 		IIdType nextResourceId = null;
 		if (theBaseResource != null) {
 			nextResourceId = theBaseResource.getIdElement();

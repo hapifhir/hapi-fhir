@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.JsonUtil;
@@ -236,11 +235,12 @@ public class BulkImportCommand extends BaseCommand {
 
 		// Poll once more to get the response body
 		IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
-			.onServer()
-			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-			.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
-			.returnResourceType(myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
-			.execute();
+				.onServer()
+				.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+				.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+				.returnResourceType(
+						myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+				.execute();
 
 		String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
 		if (isNotBlank(diagnostics) && diagnostics.startsWith("{")) {
