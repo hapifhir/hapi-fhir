@@ -772,7 +772,7 @@ public class BundleUtilTest {
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
-		bundle.addEntry().getResponse().setOutcome(oo).setLocation("http://foo.com/Patient/123");
+		bundle.addEntry().getResponse().setOutcome(oo).setStatus("200 OK").setLocation("http://foo.com/Patient/123");
 
 		// Test
 		List<BundleUtil.StorageOutcome> outcomes = BundleUtil.toTransactionResponse(ourCtx, bundle).getStorageOutcomes();
