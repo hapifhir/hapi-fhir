@@ -37,10 +37,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -78,7 +81,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 		myThreadPoolTaskExecutor = createExecutor();
 		myPreFillTaskExecutor = Executors.newSingleThreadScheduledExecutor();
 		myMemoryCacheService = theMemoryCacheService;
-		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPoolTaskExecutor, myMemoryCacheService);
+		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPoolTaskExecutor);
 	}
 
 	/**
@@ -388,35 +391,34 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 */
 	private static class UniqueTaskExecutor {
 		private final ThreadPoolTaskExecutor myTaskExecutor;
-		private final MemoryCacheService myMemoryCacheService;
+		private final Map<Long, Future<Void>> myInFlightTasks = new ConcurrentHashMap<>();
 
-		public UniqueTaskExecutor(ThreadPoolTaskExecutor theTaskExecutor, MemoryCacheService theMemoryCacheService) {
+		public UniqueTaskExecutor(ThreadPoolTaskExecutor theTaskExecutor) {
 			myTaskExecutor = theTaskExecutor;
-			myMemoryCacheService = theMemoryCacheService;
 		}
 
 		public void submitIfAbsent(PersistSearchParameterIdentityTask theTask) {
 			Long hashIdentity = theTask.getHashIdentity();
 
-			FutureTask<Void> newFutureTask = new LoggingFutureTask(theTask);
+			// already have a task with same hashIdentity - skip scheduling
+			Future<Void> existing = myInFlightTasks.get(hashIdentity);
+			if (existing != null) {
+				return;
+			}
 
-			FutureTask<Void> existingOrNewFutureTask = myMemoryCacheService.get(
-					MemoryCacheService.CacheEnum.PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS,
-					hashIdentity,
-					key -> newFutureTask);
-
-			if (!Objects.equals(existingOrNewFutureTask, newFutureTask)) {
-				// cache already have a task with same hashIdentity - skip scheduling
+			// put FutureTask in the map. If another thread already put it - skip scheduling.
+			FutureTask<Void> futureTask = new LoggingFutureTask(theTask);
+			existing = myInFlightTasks.putIfAbsent(hashIdentity, futureTask);
+			if (existing != null) {
 				return;
 			}
 
 			myTaskExecutor.execute(() -> {
 				try {
-					newFutureTask.run();
+					futureTask.run();
 				} finally {
 					// remove from the cache once done or failed
-					myMemoryCacheService.invalidate(
-							MemoryCacheService.CacheEnum.PERSIST_SEARCH_PARAM_IDENTITY_IN_FLIGHT_TASKS, hashIdentity);
+					myInFlightTasks.remove(hashIdentity, futureTask);
 				}
 			});
 		}
