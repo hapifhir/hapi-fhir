@@ -249,9 +249,7 @@ public class BulkDataImportProvider {
 			}
 		}
 
-		// FIXME: make debug
-		ourLog.info("Client is polling for $import status: {}", instance.getStatus());
-
+		ourLog.debug("Client is polling for $import status: {}", instance.getStatus());
 		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -295,6 +293,9 @@ public class BulkDataImportProvider {
 				String msg = "Job was cancelled.";
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
+			}
+			default: {
+				ourLog.warn("Don't know how to handle status {}", instance.getStatus());
 			}
 		}
 	}

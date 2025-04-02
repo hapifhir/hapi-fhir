@@ -88,7 +88,6 @@ public class BulkImportCommand extends BaseCommand {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
 	public static final String GROUP_BY_COMPARTMENT_NAME = "group-by-compartment-name";
 	public static final String BATCH_SIZE = "batch-size";
-	private static volatile boolean ourEndNow;
 	private BulkImportFileServlet myServlet;
 	private Server myServer;
 	private Integer myPort;
@@ -192,6 +191,12 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		checkJobComplete(outcome.getIdElement().toString(), client);
+
+		try {
+			myServer.stop();
+		} catch (Exception e) {
+			ourLog.warn("Failed to stop server: {}", e.getMessage());
+		}
 	}
 
 	private void checkJobComplete(String url, IGenericClient client) {
@@ -222,7 +227,7 @@ public class BulkImportCommand extends BaseCommand {
 				break;
 			} else if (response.getResponseStatusCode() == 202) {
 				// still in progress
-				ThreadUtils.sleepQuietly(Duration.ofSeconds(5));
+				ThreadUtils.sleepQuietly(Duration.ofSeconds(1));
 			} else {
 				throw new InternalErrorException(
 						Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
@@ -230,7 +235,6 @@ public class BulkImportCommand extends BaseCommand {
 		}
 
 		// Poll once more to get the response body
-		client.registerInterceptor(new LoggingInterceptor(true));
 		IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
 			.onServer()
 			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
