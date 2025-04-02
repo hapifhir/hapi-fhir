@@ -400,7 +400,7 @@ public class BulkDataExportProvider {
 
 					// Create a JSON response
 					BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-					bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
+					bulkResponseDocument.setTransactionTime(info.getStartTime()); // completed
 
 					bulkResponseDocument.setRequiresAccessToken(true);
 
@@ -449,6 +449,7 @@ public class BulkDataExportProvider {
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
+			//noinspection DefaultNotLastCaseInSwitch
 			default:
 				// Deliberate fall through
 				ourLog.warn(
@@ -459,6 +460,7 @@ public class BulkDataExportProvider {
 			case QUEUED:
 			case IN_PROGRESS:
 			case CANCELLED:
+				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
 					handleDeleteRequest(theJobId, response, info.getStatus());
