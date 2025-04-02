@@ -2266,7 +2266,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
-	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMapsToken(String, Set, TransactionDetails, RequestPartitionId, List, List, Set)}
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMapsToken(String, Set, TransactionDetails, RequestPartitionId, List, Set, Set)}
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
@@ -2335,7 +2335,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	/**
-	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(RequestDetails, TransactionDetails, RequestPartitionId, List, List, Set)}
+	 * See {@link ca.uhn.fhir.jpa.dao.TransactionProcessor#preFetchSearchParameterMaps(RequestDetails, TransactionDetails, RequestPartitionId, List, Set, Set)}
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.

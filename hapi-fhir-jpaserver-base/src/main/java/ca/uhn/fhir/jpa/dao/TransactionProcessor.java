@@ -92,7 +92,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
+	/**
+	 * Matches conditional URLs in the form of [resourceType]?[paramName]=[paramValue]{...more params...}
+	 *
+	 *
+	 */
 	public static final Pattern MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
+
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
@@ -219,7 +225,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId) {
 		Set<String> foundIds = new HashSet<>();
-		List<JpaPid> idsToPreFetchBodiesFor = new ArrayList<>();
+		Set<JpaPid> idsToPreFetchBodiesFor = new HashSet<>();
 		Set<JpaPid> idsToPreFetchVersionsFor = new HashSet<>();
 
 		/*
@@ -251,7 +257,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * going to update)
 		 */
 		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
-		systemDao.preFetchResources(idsToPreFetchBodiesFor, true);
+		systemDao.preFetchResources(List.copyOf(idsToPreFetchBodiesFor), true);
 
 		/*
 		 * Pre-Fetch Resource Versions (this will happen for any resources we are doing a
@@ -319,7 +325,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
 			Set<String> foundIds,
-			List<JpaPid> theIdsToPreFetchBodiesFor) {
+			Set<JpaPid> theIdsToPreFetchBodiesFor) {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -421,7 +427,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
-			List<JpaPid> theIdsToPreFetchBodiesFor,
+			Set<JpaPid> theIdsToPreFetchBodiesFor,
 			Set<JpaPid> theIdsToPreFetchVersionsFor) {
 
 		List<MatchUrlToResolve> searchParameterMapsToResolve = new ArrayList<>();
@@ -513,7 +519,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
-			List<JpaPid> theOutputPidsToLoadBodiesFor,
+			Set<JpaPid> theOutputPidsToLoadBodiesFor,
 			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
 
 		Set<Long> systemAndValueHashes = new HashSet<>();
@@ -604,7 +610,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
-			List<JpaPid> theOutputPidsToLoadFully,
+			Set<JpaPid> theOutputPidsToLoadFully,
 			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
 		if (!theHashesForIndexColumn.isEmpty()) {
 			ListMultimap<Long, MatchUrlToResolve> hashToSearchMap =
@@ -678,7 +684,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	private void handleFoundPreFetchResourceId(
 			TransactionDetails theTransactionDetails,
-			List<JpaPid> theOutputPidsToLoadFully,
+			Set<JpaPid> theOutputPidsToLoadFully,
 			Set<JpaPid> theOutputPidsToLoadVersionsFor,
 			MatchUrlToResolve theMatchUrl,
 			JpaPid theFoundPid) {
@@ -728,7 +734,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
 			boolean theShouldPreFetchResourceVersion,
-			List<JpaPid> theOutputIdsToPreFetchBodiesFor,
+			Set<JpaPid> theOutputIdsToPreFetchBodiesFor,
 			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
 		JpaPid cachedId =
 				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);

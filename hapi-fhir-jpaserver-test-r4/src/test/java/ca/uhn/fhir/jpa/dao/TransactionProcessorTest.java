@@ -115,6 +115,8 @@ public class TransactionProcessorTest {
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@MockBean
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
+	@MockBean
+	private MemoryCacheService myMemoryCacheService;
 	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
@@ -248,11 +250,6 @@ public class TransactionProcessorTest {
 		@Bean
 		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
-		}
-
-		@Bean
-		public MemoryCacheService memoryCacheService() {
-			return new MemoryCacheService(storageSettings());
 		}
 
 		@Bean
