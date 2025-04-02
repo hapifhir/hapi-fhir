@@ -14,8 +14,8 @@ class TransactionSemanticsHeaderTest {
 	@ParameterizedTest
 	@ValueSource(strings = {
 		// Same but with different spacing
-		"retryCount=3; minDelay=100; maxDelay=200; finalRetryAsBatch=true",
-		"retryCount =  3 ; minDelay  = 100  ; maxDelay   = 200  ;    finalRetryAsBatch  =   true ",
+		"retryCount=3; minRetryDelay=100; maxRetryDelay=200; finalRetryAsBatch=true",
+		"retryCount =  3 ; minRetryDelay  = 100  ; maxRetryDelay   = 200  ;    finalRetryAsBatch  =   true ",
 	})
 	public void testParse(String theInput) {
 		TransactionSemanticsHeader actual = TransactionSemanticsHeader.parse(theInput);
@@ -27,9 +27,9 @@ class TransactionSemanticsHeaderTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"retryCount = -1; minDelay = -1; maxDelay = -1; finalRetryAsBatch = -1",
-		"retryCount =; minDelay =; maxDelay =; finalRetryAsBatch =",
-		"retryCount =HELLO; minDelay =HELLO;;;;  ; maxDelay =HELLO; finalRetryAsBatch =HELLO",
+		"retryCount = -1; minRetryDelay = -1; maxRetryDelay = -1; finalRetryAsBatch = -1",
+		"retryCount =; minRetryDelay =; maxRetryDelay =; finalRetryAsBatch =",
+		"retryCount =HELLO; minRetryDelay =HELLO;;;;  ; maxRetryDelay =HELLO; finalRetryAsBatch =HELLO",
 	})
 	public void testParseInvalidValues(String theInput) {
 		TransactionSemanticsHeader actual = TransactionSemanticsHeader.parse(theInput);

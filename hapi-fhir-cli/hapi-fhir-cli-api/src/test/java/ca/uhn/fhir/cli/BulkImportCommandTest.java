@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -17,6 +18,9 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,13 +29,14 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +70,7 @@ public class BulkImportCommandTest {
 
 	static {
 		HapiSystemProperties.enableTestMode();
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@RegisterExtension
@@ -77,8 +85,8 @@ public class BulkImportCommandTest {
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider)
 		.registerInterceptor(new LoggingInterceptor());
 	private Path myTempDir;
-	@Captor
-	private ArgumentCaptor<JobInstanceStartRequest> myStartCaptor;
+	@RegisterExtension
+	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BulkImportCommand.class);
 
 	@BeforeEach
 	public void beforeEach() throws IOException {
@@ -104,11 +112,14 @@ public class BulkImportCommandTest {
 	@Test
 	public void testBulkImport() throws IOException {
 
+		BulkImportReportJson report = new BulkImportReportJson();
+		report.setReportMsg("Bulk Import Report\n-------------------\nThis is the text!");
+
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.COMPLETED)
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
 			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
-			.setReport("Bulk Import Report\n-------------------\nThis is the text!");
+			.setReport(JsonUtil.serialize(report));
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
@@ -117,9 +128,11 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
-		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
-		// Start the command in a separate thread
+		// Reverse order because Patient should be first
+		when(myJobCoordinator.startInstance(any(), any())).thenAnswer(new StartRequestFetchFilesVerifier(fileContents2, fileContents1));
+
+		// Run the command
 		App.main(new String[]{
 			BulkImportCommand.BULK_IMPORT,
 			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
@@ -129,18 +142,13 @@ public class BulkImportCommandTest {
 		});
 
 		assertThat(myRestfulServerExtension.getRequestContentTypes()).containsExactly(
-			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
+			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
 		);
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), any());
 
-		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
-		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
-
-		// Reverse order because Patient should be first
-		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+		ILoggingEvent message = myLogbackTestExtension.findLogEventWithFormattedMessage(report.getReportMsg()).orElseThrow();
+		assertThat(message.getFormattedMessage()).startsWith("Output:");
 	}
 
 	@Test
@@ -160,30 +168,22 @@ public class BulkImportCommandTest {
 
 		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myJobCoordinator.startInstance(any(), any())).thenAnswer(new StartRequestFetchFilesVerifier(fileContents2, fileContents1));
 
-		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
+		// Run the command
+		App.main(new String[]{
 			BulkImportCommand.BULK_IMPORT,
 			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
 			"--" + BulkImportCommand.PORT, "0",
 			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
 			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		});
 
-		ourLog.info("Waiting for initiation requests");
-		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
-		ourLog.info("Initiation requests complete");
+		assertThat(myRestfulServerExtension.getRequestContentTypes()).containsExactly(
+			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
+		);
 
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
-
-		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
-		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
-
-		// Reverse order because Patient should be first
-		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+		verify(myJobCoordinator, times(1)).startInstance(any(), any());
 	}
 
 	@Test
@@ -191,6 +191,7 @@ public class BulkImportCommandTest {
 
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.FAILED)
+			.setErrorMessage("This is the error message")
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
 			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 
@@ -204,33 +205,17 @@ public class BulkImportCommandTest {
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
-		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
+		// Run the command
+		App.main(new String[]{
 			BulkImportCommand.BULK_IMPORT,
 			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
 			"--" + BulkImportCommand.PORT, "0",
 			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
 			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		});
 
-		ourLog.info("Waiting for initiation requests");
-		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
-		ourLog.info("Initiation requests complete");
-
-		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
-
-		try{
-			JobInstanceStartRequest startRequest = myStartCaptor.getValue();
-			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
-
-			// Reverse order because Patient should be first
-			assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
-		}
-		catch(InternalErrorException e) {
-			ourLog.error(e.getMessage());
-		}
+		ILoggingEvent message = myLogbackTestExtension.findLogEventWithFormattedMessage("Job is in FAILED state").orElseThrow();
+		assertThat(message.getFormattedMessage()).contains("Last error: This is the error message");
 	}
 
 	private String fetchFile(String url) throws IOException {
@@ -258,4 +243,24 @@ public class BulkImportCommandTest {
 	}
 
 
+	private class StartRequestFetchFilesVerifier implements Answer<Object> {
+		private final String[] myFileContents;
+
+		public StartRequestFetchFilesVerifier(String... theFileContents) {
+			myFileContents = theFileContents;
+		}
+
+		@Override
+		public Object answer(InvocationOnMock t) throws Throwable {
+			JobInstanceStartRequest startRequest = t.getArgument(1, JobInstanceStartRequest.class);
+			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
+
+			assertThat(jobParameters.getNdJsonUrls()).hasSize(myFileContents.length);
+			for (int i = 0; i < myFileContents.length; i++) {
+				assertEquals(myFileContents[i], BulkImportCommandTest.this.fetchFile(jobParameters.getNdJsonUrls().get(i)));
+			}
+
+			return BulkImportCommandTest.this.createJobStartResponse("THE-JOB-ID");
+		}
+	}
 }
