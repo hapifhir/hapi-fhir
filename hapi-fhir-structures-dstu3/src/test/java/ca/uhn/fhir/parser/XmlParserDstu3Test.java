@@ -585,7 +585,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals(organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -3410,10 +3410,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
+		assertEquals("2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
+		assertEquals("3", performer.getId());
 	}
 
 	/**
