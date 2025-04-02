@@ -238,12 +238,12 @@ public class BulkImportCommand extends BaseCommand {
 		// Poll once more to get the response body
 		if (succeeded) {
 			IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
-				.onServer()
-				.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-				.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
-				.returnResourceType(
-					myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
-				.execute();
+					.onServer()
+					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+					.returnResourceType(
+							myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+					.execute();
 
 			String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
 			if (isNotBlank(diagnostics) && diagnostics.startsWith("{")) {
