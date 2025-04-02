@@ -1672,12 +1672,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			// TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt
 			// to contain it internally. Wild
-			myContext
-					.newTerser()
-					.containResources(
-							theResource,
-							FhirTerser.OptionsEnum.MODIFY_RESOURCE,
-							FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+			myContext.newTerser().containResources(theResource, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
 	}
 

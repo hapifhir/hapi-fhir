@@ -238,8 +238,7 @@ class ParserState<T> {
 	}
 
 	public IPrimitiveType<?> getPrimitiveInstance(
-			BaseRuntimeChildDefinition theChild,
-			RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
+			BaseRuntimeChildDefinition theChild, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
 		return thePrimitiveTarget.newInstance(theChild.getInstanceConstructorArguments());
 	}
 
@@ -1121,8 +1120,7 @@ class ParserState<T> {
 			myInstance = newInstance(def);
 
 			if (myInstance instanceof IResource) {
-				push(new ResourceStateHapi(
-						getRootPreResourceState(), def, (IResource) myInstance));
+				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance));
 			} else {
 				push(new ResourceStateHl7Org(getRootPreResourceState(), def, myInstance));
 			}
@@ -1836,5 +1834,4 @@ class ParserState<T> {
 		}
 		return retVal;
 	}
-
 }

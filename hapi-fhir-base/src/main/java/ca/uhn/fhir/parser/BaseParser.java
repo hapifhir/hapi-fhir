@@ -193,12 +193,17 @@ public abstract class BaseParser implements IParser {
 			String reference = ref.getValue();
 			if (theRef.getResource() != null) {
 				IIdType containedId = theContext.getContainedResources().getResourceId(theRef.getResource());
+				IIdType previouslyContainedId =
+						theContext.getContainedResources().getPreviouslyContainedResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
 					if (containedId.isLocal()) {
 						reference = containedId.getValue();
 					} else {
 						reference = "#" + containedId.getValue();
 					}
+				} else if (previouslyContainedId != null) {
+					reference = "#" + previouslyContainedId.getValue();
+					theContext.getContainedResources().addContained(previouslyContainedId, theRef.getResource());
 				} else {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
@@ -1039,7 +1044,9 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		theContext.setContainedResources(getContext().newTerser().containResources(theResource));
+		FhirTerser.ContainedResources containedResources =
+				getContext().newTerser().containResources(theResource, theContext.getContainedResources());
+		theContext.setContainedResources(containedResources);
 	}
 
 	static class ChildNameAndDef {
