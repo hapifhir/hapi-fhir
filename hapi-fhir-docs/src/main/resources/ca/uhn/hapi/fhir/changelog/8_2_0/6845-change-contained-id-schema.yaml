@@ -16,6 +16,6 @@ patient.getContained().add(org);
 patient.setManagingOrganization(new Reference(\"#1\"));
 ```
 
-Existing code using the previous form of ID (e.g. \#1) will continue to work, but will emit
+Existing code using the previous form of ID (e.g. #1) will continue to work, but will emit
 a warning and be automatically corrected by the parser.
 "
