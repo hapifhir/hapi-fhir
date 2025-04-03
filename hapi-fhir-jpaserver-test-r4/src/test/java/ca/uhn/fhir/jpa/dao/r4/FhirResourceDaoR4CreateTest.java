@@ -754,7 +754,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(organizationUuid, organizationUuidParsed);
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getId());
+		assertEquals(organizationUuid, org.getId());
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}

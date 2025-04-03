@@ -95,12 +95,12 @@ class ParserState<T> {
 	private final IParserErrorHandler myErrorHandler;
 	private final boolean myJsonMode;
 	private final IParser myParser;
-	private List<String> myComments = new ArrayList<String>(2);
+	private final List<String> myComments = new ArrayList<>(2);
 	private T myObject;
 	private IBase myPreviousElement;
 	private BaseState myState;
-	private List<IBaseResource> myGlobalResources = new ArrayList<>();
-	private List<IBaseReference> myGlobalReferences = new ArrayList<>();
+	private final List<IBaseResource> myGlobalResources = new ArrayList<>();
+	private final List<IBaseReference> myGlobalReferences = new ArrayList<>();
 
 	private ParserState(
 			IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
@@ -204,7 +204,7 @@ class ParserState<T> {
 		return theDefinition.newInstance();
 	}
 
-	public ICompositeType newCompositeInstance(
+	private ICompositeType newCompositeInstance(
 			@Nullable BasePreResourceState thePreResourceState,
 			BaseRuntimeChildDefinition theChild,
 			BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
@@ -220,7 +220,7 @@ class ParserState<T> {
 		return retVal;
 	}
 
-	public ICompositeType newCompositeTypeInstance(
+	private ICompositeType newCompositeTypeInstance(
 			BasePreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance();
 		if (retVal instanceof IBaseReference) {
@@ -238,9 +238,7 @@ class ParserState<T> {
 	}
 
 	public IPrimitiveType<?> getPrimitiveInstance(
-			BaseRuntimeChildDefinition theChild,
-			RuntimePrimitiveDatatypeDefinition thePrimitiveTarget,
-			String theChildName) {
+			BaseRuntimeChildDefinition theChild, RuntimePrimitiveDatatypeDefinition thePrimitiveTarget) {
 		return thePrimitiveTarget.newInstance(theChild.getInstanceConstructorArguments());
 	}
 
@@ -268,7 +266,7 @@ class ParserState<T> {
 
 	private abstract class BaseState {
 
-		private BasePreResourceState myPreResourceState;
+		private final BasePreResourceState myPreResourceState;
 		private BaseState myStack;
 
 		BaseState(BasePreResourceState thePreResourceState) {
@@ -403,9 +401,7 @@ class ParserState<T> {
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
 				if (!res.getId().isLocal()) {
-					res.setId(new IdDt('#' + res.getId().getIdPart()));
-					// TODO rolled back this local ref prefix change
-					//					res.setId(new IdDt(res.getId().getIdPart()));
+					res.setId(new IdDt(res.getId().getIdPart()));
 				}
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
 			}
@@ -445,9 +441,7 @@ class ParserState<T> {
 				// need an ID to be referred to)
 				myErrorHandler.containedResourceWithNoId(null);
 			} else {
-				res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
-				// TODO rolled back this local ref prefix change
-				//				res.getIdElement().setValue(res.getIdElement().getIdPart());
+				res.getIdElement().setValue(res.getIdElement().getIdPart());
 				getPreResourceState()
 						.getContainedResources()
 						.put(res.getIdElement().getValue(), res);
@@ -463,9 +457,9 @@ class ParserState<T> {
 	private class DeclaredExtensionState extends BaseState {
 
 		private IBase myChildInstance;
-		private RuntimeChildDeclaredExtensionDefinition myDefinition;
-		private IBase myParentInstance;
-		private BasePreResourceState myPreResourceState;
+		private final RuntimeChildDeclaredExtensionDefinition myDefinition;
+		private final IBase myParentInstance;
+		private final BasePreResourceState myPreResourceState;
 
 		public DeclaredExtensionState(
 				BasePreResourceState thePreResourceState,
@@ -696,7 +690,7 @@ class ParserState<T> {
 				case PRIMITIVE_DATATYPE: {
 					RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 					IPrimitiveType<?> newChildInstance;
-					newChildInstance = getPrimitiveInstance(child, primitiveTarget, theChildName);
+					newChildInstance = getPrimitiveInstance(child, primitiveTarget);
 					child.getMutator().addValue(myInstance, newChildInstance);
 					PrimitiveState newState = new PrimitiveState(
 							getPreResourceState(), newChildInstance, theChildName, primitiveTarget.getName());
@@ -838,7 +832,7 @@ class ParserState<T> {
 
 		@Override
 		public void endingElement() throws DataFormatException {
-			if (myExtension.getValue() != null && myExtension.getExtension().size() > 0) {
+			if (myExtension.getValue() != null && !myExtension.getExtension().isEmpty()) {
 				throw new DataFormatException(Msg.code(1811) + "Extension (URL='" + myExtension.getUrl()
 						+ "') must not have both a value and other contained extensions");
 			}
@@ -908,11 +902,11 @@ class ParserState<T> {
 		}
 	}
 
-	public class IdentifiableElementIdState extends BaseState {
+	private class IdentifiableElementIdState extends BaseState {
 
 		private final IIdentifiableElement myElement;
 
-		public IdentifiableElementIdState(BasePreResourceState thePreResourceState, IIdentifiableElement theElement) {
+		private IdentifiableElementIdState(BasePreResourceState thePreResourceState, IIdentifiableElement theElement) {
 			super(thePreResourceState);
 			myElement = theElement;
 		}
@@ -1048,10 +1042,10 @@ class ParserState<T> {
 
 	private abstract class BasePreResourceState extends BaseState {
 
-		private Map<String, IBaseResource> myContainedResources;
-		private List<IBaseReference> myLocalReferences = new ArrayList<>();
+		private final Map<String, IBaseResource> myContainedResources;
+		private final List<IBaseReference> myLocalReferences = new ArrayList<>();
 		private IBaseResource myInstance;
-		private FhirVersionEnum myParentVersion;
+		private final FhirVersionEnum myParentVersion;
 		private Class<? extends IBaseResource> myResourceType;
 
 		BasePreResourceState(Class<? extends IBaseResource> theResourceType) {
@@ -1068,7 +1062,7 @@ class ParserState<T> {
 
 		BasePreResourceState(BasePreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
-			Validate.notNull(theParentVersion);
+			Validate.notNull(theParentVersion, "theParentVersion must not be null");
 			myParentVersion = theParentVersion;
 			myContainedResources = thePreResourcesState.getContainedResources();
 		}
@@ -1126,8 +1120,7 @@ class ParserState<T> {
 			myInstance = newInstance(def);
 
 			if (myInstance instanceof IResource) {
-				push(new ResourceStateHapi(
-						getRootPreResourceState(), def, (IResource) myInstance, myContainedResources));
+				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance));
 			} else {
 				push(new ResourceStateHl7Org(getRootPreResourceState(), def, myInstance));
 			}
@@ -1276,10 +1269,8 @@ class ParserState<T> {
 				String ref = nextRef.getReferenceElement().getValue();
 				if (isNotBlank(ref)) {
 					if (ref.startsWith("#") && ref.length() > 1) {
-						IBaseResource target = myContainedResources.get(ref);
-						// TODO rolled back this local ref prefix change
-						//						String refId = ref.substring(1);
-						//						IBaseResource target = myContainedResources.get(refId);
+						String refId = ref.substring(1);
+						IBaseResource target = myContainedResources.get(refId);
 						if (target != null) {
 							ourLog.debug("Resource contains local ref {}", ref);
 							nextRef.setResource(target);
@@ -1370,8 +1361,8 @@ class ParserState<T> {
 		public void wereBack() {
 			super.wereBack();
 
-			if (getCurrentElement() instanceof IBaseResource) {
-				IBaseResource elem = (IBaseResource) getCurrentElement();
+			if (getCurrentElement() != null) {
+				IBaseResource elem = getCurrentElement();
 				String resourceName = myContext.getResourceType(elem);
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
@@ -1393,7 +1384,7 @@ class ParserState<T> {
 
 	private class PreTagListState extends BaseState {
 
-		private TagList myTagList;
+		private final TagList myTagList;
 
 		PreTagListState() {
 			super(null);
@@ -1429,7 +1420,7 @@ class ParserState<T> {
 	private class PrimitiveState extends BaseState {
 		private final String myChildName;
 		private final String myTypeName;
-		private IPrimitiveType<?> myInstance;
+		private final IPrimitiveType<?> myInstance;
 
 		PrimitiveState(
 				BasePreResourceState thePreResourceState,
@@ -1515,13 +1506,12 @@ class ParserState<T> {
 
 	private class ResourceStateHapi extends ElementCompositeState {
 
-		private IResource myInstance;
+		private final IResource myInstance;
 
 		public ResourceStateHapi(
 				BasePreResourceState thePreResourceState,
 				BaseRuntimeElementCompositeDefinition<?> theDef,
-				IResource theInstance,
-				Map<String, IBaseResource> theContainedResources) {
+				IResource theInstance) {
 			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 			myInstance = theInstance;
 		}
@@ -1598,7 +1588,7 @@ class ParserState<T> {
 
 	private class TagListState extends BaseState {
 
-		private TagList myTagList;
+		private final TagList myTagList;
 
 		public TagListState(TagList theTagList) {
 			super(null);
@@ -1637,7 +1627,7 @@ class ParserState<T> {
 		private String myLabel;
 		private String myScheme;
 		private int mySubState = 0;
-		private TagList myTagList;
+		private final TagList myTagList;
 		private String myTerm;
 		private String myVersion;
 		private Boolean myUserSelected;
@@ -1713,9 +1703,9 @@ class ParserState<T> {
 
 	private class XhtmlState extends BaseState {
 		private int myDepth;
-		private XhtmlDt myDt;
-		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
-		private boolean myIncludeOuterEvent;
+		private final XhtmlDt myDt;
+		private final List<XMLEvent> myEvents = new ArrayList<>();
+		private final boolean myIncludeOuterEvent;
 
 		private XhtmlState(BasePreResourceState thePreResourceState, XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent)
 				throws DataFormatException {
@@ -1786,7 +1776,7 @@ class ParserState<T> {
 	}
 
 	private class XhtmlStateHl7Org extends XhtmlState {
-		private IBaseXhtml myHl7OrgDatatype;
+		private final IBaseXhtml myHl7OrgDatatype;
 
 		private XhtmlStateHl7Org(BasePreResourceState thePreResourceState, IBaseXhtml theHl7OrgDatatype) {
 			super(thePreResourceState, new XhtmlDt(), true);
@@ -1842,13 +1832,6 @@ class ParserState<T> {
 				retVal.push(retVal.new PreResourceStateHl7Org(theResourceType));
 			}
 		}
-		return retVal;
-	}
-
-	static ParserState<TagList> getPreTagListInstance(
-			IParser theParser, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
-		ParserState<TagList> retVal = new ParserState<TagList>(theParser, theContext, theJsonMode, theErrorHandler);
-		retVal.push(retVal.new PreTagListState());
 		return retVal;
 	}
 }

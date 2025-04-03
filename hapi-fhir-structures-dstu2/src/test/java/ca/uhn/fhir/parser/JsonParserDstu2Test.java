@@ -1400,7 +1400,7 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) ((ResourceReferenceDt) p.getMedication()).getResource();
 		assertNotNull(m);
-		assertEquals("#med", m.getId().getValue());
+		assertEquals("med", m.getId().getValue());
 		assertThat(p.getContained().getContainedResources()).hasSize(1);
 		assertThat(p.getContained().getContainedResources().get(0)).isSameAs(m);
 
