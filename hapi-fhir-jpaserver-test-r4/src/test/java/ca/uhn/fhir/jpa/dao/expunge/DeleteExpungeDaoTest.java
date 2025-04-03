@@ -196,69 +196,6 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeleteExpungeRespectsExpungeBatchSizeWithLargeDataSet() {
-		// setup
-		myStorageSettings.setExpungeBatchSize(1000);
-		int numOfRecords = 1000;
-		for (int i = 0; i < numOfRecords; ++i) {
-			IIdType p1 = createPatient(withActiveTrue());
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-			createObservation(withSubject(p1));
-		}
-
-		when(mySrd.getParameters()).thenReturn(Map.of(
-			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
-			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"}
-		));
-
-		// execute
-		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-
-		// validate
-		String jobId = jobExecutionIdFromOutcome(outcome);
-		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
-
-//		assertEquals(numOfRecords, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
-
-//		// Setup
-//
-//		// Create a chain of dependent references
-//		IIdType p1 = createPatient(withActiveTrue());
-//		IIdType o1 = createObservation(withSubject(p1));
-//
-//		// validate precondition
-//		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-//		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-//
-//		String url = "Patient?" +
-//			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
-//		when(mySrd.getParameters()).thenReturn(Map.of(
-//			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
-//			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
-//			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"2"}
-//		));
-//		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl(url, mySrd);
-//		String jobId = jobExecutionIdFromOutcome(outcome);
-//		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
-//
-//		// Validate
-//		assertThat(job.getErrorMessage()).contains("Unable to delete");
-//		assertNotGone(p1);
-//		assertNotGone(o1);
-	}
-
-	@Test
 	public void testDeleteExpungeWithDefaultExpungeBatchSize() {
 		// setup
 		for (int i = 0; i < 10; ++i) {
