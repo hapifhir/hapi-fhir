@@ -1,0 +1,21 @@
+---
+type: change
+issue: 6845
+title: "Recent versions of the HAPI FHIR corelib (containing model classes, fhirpath evaluator, 
+validator, etc.) now enforce a rule that contained resources must not have a # character in
+their ID, so the # character is only used in the reference. In other words, when adding a
+contained resource to a containing resource, the contained resource should now have an ID
+set as follows:
+
+```java
+Organization org = new Organization();
+org.setId(\"1\"); // Previously \"#1\" was preferred here, now \"1\" is preferred
+
+Patient patient = new Patient();
+patient.getContained().add(org);
+patient.setManagingOrganization(new Reference(\"#1\"));
+```
+
+Existing code using the previous form of ID (e.g. \#1) will continue to work, but will emit
+a warning and be automatically corrected by the parser.
+"
