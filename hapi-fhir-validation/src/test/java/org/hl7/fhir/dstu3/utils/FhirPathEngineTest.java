@@ -45,7 +45,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 	@Test
 	public void testCrossResourceBoundaries() throws FHIRException {
 		Specimen specimen = new Specimen();
-		specimen.setId("#FOO");
+		specimen.setId("FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 		Observation o = new Observation();
 		o.getContained().add(specimen);
