@@ -1496,35 +1496,13 @@ public class FhirTerser {
 	 * @since 5.4.0
 	 */
 	public ContainedResources containResources(
-			IBaseResource theResource, ContainedResources theParentContainedResources, OptionsEnum... theOptions) {
-		boolean storeAndReuse = false;
-		for (OptionsEnum next : theOptions) {
-			if (next == OptionsEnum.STORE_AND_REUSE_RESULTS) {
-				storeAndReuse = true;
-			}
-		}
-
-		if (storeAndReuse) {
-			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
-			if (cachedValue != null) {
-				return (ContainedResources) cachedValue;
-			}
+		IBaseResource theResource, ContainedResources theParentContainedResources, boolean theStoreResults) {
+		Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
+		if (cachedValue != null) {
+			return (ContainedResources) cachedValue;
 		}
 
 		ContainedResources contained = new ContainedResources();
-
-		if (theParentContainedResources != null) {
-			if (theParentContainedResources.hasResourceToIdValues()) {
-				contained
-						.getPreviouslyContainedResourceToIdMap()
-						.putAll(theParentContainedResources.getResourceToIdMap());
-			}
-			if (theParentContainedResources.hasPreviouslyContainedResourceToIdValues()) {
-				contained
-						.getPreviouslyContainedResourceToIdMap()
-						.putAll(theParentContainedResources.getPreviouslyContainedResourceToIdMap());
-			}
-		}
 
 		List<? extends IBaseResource> containedResources = getContainedResourceList(theResource);
 		for (IBaseResource next : containedResources) {
@@ -1539,10 +1517,23 @@ public class FhirTerser {
 		}
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
+			if (theParentContainedResources != null) {
+				if (theParentContainedResources.hasResourceToIdValues()) {
+					contained
+						.getPreviouslyContainedResourceToIdMap()
+						.putAll(theParentContainedResources.getResourceToIdMap());
+				}
+				if (theParentContainedResources.hasPreviouslyContainedResourceToIdValues()) {
+					contained
+						.getPreviouslyContainedResourceToIdMap()
+						.putAll(theParentContainedResources.getPreviouslyContainedResourceToIdMap());
+				}
+			}
+
 			containResourcesForEncoding(contained, theResource);
 		}
 
-		if (storeAndReuse) {
+		if (theStoreResults) {
 			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
 		}
 
@@ -1781,15 +1772,6 @@ public class FhirTerser {
 		T target = (T) myContext.getResourceDefinition(theSource).newInstance();
 		cloneInto(theSource, target, false);
 		return target;
-	}
-
-	public enum OptionsEnum {
-		/**
-		 * Store the results of the operation in the resource metadata and reuse them if
-		 * subsequent calls are made.
-		 */
-		// FIXME: needed for?
-		STORE_AND_REUSE_RESULTS
 	}
 
 	@FunctionalInterface

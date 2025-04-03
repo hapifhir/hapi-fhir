@@ -197,7 +197,7 @@ public class FhirTerserR4Test {
 		mr.setMedication(new Reference(new Medication().setStatus(Medication.MedicationStatus.ACTIVE)));
 		mr.getRequester().setResource(new Practitioner().setActive(true));
 
-		FhirTerser.ContainedResources contained = myCtx.newTerser().containResources(mr, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+		FhirTerser.ContainedResources contained = myCtx.newTerser().containResources(mr, null, true);
 
 		assertThat(mr.getContained().get(0).getId()).matches(UUID_PATTERN);
 		assertThat(mr.getContained().get(1).getId()).matches(UUID_PATTERN);
@@ -206,7 +206,7 @@ public class FhirTerserR4Test {
 		assertEquals("#" + mr.getContained().get(0).getId(), mr.getMedicationReference().getReference());
 		assertEquals("#" + mr.getContained().get(1).getId(), mr.getRequester().getReference());
 
-		FhirTerser.ContainedResources secondPass = myCtx.newTerser().containResources(mr, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+		FhirTerser.ContainedResources secondPass = myCtx.newTerser().containResources(mr, null, true);
 		assertThat(secondPass).isSameAs(contained);
 	}
 
@@ -221,7 +221,7 @@ public class FhirTerserR4Test {
 		MedicationAdministration medAdmin = new MedicationAdministration();
 		medAdmin.setMedication(new Reference(medication));
 
-		myCtx.newTerser().containResources(medAdmin, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+		myCtx.newTerser().containResources(medAdmin, null, true);
 
 		assertThat(medAdmin.getContained().get(0).getId()).matches(UUID_PATTERN);
 		assertThat(medAdmin.getContained().get(1).getId()).matches(UUID_PATTERN);
@@ -242,7 +242,7 @@ public class FhirTerserR4Test {
 		Bundle bundle = new Bundle();
 		bundle.addEntry().setResource(mr);
 
-		myCtx.newTerser().containResources(bundle, null);
+		myCtx.newTerser().containResources(bundle, null, false);
 
 		assertThat(mr.getContained()).isEmpty();
 		assertNull(mr.getRequester().getReference());

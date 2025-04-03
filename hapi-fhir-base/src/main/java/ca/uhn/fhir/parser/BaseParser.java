@@ -1045,7 +1045,7 @@ public abstract class BaseParser implements IParser {
 		}
 
 		FhirTerser.ContainedResources containedResources =
-				getContext().newTerser().containResources(theResource, theContext.getContainedResources());
+				getContext().newTerser().containResources(theResource, theContext.getContainedResources(), false);
 		theContext.setContainedResources(containedResources);
 	}
 

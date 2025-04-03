@@ -126,8 +126,16 @@ public class SearchParamExtractorService {
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 
-		// FIXME: document
-		myContext.newTerser().containResources(theResource, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+		/*
+		 * The FHIRPath evaluator doesn't know how to handle reference which are
+		 * stored by value in Reference#setResource(IBaseResource) as opposed to being
+		 * stored by reference in Reference#setReference(String). It also doesn't know
+		 * how to handle contained resources where the ID contains a hash mark (which
+		 * was the default in HAPI FHIR until 8.2.0 but became disallowed by the
+		 * FHIRPath evaluator in that version. So prior to indexing we will now always
+		 * clean references up.
+		 */
+		myContext.newTerser().containResources(theResource, null, true);
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
