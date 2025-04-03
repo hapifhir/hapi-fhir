@@ -29,12 +29,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.BundleUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -92,11 +92,11 @@ public class ConsumeFilesStep
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		BundleUtil.TransactionResponse response = storeResources(resources, partitionId);
+		TransactionUtil.TransactionResponse response = storeResources(resources, partitionId);
 
 		ConsumeFilesOutcomeJson outcome = new ConsumeFilesOutcomeJson();
 		outcome.setSourceName(sourceName);
-		for (BundleUtil.StorageOutcome entry : response.getStorageOutcomes()) {
+		for (TransactionUtil.StorageOutcome entry : response.getStorageOutcomes()) {
 			if (entry.getStorageResponseCode() != null) {
 				outcome.addOutcome(entry.getStorageResponseCode());
 			}
@@ -109,14 +109,14 @@ public class ConsumeFilesStep
 		return new RunOutcome(resources.size());
 	}
 
-	public BundleUtil.TransactionResponse storeResources(
+	public TransactionUtil.TransactionResponse storeResources(
 			List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(
 				requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
-				.withFinalRetryAsBatch(true)
+				.withTryBatchAsTransactionFirst(true)
 				.withRetryCount(2)
 				.withMinRetryDelay(500)
 				.withMaxRetryDelay(1000)
@@ -124,6 +124,7 @@ public class ConsumeFilesStep
 		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, transactionSemantics.toHeaderValue());
 
 		BundleBuilder bb = new BundleBuilder(myCtx);
+		bb.setType("batch");
 
 		for (var resource : resources) {
 			if (resource.getIdElement().hasIdPart()) {
@@ -136,6 +137,6 @@ public class ConsumeFilesStep
 		IBaseBundle requestBundle = bb.getBundleTyped();
 		IBaseBundle responseBundle = (IBaseBundle) mySystemDao.transaction(requestDetails, requestBundle);
 
-		return BundleUtil.toTransactionResponse(myCtx, responseBundle);
+		return TransactionUtil.parseTransactionResponse(myCtx, responseBundle);
 	}
 }

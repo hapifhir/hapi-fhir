@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk.imprt2;
 
 import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -223,7 +224,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		resources.add(patient);
 
 		// Execute
-		BundleUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
+		TransactionUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
 
 		// Verify
 		assertEquals(2, outcome.getStorageOutcomes().size());
