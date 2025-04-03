@@ -242,7 +242,6 @@ public class ConsentInterceptor {
 					continue;
 				}
 
-				// FIXME this is causing issues when constructing a method outcome after creates / updates
 				ConsentOutcome outcome =
 						nextService.canSeeResource(theRequestDetails, nextResource, myContextConsentServices);
 				Validate.notNull(outcome, "Consent service returned null outcome");
