@@ -55,6 +55,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +90,7 @@ public class FhirTerser {
 			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 
 	private final FhirContext myContext;
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerser.class);
 
 	/**
 	 * This comparator sorts IBaseReferences, and places any that are missing an ID at the end. Those with an ID go to the front.
@@ -1497,9 +1500,12 @@ public class FhirTerser {
 	 */
 	public ContainedResources containResources(
 		IBaseResource theResource, ContainedResources theParentContainedResources, boolean theStoreResults) {
-		Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
-		if (cachedValue != null) {
-			return (ContainedResources) cachedValue;
+
+		if (theStoreResults) {
+			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
+			if (cachedValue != null) {
+				return (ContainedResources) cachedValue;
+			}
 		}
 
 		ContainedResources contained = new ContainedResources();
@@ -1509,6 +1515,7 @@ public class FhirTerser {
 			String nextId = next.getIdElement().getValue();
 			if (StringUtils.isNotBlank(nextId)) {
 				while (nextId.startsWith("#")) {
+					ourLog.warn("Found contained resource with ID starting with # character ({}). This form of ID is deprecated and will be dropped in a future release, preventing the current code from working correctly.", nextId);
 					nextId = nextId.substring(1);
 				}
 				next.getIdElement().setValue(nextId);
