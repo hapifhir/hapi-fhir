@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,25 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config;
+package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.time.ZoneOffset;
-
-@Configuration
-public class CrBaseConfig {
-
-	@Bean
-	StringTimePeriodHandler stringTimePeriodHandler() {
-		return new StringTimePeriodHandler(ZoneOffset.UTC);
-	}
-
-	@Bean
-	MeasurePeriodValidator measurePeriodValidator() {
-		return new MeasurePeriodValidator();
-	}
-}
+/**
+ * Indicates that a method parameter is for a class annotated with {@link EmbeddableOperationParams} which will in turn
+ * contain a constructor whose parameters will be annotated with {@link OperationParam} and similar annotations.
+ * a
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value = {ElementType.PARAMETER})
+public @interface EmbeddedOperationParams {}
