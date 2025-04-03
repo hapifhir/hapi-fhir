@@ -45,6 +45,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -925,17 +926,14 @@ public class BundleUtil {
 						errorMessage = terser.getSinglePrimitiveValueOrNull(issue, "diagnostics");
 					}
 
-					IIdType targetId = null;
+					IIdType targetId;
 					if (responseCode == StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE) {
-						/*
-						TODO: uncomment this when branch ja_20250217_tx_log_provenance merges
 						targetId = ((IBaseHasExtensions) issue)
 							.getExtension().stream()
 							.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
 							.findFirst()
 							.map(t -> (IIdType) t.getValue())
 							.orElse(null);
-						*/
 						sourceId = groupSourceId;
 					} else {
 						targetId = theContext
