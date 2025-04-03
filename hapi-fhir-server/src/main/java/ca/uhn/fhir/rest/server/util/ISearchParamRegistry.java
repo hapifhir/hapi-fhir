@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 // TODO: JA remove default methods
-public interface ISearchParamRegistry {
+public interface ISearchParamRegistry extends IResourceRepositoryCache {
 
 	/**
 	 * Return true if this registry is initialized and ready to handle
@@ -81,16 +81,6 @@ public interface ISearchParamRegistry {
 	 */
 	ResourceSearchParams getActiveSearchParams(
 			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext);
-
-	/**
-	 * Request that the cache be refreshed now, in the current thread
-	 */
-	default void forceRefresh() {}
-
-	/**
-	 * Request that the cache be refreshed at the next convenient time (in a different thread)
-	 */
-	default void requestRefresh() {}
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
