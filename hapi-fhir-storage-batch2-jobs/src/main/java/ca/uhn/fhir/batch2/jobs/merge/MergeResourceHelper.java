@@ -20,18 +20,21 @@
 package ca.uhn.fhir.batch2.jobs.merge;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,9 +47,11 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class MergeResourceHelper {
 
 	private final IFhirResourceDao<Patient> myPatientDao;
+	private final MergeProvenanceSvc myProvenanceSvc;
 
-	public MergeResourceHelper(IFhirResourceDao<Patient> theDao) {
-		myPatientDao = theDao;
+	public MergeResourceHelper(DaoRegistry theDaoRegistry, MergeProvenanceSvc theMergeProvenanceSvc) {
+		myPatientDao = theDaoRegistry.getResourceDao(Patient.class);
+		myProvenanceSvc = theMergeProvenanceSvc;
 	}
 
 	public static int setResourceLimitFromParameter(
@@ -60,32 +65,38 @@ public class MergeResourceHelper {
 		return retval;
 	}
 
-	public void updateMergedResourcesAfterReferencesReplaced(
+	public void updateMergedResourcesAndCreateProvenance(
 			IHapiTransactionService myHapiTransactionService,
-			IIdType theSourceResourceId,
-			IIdType theTargetResourceId,
+			IdDt theSourceResourceId,
+			IdDt theTargetResourceId,
+			List<Bundle> thePatchResultBundles,
 			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			Date theStartTime) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
-		updateMergedResourcesAfterReferencesReplaced(
+		updateMergedResourcesAndCreateProvenance(
 				myHapiTransactionService,
 				sourceResource,
 				targetResource,
+				thePatchResultBundles,
 				theResultResource,
 				theDeleteSource,
-				theRequestDetails);
+				theRequestDetails,
+				theStartTime);
 	}
 
-	public Patient updateMergedResourcesAfterReferencesReplaced(
+	public Patient updateMergedResourcesAndCreateProvenance(
 			IHapiTransactionService myHapiTransactionService,
 			Patient theSourceResource,
 			Patient theTargetResource,
+			List<Bundle> thePatchResultBundles,
 			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			Date theStartTime) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -93,13 +104,20 @@ public class MergeResourceHelper {
 					theTargetResource, theSourceResource, theResultResource, theDeleteSource);
 
 			targetPatientAfterUpdate.set(updateResource(patientToUpdate, theRequestDetails));
-
+			Patient sourcePatientAfterUpdate = null;
 			if (theDeleteSource) {
 				deleteResource(theSourceResource, theRequestDetails);
 			} else {
 				prepareSourcePatientForUpdate(theSourceResource, theTargetResource);
-				updateResource(theSourceResource, theRequestDetails);
+				sourcePatientAfterUpdate = updateResource(theSourceResource, theRequestDetails);
 			}
+
+			myProvenanceSvc.createProvenance(
+					targetPatientAfterUpdate.get().getIdElement(),
+					theDeleteSource ? null : sourcePatientAfterUpdate.getIdElement(),
+					thePatchResultBundles,
+					theStartTime,
+					theRequestDetails);
 		});
 
 		return targetPatientAfterUpdate.get();
