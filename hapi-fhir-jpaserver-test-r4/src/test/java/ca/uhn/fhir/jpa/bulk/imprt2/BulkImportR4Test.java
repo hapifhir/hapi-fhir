@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -33,19 +35,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-
+/**
+ * Test the standard bulk import job
+ */
 public class BulkImportR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportR4Test.class);
@@ -87,7 +90,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -114,6 +117,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		});
 
 	}
+
 	@Test
 	public void testRunBulkImport() {
 		// Setup
@@ -123,7 +127,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 
-        parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -135,7 +139,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -161,6 +165,14 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			assertNotNull(instance.getEndTime());
 			assertEquals(200, instance.getCombinedRecordsProcessed());
 			assertThat(instance.getCombinedRecordsProcessedPerSecond()).isGreaterThan(5.0);
+
+			String reportJson = instance.getReport();
+			BulkImportReportJson reportJsonParsed = JsonUtil.deserialize(reportJson, BulkImportReportJson.class);
+			String report = reportJsonParsed.getReportMsg();
+			ourLog.info("Final Report:\n{}", report);
+
+			assertEquals(100, StringUtils.countMatches(report, "Source: "));
+			assertThat(report).contains("* SUCCESSFUL_UPDATE_AS_CREATE: 2");
 		});
 	}
 
@@ -190,7 +202,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Execute
 
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
 			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
@@ -203,13 +215,13 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				StatusEnum status = instance.getStatus();
 				ourLog.info("Job status for instance[{}]: {}", instanceId, status);
 
-				runInTransaction(()->{
+				runInTransaction(() -> {
 					List<Batch2WorkChunkEntity> allChunks = myWorkChunkRepository.fetchChunks(Pageable.ofSize(1000), instanceId);
-					ourLog.info("Chunks:\n * " + allChunks.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+					ourLog.info("Chunks:\n * " + allChunks.stream().map(Batch2WorkChunkEntity::toString).collect(Collectors.joining("\n * ")));
 				});
 
-				return status == StatusEnum.ERRORED;
-			});
+				return status;
+			}, s -> s == StatusEnum.COMPLETED);
 
 			String storageDescription = runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
@@ -227,20 +239,20 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return storage;
 			});
 
-			await().atMost(120, TimeUnit.SECONDS).until(() -> {
-				myJobCleanerService.runMaintenancePass();
-				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getErrorCount() > 0;
-			}); // This should hit 3, but concurrency can lead it to only hitting 1-2
-
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-				assertThat(instance.getErrorCount()).as(storageDescription).isGreaterThan(0);
+
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
-				assertNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage()).contains("This is an exception");
+				assertNotNull(instance.getEndTime());
+
+				String reportJson = instance.getReport();
+				BulkImportReportJson reportJsonParsed = JsonUtil.deserialize(reportJson, BulkImportReportJson.class);
+				String report = reportJsonParsed.getReportMsg();
+				ourLog.info("Final Report:\n{}", report);
+
+				assertThat(report).contains("* HAPI-2223: This is an exception");
 			});
 
 		} finally {
@@ -271,7 +283,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -315,7 +327,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		try {
 
 			// Execute
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
 			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
@@ -355,7 +367,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -378,7 +390,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -405,7 +417,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -436,7 +448,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			builder.append("\n");
 			builder.append("\n");
 
-			String index = myBulkImportFileServlet.registerFileByContents(builder.toString());
+			String index = myBulkImportFileServlet.registerFileByContents(builder.toString(), "FILE" + i);
 			retVal.add(index);
 		}
 		return retVal;

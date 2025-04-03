@@ -72,6 +72,7 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_URL = "url";
 	public static final String PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC = "credentialHttpBasic";
 	public static final String PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT = "maxBatchResourceCount";
+	public static final String PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME = "groupByCompartmentName";
 
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
@@ -153,6 +154,12 @@ public class BulkDataImportProvider {
 					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT);
 			if (isNotBlank(maximumBatchResourceCount)) {
 				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
+			}
+
+			String groupByCompartmentName = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME);
+			if (isNotBlank(groupByCompartmentName)) {
+				jobParameters.setGroupByCompartmentName(groupByCompartmentName);
 			}
 		}
 
@@ -241,7 +248,8 @@ public class BulkDataImportProvider {
 						Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
-		IBaseOperationOutcome oo;
+
+		ourLog.debug("Client is polling for $import status: {}", instance.getStatus());
 		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -252,6 +260,7 @@ public class BulkDataImportProvider {
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}
+			case FINALIZE:
 			case ERRORED:
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -268,7 +277,7 @@ public class BulkDataImportProvider {
 			}
 			case COMPLETED: {
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
-				String msg = "Job is complete.";
+				String msg = instance.getReport();
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
 			}
@@ -284,6 +293,9 @@ public class BulkDataImportProvider {
 				String msg = "Job was cancelled.";
 				streamOperationOutcomeResponse(response, msg, "information");
 				break;
+			}
+			default: {
+				ourLog.warn("Don't know how to handle status {}", instance.getStatus());
 			}
 		}
 	}

@@ -99,7 +99,16 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
+	/**
+	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
+	 * method has always been misnamed for historical reasons.
+	 */
+	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getFirstIssueDiagnostics(theCtx, theOutcome);
+	}
+
+	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
 	}
 

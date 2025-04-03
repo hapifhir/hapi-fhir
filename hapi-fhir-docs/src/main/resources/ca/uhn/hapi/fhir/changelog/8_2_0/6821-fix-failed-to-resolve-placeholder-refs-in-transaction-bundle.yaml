@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6821
+jira: SMILE-10029
+title: "Previously, when submitting a transaction bundle with a placeholder ID referencing another resource within the same bundle, the 
+reference would sometimes fail to resolve, resulting in a 400 Bad Request error. This has now been fixed."

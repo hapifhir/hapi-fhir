@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,10 +112,12 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < 20; i++) {
 			Patient patient = new Patient();
+			// Provide a stable ID sort
+			patient.setId("A" + leftPad(Integer.toString(i), 4, '0'));
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
 			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i+1));
-			String id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+			String id = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;

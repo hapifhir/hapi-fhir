@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
@@ -53,12 +52,12 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		Patient patient = new Patient();
 		patient.setId("A");
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 		patient = new Patient();
 		patient.setId("B");
 		patient.setActive(false);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 
 		List<IBaseResource> resources = new ArrayList<>();
@@ -88,9 +87,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		patient = myPatientDao.read(new IdType("Patient/A"));
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());
-		patient = myPatientDao.read(new IdType("Patient/B"));
+		patient = myPatientDao.read(new IdType("Patient/B"), mySrd);
 		assertFalse(patient.getActive());
 
 	}
@@ -102,8 +101,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		if (partitionEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setIncludePartitionInSearchHashes(true);
-			addCreatePartition(1);
-			addCreatePartition(1);
+			addNextTargetPartitionNTimesForCreate(1, 2);
 		}
 		Patient patient = new Patient();
 		patient.setId("A");
@@ -132,8 +130,8 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		myMemoryCacheService.invalidateAllCaches();
 		myCaptureQueriesListener.clear();
 		if (partitionEnabled) {
-			addReadPartition(1);
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
+			addNextTargetPartitionsForRead(1);
 			mySvc.storeResources(resources, myRequestPartitionId);
 		} else {
 			mySvc.storeResources(resources, null);
@@ -191,8 +189,8 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		assertThat(sql).satisfiesAnyOf(
-				s -> assertThat(s).contains("where rt1_0.PARTITION_ID is null and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')"),
-				s -> assertThat(s).contains("where rt1_0.PARTITION_ID is null and (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B')")
+				s -> assertThat(s).contains("where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A')"),
+				s -> assertThat(s).contains("where (rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B')")
 			);
 		assertEquals(50, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
@@ -201,9 +199,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 
-		patient = myPatientDao.read(new IdType("Patient/A"));
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());
-		patient = myPatientDao.read(new IdType("Patient/B"));
+		patient = myPatientDao.read(new IdType("Patient/B"), mySrd);
 		assertFalse(patient.getActive());
 
 	}
@@ -225,21 +223,12 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		resources.add(patient);
 
 		// Execute
+		BundleUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
 
-		myCaptureQueriesListener.clear();
-		try {
-
-			mySvc.storeResources(resources, null);
-			fail();
-
-		} catch (JobExecutionFailedException e) {
-
-			// Validate
-			assertThat(e.getMessage()).contains("no resource with this ID exists and clients may only assign IDs");
-
-		}
-
-
+		// Verify
+		assertEquals(2, outcome.getStorageOutcomes().size());
+		assertThat(outcome.getStorageOutcomes().get(0).getErrorMessage()).contains("no resource with this ID exists and clients may only assign IDs");
+		assertThat(outcome.getStorageOutcomes().get(1).getErrorMessage()).contains("no resource with this ID exists and clients may only assign IDs");
 	}
 
 }

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -46,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,19 +73,23 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  */
 public class BundleUtil {
 
-	/** Non instantiable */
-	private BundleUtil() {
-		// nothing
-	}
-
+	public static final String DIFFERENT_LINK_ERROR_MSG =
+			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
 	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
 
-	public static final String DIFFERENT_LINK_ERROR_MSG =
-			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	/**
+	 * Non instantiable
+	 */
+	private BundleUtil() {
+		// nothing
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -297,10 +303,6 @@ public class BundleUtil {
 		return entryListAccumulator.getList();
 	}
 
-	static int WHITE = 1;
-	static int GRAY = 2;
-	static int BLACK = 3;
-
 	/**
 	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
 	 * 1. Deletes
@@ -315,7 +317,7 @@ public class BundleUtil {
 	 * this function will throw an IllegalStateException.
 	 *
 	 * @param theContext The FhirContext.
-	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
+	 * @param theBundle  The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle)
 			throws IllegalStateException {
@@ -367,8 +369,8 @@ public class BundleUtil {
 	 * </ul>
 	 * </p>
 	 *
-	 * @param theContext The FhirContext to use with the bundle
-	 * @param theBundle The Bundle to modify. All resources in the Bundle should have an ID.
+	 * @param theContext         The FhirContext to use with the bundle
+	 * @param theBundle          The Bundle to modify. All resources in the Bundle should have an ID.
 	 * @param thePrefixIdsOrNull If not <code>null</code>, all resource IDs and all references in the Bundle will be
 	 *                           modified to such that their IDs contain the given prefix. For example, for a value
 	 *                           of "A", the resource "Patient/123" will be changed to be "Patient/A123". If set to
@@ -630,8 +632,9 @@ public class BundleUtil {
 
 	/**
 	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
-	 * @param theContext The FHIR Context
-	 * @param theBundle The bundle to have its entries processed.
+	 *
+	 * @param theContext   The FHIR Context
+	 * @param theBundle    The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
 	 */
 	public static void processEntries(
@@ -825,9 +828,10 @@ public class BundleUtil {
 
 	/**
 	 * create a new bundle entry and set a value for a single field
-	 * @param theContext     Context holding resource definition
-	 * @param theFieldName   Child field name of the bundle entry to set
-	 * @param theValues      The values to set on the bundle entry child field name
+	 *
+	 * @param theContext   Context holding resource definition
+	 * @param theFieldName Child field name of the bundle entry to set
+	 * @param theValues    The values to set on the bundle entry child field name
 	 * @return the new bundle entry
 	 */
 	public static IBase createNewBundleEntryWithSingleField(
@@ -857,6 +861,7 @@ public class BundleUtil {
 
 	/**
 	 * Get resource from bundle by resource type and reference
+	 *
 	 * @param theContext   FhirContext
 	 * @param theBundle    IBaseBundle
 	 * @param theReference IBaseReference
@@ -874,6 +879,143 @@ public class BundleUtil {
 				.orElse(null);
 	}
 
+	/**
+	 * This method accepts a {@literal Bundle} which was returned by a call to HAPI FHIR's
+	 * transaction/batch processor. HAPI FHIR has specific codes and extensions it will
+	 * always put into the OperationOutcomes returned by the transaction processor, so
+	 * this method parses these and returns a more machine-processable interpretation.
+	 * <p>
+	 * This method should only be called for Bundles returned by HAPI FHIR's transaction
+	 * processor, results will have no meaning for any other input.
+	 * </p>
+	 *
+	 * @since 8.2.0
+	 */
+	public static TransactionResponse toTransactionResponse(
+			FhirContext theContext, IBaseBundle theTransactionResponseBundle) {
+		FhirTerser terser = theContext.newTerser();
+		List<StorageOutcome> storageOutcomes = new ArrayList<>();
+
+		List<IBase> entries = terser.getValues(theTransactionResponseBundle, "entry");
+		for (IBase entry : entries) {
+
+			IBase response = terser.getSingleValueOrNull(entry, "response", IBase.class);
+			if (response != null) {
+
+				String statusString = terser.getSinglePrimitiveValueOrNull(response, "status");
+				int statusSpaceIdx = statusString.indexOf(' ');
+				int statusCode = Integer.parseInt(statusString.substring(0, statusSpaceIdx));
+
+				List<IBase> issues = terser.getValues(response, "outcome.issue");
+				IIdType groupSourceId = null;
+				for (int issueIndex = 0; issueIndex < issues.size(); issueIndex++) {
+					IBase issue = issues.get(issueIndex);
+					IIdType sourceId = null;
+
+					String outcomeSystem = terser.getSinglePrimitiveValueOrNull(issue, "details.coding.system");
+					StorageResponseCodeEnum responseCode = null;
+					if (StorageResponseCodeEnum.SYSTEM.equals(outcomeSystem)) {
+						String outcomeCode = terser.getSinglePrimitiveValueOrNull(issue, "details.coding.code");
+						responseCode = StorageResponseCodeEnum.valueOf(outcomeCode);
+					}
+
+					String errorMessage = null;
+					String issueCode = terser.getSinglePrimitiveValueOrNull(issue, "code");
+					if ("exception".equals(issueCode)) {
+						errorMessage = terser.getSinglePrimitiveValueOrNull(issue, "diagnostics");
+					}
+
+					IIdType targetId = null;
+					if (responseCode == StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE) {
+						/*
+						TODO: uncomment this when branch ja_20250217_tx_log_provenance merges
+						targetId = ((IBaseHasExtensions) issue)
+							.getExtension().stream()
+							.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
+							.findFirst()
+							.map(t -> (IIdType) t.getValue())
+							.orElse(null);
+						*/
+						sourceId = groupSourceId;
+					} else {
+						targetId = theContext
+								.getVersion()
+								.newIdType(terser.getSinglePrimitiveValueOrNull(entry, "response.location"));
+						if (issueIndex == 0) {
+							groupSourceId = targetId;
+						}
+					}
+
+					StorageOutcome outcome =
+							new StorageOutcome(statusCode, responseCode, targetId, sourceId, errorMessage);
+					storageOutcomes.add(outcome);
+				}
+			}
+		}
+
+		return new TransactionResponse(storageOutcomes);
+	}
+
+	/**
+	 * @see #toTransactionResponse(FhirContext, IBaseBundle)
+	 */
+	public static class TransactionResponse {
+
+		private final List<StorageOutcome> myStorageOutcomes;
+
+		public TransactionResponse(List<StorageOutcome> theStorageOutcomes) {
+			myStorageOutcomes = theStorageOutcomes;
+		}
+
+		public List<StorageOutcome> getStorageOutcomes() {
+			return myStorageOutcomes;
+		}
+	}
+
+	/**
+	 * @see #toTransactionResponse(FhirContext, IBaseBundle)
+	 */
+	public static class StorageOutcome {
+		private final StorageResponseCodeEnum myStorageResponseCode;
+		private final IIdType myTargetId;
+		private final IIdType mySourceId;
+		private final int myStatusCode;
+		private final String myErrorMessage;
+
+		public StorageOutcome(
+				int theStatusCode,
+				StorageResponseCodeEnum theStorageResponseCode,
+				IIdType theTargetId,
+				IIdType theSourceId,
+				String theErrorMessage) {
+			myStatusCode = theStatusCode;
+			myStorageResponseCode = theStorageResponseCode;
+			myTargetId = theTargetId;
+			mySourceId = theSourceId;
+			myErrorMessage = theErrorMessage;
+		}
+
+		public String getErrorMessage() {
+			return myErrorMessage;
+		}
+
+		public int getStatusCode() {
+			return myStatusCode;
+		}
+
+		public StorageResponseCodeEnum getStorageResponseCode() {
+			return myStorageResponseCode;
+		}
+
+		public IIdType getTargetId() {
+			return myTargetId;
+		}
+
+		public IIdType getSourceId() {
+			return mySourceId;
+		}
+	}
+
 	private static class SortLegality {
 		private boolean myIsLegal;
 
@@ -881,12 +1023,12 @@ public class BundleUtil {
 			this.myIsLegal = true;
 		}
 
-		private void setLegal(boolean theLegal) {
-			myIsLegal = theLegal;
-		}
-
 		public boolean isLegal() {
 			return myIsLegal;
+		}
+
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
 		}
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,8 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +43,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,18 +55,20 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class BulkImportFileServlet extends HttpServlet {
 
 	public static final String INDEX_PARAM = "index";
-	private static final long serialVersionUID = 8302513561762436076L;
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
-	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
-
 	public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
-
+	private static final long serialVersionUID = 8302513561762436076L;
+	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
+	private Logger myLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
 	private String myBasicAuth;
 
 	public BulkImportFileServlet() {}
 
 	public BulkImportFileServlet(String theBasicAuthUsername, String theBasicAuthPassword) {
 		setBasicAuth(theBasicAuthUsername, theBasicAuthPassword);
+	}
+
+	public void setLog(Logger theLog) {
+		myLog = theLog;
 	}
 
 	public void setBasicAuth(String username, String password) {
@@ -100,7 +106,7 @@ public class BulkImportFileServlet extends HttpServlet {
 
 			throw new ResourceNotFoundException(Msg.code(2049) + "Invalid request path: " + requestPath);
 		} catch (Exception e) {
-			ourLog.warn("Failure serving file", e);
+			myLog.warn("Failure serving file", e);
 			int responseCode = 500;
 			if (e instanceof BaseServerResponseException) {
 				responseCode = ((BaseServerResponseException) e).getStatusCode();
@@ -123,7 +129,7 @@ public class BulkImportFileServlet extends HttpServlet {
 					Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
 		}
 
-		ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
+		myLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
 
 		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, getHeaderContentType());
 
@@ -132,14 +138,14 @@ public class BulkImportFileServlet extends HttpServlet {
 			theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 		}
 
-		if (ourLog.isDebugEnabled()) {
-			try (Reader reader = new InputStreamReader(supplier.get())) {
+		if (myLog.isDebugEnabled()) {
+			try (Reader reader = new InputStreamReader(supplier.openStream())) {
 				String string = IOUtils.toString(reader);
-				ourLog.debug("file content: {}", string);
+				myLog.debug("file content: {}", string);
 			}
 		}
 
-		try (InputStream reader = supplier.get()) {
+		try (InputStream reader = supplier.openStream()) {
 			IOUtils.copy(reader, theResponse.getOutputStream());
 		}
 	}
@@ -156,7 +162,12 @@ public class BulkImportFileServlet extends HttpServlet {
 	 * Registers a file, and returns the index descriptor
 	 */
 	public String registerFile(IFileSupplier theFile) {
-		String index = UUID.randomUUID().toString();
+		String indexPrefix = "";
+		if (theFile.getName() != null) {
+			indexPrefix = theFile.getName().replaceAll("^[^a-zA-Z0-9._-]", "") + "-";
+		}
+
+		String index = indexPrefix + UUID.randomUUID();
 		myFileIds.put(index, theFile);
 		return index;
 	}
@@ -166,6 +177,14 @@ public class BulkImportFileServlet extends HttpServlet {
 	 * using raw file contents.
 	 */
 	public String registerFileByContents(String theFileContents) {
+		return registerFileByContents(theFileContents, null);
+	}
+
+	/**
+	 * Mostly intended for unit tests, registers a file
+	 * using raw file contents.
+	 */
+	public String registerFileByContents(String theFileContents, String theSourceName) {
 		return registerFile(new IFileSupplier() {
 			@Override
 			public boolean isGzip() {
@@ -173,8 +192,36 @@ public class BulkImportFileServlet extends HttpServlet {
 			}
 
 			@Override
-			public InputStream get() {
-				return new ReaderInputStream(new StringReader(theFileContents), StandardCharsets.UTF_8);
+			public InputStream openStream() throws IOException {
+				return ReaderInputStream.builder()
+						.setReader(new StringReader(theFileContents))
+						.setCharset(StandardCharsets.UTF_8)
+						.get();
+			}
+
+			@Nullable
+			@Override
+			public String getName() {
+				return theSourceName;
+			}
+		});
+	}
+
+	public String registerFile(File theFile) {
+		return registerFile(new IFileSupplier() {
+			@Override
+			public boolean isGzip() {
+				return theFile.getName().toLowerCase(Locale.ROOT).endsWith(".gz");
+			}
+
+			@Override
+			public InputStream openStream() throws IOException {
+				return new FileInputStream(theFile);
+			}
+
+			@Override
+			public String getName() {
+				return theFile.getName();
 			}
 		});
 	}
@@ -183,6 +230,9 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		boolean isGzip();
 
-		InputStream get() throws IOException;
+		InputStream openStream() throws IOException;
+
+		@Nullable
+		String getName();
 	}
 }

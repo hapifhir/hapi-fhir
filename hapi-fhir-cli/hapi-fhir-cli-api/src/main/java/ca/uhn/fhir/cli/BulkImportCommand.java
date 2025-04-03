@@ -21,15 +21,17 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
@@ -41,6 +43,7 @@ import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -48,6 +51,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -63,12 +67,15 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkImportCommand extends BaseCommand {
 
@@ -78,7 +85,8 @@ public class BulkImportCommand extends BaseCommand {
 	public static final String TARGET_BASE = "target-base";
 	public static final String PORT = "port";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
-	private static volatile boolean ourEndNow;
+	public static final String GROUP_BY_COMPARTMENT_NAME = "group-by-compartment-name";
+	public static final String BATCH_SIZE = "batch-size";
 	private BulkImportFileServlet myServlet;
 	private Server myServer;
 	private Integer myPort;
@@ -112,12 +120,24 @@ public class BulkImportCommand extends BaseCommand {
 				SOURCE_BASE,
 				"base url",
 				"The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
+		addOptionalOption(
+				options,
+				null,
+				BATCH_SIZE,
+				"batch size",
+				"If set, specifies the number of resources to process in a single work chunk. Smaller numbers can avoid timeouts, larger numbers can give better throughput. Always measure the effect of different settings.");
 		addRequiredOption(
 				options,
 				null,
 				SOURCE_DIRECTORY,
 				"directory",
 				"The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
+		addOptionalOption(
+				options,
+				null,
+				GROUP_BY_COMPARTMENT_NAME,
+				"compartment name",
+				"If specified, requests that the process attempt to group resources in the same compartment. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;
@@ -137,7 +157,7 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Found {} files", files.size());
 
 		ourLog.info("Starting server on port: {}", myPort);
-		List<String> indexes = startServer(myPort, files);
+		List<String> indexes = startServer(files);
 		String sourceBaseUrl = "http://localhost:" + myPort;
 		if (theCommandLine.hasOption(SOURCE_BASE)) {
 			sourceBaseUrl = theCommandLine.getOptionValue(SOURCE_BASE);
@@ -148,9 +168,13 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
 		IGenericClient client = newClient(
 				theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
-		client.registerInterceptor(new LoggingInterceptor(false));
 
-		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);
+		Integer batchSize = null;
+		if (theCommandLine.hasOption(BATCH_SIZE)) {
+			batchSize = getAndParsePositiveIntegerParam(theCommandLine, BATCH_SIZE);
+		}
+
+		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes, batchSize);
 		IBaseResource outcome = client.operation()
 				.onServer()
 				.named(JpaConstants.OPERATION_IMPORT)
@@ -166,13 +190,20 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		checkJobComplete(outcome.getIdElement().toString(), client);
+
+		try {
+			myServer.stop();
+		} catch (Exception e) {
+			ourLog.warn("Failed to stop server: {}", e.getMessage());
+		}
 	}
 
 	private void checkJobComplete(String url, IGenericClient client) {
 		String jobId = url.substring(url.indexOf("=") + 1);
 
+		MethodOutcome response = null;
+		boolean succeeded = false;
 		while (true) {
-			MethodOutcome response;
 			// handle NullPointerException
 			if (jobId == null) {
 				ourLog.error("The jobId cannot be null.");
@@ -193,19 +224,40 @@ public class BulkImportCommand extends BaseCommand {
 			}
 
 			if (response.getResponseStatusCode() == 200) {
+				succeeded = true;
 				break;
 			} else if (response.getResponseStatusCode() == 202) {
 				// still in progress
-				continue;
+				ThreadUtils.sleepQuietly(Duration.ofSeconds(1));
 			} else {
 				throw new InternalErrorException(
 						Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
 			}
 		}
+
+		// Poll once more to get the response body
+		if (succeeded) {
+			IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
+					.onServer()
+					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+					.returnResourceType(
+							myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+					.execute();
+
+			String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
+			if (isNotBlank(diagnostics) && diagnostics.startsWith("{")) {
+				BulkImportReportJson report = JsonUtil.deserialize(diagnostics, BulkImportReportJson.class);
+				ourLog.info("Output:\n{}", report.getReportMsg());
+			} else {
+				ourLog.info("No diagnostics response received from bulk import URL: {}", url);
+			}
+		}
 	}
 
 	@Nonnull
-	private IBaseParameters createRequest(String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes) {
+	private IBaseParameters createRequest(
+			String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes, Integer theBatchSize) {
 
 		FhirContext ctx = getFhirContext();
 		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
@@ -223,6 +275,14 @@ public class BulkImportCommand extends BaseCommand {
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE,
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
 
+		if (theBatchSize != null) {
+			ParametersUtil.addPartInteger(
+					ctx,
+					storageDetail,
+					BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT,
+					theBatchSize);
+		}
+
 		for (int i = 0; i < theIndexes.size(); i++) {
 			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT);
 			ParametersUtil.addPartCode(ctx, input, BulkDataImportProvider.PARAM_INPUT_TYPE, theResourceTypes.get(i));
@@ -233,7 +293,7 @@ public class BulkImportCommand extends BaseCommand {
 		return retVal;
 	}
 
-	private List<String> startServer(int thePort, List<File> files) {
+	private List<String> startServer(List<File> files) {
 		List<String> indexes = new ArrayList<>();
 
 		myServer = new Server();
@@ -243,20 +303,13 @@ public class BulkImportCommand extends BaseCommand {
 		myServer.setConnectors(new Connector[] {connector});
 
 		myServlet = new BulkImportFileServlet();
+
+		// The logback used by the CLI tool only allows loggers in this package
+		// to emit log lines, and the servlet's logs are useful.
+		myServlet.setLog(ourLog);
+
 		for (File t : files) {
-
-			BulkImportFileServlet.IFileSupplier fileSupplier = new BulkImportFileServlet.IFileSupplier() {
-				@Override
-				public boolean isGzip() {
-					return t.getName().toLowerCase(Locale.ROOT).endsWith(".gz");
-				}
-
-				@Override
-				public InputStream get() throws IOException {
-					return new FileInputStream(t);
-				}
-			};
-			indexes.add(myServlet.registerFile(fileSupplier));
+			indexes.add(myServlet.registerFile(t));
 		}
 
 		ServletHolder servletHolder = new ServletHolder(myServlet);
