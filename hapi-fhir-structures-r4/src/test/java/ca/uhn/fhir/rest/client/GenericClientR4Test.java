@@ -2667,7 +2667,6 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
-
 		response = client
 			 .history()
 			 .onInstance(new IdType("Patient", "123"))
