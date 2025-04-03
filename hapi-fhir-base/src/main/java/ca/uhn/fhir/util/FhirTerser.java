@@ -1496,7 +1496,7 @@ public class FhirTerser {
 	 * @since 5.4.0
 	 */
 	public ContainedResources containResources(
-		IBaseResource theResource, ContainedResources theParentContainedResources, boolean theStoreResults) {
+			IBaseResource theResource, ContainedResources theParentContainedResources, boolean theStoreResults) {
 		Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
 		if (cachedValue != null) {
 			return (ContainedResources) cachedValue;
@@ -1520,13 +1520,13 @@ public class FhirTerser {
 			if (theParentContainedResources != null) {
 				if (theParentContainedResources.hasResourceToIdValues()) {
 					contained
-						.getPreviouslyContainedResourceToIdMap()
-						.putAll(theParentContainedResources.getResourceToIdMap());
+							.getPreviouslyContainedResourceToIdMap()
+							.putAll(theParentContainedResources.getResourceToIdMap());
 				}
 				if (theParentContainedResources.hasPreviouslyContainedResourceToIdValues()) {
 					contained
-						.getPreviouslyContainedResourceToIdMap()
-						.putAll(theParentContainedResources.getPreviouslyContainedResourceToIdMap());
+							.getPreviouslyContainedResourceToIdMap()
+							.putAll(theParentContainedResources.getPreviouslyContainedResourceToIdMap());
 				}
 			}
 
