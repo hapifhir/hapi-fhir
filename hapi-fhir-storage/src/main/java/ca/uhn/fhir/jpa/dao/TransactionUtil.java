@@ -37,7 +37,7 @@ public class TransactionUtil {
 	 * @since 8.2.0
 	 */
 	public static TransactionResponse parseTransactionResponse(
-		FhirContext theContext, IBaseBundle theTransactionResponseBundle) {
+			FhirContext theContext, IBaseBundle theTransactionResponseBundle) {
 		FhirTerser terser = theContext.newTerser();
 		List<StorageOutcome> storageOutcomes = new ArrayList<>();
 
@@ -97,15 +97,15 @@ public class TransactionUtil {
 						sourceId = groupSourceId;
 					} else {
 						targetId = theContext
-							.getVersion()
-							.newIdType(terser.getSinglePrimitiveValueOrNull(entry, "response.location"));
+								.getVersion()
+								.newIdType(terser.getSinglePrimitiveValueOrNull(entry, "response.location"));
 						if (issueIndex == 0) {
 							groupSourceId = targetId;
 						}
 					}
 
 					StorageOutcome outcome =
-						new StorageOutcome(statusCode, responseCode, targetId, sourceId, errorMessage);
+							new StorageOutcome(statusCode, responseCode, targetId, sourceId, errorMessage);
 					storageOutcomes.add(outcome);
 				}
 			}
@@ -141,11 +141,11 @@ public class TransactionUtil {
 		private final String myErrorMessage;
 
 		public StorageOutcome(
-			int theStatusCode,
-			StorageResponseCodeEnum theStorageResponseCode,
-			IIdType theTargetId,
-			IIdType theSourceId,
-			String theErrorMessage) {
+				int theStatusCode,
+				StorageResponseCodeEnum theStorageResponseCode,
+				IIdType theTargetId,
+				IIdType theSourceId,
+				String theErrorMessage) {
 			myStatusCode = theStatusCode;
 			myStorageResponseCode = theStorageResponseCode;
 			myTargetId = theTargetId;
@@ -173,5 +173,4 @@ public class TransactionUtil {
 			return mySourceId;
 		}
 	}
-
 }

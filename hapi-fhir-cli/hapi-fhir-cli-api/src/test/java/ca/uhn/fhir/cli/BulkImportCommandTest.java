@@ -67,6 +67,7 @@ import static org.mockito.Mockito.when;
 public class BulkImportCommandTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandTest.class);
+	public static final String REPORT_TEXT = "Bulk Import Report\n-------------------\nThis is the text!";
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -112,14 +113,11 @@ public class BulkImportCommandTest {
 	@Test
 	public void testBulkImport() throws IOException {
 
-		BulkImportReportJson report = new BulkImportReportJson();
-		report.setReportMsg("Bulk Import Report\n-------------------\nThis is the text!");
-
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.COMPLETED)
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
 			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
-			.setReport(JsonUtil.serialize(report));
+			.setReport(createSerializedReport());
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
@@ -142,13 +140,20 @@ public class BulkImportCommandTest {
 		});
 
 		assertThat(myRestfulServerExtension.getRequestContentTypes()).containsExactly(
-			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
+			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
 		);
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(), any());
 
-		ILoggingEvent message = myLogbackTestExtension.findLogEventWithFormattedMessage(report.getReportMsg()).orElseThrow();
+		ILoggingEvent message = myLogbackTestExtension.findLogEventWithFormattedMessage(REPORT_TEXT).orElseThrow();
 		assertThat(message.getFormattedMessage()).startsWith("Output:");
+	}
+
+	private static String createSerializedReport() {
+		BulkImportReportJson report = new BulkImportReportJson();
+		report.setReportMsg(REPORT_TEXT);
+		String serializedReport = JsonUtil.serialize(report);
+		return serializedReport;
 	}
 
 	@Test
@@ -180,7 +185,7 @@ public class BulkImportCommandTest {
 		});
 
 		assertThat(myRestfulServerExtension.getRequestContentTypes()).containsExactly(
-			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
+			null, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_JSON_NEW
 		);
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), any());
@@ -193,7 +198,8 @@ public class BulkImportCommandTest {
 			.setStatus(StatusEnum.FAILED)
 			.setErrorMessage("This is the error message")
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
+			.setReport(createSerializedReport());
 
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
@@ -216,6 +222,9 @@ public class BulkImportCommandTest {
 
 		ILoggingEvent message = myLogbackTestExtension.findLogEventWithFormattedMessage("Job is in FAILED state").orElseThrow();
 		assertThat(message.getFormattedMessage()).contains("Last error: This is the error message");
+
+		message = myLogbackTestExtension.findLogEventWithFormattedMessage("Output:").orElseThrow();
+		assertThat(message.getFormattedMessage()).contains(REPORT_TEXT);
 	}
 
 	private String fetchFile(String url) throws IOException {

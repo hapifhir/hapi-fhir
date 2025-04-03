@@ -19,16 +19,11 @@
  */
 package ca.uhn.fhir.batch2.jobs.imprt;
 
-/*
-public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJobParameters>
-		implements IReductionStepWorker<PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> {
-
- */
-
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
@@ -46,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class GenerateReportReductionStep
 		implements IReductionStepWorker<BulkImportJobParameters, ConsumeFilesOutcomeJson, BulkImportReportJson> {
 
-	private Map<String, ConsumeFilesOutcomeJson> myOutcomes = new HashMap<>();
+	private final Map<String, ConsumeFilesOutcomeJson> myOutcomes = new HashMap<>();
 	private int myOutcomeCount = 0;
 
 	@Nonnull
@@ -102,6 +97,7 @@ public class GenerateReportReductionStep
 				.append('\n');
 		report.append("------------------------------------------\n");
 
+		boolean hasErrors = false;
 		for (String source : new TreeSet<>(myOutcomes.keySet())) {
 			report.append("Source: ").append(source).append("\n");
 			ConsumeFilesOutcomeJson outcomes = myOutcomes.get(source);
@@ -122,6 +118,7 @@ public class GenerateReportReductionStep
 				for (String error : outcomes.getErrors()) {
 					report.append("    * ").append(error).append('\n');
 				}
+				hasErrors = true;
 			}
 		}
 
@@ -129,8 +126,12 @@ public class GenerateReportReductionStep
 
 		BulkImportReportJson reportJson = new BulkImportReportJson();
 		reportJson.setReportMsg(reportString);
-		theDataSink.accept(reportJson);
 
+		if (hasErrors) {
+			throw new ReductionStepFailureException("Job completed with at least one failure", reportJson);
+		}
+
+		theDataSink.accept(reportJson);
 		return RunOutcome.SUCCESS;
 	}
 }

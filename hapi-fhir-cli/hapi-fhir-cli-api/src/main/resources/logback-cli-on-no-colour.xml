@@ -7,58 +7,36 @@
 		</encoder>
 	</appender>
 
-	<logger name="ca.uhn.fhir.cli" additivity="false" level="info">
+	<root level="warn">
 		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="ca.cdr.cli" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
+	</root>
+
+	<logger name="ca.uhn.fhir.cli" additivity="false" level="info"/>
+	<logger name="ca.cdr.cli" additivity="false" level="info"/>
 
 	<!-- These two are used by the websocket client -->
-	<logger name="websocket.RECV" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="websocket.SEND" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
+	<logger name="websocket.RECV" additivity="false" level="info"/>
+	<logger name="websocket.SEND" additivity="false" level="info"/>
 
 	<!-- These two are used by SynchronizeFhirServersCommand -->
-	<logger name="sync.SOURCE" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="sync.TARGET" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
+	<logger name="sync.SOURCE" additivity="false" level="info"/>
+	<logger name="sync.TARGET" additivity="false" level="info"/>
 
 	<!--
 	It's useful to have this log when uploading big terminologies
 	-->
-	<logger name="ca.uhn.fhir.jpa.term.TermReadSvcImpl" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<logger name="ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermReadSvcImpl" additivity="false" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl" additivity="false" level="info"/>
 
 	<!--
 	Always log the migrator
 	-->
-	<logger name="ca.uhn.fhir.jpa.migrate" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
+	<logger name="ca.uhn.fhir.jpa.migrate" additivity="false" level="info"/>
 
 	<!--
 	Log client interactions
 	-->
-	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-
-	<root level="warn">
-		<appender-ref ref="STDOUT" />
-	</root>
+	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor" additivity="false" level="info"/>
 
 </configuration>

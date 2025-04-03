@@ -202,7 +202,7 @@ public class BulkImportCommand extends BaseCommand {
 		String jobId = url.substring(url.indexOf("=") + 1);
 
 		MethodOutcome response = null;
-		boolean succeeded = false;
+		IBaseOperationOutcome operationOutcomeResponse = null;
 		while (true) {
 			// handle NullPointerException
 			if (jobId == null) {
@@ -220,11 +220,12 @@ public class BulkImportCommand extends BaseCommand {
 			} catch (InternalErrorException e) {
 				// handle ERRORED status
 				ourLog.error(e.getMessage());
+				operationOutcomeResponse = e.getOperationOutcome();
 				break;
 			}
 
 			if (response.getResponseStatusCode() == 200) {
-				succeeded = true;
+				operationOutcomeResponse = response.getOperationOutcome();
 				break;
 			} else if (response.getResponseStatusCode() == 202) {
 				// still in progress
@@ -235,23 +236,24 @@ public class BulkImportCommand extends BaseCommand {
 			}
 		}
 
-		// Poll once more to get the response body
-		if (succeeded) {
-			IBaseOperationOutcome operationOutcomeResponse = (IBaseOperationOutcome) client.operation()
-					.onServer()
-					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
-					.returnResourceType(
-							myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
-					.execute();
-
-			String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, operationOutcomeResponse);
-			if (isNotBlank(diagnostics) && diagnostics.startsWith("{")) {
-				BulkImportReportJson report = JsonUtil.deserialize(diagnostics, BulkImportReportJson.class);
-				ourLog.info("Output:\n{}", report.getReportMsg());
-			} else {
-				ourLog.info("No diagnostics response received from bulk import URL: {}", url);
+		boolean haveOutput = false;
+		if (operationOutcomeResponse != null) {
+			int issueCount = OperationOutcomeUtil.getIssueCount(myFhirCtx, operationOutcomeResponse);
+			for (int i = 0; i < issueCount; i++) {
+				String diagnostics = OperationOutcomeUtil.getIssueDiagnostics(myFhirCtx, operationOutcomeResponse, i);
+				if (isNotBlank(diagnostics)) {
+					if (diagnostics.startsWith("{")) {
+						BulkImportReportJson report = JsonUtil.deserialize(diagnostics, BulkImportReportJson.class);
+						ourLog.info("Output:\n{}", report.getReportMsg());
+					} else {
+						ourLog.info(diagnostics);
+					}
+					haveOutput = true;
+				}
 			}
+		}
+		if (!haveOutput) {
+			ourLog.info("No diagnostics response received from bulk import URL: {}", url);
 		}
 	}
 
