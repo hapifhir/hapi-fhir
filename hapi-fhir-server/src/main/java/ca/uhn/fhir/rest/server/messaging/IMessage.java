@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.messaging;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface IMessage<T> {
 	/**
@@ -40,11 +41,10 @@ public interface IMessage<T> {
 	Map<String, Object> getHeaders();
 
 	/**
-	 * @return return a specific header
+	 * @return return an optional of the specific header
 	 */
-	// FIXME KHS use optional
-	default Object getHeader(String theHeaderName) {
-		return getHeaders().get(theHeaderName);
+	default <H> Optional<H> getHeader(String theHeaderName) {
+		return (Optional<H>) Optional.ofNullable(getHeaders().get(theHeaderName));
 	}
 
 	/**

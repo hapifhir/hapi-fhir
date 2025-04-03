@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class TestMessage<T> implements IMessage<T> {
 	private final String myKey;
@@ -46,8 +47,8 @@ public class TestMessage<T> implements IMessage<T> {
 	}
 
 	@Override
-	public Object getHeader(String theHeaderName) {
-		return myHeaders.get(theHeaderName);
+	public <H> Optional<H> getHeader(String theHeaderName) {
+		return (Optional<H>) Optional.ofNullable(myHeaders.get(theHeaderName));
 	}
 
 	@Override
