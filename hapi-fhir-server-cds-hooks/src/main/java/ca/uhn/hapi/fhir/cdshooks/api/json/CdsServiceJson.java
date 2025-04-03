@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
 import ca.uhn.fhir.rest.api.server.cdshooks.BaseCdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsPrefetchFailureMode;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -55,6 +56,8 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 	private Map<String, String> myPrefetch;
 
 	private Map<String, CdsResolutionStrategyEnum> mySource;
+
+	private Map<String, CdsPrefetchFailureMode> myPrefetchFailureModes;
 
 	public String getHook() {
 		return myHook;
@@ -118,5 +121,19 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 			mySource = new LinkedHashMap<>();
 		}
 		return Collections.unmodifiableMap(mySource);
+	}
+
+	public void addPrefetchFailureMode(String theKey, CdsPrefetchFailureMode theFailureMode) {
+		if (myPrefetchFailureModes == null) {
+			myPrefetchFailureModes = new LinkedHashMap<>();
+		}
+		myPrefetchFailureModes.put(theKey, theFailureMode);
+	}
+
+	public CdsPrefetchFailureMode getPrefetchFailureMode(String theKey) {
+		if (myPrefetchFailureModes == null) {
+			myPrefetchFailureModes = new LinkedHashMap<>();
+		}
+		return myPrefetchFailureModes.getOrDefault(theKey, CdsPrefetchFailureMode.FAIL);
 	}
 }
