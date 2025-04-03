@@ -1669,6 +1669,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		boolean havePathWithResolveExpression = myStorageSettings.isIndexOnContainedResources()
 				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
+		// FIXME: remove?
 		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			// TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt
 			// to contain it internally. Wild

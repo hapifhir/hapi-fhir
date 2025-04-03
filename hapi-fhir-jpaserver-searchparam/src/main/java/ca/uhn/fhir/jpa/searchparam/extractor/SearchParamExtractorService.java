@@ -125,12 +125,17 @@ public class SearchParamExtractorService {
 			TransactionDetails theTransactionDetails,
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+
+		// FIXME: document
+		myContext.newTerser().containResources(theResource, null, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
+
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
 		getExtractionUtil()
 				.extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);
 		mergeParams(normalParams, theNewParams);
 
+		// Reference search parameters
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences =
 				mySearchParamExtractor.extractResourceLinks(theResource, indexOnContainedResources);
