@@ -478,7 +478,7 @@ public class SearchParamExtractorService {
 			String referenceString = reference.getReferenceElement().getValue();
 			if (referenceString.length() > 1) {
 				referenceString = referenceString.substring(1);
-				if (resource.getIdElement().getValue().equals(referenceString)){
+				if (resource.getIdElement().getValue().equals(referenceString)) {
 					return resource;
 				}
 			}

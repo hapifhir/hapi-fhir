@@ -1515,7 +1515,9 @@ public class FhirTerser {
 			String nextId = next.getIdElement().getValue();
 			if (StringUtils.isNotBlank(nextId)) {
 				while (nextId.startsWith("#")) {
-					ourLog.warn("Found contained resource with ID starting with # character ({}). This form of ID is deprecated and will be dropped in a future release, preventing the current code from working correctly.", nextId);
+					ourLog.warn(
+							"Found contained resource with ID starting with # character ({}). This form of ID is deprecated and will be dropped in a future release, preventing the current code from working correctly.",
+							nextId);
 					nextId = nextId.substring(1);
 				}
 				next.getIdElement().setValue(nextId);
