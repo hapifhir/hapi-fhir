@@ -500,7 +500,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	}
 
 	public void setUserDataAsString(String theUserDataAsString) {
-		if (isBlank(theUserDataAsString)){
+		if (isBlank(theUserDataAsString)) {
 			myUserData = new HashMap<>();
 		} else {
 			myUserData = JsonUtil.deserialize(theUserDataAsString, Map.class);
