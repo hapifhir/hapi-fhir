@@ -154,7 +154,11 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 				}
 
-				// Send any lingering data in buffers
+				/*
+				 * Send any lingering data in buffers. In the code above we are going through each resource and builing
+				 * up a series of buffers, which are transmitted when they are full. The following loop transmits any
+				 * data that remains in any of the buffers because they did not reach capacity.
+				 */
 				for (FileBuffer buffer : groupToBuffer.values()) {
 					if (buffer.getResourceCount() > 0) {
 						transmitBuffer(
@@ -311,17 +315,18 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 			int theLineCount,
 			int theLineCountTotal) {
 
-		int linePercentage = (int) (100.0 * ((double) theLineCount / theLineCountTotal));
-
-		ourLog.info(
-				"Loaded chunk {} of {} NDJSON file (overall progress {}% line {} / {}) with {} resources from URL: {}",
-				chunkCount,
-				FileUtil.formatFileSize(buffer.getFileSize()),
-				linePercentage,
-				theLineCount,
-				theLineCountTotal,
-				buffer.getResourceCount(),
-				nextUrl);
+		if (theLineCountTotal > 0) {
+			int linePercentage = (int) (100.0 * ((double) theLineCount / theLineCountTotal));
+			ourLog.info(
+					"Loaded chunk {} of {} NDJSON file (overall progress {}% line {} / {}) with {} resources from URL: {}",
+					chunkCount,
+					FileUtil.formatFileSize(buffer.getFileSize()),
+					linePercentage,
+					theLineCount,
+					theLineCountTotal,
+					buffer.getResourceCount(),
+					nextUrl);
+		}
 
 		NdJsonFileJson data = new NdJsonFileJson();
 		data.setNdJsonText(buffer.toString());

@@ -28,6 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * During the bulk import process, we break the import files into smaller collections of resources  for manageable
+ * ingestion transactions. Each of these collections is a batch2 chunk which is processed by {@link ConsumeFilesStepV2},
+ * which ingests the collection and produces one of these objects containing details about how the ingestion of
+ * that collection went. The {@link GenerateReportReductionStep} takes these chunks and generates a consolidated
+ * report at the end.
+ */
 public class ConsumeFilesOutcomeJson implements IModelJson {
 
 	@JsonProperty("sourceName")

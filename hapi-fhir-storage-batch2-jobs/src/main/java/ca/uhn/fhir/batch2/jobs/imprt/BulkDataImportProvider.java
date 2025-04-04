@@ -257,7 +257,7 @@ public class BulkDataImportProvider {
 						+ instance.getStatus() + " state.";
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			case FINALIZE:
@@ -272,26 +272,27 @@ public class BulkDataImportProvider {
 						+ instance.getEstimatedTimeRemaining();
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			case COMPLETED: {
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
 				String msg = instance.getReport();
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			case FAILED: {
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 				String msg = "Job is in " + instance.getStatus() + " state with " + instance.getErrorCount()
 						+ " error count. Last error: " + instance.getErrorMessage();
-				streamOperationOutcomeResponse(response, msg, "error");
+				String report = instance.getReport();
+				streamOperationOutcomeResponse(response, "error", msg, report);
 				break;
 			}
 			case CANCELLED: {
 				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
 				String msg = "Job was cancelled.";
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			default: {
@@ -300,11 +301,13 @@ public class BulkDataImportProvider {
 		}
 	}
 
-	private void streamOperationOutcomeResponse(HttpServletResponse response, String theMessage, String theSeverity)
+	private void streamOperationOutcomeResponse(HttpServletResponse response, String theSeverity, String... theMessages)
 			throws IOException {
 		response.setContentType(Constants.CT_FHIR_JSON);
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirCtx);
-		OperationOutcomeUtil.addIssue(myFhirCtx, oo, theSeverity, theMessage, null, null);
+		for (String message : theMessages) {
+			OperationOutcomeUtil.addIssue(myFhirCtx, oo, theSeverity, message, null, null);
+		}
 		myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 		response.getWriter().close();
 	}

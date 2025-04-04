@@ -155,6 +155,10 @@ public abstract class BaseTransactionProcessor {
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	private static final String POST = "POST";
+	private static final String PUT = "PUT";
+	private static final String DELETE = "DELETE";
+	private static final String PATCH = "PATCH";
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
@@ -402,6 +406,15 @@ public abstract class BaseTransactionProcessor {
 		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
 		boolean switchedToBatch = false;
 
+		int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
+		int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+
+		// Don't let the user request a crazy delay, this could be used
+		// as a DOS attack
+		maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
+		maxRetryDelay = Math.min(maxRetryDelay, 10000);
+		totalAttempts = Math.min(totalAttempts, 5);
+
 		IBaseBundle response;
 		for (int i = 1; ; i++) {
 			try {
@@ -417,14 +430,6 @@ public abstract class BaseTransactionProcessor {
 				if (i >= totalAttempts || theNestedMode) {
 					throw e;
 				}
-
-				int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
-				int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
-				maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
-
-				// Don't let the user request a crazy delay, this could be used
-				// as a DOS attack
-				maxRetryDelay = Math.min(maxRetryDelay, 10000);
 
 				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
 				String sleepMessage = "";
@@ -2285,11 +2290,11 @@ public abstract class BaseTransactionProcessor {
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		switch (defaultString(verb)) {
-			case "POST":
+			case POST:
 				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			case "PUT":
-			case "DELETE":
-			case "PATCH":
+			case PUT:
+			case DELETE:
+			case PATCH:
 				String url = extractTransactionUrlOrThrowException(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {

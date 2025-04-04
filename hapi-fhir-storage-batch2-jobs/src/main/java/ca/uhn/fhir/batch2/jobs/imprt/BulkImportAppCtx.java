@@ -59,7 +59,7 @@ public class BulkImportAppCtx {
 				.setParametersType(BulkImportJobParameters.class)
 				.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
 				.addIntermediateStep(
-						"process-files", "Process files", ConsumeFilesOutcomeJson.class, bulkImport2ConsumeFiles())
+						"process-files", "Process files", ConsumeFilesOutcomeJson.class, bulkImport2ConsumeFilesV2())
 				.addFinalReducerStep(
 						"generate-report",
 						"Generate outcome report",
@@ -84,8 +84,8 @@ public class BulkImportAppCtx {
 	}
 
 	@Bean
-	public ConsumeFilesStep bulkImport2ConsumeFiles() {
-		return new ConsumeFilesStep();
+	public ConsumeFilesStepV2 bulkImport2ConsumeFilesV2() {
+		return new ConsumeFilesStepV2();
 	}
 
 	@Bean

@@ -50,10 +50,10 @@ import java.util.List;
 import static java.util.Objects.requireNonNullElseGet;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ConsumeFilesStep
+public class ConsumeFilesStepV2
 		implements IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, ConsumeFilesOutcomeJson> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStepV2.class);
 
 	@Autowired
 	private FhirContext myCtx;
@@ -117,7 +117,7 @@ public class ConsumeFilesStep
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
 				.withTryBatchAsTransactionFirst(true)
-				.withRetryCount(2)
+				.withRetryCount(3)
 				.withMinRetryDelay(500)
 				.withMaxRetryDelay(1000)
 				.build();
