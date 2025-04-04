@@ -49,7 +49,10 @@ public class TransactionSemanticsHeader {
 	 * Non-instantiable, see {@link #newBuilder()}
 	 */
 	private TransactionSemanticsHeader(
-			Integer theRetryCount, Integer theMinRetryDelay, Integer theMaxRetryDelay, boolean theTryAsBatchAsTransactionFirst) {
+			Integer theRetryCount,
+			Integer theMinRetryDelay,
+			Integer theMaxRetryDelay,
+			boolean theTryAsBatchAsTransactionFirst) {
 		myRetryCount = theRetryCount;
 		myMinRetryDelay = theMinRetryDelay;
 		myMaxRetryDelay = theMaxRetryDelay;
@@ -253,7 +256,8 @@ public class TransactionSemanticsHeader {
 		 * Construct the header
 		 */
 		public TransactionSemanticsHeader build() {
-			return new TransactionSemanticsHeader(myRetryCount, myMinRetryDelay, myMaxRetryDelay, myTryBatchAsTransactionFirst);
+			return new TransactionSemanticsHeader(
+					myRetryCount, myMinRetryDelay, myMaxRetryDelay, myTryBatchAsTransactionFirst);
 		}
 	}
 }

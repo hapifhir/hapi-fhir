@@ -93,9 +93,9 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 
 		Map<String, FileBuffer> groupToBuffer = new HashMap<>();
 
-		String groupByCompartmentName = theStepExecutionDetails.getParameters().getGroupByCompartmentName();
-		if (isNotBlank(groupByCompartmentName)) {
-			ourLog.info("Will group resources by compartment: {}", groupByCompartmentName);
+		String chunkByCompartmentName = theStepExecutionDetails.getParameters().getChunkByCompartmentName();
+		if (isNotBlank(chunkByCompartmentName)) {
+			ourLog.info("Will group resources by compartment: {}", chunkByCompartmentName);
 		}
 
 		try (CloseableHttpClient httpClient = newHttpClient(theStepExecutionDetails)) {
@@ -129,8 +129,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 								if (isNotBlank(nextLine)) {
 									lineCountOverallProgress++;
 
-									if (isNotBlank(groupByCompartmentName)) {
-										groupName = determineCompartmentGroup(groupByCompartmentName, nextLine);
+									if (isNotBlank(chunkByCompartmentName)) {
+										groupName = determineCompartmentGroup(chunkByCompartmentName, nextLine);
 									}
 
 									FileBuffer buffer = groupToBuffer.computeIfAbsent(groupName, p -> new FileBuffer());

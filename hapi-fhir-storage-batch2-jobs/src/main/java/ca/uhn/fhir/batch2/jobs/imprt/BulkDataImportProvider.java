@@ -72,7 +72,7 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_URL = "url";
 	public static final String PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC = "credentialHttpBasic";
 	public static final String PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT = "maxBatchResourceCount";
-	public static final String PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME = "groupByCompartmentName";
+	public static final String PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME = "chunkByCompartmentName";
 
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
@@ -157,9 +157,9 @@ public class BulkDataImportProvider {
 			}
 
 			String groupByCompartmentName = ParametersUtil.getParameterPartValueAsString(
-					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME);
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME);
 			if (isNotBlank(groupByCompartmentName)) {
-				jobParameters.setGroupByCompartmentName(groupByCompartmentName);
+				jobParameters.setChunkByCompartmentName(groupByCompartmentName);
 			}
 		}
 
@@ -184,7 +184,7 @@ public class BulkDataImportProvider {
 			Pair<String, String> typeAndUrl = Pair.of(type, url);
 			typeAndUrls.add(typeAndUrl);
 		}
-		ValidateUtil.isTrueOrThrowInvalidRequest(typeAndUrls.size() > 0, "No URLs specified");
+		ValidateUtil.isTrueOrThrowInvalidRequest(!typeAndUrls.isEmpty(), "No URLs specified");
 		List<String> resourceTypeOrder = getResourceTypeOrder();
 		typeAndUrls.sort(Comparator.comparing(t -> resourceTypeOrder.indexOf(t.getKey())));
 

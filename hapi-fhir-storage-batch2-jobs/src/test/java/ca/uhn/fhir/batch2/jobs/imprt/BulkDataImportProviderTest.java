@@ -161,7 +161,7 @@ public class BulkDataImportProviderTest {
 		if (partitionEnabled) {
 			assertEquals(123, startParameters.getPartitionId().getFirstPartitionIdOrNull());
 		}
-		assertEquals("Patient", startParameters.getGroupByCompartmentName());
+		assertEquals("Patient", startParameters.getChunkByCompartmentName());
 	}
 
 	@Test
@@ -234,7 +234,7 @@ public class BulkDataImportProviderTest {
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC).setValue(new StringType("admin:password")))
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT).setValue(new StringType("500")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_GROUP_BY_COMPARTMENT_NAME).setValue(new StringType("Patient")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME).setValue(new StringType("Patient")));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))

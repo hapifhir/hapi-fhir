@@ -85,7 +85,7 @@ public class BulkImportCommand extends BaseCommand {
 	public static final String TARGET_BASE = "target-base";
 	public static final String PORT = "port";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
-	public static final String GROUP_BY_COMPARTMENT_NAME = "group-by-compartment-name";
+	public static final String CHUNK_BY_COMPARTMENT_NAME = "chunk-by-compartment-name";
 	public static final String BATCH_SIZE = "batch-size";
 	private BulkImportFileServlet myServlet;
 	private Server myServer;
@@ -135,9 +135,9 @@ public class BulkImportCommand extends BaseCommand {
 		addOptionalOption(
 				options,
 				null,
-				GROUP_BY_COMPARTMENT_NAME,
+				CHUNK_BY_COMPARTMENT_NAME,
 				"compartment name",
-				"If specified, requests that the process attempt to group resources in the same compartment. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction.");
+				"If specified, requests that the bulk import process try to process resources in chunks with other resources beloning to the same compartment. For example, if the value of \"Patient\" is used, resources belonging to the same patient will be placed in the same work chunk(s) for ingestion. This should not functionally affect processing and there is no guarantee that all resources in the same compartment will end up in the same work chunk, but specifying a grouping can help to make processing more efficient by grouping related resources in a single database transaction, and may reduce constraint errors if 'Automatically Create Placeholder Reference Targets' is enabled on the target server.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;
@@ -169,12 +169,8 @@ public class BulkImportCommand extends BaseCommand {
 		IGenericClient client = newClient(
 				theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 
-		Integer batchSize = null;
-		if (theCommandLine.hasOption(BATCH_SIZE)) {
-			batchSize = getAndParsePositiveIntegerParam(theCommandLine, BATCH_SIZE);
-		}
+		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes, null, theCommandLine);
 
-		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes, batchSize);
 		IBaseResource outcome = client.operation()
 				.onServer()
 				.named(JpaConstants.OPERATION_IMPORT)
@@ -257,7 +253,12 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Nonnull
 	private IBaseParameters createRequest(
-			String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes, Integer theBatchSize) {
+			String theBaseUrl,
+			List<String> theIndexes,
+			List<String> theResourceTypes,
+			Integer theBatchSize_,
+			CommandLine theCommandLine)
+			throws ParseException {
 
 		FhirContext ctx = getFhirContext();
 		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
@@ -275,12 +276,27 @@ public class BulkImportCommand extends BaseCommand {
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE,
 				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
 
-		if (theBatchSize != null) {
+		// Batch size
+		Integer batchSize = null;
+		if (theCommandLine.hasOption(BATCH_SIZE)) {
+			batchSize = getAndParsePositiveIntegerParam(theCommandLine, BATCH_SIZE);
+		}
+		if (batchSize != null) {
 			ParametersUtil.addPartInteger(
 					ctx,
 					storageDetail,
 					BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT,
-					theBatchSize);
+					batchSize);
+		}
+
+		// Chunk by compartment
+		if (theCommandLine.hasOption(CHUNK_BY_COMPARTMENT_NAME)) {
+			String chunkByCompartmentName = theCommandLine.getOptionValue(CHUNK_BY_COMPARTMENT_NAME);
+			ParametersUtil.addPartString(
+					ctx,
+					storageDetail,
+					BulkDataImportProvider.PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME,
+					chunkByCompartmentName);
 		}
 
 		for (int i = 0; i < theIndexes.size(); i++) {

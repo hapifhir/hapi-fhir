@@ -162,7 +162,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + id)
 			.setMaxBatchResourceCount(2)
-			.setGroupByCompartmentName("Patient");
+			.setChunkByCompartmentName("Patient");
 		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, new WorkChunk().setId(CHUNK_ID));
 
 		// Test
