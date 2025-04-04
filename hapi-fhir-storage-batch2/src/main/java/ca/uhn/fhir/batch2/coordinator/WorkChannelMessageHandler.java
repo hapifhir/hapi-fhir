@@ -261,7 +261,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 			processingPreparation.ifPresentOrElse(
 					// all the setup is happy and committed.  Do the work.
 					process -> {
-						// FIXME ND - is there anything else we want to add to these hooks?
 						JobInstance jobInstance = process.myJobInstance;
 						WorkChunk workChunk = process.myWorkChunk;
 						try {
