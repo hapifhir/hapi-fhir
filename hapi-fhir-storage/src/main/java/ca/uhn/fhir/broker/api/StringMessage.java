@@ -29,4 +29,9 @@ public class StringMessage extends BaseJsonMessage<String> {
 	public void setPayload(String thePayload) {
 		myPayload = thePayload;
 	}
+
+	@Override
+	public String toString() {
+		throw new UnsupportedOperationException();
+	}
 }
