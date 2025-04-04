@@ -1,0 +1,89 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.broker.jms;
+
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.util.CloseUtil;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+import org.springframework.messaging.MessageHandler;
+
+public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
+	private final Class<? extends IMessage<T>> myMessageType;
+	private final ISpringMessagingChannelReceiver myLegacyChannelReceiver;
+	private final IMessageListener<T> myMessageListener;
+	private MessageHandler myMessageHandler;
+
+	public SpringMessagingReceiverAdapter(
+			Class<? extends IMessage<T>> theMessageType,
+			ISpringMessagingChannelReceiver theLegacyChannelReceiver,
+			IMessageListener<T> theMessageListener) {
+		myMessageType = theMessageType;
+		myLegacyChannelReceiver = theLegacyChannelReceiver;
+		myMessageListener = theMessageListener;
+	}
+
+	public void subscribe(MessageHandler theMessageHandler) {
+		if (myMessageHandler != null) {
+			throw new IllegalArgumentException("Only one subscriber allowed");
+		}
+		myMessageHandler = theMessageHandler;
+		myLegacyChannelReceiver.subscribe(theMessageHandler);
+	}
+
+	@Override
+	public void close() {
+		if (myMessageHandler != null) {
+			myLegacyChannelReceiver.unsubscribe(myMessageHandler);
+			CloseUtil.close(myMessageHandler);
+		}
+		CloseUtil.close(myLegacyChannelReceiver);
+		CloseUtil.close(myMessageListener);
+	}
+
+	@Override
+	public String getChannelName() {
+		return myLegacyChannelReceiver.getName();
+	}
+
+	public ISpringMessagingChannelReceiver getSpringMessagingChannelReceiver() {
+		return myLegacyChannelReceiver;
+	}
+
+	@Override
+	public Class<? extends IMessage<T>> getMessageType() {
+		return myMessageType;
+	}
+
+	@Override
+	public IMessageListener<T> getMessageListener() {
+		return myMessageListener;
+	}
+
+	@Override
+	public void pause() {
+		myLegacyChannelReceiver.stop();
+	}
+
+	@Override
+	public void resume() {
+		myLegacyChannelReceiver.start();
+	}
+}

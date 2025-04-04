@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,7 +31,7 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
-public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
+public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson {
 
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
@@ -65,17 +66,6 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		myHeaders = theHeaders;
 	}
 
-	@Deprecated
-	@Nullable
-	public String getMessageKeyOrNull() {
-		return getMessageKey();
-	}
-
-	@Nullable
-	public String getMessageKey() {
-		return null;
-	}
-
 	/**
 	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
 	 *
@@ -83,7 +73,7 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	 */
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return Objects.toString(getMessageKey(), getMessageKeyDefaultValue());
+		return Objects.toString(this.getMessageKey(), getMessageKeyDefaultValue());
 	}
 
 	/**
