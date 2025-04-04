@@ -24,22 +24,20 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -2332,20 +2330,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += myCaptureQueriesListener.countSelectQueries();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		selectCounts += myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
@@ -2397,20 +2395,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += myCaptureQueriesListener.countSelectQueries();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		selectCounts += myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
 
 		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
