@@ -64,6 +64,7 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 			Class<? extends IMessage<T>> theMessageType,
 			ChannelProducerSettings theChannelProducerSettings) {
 		return new SpringMessagingProducerAdapter<>(
+				theMessageType,
 				myLinkedBlockingChannelFactory.getOrCreateProducer(theChannelName, theChannelProducerSettings));
 	}
 

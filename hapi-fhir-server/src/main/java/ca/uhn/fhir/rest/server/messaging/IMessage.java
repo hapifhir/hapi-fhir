@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
+import jakarta.annotation.Nullable;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,9 +33,15 @@ public interface IMessage<T> {
 	}
 
 	/**
-	 * @return the key of the message
+	 * This is used by brokers that support partitioning of messages. It is used to determine which partition a message
+	 * should be sent to. If message order is important, then you can use the message key to ensure that all messages
+	 * with the same key are sent to the same partition.
+	 * @return the key of the message.
 	 */
-	String getMessageKey();
+	@Nullable
+	default String getMessageKey() {
+		return null;
+	}
 
 	/**
 	 * @return a map of message headers

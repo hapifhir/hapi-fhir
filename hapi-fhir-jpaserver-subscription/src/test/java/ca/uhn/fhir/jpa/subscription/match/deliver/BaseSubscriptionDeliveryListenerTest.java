@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver;
 
 import ca.uhn.fhir.broker.api.IBrokerClient;
-import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

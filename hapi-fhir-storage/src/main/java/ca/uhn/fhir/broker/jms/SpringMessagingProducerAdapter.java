@@ -21,15 +21,20 @@ package ca.uhn.fhir.broker.jms;
 
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.broker.api.StringMessage;
 import ca.uhn.fhir.broker.impl.SpringMessagingSendResult;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ChannelInterceptor;
 
 public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
+	private final Class<? extends IMessage<T>> myMessageType;
 	private final ISpringMessagingChannelProducer mySpringMessagingChannelProducer;
 
-	public SpringMessagingProducerAdapter(ISpringMessagingChannelProducer theSpringMessagingChannelProducer) {
+	public SpringMessagingProducerAdapter(
+			Class<? extends IMessage<T>> theMessageType,
+			ISpringMessagingChannelProducer theSpringMessagingChannelProducer) {
+		myMessageType = theMessageType;
 		mySpringMessagingChannelProducer = theSpringMessagingChannelProducer;
 	}
 
@@ -40,6 +45,11 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
+		if (!myMessageType.isAssignableFrom(theMessage.getClass())) {
+			throw new IllegalArgumentException("Expecting message of type " + myMessageType
+					+ ". But received message of type: " + theMessage.getClass());
+		}
+
 		if (!Message.class.isAssignableFrom(theMessage.getClass())) {
 			throw new IllegalArgumentException("Expecting message of type " + Message.class
 					+ ". But received message of type: " + theMessage.getClass());
@@ -55,5 +65,9 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 
 	public ISpringMessagingChannelProducer getSpringMessagingProducer() {
 		return mySpringMessagingChannelProducer;
+	}
+
+	public Class<? extends IMessage<T>> getMessageType() {
+		return myMessageType;
 	}
 }

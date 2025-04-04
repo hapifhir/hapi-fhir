@@ -67,15 +67,6 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 	}
 
 	/**
-	 * This is used by brokers that support partitioning of messages. It is used to determine which partition a message
-	 * should be sent to. If message order is important, then you can use the message key to ensure that all messages
-	 * with the same key are sent to the same partition.
-	 * @return the key of the message.
-	 */
-	@Nullable
-	public abstract String getMessageKey();
-
-	/**
 	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
 	 *
 	 * @return the message key value or default

@@ -13,6 +13,7 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
@@ -435,7 +436,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// verify never updated (should remain in ready state)
 		verify(myJobPersistence, never()).fetchAllWorkChunkMetadataForJobInStates(any(), anyString(), any());
 		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
-		verify(myWorkChannelProducer, never()).send(any());
+		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
 		verify(myReductionStepExecutorService)
 			.triggerReductionStep(anyString(), any());
 	}
@@ -507,7 +508,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// verify
 		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
-		verify(myWorkChannelProducer, never()).send(any());
+		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
 
 		List<ILoggingEvent> events = myLogCapture.getLogEvents();
 		assertEquals(2, events.size());
