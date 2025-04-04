@@ -234,7 +234,10 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		InputStream openStream() throws IOException;
 
+		// TODO: drop the default method once all implementations implement it
 		@Nullable
-		String getName();
+		default String getName() {
+			return null;
+		}
 	}
 }
