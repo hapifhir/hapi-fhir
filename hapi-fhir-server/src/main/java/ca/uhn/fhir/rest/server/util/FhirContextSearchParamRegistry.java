@@ -134,11 +134,6 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public void requestRefresh() {
-		// nothing
-	}
-
-	@Override
 	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 		// nothing
 	}

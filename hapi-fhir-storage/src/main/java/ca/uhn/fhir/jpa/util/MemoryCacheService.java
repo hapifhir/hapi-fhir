@@ -215,7 +215,7 @@ public class MemoryCacheService {
 		 */
 		PID_TO_FORCED_ID(JpaPid.class),
 		MATCH_URL(String.class),
-		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
+		RESOURCE_CONDITIONAL_CREATE_VERSION(JpaPid.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class),

@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -398,41 +399,13 @@ public class BulkDataExportProvider {
 					response.setStatus(Constants.STATUS_HTTP_200_OK);
 					response.setContentType(Constants.CT_JSON);
 
-					// Create a JSON response
-					BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-					bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
-
-					bulkResponseDocument.setRequiresAccessToken(true);
-
-					String report = info.getReport();
-					if (isEmpty(report)) {
+					if (isEmpty(info.getReport())) {
 						// this should never happen, but just in case...
 						ourLog.error("No report for completed bulk export job.");
 						response.getWriter().close();
 					} else {
-						BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-						bulkResponseDocument.setMsg(results.getReportMsg());
-						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
-
 						String serverBase = BulkDataExportUtil.getServerBase(theRequestDetails);
-
-						// an output is required, even if empty, according to HL7 FHIR IG
-						bulkResponseDocument.getOutput();
-
-						for (Map.Entry<String, List<String>> entrySet :
-								results.getResourceTypeToBinaryIds().entrySet()) {
-							String resourceType = entrySet.getKey();
-							List<String> binaryIds = entrySet.getValue();
-							for (String binaryId : binaryIds) {
-								IIdType iId = new IdType(binaryId);
-								String nextUrl = serverBase + "/"
-										+ iId.toUnqualifiedVersionless().getValue();
-								bulkResponseDocument
-										.addOutput()
-										.setType(resourceType)
-										.setUrl(nextUrl);
-							}
-						}
+						BulkExportResponseJson bulkResponseDocument = buildCompleteResponseDocument(serverBase, info);
 						JsonUtil.serialize(bulkResponseDocument, response.getWriter());
 						response.getWriter().close();
 					}
@@ -449,6 +422,7 @@ public class BulkDataExportProvider {
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
+				//noinspection DefaultNotLastCaseInSwitch
 			default:
 				// Deliberate fall through
 				ourLog.warn(
@@ -459,6 +433,7 @@ public class BulkDataExportProvider {
 			case QUEUED:
 			case IN_PROGRESS:
 			case CANCELLED:
+				//noinspection deprecation - we need to support old jobs after upgrade.
 			case ERRORED:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
 					handleDeleteRequest(theJobId, response, info.getStatus());
@@ -472,6 +447,34 @@ public class BulkDataExportProvider {
 				}
 				break;
 		}
+	}
+
+	@Nonnull
+	static BulkExportResponseJson buildCompleteResponseDocument(String theServerBase, JobInstance theJob) {
+		// Create a JSON response
+		BulkExportResponseJson response = new BulkExportResponseJson();
+		response.setTransactionTime(theJob.getStartTime());
+		response.setRequiresAccessToken(true);
+
+		BulkExportJobResults results = JsonUtil.deserialize(theJob.getReport(), BulkExportJobResults.class);
+		response.setMsg(results.getReportMsg());
+		response.setRequest(results.getOriginalRequestUrl());
+
+		// an output is required, even if empty, according to HL7 FHIR IG
+		response.getOutput();
+
+		for (Map.Entry<String, List<String>> entrySet :
+				results.getResourceTypeToBinaryIds().entrySet()) {
+			String resourceType = entrySet.getKey();
+			List<String> binaryIds = entrySet.getValue();
+			for (String binaryId : binaryIds) {
+				IIdType iId = new IdType(binaryId);
+				String nextUrl =
+						theServerBase + "/" + iId.toUnqualifiedVersionless().getValue();
+				response.addOutput().setType(resourceType).setUrl(nextUrl);
+			}
+		}
+		return response;
 	}
 
 	private void handleDeleteRequest(

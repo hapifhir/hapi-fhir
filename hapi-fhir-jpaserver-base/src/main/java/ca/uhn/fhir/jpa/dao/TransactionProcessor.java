@@ -31,11 +31,14 @@ import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -48,7 +51,6 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
@@ -76,8 +78,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -88,7 +92,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
 
-	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
+	/**
+	 * Matches conditional URLs in the form of [resourceType]?[paramName]=[paramValue]{...more params...}
+	 *
+	 *
+	 */
+	public static final Pattern MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
+
 	public static final int CONDITIONAL_URL_FETCH_CHUNK_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
 
@@ -120,7 +130,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionSvc;
+	private MemoryCacheService myMemoryCacheService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -130,7 +143,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	protected void validateDependencies() {
 		super.validateDependencies();
 
-		Validate.notNull(myEntityManager);
+		Validate.notNull(myEntityManager, "EntityManager must not be null");
 	}
 
 	@VisibleForTesting
@@ -185,7 +198,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					super.determineRequestPartitionIdForWriteEntries(theRequest, theEntries);
 
 			if (requestPartitionId != null) {
-				preFetch(theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
+				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, requestPartitionId);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -204,29 +217,95 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void preFetch(
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId) {
 		Set<String> foundIds = new HashSet<>();
-		List<Long> idsToPreFetch = new ArrayList<>();
+		Set<JpaPid> idsToPreFetchBodiesFor = new HashSet<>();
+		Set<JpaPid> idsToPreFetchVersionsFor = new HashSet<>();
 
 		/*
 		 * Pre-Fetch any resources that are referred to normally by ID, e.g.
 		 * regular FHIR updates within the transaction.
 		 */
 		preFetchResourcesById(
-				theTransactionDetails, theEntries, theVersionAdapter, theRequestPartitionId, foundIds, idsToPreFetch);
+				theTransactionDetails,
+				theEntries,
+				theVersionAdapter,
+				theRequestPartitionId,
+				foundIds,
+				idsToPreFetchBodiesFor);
 
 		/*
 		 * Pre-resolve any conditional URLs we can
 		 */
 		preFetchConditionalUrls(
-				theTransactionDetails, theEntries, theVersionAdapter, theRequestPartitionId, idsToPreFetch);
+				theRequestDetails,
+				theTransactionDetails,
+				theEntries,
+				theVersionAdapter,
+				theRequestPartitionId,
+				idsToPreFetchBodiesFor,
+				idsToPreFetchVersionsFor);
 
+		/*
+		 * Pre-Fetch Resource Bodies (this will happen for any resources we are potentially
+		 * going to update)
+		 */
 		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
-		systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch), true);
+		systemDao.preFetchResources(List.copyOf(idsToPreFetchBodiesFor), true);
+
+		/*
+		 * Pre-Fetch Resource Versions (this will happen for any resources we are doing a
+		 * conditional create on, meaning we don't actually care about the contents, just
+		 * the ID and version)
+		 */
+		preFetchResourceVersions(idsToPreFetchVersionsFor);
+	}
+
+	/**
+	 * Given a collection of {@link JpaPid}, loads the current version associated with
+	 * each PID and puts it into the {@link JpaPid#setVersion(Long)} field.
+	 */
+	private void preFetchResourceVersions(Set<JpaPid> theIds) {
+		ourLog.trace("Versions to fetch: {}", theIds);
+
+		for (Iterator<JpaPid> it = theIds.iterator(); it.hasNext(); ) {
+			JpaPid pid = it.next();
+			Long version = myMemoryCacheService.getIfPresent(
+					MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
+			if (version != null) {
+				it.remove();
+				pid.setVersion(version);
+			}
+		}
+
+		if (!theIds.isEmpty()) {
+			Map<JpaPid, JpaPid> idMap = theIds.stream().collect(Collectors.toMap(t -> t, t -> t));
+
+			QueryChunker.chunk(theIds, ids -> {
+				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+				CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+				Root<ResourceTable> from = cq.from(ResourceTable.class);
+				cq.multiselect(from.get("myPid"), from.get("myVersion"));
+				cq.where(from.get("myPid").in(ids));
+				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+				List<Tuple> results = query.getResultList();
+
+				for (Tuple tuple : results) {
+					JpaPid pid = tuple.get(0, JpaPid.class);
+					Long version = tuple.get(1, Long.class);
+					idMap.get(pid).setVersion(version);
+
+					myMemoryCacheService.putAfterCommit(
+							MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid, version);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -239,13 +318,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void preFetchResourcesById(
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
 			Set<String> foundIds,
-			List<Long> idsToPreFetch) {
+			Set<JpaPid> theIdsToPreFetchBodiesFor) {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -319,7 +399,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
 						|| (next.getAssociatedResourceId() != null
 								&& !next.getAssociatedResourceId().isIdPartValidLong())) {
-					idsToPreFetch.add(next.getId());
+					theIdsToPreFetchBodiesFor.add(next);
 				}
 			}
 		}
@@ -340,12 +420,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		myEntityManager.flush();
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void preFetchConditionalUrls(
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
 			ITransactionProcessorVersionAdapter theVersionAdapter,
 			RequestPartitionId theRequestPartitionId,
-			List<Long> idsToPreFetch) {
+			Set<JpaPid> theIdsToPreFetchBodiesFor,
+			Set<JpaPid> theIdsToPreFetchVersionsFor) {
+
 		List<MatchUrlToResolve> searchParameterMapsToResolve = new ArrayList<>();
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
@@ -354,25 +438,27 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 				String requestIfNoneExist = theVersionAdapter.getEntryIfNoneExist(nextEntry);
 				String resourceType = determineResourceTypeInResourceUrl(myFhirContext, requestUrl);
-				if (resourceType == null && resource != null) {
+				if (resourceType == null) {
 					resourceType = myFhirContext.getResourceType(resource);
 				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
-					preFetchConditionalUrl(
+					processConditionalUrlForPreFetching(
+							theRequestPartitionId,
 							resourceType,
 							requestUrl,
 							true,
-							idsToPreFetch,
-							searchParameterMapsToResolve,
-							theRequestPartitionId);
+							false,
+							theIdsToPreFetchBodiesFor,
+							searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
-					preFetchConditionalUrl(
+					processConditionalUrlForPreFetching(
+							theRequestPartitionId,
 							resourceType,
 							requestIfNoneExist,
 							false,
-							idsToPreFetch,
-							searchParameterMapsToResolve,
-							theRequestPartitionId);
+							true,
+							theIdsToPreFetchBodiesFor,
+							searchParameterMapsToResolve);
 				}
 
 				if (myStorageSettings.isAllowInlineMatchUrlReferences()) {
@@ -384,13 +470,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 								.getValue();
 						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
 						if (refResourceType != null) {
-							preFetchConditionalUrl(
+							processConditionalUrlForPreFetching(
+									theRequestPartitionId,
 									refResourceType,
 									referenceUrl,
 									false,
-									idsToPreFetch,
-									searchParameterMapsToResolve,
-									theRequestPartitionId);
+									false,
+									theIdsToPreFetchBodiesFor,
+									searchParameterMapsToResolve);
 						}
 					}
 				}
@@ -400,33 +487,84 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		TaskChunker.chunk(
 				searchParameterMapsToResolve,
 				CONDITIONAL_URL_FETCH_CHUNK_SIZE,
-				map -> preFetchSearchParameterMaps(theTransactionDetails, theRequestPartitionId, map, idsToPreFetch));
+				map -> preFetchSearchParameterMaps(
+						theRequestDetails,
+						theTransactionDetails,
+						theRequestPartitionId,
+						map,
+						theIdsToPreFetchBodiesFor,
+						theIdsToPreFetchVersionsFor));
 	}
 
 	/**
+	 * This method attempts to resolve a collection of conditional URLs that were found
+	 * in a FHIR transaction bundle being processed.
+	 *
+	 * @param theRequestDetails        The active request
 	 * @param theTransactionDetails    The active transaction details
 	 * @param theRequestPartitionId    The active partition
-	 * @param theInputParameters       These are the search parameter maps that will actually be resolved
-	 * @param theOutputPidsToLoadFully This list will be added to with any resource PIDs that need to be fully
-	 *                                 pre-loaded (ie. fetch the actual resource body since we're presumably
+	 * @param theInputParameters       These are the conditional URLs that will actually be resolved
+	 * @param theOutputPidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
+	 *                                 preloaded (i.e. fetch the actual resource body since we're presumably
 	 *                                 going to update it and will need to see its current state eventually)
+	 * @param theOutputPidsToLoadVersionsFor This list will be added to with any resource PIDs that need to have
+	 *                                 their current version resolved. This is used for conditional creates,
+	 *                                 where we don't actually care about the body of the resource, only
+	 *                                 the version it has (since the version is returned in the response,
+	 *                                 and potentially used if we're auto-versioning references).
 	 */
-	private void preFetchSearchParameterMaps(
+	@VisibleForTesting
+	public void preFetchSearchParameterMaps(
+			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
-			List<Long> theOutputPidsToLoadFully) {
+			Set<JpaPid> theOutputPidsToLoadBodiesFor,
+			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
+
 		Set<Long> systemAndValueHashes = new HashSet<>();
 		Set<Long> valueHashes = new HashSet<>();
+
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
+
+			/*
+			 * Any conditional URLs that consist of a single token parameter are batched
+			 * up into a single query against the HFJ_SPIDX_TOKEN table so that we only
+			 * perform one SQL query for all of them.
+			 *
+			 * We could potentially add other patterns in the future, but it's much more
+			 * tricky to implement this when there are multiple parameters, and non-token
+			 * parameter types aren't often used on their own in conditional URLs. So for
+			 * now we handle single-token only, and that's probably good enough.
+			 */
+			boolean canBeHandledInAggregateQuery = false;
+
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					buildHashPredicateFromTokenParam(
-							(TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+					TokenParam tokenParam = (TokenParam) param;
+					canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
+							tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
+				}
+			}
+
+			if (!canBeHandledInAggregateQuery) {
+				Set<JpaPid> matchUrlResults = myMatchResourceUrlService.processMatchUrl(
+						next.myRequestUrl,
+						next.myResourceDefinition.getImplementingClass(),
+						theTransactionDetails,
+						theRequestDetails,
+						theRequestPartitionId);
+				for (JpaPid matchUrlResult : matchUrlResults) {
+					handleFoundPreFetchResourceId(
+							theTransactionDetails,
+							theOutputPidsToLoadBodiesFor,
+							theOutputPidsToLoadVersionsFor,
+							next,
+							matchUrlResult);
 				}
 			}
 		}
@@ -437,26 +575,26 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				theTransactionDetails,
 				theRequestPartitionId,
 				theInputParameters,
-				theOutputPidsToLoadFully);
+				theOutputPidsToLoadBodiesFor,
+				theOutputPidsToLoadVersionsFor);
 		preFetchSearchParameterMapsToken(
 				"myHashValue",
 				valueHashes,
 				theTransactionDetails,
 				theRequestPartitionId,
 				theInputParameters,
-				theOutputPidsToLoadFully);
+				theOutputPidsToLoadBodiesFor,
+				theOutputPidsToLoadVersionsFor);
 
 		// For each SP Map which did not return a result, tag it as not found.
-		if (!valueHashes.isEmpty() || !systemAndValueHashes.isEmpty()) {
-			theInputParameters.stream()
-					// No matches
-					.filter(match -> !match.myResolved)
-					.forEach(match -> {
-						ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
-						theTransactionDetails.addResolvedMatchUrl(
-								myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
-					});
-		}
+		theInputParameters.stream()
+				// No matches
+				.filter(match -> !match.myResolved)
+				.forEach(match -> {
+					ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
+					theTransactionDetails.addResolvedMatchUrl(
+							myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
+				});
 	}
 
 	/**
@@ -466,13 +604,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * Note that we do a tuple query for only 2 columns in order to ensure that we can get by with only
 	 * the data in the index (ie no need to load the actual table rows).
 	 */
-	private void preFetchSearchParameterMapsToken(
+	public void preFetchSearchParameterMapsToken(
 			String theIndexColumnName,
 			Set<Long> theHashesForIndexColumn,
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId,
 			List<MatchUrlToResolve> theInputParameters,
-			List<Long> theOutputPidsToLoadFully) {
+			Set<JpaPid> theOutputPidsToLoadFully,
+			Set<JpaPid> theOutputPidsToLoadVersionsFor) {
 		if (!theHashesForIndexColumn.isEmpty()) {
 			ListMultimap<Long, MatchUrlToResolve> hashToSearchMap =
 					buildHashToSearchMap(theInputParameters, theIndexColumnName);
@@ -492,7 +631,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (myPartitionSettings.isPartitioningEnabled()
 					&& !myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (theRequestPartitionId.isDefaultPartition()) {
+				if (myRequestPartitionHelperSvc.isDefaultPartition(theRequestPartitionId)
+						&& myPartitionSettings.getDefaultPartitionId() == null) {
 					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue"));
 					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
 				} else if (!theRequestPartitionId.isAllPartitions()) {
@@ -530,20 +670,43 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				List<MatchUrlToResolve> matchedSearch = hashToSearchMap.get(nextHash);
 				matchedSearch.forEach(matchUrl -> {
 					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
-					if (matchUrl.myShouldPreFetchResourceBody) {
-						theOutputPidsToLoadFully.add(nextResourcePid);
-					}
 					JpaPid pid = JpaPid.fromId(nextResourcePid, nextPartitionId);
-					myMatchResourceUrlService.matchUrlResolved(
-							theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, pid);
-					theTransactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl.myRequestUrl, pid);
-					matchUrl.setResolved(true);
+					handleFoundPreFetchResourceId(
+							theTransactionDetails,
+							theOutputPidsToLoadFully,
+							theOutputPidsToLoadVersionsFor,
+							matchUrl,
+							pid);
 				});
 			}
 		}
 	}
 
+	private void handleFoundPreFetchResourceId(
+			TransactionDetails theTransactionDetails,
+			Set<JpaPid> theOutputPidsToLoadFully,
+			Set<JpaPid> theOutputPidsToLoadVersionsFor,
+			MatchUrlToResolve theMatchUrl,
+			JpaPid theFoundPid) {
+		if (theMatchUrl.myShouldPreFetchResourceBody) {
+			theOutputPidsToLoadFully.add(theFoundPid);
+		}
+		if (theMatchUrl.myShouldPreFetchResourceVersion) {
+			theOutputPidsToLoadVersionsFor.add(theFoundPid);
+		}
+		myMatchResourceUrlService.matchUrlResolved(
+				theTransactionDetails,
+				theMatchUrl.myResourceDefinition.getName(),
+				theMatchUrl.myRequestUrl,
+				theFoundPid);
+		theTransactionDetails.addResolvedMatchUrl(myFhirContext, theMatchUrl.myRequestUrl, theFoundPid);
+		theMatchUrl.setResolved(true);
+	}
+
 	/**
+	 * Examines a conditional URL, and potentially adds it to either {@literal theOutputIdsToPreFetchBodiesFor}
+	 * or {@literal theOutputSearchParameterMapsToResolve}.
+	 * <p>
 	 * Note that if {@literal theShouldPreFetchResourceBody} is false, then we'll check if a given match
 	 * URL resolves to a resource PID, but we won't actually try to load that resource. If we're resolving
 	 * a match URL because it's there for a conditional update, we'll eagerly fetch the
@@ -556,47 +719,54 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * {@literal testTransactionCreateInlineMatchUrlWithAuthorizationDenied()}. This security tradeoff
 	 * is acceptable since we're only prefetching things with very simple match URLs (nothing with
 	 * a reference in it for example) so it's not really possible to doing anything useful with this.
+	 * </p>
 	 *
+	 * @param thePartitionId                        The partition ID of the associated resource (can be null)
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
-	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it. See the method javadoc above for some context.
-	 * @param theOutputIdsToPreFetch                This will be populated with any resource PIDs that need to be pre-fetched
+	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it? See the method javadoc above for some context.
+	 * @param theOutputIdsToPreFetchBodiesFor       This will be populated with any resource PIDs that need to be pre-fetched
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
-	 * @param thePartitionId						The partition ID of the associated resource (can be null)
 	 */
-	private void preFetchConditionalUrl(
+	private void processConditionalUrlForPreFetching(
+			RequestPartitionId thePartitionId,
 			String theResourceType,
 			String theRequestUrl,
 			boolean theShouldPreFetchResourceBody,
-			List<Long> theOutputIdsToPreFetch,
-			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve,
-			RequestPartitionId thePartitionId) {
+			boolean theShouldPreFetchResourceVersion,
+			Set<JpaPid> theOutputIdsToPreFetchBodiesFor,
+			List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
 		JpaPid cachedId =
 				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);
 		if (cachedId != null) {
 			if (theShouldPreFetchResourceBody) {
-				theOutputIdsToPreFetch.add(cachedId.getId());
+				theOutputIdsToPreFetchBodiesFor.add(cachedId);
 			}
-		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(theRequestUrl).matches()) {
+		} else if (MATCH_URL_PATTERN.matcher(theRequestUrl).find()) {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			SearchParameterMap matchUrlSearchMap =
 					myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
 			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(
-					theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody));
+					theRequestUrl,
+					matchUrlSearchMap,
+					resourceDefinition,
+					theShouldPreFetchResourceBody,
+					theShouldPreFetchResourceVersion));
 		}
 	}
 
 	/**
 	 * Given a token parameter, build the query predicate based on its hash. Uses system and value if both are available, otherwise just value.
 	 * If neither are available, it returns null.
+	 *
+	 * @return Returns {@literal true} if the param was added to one of the output lists
 	 */
-	@Nullable
-	private void buildHashPredicateFromTokenParam(
+	private boolean buildHashPredicateFromTokenParam(
 			TokenParam theTokenParam,
 			RequestPartitionId theRequestPartitionId,
 			MatchUrlToResolve theMatchUrl,
-			Set<Long> theSysAndValuePredicates,
-			Set<Long> theValuePredicates) {
+			Set<Long> theOutputSysAndValuePredicates,
+			Set<Long> theOutputValuePredicates) {
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 					myPartitionSettings,
@@ -605,7 +775,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getSystem(),
 					theTokenParam.getValue());
-			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
+			theOutputSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
+			return true;
 		} else if (isNotBlank(theTokenParam.getValue())) {
 			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(
 					myPartitionSettings,
@@ -613,8 +784,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theMatchUrl.myResourceDefinition.getName(),
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
 					theTokenParam.getValue());
-			theValuePredicates.add(theMatchUrl.myHashValue);
+			theOutputValuePredicates.add(theMatchUrl.myHashValue);
+			return true;
 		}
+
+		return false;
 	}
 
 	private ListMultimap<Long, MatchUrlToResolve> buildHashToSearchMap(
@@ -656,8 +830,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		} catch (PersistenceException e) {
 			if (myHapiFhirHibernateJpaDialect != null) {
 				List<String> types = theIdToPersistedOutcome.keySet().stream()
-						.filter(t -> t != null)
-						.map(t -> t.getResourceType())
+						.filter(Objects::nonNull)
+						.map(IIdType::getResourceType)
 						.collect(Collectors.toList());
 				String message = "Error flushing transaction with resource types: " + types;
 				throw myHapiFhirHibernateJpaDialect.translate(e, message);
@@ -667,7 +841,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@VisibleForTesting
-	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+	public void setIdHelperServiceForUnitTest(IIdHelperService<JpaPid> theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
 
@@ -676,12 +850,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		myApplicationContext = theAppCtx;
 	}
 
-	private static class MatchUrlToResolve {
+	public static class MatchUrlToResolve {
 
 		private final String myRequestUrl;
 		private final SearchParameterMap myMatchUrlSearchMap;
 		private final RuntimeResourceDefinition myResourceDefinition;
 		private final boolean myShouldPreFetchResourceBody;
+		private final boolean myShouldPreFetchResourceVersion;
 		public boolean myResolved;
 		private Long myHashValue;
 		private Long myHashSystemAndValue;
@@ -690,11 +865,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String theRequestUrl,
 				SearchParameterMap theMatchUrlSearchMap,
 				RuntimeResourceDefinition theResourceDefinition,
-				boolean theShouldPreFetchResourceBody) {
+				boolean theShouldPreFetchResourceBody,
+				boolean theShouldPreFetchResourceVersion) {
 			myRequestUrl = theRequestUrl;
 			myMatchUrlSearchMap = theMatchUrlSearchMap;
 			myResourceDefinition = theResourceDefinition;
 			myShouldPreFetchResourceBody = theShouldPreFetchResourceBody;
+			myShouldPreFetchResourceVersion = theShouldPreFetchResourceVersion;
 		}
 
 		public void setResolved(boolean theResolved) {

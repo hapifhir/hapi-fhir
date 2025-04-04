@@ -151,7 +151,7 @@ public class GiantTransactionPerfTest {
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 	private final ResourceHistoryCalculator myResourceHistoryCalculator = new ResourceHistoryCalculator(FhirContext.forR4Cached(), false);

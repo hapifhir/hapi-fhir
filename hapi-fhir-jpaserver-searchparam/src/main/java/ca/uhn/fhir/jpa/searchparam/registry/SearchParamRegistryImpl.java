@@ -75,8 +75,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParamRegistryImpl
 		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
+	// Basic is needed by the R4 SubscriptionTopic registry
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
-			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*"));
+			Collections.unmodifiableSet(Sets.newHashSet("*:url", "Subscription:*", "SearchParameter:*", "Basic:*"));
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	public static final int MAX_MANAGED_PARAM_COUNT = 10000;
