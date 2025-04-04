@@ -277,12 +277,13 @@ public class ReindexStepV1Test extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();

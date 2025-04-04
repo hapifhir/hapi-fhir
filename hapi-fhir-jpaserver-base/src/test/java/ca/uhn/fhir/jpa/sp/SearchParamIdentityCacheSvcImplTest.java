@@ -7,8 +7,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,8 +17,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,9 +45,6 @@ class SearchParamIdentityCacheSvcImplTest {
 
 	@Mock
 	PlatformTransactionManager myTxManager;
-
-	@Mock
-	ISearchParamRegistry mySearchParamRegistry;
 
 	@Spy
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
@@ -183,51 +176,6 @@ class SearchParamIdentityCacheSvcImplTest {
 		mySearchParamIdentityCacheSvc.initCache();
 
 		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
-
-		// verify
-		waitOneSecond();
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-			verify(myResourceIndexedSearchParamIdentityDao, times(0)).getSearchParameterIdByHashIdentity(anyLong());
-			verify(myResourceIndexedSearchParamIdentityDao, times(0)).save(any(IndexedSearchParamIdentity.class));
-		});
-	}
-
-	@Test
-	void findOrCreateSearchParamIdentity_withInitCacheAndSpRegistryPreFill_saveExecutedOnce() {
-		// setup
-		Map<Long, IndexedSearchParam> searchParamRegistry = new HashMap<>();
-		searchParamRegistry.put(PATIENT_GIVEN_HASH_IDENTITY, new IndexedSearchParam("given", "Patient"));
-		when(mySearchParamRegistry.isInitialized()).thenReturn(true);
-		when(mySearchParamRegistry.getHashIdentityToIndexedSearchParamMap()).thenReturn(searchParamRegistry);
-		mockSearchParamIdentitySave();
-		mySearchParamIdentityCacheSvc.initCache();
-		waitOneSecond();
-
-		// execute
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
-
-		// verify
-		waitOneSecond();
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-			verify(myResourceIndexedSearchParamIdentityDao, times(1)).getSearchParameterIdByHashIdentity(anyLong());
-			verify(myResourceIndexedSearchParamIdentityDao, times(1)).save(any(IndexedSearchParamIdentity.class));
-		});
-	}
-
-	@Test
-	void findOrCreateSearchParamIdentity_withInitCacheAndDatabasePreFill_saveExecutedOnce() {
-		// setup
-		when(myResourceIndexedSearchParamIdentityDao.getAllHashIdentities())
-			.thenReturn(Collections.singletonList(new Object[]{PATIENT_GIVEN_HASH_IDENTITY, 12345}));
-		Map<Long, IndexedSearchParam> searchParamRegistry = new HashMap<>();
-		searchParamRegistry.put(PATIENT_GIVEN_HASH_IDENTITY, new IndexedSearchParam("given", "Patient"));
-		when(mySearchParamRegistry.isInitialized()).thenReturn(true);
-		when(mySearchParamRegistry.getHashIdentityToIndexedSearchParamMap()).thenReturn(searchParamRegistry);
-
-		// execute
-		mySearchParamIdentityCacheSvc.initCache();
-		waitOneSecond();
 		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(PATIENT_GIVEN_HASH_IDENTITY, "Patient", "given");
 
 		// verify

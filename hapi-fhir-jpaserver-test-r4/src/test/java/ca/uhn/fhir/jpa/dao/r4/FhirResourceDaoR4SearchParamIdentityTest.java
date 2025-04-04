@@ -47,6 +47,7 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		myStorageSettings.setIndexStorageOptimized(false);
+		mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 	}
 
 	@Test
@@ -204,6 +205,18 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		myPatientDao.search(map, mySrd);
 
 		verifySearchParamIdentity(1, "Patient", Patient.SP_GENDER);
+	}
+
+	@Test
+	void createSearchParamIdentity_withSpRegistryInit_searchParamIdentitiesCreated() {
+		mySearchParamRegistry.setPopulateSearchParamIdentities(true);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// verify
+		int expectedSpIdentities = mySearchParamRegistry.getHashIdentityToIndexedSearchParamMap().size();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> runInTransaction(() ->
+			assertEquals(expectedSpIdentities, myResourceIndexedSearchParamIdentityDao.getAllHashIdentities().size())));
 	}
 
 	private void verifySearchParamIdentity(int theSearchParamIdentityCount, String theResourceType,

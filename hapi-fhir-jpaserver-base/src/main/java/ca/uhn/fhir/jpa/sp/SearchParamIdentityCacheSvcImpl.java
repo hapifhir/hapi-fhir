@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.sp;
 
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -42,13 +42,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,27 +55,20 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
 	private static final int THREAD_POOL_QUEUE_SIZE = 5000;
-	private static final int MAX_PRE_FILL_ATTEMPTS = 10;
-	private final AtomicInteger myPreFillAttempts = new AtomicInteger(0);
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
 	private final ThreadPoolTaskExecutor myThreadPoolTaskExecutor;
-	private final ScheduledExecutorService myPreFillTaskExecutor;
-	private final ISearchParamRegistry mySearchParamRegistry;
 	private final MemoryCacheService myMemoryCacheService;
 	private final UniqueTaskExecutor myUniqueTaskExecutor;
 
 	public SearchParamIdentityCacheSvcImpl(
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
-			ISearchParamRegistry theSearchParamRegistry,
 			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
 		mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
-		mySearchParamRegistry = theSearchParamRegistry;
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		myThreadPoolTaskExecutor = createExecutor();
-		myPreFillTaskExecutor = Executors.newSingleThreadScheduledExecutor();
 		myMemoryCacheService = theMemoryCacheService;
 		myUniqueTaskExecutor = new UniqueTaskExecutor(myThreadPoolTaskExecutor);
 	}
@@ -106,12 +95,10 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	@PreDestroy
 	public void preDestroy() {
 		myThreadPoolTaskExecutor.shutdown();
-		myPreFillTaskExecutor.shutdown();
 	}
 
 	/**
-	 * Initializes the cache by preloading search parameter identities {@link IndexedSearchParamIdentity}
-	 * from the database and the search parameter registry {@link ISearchParamRegistry}.
+	 * Initializes the cache by preloading search parameter identities {@link IndexedSearchParamIdentity}.
 	 */
 	protected void initCache() {
 		// populate cache with IndexedSearchParamIdentities from database
@@ -119,41 +106,6 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 				Objects.requireNonNull(myTxTemplate.execute(t -> mySearchParamIdentityDao.getAllHashIdentities()));
 		spIdentities.forEach(
 				i -> CacheUtils.putSearchParamIdentityToCache(myMemoryCacheService, (Long) i[0], (Integer) i[1]));
-
-		// schedule cache pre-fill with SearchParamIdentities from SearchParamRegistry
-		myPreFillTaskExecutor.scheduleAtFixedRate(
-				this::preFillSearchParameterIdentitiesFromRegistry, 0, 60, TimeUnit.SECONDS);
-	}
-
-	/**
-	 * Pre-fills the cache with Search Parameter Identities from the SearchParamRegistry.
-	 * <p>
-	 * Scheduled with a 1-minute delay to allow the SearchParamRegistry to initialize.
-	 * If the registry is not initialized after 10 attempts, the pre-fill is skipped.
-	 */
-	private void preFillSearchParameterIdentitiesFromRegistry() {
-		if (!mySearchParamRegistry.isInitialized()) {
-			int attempts = myPreFillAttempts.incrementAndGet();
-			if (attempts >= MAX_PRE_FILL_ATTEMPTS) {
-				myPreFillTaskExecutor.shutdown();
-			}
-			return;
-		}
-
-		try {
-			mySearchParamRegistry
-					.getHashIdentityToIndexedSearchParamMap()
-					.forEach((hashIdentity, indexedSearchParam) -> {
-						if (CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, hashIdentity) == null) {
-							submitPersistSearchParameterIdentityTask(
-									hashIdentity,
-									indexedSearchParam.getResourceType(),
-									indexedSearchParam.getParameterName());
-						}
-					});
-		} finally {
-			myPreFillTaskExecutor.shutdown();
-		}
 	}
 
 	private void submitPersistSearchParameterIdentityTask(
@@ -318,19 +270,19 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 					// retryable exception - unique search parameter identity or hash identity constraint violation
 					ourLog.trace(
 							"Failed to save SearchParamIndexIdentity for search parameter with hash identity: {}, "
-									+ "paramName: {}, resourceType: {}, retrying attempt: {}",
+									+ "resourceType: {}, paramName: {}, retry attempt: {}",
 							myHashIdentity,
-							myParamName,
 							myResourceType,
+							myParamName,
 							retry,
 							theDataIntegrityViolationException);
 				}
-				ourLog.warn(
-						"Failed saving IndexedSearchParamIdentity with hash identity: {}, paramName: {}, resourceType: {}",
-						myHashIdentity,
-						myResourceType,
-						myParamName);
 			}
+			ourLog.warn(
+					"Failed saving IndexedSearchParamIdentity with hash identity: {}, resourceType: {}, paramName: {}",
+					myHashIdentity,
+					myResourceType,
+					myParamName);
 			return null;
 		}
 
