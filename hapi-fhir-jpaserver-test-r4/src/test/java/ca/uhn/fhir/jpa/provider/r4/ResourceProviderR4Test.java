@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -2478,6 +2479,69 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + (InstantDt.withCurrentTime().getYear() + 1));
 		assertThat(idValues).isEmpty();
+	}
+
+	@Test
+	public void testPaginatingHistoryWithGenericClientLoadPageMethod() throws Exception {
+		//Given: A patient with 100 versions.
+		Patient p = new Patient().setActive(true);
+		p.setId("a123");
+		myPatientDao.update(p);
+
+		for (int i=0; i < 99; i++) {
+			p.addName().setFamily("John" + i);
+			myPatientDao.update(p, mySrd);
+		}
+
+		Bundle response = myClient
+			.history()
+			.onInstance(new IdType("Patient", "a123"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		//When: Paginating using GenericClient's "loadPage()" method
+		while (response.getLink("next") != null) {
+			response = myClient.loadPage().next(response).execute();
+		}
+		//Verify: We paginate to the last page.
+		assertNotNull(response.getLink("self"));
+		assertNotNull(response.getLink("previous"));
+		assertNull(response.getLink("next"));
+	}
+
+	@Test
+	public void testPaginatingHistoryWithOffsetAndCountQueryParam() throws Exception {
+		//Given: A patient with 100 versions.
+		Patient p = new Patient().setActive(true);
+		p.setId("a123");
+		myPatientDao.update(p);
+
+		for (int i=0; i < 99; i++) {
+			p.addName().setFamily("John" + i);
+			myPatientDao.update(p, mySrd);
+		}
+
+		int offset = 0;
+		Bundle response;
+		boolean nextLinkExists = true;
+		//When: Paginating using _offset and _count query parameters
+		while (nextLinkExists) {
+			response = myClient
+				.history()
+				.onInstance(new IdType("Patient", "a123"))
+				.returnBundle(Bundle.class)
+				.offset(offset)
+				.count(10)
+				.execute();
+			offset += 10;
+			nextLinkExists = response.getLink("next") != null;
+			//Verify: We get to the last page.
+			if (!nextLinkExists){
+				assertNotNull(response.getLink("self"));
+				assertNotNull(response.getLink("previous"));
+				assertNull(response.getLink("next"));
+			}
+		}
 	}
 
 

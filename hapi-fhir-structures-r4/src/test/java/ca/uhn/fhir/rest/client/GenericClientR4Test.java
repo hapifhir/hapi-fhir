@@ -2661,11 +2661,20 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		response = client
 			.history()
 			.onInstance(new IdType("Patient", "123"))
-			.andReturnBundle(Bundle.class)
+			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertThat(response.getEntry()).hasSize(1);
 		idx++;
+
+		response = client
+			 .history()
+			 .onInstance(new IdType("Patient", "123"))
+			 .returnBundle(Bundle.class)
+			 .offset(0)
+			 .count(1)
+			 .execute();
+		assertEquals("http://example.com/fhir/Patient/123/_history?_count=1&_offset=0", capt.getAllValues().get(idx).getURI().toString());
 	}
 
 	@Test

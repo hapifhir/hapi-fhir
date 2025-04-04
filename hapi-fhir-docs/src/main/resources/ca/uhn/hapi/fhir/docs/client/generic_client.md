@@ -235,7 +235,7 @@ To retrieve the version history of all resources, or all resources of a given ty
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|historyDstu2}}
 ```
 
-You can also optionally request that only resource versions later than a given date, and/or only up to a given count (number) of resource versions be returned.
+You can also optionally request that only resource versions later than a given date, and/or only up to a given count (number) of resource versions be returned starting from a specific index.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/GenericClientExample.java|historyFeatures}}
