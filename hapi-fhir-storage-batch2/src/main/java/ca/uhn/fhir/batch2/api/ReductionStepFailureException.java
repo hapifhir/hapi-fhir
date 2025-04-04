@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.topic;
+package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
-import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
 
 /**
- * Tag interface for Subscription Topic Loaders
+ * This class holds the report produced at the end of a bulk import
  */
-public interface ISubscriptionTopicLoader extends IResourceChangeListener, IResourceRepositoryCache {}
+public class ReductionStepFailureException extends BaseUnrecoverableRuntimeException {
+
+	private final IModelJson myReportMsg;
+
+	public ReductionStepFailureException(String theErrorMessage, IModelJson theReportMsg) {
+		super(theErrorMessage);
+
+		myReportMsg = theReportMsg;
+	}
+
+	public IModelJson getReportMsg() {
+		return myReportMsg;
+	}
+}

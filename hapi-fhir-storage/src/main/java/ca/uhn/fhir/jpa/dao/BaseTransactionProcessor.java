@@ -52,6 +52,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -81,6 +82,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -91,7 +93,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -114,6 +118,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,6 +143,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -149,6 +155,10 @@ public abstract class BaseTransactionProcessor {
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	private static final String POST = "POST";
+	private static final String PUT = "PUT";
+	private static final String DELETE = "DELETE";
+	private static final String PATCH = "PATCH";
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
@@ -385,6 +395,78 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.DEFAULT;
+		if (theRequestDetails != null) {
+			String transactionSemanticsString = theRequestDetails.getHeader("X-Transaction-Semantics");
+			if (transactionSemanticsString != null) {
+				transactionSemantics = TransactionSemanticsHeader.parse(transactionSemanticsString);
+			}
+		}
+
+		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
+		boolean switchedToBatch = false;
+
+		int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
+		int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+
+		// Don't let the user request a crazy delay, this could be used
+		// as a DOS attack
+		maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
+		maxRetryDelay = Math.min(maxRetryDelay, 10000);
+		totalAttempts = Math.min(totalAttempts, 5);
+
+		IBaseBundle response;
+		for (int i = 1; ; i++) {
+			try {
+				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					BundleUtil.setBundleType(myContext, theRequest, "transaction");
+					response = processTransaction(theRequestDetails, theRequest, "Transaction", theNestedMode);
+				} else {
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+					response = processBatch(theRequestDetails, theRequest, theNestedMode);
+				}
+				break;
+			} catch (BaseServerResponseException e) {
+				if (i >= totalAttempts || theNestedMode) {
+					throw e;
+				}
+
+				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
+				String sleepMessage = "";
+				if (delay > 0) {
+					sleepMessage = "Sleeping for " + delay + " ms. ";
+				}
+
+				String switchedToBatchMessage = "";
+				if (switchedToBatch) {
+					switchedToBatchMessage = " (as batch)";
+				}
+
+				String switchingToBatchMessage = "";
+				if (i + 1 == totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					switchingToBatchMessage = "Performing final retry using batch semantics. ";
+					switchedToBatch = true;
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+				}
+
+				ourLog.warn(
+						"Transaction processing attempt{} {}/{} failed. {}{}",
+						switchedToBatchMessage,
+						i,
+						totalAttempts,
+						sleepMessage,
+						switchingToBatchMessage);
+
+				if (delay > 0) {
+					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
+				}
+			}
+		}
+
+		return response;
+	}
+
+	private IBaseBundle processBatch(RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info(
 				"Beginning batch with {} resources",
 				myVersionAdapter.getEntries(theRequest).size());
@@ -1030,10 +1112,11 @@ public abstract class BaseTransactionProcessor {
 	 * @param theBaseResource - base resource
 	 * @param theNextReqEntry - next request entry
 	 * @param theAllIds       - set of all IIdType values
+	 * @param theVerb
 	 * @return
 	 */
 	private IIdType getNextResourceIdFromBaseResource(
-			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds) {
+			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
 		IIdType nextResourceId = null;
 		if (theBaseResource != null) {
 			nextResourceId = theBaseResource.getIdElement();
@@ -1080,7 +1163,7 @@ public abstract class BaseTransactionProcessor {
 											"transactionContainsMultipleWithDuplicateId",
 											nextResourceId));
 				}
-			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart() && !"POST".equals(theVerb)) {
 				IIdType nextId = nextResourceId.toUnqualifiedVersionless();
 				if (!theAllIds.add(nextId)) {
 					throw new InvalidRequestException(Msg.code(535)
@@ -1146,13 +1229,13 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 
-				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
-
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
 				}
 				previousVerb = verb;
+
+				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
 
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
@@ -1972,9 +2055,10 @@ public abstract class BaseTransactionProcessor {
 	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
 	 * 2. It is a reference that has been identified for auto versioning or
 	 * 3. Is a placeholder reference
-	 * @param theReferencesToAutoVersion list of references identified for auto versioning
+	 *
+	 * @param theReferencesToAutoVersion               list of references identified for auto versioning
 	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
-	 * @param theResourceReference the resource reference
+	 * @param theResourceReference                     the resource reference
 	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
 	 */
 	private boolean shouldReplaceResourceReference(
@@ -2206,11 +2290,11 @@ public abstract class BaseTransactionProcessor {
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		switch (defaultString(verb)) {
-			case "POST":
+			case POST:
 				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			case "PUT":
-			case "DELETE":
-			case "PATCH":
+			case PUT:
+			case DELETE:
+			case PATCH:
 				String url = extractTransactionUrlOrThrowException(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {

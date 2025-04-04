@@ -59,9 +59,9 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
+public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStepV1.class);
 
 	@Autowired
 	private FhirContext myCtx;

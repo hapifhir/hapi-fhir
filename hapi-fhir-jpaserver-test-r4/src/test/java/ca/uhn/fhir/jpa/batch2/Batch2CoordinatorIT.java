@@ -1051,6 +1051,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				return ChunkOutcome.SUCCESS();
 			}
 
+			@Override
+			public IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> newInstance() {
+				return this;
+			}
+
 			@Nonnull
 			@Override
 			public RunOutcome run(

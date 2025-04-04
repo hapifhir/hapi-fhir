@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Converter
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%

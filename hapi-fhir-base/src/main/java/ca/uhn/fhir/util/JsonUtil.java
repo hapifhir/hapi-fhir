@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.Nonnull;
+import org.thymeleaf.util.Validate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +84,7 @@ public class JsonUtil {
 	 * Parse JSON
 	 */
 	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
+		Validate.notEmpty(theInput, "theInput must not be blank or null");
 		try {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 		} catch (IOException e) {

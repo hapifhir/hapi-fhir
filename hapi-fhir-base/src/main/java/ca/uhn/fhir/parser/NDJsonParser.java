@@ -54,12 +54,12 @@ public class NDJsonParser extends BaseParser {
 		super(theContext, theParserErrorHandler);
 		myFhirContext = theContext;
 
-		myJsonParser = theContext.newJsonParser();
+		myJsonParser = theContext.newJsonParser().setPrettyPrint(false);
 	}
 
 	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {
-		myJsonParser.setPrettyPrint(thePrettyPrint);
+		// Ignore this call, because it doesn't make sense for NDJSON
 		return this;
 	}
 

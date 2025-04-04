@@ -65,6 +65,11 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 		return ChunkOutcome.SUCCESS();
 	}
 
+	@Override
+	public IReductionStepWorker<PT, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson> newInstance() {
+		return new ReplaceReferenceUpdateTaskReducerStep<>(myDaoRegistry);
+	}
+
 	@Nonnull
 	@Override
 	public RunOutcome run(

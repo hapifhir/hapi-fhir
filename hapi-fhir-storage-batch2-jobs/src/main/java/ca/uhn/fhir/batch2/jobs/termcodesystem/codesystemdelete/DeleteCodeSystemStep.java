@@ -73,4 +73,10 @@ public class DeleteCodeSystemStep
 		 */
 		return ChunkOutcome.SUCCESS();
 	}
+
+	@Override
+	public IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel>
+			newInstance() {
+		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
+	}
 }

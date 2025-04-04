@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6840
+title: "When invoking a FHIR transaction, a new optional header called `X-Transaction-Semantics` can be used to
+   influence how the operation is processed. This header can request automatic retry on failure and other options.
+   See [FHIR Transactions](https://smilecdr.com/docs/fhir_standard/transactions.html) for more information."

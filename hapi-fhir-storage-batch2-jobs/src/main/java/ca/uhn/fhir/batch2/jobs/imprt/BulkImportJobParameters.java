@@ -61,6 +61,20 @@ public class BulkImportJobParameters implements IModelJson {
 	@Nullable
 	private RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "chunkByCompartmentName", required = false)
+	@Nullable
+	private String myChunkByCompartmentName;
+
+	@Nullable
+	public String getChunkByCompartmentName() {
+		return myChunkByCompartmentName;
+	}
+
+	public BulkImportJobParameters setChunkByCompartmentName(@Nullable String theChunkByCompartmentName) {
+		myChunkByCompartmentName = theChunkByCompartmentName;
+		return this;
+	}
+
 	public List<String> getNdJsonUrls() {
 		if (myNdJsonUrls == null) {
 			myNdJsonUrls = new ArrayList<>();

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * hapi-fhir-storage-batch2-jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.topic;
+package ca.uhn.fhir.batch2.jobs.imprt;
 
-import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
-import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Tag interface for Subscription Topic Loaders
- */
-public interface ISubscriptionTopicLoader extends IResourceChangeListener, IResourceRepositoryCache {}
+public class BulkImportReportJson implements IModelJson {
+
+	@JsonProperty("reportMsg")
+	private String myReportMsg;
+
+	public String getReportMsg() {
+		return myReportMsg;
+	}
+
+	public void setReportMsg(String theReportMsg) {
+		myReportMsg = theReportMsg;
+	}
+}

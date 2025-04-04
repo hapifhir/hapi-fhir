@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -164,6 +165,20 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	/**
+	 * Returns the first logged message where the formatted text (i.e. including placeholder {} substitutions) contains
+	 * the substring of {@literal theText}.
+	 */
+	public Optional<ILoggingEvent> findLogEventWithFormattedMessage(String theText) {
+		for (ILoggingEvent t : getLogEvents()) {
+			String formattedMessage = t.getFormattedMessage();
+			if (formattedMessage.contains(theText)) {
+				return Optional.of(t);
+			}
+		}
+		return Optional.empty();
+	}
+
+    /**
 	 * Predicate for passing to {@link #getLogEvents(Predicate)}
 	 */
 	public static Predicate<ILoggingEvent> atLeastLevel(Level theLevel) {
