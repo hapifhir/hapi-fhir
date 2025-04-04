@@ -21,7 +21,6 @@ package ca.uhn.fhir.broker.jms;
 
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
-import ca.uhn.fhir.broker.api.StringMessage;
 import ca.uhn.fhir.broker.impl.SpringMessagingSendResult;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;

@@ -19,10 +19,7 @@
  */
 package ca.uhn.fhir.broker.api;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
-
-import java.security.InvalidParameterException;
 
 /**
  * @param <T> The type of messages sent by this producer
