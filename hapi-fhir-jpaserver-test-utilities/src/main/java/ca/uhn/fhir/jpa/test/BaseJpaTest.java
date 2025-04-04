@@ -321,12 +321,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	@TestConfiguration
 	public static class TestSearchParamRegistryConfig {
 
-		@Autowired
+		@Autowired(required = false)
 		private SearchParamRegistryImpl mySearchParamRegistry;
 
 		@PostConstruct
 		public void disablePrePopulation() {
-			mySearchParamRegistry.setPopulateSearchParamIdentities(false);
+			if (mySearchParamRegistry != null) {
+				mySearchParamRegistry.setPopulateSearchParamIdentities(false);
+			}
 		}
 	}
 
