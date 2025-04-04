@@ -3557,10 +3557,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myCaptureQueriesListener.clear();
 		myObservationDao.update(obs);
 
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(9, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(9, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		String unformattedSql = myCaptureQueriesListener.getUpdateQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql).contains(

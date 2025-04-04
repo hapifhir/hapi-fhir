@@ -71,7 +71,7 @@ Setting this property explicitly to false disables the feature:  [Non Resource D
 
 # Enabling Index Storage Optimization
 
-If enabled, the server will not write data to the `SP_NAME`, `RES_TYPE`, `SP_UPDATED` columns for all `HFJ_SPIDX_xxx` tables.
+If enabled, the server will not write data to the `SP_NAME`, `RES_TYPE` columns for all `HFJ_SPIDX_xxx` tables.
 
 This setting may be enabled on servers where `HFJ_SPIDX_xxx` tables are expected to have a large amount of data (millions of rows) in order to reduce overall storage size.
 
@@ -79,7 +79,7 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 
 ## Limitations
 
-* This setting only applies to newly inserted and updated rows in `HFJ_SPIDX_xxx` tables. All existing rows will still have values in `SP_NAME`, `RES_TYPE` and `SP_UPDATED` columns. Executing `$reindex` operation will apply storage optimization to existing data.
+* This setting only applies to newly inserted and updated rows in `HFJ_SPIDX_xxx` tables. All existing rows will still have values in `SP_NAME`, `RES_TYPE` columns. Executing `$reindex` operation will apply storage optimization to existing data.
 
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 

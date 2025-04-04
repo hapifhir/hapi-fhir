@@ -1,0 +1,5 @@
+---
+type: remove
+issue: 6621
+title: "The `SP_UPDATED` column is no longer used in the `HFJ_SPIDX_*` tables.
+Existing data in the `SP_UPDATED` column can be safely removed manually to reclaim database storage space."

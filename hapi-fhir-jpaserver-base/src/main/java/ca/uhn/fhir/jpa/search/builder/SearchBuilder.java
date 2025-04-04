@@ -203,6 +203,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
 	private final JpaStorageSettings myStorageSettings;
+	private final SearchQueryProperties mySearchProperties;
+	private final IResourceHistoryTableDao myResourceHistoryTableDao;
+	private final IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -222,18 +225,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 
-	private SearchQueryProperties mySearchProperties;
-
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	@Autowired(required = false)
 	public void setFullTextSearch(IFulltextSearchSvc theFulltextSearchSvc) {
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
-
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;

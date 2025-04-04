@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR JPA - Search Parameters
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
+public interface ISearchParamIdentityCacheSvc {
 
-import java.util.Optional;
-
-public interface ISearchParamHashIdentityRegistry {
-	Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity);
+	void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName);
 }

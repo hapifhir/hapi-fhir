@@ -559,7 +559,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), () ->
+			myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n")));
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
