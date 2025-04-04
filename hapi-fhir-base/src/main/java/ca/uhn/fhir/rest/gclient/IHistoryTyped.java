@@ -52,7 +52,7 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 	IHistoryTyped<T> since(Date theCutoff);
 
 	/**
-	 * Requests that the server returns results starting from a specific index of a page. Use
+	 * Requests that the server skips a number of resources and start at the specified element. Use
 	 * with {@link #count(Integer)}.
 	 */
 	IHistoryTyped<T> offset(Integer theOffset);
