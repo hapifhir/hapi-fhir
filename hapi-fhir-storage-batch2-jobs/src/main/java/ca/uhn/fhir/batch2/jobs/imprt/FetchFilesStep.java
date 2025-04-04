@@ -221,8 +221,17 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 				if (pathSegments.length > 1) {
 					String elementName = pathSegments[1];
 
-					Map<String, Object> reference = (Map<String, Object>) parsed.get(elementName);
-					if (reference != null) {
+					Object object = parsed.get(elementName);
+					if (object instanceof List) {
+						List<Object> list = (List<Object>) object;
+						object = null;
+						if (!list.isEmpty()) {
+							object = list.get(0);
+						}
+					}
+
+					if (object instanceof Map) {
+						Map<String, Object> reference = (Map<String, Object>) object;
 						String referenceVal = (String) reference.get("reference");
 						if (referenceVal != null) {
 							return Integer.toString(referenceVal.hashCode() % 100);
