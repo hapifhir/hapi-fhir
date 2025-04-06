@@ -73,11 +73,18 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 	private void doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
 		try {
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+		// FIXME KHS streamline the exception api
 		} catch (MessageDeliveryException e) {
 			if (e.getCause() instanceof PayloadTooLargeException) {
-				theResourceModifiedMessage.setPayloadToNull();
-				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+				nullPayloadAndResubmit(theResourceModifiedMessage);
 			}
+		} catch (PayloadTooLargeException e) {
+			nullPayloadAndResubmit(theResourceModifiedMessage);
 		}
+	}
+
+	private void nullPayloadAndResubmit(ResourceModifiedMessage theResourceModifiedMessage) {
+		theResourceModifiedMessage.setPayloadToNull();
+		myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 	}
 }

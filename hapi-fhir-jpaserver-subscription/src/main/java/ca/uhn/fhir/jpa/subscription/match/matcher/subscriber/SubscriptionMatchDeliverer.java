@@ -156,7 +156,8 @@ public class SubscriptionMatchDeliverer {
 				ourLog.warn("Failed to send message to Delivery Channel.");
 			}
 		} catch (RuntimeException e) {
-			if (e.getCause() instanceof PayloadTooLargeException) {
+			// FIXME KHS use util
+			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
 				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker "
 						+ "max message size. Retry is about to be performed without payload.");
 				ResourceDeliveryJsonMessage msgPayloadLess = nullOutPayload(theWrappedMsg);
