@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -29,6 +30,9 @@ class LogbackUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(LogbackUtil.class);
 
 	static void loggingConfigOff() {
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			return;
+		}
 		try {
 			JoranConfigurator configurator = new JoranConfigurator();
 			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
@@ -52,6 +56,9 @@ class LogbackUtil {
 	}
 
 	static void setLogbackConfig(String logbackConfigFilename) {
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			return;
+		}
 		try {
 			JoranConfigurator configurator = new JoranConfigurator();
 			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
