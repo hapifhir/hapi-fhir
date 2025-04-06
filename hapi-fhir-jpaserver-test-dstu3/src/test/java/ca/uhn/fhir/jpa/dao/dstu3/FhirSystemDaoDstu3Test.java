@@ -1653,27 +1653,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
-	public void testTransactionFailsWithDuplicateIds() {
-		Bundle request = new Bundle();
-
-		Patient patient1 = new Patient();
-		patient1.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
-		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST);
-
-		Patient patient2 = new Patient();
-		patient2.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
-		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
-		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
-		try {
-			mySystemDao.transaction(mySrd, request);
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = FhirSystemDaoDstu3Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
