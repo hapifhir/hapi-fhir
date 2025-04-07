@@ -99,15 +99,29 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
+	/**
+	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
+	 * method has always been misnamed for historical reasons.
+	 */
+	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
+		return getFirstIssueDiagnostics(theCtx, theOutcome);
+	}
+
+	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", 0);
+	}
+
+	public static String getIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome, int theIndex) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", theIndex);
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "location");
+		return getIssueStringPart(theCtx, theOutcome, "location", 0);
 	}
 
-	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
+	private static String getIssueStringPart(
+			FhirContext theCtx, IBaseOperationOutcome theOutcome, String theName, int theIndex) {
 		if (theOutcome == null) {
 			return null;
 		}
@@ -116,14 +130,14 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 
 		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
-		if (issues.isEmpty()) {
+		if (issues.size() <= theIndex) {
 			return null;
 		}
 
-		IBase issue = issues.get(0);
+		IBase issue = issues.get(theIndex);
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(theName);
 
 		List<IBase> details = detailsChild.getAccessor().getValues(issue);
 		if (details.isEmpty()) {

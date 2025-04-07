@@ -101,6 +101,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
 			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAILED));
+		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
@@ -156,6 +157,7 @@ public class ReductionStepExecutorServiceImplTest {
 			.thenReturn(ChunkOutcome.SUCCESS());
 		when(myReductionStepWorker.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
 			.thenReturn(RunOutcome.SUCCESS);
+		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
@@ -205,6 +207,7 @@ public class ReductionStepExecutorServiceImplTest {
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID))).thenReturn(chunks.stream());
 		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
 		doThrow(new RuntimeException("This is an error")).when(myReductionStepWorker).consume(any(ChunkExecutionDetails.class));
+		when(myReductionStepWorker.newInstance()).thenReturn(myReductionStepWorker);
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
