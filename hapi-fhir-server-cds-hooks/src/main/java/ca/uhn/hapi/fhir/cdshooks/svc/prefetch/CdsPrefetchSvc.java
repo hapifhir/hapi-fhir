@@ -144,6 +144,7 @@ public class CdsPrefetchSvc {
 			String template = theServiceSpec.getPrefetch().get(key);
 			CdsResolutionStrategyEnum source = theServiceSpec.getSource().get(key);
 			CdsPrefetchFailureMode failureMode = theServiceSpec.getPrefetchFailureMode(key);
+			Integer maxPages = theServiceSpec.getMaxPages(key);
 			if (!theStrategies.contains(source)) {
 				throw new PreconditionFailedException(
 						Msg.code(2386) + "Unable to fetch missing resource(s) with source " + source);
@@ -177,7 +178,7 @@ public class CdsPrefetchSvc {
 			cdsHookPrefetchPointcutContext.setCdsResolutionStrategy(source);
 
 			IBaseResource resource = prefetchResource(
-					theCdsServiceRequestJson, key, url, source, failureMode, cdsHookPrefetchPointcutContext);
+					theCdsServiceRequestJson, key, url, source, failureMode, maxPages, cdsHookPrefetchPointcutContext);
 
 			// if the prefetch failed and the failure mode is OMIT, then the resource would be null,
 			// it shouldn't be added to the request
@@ -194,6 +195,7 @@ public class CdsPrefetchSvc {
 			String theUrl,
 			CdsResolutionStrategyEnum theStrategy,
 			CdsPrefetchFailureMode theFailureMode,
+			Integer theMaxPages,
 			CdsHookPrefetchPointcutContextJson theCdsHookPrefetchPointcutContext) {
 
 		callCdsPrefetchRequestHooks(theCdsHookPrefetchPointcutContext, theCdsServiceRequestJson);
@@ -202,7 +204,7 @@ public class CdsPrefetchSvc {
 		try {
 
 			if (theStrategy == CdsResolutionStrategyEnum.FHIR_CLIENT) {
-				resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, theUrl);
+				resource = myResourcePrefetchFhirClient.resourceFromUrl(theCdsServiceRequestJson, theUrl, theMaxPages);
 			} else if (theStrategy == CdsResolutionStrategyEnum.DAO) {
 				resource = getResourceFromDaoWithPermissionCheck(theUrl);
 			} else {

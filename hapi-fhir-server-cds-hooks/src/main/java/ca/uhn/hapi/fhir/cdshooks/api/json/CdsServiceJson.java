@@ -59,6 +59,8 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 
 	private Map<String, CdsPrefetchFailureMode> myPrefetchFailureModes;
 
+	private Map<String, Integer> myMaxPages;
+
 	public String getHook() {
 		return myHook;
 	}
@@ -135,5 +137,19 @@ public class CdsServiceJson extends BaseCdsServiceJson {
 			myPrefetchFailureModes = new LinkedHashMap<>();
 		}
 		return myPrefetchFailureModes.getOrDefault(theKey, CdsPrefetchFailureMode.FAIL);
+	}
+
+	public void addMaxPages(String theKey, Integer theMaxPages) {
+		if (myMaxPages == null) {
+			myMaxPages = new LinkedHashMap<>();
+		}
+		myMaxPages.put(theKey, theMaxPages);
+	}
+
+	public Integer getMaxPages(String theKey) {
+		if (myMaxPages == null) {
+			myMaxPages = new LinkedHashMap<>();
+		}
+		return myMaxPages.getOrDefault(theKey, 0);
 	}
 }

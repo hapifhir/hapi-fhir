@@ -232,8 +232,9 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	CdsPrefetchFhirClientSvc resourcePrefetchFhirClient(FhirContext theFhirContext) {
-		return new CdsPrefetchFhirClientSvc(theFhirContext);
+	CdsPrefetchFhirClientSvc resourcePrefetchFhirClient(
+			FhirContext theFhirContext, @Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new CdsPrefetchFhirClientSvc(theFhirContext, theInterceptorBroadcaster);
 	}
 
 	@Bean

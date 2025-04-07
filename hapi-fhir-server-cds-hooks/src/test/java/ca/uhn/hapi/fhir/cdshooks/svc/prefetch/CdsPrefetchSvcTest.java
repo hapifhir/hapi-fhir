@@ -398,7 +398,7 @@ class CdsPrefetchSvcTest {
 		when(myCdsResolutionStrategySvc.determineResolutionStrategy(myServiceMethodMock, theRequest)).thenReturn(Set.of(theResolutionStrategy));
 		when(myServiceMethodMock.getCdsServiceJson()).thenReturn(theServiceDefinition);
 		if (theResolutionStrategy == CdsResolutionStrategyEnum.FHIR_CLIENT) {
-			when(myCdsPrefetchFhirClientSvc.resourceFromUrl(eq(theRequest), any(String.class))).thenThrow(theException);
+			when(myCdsPrefetchFhirClientSvc.resourceFromUrl(eq(theRequest), any(String.class), eq(0))).thenThrow(theException);
 		}
 		else if (theResolutionStrategy == CdsResolutionStrategyEnum.DAO) {
 			when(myCdsPrefetchDaoSvc.resourceFromUrl(any(String.class))).thenThrow(theException);
@@ -414,7 +414,7 @@ class CdsPrefetchSvcTest {
 		when(myCdsResolutionStrategySvc.determineResolutionStrategy(myServiceMethodMock, theRequest)).thenReturn(Set.of(theResolutionStrategy));
 		when(myServiceMethodMock.getCdsServiceJson()).thenReturn(theServiceDefinition);
 		if (theResolutionStrategy == CdsResolutionStrategyEnum.FHIR_CLIENT) {
-			when(myCdsPrefetchFhirClientSvc.resourceFromUrl(eq(theRequest), any(String.class))).thenReturn(theResource);
+			when(myCdsPrefetchFhirClientSvc.resourceFromUrl(eq(theRequest), any(String.class), eq(0))).thenReturn(theResource);
 		}
 		else if (theResolutionStrategy == CdsResolutionStrategyEnum.DAO) {
 			when(myCdsPrefetchDaoSvc.resourceFromUrl(any(String.class))).thenReturn(theResource);
