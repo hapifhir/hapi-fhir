@@ -50,4 +50,10 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
 	 */
 	IHistoryTyped<T> since(Date theCutoff);
+
+	/**
+	 * Specifies the <code>_offset</code> parameter, which indicates to the server the offset of the history query. Use
+	 * with {@link #count(int)}.
+	 */
+	IHistoryTyped<T> offset(Integer theOffset);
 }
