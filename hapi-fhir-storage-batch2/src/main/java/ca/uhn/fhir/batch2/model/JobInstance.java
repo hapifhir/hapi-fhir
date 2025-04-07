@@ -385,8 +385,9 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return myReport;
 	}
 
-	public void setReport(String theReport) {
+	public JobInstance setReport(String theReport) {
 		myReport = theReport;
+		return this;
 	}
 
 	public String getTriggeringUsername() {

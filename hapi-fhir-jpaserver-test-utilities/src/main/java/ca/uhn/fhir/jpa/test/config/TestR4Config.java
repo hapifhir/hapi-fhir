@@ -30,8 +30,8 @@ import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -43,7 +43,6 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,6 +56,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -74,6 +74,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 	PackageLoaderConfig.class,
 	TestHapiJpaConfig.class,
 	TestJPAConfig.class,
+	SubscriptionTopicConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
@@ -112,8 +113,6 @@ public class TestR4Config {
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -191,7 +190,9 @@ public class TestR4Config {
 		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
-		DataSource dataSource = ProxyDataSourceBuilder
+		//			.logQueryBySlf4j(level)
+
+		return ProxyDataSourceBuilder
 			.create(retVal)
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
@@ -202,15 +203,13 @@ public class TestR4Config {
 			.countQuery(singleQueryCountHolder())
 			.afterMethod(captureQueriesListener())
 			.build();
-
-		return dataSource;
 	}
 
 
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
 		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
-		theDataSource.setMaxWaitMillis(30000);
+		theDataSource.setMaxWait(Duration.ofSeconds(30));
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");
 		theDataSource.setMaxTotal(ourMaxThreads);

@@ -62,6 +62,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+/**
+ * Tests the legacy bulk import job, which may well no longer be needed
+ */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuilder {
 
