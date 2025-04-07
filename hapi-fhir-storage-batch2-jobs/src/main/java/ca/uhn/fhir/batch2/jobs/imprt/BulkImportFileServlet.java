@@ -181,8 +181,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	}
 
 	/**
-	 * Mostly intended for unit tests, registers a file
-	 * using raw file contents.
+	 * Registers a file using file contents as a String for service up to the bulk import job.
 	 */
 	public String registerFileByContents(String theFileContents, String theSourceName) {
 		return registerFile(new IFileSupplier() {
@@ -207,6 +206,9 @@ public class BulkImportFileServlet extends HttpServlet {
 		});
 	}
 
+	/**
+	 * Registers a file on disk for service up to the bulk import job.
+	 */
 	public String registerFile(File theFile) {
 		return registerFile(new IFileSupplier() {
 			@Override
@@ -232,7 +234,10 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		InputStream openStream() throws IOException;
 
+		// TODO: drop the default method once all implementations implement it
 		@Nullable
-		String getName();
+		default String getName() {
+			return null;
+		}
 	}
 }

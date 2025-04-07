@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -221,9 +222,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				});
 
 				return status;
-			}, s -> s == StatusEnum.COMPLETED);
+			}, s -> s == StatusEnum.COMPLETED || s == StatusEnum.FAILED);
 
-			String storageDescription = runInTransaction(() -> {
+			runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
 				String storage = myJobInstanceRepository
 					.findAll()
@@ -243,6 +244,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
 
+				assertEquals(StatusEnum.FAILED, instance.getStatus());
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNotNull(instance.getEndTime());

@@ -93,9 +93,9 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 
 		Map<String, FileBuffer> groupToBuffer = new HashMap<>();
 
-		String groupByCompartmentName = theStepExecutionDetails.getParameters().getGroupByCompartmentName();
-		if (isNotBlank(groupByCompartmentName)) {
-			ourLog.info("Will group resources by compartment: {}", groupByCompartmentName);
+		String chunkByCompartmentName = theStepExecutionDetails.getParameters().getChunkByCompartmentName();
+		if (isNotBlank(chunkByCompartmentName)) {
+			ourLog.info("Will group resources by compartment: {}", chunkByCompartmentName);
 		}
 
 		try (CloseableHttpClient httpClient = newHttpClient(theStepExecutionDetails)) {
@@ -129,8 +129,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 								if (isNotBlank(nextLine)) {
 									lineCountOverallProgress++;
 
-									if (isNotBlank(groupByCompartmentName)) {
-										groupName = determineCompartmentGroup(groupByCompartmentName, nextLine);
+									if (isNotBlank(chunkByCompartmentName)) {
+										groupName = determineCompartmentGroup(chunkByCompartmentName, nextLine);
 									}
 
 									FileBuffer buffer = groupToBuffer.computeIfAbsent(groupName, p -> new FileBuffer());
@@ -154,7 +154,11 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 				}
 
-				// Send any lingering data in buffers
+				/*
+				 * Send any lingering data in buffers. In the code above we are going through each resource and builing
+				 * up a series of buffers, which are transmitted when they are full. The following loop transmits any
+				 * data that remains in any of the buffers because they did not reach capacity.
+				 */
 				for (FileBuffer buffer : groupToBuffer.values()) {
 					if (buffer.getResourceCount() > 0) {
 						transmitBuffer(
@@ -217,8 +221,17 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 				if (pathSegments.length > 1) {
 					String elementName = pathSegments[1];
 
-					Map<String, Object> reference = (Map<String, Object>) parsed.get(elementName);
-					if (reference != null) {
+					Object object = parsed.get(elementName);
+					if (object instanceof List) {
+						List<Object> list = (List<Object>) object;
+						object = null;
+						if (!list.isEmpty()) {
+							object = list.get(0);
+						}
+					}
+
+					if (object instanceof Map) {
+						Map<String, Object> reference = (Map<String, Object>) object;
 						String referenceVal = (String) reference.get("reference");
 						if (referenceVal != null) {
 							return Integer.toString(referenceVal.hashCode() % 100);
@@ -311,17 +324,18 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 			int theLineCount,
 			int theLineCountTotal) {
 
-		int linePercentage = (int) (100.0 * ((double) theLineCount / theLineCountTotal));
-
-		ourLog.info(
-				"Loaded chunk {} of {} NDJSON file (overall progress {}% line {} / {}) with {} resources from URL: {}",
-				chunkCount,
-				FileUtil.formatFileSize(buffer.getFileSize()),
-				linePercentage,
-				theLineCount,
-				theLineCountTotal,
-				buffer.getResourceCount(),
-				nextUrl);
+		if (theLineCountTotal > 0) {
+			int linePercentage = (int) (100.0 * ((double) theLineCount / theLineCountTotal));
+			ourLog.info(
+					"Loaded chunk {} of {} NDJSON file (overall progress {}% line {} / {}) with {} resources from URL: {}",
+					chunkCount,
+					FileUtil.formatFileSize(buffer.getFileSize()),
+					linePercentage,
+					theLineCount,
+					theLineCountTotal,
+					buffer.getResourceCount(),
+					nextUrl);
+		}
 
 		NdJsonFileJson data = new NdJsonFileJson();
 		data.setNdJsonText(buffer.toString());

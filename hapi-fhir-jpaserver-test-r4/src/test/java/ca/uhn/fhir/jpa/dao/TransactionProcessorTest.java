@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
@@ -161,17 +160,19 @@ public class TransactionProcessorTest {
 	@Test
 	public void testTransactionWithAutoRetry() {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.setType("batch");
 		Patient p = new Patient();
 		p.setId("P");
 		bb.addTransactionUpdateEntry(p);
 		Bundle input = bb.getBundleTyped();
+		assertEquals(Bundle.BundleType.BATCH, input.getType());
 
 		String headerValue = TransactionSemanticsHeader
 			.newBuilder()
 			.withRetryCount(2)
 			.withMinRetryDelay(20)
 			.withMaxRetryDelay(50)
-			.withFinalRetryAsBatch(true)
+			.withTryBatchAsTransactionFirst(true)
 			.build()
 			.toHeaderValue();
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
@@ -181,24 +182,14 @@ public class TransactionProcessorTest {
 			throw new InternalErrorException("Expected error");
 		});
 
-		List<String> bundleModes = new ArrayList<>();
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, new IAnonymousInterceptor() {
-			@Override
-			public void invoke(IPointcut thePointcut, HookParams theArgs) {
-				Bundle bundle = (Bundle) theArgs.get(IBaseBundle.class);
-				bundleModes.add(bundle.getType().toCode());
-			}
-		});
-
 		// Test
 		Bundle outcome = myTransactionProcessor.transaction(requestDetails, input, false);
 		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		// Verify
 		verify(myPatientDao, times(3)).update(any(), any(), anyBoolean(), anyBoolean(), any(), any());
-		// The last transaction is the nested transaction inside the batch execution
-		assertThat(bundleModes).containsExactly("transaction", "transaction", "batch", "transaction");
-		BundleUtil.TransactionResponse resp = BundleUtil.toTransactionResponse(myFhirContext, outcome);
+
+		TransactionUtil.TransactionResponse resp = TransactionUtil.parseTransactionResponse(myFhirContext, outcome);
 		assertEquals("Expected error", resp.getStorageOutcomes().get(0).getErrorMessage());
 		assertEquals(500, resp.getStorageOutcomes().get(0).getStatusCode());
 

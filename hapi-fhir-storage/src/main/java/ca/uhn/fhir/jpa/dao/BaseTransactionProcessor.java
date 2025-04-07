@@ -155,6 +155,10 @@ public abstract class BaseTransactionProcessor {
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	private static final String POST = "POST";
+	private static final String PUT = "PUT";
+	private static final String DELETE = "DELETE";
+	private static final String PATCH = "PATCH";
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
@@ -451,6 +455,78 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.DEFAULT;
+		if (theRequestDetails != null) {
+			String transactionSemanticsString = theRequestDetails.getHeader("X-Transaction-Semantics");
+			if (transactionSemanticsString != null) {
+				transactionSemantics = TransactionSemanticsHeader.parse(transactionSemanticsString);
+			}
+		}
+
+		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
+		boolean switchedToBatch = false;
+
+		int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
+		int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+
+		// Don't let the user request a crazy delay, this could be used
+		// as a DOS attack
+		maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
+		maxRetryDelay = Math.min(maxRetryDelay, 10000);
+		totalAttempts = Math.min(totalAttempts, 5);
+
+		IBaseBundle response;
+		for (int i = 1; ; i++) {
+			try {
+				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					BundleUtil.setBundleType(myContext, theRequest, "transaction");
+					response = processTransaction(theRequestDetails, theRequest, "Transaction", theNestedMode);
+				} else {
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+					response = processBatch(theRequestDetails, theRequest, theNestedMode);
+				}
+				break;
+			} catch (BaseServerResponseException e) {
+				if (i >= totalAttempts || theNestedMode) {
+					throw e;
+				}
+
+				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
+				String sleepMessage = "";
+				if (delay > 0) {
+					sleepMessage = "Sleeping for " + delay + " ms. ";
+				}
+
+				String switchedToBatchMessage = "";
+				if (switchedToBatch) {
+					switchedToBatchMessage = " (as batch)";
+				}
+
+				String switchingToBatchMessage = "";
+				if (i + 1 == totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					switchingToBatchMessage = "Performing final retry using batch semantics. ";
+					switchedToBatch = true;
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+				}
+
+				ourLog.warn(
+						"Transaction processing attempt{} {}/{} failed. {}{}",
+						switchedToBatchMessage,
+						i,
+						totalAttempts,
+						sleepMessage,
+						switchingToBatchMessage);
+
+				if (delay > 0) {
+					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
+				}
+			}
+		}
+
+		return response;
+	}
+
+	private IBaseBundle processBatch(RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info(
 				"Beginning batch with {} resources",
 				myVersionAdapter.getEntries(theRequest).size());
@@ -2039,9 +2115,10 @@ public abstract class BaseTransactionProcessor {
 	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
 	 * 2. It is a reference that has been identified for auto versioning or
 	 * 3. Is a placeholder reference
-	 * @param theReferencesToAutoVersion list of references identified for auto versioning
+	 *
+	 * @param theReferencesToAutoVersion               list of references identified for auto versioning
 	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
-	 * @param theResourceReference the resource reference
+	 * @param theResourceReference                     the resource reference
 	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
 	 */
 	private boolean shouldReplaceResourceReference(
@@ -2273,11 +2350,11 @@ public abstract class BaseTransactionProcessor {
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		switch (defaultString(verb)) {
-			case "POST":
+			case POST:
 				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			case "PUT":
-			case "DELETE":
-			case "PATCH":
+			case PUT:
+			case DELETE:
+			case PATCH:
 				String url = extractTransactionUrlOrThrowException(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {

@@ -61,17 +61,17 @@ public class BulkImportJobParameters implements IModelJson {
 	@Nullable
 	private RequestPartitionId myPartitionId;
 
-	@JsonProperty(value = "groupByCompartmentName", required = false)
+	@JsonProperty(value = "chunkByCompartmentName", required = false)
 	@Nullable
-	private String myGroupByCompartmentName;
+	private String myChunkByCompartmentName;
 
 	@Nullable
-	public String getGroupByCompartmentName() {
-		return myGroupByCompartmentName;
+	public String getChunkByCompartmentName() {
+		return myChunkByCompartmentName;
 	}
 
-	public BulkImportJobParameters setGroupByCompartmentName(@Nullable String theGroupByCompartmentName) {
-		myGroupByCompartmentName = theGroupByCompartmentName;
+	public BulkImportJobParameters setChunkByCompartmentName(@Nullable String theChunkByCompartmentName) {
+		myChunkByCompartmentName = theChunkByCompartmentName;
 		return this;
 	}
 

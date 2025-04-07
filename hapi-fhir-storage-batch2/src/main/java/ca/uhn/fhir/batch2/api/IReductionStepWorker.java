@@ -46,9 +46,23 @@ public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJs
 	ChunkOutcome consume(ChunkExecutionDetails<PT, IT> theChunkDetails);
 
 	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws ReductionStepFailureException The reduction step may throw {@link ReductionStepFailureException} if it wishes to mark the job as {@link ca.uhn.fhir.batch2.model.StatusEnum#FAILED}
+	 *         but also attach a report to the failed job.
+	 */
+	@Nonnull
+	@Override
+	RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink)
+			throws JobExecutionFailedException, ReductionStepFailureException;
+
+	/**
 	 * This method is called to clone the current worker, so that a fresh clone
 	 * will be used for each reduction invocation. The clone should have any
 	 * dependencies set, but should not have any job state present.
 	 */
-	IReductionStepWorker<PT, IT, OT> newInstance();
+	// TODO: drop the default method once every task has implemented this method
+	default IReductionStepWorker<PT, IT, OT> newInstance() {
+		return this;
+	}
 }

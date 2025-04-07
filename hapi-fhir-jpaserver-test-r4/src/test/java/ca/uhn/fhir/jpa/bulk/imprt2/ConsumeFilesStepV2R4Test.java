@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
-import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
+import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStepV2;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
-import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
+public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 
 	@Autowired
-	private ConsumeFilesStep mySvc;
+	private ConsumeFilesStepV2 mySvc;
 	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "PART-1");
 
 	@BeforeEach
@@ -223,7 +223,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		resources.add(patient);
 
 		// Execute
-		BundleUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
+		TransactionUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
 
 		// Verify
 		assertEquals(2, outcome.getStorageOutcomes().size());

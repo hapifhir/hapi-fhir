@@ -36,24 +36,27 @@ public class TransactionSemanticsHeader {
 	public static final String RETRY_COUNT = "retryCount";
 	public static final String MIN_DELAY = "minRetryDelay";
 	public static final String MAX_DELAY = "maxRetryDelay";
-	public static final String FINAL_RETRY_AS_BATCH = "finalRetryAsBatch";
+	public static final String TRY_BATCH_AS_TRANSACTION_FIRST = "tryBatchAsTransactionFirst";
 	public static final TransactionSemanticsHeader DEFAULT = newBuilder().build();
 	public static final String HEADER_NAME = "X-Transaction-Semantics";
 
 	private final Integer myRetryCount;
 	private final Integer myMinRetryDelay;
 	private final Integer myMaxRetryDelay;
-	private final boolean myFinalRetryAsBatch;
+	private final boolean myTryBatchAsTransactionFirst;
 
 	/**
-	 * Non instantiable, see {@link #newBuilder()}
+	 * Non-instantiable, see {@link #newBuilder()}
 	 */
 	private TransactionSemanticsHeader(
-			Integer theRetryCount, Integer theMinRetryDelay, Integer theMaxRetryDelay, boolean theFinalRetryAsBatch) {
+			Integer theRetryCount,
+			Integer theMinRetryDelay,
+			Integer theMaxRetryDelay,
+			boolean theTryAsBatchAsTransactionFirst) {
 		myRetryCount = theRetryCount;
 		myMinRetryDelay = theMinRetryDelay;
 		myMaxRetryDelay = theMaxRetryDelay;
-		myFinalRetryAsBatch = theFinalRetryAsBatch;
+		myTryBatchAsTransactionFirst = theTryAsBatchAsTransactionFirst;
 	}
 
 	/**
@@ -85,12 +88,15 @@ public class TransactionSemanticsHeader {
 	}
 
 	/**
-	 * When automatically retrying a failed transaction, if this is {@literal true},
-	 * the system will switch from transaction mode to batch mode for the final
-	 * attempt.
+	 * When processing a FHIR Batch bundle, try it as a FHIR transaction first, and only switch
+	 * to batch mode on the first retry. This option is useful in cases where data can safely be
+	 * ingested as a FHIR Batch, since FHIR Transaction processing is generally significantly
+	 * faster. However, FHIR transactions exhibit an all-or-nothing failure mode which is not
+	 * always desirable for batch ingestion, so this option provides an easy fallback which brings
+	 * the benefits of both approaches.
 	 */
-	public boolean isFinalRetryAsBatch() {
-		return myFinalRetryAsBatch;
+	public boolean isTryBatchAsTransactionFirst() {
+		return myTryBatchAsTransactionFirst;
 	}
 
 	/**
@@ -112,9 +118,9 @@ public class TransactionSemanticsHeader {
 				b.append("; ");
 				b.append(MAX_DELAY).append('=').append(myMaxRetryDelay);
 			}
-			if (myFinalRetryAsBatch) {
+			if (myTryBatchAsTransactionFirst) {
 				b.append("; ");
-				b.append(FINAL_RETRY_AS_BATCH).append('=').append("true");
+				b.append(TRY_BATCH_AS_TRANSACTION_FIRST).append('=').append("true");
 			}
 		}
 
@@ -130,7 +136,7 @@ public class TransactionSemanticsHeader {
 		Integer retryCount = null;
 		Integer minRetryDelay = null;
 		Integer maxRetryDelay = null;
-		boolean finalRetryAsBatch = false;
+		boolean tryBatchAsTransactionFirst = false;
 
 		StringTokenizer tok = new StringTokenizer(theHeaderValue, ";");
 		while (tok.hasNext()) {
@@ -153,13 +159,13 @@ public class TransactionSemanticsHeader {
 				case MAX_DELAY:
 					maxRetryDelay = parsePositiveInteger(value);
 					break;
-				case FINAL_RETRY_AS_BATCH:
-					finalRetryAsBatch = parseBoolean(value);
+				case TRY_BATCH_AS_TRANSACTION_FIRST:
+					tryBatchAsTransactionFirst = parseBoolean(value);
 					break;
 			}
 		}
 
-		return new TransactionSemanticsHeader(retryCount, minRetryDelay, maxRetryDelay, finalRetryAsBatch);
+		return new TransactionSemanticsHeader(retryCount, minRetryDelay, maxRetryDelay, tryBatchAsTransactionFirst);
 	}
 
 	/**
@@ -190,8 +196,7 @@ public class TransactionSemanticsHeader {
 		private Integer myRetryCount;
 		private Integer myMinRetryDelay;
 		private Integer myMaxRetryDelay;
-
-		private boolean myFinalRetryAsBatch;
+		private boolean myTryBatchAsTransactionFirst;
 
 		private Builder() {}
 
@@ -235,12 +240,15 @@ public class TransactionSemanticsHeader {
 		}
 
 		/**
-		 * When automatically retrying a failed transaction, if this is {@literal true},
-		 * the system will switch from transaction mode to batch mode for the final
-		 * attempt.
+		 * When processing a FHIR Batch bundle, try it as a FHIR transaction first, and only switch
+		 * to batch mode on the first retry. This option is useful in cases where data can safely be
+		 * ingested as a FHIR Batch, since FHIR Transaction processing is generally significantly
+		 * faster. However, FHIR transactions exhibit an all-or-nothing failure mode which is not
+		 * always desirable for batch ingestion, so this option provides an easy fallback which brings
+		 * the benefits of both approaches.
 		 */
-		public Builder withFinalRetryAsBatch(boolean theFinalRetryAsBatch) {
-			myFinalRetryAsBatch = theFinalRetryAsBatch;
+		public Builder withTryBatchAsTransactionFirst(boolean theTryBatchAsTransactionFirst) {
+			myTryBatchAsTransactionFirst = theTryBatchAsTransactionFirst;
 			return this;
 		}
 
@@ -248,7 +256,8 @@ public class TransactionSemanticsHeader {
 		 * Construct the header
 		 */
 		public TransactionSemanticsHeader build() {
-			return new TransactionSemanticsHeader(myRetryCount, myMinRetryDelay, myMaxRetryDelay, myFinalRetryAsBatch);
+			return new TransactionSemanticsHeader(
+					myRetryCount, myMinRetryDelay, myMaxRetryDelay, myTryBatchAsTransactionFirst);
 		}
 	}
 }
