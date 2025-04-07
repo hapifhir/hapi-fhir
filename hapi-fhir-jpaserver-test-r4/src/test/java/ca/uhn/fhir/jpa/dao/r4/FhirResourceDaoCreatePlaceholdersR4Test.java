@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -724,7 +725,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals("Patient/RED/_history/1", placeholderId.getValue());
 
 		// verify subresource is created
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 
 		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myFhirContext, outcome).getStorageOutcomes();
@@ -732,10 +733,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, outcomes.get(0).getStorageResponseCode());
 		assertEquals("Observation/DEF/_history/1", outcomes.get(0).getTargetId().getValue());
 		assertNull(outcomes.get(0).getSourceId());
-		// TODO: uncomment this when branch ja_20250217_tx_log_provenance merges
-//		assertEquals(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE, outcomes.get(1).getStorageResponseCode());
-//		assertEquals("Patient/RED/_history/1", outcomes.get(1).getTargetId().getValue());
-//		assertEquals("Observation/DEF/_history/1", outcomes.get(1).getSourceId().getValue());
+		assertEquals(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE, outcomes.get(1).getStorageResponseCode());
+		assertEquals("Patient/RED/_history/1", outcomes.get(1).getTargetId().getValue());
+		assertEquals("Observation/DEF/_history/1", outcomes.get(1).getSourceId().getValue());
 	}
 
 
@@ -749,11 +749,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType(patientId));
-		myPatientDao.update(patient); // use update to use forcedid
+		myPatientDao.update(patient, mySrd); // use update to use forcedid
 
 		// update
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 		logAllResources();
 		logAllResourceVersions();
@@ -766,14 +766,14 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
-		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 		assertTrue(returned.getActive());
 		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
-		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		Observation retObservation = myObservationDao.read(obs.getIdElement(), mySrd);
 		assertNotNull(retObservation);
 	}
 
@@ -788,11 +788,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType("Patient"));
-		DaoMethodOutcome ret = myPatientDao.create(patient); // use create to use server id
+		DaoMethodOutcome ret = myPatientDao.create(patient, mySrd); // use create to use server id
 
 		// update - to update our version
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 		// observation (with version 2)
 		Observation obs = new Observation();
@@ -804,11 +804,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
-		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		Observation retObservation = myObservationDao.read(obs.getIdElement(), mySrd);
 		assertNotNull(retObservation);
 	}
 
@@ -834,7 +834,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
 		// verify links created to Patient placeholder from both Observations
-		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
 		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 
@@ -856,7 +856,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
 		// verify links created to Patient placeholder from both Observations
-		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
 		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 

@@ -929,11 +929,11 @@ public class BundleUtil {
 					IIdType targetId;
 					if (responseCode == StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE) {
 						targetId = ((IBaseHasExtensions) issue)
-							.getExtension().stream()
-							.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
-							.findFirst()
-							.map(t -> (IIdType) t.getValue())
-							.orElse(null);
+								.getExtension().stream()
+										.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
+										.findFirst()
+										.map(t -> (IIdType) t.getValue())
+										.orElse(null);
 						sourceId = groupSourceId;
 					} else {
 						targetId = theContext

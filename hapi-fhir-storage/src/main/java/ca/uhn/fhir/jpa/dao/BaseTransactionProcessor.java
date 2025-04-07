@@ -229,67 +229,7 @@ public abstract class BaseTransactionProcessor {
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
-
-		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.DEFAULT;
-		if (theRequestDetails != null) {
-			String transactionSemanticsString = theRequestDetails.getHeader("X-Transaction-Semantics");
-			if (transactionSemanticsString != null) {
-				transactionSemantics = TransactionSemanticsHeader.parse(transactionSemanticsString);
-			}
-		}
-
-		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
-		boolean switchedToBatch = false;
-
-		IBaseBundle response;
-		for (int i = 1; ; i++) {
-			try {
-				response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
-				break;
-			} catch (BaseServerResponseException e) {
-				if (i >= totalAttempts || theNestedMode) {
-					throw e;
-				}
-
-				int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
-				int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
-				maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
-
-				// Don't let the user request a crazy delay, this could be used
-				// as a DOS attack
-				maxRetryDelay = Math.min(maxRetryDelay, 10000);
-
-				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
-				String sleepMessage = "";
-				if (delay > 0) {
-					sleepMessage = "Sleeping for " + delay + " ms. ";
-				}
-
-				String switchedToBatchMessage = "";
-				if (switchedToBatch) {
-					switchedToBatchMessage = " (as batch)";
-				}
-
-				String switchingToBatchMessage = "";
-				if (i + 1 == totalAttempts && transactionSemantics.isFinalRetryAsBatch()) {
-					switchingToBatchMessage = "Performing final retry using batch semantics. ";
-					switchedToBatch = true;
-					BundleUtil.setBundleType(myContext, theRequest, "batch");
-				}
-
-				ourLog.warn(
-						"Transaction processing attempt{} {}/{} failed. {}{}",
-						switchedToBatchMessage,
-						i,
-						totalAttempts,
-						sleepMessage,
-						switchingToBatchMessage);
-
-				if (delay > 0) {
-					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
-				}
-			}
-		}
+		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {

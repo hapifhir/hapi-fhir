@@ -81,7 +81,6 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -830,11 +829,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					updateCount);
 		} catch (PersistenceException e) {
 			if (myHapiFhirHibernateJpaDialect != null) {
-                // Generate a list of the resource types in the request, and the number
-                // of resources for each type that were present. This is not used for
-                // anything other than returning to the client, but could help them
-                // understanding what went wrong or which of their requests led to
-                // the issue
+				// Generate a list of the resource types in the request, and the number
+				// of resources for each type that were present. This is not used for
+				// anything other than returning to the client, but could help them
+				// understanding what went wrong or which of their requests led to
+				// the issue
 				TreeMap<String, Integer> types = new TreeMap<>();
 				for (IIdType t : theIdToPersistedOutcome.keySet()) {
 					if (t != null) {
