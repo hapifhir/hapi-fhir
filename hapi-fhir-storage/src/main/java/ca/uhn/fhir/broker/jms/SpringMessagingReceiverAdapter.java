@@ -27,16 +27,16 @@ import org.springframework.messaging.MessageHandler;
 
 public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private final Class<? extends IMessage<T>> myMessageType;
-	private final ISpringMessagingChannelReceiver myLegacyChannelReceiver;
+	private final ISpringMessagingChannelReceiver mySpringMessagingChannelReceiver;
 	private final IMessageListener<T> myMessageListener;
 	private MessageHandler myMessageHandler;
 
 	public SpringMessagingReceiverAdapter(
 			Class<? extends IMessage<T>> theMessageType,
-			ISpringMessagingChannelReceiver theLegacyChannelReceiver,
+			ISpringMessagingChannelReceiver theSpringMessagingChannelReceiver,
 			IMessageListener<T> theMessageListener) {
 		myMessageType = theMessageType;
-		myLegacyChannelReceiver = theLegacyChannelReceiver;
+		mySpringMessagingChannelReceiver = theSpringMessagingChannelReceiver;
 		myMessageListener = theMessageListener;
 	}
 
@@ -45,26 +45,26 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 			throw new IllegalArgumentException("Only one subscriber allowed");
 		}
 		myMessageHandler = theMessageHandler;
-		myLegacyChannelReceiver.subscribe(theMessageHandler);
+		mySpringMessagingChannelReceiver.subscribe(theMessageHandler);
 	}
 
 	@Override
 	public void close() {
 		if (myMessageHandler != null) {
-			myLegacyChannelReceiver.unsubscribe(myMessageHandler);
+			mySpringMessagingChannelReceiver.unsubscribe(myMessageHandler);
 			CloseUtil.close(myMessageHandler);
 		}
-		CloseUtil.close(myLegacyChannelReceiver);
+		CloseUtil.close(mySpringMessagingChannelReceiver);
 		CloseUtil.close(myMessageListener);
 	}
 
 	@Override
 	public String getChannelName() {
-		return myLegacyChannelReceiver.getName();
+		return mySpringMessagingChannelReceiver.getName();
 	}
 
 	public ISpringMessagingChannelReceiver getSpringMessagingChannelReceiver() {
-		return myLegacyChannelReceiver;
+		return mySpringMessagingChannelReceiver;
 	}
 
 	@Override
@@ -79,11 +79,11 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public void pause() {
-		myLegacyChannelReceiver.stop();
+		mySpringMessagingChannelReceiver.stop();
 	}
 
 	@Override
 	public void resume() {
-		myLegacyChannelReceiver.start();
+		mySpringMessagingChannelReceiver.start();
 	}
 }

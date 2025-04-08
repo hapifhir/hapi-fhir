@@ -23,14 +23,25 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
+/**
+ * Provide JMS Channel Receiver services for Spring Messaging.
+ */
 public interface ISpringMessagingChannelReceiver extends SubscribableChannel, InterceptableChannel, DisposableBean {
+	/**
+	 * @return the name of the Queue this Channel Receiver consumes from
+	 */
 	String getName();
 
-	// FIXME KHS javadoc
+	/**
+	 * Stop the service (e.g. stop subscriber threads)
+	 */
 	default void stop() {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * Start the service (e.g. start the subscriber threads)
+	 */
 	default void start() {
 		throw new UnsupportedOperationException();
 	}
