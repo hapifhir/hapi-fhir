@@ -13,10 +13,4 @@ public class RawMessage extends GenericMessage<String> implements IMessage<Strin
 	public RawMessage(String thePayload, Map<String, Object> theHeaders) {
 		super(thePayload, theHeaders);
 	}
-
-	// FIXME KHS
-	@Override
-	public String toString() {
-		return getPayload();
-	}
 }
