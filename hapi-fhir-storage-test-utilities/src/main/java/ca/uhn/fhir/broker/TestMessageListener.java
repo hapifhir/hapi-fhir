@@ -22,7 +22,7 @@ public class TestMessageListener<M extends IMessage<P>, P>
 		implements IMessageListener<P>, IPointcutLatch, AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestMessageListener.class);
 	private final PointcutLatch myMessageHandledLatch;
-	private final Consumer<IMessage<P>> myCallback;
+	private Consumer<IMessage<P>> myCallback;
 	private final Class<P> myPayloadType;
 	private final List<M> myReceivedMessages = Collections.synchronizedList(new ArrayList<>());
 	private final Class<M> myMessageType;
@@ -94,6 +94,10 @@ public class TestMessageListener<M extends IMessage<P>, P>
 	public void close() throws Exception {
 		myMessageHandledLatch.clear();
 		myReceivedMessages.clear();
+	}
+
+	public void setCallback(Consumer<IMessage<P>> theCallback) {
+		myCallback = theCallback;
 	}
 
 	public P getLastReceivedMessagePayload() {
