@@ -62,9 +62,6 @@ public abstract class BaseBatch2Config {
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
 
-	// FIXME ND do we want to make this dependency optional or should we expect an interceptor broadcaster here
-	//    so the appropriate batch2 hooks can be called? If we want this dependency as optional, might be good to
-	//    create a null implementation of IInterceptorBroadcaster to avoid a bunch of null checks.
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 

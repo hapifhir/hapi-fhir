@@ -497,7 +497,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	}
 
 	public String getUserDataAsString() {
-		return JsonUtil.serialize(getUserData());
+		return JsonUtil.serializeOrInvalidRequest(getUserData());
 	}
 
 	public void setUserDataAsString(String theUserDataAsString) {
