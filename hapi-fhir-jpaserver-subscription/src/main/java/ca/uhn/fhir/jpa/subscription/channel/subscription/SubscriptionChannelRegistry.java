@@ -136,7 +136,6 @@ public class SubscriptionChannelRegistry {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		}
 
-		// FIXME KHS how do we need support for more than one?
 		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
 			SubscriptionConsumerWithListeners deliveryConsumer = myDeliveryConsumerCache.get(channelName);

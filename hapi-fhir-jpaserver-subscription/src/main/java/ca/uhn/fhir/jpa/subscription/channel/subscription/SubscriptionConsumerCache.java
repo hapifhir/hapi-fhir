@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// FIXME KHS remove this class
 class SubscriptionConsumerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionConsumerCache.class);
 
