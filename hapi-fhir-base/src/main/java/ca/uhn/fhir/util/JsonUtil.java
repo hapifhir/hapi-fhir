@@ -178,7 +178,8 @@ public class JsonUtil {
 		}
 	}
 
-	private static InvalidRequestException invalidRequestException(Object theObject, Exception theCause) throws InvalidRequestException{
+	private static InvalidRequestException invalidRequestException(Object theObject, Exception theCause)
+			throws InvalidRequestException {
 		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
 	}
 

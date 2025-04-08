@@ -314,14 +314,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)) {
-			HookParams params =
-					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
-		}
-	}
-
 	private void invokeBatch2ChunkCompletedNormally(JobInstance theJobInstance, WorkChunk theWorkChunk) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY)) {
 			HookParams params =
@@ -332,12 +324,20 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	private void invokeBatch2ChunkCompletedHandleException(
 			JobInstance theJobInstance, WorkChunk theWorkChunk, Exception theException) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY)) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION)) {
 			HookParams params = new HookParams()
 					.add(JobInstance.class, theJobInstance)
 					.add(WorkChunk.class, theWorkChunk)
 					.add(Exception.class, theException);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION, params);
+		}
+	}
+
+	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)) {
+			HookParams params =
+					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
+			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
 		}
 	}
 

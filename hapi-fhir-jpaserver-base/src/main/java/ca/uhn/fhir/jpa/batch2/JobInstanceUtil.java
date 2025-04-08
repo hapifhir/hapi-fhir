@@ -62,7 +62,7 @@ class JobInstanceUtil {
 		retVal.setWarningMessages(theEntity.getWarningMessages());
 		retVal.setTriggeringUsername(theEntity.getTriggeringUsername());
 		retVal.setTriggeringClientId(theEntity.getTriggeringClientId());
-		retVal.setUserDataAsString(theEntity.getUserData());
+		retVal.setUserDataAsString(theEntity.getUserDataJson());
 		return retVal;
 	}
 
@@ -99,7 +99,7 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
 		theJobInstanceEntity.setTriggeringUsername(theJobInstance.getTriggeringUsername());
 		theJobInstanceEntity.setTriggeringClientId(theJobInstance.getTriggeringClientId());
-		theJobInstanceEntity.setUserData(theJobInstance.getUserDataAsString());
+		theJobInstanceEntity.setUserDataJson(theJobInstance.getUserDataAsString());
 	}
 
 	/**
