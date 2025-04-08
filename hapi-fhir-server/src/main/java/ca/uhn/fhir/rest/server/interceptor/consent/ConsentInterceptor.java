@@ -181,15 +181,11 @@ public class ConsentInterceptor {
 				case PROCEED:
 					continue;
 				case AUTHORIZED:
-					authorizeRequest(theRequestDetails);
+					Map<Object, Object> userData = theRequestDetails.getUserData();
+					userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 					return;
 			}
 		}
-	}
-
-	protected void authorizeRequest(RequestDetails theRequestDetails) {
-		Map<Object, Object> userData = theRequestDetails.getUserData();
-		userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 	}
 
 	/**
@@ -549,18 +545,18 @@ public class ConsentInterceptor {
 		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
 
 		for (IConsentService next : myConsentService) {
-			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
-			ConsentOperationStatusEnum status = nextOutcome.getStatus();
-			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
-				// if any consent service rejects, reject the resource
-				return false;
-			}
+			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
 
-			nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
-			status = nextOutcome.getStatus();
-			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
-				// if any consent service rejects, reject the resource
-				return false;
+			ConsentOperationStatusEnum status = nextOutcome.getStatus();
+			switch (status) {
+				case AUTHORIZED:
+				case PROCEED:
+					// go to the next
+					break;
+				case REJECT:
+					// if any consent service rejects,
+					// reject the resource
+					return false;
 			}
 		}
 
