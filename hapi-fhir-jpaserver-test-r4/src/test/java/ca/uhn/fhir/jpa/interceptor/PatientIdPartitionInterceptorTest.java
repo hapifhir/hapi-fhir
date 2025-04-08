@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -617,10 +618,12 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Test
 	void testSyntheaLoad() throws IOException {
 	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+
 		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		myServer.getFhirClient().transaction().withBundle(Resources.toString(new URL("classpath:/transaction-bundles/synthea/hospitalInformation.json"), Charsets.UTF_8)).execute();
-		myServer.getFhirClient().transaction().withBundle(Resources.toString(new URL("classpath:/transaction-bundles/synthea/practitionerInformation.json"), Charsets.UTF_8)).execute();
-		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(new URL("classpath:/transaction-bundles/synthea/Abe604_Morar593_04f71290-6ace-8512-ab82-02fbfb910cc1.json"), Charsets.UTF_8));
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
 
 		// when
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
