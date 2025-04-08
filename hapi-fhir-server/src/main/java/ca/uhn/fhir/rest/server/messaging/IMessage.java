@@ -59,5 +59,4 @@ public interface IMessage<T> {
 	 * @return the de-serialized value of the message
 	 */
 	T getPayload();
-
 }
