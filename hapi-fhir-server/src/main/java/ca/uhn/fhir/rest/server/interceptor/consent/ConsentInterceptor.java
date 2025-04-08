@@ -549,18 +549,18 @@ public class ConsentInterceptor {
 		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
 
 		for (IConsentService next : myConsentService) {
-			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
-
+			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
-			switch (status) {
-				case AUTHORIZED:
-				case PROCEED:
-					// go to the next
-					break;
-				case REJECT:
-					// if any consent service rejects,
-					// reject the resource
-					return false;
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
+			}
+
+			nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
+			status = nextOutcome.getStatus();
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
 			}
 		}
 
