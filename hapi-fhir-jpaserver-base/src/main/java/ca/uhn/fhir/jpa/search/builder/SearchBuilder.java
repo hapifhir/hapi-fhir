@@ -2661,6 +2661,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * To reduce memory usage, when using deduplication mode, we use a numeric count.
 		 */
 		private int mySkipCount = 0;
+
 		private Set<JpaPid> mySetOfSkippedPids = new HashSet<>();
 		/**
 		 * The count of resources that are new in this search
@@ -2770,7 +2771,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (!myResultsIterator.hasNext()) {
 							if (mySearchProperties.hasMaxResultsRequested()
-									&& (getSkippedCount() + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
+									&& (getSkippedCount() + myNonSkipCount
+											== mySearchProperties.getMaxResultsRequested())) {
 								if (getSkippedCount() > 0 && myNonSkipCount == 0) {
 									sendProcessingMsgAndFirePerformanceHook();
 									// need the next iterator; increase the maxsize
