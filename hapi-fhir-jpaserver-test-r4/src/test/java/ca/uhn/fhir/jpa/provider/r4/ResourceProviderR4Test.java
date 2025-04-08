@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -67,6 +68,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -182,13 +184,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ch. qos. logback. classic.Level;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 
 
 import java.io.BufferedReader;
@@ -206,6 +208,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -234,6 +237,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@RegisterExtension
 	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
+
+	@RegisterExtension
+	private LogbackTestExtension mySearchBuilderLogCapture = new LogbackTestExtension(SearchBuilder.class, Level.WARN);
 
 	@Override
 	@AfterEach
@@ -664,7 +670,140 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Ids: {}", ids);
 		assertThat(output.getEntry()).hasSize(4);
 		assertNull(output.getLink("next"));
+	}
 
+	/**
+	 * Test for <a href = https://github.com/hapifhir/hapi-fhir/issues/6849>#6849</a>
+	 *
+	 * This is an edge case for chained searches with the _count parameter may not terminate when the search returns
+	 * resources with multiple references.
+	 */
+	@ParameterizedTest
+	@MethodSource("createFhirSearchWithChainingAndCountParams")
+	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
+		// Given
+		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(3000);
+		if (theMaxPageSize != null) {
+			myPagingProvider.setMaximumPageSize(theMaxPageSize);
+		}
+		if (thePrefetchThresholds != null) {
+			myStorageSettings.setSearchPreFetchThresholds(thePrefetchThresholds);
+		}
+
+		// Create some organizations to reference
+		int maxNumberOfRefs = theRefCountToResourceCount.keySet().stream().mapToInt(num -> num).max().orElseThrow();
+		List<IIdType> organizations = new ArrayList<>();
+
+		for (int i = 0; i < maxNumberOfRefs; i++) {
+			Organization o = new Organization();
+			o.setId("O" + i);
+			o.setName("O" + i);
+			o.setActive(true);
+			organizations.add(myClient.update().resource(o).execute().getId().toUnqualifiedVersionless());
+		}
+
+
+		int totalNumberOfPatientsCreated = createPatientsWithReferences(theRefCountToResourceCount, organizations);
+
+		int numberOfSingleRefResources = theRefCountToResourceCount.getOrDefault(1, 0);
+		int count = totalNumberOfPatientsCreated - numberOfSingleRefResources;
+
+		ourLog.info("Loading page: 1");
+		Bundle output = myClient
+			.search()
+			.byUrl("Patient?general-practitioner.active=true")
+			.count(count)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		ourLog.info("Ids: {}", ids);
+		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
+
+		// When: loading the next page
+		for (int i = 2; output.getLink("next") != null; i++) {
+			// next page
+			ourLog.info("Loading page: " + i);
+			output = myClient
+				.loadPage()
+				.next(output)
+				.execute();
+
+			ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+			ourLog.info("Ids: {}", ids);
+
+			// Then: search properly resolves, and has the correct count
+			if (output.getLink("next") != null) {
+				assertThat(output.getEntry()).hasSize(count);
+			} else {
+				int numLeft = totalNumberOfPatientsCreated % count;
+				numLeft = numLeft == 0 ? count : numLeft;
+				assertThat(output.getEntry()).hasSize(numLeft);
+			}
+		}
+
+		// Also assert that this warning message is not logged
+		// This appears when all resources returned from the search are skipped (because we've seen them before)
+		// which results in expanding the search
+		// We end up skipping all resources when there are duplicate PIDs in the PID list
+		assertThat(getLogMessagesOfType()).noneMatch(msg -> msg.contains("Pass completed with no matching results seeking rows"));
+	}
+
+	private List<String> getLogMessagesOfType() {
+		return mySearchBuilderLogCapture.getLogEvents()
+			.stream()
+			.map(ILoggingEvent::getFormattedMessage)
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+	/**
+	 * @param theRefCountToResourceCount map where the key is the number of references (general-practitioner) the Patient should have, and the value is the number of such Patients to create
+	 * @param theOrganizationRefs the Organizations to use as references
+	 * @return total number of patients created
+	 */
+	private int createPatientsWithReferences(Map<Integer, Integer> theRefCountToResourceCount, List<IIdType> theOrganizationRefs) {
+		int totalNumberOfPatientsCreated = 0;
+
+		for (Integer refCount : theRefCountToResourceCount.keySet()) {
+			// Create a new patient with refCount references
+			Patient p = new Patient();
+			p.setActive(true);
+			for (int j = 0; j < refCount; j++) {
+				p.addGeneralPractitioner(new Reference(theOrganizationRefs.get(j).getValue()));
+			}
+
+			for (int i = 0; i < theRefCountToResourceCount.get(refCount); i++) {
+				p.setId("P" + totalNumberOfPatientsCreated);
+				myPatientDao.update(p, mySrd);
+
+				totalNumberOfPatientsCreated++;
+			}
+		}
+		return totalNumberOfPatientsCreated;
+	}
+
+	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
+		// 5 resources with 2 refs; 3 resources with 1 ref
+		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
+		// 10 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m2 = Map.of(2, 10, 1, 2);
+		// 251 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m3 = Map.of(2, 251, 1, 2);
+		// 4 resources with 3 refs; 1 resources with 1 ref
+		Map<Integer, Integer> m4 = Map.of(3, 4, 1, 1);
+		// 2 resources with 3 refs; 2 resources with 2 refs, 3 resources with 1 ref
+		Map<Integer, Integer> m5 = Map.of(3, 2, 2, 2,1, 3);
+
+
+		return Stream.of(
+			// Map of ref count to resource count; the max page size; the pre-fetch thresholds to use
+			Arguments.of(m1, null, null),
+			Arguments.of(m2, null, null),
+			Arguments.of(m3, 500, null),
+			Arguments.of(m4, null, null),
+			Arguments.of(m5, null, null),
+			Arguments.of(m1, null, List.of(9, 13, 503, -1))
+		);
 	}
 
 	@Test
