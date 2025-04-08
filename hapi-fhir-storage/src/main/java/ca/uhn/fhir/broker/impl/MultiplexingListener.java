@@ -20,6 +20,7 @@
 package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.BrokerConsumerClosedException;
+import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -81,8 +82,8 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 
 	private void checkState() {
 		if (myClosed) {
-			throw new BrokerConsumerClosedException(
-					"Attempted to use a closed " + this.getClass().getSimpleName() + ": " + this);
+			throw new BrokerListenerClosedException(
+					"Attempted to use a closed MultiplexingListener");
 		}
 	}
 
