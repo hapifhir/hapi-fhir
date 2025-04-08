@@ -181,11 +181,15 @@ public class ConsentInterceptor {
 				case PROCEED:
 					continue;
 				case AUTHORIZED:
-					Map<Object, Object> userData = theRequestDetails.getUserData();
-					userData.put(myRequestAuthorizedKey, Boolean.TRUE);
+					authorizeRequest(theRequestDetails);
 					return;
 			}
 		}
+	}
+
+	protected void authorizeRequest(RequestDetails theRequestDetails) {
+		Map<Object, Object> userData = theRequestDetails.getUserData();
+		userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 	}
 
 	/**
