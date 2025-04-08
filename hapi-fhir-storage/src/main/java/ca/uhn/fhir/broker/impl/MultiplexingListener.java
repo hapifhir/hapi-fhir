@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.broker.impl;
 
+import ca.uhn.fhir.broker.api.BrokerConsumerClosedException;
 import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
@@ -35,7 +36,7 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
 
 	private final Class<T> myPayloadType;
-	private boolean myClosed = false;
+	private boolean myClosed;
 
 	public MultiplexingListener(Class<T> thePayloadType) {
 		myPayloadType = thePayloadType;
@@ -43,7 +44,7 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 
 	@Override
 	public void handleMessage(IMessage<T> theMessage) {
-		validateNotClosed();
+		checkState();
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
 		if (!getPayloadType().isAssignableFrom(messageClass)) {
@@ -53,19 +54,13 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 		mySubListeners.forEach(listener -> listener.handleMessage(theMessage));
 	}
 
-	private void validateNotClosed() {
-		if (myClosed) {
-			throw new BrokerListenerClosedException("Attempted to use a closed MultiplexingListener.");
-		}
-	}
-
 	@Override
 	public Class<T> getPayloadType() {
 		return myPayloadType;
 	}
 
 	public boolean addListener(IMessageListener<T> theListener) {
-		validateNotClosed();
+		checkState();
 
 		if (!getPayloadType().isAssignableFrom(theListener.getPayloadType())) {
 			throw new InternalErrorException("Expecting listener of type " + getPayloadType()
@@ -85,6 +80,12 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 		myClosed = true;
 	}
 
+	private void checkState() {
+		if (myClosed) {
+			throw new BrokerConsumerClosedException(
+				"Attempted to use a closed " + this.getClass().getSimpleName() + ": " + this);
+		}
+	}
 	public <L extends IMessageListener<T>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
 		for (IMessageListener<T> next : mySubListeners) {
 			if (theMessageListenerClass.isAssignableFrom(next.getClass())) {

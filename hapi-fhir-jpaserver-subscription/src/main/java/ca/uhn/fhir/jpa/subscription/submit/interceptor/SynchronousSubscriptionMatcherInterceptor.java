@@ -23,8 +23,8 @@ import ca.uhn.fhir.broker.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -73,18 +73,14 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 	private void doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
 		try {
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
-			// FIXME KHS streamline the exception api
-		} catch (MessageDeliveryException e) {
-			if (e.getCause() instanceof PayloadTooLargeException) {
-				nullPayloadAndResubmit(theResourceModifiedMessage);
+		} catch (Exception e) {
+			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
+				theResourceModifiedMessage.setPayloadToNull();
+				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+			} else {
+				throw e;
 			}
-		} catch (PayloadTooLargeException e) {
-			nullPayloadAndResubmit(theResourceModifiedMessage);
 		}
 	}
 
-	private void nullPayloadAndResubmit(ResourceModifiedMessage theResourceModifiedMessage) {
-		theResourceModifiedMessage.setPayloadToNull();
-		myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
-	}
 }

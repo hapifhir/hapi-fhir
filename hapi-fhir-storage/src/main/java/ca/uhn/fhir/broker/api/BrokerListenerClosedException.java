@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.broker.api;
 
-// FIXME KHS javadoc on all the new exceptions
+/**
+ * Thrown when attempting to use a closed Listener
+ */
 public class BrokerListenerClosedException extends RuntimeException {
 	public BrokerListenerClosedException(String theErrorMessage) {
 		super(theErrorMessage);

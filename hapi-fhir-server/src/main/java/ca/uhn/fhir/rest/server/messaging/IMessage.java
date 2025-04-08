@@ -60,11 +60,4 @@ public interface IMessage<T> {
 	 */
 	T getPayload();
 
-	/**
-	 * @return the uncompressed message payload size in bytes.
-	 */
-	// FIXME KHS
-	//	default int size() {
-	//		return getData().length;
-	//	}
 }

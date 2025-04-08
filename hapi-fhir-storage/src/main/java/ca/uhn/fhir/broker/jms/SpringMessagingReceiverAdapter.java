@@ -30,6 +30,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private final ISpringMessagingChannelReceiver mySpringMessagingChannelReceiver;
 	private final IMessageListener<T> myMessageListener;
 	private MessageHandler myMessageHandler;
+	private boolean myClosed;
 
 	public SpringMessagingReceiverAdapter(
 			Class<? extends IMessage<T>> theMessageType,
@@ -41,6 +42,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	}
 
 	public void subscribe(MessageHandler theMessageHandler) {
+		checkState();
 		if (myMessageHandler != null) {
 			throw new IllegalArgumentException("Only one subscriber allowed");
 		}
@@ -50,12 +52,18 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public void close() {
+		myClosed = true;
 		if (myMessageHandler != null) {
 			mySpringMessagingChannelReceiver.unsubscribe(myMessageHandler);
 			CloseUtil.close(myMessageHandler);
 		}
 		CloseUtil.close(mySpringMessagingChannelReceiver);
 		CloseUtil.close(myMessageListener);
+	}
+
+	@Override
+	public boolean isClosed() {
+		return myClosed;
 	}
 
 	@Override
@@ -84,6 +92,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public void resume() {
+		checkState();
 		mySpringMessagingChannelReceiver.start();
 	}
 }

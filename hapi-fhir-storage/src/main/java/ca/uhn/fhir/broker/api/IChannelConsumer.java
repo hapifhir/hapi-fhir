@@ -35,6 +35,11 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	void close();
 
+	/**
+	 * @return true if this consumer is closed
+	 */
+	boolean isClosed();
+
 	Class<? extends IMessage<T>> getMessageType();
 
 	IMessageListener<T> getMessageListener();
@@ -51,5 +56,15 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	default void resume() {
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Consumers should call this method at the top of any method attempting to use the consumer
+	 */
+	default void checkState() {
+		if (isClosed()) {
+			throw new BrokerConsumerClosedException(
+				"Attempted to use a closed " + this.getClass().getSimpleName() + ": " + this);
+		}
 	}
 }

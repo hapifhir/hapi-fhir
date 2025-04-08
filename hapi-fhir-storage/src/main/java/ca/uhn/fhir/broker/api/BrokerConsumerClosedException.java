@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.broker.api;
 
+/**
+ * Thrown when attempting to use a closed Consumer
+ */
 public class BrokerConsumerClosedException extends RuntimeException {
 	public BrokerConsumerClosedException(String theErrorMessage) {
 		super(theErrorMessage);
