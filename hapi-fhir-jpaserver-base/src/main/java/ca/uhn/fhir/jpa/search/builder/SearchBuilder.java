@@ -2656,13 +2656,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private boolean myFetchIncludesForEverythingOperation;
 		/**
 		 * The count of resources skipped because they were seen in earlier results
-		 * We use the set of JpaPids when not using {@link SearchBuilder#setDeduplicateInDatabase(boolean)},
-		 * since the database could return duplicate PIDs depending on the query.
-		 * To reduce memory usage, when using deduplication mode, we use a numeric count.
 		 */
 		private int mySkipCount = 0;
-
-		private Set<JpaPid> mySetOfSkippedPids = new HashSet<>();
 		/**
 		 * The count of resources that are new in this search
 		 * (ie, not cached in previous searches)
@@ -2758,22 +2753,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									break;
 								}
 							} else {
-								/*
-								 * If deduplication is disabled, we might get duplicate results from the SQL query
-								 * So we need to keep track of skipped PIDs in a set.
-								 */
-								if (!mySearchProperties.isDeduplicateInDatabase()) {
-									mySetOfSkippedPids.add(nextPid);
-								}
 								mySkipCount++;
 							}
 						}
 
 						if (!myResultsIterator.hasNext()) {
 							if (mySearchProperties.hasMaxResultsRequested()
-									&& (getSkippedCount() + myNonSkipCount
+									&& (mySkipCount + myNonSkipCount
 											== mySearchProperties.getMaxResultsRequested())) {
-								if (getSkippedCount() > 0 && myNonSkipCount == 0) {
+								if (mySkipCount > 0 && myNonSkipCount == 0) {
 									sendProcessingMsgAndFirePerformanceHook();
 									// need the next iterator; increase the maxsize
 									// (we should always do this)
@@ -2883,7 +2871,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void sendProcessingMsgAndFirePerformanceHook() {
 			String msg = "Pass completed with no matching results seeking rows "
-					+ myPidSet.size() + "-" + getSkippedCount()
+					+ myPidSet.size() + "-" + mySkipCount
 					+ ". This indicates an inefficient query! Retrying with new max count of "
 					+ mySearchProperties.getMaxResultsRequested();
 			firePerformanceWarning(myRequest, msg);
@@ -2915,7 +2903,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			retrieveNextIteratorQuery();
 
 			mySkipCount = 0;
-			mySetOfSkippedPids.clear();
 			myNonSkipCount = 0;
 		}
 
@@ -2949,10 +2936,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		@Override
 		public int getSkippedCount() {
-			if (!mySearchProperties.isDeduplicateInDatabase()) {
-				return mySetOfSkippedPids.size();
-			}
-
 			return mySkipCount;
 		}
 

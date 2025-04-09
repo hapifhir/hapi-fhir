@@ -538,6 +538,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.collect(Collectors.joining("\n * "));
 
 			ourLog.info("Found: {}", found);
+			ourLog.info("Found count: {}", foundCount);
 
 			runInTransaction(() -> {
 

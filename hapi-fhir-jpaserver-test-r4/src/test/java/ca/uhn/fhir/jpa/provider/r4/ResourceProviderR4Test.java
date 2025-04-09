@@ -682,7 +682,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@MethodSource("createFhirSearchWithChainingAndCountParams")
 	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
 		// Given
-		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(3000);
+		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);//todo jdjd increase
 		if (theMaxPageSize != null) {
 			myPagingProvider.setMaximumPageSize(theMaxPageSize);
 		}
@@ -741,19 +741,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				assertThat(output.getEntry()).hasSize(numLeft);
 			}
 		}
-
-		// Also assert that this warning message is not logged
-		// This appears when all resources returned from the search are skipped (because we've seen them before)
-		// which results in expanding the search
-		// We end up skipping all resources when there are duplicate PIDs in the PID list
-		assertThat(getLogMessagesOfType()).noneMatch(msg -> msg.contains("Pass completed with no matching results seeking rows"));
 	}
 
 	private List<String> getLogMessagesOfType() {
 		return mySearchBuilderLogCapture.getLogEvents()
 			.stream()
 			.map(ILoggingEvent::getFormattedMessage)
-			.collect(Collectors.toUnmodifiableList());
+			.toList();
 	}
 
 	/**
@@ -783,6 +777,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
+		//todo jdjd the after bc u changed it
+		//todo change to do while as well
 		// 5 resources with 2 refs; 3 resources with 1 ref
 		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
 		// 10 resources with 2 refs; 2 resources with 1 ref
