@@ -142,7 +142,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
 			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
 			spidxIdentity.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
-			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 255);
+			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 256);
 
 			spidxIdentity
 					.addIndex("20250324.3", "IDX_HASH_IDENTITY")

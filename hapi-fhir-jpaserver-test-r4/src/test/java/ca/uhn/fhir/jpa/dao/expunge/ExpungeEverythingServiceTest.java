@@ -67,6 +67,7 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 	@Test
 	void testExpungeEverythingInvalidatesSearchParameterIdentityCache() {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		createPatient(withActiveTrue());
 		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myPartitionSettings,
 			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_ACTIVE);

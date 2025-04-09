@@ -45,11 +45,13 @@ public class FhirResourceDaoR5IndexStorageOptimizedTest {
 	public class IndexStorageOptimizedUpliftedRefchainsAndChainedSortingR5Test extends UpliftedRefchainsAndChainedSortingR5Test {
 		@BeforeEach
 		public void setUp() {
+			myStorageSettings.setWriteToSearchParamIdentityTable(true);
 			myStorageSettings.setIndexStorageOptimized(true);
 		}
 
 		@AfterEach
 		public void cleanUp() {
+			myStorageSettings.setWriteToSearchParamIdentityTable(false);
 			myStorageSettings.setIndexStorageOptimized(false);
 		}
 

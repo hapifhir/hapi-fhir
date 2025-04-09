@@ -97,12 +97,14 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@AfterEach
 	void cleanUp() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testCoordinatesIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Location loc = new Location();
 		loc.getPosition().setLatitude(43.7);
@@ -117,6 +119,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testDateIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Patient p = new Patient();
 		p.setBirthDateElement(new DateType("2021-02-22"));
@@ -130,6 +133,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testNumberIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		RiskAssessment riskAssessment = new RiskAssessment();
 		DecimalType doseNumber = new DecimalType(15);
@@ -144,6 +148,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testQuantityIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Observation observation = new Observation();
 		observation.setValue(new Quantity(123));
@@ -157,6 +162,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testQuantityNormalizedIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Substance res = new Substance();
@@ -172,6 +178,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testStringIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Patient p = new Patient();
 		p.addAddress().addLine("123 Main Street");
@@ -185,6 +192,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testTokenIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.FINAL);
@@ -198,6 +206,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testUriIndexedSearchParam_searchAndReindex_searchParamUpdatedCorrectly(boolean theIsIndexStorageOptimized) {
 		// setup
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 		myStorageSettings.setIndexStorageOptimized(theIsIndexStorageOptimized);
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl("http://vs");

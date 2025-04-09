@@ -177,11 +177,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 		myStorageSettings.setMassIngestionMode(false);
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
 	}
 
 	@BeforeEach
-	public void beforeDisableResultReuse() {
+	public void beforeEach() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {

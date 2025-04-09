@@ -40,6 +40,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 		uniqueConstraints = @UniqueConstraint(name = "IDX_HASH_IDENTITY", columnNames = "HASH_IDENTITY"))
 public class IndexedSearchParamIdentity {
 
+	public static final int SP_NAME_LENGTH = 256;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_IDENTITY", sequenceName = "SEQ_SPIDX_IDENTITY", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_IDENTITY")
@@ -54,7 +56,7 @@ public class IndexedSearchParamIdentity {
 	private String myResourceType;
 
 	@FullTextField
-	@Column(name = "SP_NAME", nullable = false)
+	@Column(name = "SP_NAME", nullable = false, length = SP_NAME_LENGTH)
 	private String myParamName;
 
 	public Integer getSpIdentityId() {

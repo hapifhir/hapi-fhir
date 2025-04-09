@@ -2314,20 +2314,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		selectCounts += myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
+		selectCounts += myCaptureQueriesListener.countSelectQueries();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
@@ -2379,20 +2379,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		selectCounts += myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
+		selectCounts += myCaptureQueriesListener.countSelectQueries();
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueriesForCurrentThread();
+		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
 
 		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
 	}
@@ -2829,7 +2829,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run a second time (creates a new observation, reuses the patient, should use cache)
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, bundleCreator.get());
+		Bundle outcome = mySystemDao.transaction(mySrd, bundleCreator.get());
+		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());

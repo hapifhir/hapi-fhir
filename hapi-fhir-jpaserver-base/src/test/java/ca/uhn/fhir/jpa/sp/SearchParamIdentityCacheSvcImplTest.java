@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,8 +47,16 @@ class SearchParamIdentityCacheSvcImplTest {
 	@Mock
 	PlatformTransactionManager myTxManager;
 
+	@Mock
+	JpaStorageSettings myStorageSettings;
+
 	@Spy
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
+
+	@BeforeEach
+	public void setUp() {
+		when(myStorageSettings.isWriteToSearchParamIdentityTable()).thenReturn(true);
+	}
 
 	@Test
 	void findOrCreateSearchParamIdentity_identityExistsInCache_searchNotExecuted() {
