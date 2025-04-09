@@ -128,6 +128,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init740();
 		init760();
 		init780();
+		init820();
+	}
+
+	protected void init820() {
+		Builder version = forVersion(VersionEnum.V8_2_0);
+		version.executeRawSqls(
+				"20250404.10",
+				Map.of(
+						DriverTypeEnum.ORACLE_12C,
+						List.of(
+								"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_EXACT varchar2(768 char) )",
+								"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_NORMALIZED varchar2(768 char) )")));
 	}
 
 	protected void init780() {
