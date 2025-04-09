@@ -68,6 +68,7 @@ public interface IResourceTableDao
 	Slice<JpaPid> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
 			Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
+	//TODO A :Look at below TODO B, and note that these 2 queries are identical.
 	@Query(
 			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
@@ -80,6 +81,7 @@ public interface IResourceTableDao
 			@Param("high") Date theHigh,
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
+	//TODO B: look at this query. This is not a default partition query, this is an all partitions query.
 	@Query(
 			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
