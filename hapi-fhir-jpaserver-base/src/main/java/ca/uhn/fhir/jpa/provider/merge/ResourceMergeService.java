@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.jobs.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -36,17 +37,24 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.List;
+
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME;
 
 /**
  * Service for the FHIR $merge operation. Currently only supports Patient/$merge. The plan is to expand to other resource types.
@@ -65,6 +73,7 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
+	private final MergeProvenanceSvc myMergeProvenanceSvc;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -84,13 +93,18 @@ public class ResourceMergeService {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myFhirContext = myPatientDao.getContext();
 		myHapiTransactionService = theHapiTransactionService;
-		myMergeResourceHelper = new MergeResourceHelper(myPatientDao);
+		myMergeProvenanceSvc = new MergeProvenanceSvc(theDaoRegistry);
+		myMergeResourceHelper = new MergeResourceHelper(theDaoRegistry, myMergeProvenanceSvc);
 		myMergeValidationService = new MergeValidationService(myFhirContext, theDaoRegistry);
 	}
 
 	/**
-	 * Perform the $merge operation. If the number of resources to be changed exceeds the provided batch size,
-	 * then switch to async mode.  See the <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
+	 * Perform the $merge operation. Operation can be performed synchronously or asynchronously depending on
+	 * the prefer-async request header.
+	 * If the operation is requested to be performed synchronously and the number of
+	 * resources to be changed exceeds the provided batch size,
+	 * and error is returned indicating that operation needs to be performed asynchronously. See the
+	 * <a href="https://build.fhir.org/patient-operation-merge.html">Patient $merge spec</a>
 	 * for details on what the difference is between synchronous and asynchronous mode.
 	 *
 	 * @param theMergeOperationParameters the merge operation parameters
@@ -211,21 +225,33 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			RequestPartitionId partitionId) {
 
+		Date startTime = new Date();
 		ReplaceReferencesRequest replaceReferencesRequest = new ReplaceReferencesRequest(
 				theSourceResource.getIdElement(),
 				theTargetResource.getIdElement(),
 				theMergeOperationParameters.getResourceLimit(),
-				partitionId);
+				partitionId,
+				// don't create provenance as part of replace-references,
+				// we create it after updating source and target for merge
+				false);
 
-		myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
+		IBaseParameters outParams =
+				myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
 
-		Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+		Bundle patchResultBundle = (Bundle) ParametersUtil.getNamedParameterResource(
+						myFhirContext, outParams, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_OUTCOME)
+				.orElseThrow();
+
+		Patient updatedTarget = myMergeResourceHelper.updateMergedResourcesAndCreateProvenance(
 				myHapiTransactionService,
 				theSourceResource,
 				theTargetResource,
+				List.of(patchResultBundle),
 				(Patient) theMergeOperationParameters.getResultResource(),
 				theMergeOperationParameters.getDeleteSource(),
-				theRequestDetails);
+				theRequestDetails,
+				startTime);
+
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
 
 		String detailsText = "Merge operation completed successfully.";
