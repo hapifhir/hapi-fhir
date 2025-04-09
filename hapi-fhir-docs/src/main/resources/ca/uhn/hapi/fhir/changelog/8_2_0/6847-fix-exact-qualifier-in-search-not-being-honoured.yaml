@@ -2,5 +2,5 @@
 type: fix
 issue: 6847
 jira: SMILE-9884
-title: "Exact qualifier when performing searches is not being honoured when feature indexing contained resource is 
-enabled. This is now fixed."
+title: "Previously, when performing chained searches, exact qualifier was not honoured when feature index contained 
+resource is enabled. This has now been fixed."

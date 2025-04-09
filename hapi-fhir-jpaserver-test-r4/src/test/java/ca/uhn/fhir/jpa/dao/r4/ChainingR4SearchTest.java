@@ -1559,7 +1559,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testChainedExactSearch() {
+	public void testChainedExactSearchWithExactValue() {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
 		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
@@ -1575,20 +1575,44 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		doUpdateResource(encounter);
 		logAllStringIndexes();
 
-		// execute/validate
+		String url = "/Encounter?service-provider.name:exact=TestOrg";
+
+		// execute
 		myCaptureQueriesListener.clear();
-		List<String> encounterIds = myTestDaoSearch.searchForIds("/Encounter?service-provider.name:exact=Test");
-		assertThat(encounterIds).isEmpty();
-
-		encounterIds = myTestDaoSearch.searchForIds("/Encounter?service-provider.name:exact=TestOrg");
-		assertThat(encounterIds).hasSize(1);
-		assertThat(encounterIds.get(0)).isEqualTo(encounter.getIdPart());
-
+		List<String> encounterIds = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
 		assertThat(encounterIds).hasSize(1);
 		assertThat(encounterIds.get(0)).isEqualTo(encounter.getIdPart());
+	}
+
+	@Test
+	public void testChainedExactSearchWithPartialValue() {
+		// setup
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
+
+		Organization organization = buildResource("Organization", withId("Org1"), withName("TestOrg"));
+		Patient patient = buildResource("Patient", withId("P1"), withBirthdate("2001-01-01"));
+		Encounter encounter = buildResource("Encounter", withId("E1"));
+		encounter.setSubject(new Reference("Patient/P1"));
+		encounter.setServiceProvider(new Reference("Organization/Org1"));
+
+		doUpdateResource(organization);
+		doUpdateResource(patient);
+		doUpdateResource(encounter);
+
+		logAllStringIndexes();
+		String url = "/Encounter?service-provider.name:exact=Test";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> encounterIds = myTestDaoSearch.searchForIds(url);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// validate
+		assertThat(encounterIds).isEmpty();
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {

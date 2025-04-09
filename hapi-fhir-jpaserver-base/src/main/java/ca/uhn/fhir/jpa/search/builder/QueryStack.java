@@ -3056,8 +3056,13 @@ public class QueryStack {
 
 			int qualifierIndex = nextParamName.indexOf(':');
 			if (qualifierIndex != -1) {
-				nextQualifier = nextParamName.substring(qualifierIndex);
-				nextParamName = nextParamName.substring(0, qualifierIndex);
+				if (isBlank(nextChain)) {
+					nextQualifier = nextParamName.substring(qualifierIndex);
+					nextParamName = nextParamName.substring(0, qualifierIndex);
+				} else {
+					nextParamName = nextParamName.substring(0, qualifierIndex);
+					nextQualifier = nextParamName.substring(qualifierIndex);
+				}
 			}
 
 			List<String> qualifiersBranch = Lists.newArrayList();
