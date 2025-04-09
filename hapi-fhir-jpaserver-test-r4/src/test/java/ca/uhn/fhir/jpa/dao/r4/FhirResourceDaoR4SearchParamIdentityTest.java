@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -41,12 +42,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 
+	@BeforeEach
+	void beforeEach() {
+		myStorageSettings.setWriteToSearchParamIdentityTable(true);
+	}
+
 	@AfterEach
 	void cleanUp() {
 		myStorageSettings.setIncludeHashIdentityForTokenSearches(false);
 		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		myStorageSettings.setIndexStorageOptimized(false);
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
 		mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 	}
 

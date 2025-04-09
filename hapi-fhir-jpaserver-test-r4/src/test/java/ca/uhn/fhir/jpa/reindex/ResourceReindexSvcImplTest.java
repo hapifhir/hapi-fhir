@@ -57,13 +57,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertThat(typedPids).hasSize(3);
 		assertThat(typedPids).containsExactly(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2));
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertEquals(1, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
 	}
 
@@ -134,13 +133,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertThat(typedResourcePids).hasSize(2);
 		assertThat(typedResourcePids).containsExactly(new TypedResourcePid("Patient", patientId1), new TypedResourcePid("Patient", patientId2));
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertEquals(1, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
 	}
 

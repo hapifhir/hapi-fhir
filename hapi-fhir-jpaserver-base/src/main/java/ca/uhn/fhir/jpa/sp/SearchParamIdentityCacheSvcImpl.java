@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.sp;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
@@ -55,6 +56,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	private static final int MAX_RETRY_COUNT = 20;
 	private static final String CACHE_THREAD_PREFIX = "search-parameter-identity-cache-";
 	private static final int THREAD_POOL_QUEUE_SIZE = 5000;
+	private final JpaStorageSettings myStorageSettings;
 	private final IResourceIndexedSearchParamIdentityDao mySearchParamIdentityDao;
 	private final TransactionTemplate myTxTemplate;
 	private final ThreadPoolTaskExecutor myThreadPoolTaskExecutor;
@@ -62,9 +64,11 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	private final UniqueTaskExecutor myUniqueTaskExecutor;
 
 	public SearchParamIdentityCacheSvcImpl(
+			JpaStorageSettings theStorageSettings,
 			IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
 			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
+		myStorageSettings = theStorageSettings;
 		mySearchParamIdentityDao = theResourceIndexedSearchParamIdentityDao;
 		myTxTemplate = new TransactionTemplate(theTxManager);
 		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -138,6 +142,10 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 * @see PersistSearchParameterIdentityTask
 	 */
 	public void findOrCreateSearchParamIdentity(Long theHashIdentity, String theResourceType, String theParamName) {
+		if (!myStorageSettings.isWriteToSearchParamIdentityTable()) {
+			return;
+		}
+
 		// check if SearchParamIdentity is already in cache
 		Integer spIdentityId = CacheUtils.getSearchParamIdentityFromCache(myMemoryCacheService, theHashIdentity);
 

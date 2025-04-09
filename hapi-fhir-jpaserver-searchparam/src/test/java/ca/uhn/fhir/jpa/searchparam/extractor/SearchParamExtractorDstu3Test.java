@@ -298,11 +298,6 @@ public class SearchParamExtractorDstu3Test {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
-		public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
-			throw new UnsupportedOperationException();
-		}
-
 		@Nullable
 		@Override
 		public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {

@@ -23,7 +23,6 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import net.ttddyy.dsproxy.listener.MethodExecutionContext;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.hl7.fhir.r4.model.InstantType;
@@ -37,10 +36,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -63,9 +60,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
 	private Queue<SqlQuery> myQueries;
 	private AtomicInteger myGetConnectionCounter;
-	private Map<String, AtomicInteger> myGetConnectionCounterPerThread;
 	private AtomicInteger myCommitCounter;
-	private Map<String, AtomicInteger> myCommitCounterPerThread;
 	private AtomicInteger myRollbackCounter;
 
 	@Nonnull
@@ -86,24 +81,6 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			@Nonnull Predicate<String> theSelectQueryInclusionCriteria) {
 		mySelectQueryInclusionCriteria = theSelectQueryInclusionCriteria;
 		return this;
-	}
-
-	@Override
-	public void execute(MethodExecutionContext theExecutionContext) {
-		super.execute(theExecutionContext);
-		switch (theExecutionContext.getMethod().getName()) {
-			case "commit":
-				incrementPerTreadCounter(myCommitCounterPerThread);
-				break;
-			case "getConnection":
-				incrementPerTreadCounter(myGetConnectionCounterPerThread);
-				break;
-		}
-	}
-
-	private void incrementPerTreadCounter(Map<String, AtomicInteger> theCounterMap) {
-		String threadName = Thread.currentThread().getName();
-		theCounterMap.computeIfAbsent(threadName, k -> new AtomicInteger()).incrementAndGet();
 	}
 
 	@Override
@@ -133,9 +110,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public void clear() {
 		myQueries.clear();
 		myGetConnectionCounter.set(0);
-		myGetConnectionCounterPerThread.clear();
 		myCommitCounter.set(0);
-		myCommitCounterPerThread.clear();
 		myRollbackCounter.set(0);
 	}
 
@@ -145,9 +120,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public void startCollecting() {
 		myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
 		myGetConnectionCounter = new AtomicInteger(0);
-		myGetConnectionCounterPerThread = new ConcurrentHashMap<>();
 		myCommitCounter = new AtomicInteger(0);
-		myCommitCounterPerThread = new ConcurrentHashMap<>();
 		myRollbackCounter = new AtomicInteger(0);
 	}
 
@@ -225,15 +198,6 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public List<SqlQuery> getSelectQueries() {
 		return getQueriesMatching(mySelectQueryInclusionCriteria);
-	}
-
-	/**
-	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
-	 */
-	public List<SqlQuery> getSelectQueries(Predicate<SqlQuery> theFilter) {
-		return getQueriesMatching(mySelectQueryInclusionCriteria).stream()
-				.filter(theFilter)
-				.collect(Collectors.toList());
 	}
 
 	/**
@@ -335,26 +299,6 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		String joined = String.join("\n", queriesStrings);
 		ourLog.info("Select Queries:\n{}", joined);
 		return joined;
-	}
-
-	/**
-	 * @return The number of times the connection pool was requested for a new connection by the current thread.
-	 */
-	public int countGetConnectionsForCurrentThread() {
-		String threadName = Thread.currentThread().getName();
-		return myGetConnectionCounterPerThread
-				.computeIfAbsent(threadName, k -> new AtomicInteger(0))
-				.intValue();
-	}
-
-	/**
-	 * @return The number of database commits made using connections from the pool by the current thread.
-	 */
-	public int countCommitsForCurrentThread() {
-		String threadName = Thread.currentThread().getName();
-		return myCommitCounterPerThread
-				.computeIfAbsent(threadName, k -> new AtomicInteger(0))
-				.intValue();
 	}
 
 	/**
@@ -496,10 +440,8 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * statements with a single set of parameters this counts as a repeated
 	 * query.
 	 */
-	public int countInsertQueriesRepeatedForCurrentThread() {
-		return (int) getInsertQueriesForCurrentThread().stream()
-				.filter(new DuplicateCheckingPredicate())
-				.count();
+	public int countInsertQueriesRepeated() {
+		return getInsertQueries(new DuplicateCheckingPredicate()).size();
 	}
 
 	public int countUpdateQueries() {

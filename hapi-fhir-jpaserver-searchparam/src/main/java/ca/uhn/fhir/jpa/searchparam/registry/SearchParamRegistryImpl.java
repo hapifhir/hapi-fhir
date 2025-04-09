@@ -183,11 +183,6 @@ public class SearchParamRegistryImpl
 	}
 
 	@Override
-	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
-		return myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
-	}
-
-	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
 			@Nonnull String theResourceName,
 			@Nonnull Set<String> theParamNames,
@@ -295,6 +290,11 @@ public class SearchParamRegistryImpl
 				.getHashIdentityToIndexedSearchParamMap()
 				.forEach((hash, param) -> spIdentityCacheSvc.findOrCreateSearchParamIdentity(
 						hash, param.getResourceType(), param.getParameterName()));
+	}
+
+	@VisibleForTesting
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
 	}
 
 	@VisibleForTesting

@@ -258,14 +258,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	public void testSystemHistory_CountCacheEnabled_Concurrent() throws ExecutionException, InterruptedException {
 		create20Patients();
 		myCaptureQueriesListener.clear();
-		String threadPrefix = "testSystemHistory";
 
-		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern(threadPrefix + "-%d")
-			.daemon(false)
-			.build();
-		ExecutorService threadPool = Executors.newFixedThreadPool(20, threadFactory);
-
+		ExecutorService threadPool = Executors.newFixedThreadPool(20);
 		try {
 			Runnable task = () -> {
 				IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
@@ -286,14 +280,12 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		}
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.getInsertQueries(
-			t -> t.getThreadName().startsWith(threadPrefix)).size());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 
 		// We fetch the history resources 20 times, but should only fetch the
 		// count(*) once, for a total of 21
-		assertEquals(20 + 1, myCaptureQueriesListener.getSelectQueries(
-			t -> t.getThreadName().startsWith(threadPrefix)).size());
+		assertEquals(20 + 1, myCaptureQueriesListener.countSelectQueries());
 
 	}
 

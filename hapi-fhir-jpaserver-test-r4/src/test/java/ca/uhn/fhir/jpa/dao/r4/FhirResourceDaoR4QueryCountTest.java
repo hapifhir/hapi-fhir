@@ -28,16 +28,13 @@ import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -129,7 +126,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -360,13 +356,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Test
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, transactionCreator.get());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
+		myCaptureQueriesListener.logSelectQueries();
 
 		// Verify
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeatedForCurrentThread());
-		assertEquals(33, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
+		assertEquals(33, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -375,9 +371,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, transactionCreator.get());
 
 		// Verify again
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeatedForCurrentThread());
-		assertEquals(30, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
+		assertEquals(30, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
@@ -488,7 +484,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		group.addIdentifier().setValue("foo");
 		group = updateGroup(group, Collections.emptyList());
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertQueryCount(4, 1, 2, 0);
 
 		assertThat(group.getMember()).hasSize(30);
@@ -548,7 +544,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(6);
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -571,7 +567,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -594,7 +590,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -730,7 +726,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(9, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(9, myCaptureQueriesListener.countCommits());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -743,7 +739,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(0, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countCommits());
 	}
 
 	/**
@@ -1080,7 +1076,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK (subject/patient)
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
@@ -1125,7 +1121,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Observation observation = new Observation();
 		observation.getSubject().setReference("Patient/P");
 		myObservationDao.create(observation, mySrd);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		// insert to: HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_LINK
@@ -1400,9 +1396,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// This really generates a surprising number of selects and commits. We
 		// could stand to reduce this!
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(56, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(71, myCaptureQueriesListener.countCommitsForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(56, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(71, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -1426,8 +1422,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		foundIds.sort(Comparator.naturalOrder());
 		assertEquals(ids, foundIds);
 
-		assertEquals(22, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(21, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(22, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(21, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -1450,8 +1446,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		foundIds.sort(Comparator.naturalOrder());
 		assertEquals(ids, foundIds);
 
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -1489,8 +1485,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<String> values = toUnqualifiedVersionlessIdValues(outcome);
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
 
 		// Now invalidate the caches, should add one more query
@@ -1502,8 +1498,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		values = toUnqualifiedVersionlessIdValues(outcome);
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
 
 		// And again, should be cached once more
@@ -1514,8 +1510,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		values = toUnqualifiedVersionlessIdValues(outcome);
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(values).asList().containsExactlyInAnyOrder(idValueArray);
 
 	}
@@ -1529,18 +1525,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		for (int i = 0; i < 10; i++) {
 			createPatient(withId("A" + i), withActiveTrue());
 		}
-
-		// make sure Patient.active, Patient.deceased search parameter identities are cached
-		long patientActiveHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_ACTIVE);
-		long patientDeceasedHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), "Patient", Patient.SP_DECEASED);
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils
-				.getSearchParamIdentityFromCache(myMemoryCacheService, patientActiveHashIdentity));
-			assertNotNull(SearchParamIdentityCacheSvcImpl.CacheUtils
-				.getSearchParamIdentityFromCache(myMemoryCacheService, patientDeceasedHashIdentity));
-		});
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronousUpTo(5);
@@ -1771,13 +1755,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = dao.search(map, mySrd);
 		toUnqualifiedVersionlessIdValues(outcome);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 
 		myCaptureQueriesListener.clear();
 		outcome = dao.search(map, mySrd);
 		toUnqualifiedVersionlessIdValues(outcome);
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 	}
 
 
@@ -1917,8 +1901,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		// 1 lookup for the match URL only
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(19, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(19, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(4, myResourceTableDao.count()));
@@ -1929,8 +1913,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(16, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(7, myResourceTableDao.count()));
@@ -1940,8 +1924,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(16, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
@@ -1992,8 +1976,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// 1 lookup for the match URL only
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(16, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(4, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> t.getIdDt().toUnqualifiedVersionless().getValue()).collect(Collectors.joining(","))));
@@ -2003,8 +1987,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(16, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(7, myResourceTableDao.count()));
@@ -2014,8 +1998,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(16, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
@@ -2048,10 +2032,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(8, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2102,12 +2086,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, input);
 
 		// Verify
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 
 		observation = myObservationDao.read(new IdType("Observation/O0"), mySrd);
 		ourLog.info("Observation:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(observation));
@@ -2154,10 +2138,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(18, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(18, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2169,10 +2153,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2185,10 +2169,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2241,8 +2225,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		// Search for IDs and Search for tag definition
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(26, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(26, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
@@ -2253,10 +2237,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(7, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2269,10 +2253,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2440,7 +2424,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), "'6445233466262474106'"));
+		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), "'6445233466262474106'"));
 		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
 
 		// Second identical pass
@@ -2682,11 +2666,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		// One to prefetch sys+val, one to prefetch val
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(45, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2698,10 +2682,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueries());
@@ -2715,10 +2699,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2730,10 +2714,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logInsertQueries();
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2767,9 +2751,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(9, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		runInTransaction(() -> {
@@ -2781,9 +2765,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		runInTransaction(() -> {
@@ -2795,8 +2779,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		runInTransaction(() -> {
@@ -2832,9 +2816,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(9, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(9, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		runInTransaction(() -> {
@@ -2845,15 +2829,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Run a second time (creates a new observation, reuses the patient, should use cache)
 
 		myCaptureQueriesListener.clear();
-		Bundle outcome = mySystemDao.transaction(mySrd, bundleCreator.get());
-		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		mySystemDao.transaction(mySrd, bundleCreator.get());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		// Make sure the match URL query uses a small limit
-		String matchUrlQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
 		assertThat(matchUrlQuery).contains("rispt1_0.HASH_SYS_AND_VALUE='-4132452001562191669'");
 		assertThat(matchUrlQuery).contains("fetch first '2'");
 
@@ -2866,8 +2849,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bundleCreator.get());
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		runInTransaction(() -> {
@@ -2963,14 +2946,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(30, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(30, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeatedForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections());
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
 		for (int i = 0; i < 5; i++) {
 			assertNotGone(new IdType("Patient/P" + i));
@@ -3463,7 +3446,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(input.getEntry().size());
@@ -3495,15 +3478,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		try {
 			output = mySystemDao.transaction(mySrd, input);
 		} finally {
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+			myCaptureQueriesListener.logSelectQueries();
+			myCaptureQueriesListener.logInsertQueries();
 		}
 
 		assertEquals(17, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(input.getEntry().size());
@@ -3546,7 +3529,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertThat(output.getEntry()).hasSize(input.getEntry().size());
@@ -3602,7 +3585,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, inputBundle);
 		assertEquals(21, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(7, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 
@@ -3630,7 +3613,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
 		mySystemDao.transaction(mySrd, inputBundle);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(7, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
@@ -3640,7 +3623,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		inputBundle = myReindexTestHelper.createTransactionBundleWith20Observation(true);
 		mySystemDao.transaction(mySrd, inputBundle);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
@@ -3770,13 +3753,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread())
-			.as(() -> "\n *" + myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * ")))
-			.isEqualTo(5);
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(() -> "\n *" + myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * "))).isEqualTo(5);
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		// Second time - Should reuse cache
@@ -3786,11 +3767,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -3815,11 +3796,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		// Second time - Should reuse cache
@@ -3829,11 +3810,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -3862,11 +3843,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		// Second time - Should reuse cache
@@ -3876,11 +3857,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(expansion.getExpansion().getContains()).hasSize(7);
 		assertThat(expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation()).hasSize(1);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -3944,9 +3925,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(7, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -3969,7 +3950,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(6, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -4078,13 +4059,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		myMemoryCacheService.invalidateAllCaches();
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(40, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeatedForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesRepeated());
 
 
 
@@ -4179,15 +4160,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		assertNotNull(myValidationSupport.fetchStructureDefinition("http://foo"));
 
-		assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
 		// Again (should use cache)
 		myCaptureQueriesListener.clear();
 		assertNotNull(myValidationSupport.fetchStructureDefinition("http://foo"));
 
-		assertEquals(0, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countGetConnections());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@ParameterizedTest
@@ -4212,13 +4193,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ValidationModeEnum mode = ValidationModeEnum.UPDATE;
 		MethodOutcome outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
 		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		if (theStoredInRepository) {
-			assertEquals(5, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(5, myCaptureQueriesListener.countGetConnections());
+			assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		} else {
-			assertEquals(6, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(6, myCaptureQueriesListener.countGetConnections());
+			assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		}
 
 		// Again (should use caches)
@@ -4226,11 +4207,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		outcome = myPatientDao.validate(resource, id, encoded, EncodingEnum.JSON, mode, null, mySrd);
 		assertThat(((OperationOutcome)outcome.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).contains("No issues detected");
 		if (theStoredInRepository) {
-			assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-			assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(1, myCaptureQueriesListener.countGetConnections());
+			assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		} else {
-			assertEquals(0, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(0, myCaptureQueriesListener.countGetConnections());
+			assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		}
 	}
 
@@ -4298,9 +4279,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertTrue(result.isOk());
 		assertThat(result.getMessage()).isNull();
 
-		assertEquals(4, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.countGetConnections());
+		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries();
 
 		// Again (should use cache)
 		myCaptureQueriesListener.clear();
@@ -4308,16 +4289,16 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertNotNull(result);
 		assertTrue(result.isOk());
 		assertThat(result.getMessage()).isNull();
-		assertEquals(0, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countGetConnections());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 
 		// Different code (should use cache)
 		myCaptureQueriesListener.clear();
 		result = myValidationSupport.validateCode(ctx, options, csUrl, code2, null, vsUrl);
 		assertNotNull(result);
 		assertTrue(result.isOk());
-		assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 
 		// Now pre-expand the VS and try again (should use disk because we're fetching from pre-expansion)
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -4326,8 +4307,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertNotNull(result);
 		assertTrue(result.isOk());
 		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
-		assertEquals(3, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countGetConnections());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 
 		// Same code (should use cache)
 		myCaptureQueriesListener.clear();
@@ -4335,8 +4316,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertNotNull(result);
 		assertTrue(result.isOk());
 		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
-		assertEquals(0, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countGetConnections());
+		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 
 		// Different code (should use cache)
 		myCaptureQueriesListener.clear();
@@ -4344,8 +4325,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertNotNull(result);
 		assertTrue(result.isOk());
 		assertThat(result.getMessage()).contains("expansion that was pre-calculated");
-		assertEquals(1, myCaptureQueriesListener.countGetConnectionsForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countGetConnections());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 
 	}
 

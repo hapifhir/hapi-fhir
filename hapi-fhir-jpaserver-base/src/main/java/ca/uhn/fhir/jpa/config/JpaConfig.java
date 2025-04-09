@@ -591,7 +591,7 @@ public class JpaConfig {
 			@Autowired PlatformTransactionManager theTxManager,
 			@Autowired MemoryCacheService theMemoryCacheService) {
 		return new SearchParamIdentityCacheSvcImpl(
-				theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
+				myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *

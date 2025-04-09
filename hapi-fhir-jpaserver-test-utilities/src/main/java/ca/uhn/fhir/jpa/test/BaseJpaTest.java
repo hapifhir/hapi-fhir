@@ -191,7 +191,7 @@ import static org.mockito.Mockito.when;
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
-@Import(BaseJpaTest.TestSearchParamRegistryConfig.class)
+@Import(BaseJpaTest.TestSearchParamConfig.class)
 @TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
@@ -319,13 +319,20 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ApplicationContext myApplicationContext;
 
 	@TestConfiguration
-	public static class TestSearchParamRegistryConfig {
+	public static class TestSearchParamConfig {
 
 		@Autowired(required = false)
 		private SearchParamRegistryImpl mySearchParamRegistry;
 
+		@Autowired(required = false)
+		protected JpaStorageSettings myStorageSettings;
+
 		@PostConstruct
-		public void disablePrePopulation() {
+		public void postConfigure() {
+			if (myStorageSettings != null) {
+				myStorageSettings.setWriteToSearchParamIdentityTable(false);
+			}
+
 			if (mySearchParamRegistry != null) {
 				mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 			}

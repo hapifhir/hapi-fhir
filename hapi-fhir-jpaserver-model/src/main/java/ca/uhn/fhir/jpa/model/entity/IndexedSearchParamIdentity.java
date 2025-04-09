@@ -30,8 +30,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.MAX_SP_NAME;
-
+/**
+ * Stores unique hash identities along with the corresponding {@code sp_name} and {@code res_type} values.
+ * This entity is populated during read, write, or update operations on the {@code HFJ_SPIDX_xxx} tables.
+ */
 @Entity
 @Table(
 		name = "HFJ_SPIDX_IDENTITY",
@@ -52,7 +54,7 @@ public class IndexedSearchParamIdentity {
 	private String myResourceType;
 
 	@FullTextField
-	@Column(name = "SP_NAME", nullable = false, length = MAX_SP_NAME)
+	@Column(name = "SP_NAME", nullable = false)
 	private String myParamName;
 
 	public Integer getSpIdentityId() {
