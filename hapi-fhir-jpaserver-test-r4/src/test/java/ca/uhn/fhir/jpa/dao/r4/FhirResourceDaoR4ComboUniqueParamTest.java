@@ -423,7 +423,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		myCaptureQueriesListener.clear();
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 
 		List<ResourceIndexedComboStringUnique> values = runInTransaction(()-> myResourceIndexedComboStringUniqueDao.findAllForResourceIdForUnitTest(JpaPid.fromId(id.getIdPartAsLong())));
 		assertEquals(2, values.size());
@@ -1234,7 +1234,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(id1.getValue(), id2.getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false))
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false))
 			.contains("SELECT t0.RES_ID FROM HFJ_IDX_CMP_STRING_UNIQ t0 WHERE (t0.IDX_STRING IN " +
 				"('Patient?family=Family1&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'," +
 				"'Patient?family=Family2&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale') )");

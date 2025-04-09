@@ -328,7 +328,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		protected JpaStorageSettings myStorageSettings;
 
 		@PostConstruct
-		public void postConfigure() {
+		public void preConfigure() {
 			if (myStorageSettings != null) {
 				myStorageSettings.setWriteToSearchParamIdentityTable(false);
 			}
@@ -337,6 +337,11 @@ public abstract class BaseJpaTest extends BaseTest {
 				mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 			}
 		}
+	}
+
+	@BeforeEach
+	public void beforeInitSearchParams() {
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
 	}
 
 	@SuppressWarnings("BusyWait")

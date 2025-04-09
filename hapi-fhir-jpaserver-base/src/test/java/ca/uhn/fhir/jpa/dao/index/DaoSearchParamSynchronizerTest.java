@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -84,7 +86,9 @@ public class DaoSearchParamSynchronizerTest {
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
 		verify(entityManager, times(1)).persist(THE_SEARCH_PARAM_NUMBER);
+		long expectedSpIdentity = BaseResourceIndexedSearchParam
+			.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", GRITTSCORE);
 		verify(searchParamIdentityCacheSvc, times(1))
-			.findOrCreateSearchParamIdentity(-7953022655090388845L, "Patient", GRITTSCORE);
+			.findOrCreateSearchParamIdentity(expectedSpIdentity, "Patient", GRITTSCORE);
 	}
 }

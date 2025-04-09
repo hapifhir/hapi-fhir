@@ -122,7 +122,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patient2Id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(1, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		myCaptureQueriesListener.clear();
@@ -131,7 +131,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		List<String> values = toUnqualifiedVersionlessIdValues(search);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(values).containsExactly(patient2Id.getValue(), patient1Id.getValue());
 		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
@@ -188,7 +188,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -229,7 +229,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		// 3 queries: Search to resolve PID from Match URL, search to resolve reference, create the resource
-		assertEquals(3, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
@@ -256,7 +256,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType observationId2 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 		// Verify
-		assertEquals(2, myCaptureQueriesListener.countCommitsForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {

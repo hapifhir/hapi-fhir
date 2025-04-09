@@ -213,9 +213,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logDeleteQueries();
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		myCaptureQueriesListener.logInsertQueries();
 		// 2 concepts, 1 link
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.clear();
 
 		delta = new CustomTerminologySet();

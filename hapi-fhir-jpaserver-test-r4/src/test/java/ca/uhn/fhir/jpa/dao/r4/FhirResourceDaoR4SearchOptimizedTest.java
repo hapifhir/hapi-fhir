@@ -845,9 +845,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		results.getResources(0, 1); // won't return anything
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
-		String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
 		assertThat(selectQuery).contains("HASH_VALUE");
 		assertThat(selectQuery).doesNotContain("HASH_SYS");
 
@@ -907,9 +907,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		SearchParameterMap params = myMatchUrlService.translateMatchUrl("/Observation?subject:patient.identifier=urn:oid:ZOOP.MRN.OID|1234", resourceDef, null);
 		params.setLoadSynchronous(true);
 		myObservationDao.search(params);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
-		String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		ourLog.info(selectQuery);
 		assertEquals(1, StringUtils.countMatches(selectQuery, "JOIN"));
 		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));

@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 
@@ -56,12 +55,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		// Resource query happens but not count query
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).doesNotStartWith("select count");
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).doesNotStartWith("select count");
 
 	}
 
@@ -92,13 +90,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 
 		/*
 		 * Subsequent history should also perform count
@@ -114,13 +110,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 
 	}
 
@@ -142,14 +136,12 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)
-			.toLowerCase(Locale.ROOT)).startsWith("select count");
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false)
-			.toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		myCaptureQueriesListener.logSelectQueries(false, false);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		/*
@@ -166,12 +158,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 	}
@@ -220,14 +211,12 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		myCaptureQueriesListener.logSelectQueries(false, false);
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		/*
@@ -244,12 +233,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history.getResources(0, 10);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0)
-			.getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 	}

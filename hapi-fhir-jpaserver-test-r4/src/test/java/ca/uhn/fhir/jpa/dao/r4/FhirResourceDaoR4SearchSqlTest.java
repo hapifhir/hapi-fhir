@@ -140,7 +140,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 	private String getSqlForRestQuery(String theFhirRestQuery) {
 		myCaptureQueriesListener.clear();
 		myTestDaoSearch.searchForIds(theFhirRestQuery);
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		return myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 	}
 
@@ -194,7 +194,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new TokenParam(code));
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?))) fetch first ? rows only", sql);
@@ -238,7 +238,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.add(Constants.PARAM_PROFILE, new UriParam(code));
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 
 		// Query 1 - Find resources: Just a standard token search in this mode
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);

@@ -310,8 +310,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			myObservationDao.update(observation, mySrd);
 
 			// Make sure we're not introducing any extra DB operations
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(4);
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId, mySrd);
@@ -439,8 +438,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 
 			// Make sure we're not introducing any extra DB operations
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(2);
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId, mySrd);

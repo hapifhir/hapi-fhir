@@ -190,8 +190,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		Patient patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID=?");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID=?");
 	}
 
 	@Test
@@ -239,8 +239,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("A")), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)).contains("PARTITION_ID = ?");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID = ?");
 	}
 
 	@Test
@@ -251,9 +251,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", new ReferenceParam("Patient/A")), mySrd);
 		assertEquals(1, outcome.size());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
 
 		// Typed
 		myCaptureQueriesListener.clear();
@@ -261,9 +261,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		referenceParam.setValueAsQueryToken(myFhirContext, "subject", ":Patient", "A");
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", referenceParam), mySrd);
 		assertEquals(1, outcome.size());
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.PARTITION_ID,t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
 	}
 
 	@Test
@@ -273,9 +273,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		myCaptureQueriesListener.clear();
 		myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) fetch first '10000' rows only",
-			myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals("SELECT t0.PARTITION_ID,t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL)) fetch first '10000' rows only", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
 
 	@Test
@@ -337,8 +336,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		IBundleProvider outcome = myOrganizationDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false)).contains("t0.PARTITION_ID = ?");
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
 
 	@Test
@@ -390,9 +389,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 		List<String> selectQueryStrings = myCaptureQueriesListener
-			.getSelectQueriesForCurrentThread()
+			.getSelectQueries()
 			.stream()
 			.map(t -> t.getSql(false, false).toUpperCase(Locale.US))
 			.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
@@ -429,9 +428,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
 		assertThat(resultIds).as(resultIds.toString()).containsExactlyInAnyOrder(resourceIds.get("Coverage").get(0), resourceIds.get("Organization").get(0), resourceIds.get("ExplanationOfBenefit").get(0), resourceIds.get("Patient").get(0), resourceIds.get("Practitioner").get(0), resourceIds.get("Practitioner").get(1), resourceIds.get("Practitioner").get(2));
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US)).matches("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*");
 
 	}
@@ -493,9 +492,9 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
 		assertThat(resultIds).as(resultIds.toString()).containsExactlyInAnyOrder(resourceIds.get("Coverage").get(0), resourceIds.get("Organization").get(0), resourceIds.get("ExplanationOfBenefit").get(0), resourceIds.get("Patient").get(0), resourceIds.get("Practitioner").get(0), resourceIds.get("Practitioner").get(1), resourceIds.get("Practitioner").get(2));
 
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US)).matches("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*");
 
 	}
