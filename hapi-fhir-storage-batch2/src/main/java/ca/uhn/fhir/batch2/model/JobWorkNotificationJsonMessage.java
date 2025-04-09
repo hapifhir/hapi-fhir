@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotification> {
 
@@ -37,11 +38,14 @@ public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotif
 
 	@Override
 	@Nonnull
-	public String getMessageKey() {
+	public @NotNull String getMessageKey() {
 		// We assume that preserving chunk order does not matter, so we want to spread work as much across the cluster
 		// as possible even if it means chunks are processed out of order. If we wanted to preserve order, we would
 		// use instanceId instead. This may need to change by job type in the future...
-		return myPayload.getChunkId();
+		if (myPayload.getChunkId() != null) {
+			return myPayload.getChunkId();
+		}
+		return super.getMessageKey();
 	}
 
 	/**

@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -57,21 +58,20 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public String getMessageKey() {
-		if (myPayload == null) {
-			return null;
+		if (getPayloadMessageKey() != null) {
+			return getPayloadMessageKey();
 		}
-		return myPayload.getMessageKey();
+		return super.getMessageKey();
 	}
 
-	@Override
 	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
+	public String getPayloadMessageKey() {
+		if (myPayload != null) {
+			return myPayload.getPayloadMessageKey();
 		}
-		return myPayload.getMessageKeyOrDefault();
+		return null;
 	}
 
 	@Override

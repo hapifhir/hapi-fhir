@@ -160,7 +160,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 
 	@Nullable
 	@Override
-	public String getMessageKeyOrDefault() {
-		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
+	public String getPayloadMessageKey() {
+		return StringUtils.defaultString(super.getPayloadMessageKey(), myPayloadId);
 	}
 }

@@ -283,7 +283,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		ResourceModifiedMessage retVal = new ResourceModifiedMessage(myFhirContext, theObservation, BaseResourceMessage.OperationTypeEnum.CREATE);
 		retVal.setSubscriptionId("subId");
 		retVal.setTransactionId("txId");
-		retVal.setMessageKey("messageKey");
+		retVal.setPayloadMessageKey("messageKey");
 		retVal.setMediaType("json");
 		retVal.setAttribute("attKey", "attValue");
 		retVal.setPartitionId(RequestPartitionId.allPartitions());

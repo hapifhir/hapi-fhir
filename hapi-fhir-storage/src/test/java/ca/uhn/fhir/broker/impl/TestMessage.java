@@ -2,6 +2,7 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,21 +25,6 @@ public class TestMessage<T> implements IMessage<T> {
 		} else {
 			myKey = null;
 		}
-	}
-//
-//	@Override
-//	public byte[] getData() {
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		try {
-//			return objectMapper.writeValueAsBytes(getValue());
-//		} catch (JsonProcessingException e) {
-//			throw new InternalErrorException("Unable to serialize " + getValue().getClass() + " JSON instance", e);
-//		}
-//	}
-
-	@Override
-	public String getMessageKey() {
-		return myKey;
 	}
 
 	@Override

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -53,21 +54,21 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public String getMessageKey() {
-		if (myPayload == null) {
-			return null;
+		if (getPayloadMessageKey() != null) {
+			return getPayloadMessageKey();
 		}
-		return myPayload.getMessageKey();
+		return super.getMessageKey();
 	}
 
-	@Override
+	// FIXME KHS this code is repeated in 3 places
 	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
+	public String getPayloadMessageKey() {
+		if (myPayload != null) {
+			return myPayload.getPayloadMessageKey();
 		}
-		return myPayload.getMessageKeyOrDefault();
+		return null;
 	}
 
 	@Override

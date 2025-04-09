@@ -262,8 +262,8 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 
 	@Nullable
 	@Override
-	public String getMessageKeyOrDefault() {
-		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
+	public String getPayloadMessageKey() {
+		return StringUtils.defaultString(super.getPayloadMessageKey(), myPayloadId);
 	}
 
 	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {

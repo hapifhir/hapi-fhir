@@ -91,7 +91,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload =
 				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
-		payload.setMessageKey(theMsg.getMessageKeyOrDefault());
+		payload.setPayloadMessageKey(theMsg.getPayloadMessageKey());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());
 		return new ResourceModifiedJsonMessage(payload);

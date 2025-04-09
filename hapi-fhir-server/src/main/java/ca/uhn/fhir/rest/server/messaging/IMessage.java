@@ -19,28 +19,22 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IMessage<T> {
-	/**
-	 * @return whether the message has a key
-	 */
-	default boolean hasKey() {
-		return getMessageKey() != null;
-	}
-
 	/**
 	 * This is used by brokers that support partitioning of messages. It is used to determine which partition a message
 	 * should be sent to. If message order is important, then you can use the message key to ensure that all messages
 	 * with the same key are sent to the same partition.
 	 * @return the key of the message.
 	 */
-	@Nullable
+	@Nonnull
 	default String getMessageKey() {
-		return null;
+		return UUID.randomUUID().toString();
 	}
 
 	/**

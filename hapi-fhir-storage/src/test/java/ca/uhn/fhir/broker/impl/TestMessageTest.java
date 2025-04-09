@@ -28,7 +28,6 @@ class TestMessageTest {
 		// Then
 		assertThat(message.getMessageKey()).isEqualTo(key);
 		assertThat(message.getPayload()).isEqualTo(payload);
-		assertThat(message.hasKey()).isTrue();
 	}
 	
 	@Test
@@ -42,7 +41,6 @@ class TestMessageTest {
 		// Then
 		assertThat(message.getMessageKey()).isNull();
 		assertThat(message.getPayload()).isEqualTo(payload);
-		assertThat(message.hasKey()).isFalse();
 	}
 	
 	@Test
@@ -59,7 +57,6 @@ class TestMessageTest {
 		// Then
 		assertThat(message.getMessageKey()).isEqualTo(jsonMessage.getMessageKey());
 		assertThat(message.getPayload()).isSameAs(jsonMessage);
-		assertThat(message.hasKey()).isEqualTo(jsonMessage.getMessageKey() != null);
 	}
 	
 	@Test
@@ -73,7 +70,6 @@ class TestMessageTest {
 		// Then
 		assertThat(message.getMessageKey()).isNull();
 		assertThat(message.getPayload()).isEqualTo(payload);
-		assertThat(message.hasKey()).isFalse();
 	}
 	
 	@Test

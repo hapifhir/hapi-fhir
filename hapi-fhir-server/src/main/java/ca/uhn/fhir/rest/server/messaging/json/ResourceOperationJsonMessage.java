@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -64,15 +65,20 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
-	@Nullable
 	@Override
+	@Nonnull
 	public String getMessageKey() {
-		return myPayload.getMessageKey();
+		if (getPayloadMessageKey() != null) {
+			return getPayloadMessageKey();
+		}
+		return super.getMessageKey();
 	}
 
 	@Nullable
-	@Override
-	public String getMessageKeyOrDefault() {
-		return myPayload.getMessageKeyOrDefault();
+	public String getPayloadMessageKey() {
+		if (myPayload != null) {
+			return myPayload.getPayloadMessageKey();
+		}
+		return null;
 	}
 }
