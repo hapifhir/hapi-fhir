@@ -3083,7 +3083,8 @@ public class QueryStack {
 							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
 						} else {
 							IQueryParameterType qp = newParameterInstance(nextSearchParam);
-							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), nextQualifier, theTargetValue);
+							qp.setValueAsQueryToken(
+									myFhirContext, nextSearchParam.getName(), nextQualifier, theTargetValue);
 							orValues.add(qp);
 						}
 
