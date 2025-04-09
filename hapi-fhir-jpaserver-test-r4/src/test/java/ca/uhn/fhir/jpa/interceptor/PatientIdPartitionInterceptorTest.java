@@ -50,7 +50,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -83,6 +82,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
+		// fixme warn if not set!
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	@Override
@@ -92,9 +93,11 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 
-		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultSettings = new PartitionSettings();
+		myPartitionSettings.setPartitioningEnabled(defaultSettings.isPartitioningEnabled());
+		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
 	}
 
 
@@ -387,6 +390,16 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertThat(resourcesByType.get("Coverage")).containsExactly(4267);
 		assertThat(resourcesByType.get("Organization")).containsExactly(-1, -1);
 		assertThat(resourcesByType.get("Practitioner")).containsExactly(-1, -1, -1);
+	}
+
+	@Test
+	void testLoadBundle_referencesExistingResource() {
+	    // given
+		createOrganization(withIdentifier("https://example.com/ns", "123"));
+
+	    // when
+	    // then
+	    fail();
 	}
 
 	@Test

@@ -809,8 +809,19 @@ public abstract class BaseTransactionProcessor {
 					}
 					break;
 				}
-				case POST:
+				case POST: {
+					// fixme here
+//					String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextEntry);
+//					if (matchUrl != null) {}
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					nextWriteEntryRequestPartitionId =
+						myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+							theRequestDetails, requestUrl);
+
+					break;
+				}
 				case PUT: {
+					// fixme check if there is a conditional url and use search for that instead
 					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
 					if (resource != null) {
 						String resourceType = myContext.getResourceType(resource);
@@ -818,6 +829,7 @@ public abstract class BaseTransactionProcessor {
 								myRequestPartitionHelperService.determineCreatePartitionForRequest(
 										theRequestDetails, resource, resourceType);
 					}
+					break;
 				}
 			}
 		}
@@ -1568,7 +1580,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void setConditionalUrlToBeValidatedLater(
 			Map<String, IIdType> theConditionalUrlToIdMap, String theMatchUrl, IIdType theId) {
-		if (!StringUtils.isBlank(theMatchUrl)) {
+		if (!isBlank(theMatchUrl)) {
 			theConditionalUrlToIdMap.put(theMatchUrl, theId);
 		}
 	}
@@ -2085,7 +2097,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
-		org.hl7.fhir.r4.model.IdType id = new org.hl7.fhir.r4.model.IdType(theResourceType, theResourceId, theVersion);
+		IdType id = new IdType(theResourceType, theResourceId, theVersion);
 		return myContext.getVersion().newIdType().setValue(id.getValue());
 	}
 

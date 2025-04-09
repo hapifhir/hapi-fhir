@@ -81,7 +81,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirTerser {
 
-	private static final Pattern COMPARTMENT_MATCHER_PATH =
+	// fixme visibility?
+	public static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =

@@ -343,8 +343,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			boolean thePerformIndexing,
 			RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-				theRequestDetails, theResource, getResourceName());
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+				theRequestDetails, getResourceName());
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withTransactionDetails(theTransactionDetails)
@@ -427,7 +427,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(PartitionablePartitionId.toStoragePartition(theRequestPartitionId, myPartitionSettings));
+		RequestPartitionId targetWritePartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+			theRequest, theResource, entity.getResourceType());
+
+		entity.setPartitionId(PartitionablePartitionId.toStoragePartition(targetWritePartitionId, myPartitionSettings));
 		entity.setCreatedByMatchUrl(theMatchUrl);
 		entity.initializeVersion();
 
