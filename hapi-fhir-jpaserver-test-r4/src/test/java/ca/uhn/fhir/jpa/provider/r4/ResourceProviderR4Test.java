@@ -50,10 +50,10 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -682,7 +682,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@MethodSource("createFhirSearchWithChainingAndCountParams")
 	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
 		// Given
-		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);//todo jdjd increase
+		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);
 		if (theMaxPageSize != null) {
 			myPagingProvider.setMaximumPageSize(theMaxPageSize);
 		}
@@ -702,13 +702,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			organizations.add(myClient.update().resource(o).execute().getId().toUnqualifiedVersionless());
 		}
 
-
 		int totalNumberOfPatientsCreated = createPatientsWithReferences(theRefCountToResourceCount, organizations);
 
 		int numberOfSingleRefResources = theRefCountToResourceCount.getOrDefault(1, 0);
 		int count = totalNumberOfPatientsCreated - numberOfSingleRefResources;
 
-		ourLog.info("Loading page: 1");
 		Bundle output = myClient
 			.search()
 			.byUrl("Patient?general-practitioner.active=true")
@@ -717,20 +715,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		ourLog.info("Ids: {}", ids);
+		ourLog.info("Loaded page 1 with ids: {}", ids);
 		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
 
 		// When: loading the next page
-		for (int i = 2; output.getLink("next") != null; i++) {
-			// next page
-			ourLog.info("Loading page: " + i);
+		for (int pageNum = 2; output.getLink("next") != null; pageNum++) {
 			output = myClient
 				.loadPage()
 				.next(output)
 				.execute();
 
 			ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-			ourLog.info("Ids: {}", ids);
+			ourLog.info("Loaded page {} with ids: {}", pageNum, ids);
 
 			// Then: search properly resolves, and has the correct count
 			if (output.getLink("next") != null) {
@@ -777,7 +773,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
-		//todo jdjd the after bc u changed it
 		//todo change to do while as well
 		// 5 resources with 2 refs; 3 resources with 1 ref
 		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
@@ -7487,6 +7482,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		@AfterEach
 		public void cleanUp() {
+			myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+			myStorageSettings.setSearchPreFetchThresholds(JpaStorageSettings.DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS);
 			myStorageSettings.setIndexStorageOptimized(false);
 		}
 	}

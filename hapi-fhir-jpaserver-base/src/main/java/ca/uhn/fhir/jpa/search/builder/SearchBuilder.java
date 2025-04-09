@@ -2759,8 +2759,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (!myResultsIterator.hasNext()) {
 							if (mySearchProperties.hasMaxResultsRequested()
-									&& (mySkipCount + myNonSkipCount
-											== mySearchProperties.getMaxResultsRequested())) {
+									&& (mySkipCount + myNonSkipCount == mySearchProperties.getMaxResultsRequested())) {
 								if (mySkipCount > 0 && myNonSkipCount == 0) {
 									sendProcessingMsgAndFirePerformanceHook();
 									// need the next iterator; increase the maxsize

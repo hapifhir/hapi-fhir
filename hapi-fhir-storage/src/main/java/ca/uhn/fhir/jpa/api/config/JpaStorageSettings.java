@@ -137,6 +137,8 @@ public class JpaStorageSettings extends StorageSettings {
 	public static final int DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE =
 			Integer.parseInt(DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
 
+	public static final List<Integer> DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS = Arrays.asList(13, 503, 2003, 1000003, -1);
+
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -210,7 +212,7 @@ public class JpaStorageSettings extends StorageSettings {
 	// If they fetch the second page, fetch more.
 	// we'll only fetch (by default) up to 1 million records, because after that, deduplication in local memory is
 	// prohibitive
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, 1000003, -1);
+	private List<Integer> mySearchPreFetchThresholds = DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS;
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
