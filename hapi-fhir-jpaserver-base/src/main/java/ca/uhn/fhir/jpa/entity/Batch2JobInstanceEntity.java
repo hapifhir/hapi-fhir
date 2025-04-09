@@ -146,6 +146,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "CLIENT_ID", length = INITIATING_CLIENT_ID_MAX_LENGTH, nullable = true)
 	private String myTriggeringClientId;
 
+	@Column(name = "USER_DATA_JSON", length = Length.LONG32, nullable = true)
+	private String myUserDataJson;
+
 	/**
 	 * Any output from the job can be held in this column
 	 * Even serialized json
@@ -392,5 +395,13 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setFastTracking(boolean theFastTracking) {
 		myFastTracking = theFastTracking;
+	}
+
+	public String getUserDataJson() {
+		return myUserDataJson;
+	}
+
+	public void setUserDataJson(String theUserDataJson) {
+		myUserDataJson = theUserDataJson;
 	}
 }
