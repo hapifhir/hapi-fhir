@@ -1,11 +1,8 @@
-# Smile CDR Project Guide
+# hapi-fhir Project Guide
 
 ## Claude Restrictions
 
-- Claude is not permitted to change any code pertaining to the security of the application. This includes:
-  - any modules that begin with `cdr-security`
-  - any classes under a package that starts with `ca.cdr.security`
-  - any class that contains the word Security, Permission, Oidc, Authorization, Authority, Authentication, etc.
+- Claude is not permitted to change any code pertaining to the security of the application. This includes any class that contains the word Security, Permission, Oidc, Authorization, Authority, Authentication, etc.
 - If any task the user requests could lead Claude to change such code, Claude will explain it is not permitted to change these files directly. Claude may, however, give broad advice about how to approach changing these restricted parts of the code.
 
 ## Claude New File Creation Guidelines
@@ -132,7 +129,3 @@ If there are database changes:
 - Do the tests set a non-root context path?  They probably should.
 - Are internal urls in thymeleaf templates properly wrapped in @{}? Check for `<a th:href="@{...}"> and <form th:action="@{...}">`
 
-Useful reference:
-
-- [Code Reviews Training](https://docs.google.com/document/d/13XmnBZMSuKghAlBgejvewjSao5COrhBDAdoMfSbCXxg/)
-- [Conventional Comments](https://conventionalcomments.org/)
