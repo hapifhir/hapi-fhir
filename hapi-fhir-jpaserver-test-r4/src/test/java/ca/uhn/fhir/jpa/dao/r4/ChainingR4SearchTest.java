@@ -1558,6 +1558,39 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
 	}
 
+	@Test
+	public void testChainedExactSearch() {
+		// setup
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
+
+		Organization organization = buildResource("Organization", withId("Org1"), withName("TestOrg"));
+		Patient patient = buildResource("Patient", withId("P1"), withBirthdate("2001-01-01"));
+		Encounter encounter = buildResource("Encounter", withId("E1"));
+		encounter.setSubject(new Reference("Patient/P1"));
+		encounter.setServiceProvider(new Reference("Organization/Org1"));
+
+		doUpdateResource(organization);
+		doUpdateResource(patient);
+		doUpdateResource(encounter);
+		logAllStringIndexes();
+
+		// execute/validate
+		myCaptureQueriesListener.clear();
+		List<String> encounterIds = myTestDaoSearch.searchForIds("/Encounter?service-provider.name:exact=Test");
+		assertThat(encounterIds).isEmpty();
+
+		encounterIds = myTestDaoSearch.searchForIds("/Encounter?service-provider.name:exact=TestOrg");
+		assertThat(encounterIds).hasSize(1);
+		assertThat(encounterIds.get(0)).isEqualTo(encounter.getIdPart());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// validate
+		assertThat(encounterIds).hasSize(1);
+		assertThat(encounterIds.get(0)).isEqualTo(encounter.getIdPart());
+	}
+
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
 		myCaptureQueriesListener.clear();
 		myTestDaoSearch.searchForIds(theUrl);
