@@ -31,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -263,7 +262,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@Nullable
 	@Override
 	public String getPayloadMessageKey() {
-		return StringUtils.defaultString(super.getPayloadMessageKey(), myPayloadId);
+		return Objects.toString(super.getPayloadMessageKey(), myPayloadId);
 	}
 
 	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {

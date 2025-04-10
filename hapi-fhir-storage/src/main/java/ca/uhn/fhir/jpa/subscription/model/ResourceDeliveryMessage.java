@@ -33,6 +33,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("WeakerAccess")
@@ -161,6 +163,6 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@Nullable
 	@Override
 	public String getPayloadMessageKey() {
-		return StringUtils.defaultString(super.getPayloadMessageKey(), myPayloadId);
+		return Objects.toString(super.getPayloadMessageKey(), myPayloadId);
 	}
 }
