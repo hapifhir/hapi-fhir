@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6834
+title: "`RemoteTerminologyServiceValidationSupport` can now be configured with a customized `IRestfulClientFactory` 
+which will be used to create the FHIR client for remote terminology requests."
