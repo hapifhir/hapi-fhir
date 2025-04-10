@@ -687,9 +687,8 @@ public class InterceptorServiceTest {
 
 			// when
 			assertThatThrownBy(() -> myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable))
-				.hasMessageContaining("Runnable was not run in filter produced by BaseInterceptorService.HookInvoker")
+				.hasMessageContaining("Runnable was not run in filter")
 				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
-
 		}
 
 		class MyFilterHookInterceptor {

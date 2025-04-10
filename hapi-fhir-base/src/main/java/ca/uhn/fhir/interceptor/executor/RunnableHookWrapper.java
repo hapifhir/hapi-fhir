@@ -1,7 +1,8 @@
 package ca.uhn.fhir.interceptor.executor;
 
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
-import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInvoker;
+
+import java.util.function.Supplier;
 
 /**
  * Wraps a runnable with a filter hook.
@@ -9,12 +10,13 @@ import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInvoker;
 public class RunnableHookWrapper implements Runnable {
 	private final IInterceptorFilterHook myAdvice;
 	private final Runnable myTarget;
-	private final IInvoker myInvoker	;
+	private Supplier<String> myMessageSupplier;
 
-	public RunnableHookWrapper(Runnable theTarget, IInterceptorFilterHook theAdvice, IInvoker theInvoker) {
+	public RunnableHookWrapper(
+			Runnable theTarget, IInterceptorFilterHook theAdvice, Supplier<String> theCauseDescriptionSupplier) {
 		myAdvice = theAdvice;
 		myTarget = theTarget;
-		myInvoker = theInvoker;
+		myMessageSupplier = theCauseDescriptionSupplier;
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class RunnableHookWrapper implements Runnable {
 		myAdvice.accept(trackingRunnableWrapper);
 
 		if (!trackingRunnableWrapper.wasRun()) {
-			throw new IllegalStateException("Runnable was not run in filter produced by " + myInvoker);
+			throw new IllegalStateException("Runnable was not run in filter produced by " + myMessageSupplier.get());
 		}
 	}
 
@@ -45,8 +47,5 @@ public class RunnableHookWrapper implements Runnable {
 		public boolean wasRun() {
 			return myRunFlag;
 		}
-
-
 	}
-
 }

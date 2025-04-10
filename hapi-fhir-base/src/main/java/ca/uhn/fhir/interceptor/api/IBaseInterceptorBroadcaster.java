@@ -78,7 +78,7 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		// traverse the invokers in reverse order because the first wrapper will be called last in sequence.
 		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
 			IInterceptorFilterHook filter = (IInterceptorFilterHook) nextInvoker.invoke(theHookParams);
-			runnable = new RunnableHookWrapper(runnable, filter, nextInvoker);
+			runnable = new RunnableHookWrapper(runnable, filter, nextInvoker::getHookDescription);
 		}
 
 		runnable.run();
@@ -116,5 +116,4 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	 */
 	@FunctionalInterface
 	interface IInterceptorFilterHook extends Consumer<Runnable> {}
-
 }
