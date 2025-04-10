@@ -12,12 +12,16 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
@@ -407,6 +411,7 @@ public class FhirPatchApplyR4Test {
 			.setName("value")
 			.setValue(new StringType("Test Item 2"));
 
+
 		svc.apply(patient, patch);
 
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
@@ -580,6 +585,10 @@ public class FhirPatchApplyR4Test {
 		Parameters patch = new Parameters();
 		patch.addParameter(createPatchReplaceOperation("Patient.identifier",  theValue));
 
+
+		ourLog.info(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+
 		//When: We apply the patch
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
@@ -735,6 +744,49 @@ public class FhirPatchApplyR4Test {
 				.setValue(new IntegerType(theIndex));
 		}
 		return operation;
+	}
+
+	@Test
+	public void testPatchENum() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Encounter encounter = new Encounter();
+		Encounter.EncounterLocationComponent encounterLocationComponent = encounter.addLocation();
+		encounterLocationComponent.setStatus(Encounter.EncounterLocationStatus.RESERVED);
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new CodeType("Encounter.location"));
+
+		Parameters.ParametersParameterComponent partList = operation.addPart().setName("value");
+
+		partList.addPart().setName("location").setValue(new Reference("Location/123"));
+
+		Encounter.EncounterLocationStatusEnumFactory encounterLocationStatusEnumFactory = new Encounter.EncounterLocationStatusEnumFactory();
+		partList.addPart().setName("status").setValue(new Enumeration<Encounter.EncounterLocationStatus>(encounterLocationStatusEnumFactory, "active"));
+		Coding value = new CodeableConcept().addCoding();
+		value.setSystem("some-system");
+		value.setCode("some-code");
+		partList.addPart().setName("physicalType").setValue(new CodeableConcept(value));
+		partList.addPart().setName("period").setValue(new Period());
+
+		String patchString = FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(patch);
+		ourLog.info(patchString);
+		patch = FhirContext.forR4().newJsonParser().parseResource(Parameters.class, patchString);
+
+		try {
+			svc.apply(encounter, patch);
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
+		}
 	}
 
 	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {

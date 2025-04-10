@@ -6,9 +6,11 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -45,6 +47,26 @@ public class FhirPatchDiffR4Test {
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.identifier[0].value", extractPartValuePrimitive(diff, 1, "operation", "path"));
 		assertEquals("value-1", extractPartValuePrimitive(diff, 1, "operation", "value"));
+
+		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
+	}
+
+	@Test
+	public void testChangeCode() {
+		Encounter oldValue = new Encounter();
+
+		Encounter newValue = new Encounter();
+		newValue.getLocationFirstRep().setStatus(Encounter.EncounterLocationStatus.ACTIVE);
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertThat(diff.getParameter()).hasSize(2);
+		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Encounter.location", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("active", extractPartValue(diff, 0, "operation", "value", Location.class));
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
@@ -457,6 +479,17 @@ public class FhirPatchDiffR4Test {
 	}
 
 	public void validateDiffProducesSameResults(Patient theOldValue, Patient theNewValue, FhirPatch theSvc, Parameters theDiff) {
+		theSvc.apply(theOldValue, theDiff);
+		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
+		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
+		assertEquals(expected, actual);
+
+		expected = ourCtx.newXmlParser().encodeResourceToString(theNewValue);
+		actual = ourCtx.newXmlParser().encodeResourceToString(theOldValue);
+		assertEquals(expected, actual);
+	}
+
+	public void validateDiffProducesSameResults(Encounter theOldValue, Encounter theNewValue, FhirPatch theSvc, Parameters theDiff) {
 		theSvc.apply(theOldValue, theDiff);
 		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
 		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
