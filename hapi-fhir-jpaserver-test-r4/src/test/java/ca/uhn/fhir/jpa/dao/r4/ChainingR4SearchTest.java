@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -1584,8 +1583,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		enc1.getSubject().setReference(p.getId());
 		enc1.getServiceProvider().setReference(org1.getId());
 		Encounter enc2 = buildResource("Encounter", withId("E2"));
-		enc2.getSubject().setReference(p.getId());              // link to same patient as enc1
-		enc2.getServiceProvider().setReference(org2.getId());   // link to different org than enc1
+		enc2.getSubject().setReference(p.getId());              // same patient as enc1
+		enc2.getServiceProvider().setReference(org2.getId());   // different org than enc1
 		doUpdateResource(enc1);
 		doUpdateResource(enc2);
 
