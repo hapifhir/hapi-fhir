@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
@@ -137,6 +138,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Autowired(required = false) // It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
+
+	@Autowired
+	HapiTransactionService myTransactionService;
 
 	@Override
 	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
@@ -710,8 +714,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	@Transactional
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 		PackageDeleteOutcomeJson retVal = new PackageDeleteOutcomeJson();
 
 		Optional<NpmPackageVersionEntity> packageVersion =
@@ -771,6 +775,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		return retVal;
+		});
 	}
 
 	@Override
