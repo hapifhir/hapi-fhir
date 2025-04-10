@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
-import ca.uhn.fhir.interceptor.executor.RunnableHookWrapper;
+import ca.uhn.fhir.interceptor.executor.SupplierFilterHookWrapper;
 import com.google.common.collect.Lists;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
@@ -70,18 +70,27 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		return null;
 	}
 
-	default void runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Runnable theCallerRunnable) {
+	default void runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Runnable theRunnable) {
+		runWithFilterHooks(thePointcut, theHookParams, () -> {
+			theRunnable.run();
+			return null;
+		});
+	}
+
+	default <T> T runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Supplier<T> theSupplier) {
 		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 
-		Runnable runnable = theCallerRunnable;
+		Supplier<T> runnable = theSupplier;
 
-		// traverse the invokers in reverse order because the first wrapper will be called last in sequence.
+		// Build a linked list of wrappers.
+		// We traverse the invokers in reverse order because the first wrapper will be called last in sequence.
 		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
-			IInterceptorFilterHook filter = (IInterceptorFilterHook) nextInvoker.invoke(theHookParams);
-			runnable = new RunnableHookWrapper(runnable, filter, nextInvoker::getHookDescription);
+			@SuppressWarnings("unchecked")
+			IInterceptorFilterHook<T> filter = (IInterceptorFilterHook<T>) nextInvoker.invoke(theHookParams);
+			runnable = new SupplierFilterHookWrapper<>(runnable, filter, nextInvoker::getHookDescription);
 		}
 
-		runnable.run();
+		return runnable.get();
 	}
 
 	/**
@@ -112,8 +121,8 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	 * run code before or after the runnable before it is executed.
 	 * Filter hooks must call the runnable passed in themselves, just like Java Servlet Filters.
 	 *
-	 * @see IInterceptorBroadcaster#runWithFilterHooks(IPointcut, HookParams, Runnable)
+	 * @see IInterceptorBroadcaster#runWithFilterHooks(IPointcut, HookParams, Supplier)
 	 */
 	@FunctionalInterface
-	interface IInterceptorFilterHook extends Consumer<Runnable> {}
+	interface IInterceptorFilterHook<T> extends Function<Supplier<T>, T> {}
 }
