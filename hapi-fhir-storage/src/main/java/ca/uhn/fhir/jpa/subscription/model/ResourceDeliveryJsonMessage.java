@@ -58,23 +58,6 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 	}
 
 	@Override
-	@Nonnull
-	public String getMessageKey() {
-		if (getPayloadMessageKey() != null) {
-			return getPayloadMessageKey();
-		}
-		return super.getMessageKey();
-	}
-
-	@Nullable
-	public String getPayloadMessageKey() {
-		if (myPayload != null) {
-			return myPayload.getPayloadMessageKey();
-		}
-		return null;
-	}
-
-	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}

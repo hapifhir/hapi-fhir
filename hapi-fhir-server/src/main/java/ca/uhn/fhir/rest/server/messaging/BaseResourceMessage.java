@@ -94,7 +94,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	 */
 	public void setAttribute(String theKey, String theValue) {
 		Validate.notBlank(theKey);
-		Validate.notNull(theValue);
+		Objects.requireNonNull(theValue);
 		if (myAttributes == null) {
 			myAttributes = new HashMap<>();
 		}
@@ -165,11 +165,13 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
+	@Override
 	@Nullable
 	public String getPayloadMessageKey() {
 		return myPayloadMessageKey;
 	}
 
+	@Override
 	public void setPayloadMessageKey(String thePayloadMessageKey) {
 		myPayloadMessageKey = thePayloadMessageKey;
 	}

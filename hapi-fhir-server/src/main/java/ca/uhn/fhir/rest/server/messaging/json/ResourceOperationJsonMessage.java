@@ -65,20 +65,4 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
-	@Override
-	@Nonnull
-	public String getMessageKey() {
-		if (getPayloadMessageKey() != null) {
-			return getPayloadMessageKey();
-		}
-		return super.getMessageKey();
-	}
-
-	@Nullable
-	public String getPayloadMessageKey() {
-		if (myPayload != null) {
-			return myPayload.getPayloadMessageKey();
-		}
-		return null;
-	}
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
@@ -61,5 +62,19 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
+	}
+
+
+	@Override
+	@Nonnull
+	public String getMessageKey() {
+		T payload = getPayload();
+		if (payload instanceof IHasPayloadMessageKey) {
+			String payloadMessageKey = ((IHasPayloadMessageKey) payload).getPayloadMessageKey();
+			if (payloadMessageKey != null) {
+				return payloadMessageKey;
+			}
+		}
+		return IMessage.super.getMessageKey();
 	}
 }
