@@ -80,17 +80,17 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	default <T> T runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Supplier<T> theSupplier) {
 		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 
-		Supplier<T> runnable = theSupplier;
+		Supplier<T> supplier = theSupplier;
 
 		// Build a linked list of wrappers.
 		// We traverse the invokers in reverse order because the first wrapper will be called last in sequence.
 		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
 			@SuppressWarnings("unchecked")
 			IInterceptorFilterHook<T> filter = (IInterceptorFilterHook<T>) nextInvoker.invoke(theHookParams);
-			runnable = new SupplierFilterHookWrapper<>(runnable, filter, nextInvoker::getHookDescription);
+			supplier = new SupplierFilterHookWrapper<>(supplier, filter, nextInvoker::getHookDescription);
 		}
 
-		return runnable.get();
+		return supplier.get();
 	}
 
 	/**
