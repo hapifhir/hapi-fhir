@@ -1942,12 +1942,6 @@
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
 			</dependency>
-<!--			&lt;!&ndash; TODO KHS remove hamcrest &ndash;&gt;-->
-<!--			<dependency>-->
-<!--				<groupId>org.hamcrest</groupId>-->
-<!--				<artifactId>hamcrest</artifactId>-->
-<!--				<version>${hamcrest_version}</version>-->
-<!--			</dependency>-->
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>

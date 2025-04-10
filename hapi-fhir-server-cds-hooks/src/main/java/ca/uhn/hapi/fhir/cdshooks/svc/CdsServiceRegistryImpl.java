@@ -120,6 +120,15 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		}
 	}
 
+	/**
+	 * @see ICdsServiceRegistry#unregisterServices
+	 */
+	@Override
+	public void unregisterServices(@Nonnull String theServiceGroupId) {
+		Objects.requireNonNull(theServiceGroupId, "CDS Hook Service Group Id cannot be null");
+		myServiceCache.unregisterServices(theServiceGroupId);
+	}
+
 	@Override
 	public CdsServiceJson getCdsServiceJson(String theServiceId) {
 		CdsServiceJson cdsServiceJson = myServiceCache.getCdsServiceJson(theServiceId);
@@ -207,8 +216,9 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
 		} catch (JsonProcessingException e) {
-			throw new InternalErrorException(Msg.code(2538) + "Failed to serialize json Cds Feedback response for service "
-					+ theServiceId + ". " + e.getMessage());
+			throw new InternalErrorException(
+					Msg.code(2538) + "Failed to serialize json Cds Feedback response for service " + theServiceId + ". "
+							+ e.getMessage());
 		}
 	}
 

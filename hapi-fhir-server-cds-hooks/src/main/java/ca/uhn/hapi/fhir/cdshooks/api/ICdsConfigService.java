@@ -58,8 +58,7 @@ public interface ICdsConfigService {
 		return rd;
 	}
 
-	private static <T extends IIdType> T newId(
-			FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
+	private static <T extends IIdType> T newId(FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
 		checkNotNull(fhirVersionEnum);
 		checkNotNull(resourceType);
 		checkNotNull(idPart);

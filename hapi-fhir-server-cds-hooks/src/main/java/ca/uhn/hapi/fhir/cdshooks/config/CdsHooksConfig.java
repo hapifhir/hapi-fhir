@@ -67,8 +67,12 @@ public class CdsHooksConfig {
 
 	@Bean
 	public ICdsConfigService cdsConfigService(
-			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper, Optional<RestfulServer> theRestfulServer, Optional<DaoRegistry> theDaoRegistry) {
-		return new CdsConfigServiceImpl(theFhirContext, theObjectMapper, theDaoRegistry.orElse(null), theRestfulServer.orElse(null));
+			FhirContext theFhirContext,
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
+			Optional<RestfulServer> theRestfulServer,
+			Optional<DaoRegistry> theDaoRegistry) {
+		return new CdsConfigServiceImpl(
+				theFhirContext, theObjectMapper, theDaoRegistry.orElse(null), theRestfulServer.orElse(null));
 	}
 
 	@Bean
@@ -87,7 +91,8 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	CdsPrefetchDaoSvc resourcePrefetchDao(DaoRegistry theDaoRegistry, FhirContext theFhirContext, Optional<MatchUrlService> theMatchUrlService) {
+	CdsPrefetchDaoSvc resourcePrefetchDao(
+			DaoRegistry theDaoRegistry, FhirContext theFhirContext, Optional<MatchUrlService> theMatchUrlService) {
 		return new CdsPrefetchDaoSvc(theDaoRegistry, theMatchUrlService.orElse(null), theFhirContext);
 	}
 
