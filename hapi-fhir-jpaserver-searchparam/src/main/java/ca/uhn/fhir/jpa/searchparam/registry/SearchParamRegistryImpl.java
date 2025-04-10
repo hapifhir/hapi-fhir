@@ -29,10 +29,10 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.search.ISearchParamHashIdentityRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -55,6 +55,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -71,10 +73,7 @@ import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForCont
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl
-		implements ISearchParamRegistry,
-				IResourceChangeListener,
-				ISearchParamRegistryController,
-				ISearchParamHashIdentityRegistry {
+		implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
 
 	// Basic is needed by the R4 SubscriptionTopic registry
 	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS =
@@ -107,10 +106,19 @@ public class SearchParamRegistryImpl
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private ObjectProvider<ISearchParamIdentityCacheSvc> mySearchParamIdentityCacheSvcProvider;
+
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
+	private boolean myPrePopulateSearchParamIdentities = true;
+
+	@VisibleForTesting
+	public void setPopulateSearchParamIdentities(boolean myPrePopulateSearchParamIdentities) {
+		this.myPrePopulateSearchParamIdentities = myPrePopulateSearchParamIdentities;
+	}
 
 	/**
 	 * Constructor
@@ -181,11 +189,6 @@ public class SearchParamRegistryImpl
 			@Nonnull SearchParamLookupContextEnum theContext) {
 		return filteredForContext(
 				myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames), theContext);
-	}
-
-	@Override
-	public Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity) {
-		return myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(theHashIdentity);
 	}
 
 	@Nullable
@@ -269,7 +272,29 @@ public class SearchParamRegistryImpl
 
 		myJpaSearchParamCache.populateActiveSearchParams(
 				myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
+		updateSearchParameterIdentityCache();
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private void updateSearchParameterIdentityCache() {
+		if (!myPrePopulateSearchParamIdentities) {
+			return;
+		}
+
+		ISearchParamIdentityCacheSvc spIdentityCacheSvc = mySearchParamIdentityCacheSvcProvider.getIfAvailable();
+		if (spIdentityCacheSvc == null) {
+			return;
+		}
+
+		myJpaSearchParamCache
+				.getHashIdentityToIndexedSearchParamMap()
+				.forEach((hash, param) -> spIdentityCacheSvc.findOrCreateSearchParamIdentity(
+						hash, param.getResourceType(), param.getParameterName()));
+	}
+
+	@VisibleForTesting
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
 	}
 
 	@VisibleForTesting
