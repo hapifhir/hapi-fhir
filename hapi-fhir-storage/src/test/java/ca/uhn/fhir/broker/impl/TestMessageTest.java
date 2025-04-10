@@ -39,7 +39,7 @@ class TestMessageTest {
 		TestMessage<String> message = new TestMessage<>(null, payload);
 		
 		// Then
-		assertThat(message.getMessageKey()).isNull();
+		assertThat(message.getMessageKey()).matches("[0-9a-f-]+");
 		assertThat(message.getPayload()).isEqualTo(payload);
 	}
 	
@@ -68,7 +68,7 @@ class TestMessageTest {
 		TestMessage<String> message = new TestMessage<>(payload);
 		
 		// Then
-		assertThat(message.getMessageKey()).isNull();
+		assertThat(message.getMessageKey()).matches("[0-9a-f-]+");
 		assertThat(message.getPayload()).isEqualTo(payload);
 	}
 	

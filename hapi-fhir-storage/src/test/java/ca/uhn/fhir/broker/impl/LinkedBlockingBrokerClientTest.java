@@ -20,7 +20,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -93,7 +96,7 @@ class LinkedBlockingBrokerClientTest {
 		return message;
 	}
 
-	private static class MyTestMessage extends TestMessage<MyTestMessageValue> {
+	private static class MyTestMessage extends TestMessage<MyTestMessageValue> implements Message<MyTestMessageValue> {
 		public MyTestMessage(MyTestMessageValue thePayload) {
 			super(thePayload);
 		}
@@ -101,6 +104,11 @@ class LinkedBlockingBrokerClientTest {
 		@Override
 		public String toString() {
 			return getPayload().toString();
+		}
+
+		@Override
+		public MessageHeaders getHeaders() {
+			return new MessageHeaders(new HashMap<>());
 		}
 	}
 

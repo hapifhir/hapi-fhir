@@ -62,7 +62,7 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 		return super.getMessageKey();
 	}
 
-	// FIXME KHS this code is repeated in 3 places
+	// FIXME KHS this code is repeated in 3 places including in TestMessage
 	@Nullable
 	public String getPayloadMessageKey() {
 		if (myPayload != null) {

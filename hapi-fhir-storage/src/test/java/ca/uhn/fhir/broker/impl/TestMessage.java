@@ -2,28 +2,29 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class TestMessage<T> implements IMessage<T> {
-	private final String myKey;
-	private final T myValue;
+	private final String myMessageKey;
+	private final T myPayload;
 	private final Map<String, Object> myHeaders = new HashMap<>();
 
-	public TestMessage(String theKey, T theValue) {
-		myKey = theKey;
-		myValue = theValue;
+	public TestMessage(String theMessageKey, T thePayload) {
+		myMessageKey = theMessageKey;
+		myPayload = thePayload;
 	}
 
-	public TestMessage(T theValue) {
-		myValue = theValue;
-		if (myValue != null && myValue instanceof BaseJsonMessage) {
-			myKey = ((BaseJsonMessage<?>) myValue).getMessageKey();
+	public TestMessage(T thePayload) {
+		myPayload = thePayload;
+		if (myPayload != null && myPayload instanceof BaseJsonMessage) {
+			myMessageKey = ((BaseJsonMessage<?>) myPayload).getMessageKey();
 		} else {
-			myKey = null;
+			myMessageKey = null;
 		}
 	}
 
@@ -39,6 +40,37 @@ public class TestMessage<T> implements IMessage<T> {
 
 	@Override
 	public T getPayload() {
-		return myValue;
+		return myPayload;
 	}
+
+	@Override
+	@Nonnull
+	public String getMessageKey() {
+		if (myMessageKey != null) {
+			return myMessageKey;
+		} else if (getPayloadMessageKey() != null) {
+			return getPayloadMessageKey();
+		}
+
+		return IMessage.super.getMessageKey();
+	}
+
+	@Nullable
+	public String getPayloadMessageKey() {
+		if (myPayload != null) {
+			try {
+				java.lang.reflect.Method method = myPayload.getClass().getMethod("getPayloadMessageKey");
+				if (method != null) {
+					Object result = method.invoke(myPayload);
+					if (result instanceof String) {
+						return (String) result;
+					}
+				}
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
 }
