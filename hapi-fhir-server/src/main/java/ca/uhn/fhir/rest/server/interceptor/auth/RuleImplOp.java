@@ -842,7 +842,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			Pointcut thePointcut) {
 		List<IBaseResource> outputResources =
 				AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(
-						theOutputResource, theRequestDetails.getFhirContext());
+						theOutputResource, theRequestDetails.getFhirContext(), theRequestDetails);
 		return applyRulesToResponseResources(theRequestDetails, theRuleApplier, thePointcut, outputResources);
 	}
 
