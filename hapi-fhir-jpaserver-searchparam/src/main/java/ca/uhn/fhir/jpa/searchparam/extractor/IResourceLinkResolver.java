@@ -27,6 +27,9 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Map;
+import java.util.Set;
+
 public interface IResourceLinkResolver {
 
 	/**
@@ -48,6 +51,13 @@ public interface IResourceLinkResolver {
 			PathAndRef thePathAndRef,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails);
+
+	Map<PathAndRef, IResourceLookup> findTargetResource(
+		@Nonnull RequestPartitionId theRequestPartitionId,
+		String theSourceResourceName,
+		Set<PathAndRef> thePathAndRefs,
+		RequestDetails theRequest,
+		TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method resolves the target of a reference found within a resource that is being created/updated. We do this
