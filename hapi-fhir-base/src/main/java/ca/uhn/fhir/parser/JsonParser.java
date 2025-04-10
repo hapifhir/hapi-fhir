@@ -2006,11 +2006,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				// Write child extensions
 				if (!ext.getExtension().isEmpty()) {
 
-					if (myModifier) {
-						beginArray(theEventWriter, "modifierExtension");
-					} else {
-						beginArray(theEventWriter, "extension");
-					}
+					beginArray(theEventWriter, "extension");
 
 					for (Object next : ext.getExtension()) {
 						writeUndeclaredExtension(
