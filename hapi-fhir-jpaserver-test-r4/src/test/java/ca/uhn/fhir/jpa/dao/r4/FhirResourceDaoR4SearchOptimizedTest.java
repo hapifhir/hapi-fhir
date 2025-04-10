@@ -54,6 +54,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -385,10 +386,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 200, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00199", ids.get(199));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
+		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isEqualTo(200);
 
 		/*
-		 * 20 should be prefetched since that's the initial page size
+		 * 200 should be prefetched since that's the initial page size
 		 */
 
 		await().until(() -> runInTransaction(() -> {
@@ -396,34 +397,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			return search.getNumFound() >= 200;
 		}));
 
+		// The search has already loaded all 200 values, so it should be finished
+		// Without needing to load the next page/pre-fetch threshold
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(200, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
-			assertNull(search.getTotalCount());
+			assertEquals(200, search.getTotalCount().intValue());
 			assertEquals(1, search.getVersion().intValue());
-			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
+			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 		});
 
 		/*
 		 * Now load a page that crosses the next threshold
+		 * This should be empty since there are only 200 resources
 		 */
 
 		ids = toUnqualifiedVersionlessIdValues(results, 200, 400, false);
 		assertThat(ids).isEmpty();
-
-		/*
-		 * Search gets incremented twice as a part of loading the next batch
-		 */
-		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
-			assertEquals(200, search.getNumFound());
-			assertEquals(search.getNumFound(), mySearchResultDao.count());
-			assertEquals(200, search.getTotalCount().intValue());
-			assertEquals(3, search.getVersion().intValue());
-		});
-
 	}
 
 
