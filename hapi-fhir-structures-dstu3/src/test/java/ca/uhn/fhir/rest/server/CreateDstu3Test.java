@@ -119,7 +119,8 @@ public class CreateDstu3Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
-		assertThat(responseContent).contains("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
+		assertThat(responseContent).contains("Unexpected character 'F'");
+		assertThat(responseContent).contains("Failed to parse request body as XML resource. Error was: " + Msg.code(1852));
 
 	}
 

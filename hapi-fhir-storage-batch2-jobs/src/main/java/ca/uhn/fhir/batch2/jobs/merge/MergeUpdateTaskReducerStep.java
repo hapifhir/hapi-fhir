@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.merge;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -39,6 +40,12 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	public MergeUpdateTaskReducerStep(DaoRegistry theDaoRegistry, IHapiTransactionService theHapiTransactionService) {
 		super(theDaoRegistry);
 		this.myHapiTransactionService = theHapiTransactionService;
+	}
+
+	@Override
+	public IReductionStepWorker<MergeJobParameters, ReplaceReferencePatchOutcomeJson, ReplaceReferenceResultsJson>
+			newInstance() {
+		return new MergeUpdateTaskReducerStep(myDaoRegistry, myHapiTransactionService);
 	}
 
 	@Nonnull

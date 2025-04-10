@@ -41,7 +41,7 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 			HookParams params = theParamsSupplier.get();
 			return callHooks(thePointcut, params);
 		}
-		return true; // callHooks returns true when none present;
+		return true; // callHooks returns true when none present
 	}
 
 	/**
@@ -84,5 +84,9 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		int getOrder();
 
 		Object getInterceptor();
+
+		default String getHookDescription() {
+			return toString();
+		}
 	}
 }

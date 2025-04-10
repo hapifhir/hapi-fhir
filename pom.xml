@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.4-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -125,7 +125,7 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-        <module>hapi-fhir-jpa-hibernate-services</module>
+		<module>hapi-fhir-jpa-hibernate-services</module>
     </modules>
 
 	<dependencies>
@@ -978,6 +978,16 @@
 			<name>Dylan Krause</name>
 			<organization>Corbalt</organization>
 		</developer>
+		<developer>
+			<id>xmhorsehead</id>
+			<name>Xun Ma</name>
+			<organization>CSIRO</organization>
+		</developer>
+		<developer>
+			<id>berkant-k</id>
+			<name>Berkant Karduman</name>
+			<organization>TigaHealth</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -988,7 +998,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.4.0</fhir_core_version>
+		<fhir_core_version>6.5.18-tmp-SNAPSHOT</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
@@ -2509,7 +2519,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.13.0</version>
+					<version>3.14.0</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
