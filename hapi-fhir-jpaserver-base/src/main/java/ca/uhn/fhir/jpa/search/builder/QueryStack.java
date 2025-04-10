@@ -3056,7 +3056,7 @@ public class QueryStack {
 
 			int qualifierIndex = nextParamName.indexOf(':');
 			if (qualifierIndex != -1) {
-				if (isBlank(nextChain)) {
+				if (StringUtils.isEmpty(nextChain)) {
 					nextQualifier = nextParamName.substring(qualifierIndex);
 					nextParamName = nextParamName.substring(0, qualifierIndex);
 				} else {
