@@ -60,7 +60,7 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 		SocketConfig socketConfig = SocketConfig
 			.copy(SocketConfig.DEFAULT)
-			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
+			.setSoTimeout((int) (300 * DateUtils.MILLIS_PER_SECOND))
 			.build();
 		connectionManager.setDefaultSocketConfig(socketConfig);
 

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class MethodOutcome {
+public class MethodOutcome implements IHasHeaders {
 
 	private Boolean myCreated;
 	private IIdType myId;
@@ -238,7 +238,7 @@ public class MethodOutcome {
 	 */
 	public void fireResourceViewCallbacks() {
 		if (myResourceViewCallbacks != null) {
-			myResourceViewCallbacks.forEach(t -> t.run());
+			myResourceViewCallbacks.forEach(Runnable::run);
 			myResourceViewCallbacks.clear();
 		}
 	}
