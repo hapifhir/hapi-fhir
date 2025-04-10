@@ -713,7 +713,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
-		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		Bundle input = (Bundle) builder.getBundle();
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		OperationOutcome oo = (OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome();
 		assertEquals("SUCCESSFUL_UPDATE_AS_CREATE", oo.getIssue().get(0).getDetails().getCodingFirstRep().getCode());
@@ -728,7 +729,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 
-		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myFhirContext, outcome).getStorageOutcomes();
+		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myFhirContext, input, outcome).getStorageOutcomes();
 		assertEquals(2, outcomes.size());
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, outcomes.get(0).getStorageResponseCode());
 		assertEquals("Observation/DEF/_history/1", outcomes.get(0).getTargetId().getValue());

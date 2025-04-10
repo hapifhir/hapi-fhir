@@ -24,13 +24,18 @@ import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class contains utility methods for working with HAPI FHIR Transactions (referring to the FHIR
@@ -55,33 +60,58 @@ public class TransactionUtil {
 	 * processor, results will have no meaning for any other input.
 	 * </p>
 	 *
+	 * @param theContext                   A FhirContext instance for the appropriate FHIR version
+	 * @param theTransactionRequestBundle  The transaction request bundle which was processed in order to produce {@literal theTransactionResponseBundle}
+	 * @param theTransactionResponseBundle The transaction response bundle. This bundle must be a transaction response produced by the same version of
+	 *                                     HAPI FHIR, as this code looks for elements it will expect to be present.
 	 * @since 8.2.0
 	 */
 	public static TransactionResponse parseTransactionResponse(
-			FhirContext theContext, IBaseBundle theTransactionResponseBundle) {
+			FhirContext theContext, IBaseBundle theTransactionRequestBundle, IBaseBundle theTransactionResponseBundle) {
 		FhirTerser terser = theContext.newTerser();
 		List<StorageOutcome> storageOutcomes = new ArrayList<>();
 
-		List<IBase> entries = terser.getValues(theTransactionResponseBundle, "entry");
-		for (IBase entry : entries) {
+		String bundleMetaSource = terser.getSinglePrimitiveValueOrNull(theTransactionRequestBundle, "meta.source");
 
-			IBase response = terser.getSingleValueOrNull(entry, "response", IBase.class);
-			if (response != null) {
+		List<IBase> requestEntries = terser.getValues(theTransactionRequestBundle, "entry");
+		List<IBase> responseEntries = terser.getValues(theTransactionResponseBundle, "entry");
+		for (int i = 0; i < responseEntries.size(); i++) {
+			IBase requestEntry = requestEntries.get(i);
+			IBase responseEntry = responseEntries.get(i);
+
+			String requestMetaSource = null;
+			IBaseResource requestResource = terser.getSingleValueOrNull(requestEntry, "resource", IBaseResource.class);
+			if (requestResource != null) {
+				requestMetaSource = terser.getSinglePrimitiveValueOrNull(requestResource, "meta.source");
+			}
+			if (isBlank(requestMetaSource)) {
+				requestMetaSource = bundleMetaSource;
+			}
+
+			String requestFullUrlString = terser.getSinglePrimitiveValueOrNull(requestEntry, "fullUrl");
+			IIdType requestFullUrl = null;
+			if (requestFullUrlString != null) {
+				requestFullUrl = theContext.getVersion().newIdType(requestFullUrlString);
+				requestFullUrl = toUnqualified(requestFullUrl);
+			}
+
+			IBase responseResponse = terser.getSingleValueOrNull(responseEntry, "response", IBase.class);
+			if (responseResponse != null) {
 
 				// As long as we're parsing a bundle from HAPI, this will never be used. But let's be
 				// defensive just in case.
 				int statusCode = 0;
-				String statusString = terser.getSinglePrimitiveValueOrNull(response, "status");
-				if (statusString != null) {
-					int statusSpaceIdx = statusString.indexOf(' ');
-					statusCode = Integer.parseInt(statusString.substring(0, statusSpaceIdx));
+				String statusMessage = terser.getSinglePrimitiveValueOrNull(responseResponse, "status");
+				if (statusMessage != null) {
+					int statusSpaceIdx = statusMessage.indexOf(' ');
+					statusCode = Integer.parseInt(statusMessage.substring(0, statusSpaceIdx));
 				}
 
-				List<IBase> issues = terser.getValues(response, "outcome.issue");
+				List<IBase> issues = terser.getValues(responseResponse, "outcome.issue");
 				IIdType groupSourceId = null;
 				for (int issueIndex = 0; issueIndex < issues.size(); issueIndex++) {
 					IBase issue = issues.get(issueIndex);
-					IIdType sourceId = null;
+					IIdType sourceId = requestFullUrl;
 
 					String outcomeSystem = terser.getSinglePrimitiveValueOrNull(issue, "details.coding.system");
 					StorageResponseCodeEnum responseCode = null;
@@ -114,16 +144,26 @@ public class TransactionUtil {
 										.orElse(null);
 						sourceId = groupSourceId;
 					} else {
-						targetId = theContext
-								.getVersion()
-								.newIdType(terser.getSinglePrimitiveValueOrNull(entry, "response.location"));
-						if (issueIndex == 0) {
-							groupSourceId = targetId;
+						String responseLocation =
+								terser.getSinglePrimitiveValueOrNull(responseEntry, "response.location");
+						if (isNotBlank(responseLocation)) {
+							targetId = theContext.getVersion().newIdType(responseLocation);
+							if (issueIndex == 0) {
+								groupSourceId = targetId;
+							}
+						} else {
+							targetId = null;
 						}
 					}
 
-					StorageOutcome outcome =
-							new StorageOutcome(statusCode, responseCode, targetId, sourceId, errorMessage);
+					StorageOutcome outcome = new StorageOutcome(
+							statusCode,
+							statusMessage,
+							responseCode,
+							toUnqualified(sourceId),
+							toUnqualified(targetId),
+							errorMessage,
+							requestMetaSource);
 					storageOutcomes.add(outcome);
 				}
 			}
@@ -132,8 +172,15 @@ public class TransactionUtil {
 		return new TransactionResponse(storageOutcomes);
 	}
 
+	private static IIdType toUnqualified(@Nullable IIdType theId) {
+		if (theId != null && theId.hasBaseUrl()) {
+			return theId.toUnqualified();
+		}
+		return theId;
+	}
+
 	/**
-	 * @see #parseTransactionResponse(FhirContext, IBaseBundle)
+	 * @see #parseTransactionResponse(FhirContext, IBaseBundle, IBaseBundle)
 	 */
 	public static class TransactionResponse {
 
@@ -149,7 +196,7 @@ public class TransactionUtil {
 	}
 
 	/**
-	 * @see #parseTransactionResponse(FhirContext, IBaseBundle)
+	 * @see #parseTransactionResponse(FhirContext, IBaseBundle, IBaseBundle)
 	 */
 	public static class StorageOutcome {
 		private final StorageResponseCodeEnum myStorageResponseCode;
@@ -157,26 +204,42 @@ public class TransactionUtil {
 		private final IIdType mySourceId;
 		private final int myStatusCode;
 		private final String myErrorMessage;
+		private final String myRequestMetaSource;
+		private final String myStatusMessage;
 
 		public StorageOutcome(
 				int theStatusCode,
+				String theStatusMessage,
 				StorageResponseCodeEnum theStorageResponseCode,
-				IIdType theTargetId,
 				IIdType theSourceId,
-				String theErrorMessage) {
+				IIdType theTargetId,
+				String theErrorMessage,
+				String theRequestMetaSource) {
 			myStatusCode = theStatusCode;
+			myStatusMessage = theStatusMessage;
 			myStorageResponseCode = theStorageResponseCode;
 			myTargetId = theTargetId;
 			mySourceId = theSourceId;
 			myErrorMessage = theErrorMessage;
+			myRequestMetaSource = theRequestMetaSource;
 		}
 
 		public String getErrorMessage() {
 			return myErrorMessage;
 		}
 
+		/**
+		 * @return Returns the HTTP status code
+		 */
 		public int getStatusCode() {
 			return myStatusCode;
+		}
+
+		/**
+		 * @return Returns the complete HTTP status message including the {@link #getStatusCode()} and the rest of the message. For example: {@literal 200 OK}
+		 */
+		public String getStatusMessage() {
+			return myStatusMessage;
 		}
 
 		public StorageResponseCodeEnum getStorageResponseCode() {
@@ -189,6 +252,14 @@ public class TransactionUtil {
 
 		public IIdType getSourceId() {
 			return mySourceId;
+		}
+
+		/**
+		 * @return Returns the <code>Resource.meta.source</code> value from the resource provided in the request
+		 * 	bundle entry corresponding to this outcome.
+		 */
+		public String getRequestMetaSource() {
+			return myRequestMetaSource;
 		}
 	}
 }

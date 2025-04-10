@@ -47,10 +47,11 @@ public class OperationOutcomeUtil {
 
 	/**
 	 * Add an issue to an OperationOutcome
-	 *  @param theCtx              The fhir context
+	 *
+	 * @param theCtx              The fhir context
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
-	 * @param theDetails          The details string
+	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
 	 * @param theCode
 	 * @return Returns the newly added issue
 	 */
@@ -58,17 +59,18 @@ public class OperationOutcomeUtil {
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode) {
-		return addIssue(theCtx, theOperationOutcome, theSeverity, theDetails, theLocation, theCode, null, null, null);
+		return addIssue(
+				theCtx, theOperationOutcome, theSeverity, theDiagnostics, theLocation, theCode, null, null, null);
 	}
 
 	public static IBase addIssue(
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			@Nullable String theDetailSystem,
@@ -79,7 +81,7 @@ public class OperationOutcomeUtil {
 				theCtx,
 				issue,
 				theSeverity,
-				theDetails,
+				theDiagnostics,
 				theLocation,
 				theCode,
 				theDetailSystem,
@@ -101,7 +103,7 @@ public class OperationOutcomeUtil {
 
 	/**
 	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
-	 * method has always been misnamed for historical reasons.
+	 * 	method has always been misnamed for historical reasons.
 	 */
 	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
@@ -199,7 +201,7 @@ public class OperationOutcomeUtil {
 			FhirContext theCtx,
 			IBase theIssue,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			String theDetailSystem,
@@ -225,7 +227,7 @@ public class OperationOutcomeUtil {
 		severityChild.getMutator().addValue(theIssue, severityElem);
 
 		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
-		string.setValueAsString(theDetails);
+		string.setValueAsString(theDiagnostics);
 		diagnosticsChild.getMutator().setValue(theIssue, string);
 
 		addLocationToIssue(theCtx, theIssue, theLocation);
