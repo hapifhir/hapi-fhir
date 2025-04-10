@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Response of a http request which can return a String payload
  */
-public class StringOutcome  implements IHasHeaders {
+public class StringOutcome implements IHasHeaders {
 
 	private String myPayload;
 	private IBaseOperationOutcome myOperationOutcome;
@@ -42,9 +42,7 @@ public class StringOutcome  implements IHasHeaders {
 		myResponseHeaders = theHeaders;
 	}
 
-	public StringOutcome() {
-
-	}
+	public StringOutcome() {}
 
 	/**
 	 * Returns the {@link String} payload to return to the client or <code>null</code> if none.

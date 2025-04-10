@@ -52,5 +52,10 @@
 	<!-- <logger name="ca.uhn.fhir.log.terminology_troubleshooting" level="TRACE"/> -->
 	 <logger name="ca.uhn.fhir.log.partition_troubleshooting" level="info"/>
 
+<!--	 <logger name="ca.uhn.fhir.rest.client" level="trace"/>-->
+<!--	 <logger name="ca.uhn.fhir.rest.server" level="trace"/>-->
+	 <logger name="ca.uhn" level="debug"/>
+<!--	 <logger name="org.springframework" level="debug"/>-->
+
 
 </configuration>

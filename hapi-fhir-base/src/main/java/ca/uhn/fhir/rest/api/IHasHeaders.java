@@ -9,5 +9,4 @@ import java.util.Map;
 public interface IHasHeaders {
 
 	Map<String, List<String>> getResponseHeaders();
-
 }

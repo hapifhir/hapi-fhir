@@ -1389,7 +1389,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 
 				if (isNotBlank(myResponseUrl)) {
-					urlParams.put(Constants.PARAM_RESPONSE_URL, Collections.singletonList(String.valueOf(myResponseUrl)));
+					urlParams.put(
+							Constants.PARAM_RESPONSE_URL, Collections.singletonList(String.valueOf(myResponseUrl)));
 				}
 				// If is $process-message operation
 				BaseHttpClientInvocation invocation = OperationMethodBinding.createProcessMsgInvocation(

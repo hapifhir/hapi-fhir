@@ -36,5 +36,4 @@ public class BulkExportJobServiceUtil {
 		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
-
 }
