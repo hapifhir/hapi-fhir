@@ -427,6 +427,16 @@ public class JpaStorageSettings extends StorageSettings {
 	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
 
 	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	private boolean myWriteToSearchParamIdentityTable = true;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2718,6 +2728,30 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
 		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
+	}
+
+	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	public boolean isWriteToSearchParamIdentityTable() {
+		return myWriteToSearchParamIdentityTable;
+	}
+
+	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	public void setWriteToSearchParamIdentityTable(boolean theWriteToSearchParamIdentityTable) {
+		myWriteToSearchParamIdentityTable = theWriteToSearchParamIdentityTable;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

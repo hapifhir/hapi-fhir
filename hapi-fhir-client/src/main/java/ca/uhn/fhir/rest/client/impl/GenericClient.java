@@ -946,6 +946,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IPrimitiveType mySince;
 		private Class<? extends IBaseResource> myType;
 		private DateRangeParam myAt;
+		private Integer myOffset;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -972,6 +973,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IHistoryTyped offset(Integer theOffset) {
+			myOffset = theOffset;
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
@@ -988,8 +995,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpGetClientInvocation invocation =
-					HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt);
+			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(
+					myContext, resourceName, id, mySince, myCount, myAt, myOffset);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
