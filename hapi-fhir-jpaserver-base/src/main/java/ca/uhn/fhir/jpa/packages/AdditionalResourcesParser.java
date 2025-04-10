@@ -8,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,9 +36,9 @@ public class AdditionalResourcesParser {
 			Set<String> folderNames, NpmPackage npmPackage, FhirContext fhirContext) {
 
 		List<NpmPackage.NpmPackageFolder> npmFolders = folderNames.stream()
-			.map(name -> npmPackage.getFolders().get(name))
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
+				.map(name -> npmPackage.getFolders().get(name))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
 		List<IBaseResource> resources = new LinkedList<>();
 		IParser parser = fhirContext.newJsonParser().setSuppressNarratives(true);

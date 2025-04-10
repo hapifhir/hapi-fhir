@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -11,7 +12,10 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.packages.AdditionalResourcesParser.bundleAdditionalResources;
 import static ca.uhn.fhir.jpa.packages.AdditionalResourcesParser.getAdditionalResources;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class AdditionalResourcesParserTest {
 
@@ -23,10 +27,10 @@ public class AdditionalResourcesParserTest {
 		var packageInstallationSpec = new PackageInstallationSpec().setPackageContents(packageAsBytes).setName("fhir.cqf.ccc").setVersion("0.1.0");
 
 		// Act
-		var bundle = (Bundle) bundleAdditionalResources(Set.of("tests/"), packageInstallationSpec, FhirContext.forR4Cached());
+		var bundle = (Bundle) bundleAdditionalResources(Set.of("tests"), packageInstallationSpec, FhirContext.forR4Cached());
 
 		// Assert
-		assertEquals(2, bundle.getEntry().size());
+		assertEquals(3, bundle.getEntry().size());
 	}
 
 	@Test
@@ -37,10 +41,10 @@ public class AdditionalResourcesParserTest {
 		var packageInstallationSpec = new PackageInstallationSpec().setPackageContents(packageAsBytes).setName("fhir.cqf.ccc").setVersion("0.1.0");
 
 		// Act
-		var bundle = (Bundle) bundleAdditionalResources(Set.of("tests/", "package"), packageInstallationSpec, FhirContext.forR4Cached());
+		var bundle = (Bundle) bundleAdditionalResources(Set.of("tests", "package"), packageInstallationSpec, FhirContext.forR4Cached());
 
 		// Assert
-		assertEquals(14, bundle.getEntry().size());
+		assertEquals(7, bundle.getEntry().size());
 	}
 
 	@Test
@@ -63,9 +67,18 @@ public class AdditionalResourcesParserTest {
 		var npmPackage = NpmPackage.fromPackage(ClasspathUtil.loadResourceAsStream("/cqf-ccc.tgz"));
 
 		// Act
-		var resourceList = getAdditionalResources(Set.of("tests/"), npmPackage, FhirContext.forR4Cached());
+		var resourceList = getAdditionalResources(Set.of("tests"), npmPackage, FhirContext.forR4Cached());
 
 		// Assert
-		assertEquals(2, resourceList.size());
+		assertEquals(3, resourceList.size());
+	}
+
+	@Test
+	public void testVerifyExceptionHandlingInvalidPackages() {
+		// Arrange
+		Exception exception = assertThrows(InternalErrorException.class, () -> NpmPackage.fromPackage(ClasspathUtil.loadResourceAsStream("/invalid.tgz")));
+
+		// Assert
+		assertThat(exception.getMessage()).contains("HAPI-1758: Unable to find classpath resource: /invalid.tgz");
 	}
 }
