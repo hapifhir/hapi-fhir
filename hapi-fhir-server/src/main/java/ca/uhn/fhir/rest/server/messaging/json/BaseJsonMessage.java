@@ -64,7 +64,6 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 		myHeaders = theHeaders;
 	}
 
-
 	@Override
 	@Nonnull
 	public String getMessageKey() {

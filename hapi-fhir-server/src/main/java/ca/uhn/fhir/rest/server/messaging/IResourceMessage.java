@@ -21,5 +21,6 @@ package ca.uhn.fhir.rest.server.messaging;
 
 public interface IResourceMessage extends IHasPayloadMessageKey {
 	String getPayloadId();
+
 	void setPayloadMessageKey(String thePayloadMessageKey);
 }
