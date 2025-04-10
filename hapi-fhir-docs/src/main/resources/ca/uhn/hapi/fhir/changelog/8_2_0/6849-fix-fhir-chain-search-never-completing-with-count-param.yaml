@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6849
+jira: SMILE-9611
+title: "Previously, when performing a FHIR chained search with the `_count` parameter, the search would sometimes
+time out. This has now been fixed."

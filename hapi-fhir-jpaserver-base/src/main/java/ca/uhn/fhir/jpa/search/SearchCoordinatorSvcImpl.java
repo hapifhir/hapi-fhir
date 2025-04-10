@@ -194,7 +194,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	@SuppressWarnings("SameParameterValue")
 	@VisibleForTesting
-	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
+	public void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
 		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
 
@@ -209,7 +209,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * include if two different clients request the same search and are both paging at the
 	 * same time, but also includes clients that are hacking the paging links to
 	 * fetch multiple pages of a search result in parallel. In both cases we need to only
-	 * let one of them actually activate the search, or we will have conficts. The other thread
+	 * let one of them actually activate the search, or we will have conflicts. The other thread
 	 * just needs to wait until the first one actually fetches more results.
 	 */
 	@Override
@@ -280,12 +280,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 			if (sw.getMillis() > myMaxMillisToWaitForRemoteResults) {
 				ourLog.error(
-						"Search {} of type {} for {}{} timed out after {}ms",
+						"Search {} of type {} for {}{} timed out after {}ms with status {}.",
 						search.getId(),
 						search.getSearchType(),
 						search.getResourceType(),
 						search.getSearchQueryString(),
-						sw.getMillis());
+						sw.getMillis(),
+						search.getStatus());
 				throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
 			}
 

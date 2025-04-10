@@ -41,7 +41,6 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.when;
 
@@ -113,9 +112,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	public void testSearchAndBlockSome() {
 		create50Observations();
 
-		AtomicInteger hitCount = new AtomicInteger(0);
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -128,7 +127,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
-		assertEquals(1, hitCount.get());
+		assertEquals(1, preAccessInterceptorCallCount.get());
 		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 21));
 
 		// Fetch the next 30 (do cross a fetch boundary)
@@ -145,7 +144,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 		}
 		assertThat(returnedIdValues).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIdsEvenOnly.subList(10, 25));
-		assertEquals(3, hitCount.get());
+		assertEquals(2, preAccessInterceptorCallCount.get());
 	}
 
 
@@ -240,9 +239,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	public void testSearchAndBlockSomeOnIncludes() {
 		create50Observations();
 
-		AtomicInteger hitCount = new AtomicInteger(0);
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -256,9 +255,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 
-		// This should probably be 4
-		assertEquals(5, hitCount.get());
-
+		assertEquals(4, preAccessInterceptorCallCount.get());
 	}
 
 	@Test
