@@ -81,7 +81,7 @@ public class SearchParamIdentityCacheSvcImpl implements ISearchParamIdentityCach
 	 * Creates a thread pool executor for asynchronously executing
 	 * {@link PersistSearchParameterIdentityTask} instances.
 	 * <p>
-	 * Uses a fixed pool size of 1 and a bounded queue with a capacity of 1000.
+	 * Uses a fixed pool size of 1 and a bounded queue with a capacity of 5000.
 	 * <p>
 	 * If the queue is full and all threads are busy, new tasks are silently
 	 * discarded using {@link ThreadPoolExecutor.DiscardPolicy}.
