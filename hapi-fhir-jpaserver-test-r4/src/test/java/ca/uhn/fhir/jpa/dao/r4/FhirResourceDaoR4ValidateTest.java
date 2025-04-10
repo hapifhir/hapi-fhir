@@ -35,7 +35,6 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.Level;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -54,6 +53,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -96,6 +96,7 @@ import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -2441,6 +2442,163 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setValue(new Quantity().setUnit("cm").setValue(51));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		assertHasNoErrors(oo);
+	}
+
+	@Test
+	public void testValidate_CompositionStructureDefinitionWithProfileTypeResolveDiscriminator_WithTargetProfileSlice_NoDuplicateIssue() {
+		String compositionSdStr =
+			"""
+				{
+				  "resourceType": "StructureDefinition",
+				  "url": "http://compositionprofile",
+				  "status": "active",
+				  "abstract": false,
+				  "type": "Composition",
+				  "derivation": "constraint",
+				  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Composition",
+				  "differential": {
+					"element": [
+					  {
+							  "id": "Composition.section.entry",
+							  "path": "Composition.section.entry",
+							  "slicing": {
+								"discriminator": [ {
+								  "type": "profile",
+								  "path": "resolve()"
+								} ],
+								"ordered": false,
+								"rules": "open"
+							  }
+							},
+					  {
+						"id": "Composition.section.entry:allergyOrIntolerance",
+						"path": "Composition.section.entry",
+						"sliceName": "allergyOrIntolerance",
+						"min": 1,
+						"max": "*",
+						"type": [
+						  {
+							"code": "Reference",
+							"targetProfile": [ "http://allergyintoleranceprofile" ]
+						  }
+						]
+					  }
+					]
+				  }
+				}
+				""";
+
+
+		String allergyIntoleranceSdStr = """
+			{
+				  "resourceType": "StructureDefinition",
+				  "url": "http://allergyintoleranceprofile",
+				  "status": "active",
+				  "abstract": false,
+				  "type": "AllergyIntolerance",
+				  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance",
+				  "derivation": "constraint",
+				  "differential": {
+				    "element": [ {
+				      "id": "AllergyIntolerance.verificationStatus",
+				      "path": "AllergyIntolerance.verificationStatus",
+				      "min": 1,
+				      "max": "1",
+				      "binding": {
+				        "strength": "required",
+				        "valueSet": "http://vs"
+				      }
+				    } ]
+				  }
+				}
+			""";
+
+		StructureDefinition sdComposition = (StructureDefinition) myFhirContext.newJsonParser().parseResource(compositionSdStr);
+		StructureDefinition sdAllergyIntolerance = (StructureDefinition) myFhirContext.newJsonParser().parseResource(allergyIntoleranceSdStr);
+
+
+		myStructureDefinitionDao.create(sdAllergyIntolerance, new SystemRequestDetails());
+
+		myStructureDefinitionDao.create(sdComposition, new SystemRequestDetails());
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept()
+			.setCode("xxxx")
+			.setDisplay("XXXX");
+
+		myCodeSystemDao.create(cs, new SystemRequestDetails());
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://cs");
+
+		myValueSetDao.create(vs, new SystemRequestDetails());
+
+
+		String resourceToValidateStr = """
+			{
+			  "resourceType": "Bundle",
+			  "entry": [ {
+			    "resource": {
+			      "resourceType": "Composition",
+			      "meta": {
+			        "profile": [ "http://compositionprofile" ]
+			      },
+			      "section": [ {
+			        "code": {
+			          "coding": [ {
+			            "system": "http://loinc.org",
+			            "code": "48765-2"
+			          } ]
+			        },
+			        "entry": [ {
+			          "reference": "AllergyIntolerance/123"
+			        } ]
+			      } ]
+			    }
+			  }, {
+			    "resource": {
+			      "resourceType": "AllergyIntolerance",
+			      "id": "123",
+			      "meta": {
+			        "profile": [ "http://allergyintoleranceprofile" ]
+			      },
+			      "text": {
+			        "status": "generated",
+			        "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\">hello</div>"
+			      },
+			      "clinicalStatus": {
+			        "coding": [ {
+			          "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+			          "code": "active"
+			        } ]
+			      },
+			      "verificationStatus": {
+			        "coding": [ {
+			          "system": "http://cs",
+			          "code": "xxxx",
+			          "display": "zzzz"
+			        } ]
+			      }
+			    }
+			  } ]
+			}
+			""";
+
+
+		Bundle resourceToValidate = (Bundle) myFhirContext.newJsonParser().parseResource(resourceToValidateStr);
+
+		OperationOutcome oo = validateAndReturnOutcome(resourceToValidate);
+
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		List<OperationOutcome.OperationOutcomeIssueComponent> badDisplayIssues =
+			oo.getIssue().stream().filter(t -> t.getDiagnostics().startsWith("Concept Display \"zzzz\" does not match expected \"XXXX\"")).toList();
+		assertThat(badDisplayIssues).hasSize(1);
 	}
 
 }
