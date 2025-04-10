@@ -3146,6 +3146,19 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
 			"java.lang.Exception"),
 
+	// fixme
+	//	/**
+	//	 * <b>Batch2 Hook:</b>
+	//	 * <p>Invoked before a work chunk is processed.</p>
+	//	 * <ul>
+	//	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	//	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
+	//	 *  </ul>
+	//	 * <p>Hooks should return <code>void</code></p>
+	//	 */
+	//	BATCH2_CHUNK_PROCESS_FILTER(
+	//		Consumer<Runnable>.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+
 	/**
 	 * <b>Batch2 Hook:</b>
 	 * <p>Invoked before a work chunk is processed.</p>
