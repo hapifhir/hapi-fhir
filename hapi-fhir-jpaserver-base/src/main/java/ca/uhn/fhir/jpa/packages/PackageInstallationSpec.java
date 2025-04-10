@@ -96,7 +96,7 @@ public class PackageInstallationSpec {
 			description =
 					"List of folders in the package to extract additional resources from. Each folder listed will be scanned for resources which will be installed as part of package installation.")
 	@JsonProperty("additionalResourceFolders")
-	private Set<String> additionalResourceFolders;
+	private Set<String> myAdditionalResourceFolders;
 
 	@JsonIgnore
 	private byte[] myPackageContents;
@@ -186,11 +186,11 @@ public class PackageInstallationSpec {
 	}
 
 	public Set<String> getAdditionalResourceFolders() {
-		return additionalResourceFolders;
+		return myAdditionalResourceFolders;
 	}
 
 	public void setAdditionalResourceFolders(Set<String> additionalResourceFolders) {
-		this.additionalResourceFolders = additionalResourceFolders;
+		this.myAdditionalResourceFolders = additionalResourceFolders;
 	}
 
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {
