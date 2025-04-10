@@ -55,7 +55,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -1624,8 +1623,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Collection<RuntimeSearchParam> filteredSearchParams = theSearchParamFilter.filterSearchParams(searchParams);
 		assert filteredSearchParams.size() == preFilterSize || searchParams != filteredSearchParams;
 
-		cleanUpContainedResourceReferences(theResource, theSearchParamType, filteredSearchParams);
-
 		for (RuntimeSearchParam nextSpDef : filteredSearchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
@@ -1651,34 +1648,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				.map(RuntimeSearchParam::getPath)
 				.filter(Objects::nonNull)
 				.anyMatch(path -> path.contains("resolve"));
-	}
-
-	/**
-	 * HAPI FHIR Reference objects (e.g. {@link org.hl7.fhir.r4.model.Reference}) can hold references either by text
-	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
-	 * first way, so if there is any chance of the FHIRPath evaluator needing to descend across references, we
-	 * have to assign values to those references before indexing.
-	 * <p>
-	 * Doing this cleanup isn't hugely expensive, but it's not completely free either so we only do it
-	 * if we think there's actually a chance
-	 */
-	private void cleanUpContainedResourceReferences(
-			IBaseResource theResource,
-			RestSearchParameterTypeEnum theSearchParamType,
-			Collection<RuntimeSearchParam> searchParams) {
-		boolean havePathWithResolveExpression = myStorageSettings.isIndexOnContainedResources()
-				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
-
-		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
-			// TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt
-			// to contain it internally. Wild
-			myContext
-					.newTerser()
-					.containResources(
-							theResource,
-							FhirTerser.OptionsEnum.MODIFY_RESOURCE,
-							FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
-		}
 	}
 
 	/**

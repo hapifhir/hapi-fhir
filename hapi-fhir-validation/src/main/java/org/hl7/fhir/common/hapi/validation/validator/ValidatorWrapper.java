@@ -54,6 +54,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private boolean myAllowExamples;
 
 	/**
 	 * Constructor
@@ -68,6 +69,11 @@ class ValidatorWrapper {
 
 	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.myAssumeValidRestReferences = assumeValidRestReferences;
+		return this;
+	}
+
+	public ValidatorWrapper setAllowExamples(boolean theAllowExamples) {
+		myAllowExamples = theAllowExamples;
 		return this;
 	}
 
@@ -141,6 +147,7 @@ class ValidatorWrapper {
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);
 		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
+		v.setAllowExamples(myAllowExamples);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();

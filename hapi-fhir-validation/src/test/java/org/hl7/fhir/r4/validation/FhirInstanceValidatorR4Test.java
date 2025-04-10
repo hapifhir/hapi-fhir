@@ -99,6 +99,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1249,8 +1250,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		myInstanceVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+		myInstanceVal.setAllowExamples(true);
 
+		// Test
 		ValidationResult output = myFhirValidator.validateWithResult(input);
+
+		// Validate
 		OperationOutcome oo = (OperationOutcome) output.toOperationOutcome();
 		ourLog.info("Outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssue()).hasSize(1);
@@ -1423,7 +1428,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 
