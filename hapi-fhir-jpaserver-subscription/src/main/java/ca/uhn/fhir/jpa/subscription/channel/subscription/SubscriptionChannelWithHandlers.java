@@ -32,6 +32,10 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.HashSet;
 
+/**
+ * @deprecated use {@link SubscriptionConsumerWithListeners}
+ */
+@Deprecated
 public class SubscriptionChannelWithHandlers implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 

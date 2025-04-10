@@ -1,19 +1,17 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
@@ -61,23 +59,22 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
-
-	@Autowired
-	IResourceModifiedDao myResourceModifiedDao;
+	private TestQueueConsumerListener<ResourceModifiedMessage> myListener;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
+	private IChannelConsumer<ResourceModifiedMessage> myConsumer;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.unPause();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myConsumer.close();
 	}
 
 	@Override
@@ -85,9 +82,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		IChannelReceiver receiver = myChannelFactory.newMatchingReceivingChannel("my-queue-name", new ChannelConsumerSettings());
-		handler = new TestQueueConsumerHandler();
-		receiver.subscribe(handler);
+		myListener = new TestQueueConsumerListener<>(ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myListener, new ChannelConsumerSettings());
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
@@ -323,12 +319,11 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(handler.getMessages()).hasSize(1);
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
-		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
+		assertThat(myListener.getPayloads()).hasSize(1);
+		ResourceModifiedMessage payload = myListener.getPayloads().get(0);
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		handler.clearMessages();
+		myListener.clearMessages();
 		return (T) resource;
 	}
 
