@@ -1106,7 +1106,7 @@
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.19.0-SNAPSHOT</clinical-reasoning.version>
+		<clinical-reasoning.version>3.19.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1942,12 +1942,12 @@
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
 			</dependency>
-			<!-- TODO KHS remove hamcrest -->
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest</artifactId>
-				<version>${hamcrest_version}</version>
-			</dependency>
+<!--			&lt;!&ndash; TODO KHS remove hamcrest &ndash;&gt;-->
+<!--			<dependency>-->
+<!--				<groupId>org.hamcrest</groupId>-->
+<!--				<artifactId>hamcrest</artifactId>-->
+<!--				<version>${hamcrest_version}</version>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
@@ -2794,7 +2794,6 @@
 								<copy todir="target/site/xref-base">
 									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
-								<!-- <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy> -->
 								<copy todir="target/site">
 									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
@@ -2849,7 +2848,6 @@
 			<br clear="both"/>
 	]]></replacevalue>
 								</replace>
-								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
 						</configuration>
 					</execution>
