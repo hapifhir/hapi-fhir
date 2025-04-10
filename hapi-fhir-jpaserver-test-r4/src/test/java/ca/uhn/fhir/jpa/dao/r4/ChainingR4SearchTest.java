@@ -26,6 +26,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -1558,61 +1561,46 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
 	}
 
-	@Test
-	public void testChainedExactSearchWithExactValue() {
+	@ParameterizedTest
+	@CsvSource({
+		"/Encounter?service-provider.name:exact=Test,			0",
+		"/Encounter?service-provider.name:exact=TestOrg1,		1",
+		"/Encounter?subject.organization.name:exact=TestOrg1,	2"  // multiple link chaining
+	})
+	public void testReferenceChainSearch_withExactQualifierInChain_willMatchExactly(String searchUrl, int expectedCount) {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
-		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 
-		Organization organization = buildResource("Organization", withId("Org1"), withName("TestOrg"));
-		Patient patient = buildResource("Patient", withId("P1"), withBirthdate("2001-01-01"));
-		Encounter encounter = buildResource("Encounter", withId("E1"));
-		encounter.setSubject(new Reference("Patient/P1"));
-		encounter.setServiceProvider(new Reference("Organization/Org1"));
+		Organization org1 = buildResource("Organization", withId("Org1"), withName("TestOrg1"));
+		Organization org2 = buildResource("Organization", withId("Org2"), withName("TestOrg2"));
+		doUpdateResource(org1);
+		doUpdateResource(org2);
 
-		doUpdateResource(organization);
-		doUpdateResource(patient);
-		doUpdateResource(encounter);
+		Patient p = buildResource("Patient", withId("P1"), withBirthdate("2001-01-01"));
+		p.getManagingOrganization().setReference(org1.getId());
+		doUpdateResource(p);
+
+		Encounter enc1 = buildResource("Encounter", withId("E1"));
+		enc1.getSubject().setReference(p.getId());
+		enc1.getServiceProvider().setReference(org1.getId());
+		Encounter enc2 = buildResource("Encounter", withId("E2"));
+		enc2.getSubject().setReference(p.getId());              // link to same patient as enc1
+		enc2.getServiceProvider().setReference(org2.getId());   // link to different org than enc1
+		doUpdateResource(enc1);
+		doUpdateResource(enc2);
+
 		logAllStringIndexes();
-
-		String url = "/Encounter?service-provider.name:exact=TestOrg";
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> encounterIds = myTestDaoSearch.searchForIds(url);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<String> encounterIds = myTestDaoSearch.searchForIds(searchUrl);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		// validate
-		assertThat(encounterIds).hasSize(1);
-		assertThat(encounterIds.get(0)).isEqualTo(encounter.getIdPart());
-	}
-
-	@Test
-	public void testChainedExactSearchWithPartialValue() {
-		// setup
-		myStorageSettings.setIndexOnContainedResources(true);
-		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
-
-		Organization organization = buildResource("Organization", withId("Org1"), withName("TestOrg"));
-		Patient patient = buildResource("Patient", withId("P1"), withBirthdate("2001-01-01"));
-		Encounter encounter = buildResource("Encounter", withId("E1"));
-		encounter.setSubject(new Reference("Patient/P1"));
-		encounter.setServiceProvider(new Reference("Organization/Org1"));
-
-		doUpdateResource(organization);
-		doUpdateResource(patient);
-		doUpdateResource(encounter);
-
-		logAllStringIndexes();
-		String url = "/Encounter?service-provider.name:exact=Test";
-
-		// execute
-		myCaptureQueriesListener.clear();
-		List<String> encounterIds = myTestDaoSearch.searchForIds(url);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-		// validate
-		assertThat(encounterIds).isEmpty();
+		assertThat(encounterIds).hasSize(expectedCount);
+		if (expectedCount == 1) {
+			assertThat(encounterIds.get(0)).isEqualTo(enc1.getIdPart());
+		}
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
