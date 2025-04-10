@@ -45,4 +45,17 @@ public @interface CdsServicePrefetch {
 	 * The strategy used for this query, defaults to the service-wide strategy
 	 */
 	CdsResolutionStrategyEnum source() default CdsResolutionStrategyEnum.NONE;
+
+	/**
+	 * How to handle prefetch failures, applies to both auto-prefetch failures or an OperationOutcome sent by the CDSClient as a prefetch resource.
+	 */
+	CdsPrefetchFailureMode failureMode() default CdsPrefetchFailureMode.FAIL;
+
+	/*
+	 * The maximum number of pages to fetch from the remote fhir server (when using CDSResolutionStrategyEnum.FHIR_CLIENT)
+	 * for the prefetch query in case the response is a paginated bundle.
+	 * 0 or negative values mean no limit.
+	 * The default is no limit.
+	 */
+	int maxPages() default 0;
 }

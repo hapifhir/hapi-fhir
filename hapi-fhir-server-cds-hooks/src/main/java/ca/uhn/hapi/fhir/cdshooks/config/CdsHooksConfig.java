@@ -215,12 +215,14 @@ public class CdsHooksConfig {
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
 			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			FhirContext theFhirContext,
 			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CdsPrefetchSvc(
 				theCdsResolutionStrategySvc,
 				theResourcePrefetchDao,
 				theResourcePrefetchFhirClient,
 				theCdsHooksDaoAuthorizationSvc,
+				theFhirContext,
 				theInterceptorBroadcaster);
 	}
 
@@ -230,8 +232,9 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	CdsPrefetchFhirClientSvc resourcePrefetchFhirClient(FhirContext theFhirContext) {
-		return new CdsPrefetchFhirClientSvc(theFhirContext);
+	CdsPrefetchFhirClientSvc resourcePrefetchFhirClient(
+			FhirContext theFhirContext, @Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new CdsPrefetchFhirClientSvc(theFhirContext, theInterceptorBroadcaster);
 	}
 
 	@Bean
