@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -672,7 +673,6 @@ public class InterceptorServiceTest {
 		}
 
 
-		// fixme is an error the right move?  Log debug?  Log warn?
 		@Test
 		void testFilterDoesNotCallRunnable_throwsError() {
 			// given no interceptors registered
@@ -686,7 +686,9 @@ public class InterceptorServiceTest {
 			});
 
 			// when
-			assertThrows(RuntimeException.class, ()->myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable));
+			assertThatThrownBy(() -> myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable))
+				.hasMessageContaining("Runnable was not run in filter produced by BaseInterceptorService.HookInvoker")
+				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
 
 		}
 

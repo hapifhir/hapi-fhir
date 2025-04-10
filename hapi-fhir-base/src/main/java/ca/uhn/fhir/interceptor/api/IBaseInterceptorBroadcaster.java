@@ -20,11 +20,11 @@
 package ca.uhn.fhir.interceptor.api;
 
 import ca.uhn.fhir.interceptor.executor.RunnableHookWrapper;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 
@@ -71,11 +71,15 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	}
 
 	default void runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Runnable theCallerRunnable) {
-		List<IInterceptorBroadcaster.IInterceptorFilterHook> filters = getInvokersForPointcut(thePointcut).stream()
-				.map(i -> (IInterceptorBroadcaster.IInterceptorFilterHook) i.invoke(theHookParams))
-				.collect(Collectors.toList());
+		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 
-		Runnable runnable = RunnableHookWrapper.wrap(theCallerRunnable, filters);
+		Runnable runnable = theCallerRunnable;
+
+		// traverse the invokers in reverse order because the first wrapper will be called last in sequence.
+		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
+			IInterceptorFilterHook filter = (IInterceptorFilterHook) nextInvoker.invoke(theHookParams);
+			runnable = new RunnableHookWrapper(runnable, filter, nextInvoker);
+		}
 
 		runnable.run();
 	}

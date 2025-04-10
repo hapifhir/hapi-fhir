@@ -1,57 +1,52 @@
 package ca.uhn.fhir.interceptor.executor;
 
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IPointcut;
-import com.google.common.collect.Lists;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInvoker;
 
 /**
  * Wraps a runnable with a filter hook.
  */
 public class RunnableHookWrapper implements Runnable {
-	private final IInterceptorBroadcaster.IInterceptorFilterHook myAdvice;
+	private final IInterceptorFilterHook myAdvice;
 	private final Runnable myTarget;
+	private final IInvoker myInvoker	;
 
-	static Runnable wrapRunnable(IInterceptorBroadcaster.IInterceptorFilterHook filter, Runnable runnable) {
-		return new RunnableHookWrapper(filter, runnable);
-	}
-
-	RunnableHookWrapper(IInterceptorBroadcaster.IInterceptorFilterHook theAdvice, Runnable theTarget) {
+	public RunnableHookWrapper(Runnable theTarget, IInterceptorFilterHook theAdvice, IInvoker theInvoker) {
 		myAdvice = theAdvice;
 		myTarget = theTarget;
-	}
-
-	public static <POINTCUT extends IPointcut> void callWrapAndRun(
-			IBaseInterceptorBroadcaster<POINTCUT> theInterceptorBroadcaster,
-			POINTCUT thePointcut,
-			HookParams theHookParams,
-			Runnable theCallerRunnable) {
-
-		var filters = theInterceptorBroadcaster.getInvokersForPointcut(thePointcut).stream()
-				.map(i -> (IInterceptorBroadcaster.IInterceptorFilterHook) i.invoke(theHookParams))
-				.collect(Collectors.toList());
-
-		Runnable runnable = wrap(theCallerRunnable, filters);
-
-		runnable.run();
-	}
-
-	public static Runnable wrap(Runnable theTargetRunnable, List<IInterceptorBroadcaster.IInterceptorFilterHook> theFilters) {
-		Runnable runnable = theTargetRunnable;
-
-		// traverse the invokers in reverse order because the first wrapper will be called last in sequence.
-		for (IInterceptorBroadcaster.IInterceptorFilterHook filter : Lists.reverse(theFilters)) {
-			runnable = wrapRunnable(filter, runnable);
-		}
-		return runnable;
+		myInvoker = theInvoker;
 	}
 
 	@Override
 	public void run() {
-		myAdvice.accept(myTarget);
+		TrackingRunnableWrapper trackingRunnableWrapper = new TrackingRunnableWrapper(myTarget);
+
+		myAdvice.accept(trackingRunnableWrapper);
+
+		if (!trackingRunnableWrapper.wasRun()) {
+			throw new IllegalStateException("Runnable was not run in filter produced by " + myInvoker);
+		}
 	}
+
+	static class TrackingRunnableWrapper implements Runnable {
+		private final Runnable myTarget;
+		private boolean myRunFlag = false;
+
+		TrackingRunnableWrapper(Runnable theTarget) {
+			myTarget = theTarget;
+		}
+
+		@Override
+		public void run() {
+			myRunFlag = true;
+			myTarget.run();
+		}
+
+		public boolean wasRun() {
+			return myRunFlag;
+		}
+
+
+	}
+
 }
