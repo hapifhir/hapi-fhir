@@ -5,20 +5,14 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.controller.TestServerAppCtx;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class TestCdsHooksConfig {
+public class TestCdsConfig {
 	@Bean
 	FhirContext fhirContext() {
 		return FhirContext.forR4Cached();
 	}
-
-	@Bean
-	CdsCrSettings cdsCrSettings() { return CdsCrSettings.getDefault(); }
 
 	@Bean
 	public CdsHooksContextBooter cdsHooksContextBooter() {
