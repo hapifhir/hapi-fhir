@@ -3215,6 +3215,12 @@ public enum Pointcut implements IPointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
+	TEST_FILTER(IInterceptorBroadcaster.IInterceptorFilterHook.class, String.class.getName()),
+
+	/**
+	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
+	 * removed at any time.
+	 */
 	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName());
 
 	private final List<String> myParameterTypes;

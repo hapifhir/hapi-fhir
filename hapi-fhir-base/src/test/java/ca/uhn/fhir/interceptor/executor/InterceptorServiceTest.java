@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -608,6 +610,111 @@ public class InterceptorServiceTest {
 		}
 	}
 
+
+	@Nested
+	class FilterHooks {
+		InterceptorService myInterceptorService = new InterceptorService();
+		HookParams myParams = new HookParams("1");
+		List<String> myCallLog = new ArrayList<>();
+
+		class MyRunnable implements Runnable {
+			public void run() {
+				myCallLog.add("MyRunnable runs!");
+			}
+		}
+
+		MyRunnable myRunnable = new MyRunnable();
+
+		@Test
+		void testNoHooks_callsRunnableNormally() {
+		    // given no interceptors registered
+
+		    // when
+			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable);
+
+		    // then
+			assertThat(myCallLog).containsExactly("MyRunnable runs!");
+		}
+
+		@Test
+		void testOneHook_calledAroundRunnable() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+
+			// when
+			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable);
+
+			// then
+			assertThat(myCallLog).containsExactly(
+				"filter1-before",
+				"MyRunnable runs!",
+				"filter1-after"
+			);
+		}
+
+		@Test
+		void testTwoHooks_calledInOrderAroundRunnable() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter2"));
+
+			// when
+			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable);
+
+			// then
+			assertThat(myCallLog).containsExactly(
+				"filter1-before",
+				"filter2-before",
+				"MyRunnable runs!",
+				"filter2-after",
+				"filter1-after"
+			);
+		}
+
+
+		// fixme is an error the right move?  Log debug?  Log warn?
+		@Test
+		void testFilterDoesNotCallRunnable_throwsError() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new Object() {
+				@Hook(Pointcut.TEST_FILTER)
+				public IInterceptorBroadcaster.IInterceptorFilterHook testFilter(HookParams theParams) {
+					// return a filter that does not call the runnable
+					return (runnable)->{};
+				}
+
+			});
+
+			// when
+			assertThrows(RuntimeException.class, ()->myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, myRunnable));
+
+		}
+
+		class MyFilterHookInterceptor {
+			final String myName;
+
+			MyFilterHookInterceptor(String theName) {
+				myName = theName;
+			}
+
+			@Hook(Pointcut.TEST_FILTER)
+			public IInterceptorBroadcaster.IInterceptorFilterHook testFilter(HookParams theParams) {
+				return new MyFilter();
+			}
+
+			private class MyFilter implements IInterceptorBroadcaster.IInterceptorFilterHook {
+				@Override
+				public void accept(Runnable theRunnable) {
+					myCallLog.add(myName + "-before");
+					try {
+						theRunnable.run();
+					} finally {
+						myCallLog.add(myName + "-after");
+					}
+				}
+			}
+		}
+	}
 
 	@BeforeEach
 	public void before() {
