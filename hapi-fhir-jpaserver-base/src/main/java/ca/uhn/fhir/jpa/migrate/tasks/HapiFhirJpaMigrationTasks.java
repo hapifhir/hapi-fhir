@@ -133,13 +133,32 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init820() {
 		Builder version = forVersion(VersionEnum.V8_2_0);
-		version.executeRawSqls(
+		// Add HFJ_SPIDX_IDENTITY table
+		{
+			version.addIdGenerator("20250324.1", "SEQ_SPIDX_IDENTITY", 1);
+			Builder.BuilderAddTableByColumns spidxIdentity =
+					version.addTableByColumns("20250324.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
+
+			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
+			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
+			spidxIdentity.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 256);
+
+			spidxIdentity
+					.addIndex("20250324.3", "IDX_HASH_IDENTITY")
+					.unique(true)
+					.withColumns("HASH_IDENTITY");
+		}
+
+		{
+			version.executeRawSqls(
 				"20250404.10",
 				Map.of(
-						DriverTypeEnum.ORACLE_12C,
-						List.of(
-								"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_EXACT varchar2(768 char) )",
-								"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_NORMALIZED varchar2(768 char) )")));
+					DriverTypeEnum.ORACLE_12C,
+					List.of(
+						"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_EXACT varchar2(768 char) )",
+						"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_NORMALIZED varchar2(768 char) )")));
+		}
 	}
 
 	protected void init780() {
