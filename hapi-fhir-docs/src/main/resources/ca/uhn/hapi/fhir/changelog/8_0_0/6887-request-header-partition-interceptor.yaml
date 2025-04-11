@@ -1,0 +1,11 @@
+---
+type: add
+issue: 6887
+title: "A new partition interceptor that can be used to identify partitions based on a specific 
+request header called `X-Request-Partition-IDs` is added. The header value is expected to be a comma separated list
+of partition ids. Also, a mechanism is introduced for overriding this header in a transaction bundle for individual 
+request entries if needed. This allows writing different transaction entries to different partitions 
+in the same transaction."
+
+
+

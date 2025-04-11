@@ -34,7 +34,8 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	/**
 	 * Map with case-insensitive keys
 	 */
-	private final ListMultimap<String, String> myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+	private final ListMultimap<String, String> myHeaderOverrides = MultimapBuilder.treeKeys(
+					String.CASE_INSENSITIVE_ORDER)
 			.arrayListValues()
 			.build();
 
@@ -45,13 +46,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	 */
 	public ServletSubRequestDetails(@Nonnull ServletRequestDetails theRequestDetails) {
 		super(theRequestDetails.getInterceptorBroadcaster());
-
 		myWrap = theRequestDetails;
-
-		Map<String, List<String>> headers = theRequestDetails.getHeaders();
-		for (Map.Entry<String, List<String>> next : headers.entrySet()) {
-			myHeaders.putAll(next.getKey(), next.getValue());
-		}
 	}
 
 	@Override
@@ -66,25 +61,31 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	@Override
 	public void addHeader(String theName, String theValue) {
-		myHeaders.put(theName, theValue);
+		myHeaderOverrides.put(theName, theValue);
 	}
 
 	@Override
 	public String getHeader(String theName) {
-		List<String> list = myHeaders.get(theName);
+		List<String> list = myHeaderOverrides.get(theName);
 		if (list.isEmpty()) {
-			return null;
+			return myWrap.getHeader(theName);
 		}
 		return list.get(0);
 	}
 
 	@Override
 	public List<String> getHeaders(String theName) {
-		List<String> list = myHeaders.get(theName.toLowerCase());
+		List<String> list = myHeaderOverrides.get(theName.toLowerCase());
 		if (list.isEmpty()) {
-			return null;
+			return myWrap.getHeaders(theName);
 		}
 		return list;
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValues) {
+		myHeaderOverrides.removeAll(theName);
+		myHeaderOverrides.putAll(theName, theValues);
 	}
 
 	@Override
