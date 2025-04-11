@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6857
+jira: SMILE-9589
+title: "When targeting an Oracle Database, a migration task modifying column size omitted to specify the character
+storage size (byte/char). As a result, SQL errors could occur when inserting a string of the column maximum set size if 
+it contained characters where the code point (character encoding) requires 2 bytes.  This issue is fixed."
