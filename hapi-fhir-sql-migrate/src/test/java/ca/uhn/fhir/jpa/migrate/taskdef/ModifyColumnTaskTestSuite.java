@@ -33,7 +33,8 @@ public interface ModifyColumnTaskTestSuite extends BaseMigrationTaskTestSuite {
 		getSupport().executeAndClearPendingTasks();
 		assertThat(JdbcUtils.getColumnNames(getSupport().getConnectionProperties(), tableName)).contains(stringColumnName);
 
-		// then we can insert the maximum set number of characters including characters taking 2 bytes of storage
+		// then we assert that we can insert the maximum set number of characters where each one has a code point (encoding)
+		// requiring 2 bytes of storage.
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask("1", "1");
 		executeRawSqlTask.addSql("insert into " + tableName + " values (1, '㏰㏱㏲㏳㋿')"); // U+32F0\U+32F1\U+32F2\U+32F3\U+32FF
 
