@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,6 +12,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -29,6 +29,7 @@ import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -54,8 +55,11 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -87,9 +91,11 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 
-		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultSettings = new PartitionSettings();
+		myPartitionSettings.setPartitioningEnabled(defaultSettings.isPartitioningEnabled());
+		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
 	}
 
 
@@ -384,6 +390,17 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertThat(resourcesByType.get("Practitioner")).containsExactly(-1, -1, -1);
 	}
 
+	// fixme
+//	@Test
+//	void testLoadBundle_referencesExistingResource() {
+//	    // given
+//		createOrganization(withIdentifier("https://example.com/ns", "123"));
+//
+//	    // when
+//	    // then
+//	    fail();
+//	}
+
 	@Test
 	public void testTransaction_SystemRequestDetails() throws IOException {
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
@@ -597,6 +614,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 		}
 	}
+
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
@@ -608,4 +626,21 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
 	}
+
+	@Test
+	void testSyntheaLoad() throws IOException {
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+
+		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(true);
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/practitionerInformation1743689610792.json"), Charsets.UTF_8)).execute();
+		Bundle patientBundle = parser.parseResource(Bundle.class, Resources.toString(Resources.getResource("transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"), Charsets.UTF_8));
+
+		// when
+		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
+
+		// then
+	}
+
 }

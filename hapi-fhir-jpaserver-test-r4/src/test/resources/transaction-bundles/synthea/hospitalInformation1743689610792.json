@@ -1,0 +1,318 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [ {
+    "fullUrl": "urn:uuid:9043e647-568d-3e87-9fc0-756a416392d3",
+    "resource": {
+      "resourceType": "Organization",
+      "id": "9043e647-568d-3e87-9fc0-756a416392d3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 40
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-procedures-extension",
+        "valueInteger": 327
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-labs-extension",
+        "valueInteger": 56
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-prescriptions-extension",
+        "valueInteger": 46
+      } ],
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "9043e647-568d-3e87-9fc0-756a416392d3"
+      } ],
+      "active": true,
+      "type": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        } ],
+        "text": "Healthcare Provider"
+      } ],
+      "name": "INTERNAL MEDICINE PHYSICIANS OF THE NORTH SHORE",
+      "telecom": [ {
+        "system": "phone",
+        "value": "9785317677"
+      } ],
+      "address": [ {
+        "line": [ "27 CENTENNIAL DR" ],
+        "city": "PEABODY",
+        "state": "MA",
+        "postalCode": "01960",
+        "country": "US"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "Organization",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|9043e647-568d-3e87-9fc0-756a416392d3"
+    }
+  }, {
+    "fullUrl": "urn:uuid:b6bdd4bc-4675-3537-8229-83d2b83bb394",
+    "resource": {
+      "resourceType": "Location",
+      "id": "b6bdd4bc-4675-3537-8229-83d2b83bb394",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location" ]
+      },
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "b6bdd4bc-4675-3537-8229-83d2b83bb394"
+      } ],
+      "status": "active",
+      "name": "INTERNAL MEDICINE PHYSICIANS OF THE NORTH SHORE",
+      "telecom": [ {
+        "system": "phone",
+        "value": "9785317677"
+      } ],
+      "address": {
+        "line": [ "27 CENTENNIAL DR" ],
+        "city": "PEABODY",
+        "state": "MA",
+        "postalCode": "01960",
+        "country": "US"
+      },
+      "position": {
+        "longitude": -70.9519832,
+        "latitude": 42.52388415
+      },
+      "managingOrganization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "9043e647-568d-3e87-9fc0-756a416392d3"
+        },
+        "display": "INTERNAL MEDICINE PHYSICIANS OF THE NORTH SHORE"
+      }
+    },
+    "request": {
+      "method": "POST",
+      "url": "Location",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|b6bdd4bc-4675-3537-8229-83d2b83bb394"
+    }
+  }, {
+    "fullUrl": "urn:uuid:0a8a4b11-d0b8-3cd2-92cd-983de5189cfa",
+    "resource": {
+      "resourceType": "Organization",
+      "id": "0a8a4b11-d0b8-3cd2-92cd-983de5189cfa",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 5
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-procedures-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-labs-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-prescriptions-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/bed-count-extension",
+        "valueInteger": 123
+      } ],
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "0a8a4b11-d0b8-3cd2-92cd-983de5189cfa"
+      } ],
+      "active": true,
+      "type": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        } ],
+        "text": "Healthcare Provider"
+      } ],
+      "name": "LIFE CARE CENTER OF THE NORTH SHORE",
+      "telecom": [ {
+        "system": "phone",
+        "value": "7815929667"
+      } ],
+      "address": [ {
+        "line": [ "111 BIRCH STREET" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019021574",
+        "country": "US"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "Organization",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|0a8a4b11-d0b8-3cd2-92cd-983de5189cfa"
+    }
+  }, {
+    "fullUrl": "urn:uuid:e26d82f8-b2b4-3002-8237-536a91460a81",
+    "resource": {
+      "resourceType": "Location",
+      "id": "e26d82f8-b2b4-3002-8237-536a91460a81",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location" ]
+      },
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "e26d82f8-b2b4-3002-8237-536a91460a81"
+      } ],
+      "status": "active",
+      "name": "LIFE CARE CENTER OF THE NORTH SHORE",
+      "telecom": [ {
+        "system": "phone",
+        "value": "7815929667"
+      } ],
+      "address": {
+        "line": [ "111 BIRCH STREET" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019021574",
+        "country": "US"
+      },
+      "position": {
+        "longitude": -70.93458444045801,
+        "latitude": 42.47859105
+      },
+      "managingOrganization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "0a8a4b11-d0b8-3cd2-92cd-983de5189cfa"
+        },
+        "display": "LIFE CARE CENTER OF THE NORTH SHORE"
+      }
+    },
+    "request": {
+      "method": "POST",
+      "url": "Location",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|e26d82f8-b2b4-3002-8237-536a91460a81"
+    }
+  }, {
+    "fullUrl": "urn:uuid:89171335-b9c0-3326-98d6-a837d432b9fd",
+    "resource": {
+      "resourceType": "Organization",
+      "id": "89171335-b9c0-3326-98d6-a837d432b9fd",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 64
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-procedures-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-labs-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/utilization-prescriptions-extension",
+        "valueInteger": 0
+      }, {
+        "url": "http://synthetichealth.github.io/synthea/bed-count-extension",
+        "valueInteger": 88
+      } ],
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "89171335-b9c0-3326-98d6-a837d432b9fd"
+      } ],
+      "active": true,
+      "type": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        } ],
+        "text": "Healthcare Provider"
+      } ],
+      "name": "WHITTIER REHABILTATION HOSPITAL",
+      "telecom": [ {
+        "system": "phone",
+        "value": "5088712063"
+      } ],
+      "address": [ {
+        "line": [ "150 FLANDERS ROAD" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019042915",
+        "country": "US"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "Organization",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|89171335-b9c0-3326-98d6-a837d432b9fd"
+    }
+  }, {
+    "fullUrl": "urn:uuid:ec828444-a329-332a-af8e-df648ced7a7a",
+    "resource": {
+      "resourceType": "Location",
+      "id": "ec828444-a329-332a-af8e-df648ced7a7a",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location" ]
+      },
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "ec828444-a329-332a-af8e-df648ced7a7a"
+      } ],
+      "status": "active",
+      "name": "WHITTIER REHABILTATION HOSPITAL",
+      "telecom": [ {
+        "system": "phone",
+        "value": "5088712063"
+      } ],
+      "address": {
+        "line": [ "150 FLANDERS ROAD" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019042915",
+        "country": "US"
+      },
+      "position": {
+        "longitude": -70.9494939,
+        "latitude": 42.466763
+      },
+      "managingOrganization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "89171335-b9c0-3326-98d6-a837d432b9fd"
+        },
+        "display": "WHITTIER REHABILTATION HOSPITAL"
+      }
+    },
+    "request": {
+      "method": "POST",
+      "url": "Location",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|ec828444-a329-332a-af8e-df648ced7a7a"
+    }
+  }, {
+    "fullUrl": "urn:uuid:bb1ad573-19b8-9cd8-68fb-0e6f684df992",
+    "resource": {
+      "resourceType": "Location",
+      "id": "bb1ad573-19b8-9cd8-68fb-0e6f684df992",
+      "identifier": [ {
+        "system": "https://github.com/synthetichealth/synthea",
+        "value": "bb1ad573-19b8-9cd8-68fb-0e6f684df992"
+      } ],
+      "status": "active",
+      "description": "Patient's Home",
+      "mode": "kind",
+      "physicalType": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+          "code": "ho",
+          "display": "House"
+        } ]
+      }
+    },
+    "request": {
+      "method": "POST",
+      "url": "Location",
+      "ifNoneExist": "identifier=https://github.com/synthetichealth/synthea|bb1ad573-19b8-9cd8-68fb-0e6f684df992"
+    }
+  } ]
+}

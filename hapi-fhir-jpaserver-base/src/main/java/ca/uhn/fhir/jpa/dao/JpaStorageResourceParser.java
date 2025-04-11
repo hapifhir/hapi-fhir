@@ -256,7 +256,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		return retVal;
 	}
 
-	private <R extends IBaseResource> void populateResourcePartitionInformation(
+	public <R extends IBaseResource> void populateResourcePartitionInformation(
 			IBaseResourceEntity theEntity, R retVal) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			PartitionablePartitionId partitionId = theEntity.getPartitionId();
@@ -553,6 +553,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			meta.setVersionId(id.getVersionIdPart());
 			meta.setLastUpdated(theEntitySource.getUpdatedDate());
 		}
+
+		populateResourcePartitionInformation(theEntitySource, theResourceTarget);
 	}
 
 	private FhirContext getContext(FhirVersionEnum theVersion) {
