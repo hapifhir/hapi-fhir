@@ -27,19 +27,17 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SubscriptionConsumerWithListeners implements AutoCloseable {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionConsumerWithListeners.class);
-	private final String myChannelName;
+/**
+ * This holds the Subscription ResourceDeliveryMessage consumer that receives Subscription matches and delivers them.
+ */
+public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseable {
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
 	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
-	public SubscriptionConsumerWithListeners(
-			String theChannelName,
-			IChannelConsumer<ResourceDeliveryMessage> theConsumer,
-			MultiplexingListener<ResourceDeliveryMessage> theMultiplexingListener) {
-		myChannelName = theChannelName;
+	public SubscriptionResourceDeliveryMessageConsumer(
+			IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		myConsumer = theConsumer;
-		myMultiplexingListener = theMultiplexingListener;
+		myMultiplexingListener = (MultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
 	}
 
 	public boolean addListener(IMessageListener<ResourceDeliveryMessage> theListener) {
@@ -53,12 +51,11 @@ public class SubscriptionConsumerWithListeners implements AutoCloseable {
 
 	@Override
 	public void close() {
-		myMultiplexingListener.close();
 		CloseUtil.close(myConsumer);
 	}
 
 	public String getChannelName() {
-		return myChannelName;
+		return myConsumer.getChannelName();
 	}
 
 	public IChannelConsumer<ResourceDeliveryMessage> getConsumer() {

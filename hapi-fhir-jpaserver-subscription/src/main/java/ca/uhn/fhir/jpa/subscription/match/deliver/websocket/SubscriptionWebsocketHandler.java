@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionConsumerWithListeners;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionResourceDeliveryMessageConsumer;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -119,10 +119,10 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySession = theSession;
 			myActiveSubscription = theActiveSubscription;
 
-			SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =
+			SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
 					mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(
 							theActiveSubscription.getChannelName());
-			subscriptionConsumerWithListeners.addListener(this);
+			subscriptionResourceDeliveryMessageConsumer.addListener(this);
 		}
 
 		public Class<ResourceDeliveryMessage> getPayloadType() {
@@ -131,10 +131,10 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 		@Override
 		public void closing() {
-			SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =
+			SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
 					mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(
 							myActiveSubscription.getChannelName());
-			subscriptionConsumerWithListeners.removeListener(this);
+			subscriptionResourceDeliveryMessageConsumer.removeListener(this);
 		}
 
 		/**

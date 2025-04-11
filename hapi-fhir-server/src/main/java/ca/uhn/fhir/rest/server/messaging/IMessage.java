@@ -19,17 +19,27 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
+import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This interface is implemented by serializable "wrapper" message classes that are exchanged with Massage Brokers. HAPI-FHIR
+ * message classes implement both {@link org.springframework.messaging.Message} and {@link IMessage} so that they can
+ * be exchanged with both JMS and non-JMS brokers. These message wrappers wrap a serializable payload that is the main content
+ * of the message. This wrapper also contains meta-data about the message such as headers and a message key.
+ *
+ * @param <T> the type of the message payload. In most cases, T will be an implementation of {@link IModelJson}
+ */
 public interface IMessage<T> {
 	/**
-	 * This is used by brokers that support partitioning of messages. It is used to determine which partition a message
-	 * should be sent to. If message order is important, then you can use the message key to ensure that all messages
-	 * with the same key are sent to the same partition.
+	 * The message key is used by brokers that support channel partitioning. The message key is used to determine which partition
+	 * a message is stored on. If message order is important, then the same message key should be used for all messages for which
+	 * order is important. E.g. if a series of messages creates, updates, and then deletes a resource, the resource id would be a good
+	 * candidate for the message key to ensure the order of operations is preserved on all messages concerning the same resource.
 	 * @return the key of the message.
 	 */
 	@Nonnull

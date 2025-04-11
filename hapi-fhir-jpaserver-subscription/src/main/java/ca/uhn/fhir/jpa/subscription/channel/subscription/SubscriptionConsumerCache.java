@@ -30,9 +30,9 @@ import java.util.concurrent.ConcurrentHashMap;
 class SubscriptionConsumerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionConsumerCache.class);
 
-	private final Map<String, SubscriptionConsumerWithListeners> myCache = new ConcurrentHashMap<>();
+	private final Map<String, SubscriptionResourceDeliveryMessageConsumer> myCache = new ConcurrentHashMap<>();
 
-	public SubscriptionConsumerWithListeners get(String theChannelName) {
+	public SubscriptionResourceDeliveryMessageConsumer get(String theChannelName) {
 		return myCache.get(theChannelName);
 	}
 
@@ -40,14 +40,14 @@ class SubscriptionConsumerCache {
 		return myCache.size();
 	}
 
-	public void put(String theChannelName, SubscriptionConsumerWithListeners theValue) {
+	public void put(String theChannelName, SubscriptionResourceDeliveryMessageConsumer theValue) {
 		myCache.put(theChannelName, theValue);
 	}
 
 	synchronized void closeAndRemove(String theChannelName) {
 		Validate.notBlank(theChannelName);
 
-		SubscriptionConsumerWithListeners subscriptionChannelWithHandlers = myCache.get(theChannelName);
+		SubscriptionResourceDeliveryMessageConsumer subscriptionChannelWithHandlers = myCache.get(theChannelName);
 		if (subscriptionChannelWithHandlers == null) {
 			return;
 		}

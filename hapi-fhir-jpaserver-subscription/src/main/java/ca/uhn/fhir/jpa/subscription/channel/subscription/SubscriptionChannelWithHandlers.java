@@ -33,7 +33,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * @deprecated use {@link SubscriptionConsumerWithListeners}
+ * @deprecated use {@link SubscriptionResourceDeliveryMessageConsumer}
  */
 @Deprecated
 public class SubscriptionChannelWithHandlers implements Closeable {

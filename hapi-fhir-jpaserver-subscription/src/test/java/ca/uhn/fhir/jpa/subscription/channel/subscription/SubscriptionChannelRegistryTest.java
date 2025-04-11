@@ -80,7 +80,7 @@ public class SubscriptionChannelRegistryTest {
 
 		// verify
 		// the receiver and sender should've been added to the maps
-		SubscriptionConsumerWithListeners channelWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(channelName);
+		SubscriptionResourceDeliveryMessageConsumer channelWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(channelName);
 		IChannelProducer<ResourceDeliveryMessage> producer2 = mySubscriptionChannelRegistry.getDeliveryChannelProducer(channelName);
 
 		assertEquals(producer, producer2);

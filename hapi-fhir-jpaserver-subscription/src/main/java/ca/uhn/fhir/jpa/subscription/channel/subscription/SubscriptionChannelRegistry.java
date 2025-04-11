@@ -99,10 +99,10 @@ public class SubscriptionChannelRegistry {
 		Optional<IMessageListener<ResourceDeliveryMessage>> oDeliveryListener =
 				mySubscriptionDeliveryListenerFactory.createDeliveryListener(theActiveSubscription.getChannelType());
 
-		SubscriptionConsumerWithListeners subscriptionConsumerWithListeners =
-				new SubscriptionConsumerWithListeners(channelName, deliveryConsumer, multiplexingListener);
-		oDeliveryListener.ifPresent(subscriptionConsumerWithListeners::addListener);
-		myDeliveryConsumerCache.put(channelName, subscriptionConsumerWithListeners);
+		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
+				new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
+		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
+		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);
 
 		// create the producing channel.
 		// channel used for sending to subscription matcher
@@ -138,7 +138,7 @@ public class SubscriptionChannelRegistry {
 
 		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
-			SubscriptionConsumerWithListeners deliveryConsumer = myDeliveryConsumerCache.get(channelName);
+			SubscriptionResourceDeliveryMessageConsumer deliveryConsumer = myDeliveryConsumerCache.get(channelName);
 			if (deliveryConsumer != null) {
 				deliveryConsumer.close();
 			}
@@ -147,7 +147,7 @@ public class SubscriptionChannelRegistry {
 		}
 	}
 
-	public synchronized SubscriptionConsumerWithListeners getDeliveryConsumerWithListeners(String theChannelName) {
+	public synchronized SubscriptionResourceDeliveryMessageConsumer getDeliveryConsumerWithListeners(String theChannelName) {
 		return myDeliveryConsumerCache.get(theChannelName);
 	}
 

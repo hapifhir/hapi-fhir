@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionConsumerWithListeners;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionResourceDeliveryMessageConsumer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -115,7 +115,7 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionConsumerWithListeners deliveryConsumerWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(activeSubscription.getChannelName());
+		SubscriptionResourceDeliveryMessageConsumer deliveryConsumerWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(activeSubscription.getChannelName());
 		SubscriptionDeliveringEmailListener subscriber = deliveryConsumerWithListeners.getListenerOfTypeOrNull(SubscriptionDeliveringEmailListener.class);
 		subscriber.setEmailSender(theEmailSender);
 	}
