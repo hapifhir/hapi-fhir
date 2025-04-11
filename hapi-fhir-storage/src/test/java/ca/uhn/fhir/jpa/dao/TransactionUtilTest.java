@@ -1,14 +1,19 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_40;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
@@ -20,8 +25,9 @@ class TransactionUtilTest {
 	private static final String URN_UUID_VALUE = "urn:uuid:52046729-f2e6-42e0-849d-a9303b6113a5";
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
-	@Test
-	public void testParseTransactionResponse_SuccessfulCreate() {
+	@ParameterizedTest
+	@EnumSource(value = FhirVersionEnum.class, names = {"R4", "DSTU2_HL7ORG"})
+	public void testParseTransactionResponse_SuccessfulCreate(FhirVersionEnum theVersion) {
 		Resource requestPatient = new Patient();
 		requestPatient.getMeta().setSource("http://source#123");
 
@@ -40,7 +46,10 @@ class TransactionUtilTest {
 		responseBundle.addEntry().getResponse().setOutcome(oo).setStatus("200 OK").setLocation("http://foo.com/Patient/123");
 
 		// Test
-		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myCtx, requestBundle, responseBundle).getStorageOutcomes();
+		FhirContext context = FhirContext.forCached(theVersion);
+		IBaseBundle requestBundleVersioned = toVersion(requestBundle, theVersion);
+		IBaseBundle responseBundleVersioned = toVersion(responseBundle, theVersion);
+		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(context, requestBundleVersioned, responseBundleVersioned).getStorageOutcomes();
 
 		// Verify
 		assertEquals(1, outcomes.size());
@@ -68,8 +77,7 @@ class TransactionUtilTest {
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl("Patient/123");
 
-		StorageResponseCodeEnum storageOutcome = StorageResponseCodeEnum.FAILURE;
-		OperationOutcome oo = newOperationOutcome(storageOutcome, "Constraint error");
+		OperationOutcome oo = newOperationOutcome(null, "Constraint error");
 
 		Bundle responseBundle = new Bundle();
 		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
@@ -80,7 +88,7 @@ class TransactionUtilTest {
 
 		// Verify
 		assertEquals(1, outcomes.size());
-		assertEquals(storageOutcome, outcomes.get(0).getStorageResponseCode());
+		assertEquals(StorageResponseCodeEnum.FAILURE, outcomes.get(0).getStorageResponseCode());
 		assertEquals("Patient/123", outcomes.get(0).getSourceId().getValue());
 		assertNull(outcomes.get(0).getTargetId());
 		assertEquals("http://source#123", outcomes.get(0).getRequestMetaSource());
@@ -127,12 +135,27 @@ class TransactionUtilTest {
 	@Nonnull
 	private OperationOutcome newOperationOutcome(StorageResponseCodeEnum storageOutcome, String theDiagnostics) {
 		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
-		String detailSystem = StorageResponseCodeEnum.SYSTEM;
-		String detailCode = storageOutcome.getCode();
-		String detailDescription = storageOutcome.getDisplay();
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (storageOutcome != null) {
+			detailSystem = StorageResponseCodeEnum.SYSTEM;
+			detailCode = storageOutcome.getCode();
+			detailDescription = storageOutcome.getDisplay();
+		}
+
 		OperationOutcomeUtil.addIssue(
 			myCtx, oo, "information", theDiagnostics, null, "informational", detailSystem, detailCode, detailDescription);
 		return oo;
+	}
+
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	private static IBaseBundle toVersion(Bundle theBundle, FhirVersionEnum theVersion) {
+		return switch (theVersion) {
+			case R4 -> theBundle;
+			case DSTU2_HL7ORG -> (IBaseBundle) VersionConvertorFactory_10_40.convertResource(theBundle);
+			default -> throw new IllegalArgumentException("Unsupported version " + theVersion);
+		};
 	}
 
 }

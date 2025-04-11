@@ -20,18 +20,21 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -56,6 +59,10 @@ public class TransactionUtil {
 	 * always put into the OperationOutcomes returned by the transaction processor, so
 	 * this method parses these and returns a more machine-processable interpretation.
 	 * <p>
+	 * This method only returns outcome details for standard write operations (create/update/patch)
+	 * and will not include details for other kinds of operations (read/search/etc).
+	 * </p>
+	 * <p>
 	 * This method should only be called for Bundles returned by HAPI FHIR's transaction
 	 * processor, results will have no meaning for any other input.
 	 * </p>
@@ -71,7 +78,10 @@ public class TransactionUtil {
 		FhirTerser terser = theContext.newTerser();
 		List<StorageOutcome> storageOutcomes = new ArrayList<>();
 
-		String bundleMetaSource = terser.getSinglePrimitiveValueOrNull(theTransactionRequestBundle, "meta.source");
+		String bundleMetaSource = null;
+		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			bundleMetaSource = terser.getSinglePrimitiveValueOrNull(theTransactionRequestBundle, "meta.source");
+		}
 
 		List<IBase> requestEntries = terser.getValues(theTransactionRequestBundle, "entry");
 		List<IBase> responseEntries = terser.getValues(theTransactionResponseBundle, "entry");
@@ -79,9 +89,15 @@ public class TransactionUtil {
 			IBase requestEntry = requestEntries.get(i);
 			IBase responseEntry = responseEntries.get(i);
 
+			String requestVerb = terser.getSinglePrimitiveValueOrNull(requestEntry, "request.method");
+			if ("GET".equals(requestVerb)) {
+				continue;
+			}
+
 			String requestMetaSource = null;
 			IBaseResource requestResource = terser.getSingleValueOrNull(requestEntry, "resource", IBaseResource.class);
-			if (requestResource != null) {
+			if (requestResource != null
+					&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 				requestMetaSource = terser.getSinglePrimitiveValueOrNull(requestResource, "meta.source");
 			}
 			if (isBlank(requestMetaSource)) {
@@ -104,10 +120,21 @@ public class TransactionUtil {
 				String statusMessage = terser.getSinglePrimitiveValueOrNull(responseResponse, "status");
 				if (statusMessage != null) {
 					int statusSpaceIdx = statusMessage.indexOf(' ');
-					statusCode = Integer.parseInt(statusMessage.substring(0, statusSpaceIdx));
+					if (statusSpaceIdx > 0) {
+						statusCode = Integer.parseInt(statusMessage.substring(0, statusSpaceIdx));
+					}
 				}
 
-				List<IBase> issues = terser.getValues(responseResponse, "outcome.issue");
+				List<IBase> issues = Collections.emptyList();
+				if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+					issues = terser.getValues(responseResponse, "outcome.issue");
+				} else {
+					IBaseResource responseResource =
+							terser.getSingleValueOrNull(responseEntry, "resource", IBaseResource.class);
+					if (responseResource instanceof IBaseOperationOutcome) {
+						issues = terser.getValues(responseResource, "issue");
+					}
+				}
 				IIdType groupSourceId = null;
 				for (int issueIndex = 0; issueIndex < issues.size(); issueIndex++) {
 					IBase issue = issues.get(issueIndex);
@@ -121,9 +148,19 @@ public class TransactionUtil {
 					}
 
 					String errorMessage = null;
-					String issueCode = terser.getSinglePrimitiveValueOrNull(issue, "code");
-					if (IssueTypeEnum.EXCEPTION.getCode().equals(issueCode)) {
-						errorMessage = terser.getSinglePrimitiveValueOrNull(issue, "diagnostics");
+					String issueSeverityString = terser.getSinglePrimitiveValueOrNull(issue, "severity");
+					if (isNotBlank(issueSeverityString)) {
+						IValidationSupport.IssueSeverity issueSeverity =
+								IValidationSupport.IssueSeverity.fromCode(issueSeverityString);
+						if (issueSeverity != null) {
+							if (issueSeverity.ordinal() <= IValidationSupport.IssueSeverity.ERROR.ordinal()) {
+								errorMessage = terser.getSinglePrimitiveValueOrNull(issue, "diagnostics");
+							}
+						}
+					}
+
+					if (responseCode == null && statusCode >= 400 && statusCode <= 599) {
+						responseCode = StorageResponseCodeEnum.FAILURE;
 					}
 
 					IIdType targetId;
@@ -224,6 +261,10 @@ public class TransactionUtil {
 			myRequestMetaSource = theRequestMetaSource;
 		}
 
+		/**
+		 * @return Returns an error message if the specific action resulted in a failure. Returns {@literal null}
+		 * 	otherwise.
+		 */
 		public String getErrorMessage() {
 			return myErrorMessage;
 		}
@@ -242,14 +283,28 @@ public class TransactionUtil {
 			return myStatusMessage;
 		}
 
+		/**
+		 * @return Contains a code identifying the specific outcome of this operation.
+		 */
 		public StorageResponseCodeEnum getStorageResponseCode() {
 			return myStorageResponseCode;
 		}
 
+		/**
+		 * @return Returns the ID of the resource as it was stored in the repository.
+		 */
 		public IIdType getTargetId() {
 			return myTargetId;
 		}
 
+		/**
+		 * @return Returns the ID of the resource in the request bundle in most cases. This could be an actual
+		 * 	resource ID if the operation was an update by ID, or a placeholder UUID if placeholder IDs were in
+		 * 	use in the bundle. If the {@link #getStorageResponseCode()} for this outcome is
+		 *    {@link StorageResponseCodeEnum#AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE}, the source ID will be the
+		 * 	actual resolved and stored resource ID of the resource containing the reference which caused the
+		 * 	placeholder to be created. The ID returned will be unqualified, meaning it has no base URL.
+		 */
 		public IIdType getSourceId() {
 			return mySourceId;
 		}
