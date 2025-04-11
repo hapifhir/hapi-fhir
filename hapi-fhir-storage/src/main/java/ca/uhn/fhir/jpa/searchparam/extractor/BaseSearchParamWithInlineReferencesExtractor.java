@@ -166,6 +166,7 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {
+					theTransactionDetails.addResolvedResourceId(newId, match);
 					String previousReference = nextRef.getReferenceElement().getValue();
 					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
 				}

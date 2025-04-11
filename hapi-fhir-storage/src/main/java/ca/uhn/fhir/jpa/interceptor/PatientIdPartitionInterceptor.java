@@ -105,6 +105,7 @@ public class PatientIdPartitionInterceptor {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
@@ -179,9 +180,7 @@ public class PatientIdPartitionInterceptor {
 
 				return terser.getValues(theSource, nextPath, IBaseReference.class).stream()
 					.filter(nextValue -> isEmpty(wantType) || wantType.equals(getTypeFromReference(nextValue)));
-
 			});
-
 	}
 
 	private String getTypeFromReference(IBaseReference theReference) {

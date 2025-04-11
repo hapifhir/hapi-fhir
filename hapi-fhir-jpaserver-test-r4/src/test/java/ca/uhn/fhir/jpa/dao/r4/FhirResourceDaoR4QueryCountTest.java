@@ -24,14 +24,12 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
@@ -240,7 +238,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElasticSearch) throws Exception {
+	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElasticSearch) {
 		// setup
 		if (theUseElasticSearch) {
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
@@ -4333,6 +4331,40 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
+	public void testTransactionWithMultiplePreExistingInlineMatchUrls() {
+		// Setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+
+		for (int i = 0; i < 5; i++) {
+			Organization org = new Organization();
+			org.addIdentifier().setSystem("http://system").setValue(Integer.toString(i));
+			myOrganizationDao.create(org, mySrd);
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 5; i++) {
+			Patient patient = new Patient();
+			patient.addGeneralPractitioner(new Reference("Organization?identifier=http://system|" + i));
+			bb.addTransactionCreateEntry(patient);
+		}
+
+		// Test
+		myMemoryCacheService.invalidateAllCaches();
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
 
 	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
