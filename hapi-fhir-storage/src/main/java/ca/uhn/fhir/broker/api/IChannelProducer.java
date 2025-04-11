@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 public interface IChannelProducer<T> {
 
 	/**
-	 * @return the name of the topic or queue that this consumer is consuming from
+	 * @return the name of the topic or queue that this producer is sending messages to
 	 */
 	String getChannelName();
 

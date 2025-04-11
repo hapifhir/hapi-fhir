@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.broker.api;
 
+import ca.uhn.fhir.rest.server.messaging.IMessage;
+
+/**
+ * Instances of this interface are returned by {@link IChannelProducer#send(IMessage)} and can be used to determine whether
+ * the message was successfully sent to the broker.
+ */
 public interface ISendResult {
 	ISendResult FAILURE = () -> false;
 

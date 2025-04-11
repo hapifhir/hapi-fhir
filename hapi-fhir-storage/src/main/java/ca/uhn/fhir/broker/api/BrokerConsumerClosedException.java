@@ -20,7 +20,7 @@
 package ca.uhn.fhir.broker.api;
 
 /**
- * Thrown when attempting to use a closed Consumer
+ * Thrown when attempting to use a closed {@link IChannelConsumer}
  */
 public class BrokerConsumerClosedException extends RuntimeException {
 	public BrokerConsumerClosedException(String theErrorMessage) {

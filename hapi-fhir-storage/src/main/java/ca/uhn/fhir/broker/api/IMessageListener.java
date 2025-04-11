@@ -21,6 +21,11 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
+/**
+ * A message listener processes messages received by a {@link IChannelConsumer}
+ *
+ * @param <T> the type of payload this message listener is expecting to receive
+ */
 public interface IMessageListener<T> {
 	/**
 	 * This method is called whenever a new message is received.
@@ -29,5 +34,8 @@ public interface IMessageListener<T> {
 	 */
 	void handleMessage(IMessage<T> theMessage);
 
+	/**
+	 * @return the type of payload this message listener is expecting to receive
+	 */
 	Class<T> getPayloadType();
 }

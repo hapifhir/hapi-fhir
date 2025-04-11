@@ -40,8 +40,14 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	boolean isClosed();
 
+	/**
+	 * @return the type of messages that will be delivered to this consumer
+	 */
 	Class<? extends IMessage<T>> getMessageType();
 
+	/**
+	 * @return the {@link IMessageListener} this consumer was created with.
+	 */
 	IMessageListener<T> getMessageListener();
 
 	/*

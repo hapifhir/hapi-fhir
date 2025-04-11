@@ -20,7 +20,7 @@
 package ca.uhn.fhir.broker.api;
 
 /**
- * Thrown when attempting to use a closed Listener
+ * Thrown when attempting to use a closed {@link IMessageListener}
  */
 public class BrokerListenerClosedException extends RuntimeException {
 	public BrokerListenerClosedException(String theErrorMessage) {

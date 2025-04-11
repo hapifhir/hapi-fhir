@@ -21,11 +21,11 @@ package ca.uhn.fhir.broker.api;
 
 public interface IChannelNamer {
 	/**
-	 * Channel factories call this service to qualify the channel name before sending it to the channel factory.
+	 * Broker clients call this service to qualify the channel name before calling the broker.
 	 *
 	 * @param theNameComponent   the component of the queue or topic name
 	 * @param theChannelSettings
-	 * @return the fully qualified the channel factory will use to name the queue or topic
+	 * @return the fully qualified the channel the client will use to name the queue or topic
 	 */
 	String getChannelName(String theNameComponent, IChannelSettings theChannelSettings);
 }

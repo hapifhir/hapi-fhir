@@ -21,18 +21,22 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
+/**
+ * IBrokerClient implementations communicate with Message Broker servers to create message producers and consumers.
+ */
 public interface IBrokerClient {
 	/**
-	 * Create a channel that is used to receive messages from the queue.
+	 * Create a consumer that is used to receive messages from the channel.
 	 *
 	 * <p>
 	 * Implementations can choose to return the same object for multiple invocations of this method
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
 	 *
-	 * @param theChannelName             The actual underlying queue name
-	 * @param theMessageType             The object type that will be placed on this queue. Objects will usually be Jackson-annotated structures.
-	 * @param theChannelConsumerSettings Contains the configuration for subscribers.
+	 * @param theChannelName             The actual underlying channel name
+	 * @param theMessageType             The object type that will be placed on this chanel. Objects will usually be Jackson-annotated structures.
+	 * @param theMessageListener		 The message handler that will be called for each arriving message. If more than one message listeners is required for a single consumer, {@link ca.uhn.fhir.broker.impl.MultiplexingListener} should be used for the listener.
+	 * @param theChannelConsumerSettings Contains the configuration for consumers.
 	 */
 	<T> IChannelConsumer<T> getOrCreateConsumer(
 			String theChannelName,
@@ -41,15 +45,15 @@ public interface IBrokerClient {
 			ChannelConsumerSettings theChannelConsumerSettings);
 
 	/**
-	 * Create a channel that is used to send messages to the queue.
+	 * Create a producer that is used to send messages to the channel.
 	 *
 	 * <p>
 	 * Implementations can choose to return the same object for multiple invocations of this method
 	 * when invoked with the same {@literal theChannelName} if they need to, or they can create a new instance.
 	 * </p>
 	 *
-	 * @param theChannelName             The actual underlying queue name
-	 * @param theMessageType             The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
+	 * @param theChannelName             The actual underlying channel name
+	 * @param theMessageType             The object type that will be placed on this channel. Objects will be Jackson-annotated structures.
 	 * @param theChannelProducerSettings Contains the configuration for senders.
 	 */
 	<T> IChannelProducer<T> getOrCreateProducer(
@@ -58,7 +62,7 @@ public interface IBrokerClient {
 			ChannelProducerSettings theChannelProducerSettings);
 
 	/**
-	 * @return the IChannelNamer used by this factory
+	 * @return the IChannelNamer used by this broker client.
 	 */
 	IChannelNamer getChannelNamer();
 }

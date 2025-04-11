@@ -5,6 +5,10 @@ import org.springframework.messaging.support.GenericMessage;
 
 import java.util.Map;
 
+/**
+ * A RawMessage is used to represent messages received from outside the system. The payload of these messages
+ * is available as a string.
+ */
 public class RawMessage extends GenericMessage<String> implements IMessage<String> {
 	public RawMessage(String thePayload) {
 		super(thePayload);
