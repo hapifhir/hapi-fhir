@@ -4,6 +4,4 @@ issue: 6853
 title: "A `Map<String, Object>` called `userData` has been added to the `JobInstance` model class. User data
 that is added to the `JobInstance` via the `STORAGE_PRESTORAGE_BATCH_JOB_CREATE` pointcut will be serialized 
 and persisted as a new attribute of the `Batch2JobInstanceEntity` called `myUserDataJson`. 
-This data will be deserialized and available on the `JobInstance` parameters of the Batch2 `WorkChunk` pointcuts 
-(`BATCH2_CHUNK_PRE_PROCESSED`, `BATCH2_CHUNK_PROCESSING_COMPLETED`, `BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY`, 
-`BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION`)."
+This data will be deserialized and available on the `JobInstance` parameter of the `BATCH2_CHUNK_PROCESS_FILTER` pointcut."
