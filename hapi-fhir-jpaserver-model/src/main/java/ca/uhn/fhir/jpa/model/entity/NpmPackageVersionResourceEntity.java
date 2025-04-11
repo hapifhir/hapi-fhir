@@ -154,6 +154,14 @@ public class NpmPackageVersionResourceEntity {
 		return myFhirVersionId;
 	}
 
+	public String getPackageId() {
+		return myPackageVersion.getPackageId();
+	}
+
+	public String getPackageVersion() {
+		return myPackageVersion.getVersionId();
+	}
+
 	public void setFhirVersionId(String theFhirVersionId) {
 		myFhirVersionId = theFhirVersionId;
 	}
