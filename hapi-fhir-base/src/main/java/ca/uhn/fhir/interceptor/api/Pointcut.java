@@ -3156,7 +3156,9 @@ public enum Pointcut implements IPointcut {
 	 * <p>Hooks should return <code>IInterceptorBroadcaster.IInterceptorFilterHook.class</code></p>
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
-		IInterceptorBroadcaster.IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+			IInterceptorBroadcaster.IInterceptorFilterHook.class,
+			"ca.uhn.fhir.batch2.model.JobInstance",
+			"ca.uhn.fhir.batch2.model.WorkChunk"),
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.

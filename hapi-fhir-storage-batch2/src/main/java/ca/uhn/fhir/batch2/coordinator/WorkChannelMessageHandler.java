@@ -262,15 +262,13 @@ class WorkChannelMessageHandler implements MessageHandler {
 					// all the setup is happy and committed.  Do the work.
 					process -> {
 						HookParams params = new HookParams()
-							.add(JobInstance.class, process.myJobInstance)
-							.add(WorkChunk.class, process.myWorkChunk);
+								.add(JobInstance.class, process.myJobInstance)
+								.add(WorkChunk.class, process.myWorkChunk);
 
 						Runnable runnable = () -> process.myStepExector.executeStep();
 
 						myInterceptorBroadcaster.runWithFilterHooks(
-							Pointcut.BATCH2_CHUNK_PROCESS_FILTER,
-							params,
-							runnable);
+								Pointcut.BATCH2_CHUNK_PROCESS_FILTER, params, runnable);
 					},
 					() -> {
 						// discard the chunk
