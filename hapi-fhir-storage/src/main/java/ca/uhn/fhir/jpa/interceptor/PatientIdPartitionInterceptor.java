@@ -37,8 +37,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -48,8 +48,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -109,20 +109,27 @@ public class PatientIdPartitionInterceptor {
 			if (oCompartmentIdentity.isPresent()) {
 				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
 			} else {
-				// HACK: enable synthea bundles to sneak through.
-				// If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
-				// and a reference points to the Patient which has already been processed and assigned a partition.
-				FhirTerser fhirTerser = myFhirContext.newTerser();
-
-				return fhirTerser
-						.getCompartmentReferencesForResource("Patient", theResource, null)
-						.flatMap(nextReference -> Stream.ofNullable(nextReference.getResource()))
-						.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())
-						.findFirst()
+				return getPartitionViaPartiallyProcessedReference(theResource)
 						// or give up and fail
 						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
 			}
 		}
+	}
+
+	/**
+	 * HACK: enable synthea bundles to sneak through with a server-assigned UUID.
+	 * If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
+	 * and a reference points to the Patient which has already been processed and assigned a partition.
+	 */
+	@Nonnull
+	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(IBaseResource theResource) {
+		return myFhirContext
+				.newTerser()
+				.getCompartmentReferencesForResource("Patient", theResource, null)
+				.map(IBaseReference::getResource)
+				.filter(Objects::nonNull)
+				.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())
+				.findFirst();
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)

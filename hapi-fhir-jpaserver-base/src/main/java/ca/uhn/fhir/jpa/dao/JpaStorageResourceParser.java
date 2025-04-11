@@ -256,7 +256,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		return retVal;
 	}
 
-	public <R extends IBaseResource> void populateResourcePartitionInformation(
+	private <R extends IBaseResource> void populateResourcePartitionInformation(
 			IBaseResourceEntity theEntity, R retVal) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			PartitionablePartitionId partitionId = theEntity.getPartitionId();
