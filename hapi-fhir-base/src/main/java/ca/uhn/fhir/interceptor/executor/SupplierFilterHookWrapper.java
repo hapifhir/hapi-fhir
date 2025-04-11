@@ -26,7 +26,8 @@ public class SupplierFilterHookWrapper<T> implements Supplier<T> {
 		T result = myAdvice.apply(trackingSupplierWrapper);
 
 		if (!trackingSupplierWrapper.wasExecuted()) {
-			throw new IllegalStateException("Supplier was not executed in filter produced by " + myMessageSupplier.get());
+			throw new IllegalStateException(
+					"Supplier was not executed in filter produced by " + myMessageSupplier.get());
 		}
 
 		return result;

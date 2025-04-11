@@ -15,7 +15,8 @@ public class WorkChunkProcessingInterceptor {
 			try {
 				// Perform pre-processing logic before the work chunk is processed
 
-				// Process the work chunk (Note: If the supplier is not executed, an IllegalStateException will be thrown)
+				// Process the work chunk (Note: If the supplier is not executed, an IllegalStateException will be
+				// thrown)
 				return theSupplier.get();
 			} catch (Exception e) {
 				// Handle any exceptions that occur during work chunk processing
