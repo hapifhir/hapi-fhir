@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -612,21 +612,21 @@ public class InterceptorServiceTest {
 
 	@Nested
 	class FilterHooks {
-		List<String> myCallLog = new ArrayList<>();
+		List<String> mySupplierLog = new ArrayList<>();
 		HookParams myParams = new HookParams("1");
 		MySupplier mySupplier = new MySupplier();
 
 		@Test
-		void testNoHooks_callsRunnableNormally() {
+		void testNoHooks_callsSupplierNormally() {
 		    // given no interceptors registered
 
 		    // when
 			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, ()->{
-				myCallLog.add("I run!");
+				mySupplierLog.add("I run!");
 			});
 
 		    // then
-			assertThat(myCallLog).containsExactly("I run!");
+			assertThat(mySupplierLog).containsExactly("I run!");
 		}
 
 
@@ -638,11 +638,11 @@ public class InterceptorServiceTest {
 			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
 
 			// then
-			assertThat(myCallLog).containsExactly("MyRunnable runs!");
+			assertThat(mySupplierLog).containsExactly("MySupplier runs!");
 			assertThat(result).isEqualTo(42);
 		}
 		@Test
-		void testOneHook_calledAroundRunnable() {
+		void testOneHook_calledAroundSupplier() {
 			// given no interceptors registered
 			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
 
@@ -651,15 +651,15 @@ public class InterceptorServiceTest {
 
 			// then
 			assertThat(result).isEqualTo(42);
-			assertThat(myCallLog).containsExactly(
+			assertThat(mySupplierLog).containsExactly(
 				"filter1-before",
-				"MyRunnable runs!",
+				"MySupplier runs!",
 				"filter1-after"
 			);
 		}
 
 		@Test
-		void testTwoHooks_calledInOrderAroundRunnable() {
+		void testTwoHooks_calledInOrderAroundSupplier() {
 			// given no interceptors registered
 			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
 			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter2"));
@@ -669,10 +669,10 @@ public class InterceptorServiceTest {
 
 			// then
 			assertThat(result).isEqualTo(42);
-			assertThat(myCallLog).containsExactly(
+			assertThat(mySupplierLog).containsExactly(
 				"filter1-before",
 				"filter2-before",
-				"MyRunnable runs!",
+				"MySupplier runs!",
 				"filter2-after",
 				"filter1-after"
 			);
@@ -680,15 +680,15 @@ public class InterceptorServiceTest {
 
 
 		@Test
-		void testFilterHookWhichDoesNotCallRunnable_throwsError() {
+		void testFilterHookWhichDoesNotCallSupplier_throwsError() {
 			// given no interceptors registered
 			myInterceptorService.registerInterceptor(new Object() {
 				@Hook(Pointcut.TEST_FILTER)
-				public IInterceptorBroadcaster.IInterceptorFilterHook<?> testFilter(HookParams theParams) {
-					// return a filter that does not call the runnable
-					return (runnable)->{
-						myCallLog.add("bad-boy ran but didn't call runnable");
-						// runnable.get(); // not called
+				public IInterceptorFilterHook<?> testFilter(HookParams theParams) {
+					// return a filter that does not call the supplier
+					return (supplier)->{
+						mySupplierLog.add("bad-boy ran but didn't call supplier");
+						// supplier.get(); // not called
 						return null;
 					};
 				}
@@ -697,17 +697,17 @@ public class InterceptorServiceTest {
 
 			// when
 			assertThatThrownBy(() -> myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier))
-				.hasMessageContaining("Runnable was not run in filter")
+				.hasMessageContaining("Supplier was not executed in filter")
 				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
 
-			assertThat(myCallLog).containsExactly(
-				"bad-boy ran but didn't call runnable"
+			assertThat(mySupplierLog).containsExactly(
+				"bad-boy ran but didn't call supplier"
 			);
 		}
 
 		class MySupplier implements Supplier<Integer> {
 			public Integer get() {
-				myCallLog.add("MyRunnable runs!");
+				mySupplierLog.add("MySupplier runs!");
 				return 42;
 			}
 		}
@@ -720,18 +720,18 @@ public class InterceptorServiceTest {
 			}
 
 			@Hook(Pointcut.TEST_FILTER)
-			public IInterceptorBroadcaster.IInterceptorFilterHook<?> testFilter(HookParams theParams) {
+			public IInterceptorFilterHook<?> testFilter(String theParam) {
 				return new MyFilter<>();
 			}
 
-			private class MyFilter<T> implements IInterceptorBroadcaster.IInterceptorFilterHook<T> {
+			private class MyFilter<T> implements IInterceptorFilterHook<T> {
 				@Override
-				public T apply(Supplier<T> theRunnable) {
-					myCallLog.add(myName + "-before");
+				public T apply(Supplier<T> theSupplier) {
+					mySupplierLog.add(myName + "-before");
 					try {
-						return theRunnable.get();
+						return theSupplier.get();
 					} finally {
-						myCallLog.add(myName + "-after");
+						mySupplierLog.add(myName + "-after");
 					}
 				}
 			}

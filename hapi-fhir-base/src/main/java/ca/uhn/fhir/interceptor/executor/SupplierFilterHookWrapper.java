@@ -21,33 +21,33 @@ public class SupplierFilterHookWrapper<T> implements Supplier<T> {
 
 	@Override
 	public T get() {
-		TrackingRunnableWrapper<T> trackingRunnableWrapper = new TrackingRunnableWrapper<>(myTarget);
+		TrackingSupplierWrapper<T> trackingSupplierWrapper = new TrackingSupplierWrapper<>(myTarget);
 
-		T result = myAdvice.apply(trackingRunnableWrapper);
+		T result = myAdvice.apply(trackingSupplierWrapper);
 
-		if (!trackingRunnableWrapper.wasRun()) {
-			throw new IllegalStateException("Runnable was not run in filter produced by " + myMessageSupplier.get());
+		if (!trackingSupplierWrapper.wasExecuted()) {
+			throw new IllegalStateException("Supplier was not executed in filter produced by " + myMessageSupplier.get());
 		}
 
 		return result;
 	}
 
-	static class TrackingRunnableWrapper<T> implements Supplier<T> {
+	static class TrackingSupplierWrapper<T> implements Supplier<T> {
 		private final Supplier<T> myTarget;
-		private boolean myRunFlag = false;
+		private boolean myExecutedFlag = false;
 
-		TrackingRunnableWrapper(Supplier<T> theTarget) {
+		TrackingSupplierWrapper(Supplier<T> theTarget) {
 			myTarget = theTarget;
 		}
 
 		@Override
 		public T get() {
-			myRunFlag = true;
+			myExecutedFlag = true;
 			return myTarget.get();
 		}
 
-		public boolean wasRun() {
-			return myRunFlag;
+		public boolean wasExecuted() {
+			return myExecutedFlag;
 		}
 	}
 }
