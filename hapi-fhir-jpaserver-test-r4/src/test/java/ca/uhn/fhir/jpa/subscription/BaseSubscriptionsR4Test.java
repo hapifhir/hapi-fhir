@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -120,13 +122,13 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
 		}
 		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
-			processingChannel.addInterceptor(myCountingInterceptor);
+		if (matchingChannel != null) {
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 

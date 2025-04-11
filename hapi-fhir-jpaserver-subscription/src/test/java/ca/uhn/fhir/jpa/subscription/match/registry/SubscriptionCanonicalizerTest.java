@@ -16,6 +16,7 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -23,8 +24,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -190,17 +189,17 @@ class SubscriptionCanonicalizerTest {
 		}
 
 		@Override
-		public boolean isDefaultPartition(@NotNull RequestPartitionId theRequestPartitionId) {
+		public boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return  theRequestPartitionId.getPartitionIds().get(0).equals(NON_NULL_DEFAULT_PARTITION_ID);
 		}
 
 		@Override
-		public boolean hasDefaultPartitionId(@NotNull RequestPartitionId theRequestPartitionId) {
+		public boolean hasDefaultPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return theRequestPartitionId.getPartitionIds().stream().anyMatch(part -> part.equals(NON_NULL_DEFAULT_PARTITION_ID));
 		}
 
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @NotNull ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			return null;
 		}
 
@@ -210,12 +209,12 @@ class SubscriptionCanonicalizerTest {
 		}
 
 		@Override
-		public @NotNull RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @NotNull IBaseResource theResource, @NotNull String theResourceType) {
+		public @Nonnull RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return null;
 		}
 
 		@Override
-		public @NotNull Set<Integer> toReadPartitions(@NotNull RequestPartitionId theRequestPartitionId) {
+		public @Nonnull Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
 			return Set.of();
 		}
 

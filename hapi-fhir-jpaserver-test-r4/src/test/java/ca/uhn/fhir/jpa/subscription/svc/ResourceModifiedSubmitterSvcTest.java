@@ -3,11 +3,12 @@ package ca.uhn.fhir.jpa.subscription.svc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -57,7 +58,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
 	@Mock
-	IChannelProducer myChannelProducer;
+	IChannelProducer<ResourceModifiedMessage> myChannelProducer;
 
 	@Mock
 	ListAppender<ILoggingEvent> myListAppender;
@@ -69,7 +70,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
 		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
-		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
+		lenient().when(mySubscriptionChannelFactory.newMatchingProducer(anyString(), any())).thenAnswer(t -> myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
@@ -234,7 +235,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	}
 
 	private ChannelProducerSettings getCapturedChannelProducerSettings(){
-		verify(mySubscriptionChannelFactory).newMatchingSendingChannel(anyString(), myArgumentCaptor.capture());
+		verify(mySubscriptionChannelFactory).newMatchingProducer(anyString(), myArgumentCaptor.capture());
 		return myArgumentCaptor.getValue();
 	}
 
