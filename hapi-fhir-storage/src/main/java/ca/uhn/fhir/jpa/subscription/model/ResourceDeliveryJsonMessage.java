@@ -20,12 +20,13 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
+import ca.uhn.fhir.rest.server.messaging.json.ICanNullPayload;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
+public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> implements ICanNullPayload {
 	private static final ObjectMapper ourObjectMapper =
 			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
@@ -66,5 +67,12 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	public String asJson() throws JsonProcessingException {
 		return ourObjectMapper.writeValueAsString(this);
+	}
+
+	@Override
+	public void setPayloadToNull() {
+		if (myPayload != null) {
+			myPayload.setPayloadToNull();
+		}
 	}
 }
