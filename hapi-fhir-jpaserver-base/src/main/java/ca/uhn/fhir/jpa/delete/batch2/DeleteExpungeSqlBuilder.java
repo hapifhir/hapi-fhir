@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -163,18 +164,23 @@ public class DeleteExpungeSqlBuilder {
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the
 		// rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
-			List<ResourceLink> conflictResourceLinks =
-					myResourceLinkDao.findWithTargetPidIn((theSomeTargetPids)).stream()
-							// Filter out resource links for which we are planning to delete the source.
-							// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only
-							// want
-							// to consider a link to be a conflict if the source of that link is not in
-							// theAllTargetPids.
-							.filter(link -> !(theAllTargetPids).contains(link.getSourceResourcePk()))
-							.collect(Collectors.toList());
+			// Chunker is used because theSomeTargetPids can contain list sizes over 100,000, a number that some
+			// databases can't handle as a query parameter count in an IN clause of a query.
+			QueryChunker.chunk(theSomeTargetPids, targetPidsChunk -> {
+				List<ResourceLink> conflictResourceLinks =
+						myResourceLinkDao.findWithTargetPidIn((targetPidsChunk)).stream()
+								// Filter out resource links for which we are planning to delete the source.
+								// theAllTargetPids contains a list of all the pids we are planning to delete.  So we
+								// only
+								// want
+								// to consider a link to be a conflict if the source of that link is not in
+								// theAllTargetPids.
+								.filter(link -> !(theAllTargetPids).contains(link.getSourceResourcePk()))
+								.collect(Collectors.toList());
 
-			// We do this in two steps to avoid lock contention on this synchronized list
-			theConflictResourceLinks.addAll(conflictResourceLinks);
+				// We do this in two steps to avoid lock contention on this synchronized list
+				theConflictResourceLinks.addAll(conflictResourceLinks);
+			});
 		}
 	}
 

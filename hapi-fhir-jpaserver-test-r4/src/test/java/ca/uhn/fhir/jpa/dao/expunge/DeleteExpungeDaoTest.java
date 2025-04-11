@@ -195,6 +195,77 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 //		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
+	/**
+	 * This tests that the SQL statement generated in DeleteExpungeSqlBuilder.findResourceLinksWithTargetPidIn()
+	 * doesn't throw an error due to too many query parameters in the IN clause.
+	 */
+	@Test
+	public void testDeleteExpungeWithCascadingDeletesWithLargeDataSet() {
+		//Given: A database with 5 patients and 100s of other resources referencing the 5 patients.
+		myStorageSettings.setExpungeBatchSize(1000);
+		int numOfRecords = 2505;
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType p2 = createPatient(withActiveTrue());
+		IIdType p3 = createPatient(withActiveTrue());
+		IIdType p4 = createPatient(withActiveTrue());
+		IIdType p5 = createPatient(withActiveTrue());
+		for (int i = 0; i < numOfRecords; ++i) {
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+		}
+
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"}
+		));
+
+		//When: A delete expunge operation is initiated with cascading deletes
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+
+		//validate: Records are deleted
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		myBatch2JobHelper.awaitJobCompletion(jobId, 120);
+		assertEquals(100205, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
+	}
+
 	@Test
 	public void testDeleteExpungeWithDefaultExpungeBatchSize() {
 		// setup
