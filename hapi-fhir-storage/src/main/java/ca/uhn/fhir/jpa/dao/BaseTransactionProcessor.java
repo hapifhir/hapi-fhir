@@ -74,6 +74,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
@@ -102,6 +103,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -141,6 +143,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -154,6 +157,7 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
+
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	private static final String POST = "POST";
 	private static final String PUT = "PUT";
@@ -720,6 +724,8 @@ public abstract class BaseTransactionProcessor {
 							Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
 				}
 
+				overrideRequestPartitionHeaderFromEntryExtensionIfExists(nextReqEntry, theRequestDetails);
+
 				Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
 				try {
 					BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
@@ -742,6 +748,19 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 			theTransactionStopWatch.endCurrentTask();
+		}
+	}
+
+	private void overrideRequestPartitionHeaderFromEntryExtensionIfExists(
+			IBase theReqEntry, RequestDetails theRequestDetails) {
+		IBaseExtension<?, ?> requestExtension =
+				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
+		if (requestExtension != null) {
+			if (requestExtension.getValue() instanceof IPrimitiveType<?>) {
+				IPrimitiveType<?> valueAsPrimitiveType = (IPrimitiveType<?>) requestExtension.getValue();
+				String value = valueAsPrimitiveType.getValueAsString();
+				theRequestDetails.addHeader(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, value);
+			}
 		}
 	}
 

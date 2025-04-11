@@ -206,6 +206,8 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_REPLACED_BY = "http://hapifhir.io/fhir/StructureDefinition/replaced-by";
 
+	public static final String EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS =
+			"http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
 	/**
 	 * Non instantiable
 	 */

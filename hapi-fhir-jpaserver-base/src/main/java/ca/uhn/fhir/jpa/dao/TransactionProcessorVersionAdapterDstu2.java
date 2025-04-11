@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -172,5 +173,11 @@ public class TransactionProcessorVersionAdapterDstu2
 	@Override
 	public void setRequestUrl(Bundle.Entry theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
+	}
+
+	@Override
+	public IBaseExtension<?, ?> getEntryRequestExtensionByUrl(Bundle.Entry theEntry, String theUrl) {
+		// FIXME EMRE: what to use here?
+		return null; // theEntry.getRequest().getExtensionByUrl(theUrl);
 	}
 }
