@@ -35,6 +35,9 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -390,17 +393,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertThat(resourcesByType.get("Practitioner")).containsExactly(-1, -1, -1);
 	}
 
-	// fixme
-//	@Test
-//	void testLoadBundle_referencesExistingResource() {
-//	    // given
-//		createOrganization(withIdentifier("https://example.com/ns", "123"));
-//
-//	    // when
-//	    // then
-//	    fail();
-//	}
-
 	@Test
 	public void testTransaction_SystemRequestDetails() throws IOException {
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
@@ -640,7 +632,45 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		// when
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
 
+	}
+
+	@Test
+	void testLoadBundle_resourceInCompartmentReferencesExistingNonCompartmentResource() {
+		// given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		IParser parser = myFhirContext.newJsonParser();
+
+		// an organization
+		IIdType orgId = createOrganization(withIdentifier("https://example.com/ns", "123"));
+
+		// and a bundle with a Patient and linked Encounter
+		Patient patient = buildResource(
+			Patient.class,
+			withIdentifier("https://example.com/ns", "456"));
+		Encounter encounter = buildResource(
+			Encounter.class,
+			withSubject("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"),
+			// that refers to the existing organization
+			withReference("serviceProvider", orgId)
+		);
+
+		Bundle bundle = new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(patient, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea").andThen()
+			.addTransactionCreateEntry(encounter).andThen()
+			.getBundleTyped();
+
+		// when processed
+		// Warning: this is weird.
+		// It works going through the server, but not through the dao without this parser dance.
+		// The parser is stitching the resources into the references during parsing, and we need this to allow a server-assigned UUID.
+		bundle = parser.parseResource(Bundle.class, parser.encodeResourceToString(bundle));
+		Bundle outcomes = mySystemDao.transaction(mySrd, bundle);
+
 		// then
+		String patientId = outcomes.getEntry().get(0).getId();
+		//
+		Bundle search = myServer.getFhirClient().search().forResource("Encounter").where(Encounter.PATIENT.hasId(patientId)).and(Encounter.SERVICE_PROVIDER.hasId(orgId)).returnBundle(Bundle.class).execute();
+		assertEquals(1, search.getEntry().size(), "we find the Encounter linked to the organization and the patient");
 	}
 
 }
