@@ -117,9 +117,9 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		}
 	}
 	/**
-	 * A filter hook is a hook that wraps a runnable and allows the interceptor to
-	 * run code before or after the runnable before it is executed.
-	 * Filter hooks must call the runnable passed in themselves, just like Java Servlet Filters.
+	 * A filter hook is a hook that wraps a supplier and allows the interceptor to
+	 * run code before or after the supplied function when it is executed.
+	 * Filter hooks must call the supplier passed in themselves, similar to Java Servlet Filters.
 	 *
 	 * @see IInterceptorBroadcaster#runWithFilterHooks(IPointcut, HookParams, Supplier)
 	 */

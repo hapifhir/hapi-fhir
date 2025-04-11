@@ -153,9 +153,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add USER_DATA_JSON column to BT2_JOB_INSTANCE
 		{
 			version.onTable("BT2_JOB_INSTANCE")
-				.addColumn("20250408.1", "USER_DATA_JSON")
-				.nullable()
-				.type(ColumnTypeEnum.TEXT);
+					.addColumn("20250408.1", "USER_DATA_JSON")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
 		}
 	}
 

@@ -36,6 +36,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
+
 /**
  * Value for {@link Hook#value()}
  * <p>
@@ -3148,17 +3150,24 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Batch2 Hook:</b>
-	 * <p>FIXME - docs</p>
+	 * <p>This is a filter hook that can be used around workchunk processing.
+	 * It is expected that implementers return an <code>IInterceptorFilterHook</code> that invokes the supplier
+	 * and includes the logic that should be executed:</p>
+	 * <ol>
+	 *     <li>Before a workchunk has been processed</li>
+	 *     <li>If an error occurs during processing</li>
+	 *     <li>After the workchunk has been processed</li>
+	 * </ol>
+	 * <p>Parameters:</p>
 	 * <ul>
 	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
 	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
 	 *  </ul>
-	 * <p>Hooks should return <code>IInterceptorBroadcaster.IInterceptorFilterHook.class</code></p>
+	 * <p>Hooks should return an {@link ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook}</p>
+	 * <p>For more details see <a href="http://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html">Filter Hook Interceptors</a></p>
 	 */
 	BATCH2_CHUNK_PROCESS_FILTER(
-			IInterceptorBroadcaster.IInterceptorFilterHook.class,
-			"ca.uhn.fhir.batch2.model.JobInstance",
-			"ca.uhn.fhir.batch2.model.WorkChunk"),
+			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
@@ -3173,7 +3182,7 @@ public enum Pointcut implements IPointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
-	TEST_FILTER(IInterceptorBroadcaster.IInterceptorFilterHook.class, String.class.getName()),
+	TEST_FILTER(IInterceptorFilterHook.class, String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
