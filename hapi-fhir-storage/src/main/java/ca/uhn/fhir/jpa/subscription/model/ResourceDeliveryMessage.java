@@ -117,6 +117,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return myPayloadId;
 	}
 
+	@Override
 	public void setPayloadId(IIdType thePayloadId) {
 		myPayloadId = null;
 		if (thePayloadId != null) {

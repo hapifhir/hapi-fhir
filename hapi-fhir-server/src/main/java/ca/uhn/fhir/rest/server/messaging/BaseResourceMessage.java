@@ -49,9 +49,6 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@JsonProperty("mediaType")
 	private String myMediaType;
 
-	/**
-	 * This is used by any message going to kafka for topic partition selection purposes.
-	 */
 	@JsonProperty("messageKey")
 	private String myPayloadMessageKey;
 

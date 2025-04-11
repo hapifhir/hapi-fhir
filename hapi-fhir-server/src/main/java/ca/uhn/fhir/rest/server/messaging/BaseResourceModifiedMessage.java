@@ -117,6 +117,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	/**
 	 * @since 5.6.0
 	 */
+	@Override
 	public void setPayloadId(IIdType thePayloadId) {
 		myPayloadId = null;
 		if (thePayloadId != null) {
