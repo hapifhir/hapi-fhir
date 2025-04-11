@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6836
+title: "CDS Hooks services can now specify how to handle prefetch failures using the `failureMode` property on the 
+`CDSServicePrefetch` annotation. The failure mode can be set to `FAIL` (default), `OMIT` or `OPERATION_OUTCOME. This
+applies in cases where an auto-prefetch request fails, or the CDS Client sends an OperationOutcome as a prefetch 
+resource, which is allowed by the [CDS Hooks version 2.0](https://cds-hooks.hl7.org/2.0/) specification."

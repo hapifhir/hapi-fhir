@@ -45,4 +45,9 @@ public @interface CdsServicePrefetch {
 	 * The strategy used for this query, defaults to the service-wide strategy
 	 */
 	CdsResolutionStrategyEnum source() default CdsResolutionStrategyEnum.NONE;
+
+	/**
+	 * How to handle prefetch failures, applies to both auto-prefetch failures or an OperationOutcome sent by the CDSClient as a prefetch resource.
+	 */
+	CdsPrefetchFailureMode failureMode() default CdsPrefetchFailureMode.FAIL;
 }
