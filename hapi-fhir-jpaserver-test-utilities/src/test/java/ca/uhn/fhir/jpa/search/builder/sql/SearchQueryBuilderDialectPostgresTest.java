@@ -35,6 +35,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 
 		DatePredicateBuilder datePredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(null);
 		datePredicateBuilder.setStorageSettingsForUnitTest(storageSettings);
+		datePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 
 		Condition datePredicate = datePredicateBuilder.createPredicateDateWithoutIdentityPredicate(new DateParam("2022"), SearchFilterParser.CompareOperation.eq);
 		Condition comboPredicate = datePredicateBuilder.combineWithHashIdentityPredicate("Observation", "date", datePredicate);

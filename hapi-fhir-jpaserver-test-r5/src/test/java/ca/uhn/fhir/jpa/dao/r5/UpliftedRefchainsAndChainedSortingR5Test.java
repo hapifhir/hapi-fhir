@@ -3,6 +3,10 @@ package ca.uhn.fhir.jpa.dao.r5;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -34,12 +38,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -91,16 +102,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		createEncounter(ENCOUNTER_E2, PATIENT_P2);
 
 		// Verify
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -118,17 +124,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		createEncounter(ENCOUNTER_E2, PATIENT_P2);
 
 		// Verify
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).isEmpty();
-		});
+		logAllStringIndexes();
+		List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+		assertThat(stringsSpParams).as(stringsSpParams.toString()).isEmpty();
 	}
 
 	/**
@@ -170,16 +168,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		myBundleDao.create(bundle, mySrd);
 
 		// Verify
-		runInTransaction(() -> {
-			logAllTokenIndexes();
-
-			List<String> params = myResourceIndexedSearchParamTokenDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("composition.type http://foo|bar");
+		logAllTokenIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> tokenSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamTokenDao);
+			assertThat(tokenSpParams).as(tokenSpParams.toString())
+				.containsExactlyInAnyOrder("composition.type http://foo|bar");
 		});
 	}
 
@@ -252,17 +245,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
-
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -297,15 +284,10 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Verify correct indexes are written
 		logAllStringIndexes();
-
-		runInTransaction(() -> {
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -338,17 +320,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
-
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -383,17 +359,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
-
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -427,17 +397,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
-
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -477,17 +441,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(9, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
-
-		runInTransaction(() -> {
-			logAllStringIndexes();
-
-			List<String> params = myResourceIndexedSearchParamStringDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getValueExact())
-				.toList();
-			assertThat(params).as(params.toString()).containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
+		logAllStringIndexes();
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+			List<String> stringsSpParams = getIndexedSearchParameters(myResourceIndexedSearchParamStringDao);
+			assertThat(stringsSpParams).as(stringsSpParams.toString())
+				.containsExactlyInAnyOrder("subject.name Homer", "subject.name Simpson", "subject.name Marge", "subject.name Simpson");
 		});
 	}
 
@@ -1112,5 +1070,52 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		return p2;
 	}
 
+	protected List<String> getIndexedSearchParameters(JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theJpaRepository) {
+		return runInTransaction(() -> theJpaRepository.findAll().stream()
+			.filter(t -> t.getParamName().contains("."))
+			.map(UpliftedRefchainsAndChainedSortingR5Test::mapIndexedSearchParamToString)
+			.filter(Objects::nonNull)
+			.toList());
+	}
+
+	private static String mapIndexedSearchParamToString(BaseResourceIndexedSearchParam theResourceIndexedSearchParam) {
+		if (theResourceIndexedSearchParam instanceof ResourceIndexedSearchParamString stringParam) {
+			return stringParam.getParamName() + " " + stringParam.getValueExact();
+		} else if (theResourceIndexedSearchParam instanceof ResourceIndexedSearchParamToken tokenParam) {
+			return tokenParam.getParamName() + " " + tokenParam.getSystem() + "|" + tokenParam.getValue();
+		} else {
+			return null;
+		}
+	}
+
+	protected List<String> getIndexedSearchParametersBySpIdentity(JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theJpaRepository) {
+		return runInTransaction(() -> {
+			Map<Long, IndexedSearchParamIdentity> searchParamIndexIdentities = myResourceIndexedSearchParamIdentityDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.collect(Collectors.toMap(IndexedSearchParamIdentity::getHashIdentity, t -> t));
+			return theJpaRepository
+				.findAll()
+				.stream()
+				.filter(t -> searchParamIndexIdentities.get(t.getHashIdentity()) != null)
+				.map(t -> mapIndexedSearchParamToStringBySpIdentity(t, searchParamIndexIdentities))
+				.filter(Objects::nonNull)
+				.toList();
+		});
+	}
+
+	private static String mapIndexedSearchParamToStringBySpIdentity(BaseResourceIndexedSearchParam theResourceIndexedSearchParam,
+																	Map<Long, IndexedSearchParamIdentity> theSearchParamIndexIdentities) {
+		IndexedSearchParamIdentity spIdentity = theSearchParamIndexIdentities.get(theResourceIndexedSearchParam.getHashIdentity());
+		String paramName = Optional.ofNullable(spIdentity).map(IndexedSearchParamIdentity::getParamName).orElse("");
+		if (theResourceIndexedSearchParam instanceof ResourceIndexedSearchParamString stringParam) {
+			return paramName + " " + stringParam.getValueExact();
+		} else if (theResourceIndexedSearchParam instanceof ResourceIndexedSearchParamToken tokenParam) {
+			return paramName + " " + tokenParam.getSystem() + "|" + tokenParam.getValue();
+		} else {
+			return null;
+		}
+	}
 
 }
