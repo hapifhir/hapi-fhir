@@ -3146,74 +3146,17 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
 			"java.lang.Exception"),
 
-	// fixme
-	//	/**
-	//	 * <b>Batch2 Hook:</b>
-	//	 * <p>Invoked before a work chunk is processed.</p>
-	//	 * <ul>
-	//	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	//	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
-	//	 *  </ul>
-	//	 * <p>Hooks should return <code>void</code></p>
-	//	 */
-	//	BATCH2_CHUNK_PROCESS_FILTER(
-	//		Consumer<Runnable>.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
-
 	/**
 	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked before a work chunk is processed.</p>
+	 * <p>FIXME - docs</p>
 	 * <ul>
 	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
 	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
 	 *  </ul>
-	 * <p>Hooks should return <code>void</code></p>
+	 * <p>Hooks should return <code>IInterceptorBroadcaster.IInterceptorFilterHook.class</code></p>
 	 */
-	BATCH2_CHUNK_PRE_PROCESSED(
-			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
-
-	/**
-	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked after a work chunk has been processed. This pointcut will be called regardless of whether
-	 * an Exception was thrown or not during chunk processing.</p>
-	 * <ul>
-	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
-	 *  </ul>
-	 * <p>Hooks should return <code>void</code></p>
-	 */
-	BATCH2_CHUNK_PROCESSING_COMPLETED(
-			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
-
-	/**
-	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked after a work chunk has been processed. This pointcut will only be called if no Exception was thrown
-	 * during chunk processing</p>
-	 * <ul>
-	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
-	 *  </ul>
-	 * <p>Hooks should return <code>void</code></p>
-	 */
-	BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY(
-			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
-
-	/**
-	 * <b>Batch2 Hook:</b>
-	 * <p>Invoked after a work chunk has been processed. This pointcut will only be called if an Exception was thrown
-	 * during chunk processing</p>
-	 * <ul>
-	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
-	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
-	 *     <li>java.lang.Exception - The exception that was thrown</li>
-	 *  </ul>
-	 * <p>Hooks should return <code>void</code></p>
-	 */
-	BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION(
-			void.class,
-			"ca.uhn.fhir.batch2.model.JobInstance",
-			"ca.uhn.fhir.batch2.model.WorkChunk",
-			"java.lang.Exception"),
-
+	BATCH2_CHUNK_PROCESS_FILTER(
+		IInterceptorBroadcaster.IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.

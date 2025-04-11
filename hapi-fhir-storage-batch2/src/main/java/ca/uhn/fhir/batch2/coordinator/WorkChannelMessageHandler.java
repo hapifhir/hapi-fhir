@@ -261,18 +261,16 @@ class WorkChannelMessageHandler implements MessageHandler {
 			processingPreparation.ifPresentOrElse(
 					// all the setup is happy and committed.  Do the work.
 					process -> {
-						JobInstance jobInstance = process.myJobInstance;
-						WorkChunk workChunk = process.myWorkChunk;
-						try {
-							invokeBatch2ChunkPreProcessed(jobInstance, workChunk);
-							process.myStepExector.executeStep();
-							invokeBatch2ChunkCompletedNormally(jobInstance, workChunk);
-						} catch (Exception e) {
-							invokeBatch2ChunkCompletedHandleException(jobInstance, workChunk, e);
-							throw e;
-						} finally {
-							invokeBatch2ChunkCompleted(jobInstance, workChunk);
-						}
+						HookParams params = new HookParams()
+							.add(JobInstance.class, process.myJobInstance)
+							.add(WorkChunk.class, process.myWorkChunk);
+
+						Runnable runnable = () -> process.myStepExector.executeStep();
+
+						myInterceptorBroadcaster.runWithFilterHooks(
+							Pointcut.BATCH2_CHUNK_PROCESS_FILTER,
+							params,
+							runnable);
 					},
 					() -> {
 						// discard the chunk
@@ -304,41 +302,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 					return setupProcessing;
 				});
-	}
-
-	private void invokeBatch2ChunkPreProcessed(JobInstance theJobInstance, WorkChunk theWorkChunk) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED)) {
-			HookParams params =
-					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PRE_PROCESSED, params);
-		}
-	}
-
-	private void invokeBatch2ChunkCompletedNormally(JobInstance theJobInstance, WorkChunk theWorkChunk) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY)) {
-			HookParams params =
-					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY, params);
-		}
-	}
-
-	private void invokeBatch2ChunkCompletedHandleException(
-			JobInstance theJobInstance, WorkChunk theWorkChunk, Exception theException) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION)) {
-			HookParams params = new HookParams()
-					.add(JobInstance.class, theJobInstance)
-					.add(WorkChunk.class, theWorkChunk)
-					.add(Exception.class, theException);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION, params);
-		}
-	}
-
-	private void invokeBatch2ChunkCompleted(JobInstance theJobInstance, WorkChunk theWorkChunk) {
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED)) {
-			HookParams params =
-					new HookParams().add(JobInstance.class, theJobInstance).add(WorkChunk.class, theWorkChunk);
-			myInterceptorBroadcaster.callHooks(Pointcut.BATCH2_CHUNK_PROCESSING_COMPLETED, params);
-		}
 	}
 
 	/**
