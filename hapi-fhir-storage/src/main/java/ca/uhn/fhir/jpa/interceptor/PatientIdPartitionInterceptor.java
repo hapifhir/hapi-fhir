@@ -30,7 +30,6 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -40,33 +39,19 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
-import static ca.uhn.fhir.util.FhirTerser.COMPARTMENT_MATCHER_PATH;
-import static ca.uhn.fhir.util.ObjectUtil.castIfInstanceof;
-import static ca.uhn.fhir.util.TerserUtil.getValues;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -112,7 +97,7 @@ public class PatientIdPartitionInterceptor {
 
 		if (resourceDef.getName().equals("Patient")) {
 			IIdType idElement = theResource.getIdElement();
-			if (idElement.getIdPart() == null || idElement.isUuid() ) {
+			if (idElement.getIdPart() == null || idElement.isUuid()) {
 				throw new MethodNotAllowedException(
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
@@ -126,77 +111,17 @@ public class PatientIdPartitionInterceptor {
 			} else {
 				// HACK: enable synthea bundles to sneak through.
 				// If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
-				// and a reference points to the Patient and the Patient has already been assigned a partition.
-				return getCompartmentReferencesForResource("Patient", theResource, null)
-					.flatMap(nextReference -> Stream.ofNullable(nextReference.getResource()))
-					.flatMap(nextResource->getPartitionIfAssigned(nextResource).stream())
-					.findFirst()
-					// or give up and fail
-					.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
+				// and a reference points to the Patient which has already been processed and assigned a partition.
+				FhirTerser fhirTerser = myFhirContext.newTerser();
+
+				return fhirTerser
+						.getCompartmentReferencesForResource("Patient", theResource, null)
+						.flatMap(nextReference -> Stream.ofNullable(nextReference.getResource()))
+						.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())
+						.findFirst()
+						// or give up and fail
+						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
 			}
-		}
-	}
-
-
-	private Stream<IBaseReference> getCompartmentReferencesForResource(
-		String theCompartmentName,
-		IBaseResource theSource,
-		@Nullable Set<String> theAdditionalCompartmentParamNames) {
-
-		FhirTerser terser = myFhirContext.newTerser();
-		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
-		Validate.notNull(theSource, "theSource must not be null");
-		theAdditionalCompartmentParamNames = Objects.requireNonNullElse(theAdditionalCompartmentParamNames, Set.of());
-
-		RuntimeResourceDefinition sourceDef = myFhirContext.getResourceDefinition(theSource);
-		List<RuntimeSearchParam> params = new ArrayList<>(sourceDef.getSearchParamsForCompartmentName(theCompartmentName));
-
-		theAdditionalCompartmentParamNames.stream()
-			.map(sourceDef::getSearchParam)
-			.filter(Objects::nonNull)
-			.forEach(params::add);
-
-		return params.stream()
-			.flatMap(nextParam -> nextParam.getPathsSplit().stream())
-			.filter(StringUtils::isNotBlank)
-			.flatMap(nextPath -> {
-
-				/*
-				 * DSTU3 and before just defined compartments as being (e.g.) named
-				 * Patient with a path like CarePlan.subject
-				 *
-				 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
-				 *
-				 * The following Regex is a hack to make that efficient at runtime.
-				 */
-				String wantTypex = null;
-				Pattern pattern = COMPARTMENT_MATCHER_PATH;
-				Matcher matcher = pattern.matcher(nextPath);
-				if (matcher.matches()) {
-					nextPath = matcher.group(1);
-					wantTypex = matcher.group(2);
-				}
-				String wantType = wantTypex;
-
-				return terser.getValues(theSource, nextPath, IBaseReference.class).stream()
-					.filter(nextValue -> isEmpty(wantType) || wantType.equals(getTypeFromReference(nextValue)));
-			});
-	}
-
-	private String getTypeFromReference(IBaseReference theReference) {
-
-		IIdType nextTargetId = theReference.getReferenceElement().toUnqualifiedVersionless();
-
-		if (isNotBlank(nextTargetId.getResourceType())) {
-			return nextTargetId.getResourceType();
-		} else if (theReference.getResource() != null) {
-			/*
-			 * If the reference isn't an explicit resource ID, but instead is just
-			 * a resource object, we'll use that type.
-			 */
-			return myFhirContext.getResourceType(theReference.getResource());
-		} else {
-			return "No type on reference";
 		}
 	}
 
@@ -247,7 +172,7 @@ public class PatientIdPartitionInterceptor {
 				String extendedOp = theReadDetails.getExtendedOperationName();
 				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
 						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
-					return provideNonPatientSpecificQueryResponse(theReadDetails);
+					return provideNonPatientSpecificQueryResponse();
 				}
 				break;
 			default:
@@ -264,9 +189,10 @@ public class PatientIdPartitionInterceptor {
 			return identifyForCreate(theReadDetails.getConditionalTargetOrNull(), theRequestDetails);
 		}
 
-		return provideNonPatientSpecificQueryResponse(theReadDetails);
+		return provideNonPatientSpecificQueryResponse();
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdList(
 			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
 		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
@@ -304,8 +230,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
-	protected RequestPartitionId provideNonPatientSpecificQueryResponse(
-			ReadPartitionIdRequestDetails theRequestDetails) {
+	protected RequestPartitionId provideNonPatientSpecificQueryResponse() {
 		return RequestPartitionId.allPartitions();
 	}
 
@@ -341,7 +266,7 @@ public class PatientIdPartitionInterceptor {
 	 * is not identified in the URL.
 	 */
 	@Nonnull
-	protected RequestPartitionId provideNonCompartmentMemberInstanceResponse(IBaseResource theResource) {
+	protected RequestPartitionId throwNonCompartmentMemberInstanceFailureResponse(IBaseResource theResource) {
 		throw new MethodNotAllowedException(Msg.code(1326) + "Resource of type "
 				+ myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
 	}

@@ -810,18 +810,14 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case POST: {
-					// fixme here
-//					String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextEntry);
-//					if (matchUrl != null) {}
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
 					nextWriteEntryRequestPartitionId =
-						myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, requestUrl);
+							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+									theRequestDetails, requestUrl);
 
 					break;
 				}
 				case PUT: {
-					// fixme check if there is a conditional url and use search for that instead
 					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
 					if (resource != null) {
 						String resourceType = myContext.getResourceType(resource);

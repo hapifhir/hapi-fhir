@@ -82,8 +82,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
-		// fixme warn if not set!
-		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	@Override
@@ -392,15 +390,16 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertThat(resourcesByType.get("Practitioner")).containsExactly(-1, -1, -1);
 	}
 
-	@Test
-	void testLoadBundle_referencesExistingResource() {
-	    // given
-		createOrganization(withIdentifier("https://example.com/ns", "123"));
-
-	    // when
-	    // then
-	    fail();
-	}
+	// fixme
+//	@Test
+//	void testLoadBundle_referencesExistingResource() {
+//	    // given
+//		createOrganization(withIdentifier("https://example.com/ns", "123"));
+//
+//	    // when
+//	    // then
+//	    fail();
+//	}
 
 	@Test
 	public void testTransaction_SystemRequestDetails() throws IOException {

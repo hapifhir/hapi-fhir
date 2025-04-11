@@ -74,15 +74,17 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.function.Consumers.nop;
 
 public class FhirTerser {
 
-	// fixme visibility?
-	public static final Pattern COMPARTMENT_MATCHER_PATH =
+	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
@@ -883,7 +885,7 @@ public class FhirTerser {
 			String theCompartmentName,
 			IBaseResource theSource,
 			IIdType theTarget,
-			Set<String> theAdditionalCompartmentParamNames) {
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
 		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
 		Validate.notNull(theSource, "theSource must not be null");
 		Validate.notNull(theTarget, "theTarget must not be null");
@@ -969,54 +971,76 @@ public class FhirTerser {
 		return consumer.getOwners();
 	}
 
+	@Nonnull
+	public Stream<IBaseReference> getCompartmentReferencesForResource(
+			String theCompartmentName,
+			IBaseResource theSource,
+			@Nullable Set<String> theAdditionalCompartmentParamNames) {
+		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
+		Validate.notNull(theSource, "theSource must not be null");
+		theAdditionalCompartmentParamNames = Objects.requireNonNullElse(theAdditionalCompartmentParamNames, Set.of());
+
+		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
+		List<RuntimeSearchParam> params =
+				new ArrayList<>(sourceDef.getSearchParamsForCompartmentName(theCompartmentName));
+
+		theAdditionalCompartmentParamNames.stream()
+				.map(sourceDef::getSearchParam)
+				.filter(Objects::nonNull)
+				.forEach(params::add);
+
+		return params.stream()
+				.flatMap(nextParam -> nextParam.getPathsSplit().stream())
+				.filter(StringUtils::isNotBlank)
+				.flatMap(nextPath -> {
+
+					/*
+					 * DSTU3 and before just defined compartments as being (e.g.) named
+					 * Patient with a path like CarePlan.subject
+					 *
+					 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
+					 *
+					 * The following Regex is a hack to make that efficient at runtime.
+					 */
+					String wantType;
+					Matcher matcher = COMPARTMENT_MATCHER_PATH.matcher(nextPath);
+					if (matcher.matches()) {
+						nextPath = matcher.group(1);
+						wantType = matcher.group(2);
+					} else {
+						wantType = null;
+					}
+
+					return getValues(theSource, nextPath, IBaseReference.class).stream()
+							.filter(nextValue -> isEmpty(wantType) || wantType.equals(getTypeFromReference(nextValue)));
+				});
+	}
+
+	private String getTypeFromReference(IBaseReference theReference) {
+
+		IIdType nextTargetId = theReference.getReferenceElement().toUnqualifiedVersionless();
+
+		if (isNotBlank(nextTargetId.getResourceType())) {
+			return nextTargetId.getResourceType();
+		} else if (theReference.getResource() != null) {
+			/*
+			 * If the reference isn't an explicit resource ID, but instead is just
+			 * a resource object, we'll use that type.
+			 */
+			return myContext.getResourceType(theReference.getResource());
+		} else {
+			return "No type on reference";
+		}
+	}
+
 	private void visitCompartmentOwnersForResource(
 			String theCompartmentName,
 			IBaseResource theSource,
-			Set<String> theAdditionalCompartmentParamNames,
+			@Nullable Set<String> theAdditionalCompartmentParamNames,
 			ICompartmentOwnerVisitor theConsumer) {
-		Validate.notBlank(theCompartmentName, "theCompartmentName must not be null or blank");
-		Validate.notNull(theSource, "theSource must not be null");
 
-		RuntimeResourceDefinition sourceDef = myContext.getResourceDefinition(theSource);
-		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
-
-		// If passed an additional set of searchparameter names, add them for comparison purposes.
-		if (theAdditionalCompartmentParamNames != null) {
-			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream()
-					.map(sourceDef::getSearchParam)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
-			if (params == null || params.isEmpty()) {
-				params = additionalParams;
-			} else {
-				List<RuntimeSearchParam> existingParams = params;
-				params = new ArrayList<>(existingParams.size() + additionalParams.size());
-				params.addAll(existingParams);
-				params.addAll(additionalParams);
-			}
-		}
-
-		for (RuntimeSearchParam nextParam : params) {
-			for (String nextPath : nextParam.getPathsSplit()) {
-
-				/*
-				 * DSTU3 and before just defined compartments as being (e.g.) named
-				 * Patient with a path like CarePlan.subject
-				 *
-				 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
-				 *
-				 * The following Regex is a hack to make that efficient at runtime.
-				 */
-				String wantType = null;
-				Pattern pattern = COMPARTMENT_MATCHER_PATH;
-				Matcher matcher = pattern.matcher(nextPath);
-				if (matcher.matches()) {
-					nextPath = matcher.group(1);
-					wantType = matcher.group(2);
-				}
-
-				List<IBaseReference> values = getValues(theSource, nextPath, IBaseReference.class);
-				for (IBaseReference nextValue : values) {
+		getCompartmentReferencesForResource(theCompartmentName, theSource, theAdditionalCompartmentParamNames)
+				.flatMap(nextValue -> {
 					IIdType nextTargetId = nextValue.getReferenceElement().toUnqualifiedVersionless();
 
 					/*
@@ -1032,23 +1056,14 @@ public class FhirTerser {
 							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
 						}
 					}
-
-					if (isNotBlank(wantType)) {
-						String nextTargetIdResourceType = nextTargetId.getResourceType();
-						if (nextTargetIdResourceType == null || !nextTargetIdResourceType.equals(wantType)) {
-							continue;
-						}
-					}
-
 					if (isNotBlank(nextTargetId.getValue())) {
-						boolean shouldContinue = theConsumer.consume(nextTargetId);
-						if (!shouldContinue) {
-							return;
-						}
+						return Stream.of(nextTargetId);
+					} else {
+						return Stream.empty();
 					}
-				}
-			}
-		}
+				})
+				.takeWhile(theConsumer::consume)
+				.forEach(nop());
 	}
 
 	private void visit(

@@ -104,14 +104,15 @@ public class ResourceCompartmentUtil {
 	}
 
 	@Nonnull
-	public static Stream<IBaseReference> getResourceCompartmentReferences(IBaseResource theResource, List<RuntimeSearchParam> theCompartmentSps, ISearchParamExtractor mySearchParamExtractor) {
+	public static Stream<IBaseReference> getResourceCompartmentReferences(
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
 		return theCompartmentSps.stream()
-			.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-			.filter(StringUtils::isNotBlank)
-			.flatMap(path -> mySearchParamExtractor
-				.getPathValueExtractor(theResource, path)
-				.get().stream())
-			.flatMap(base -> castIfInstanceof(base, IBaseReference.class).stream());
+				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
+				.filter(StringUtils::isNotBlank)
+				.flatMap(path -> mySearchParamExtractor.getPathValueExtractor(theResource, path).get().stream())
+				.flatMap(base -> castIfInstanceof(base, IBaseReference.class).stream());
 	}
 
 	/**

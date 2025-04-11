@@ -177,7 +177,6 @@ public class RequestPartitionId implements IModelJson {
 		return b.build();
 	}
 
-
 	/**
 	 * Returns true if this partition defintion contains the other.
 	 * Compatible with equals: a.contains(b) && b.contains(a) ==> a.equals(b).
