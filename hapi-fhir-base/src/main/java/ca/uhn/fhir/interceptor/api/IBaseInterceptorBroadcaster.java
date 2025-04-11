@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import ca.uhn.fhir.interceptor.executor.SupplierFilterHookWrapper;
+import com.google.common.collect.Lists;
+
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
@@ -66,6 +70,29 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		return null;
 	}
 
+	default void runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Runnable theRunnable) {
+		runWithFilterHooks(thePointcut, theHookParams, () -> {
+			theRunnable.run();
+			return null;
+		});
+	}
+
+	default <T> T runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Supplier<T> theSupplier) {
+		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
+
+		Supplier<T> supplier = theSupplier;
+
+		// Build a linked list of wrappers.
+		// We traverse the invokers in reverse order because the first wrapper will be called last in sequence.
+		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
+			@SuppressWarnings("unchecked")
+			IInterceptorFilterHook<T> filter = (IInterceptorFilterHook<T>) nextInvoker.invoke(theHookParams);
+			supplier = new SupplierFilterHookWrapper<>(supplier, filter, nextInvoker::getHookDescription);
+		}
+
+		return supplier.get();
+	}
+
 	/**
 	 * Does this broadcaster have any hooks for the given pointcut?
 	 *
@@ -89,4 +116,13 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 			return toString();
 		}
 	}
+	/**
+	 * A filter hook is a hook that wraps a runnable and allows the interceptor to
+	 * run code before or after the runnable before it is executed.
+	 * Filter hooks must call the runnable passed in themselves, just like Java Servlet Filters.
+	 *
+	 * @see IInterceptorBroadcaster#runWithFilterHooks(IPointcut, HookParams, Supplier)
+	 */
+	@FunctionalInterface
+	interface IInterceptorFilterHook<T> extends Function<Supplier<T>, T> {}
 }

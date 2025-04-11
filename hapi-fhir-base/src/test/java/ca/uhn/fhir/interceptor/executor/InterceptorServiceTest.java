@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -19,8 +20,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
+import static ca.uhn.fhir.interceptor.executor.BaseInterceptorService.haveAppropriateParams;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -29,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class InterceptorServiceTest {
+	final InterceptorService myInterceptorService = new InterceptorService();
 
 	private final List<String> myInvocations = new ArrayList<>();
 
@@ -450,23 +455,21 @@ public class InterceptorServiceTest {
 
 	@Test
 	public void testValidateParamTypes() {
-		InterceptorService svc = new InterceptorService();
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
 		params.add(String.class, "B");
-		boolean validated = svc.haveAppropriateParams(Pointcut.TEST_RB, params);
+		boolean validated = haveAppropriateParams(Pointcut.TEST_RB, params);
 		assertTrue(validated);
 	}
 
 	@Test
 	public void testValidateParamTypesMissingParam() {
-		InterceptorService svc = new InterceptorService();
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
 		try {
-			svc.haveAppropriateParams(Pointcut.TEST_RB, params);
+			haveAppropriateParams(Pointcut.TEST_RB, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found [String]", e.getMessage());
@@ -475,7 +478,6 @@ public class InterceptorServiceTest {
 
 	@Test
 	public void testValidateParamTypesExtraParam() {
-		InterceptorService svc = new InterceptorService();
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
@@ -486,7 +488,7 @@ public class InterceptorServiceTest {
 		params.add(String.class, "F");
 		params.add(String.class, "G");
 		try {
-			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+			haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum,ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String, String]", e.getMessage());
@@ -496,7 +498,6 @@ public class InterceptorServiceTest {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testValidateParamTypesWrongParam() {
-		InterceptorService svc = new InterceptorService();
 
 		HookParams params = new HookParams();
 		params.add((Class) String.class, 1);
@@ -506,7 +507,7 @@ public class InterceptorServiceTest {
 		params.add((Class) String.class, 5);
 		params.add((Class) String.class, 6);
 		try {
-			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+			haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String", e.getMessage());
@@ -608,6 +609,134 @@ public class InterceptorServiceTest {
 		}
 	}
 
+
+	@Nested
+	class FilterHooks {
+		List<String> myCallLog = new ArrayList<>();
+		HookParams myParams = new HookParams("1");
+		MySupplier mySupplier = new MySupplier();
+
+		@Test
+		void testNoHooks_callsRunnableNormally() {
+		    // given no interceptors registered
+
+		    // when
+			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, ()->{
+				myCallLog.add("I run!");
+			});
+
+		    // then
+			assertThat(myCallLog).containsExactly("I run!");
+		}
+
+
+		@Test
+		void testNoHooks_callsSupplierNormallyAndReturnsValue() {
+			// given no interceptors registered
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(myCallLog).containsExactly("MyRunnable runs!");
+			assertThat(result).isEqualTo(42);
+		}
+		@Test
+		void testOneHook_calledAroundRunnable() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(result).isEqualTo(42);
+			assertThat(myCallLog).containsExactly(
+				"filter1-before",
+				"MyRunnable runs!",
+				"filter1-after"
+			);
+		}
+
+		@Test
+		void testTwoHooks_calledInOrderAroundRunnable() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter2"));
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(result).isEqualTo(42);
+			assertThat(myCallLog).containsExactly(
+				"filter1-before",
+				"filter2-before",
+				"MyRunnable runs!",
+				"filter2-after",
+				"filter1-after"
+			);
+		}
+
+
+		@Test
+		void testFilterHookWhichDoesNotCallRunnable_throwsError() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new Object() {
+				@Hook(Pointcut.TEST_FILTER)
+				public IInterceptorBroadcaster.IInterceptorFilterHook<?> testFilter(HookParams theParams) {
+					// return a filter that does not call the runnable
+					return (runnable)->{
+						myCallLog.add("bad-boy ran but didn't call runnable");
+						// runnable.get(); // not called
+						return null;
+					};
+				}
+
+			});
+
+			// when
+			assertThatThrownBy(() -> myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier))
+				.hasMessageContaining("Runnable was not run in filter")
+				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
+
+			assertThat(myCallLog).containsExactly(
+				"bad-boy ran but didn't call runnable"
+			);
+		}
+
+		class MySupplier implements Supplier<Integer> {
+			public Integer get() {
+				myCallLog.add("MyRunnable runs!");
+				return 42;
+			}
+		}
+
+		class MyFilterHookInterceptor {
+			final String myName;
+
+			MyFilterHookInterceptor(String theName) {
+				myName = theName;
+			}
+
+			@Hook(Pointcut.TEST_FILTER)
+			public IInterceptorBroadcaster.IInterceptorFilterHook<?> testFilter(HookParams theParams) {
+				return new MyFilter<>();
+			}
+
+			private class MyFilter<T> implements IInterceptorBroadcaster.IInterceptorFilterHook<T> {
+				@Override
+				public T apply(Supplier<T> theRunnable) {
+					myCallLog.add(myName + "-before");
+					try {
+						return theRunnable.get();
+					} finally {
+						myCallLog.add(myName + "-after");
+					}
+				}
+			}
+		}
+	}
 
 	@BeforeEach
 	public void before() {

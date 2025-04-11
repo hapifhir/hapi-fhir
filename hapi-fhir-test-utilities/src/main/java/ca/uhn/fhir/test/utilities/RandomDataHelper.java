@@ -24,6 +24,7 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -68,6 +69,10 @@ public class RandomDataHelper {
 			result = enumValues[random.nextInt(enumValues.length)];
 		} else if (fieldType.equals(Boolean.TYPE) || fieldType.equals(Boolean.class)) {
 			result = random.nextBoolean();
+		} else if (fieldType.equals(Map.class)){
+			String key = UUID.randomUUID().toString();
+			Object value = UUID.randomUUID().toString();
+			result = Map.of(key, value);
 		}
 		Validate.notNull(result, "Does not support type %s", fieldType);
 		return result;

@@ -3147,6 +3147,19 @@ public enum Pointcut implements IPointcut {
 			"java.lang.Exception"),
 
 	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>FIXME - docs</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
+	 *  </ul>
+	 * <p>Hooks should return <code>IInterceptorBroadcaster.IInterceptorFilterHook.class</code></p>
+	 */
+	BATCH2_CHUNK_PROCESS_FILTER(
+			IInterceptorBroadcaster.IInterceptorFilterHook.class,
+			"ca.uhn.fhir.batch2.model.JobInstance",
+			"ca.uhn.fhir.batch2.model.WorkChunk"),
+	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
@@ -3155,6 +3168,12 @@ public enum Pointcut implements IPointcut {
 			new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
 			String.class.getName(),
 			String.class.getName()),
+
+	/**
+	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
+	 * removed at any time.
+	 */
+	TEST_FILTER(IInterceptorBroadcaster.IInterceptorFilterHook.class, String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

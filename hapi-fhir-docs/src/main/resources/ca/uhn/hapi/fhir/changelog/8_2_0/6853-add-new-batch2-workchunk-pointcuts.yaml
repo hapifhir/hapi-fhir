@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6853
+title: "The following Batch2 pointcuts have been added that will be invoked when each `WorkChunk` of a job 
+is processed: `BATCH2_CHUNK_PRE_PROCESSED`, `BATCH2_CHUNK_PROCESSING_COMPLETED`, 
+`BATCH2_CHUNK_PROCESSING_COMPLETED_NORMALLY`, and `BATCH2_CHUNK_PROCESSING_COMPLETED_HANDLE_EXCEPTION`."
