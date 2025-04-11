@@ -1565,21 +1565,20 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		"/Encounter?service-provider.name:exact=Test",
 		"/Encounter?service-provider:Organization.name:exact=Test",
 		"/Encounter?subject.organization.name:exact=Test",
-		"/Encounter?subject:Patient.organization.name:exact=Test"  // multiple link chaining
+		"/Encounter?subject:Patient.organization:Organization.name:exact=Test"  // multi-link chained search
 	})
 	public void testExactChainedSearch_withPartialSearchValue_noMatchFound(String theSearchUrl) {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
 
-		Organization org = buildResource("Organization", withId("Org1"), withName("TestOrg1"));
-		doUpdateResource(org);
+		Organization org = buildResource("Organization", withName("TestOrg"));
+		IIdType orgId = doCreateResource(org);
 
-		Patient p = buildResource("Patient", withId("P1"), withReference("managingOrganization", org.getIdElement()));
-		doUpdateResource(p);
+		Patient p = buildResource("Patient", withReference("managingOrganization", orgId));
+		IIdType pId = doCreateResource(p);
 
-		Encounter enc = buildResource("Encounter", withId("E1"), withReference(
-			"subject", p.getIdElement()), withReference("serviceProvider", org.getIdElement()));
-		doUpdateResource(enc);
+		Encounter enc = buildResource("Encounter", withReference("subject", pId), withReference("serviceProvider", orgId));
+		doCreateResource(enc);
 
 		logAllStringIndexes();
 
@@ -1594,31 +1593,29 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"/Encounter?service-provider.name:exact=TestOrg1",
-		"/Encounter?service-provider:Organization.name:exact=TestOrg1",
-		"/Encounter?subject.organization.name:exact=TestOrg1",
-		"/Encounter?subject:Patient.organization.name:exact=TestOrg1" // multiple link chaining
+		"/Encounter?service-provider.name:exact=TestOrg",
+		"/Encounter?service-provider:Organization.name:exact=TestOrg",
+		"/Encounter?subject.organization.name:exact=TestOrg",
+		"/Encounter?subject:Patient.organization:Organization.name:exact=TestOrg"  // multi-link chained search
 	})
 	public void testExactChainedSearch_withExactSearchValue_exactMatchFound(String theSearchUrl) {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
 
-		Organization org1 = buildResource("Organization", withId("Org1"), withName("TestOrg1"));
-		Organization org2 = buildResource("Organization", withId("Org2"), withName("TestOrg2"));
-		doUpdateResource(org1);
-		doUpdateResource(org2);
+		Organization org1 = buildResource("Organization", withName("TestOrg"));
+		Organization org2 = buildResource("Organization", withName("TestOrganization"));
+		IIdType org1Id = doCreateResource(org1);
+		IIdType org2Id = doCreateResource(org2);
 
-		Patient p1 = buildResource("Patient", withId("P1"), withReference("managingOrganization", org1.getIdElement()));
-		Patient p2 = buildResource("Patient", withId("P2"), withReference("managingOrganization", org2.getIdElement()));
-		doUpdateResource(p1);
-		doUpdateResource(p2);
+		Patient p1 = buildResource("Patient", withReference("managingOrganization", org1Id));
+		Patient p2 = buildResource("Patient", withReference("managingOrganization", org2Id));
+		IIdType p1Id = doCreateResource(p1);
+		IIdType p2Id = doCreateResource(p2);
 
-		Encounter enc1 = buildResource("Encounter", withId("E1"), withReference(
-			"subject", p1.getIdElement()), withReference("serviceProvider", org1.getIdElement()));
-		Encounter enc2 = buildResource("Encounter", withId("E2"), withReference(
-			"subject", p2.getIdElement()), withReference("serviceProvider", org2.getIdElement()));
-		doUpdateResource(enc1);
-		doUpdateResource(enc2);
+		Encounter enc1 = buildResource("Encounter", withReference("subject", p1Id), withReference("serviceProvider", org1Id));
+		Encounter enc2 = buildResource("Encounter", withReference("subject", p2Id), withReference("serviceProvider", org2Id));
+		IIdType enc1Id = doCreateResource(enc1);
+		doCreateResource(enc2);
 
 		logAllStringIndexes();
 
@@ -1629,7 +1626,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// validate
 		assertThat(encounterIds).hasSize(1);
-		assertThat(encounterIds.get(0)).isEqualTo(enc1.getIdPart());
+		assertThat(encounterIds.get(0)).isEqualTo(enc1Id.getIdPart());
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
