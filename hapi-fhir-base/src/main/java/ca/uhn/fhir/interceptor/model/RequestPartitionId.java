@@ -178,6 +178,21 @@ public class RequestPartitionId implements IModelJson {
 		return b.build();
 	}
 
+
+	/**
+	 * Returns true if this partition defintion contains the other.
+	 * Compatible with equals: a.contains(b) && b.contains(a) ==> a.equals(b).
+	 * We can't implement Comparable because this is only a partial order.
+	 */
+	public boolean contains(RequestPartitionId theOther) {
+		if (this.isAllPartitions()) {
+			return true;
+		} else if (theOther.isAllPartitions()) {
+			return false;
+		}
+		return this.myPartitionIds.containsAll(theOther.myPartitionIds);
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) {
