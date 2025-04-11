@@ -26,6 +26,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -1556,6 +1558,78 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/Encounter?service-provider.name:exact=Test",
+		"/Encounter?service-provider:Organization.name:exact=Test",
+		"/Encounter?subject.organization.name:exact=Test",
+		"/Encounter?subject:Patient.organization.name:exact=Test"  // multiple link chaining
+	})
+	public void testExactChainedSearch_withPartialSearchValue_noMatchFound(String theSearchUrl) {
+		// setup
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Organization org = buildResource("Organization", withId("Org1"), withName("TestOrg1"));
+		doUpdateResource(org);
+
+		Patient p = buildResource("Patient", withId("P1"), withReference("managingOrganization", org.getIdElement()));
+		doUpdateResource(p);
+
+		Encounter enc = buildResource("Encounter", withId("E1"), withReference(
+			"subject", p.getIdElement()), withReference("serviceProvider", org.getIdElement()));
+		doUpdateResource(enc);
+
+		logAllStringIndexes();
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> encounterIds = myTestDaoSearch.searchForIds(theSearchUrl);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		// validate
+		assertThat(encounterIds).isEmpty();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/Encounter?service-provider.name:exact=TestOrg1",
+		"/Encounter?service-provider:Organization.name:exact=TestOrg1",
+		"/Encounter?subject.organization.name:exact=TestOrg1",
+		"/Encounter?subject:Patient.organization.name:exact=TestOrg1" // multiple link chaining
+	})
+	public void testExactChainedSearch_withExactSearchValue_exactMatchFound(String theSearchUrl) {
+		// setup
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Organization org1 = buildResource("Organization", withId("Org1"), withName("TestOrg1"));
+		Organization org2 = buildResource("Organization", withId("Org2"), withName("TestOrg2"));
+		doUpdateResource(org1);
+		doUpdateResource(org2);
+
+		Patient p1 = buildResource("Patient", withId("P1"), withReference("managingOrganization", org1.getIdElement()));
+		Patient p2 = buildResource("Patient", withId("P2"), withReference("managingOrganization", org2.getIdElement()));
+		doUpdateResource(p1);
+		doUpdateResource(p2);
+
+		Encounter enc1 = buildResource("Encounter", withId("E1"), withReference(
+			"subject", p1.getIdElement()), withReference("serviceProvider", org1.getIdElement()));
+		Encounter enc2 = buildResource("Encounter", withId("E2"), withReference(
+			"subject", p2.getIdElement()), withReference("serviceProvider", org2.getIdElement()));
+		doUpdateResource(enc1);
+		doUpdateResource(enc2);
+
+		logAllStringIndexes();
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> encounterIds = myTestDaoSearch.searchForIds(theSearchUrl);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		// validate
+		assertThat(encounterIds).hasSize(1);
+		assertThat(encounterIds.get(0)).isEqualTo(enc1.getIdPart());
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {

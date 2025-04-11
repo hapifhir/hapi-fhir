@@ -3056,8 +3056,13 @@ public class QueryStack {
 
 			int qualifierIndex = nextParamName.indexOf(':');
 			if (qualifierIndex != -1) {
-				nextParamName = nextParamName.substring(0, qualifierIndex);
-				nextQualifier = nextParamName.substring(qualifierIndex);
+				if (StringUtils.isEmpty(nextChain)) {
+					nextQualifier = nextParamName.substring(qualifierIndex);
+					nextParamName = nextParamName.substring(0, qualifierIndex);
+				} else {
+					nextParamName = nextParamName.substring(0, qualifierIndex);
+					nextQualifier = nextParamName.substring(qualifierIndex);
+				}
 			}
 
 			List<String> qualifiersBranch = Lists.newArrayList();
@@ -3083,7 +3088,8 @@ public class QueryStack {
 							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
 						} else {
 							IQueryParameterType qp = newParameterInstance(nextSearchParam);
-							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), null, theTargetValue);
+							qp.setValueAsQueryToken(
+									myFhirContext, nextSearchParam.getName(), nextQualifier, theTargetValue);
 							orValues.add(qp);
 						}
 
