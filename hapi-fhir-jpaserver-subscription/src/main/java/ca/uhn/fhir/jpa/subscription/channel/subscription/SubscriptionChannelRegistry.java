@@ -147,7 +147,8 @@ public class SubscriptionChannelRegistry {
 		}
 	}
 
-	public synchronized SubscriptionResourceDeliveryMessageConsumer getDeliveryConsumerWithListeners(String theChannelName) {
+	public synchronized SubscriptionResourceDeliveryMessageConsumer getDeliveryConsumerWithListeners(
+			String theChannelName) {
 		return myDeliveryConsumerCache.get(theChannelName);
 	}
 

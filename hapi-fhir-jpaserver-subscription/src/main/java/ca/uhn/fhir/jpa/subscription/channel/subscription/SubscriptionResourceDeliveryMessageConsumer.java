@@ -24,8 +24,6 @@ import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This holds the Subscription ResourceDeliveryMessage consumer that receives Subscription matches and delivers them.
@@ -34,8 +32,7 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
 	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
-	public SubscriptionResourceDeliveryMessageConsumer(
-			IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
+	public SubscriptionResourceDeliveryMessageConsumer(IChannelConsumer<ResourceDeliveryMessage> theConsumer) {
 		myConsumer = theConsumer;
 		myMultiplexingListener = (MultiplexingListener<ResourceDeliveryMessage>) theConsumer.getMessageListener();
 	}
