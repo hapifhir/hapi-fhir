@@ -21,16 +21,20 @@ package ca.uhn.fhir.broker.impl;
 
 import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseable {
+public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultiplexingListener.class);
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
 
@@ -42,7 +46,8 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 	}
 
 	@Override
-	public void handleMessage(IMessage<T> theMessage) {
+	public void handleMessage(
+			@Nullable IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage) {
 		checkState();
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
@@ -50,7 +55,8 @@ public class MultiplexingListener<T> implements IMessageListener<T>, AutoCloseab
 			throw new InternalErrorException("Expecting message of type " + getPayloadType()
 					+ ". But received message of type: " + messageClass);
 		}
-		mySubListeners.forEach(listener -> listener.handleMessage(theMessage));
+		mySubListeners.forEach(
+				listener -> IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage));
 	}
 
 	@Override

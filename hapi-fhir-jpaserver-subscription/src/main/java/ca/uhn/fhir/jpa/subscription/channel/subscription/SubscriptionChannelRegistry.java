@@ -25,6 +25,7 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
+import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -58,6 +59,11 @@ public class SubscriptionChannelRegistry {
 
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+
+	@Autowired
+	private ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
+
+	public SubscriptionChannelRegistry() {}
 
 	private final Map<String, IChannelProducer<ResourceDeliveryMessage>> myChannelProducers = new ConcurrentHashMap<>();
 
@@ -101,6 +107,9 @@ public class SubscriptionChannelRegistry {
 
 		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
 				new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
+		SubscriptionValidatingListener subscriptionValidatingListener =
+				new SubscriptionValidatingListener(mySubscriptionDeliveryValidator, theActiveSubscription);
+		subscriptionResourceDeliveryMessageConsumer.addListener(subscriptionValidatingListener);
 		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
 		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);
 

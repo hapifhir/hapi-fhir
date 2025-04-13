@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryListenerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailListener;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageListener;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivat
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringListener;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
@@ -95,6 +97,12 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionLoader subscriptionLoader() {
 		return new SubscriptionLoader();
+	}
+
+	@Bean
+	public SubscriptionDeliveryValidator subscriptionDeliveryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+		return new SubscriptionDeliveryValidator(theDaoRegistry, theSubscriptionCanonicalizer);
 	}
 
 	@Bean

@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.springframework.messaging.Message;
@@ -29,7 +30,7 @@ import org.springframework.messaging.MessageHeaders;
 
 import static java.util.Objects.isNull;
 
-public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson {
+public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson, IMessageDeliveryContext {
 
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
@@ -75,5 +76,10 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 			}
 		}
 		return IMessage.super.getMessageKey();
+	}
+
+	@Override
+	public int getRetryCount() {
+		return getHapiHeaders().getRetryCount();
 	}
 }
