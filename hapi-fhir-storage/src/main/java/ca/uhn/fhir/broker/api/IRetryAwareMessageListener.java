@@ -34,13 +34,15 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 	 */
 	void handleMessage(@Nonnull IMessageDeliveryContext theMessageDeliveryContext, @Nonnull IMessage<T> theMessage);
 
-	// FIXME KHS
 	/**
 	 *
-	 * @param theMessageListener
-	 * @param theMessageDeliveryContext
-	 * @param theMessage
-	 * @param <P>
+	 * Static helper method to call handleMessage on a message listener when it is not known in advance whether the
+	 * listener is an instance of {@link IRetryAwareMessageListener}
+	 *
+	 * @param theMessageListener the message listener to call
+	 * @param theMessageDeliveryContext details about the message delivery if available
+	 * @param theMessage the message that was received
+	 * @param <P> the type of payload this message listener is expecting to receive
 	 */
 	static <P> void handleMessage(
 			IMessageListener<P> theMessageListener,
