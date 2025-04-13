@@ -182,7 +182,6 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		return subscription;
 	}
 
-
 	protected void waitForQueueToDrain() throws InterruptedException {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}

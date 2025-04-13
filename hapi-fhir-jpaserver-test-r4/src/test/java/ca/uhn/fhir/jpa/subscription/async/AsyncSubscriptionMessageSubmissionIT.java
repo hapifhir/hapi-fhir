@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.async;
 
+import ca.uhn.fhir.broker.TestMessageListener;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -10,18 +11,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.message.TestQueueConsumerListener;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SynchronousSubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -64,7 +62,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
-	private TestQueueConsumerListener<ResourceModifiedMessage> myQueueConsumerListener;
+	private TestMessageListener<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListener;
 
 	@Autowired
 	private IResourceModifiedDao myResourceModifiedDao;
@@ -83,8 +81,8 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myQueueConsumerListener = new TestQueueConsumerListener<>(ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myQueueConsumerListener, new ChannelConsumerSettings());
+		myTestMessageListener = new TestMessageListener<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListener, new ChannelConsumerSettings());
 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 	}
@@ -148,10 +146,11 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 		// since scheduled tasks are disabled during tests, let's trigger a submission
 		// just like the AsyncResourceModifiedProcessingSchedulerSvc would.
+		myTestMessageListener.setExpectedCount(1);
 		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
+		myTestMessageListener.awaitExpected();
 
 		//then
-		waitForQueueToDrain();
 		assertCountOfResourcesNeedingSubmission(0);
 		assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(1);
 
@@ -190,16 +189,16 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myQueueConsumerListener.getPayloads()).hasSize(1);
-		ResourceModifiedMessage payload = myQueueConsumerListener.getPayloads().get(0);
+		assertThat(myTestMessageListener.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = myTestMessageListener.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myQueueConsumerListener.clearMessages();
+		myTestMessageListener.clear();
 		return resource;
 	}
 
 	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
-		assertThat(myQueueConsumerListener.getPayloads()).hasSize(expectedCount);
+		assertThat(myTestMessageListener.getReceivedMessages()).hasSize(expectedCount);
 	}
 
 	@Configuration

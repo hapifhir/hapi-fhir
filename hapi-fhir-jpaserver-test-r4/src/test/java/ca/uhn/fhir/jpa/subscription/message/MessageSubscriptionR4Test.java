@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import ca.uhn.fhir.broker.TestMessageListener;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -59,7 +61,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestQueueConsumerListener<ResourceModifiedMessage> myListener;
+	private TestMessageListener<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListener;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -82,8 +84,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myListener = new TestQueueConsumerListener<>(ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myListener, new ChannelConsumerSettings());
+		myTestMessageListener = new TestMessageListener<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListener, new ChannelConsumerSettings());
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
@@ -122,14 +124,13 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
+		myTestMessageListener.setExpectedCount(1);
 		Observation obs = sendObservation("zoop", "SNOMED-CT", theExplicitSource, theRequestId);
+		myTestMessageListener.awaitExpected();
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 		assertEquals(theExpectedSourceValue, readObs.getMeta().getSource());
-
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
 
 		//Should receive at our queue receiver
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
@@ -166,9 +167,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		patient.setActive(true);
 		patient.getMeta().setTag(toSimpleCodingList(theTagsForCreate));
 
+		myTestMessageListener.setExpectedCount(1);
 		IIdType id = myClient.create().resource(patient).execute().getId();
-
-		waitForQueueToDrain();
+		myTestMessageListener.awaitExpected();
 
 		Patient receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(receivedPatient.getMeta().getTag()).hasSize(theTagsForCreate.size());
@@ -180,9 +181,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		maybeAddHeaderInterceptor(myClient, theHeaders);
 
+		myTestMessageListener.setExpectedCount(1);
 		myClient.update().resource(patient).execute();
-
-		waitForQueueToDrain();
+		myTestMessageListener.awaitExpected();
 
 		receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();;
 
@@ -319,11 +320,11 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myListener.getPayloads()).hasSize(1);
-		ResourceModifiedMessage payload = myListener.getPayloads().get(0);
+		assertThat(myTestMessageListener.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = myTestMessageListener.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myListener.clearMessages();
+		myTestMessageListener.clear();
 		return (T) resource;
 	}
 
