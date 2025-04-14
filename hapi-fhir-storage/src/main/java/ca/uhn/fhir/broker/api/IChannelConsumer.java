@@ -36,7 +36,7 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 * Start the thread(s) that will be consuming messages
 	 * @throws ChannelConsumerStartFailureException if the consumer fails to start (e.g. if it fails to connect to the broker)
 	 */
-	void start() throws ChannelConsumerStartFailureException;
+	void start();
 	/**
 	 * Close the consumer and release any resources.
 	 */
