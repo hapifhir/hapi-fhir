@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.broker.jms;
 
+import ca.uhn.fhir.broker.api.ChannelConsumerStartFailureException;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
@@ -76,6 +77,12 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 		return mySpringMessagingChannelReceiver.getName();
 	}
 
+	@Override
+	public void start() throws ChannelConsumerStartFailureException {
+		checkState();
+		mySpringMessagingChannelReceiver.start();
+	}
+
 	public ISpringMessagingChannelReceiver getSpringMessagingChannelReceiver() {
 		return mySpringMessagingChannelReceiver;
 	}
@@ -97,7 +104,6 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public void resume() {
-		checkState();
-		mySpringMessagingChannelReceiver.start();
+		start();
 	}
 }

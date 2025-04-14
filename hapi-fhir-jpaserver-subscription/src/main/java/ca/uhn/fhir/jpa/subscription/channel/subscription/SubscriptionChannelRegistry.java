@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;

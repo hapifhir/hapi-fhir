@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import jakarta.annotation.Nonnull;
 
