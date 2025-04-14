@@ -1562,43 +1562,13 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"/Encounter?service-provider.name:exact=Test",
-		"/Encounter?service-provider:Organization.name:exact=Test",
-		"/Encounter?subject.organization.name:exact=Test",
-		"/Encounter?subject:Patient.organization:Organization.name:exact=Test"  // multi-link chained search
-	})
-	public void testExactChainedSearch_withPartialSearchValue_noMatchFound(String theSearchUrl) {
-		// setup
-		myStorageSettings.setIndexOnContainedResources(true);
-
-		Organization org = buildResource("Organization", withName("TestOrg"));
-		IIdType orgId = doCreateResource(org);
-
-		Patient p = buildResource("Patient", withReference("managingOrganization", orgId));
-		IIdType pId = doCreateResource(p);
-
-		Encounter enc = buildResource("Encounter", withReference("subject", pId), withReference("serviceProvider", orgId));
-		doCreateResource(enc);
-
-		logAllStringIndexes();
-
-		// execute
-		myCaptureQueriesListener.clear();
-		List<String> encounterIds = myTestDaoSearch.searchForIds(theSearchUrl);
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
-
-		// validate
-		assertThat(encounterIds).isEmpty();
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {
 		"/Encounter?service-provider.name:exact=TestOrg",
 		"/Encounter?service-provider:Organization.name:exact=TestOrg",
 		"/Encounter?subject.organization.name:exact=TestOrg",
-		"/Encounter?subject:Patient.organization:Organization.name:exact=TestOrg"  // multi-link chained search
+		"/Encounter?subject:Patient.organization.name:exact=TestOrg",
+		"/Encounter?subject:Patient.organization:Organization.name:exact=TestOrg"
 	})
-	public void testExactChainedSearch_withExactSearchValue_exactMatchFound(String theSearchUrl) {
+	public void testReferenceChainedSearch_withExactModifier_willMatchExactly(String theSearchUrl) {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
 
