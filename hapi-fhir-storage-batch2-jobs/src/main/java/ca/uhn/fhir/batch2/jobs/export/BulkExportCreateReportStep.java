@@ -63,6 +63,11 @@ public class BulkExportCreateReportStep
 		return ChunkOutcome.SUCCESS();
 	}
 
+	@Override
+	public IReductionStepWorker<BulkExportJobParameters, BulkExportBinaryFileId, BulkExportJobResults> newInstance() {
+		return new BulkExportCreateReportStep();
+	}
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -80,8 +85,6 @@ public class BulkExportCreateReportStep
 					theStepExecutionDetails.getInstance().getInstanceId());
 
 			results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
-
-			myResourceToBinaryIds = null;
 		} else {
 			String msg = "Export complete, but no data to generate report for job instance: "
 					+ theStepExecutionDetails.getInstance().getInstanceId();

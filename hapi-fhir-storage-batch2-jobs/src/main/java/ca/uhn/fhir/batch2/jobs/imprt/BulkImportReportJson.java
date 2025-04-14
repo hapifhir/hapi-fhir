@@ -1,6 +1,6 @@
-/*
+/*-
  * #%L
- * HAPI FHIR JPA Server
+ * hapi-fhir-storage-batch2-jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,33 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.batch2.jobs.imprt;
 
-import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class LogicUtil {
+public class BulkImportReportJson implements IModelJson {
 
-	/**
-	 * Non instantiable
-	 */
-	@CoverageIgnore
-	private LogicUtil() {
-		// nothing
+	@JsonProperty("reportMsg")
+	private String myReportMsg;
+
+	public String getReportMsg() {
+		return myReportMsg;
 	}
 
-	/**
-	 * Returns true IF and ONLY IF exactly 1 of the provided boolean(s) is true
-	 */
-	public static boolean multiXor(boolean... theValues) {
-		boolean foundOne = false;
-		for (boolean next : theValues) {
-			if (next) {
-				if (foundOne) {
-					return false;
-				}
-				foundOne = true;
-			}
-		}
-		return foundOne;
+	public void setReportMsg(String theReportMsg) {
+		myReportMsg = theReportMsg;
 	}
 }

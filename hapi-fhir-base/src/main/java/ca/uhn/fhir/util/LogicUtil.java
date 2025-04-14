@@ -1,6 +1,6 @@
-/*-
+/*
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,31 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
+public class LogicUtil {
 
-import java.util.Optional;
+	/**
+	 * Non instantiable
+	 */
+	@CoverageIgnore
+	private LogicUtil() {
+		// nothing
+	}
 
-public interface ISearchParamHashIdentityRegistry {
-	Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity);
+	/**
+	 * Returns true IF and ONLY IF exactly 1 of the provided boolean(s) is true
+	 */
+	public static boolean multiXor(boolean... theValues) {
+		boolean foundOne = false;
+		for (boolean next : theValues) {
+			if (next) {
+				if (foundOne) {
+					return false;
+				}
+				foundOne = true;
+			}
+		}
+		return foundOne;
+	}
 }
