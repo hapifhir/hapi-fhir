@@ -120,6 +120,8 @@ public class SearchTask implements Callable<Void> {
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
 	// The max number of results that we request from the search
+	// Note that this is set using the configured pre-fetch thresholds, maximum page size, and/or the client provided
+	// _count parameter
 	private Integer myMaxResultsToFetch;
 
 	/**
