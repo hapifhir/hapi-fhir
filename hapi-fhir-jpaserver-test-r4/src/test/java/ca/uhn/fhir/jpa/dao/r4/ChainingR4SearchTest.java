@@ -1597,6 +1597,10 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// validate
 		assertThat(encounterIds).hasSize(1);
 		assertThat(encounterIds.get(0)).isEqualTo(enc1Id.getIdPart());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true))
+			.doesNotContain("HASH_NORM_PREFIX")
+			.doesNotContain("SP_VALUE_NORMALIZED")
+			.contains("HASH_EXACT");
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
