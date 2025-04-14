@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -485,19 +486,36 @@ public class JobInstance implements IModelJson, IJobInstance {
 		myFastTracking = theFastTracking;
 	}
 
+	/**
+	 * @return myUserData as an Unmodifiable Map<String, Object>
+	 */
 	public Map<String, Object> getUserData() {
 		if (myUserData == null) {
 			myUserData = new HashMap<>();
 		}
-		return myUserData;
+		return Collections.unmodifiableMap(myUserData);
+	}
+
+	public void addUserData(String theKey, Object theValue){
+		getUserData().put(theKey, theValue);
+		validateUserDataIsSerializable();
 	}
 
 	public void setUserData(Map<String, Object> theUserData) {
 		myUserData = theUserData;
+		validateUserDataIsSerializable();
 	}
 
 	public String getUserDataAsString() {
 		return JsonUtil.serializeOrInvalidRequest(getUserData());
+	}
+
+	/**
+	 * Calls getUserDataAsString() in order to ensure that myUserData is serializable
+	 * throws an InvalidRequestException if myUserData can't be serialized
+	 */
+	public void validateUserDataIsSerializable(){
+		getUserDataAsString();
 	}
 
 	public void setUserDataAsString(String theUserDataAsString) {
