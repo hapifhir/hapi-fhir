@@ -25,6 +25,11 @@ import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.MessageHandler;
 
+/**
+ * Adapt a Spring Messaging (JMS) Queue to {@link IChannelConsumer}
+ *
+ * @param <T> the type of payload this message consumer is expecting to receive
+ */
 public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 	private final Class<? extends IMessage<T>> myMessageType;
 	private final ISpringMessagingChannelReceiver mySpringMessagingChannelReceiver;

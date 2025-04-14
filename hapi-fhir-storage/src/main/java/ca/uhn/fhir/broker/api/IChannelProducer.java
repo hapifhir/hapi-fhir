@@ -22,6 +22,8 @@ package ca.uhn.fhir.broker.api;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
 /**
+ * Sends messages to a Message Broker.
+ *
  * @param <T> The type of messages sent by this producer
  */
 public interface IChannelProducer<T> {

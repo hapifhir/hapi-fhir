@@ -26,6 +26,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+/**
+ * Adapt a {@link IMessageListener} to Spring Messaging (JMS)
+ *
+ * @param <T> the type of payload this message handler is expecting to receive
+ */
 public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 	private final IMessageListener<T> myMessageListener;
 	private final Class<? extends IMessage<T>> myMessageType;

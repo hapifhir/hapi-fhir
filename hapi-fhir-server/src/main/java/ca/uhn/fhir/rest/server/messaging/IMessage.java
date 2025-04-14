@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import jakarta.annotation.Nonnull;
 
 import java.util.Map;
@@ -32,14 +33,14 @@ import java.util.UUID;
  * be exchanged with both JMS and non-JMS brokers. These message wrappers wrap a serializable payload that is the main content
  * of the message. This wrapper also contains meta-data about the message such as headers and a message key.
  *
- * @param <T> the type of the message payload. In most cases, T will be an implementation of {@link IModelJson}
+ * @param <T> the type of the message payload. In most cases, T will be a subclass of {@link BaseJsonMessage}
  */
 public interface IMessage<T> {
 	/**
 	 * The message key is used by brokers that support channel partitioning. The message key is used to determine which partition
-	 * a message is stored on. If message order is important, then the same message key should be used for all messages for which
-	 * order is important. E.g. if a series of messages creates, updates, and then deletes a resource, the resource id would be a good
-	 * candidate for the message key to ensure the order of operations is preserved on all messages concerning the same resource.
+	 * a message is stored on. If message order is important, then the same message key should be used for all messages that need
+	 * to preserve their order. E.g. if a series of messages create, update, and delete a resource, the resource id would be a good
+	 * candidate for the message key to ensure the order of operations is preserved on all messages concerning that resource.
 	 * @return the key of the message.
 	 */
 	@Nonnull
@@ -50,10 +51,11 @@ public interface IMessage<T> {
 	/**
 	 * @return a map of message headers
 	 */
+	@Nonnull
 	Map<String, Object> getHeaders();
 
 	/**
-	 * @return return an optional of the specific header
+	 * @return a header value as an Optional
 	 */
 	default <H> Optional<H> getHeader(String theHeaderName) {
 		return (Optional<H>) Optional.ofNullable(getHeaders().get(theHeaderName));

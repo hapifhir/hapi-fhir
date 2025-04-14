@@ -40,9 +40,11 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +78,7 @@ public abstract class BaseSubscriptionDeliveryListener implements IMessageListen
 	private MatchUrlService myMatchUrlService;
 
 	@Override
-	public void handleMessage(IMessage<ResourceDeliveryMessage> theMessage) {
+	public void handleMessage(@Nonnull @NotNull IMessage<ResourceDeliveryMessage> theMessage) {
 		ResourceDeliveryMessage msg = theMessage.getPayload();
 		String subscriptionId = msg.getSubscriptionId(myFhirContext);
 		if (subscriptionId == null) {

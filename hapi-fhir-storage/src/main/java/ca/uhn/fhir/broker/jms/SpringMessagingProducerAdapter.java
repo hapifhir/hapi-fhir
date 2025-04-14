@@ -26,6 +26,11 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ChannelInterceptor;
 
+/**
+ * Adapt a Spring Messaging (JMS) Queue to {@link IChannelProducer}
+ *
+ * @param <T> the type of payload this message producer is expecting to send
+ */
 public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 	private final Class<? extends IMessage<T>> myMessageType;
 	private final ISpringMessagingChannelProducer mySpringMessagingChannelProducer;

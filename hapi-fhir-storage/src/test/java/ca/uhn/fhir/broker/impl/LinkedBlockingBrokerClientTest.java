@@ -16,6 +16,7 @@ import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -153,7 +154,7 @@ class LinkedBlockingBrokerClientTest {
 		private final PointcutLatch myLatch = new PointcutLatch("MyMessageListener");
 
 		@Override
-		public void handleMessage(IMessage<MyTestMessageValue> theMessage) {
+		public void handleMessage(@Nonnull @NotNull IMessage<MyTestMessageValue> theMessage) {
 			ourLog.info("Received {}", theMessage);
 			myLatch.call(theMessage);
 		}

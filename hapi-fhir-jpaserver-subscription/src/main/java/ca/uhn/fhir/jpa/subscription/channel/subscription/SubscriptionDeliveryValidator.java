@@ -11,14 +11,13 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +37,16 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 	}
 
 	@Override
-	public void validate(ActiveSubscription theActiveSubscription, ResourceDeliveryMessage theResourceDeliveryMessage) {
-		String subscriptionId = theActiveSubscription.getSubscription().getIdElementString();
-		ourLog.debug("Retrieving subscription {}", subscriptionId);
+	public void validate(IIdType theSubscriptionId, ResourceDeliveryMessage theResourceDeliveryMessage) {
+		ourLog.debug("Retrieving subscription {}", theSubscriptionId);
 		IBaseResource resource;
 		try {
 			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 			systemRequestDetails.setRequestPartitionId(theResourceDeliveryMessage.getRequestPartitionId());
-			resource = myDaoRegistry.getSubscriptionDao().read(new IdDt(subscriptionId), systemRequestDetails);
+			resource = myDaoRegistry.getSubscriptionDao().read(theSubscriptionId, systemRequestDetails);
 		} catch (ResourceNotFoundException e) {
 			throw new SubscriptionInactiveException("Attempting to deliver " + theResourceDeliveryMessage.getPayloadId()
-					+ " to deleted subscription " + subscriptionId + ".  Aborting delivery.");
+					+ " to deleted subscription " + theSubscriptionId + ".  Aborting delivery.");
 		}
 		ourLog.debug("Retrieved resource {}", resource.getIdElement());
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(resource);

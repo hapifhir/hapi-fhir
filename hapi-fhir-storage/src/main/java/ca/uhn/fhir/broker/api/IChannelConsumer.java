@@ -22,6 +22,8 @@ package ca.uhn.fhir.broker.api;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
 /**
+ * Receives messages from a Message Broker.
+ *
  * @param <T> The type of messages received by this consumer
  */
 public interface IChannelConsumer<T> extends AutoCloseable {
@@ -50,14 +52,14 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	IMessageListener<T> getMessageListener();
 
-	/*
+	/**
 	 * Stop requesting new messages from the broker until resume() is called.
 	 */
 	default void pause() {
 		throw new UnsupportedOperationException();
 	}
 
-	/*
+	/**
 	 * Resume requesting messages from the broker.
 	 */
 	default void resume() {

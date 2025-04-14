@@ -51,7 +51,7 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 	@Override
 	@Nonnull
 	public MessageHeaders getHeaders() {
-		return myHeaders.toMessageHeaders();
+		return getHapiHeaders().toMessageHeaders();
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {

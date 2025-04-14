@@ -41,9 +41,11 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessagingException;
@@ -73,7 +75,7 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	private IMdmModelConverterSvc myModelConverter;
 
 	@Override
-	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) throws MessagingException {
+	public void handleMessage(@Nonnull @NotNull IMessage<ResourceModifiedMessage> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();

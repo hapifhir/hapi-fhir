@@ -26,6 +26,7 @@ import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -34,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This message listener delegates message handling to an ordered list of sub-listeners. It supports message handling
+ * within a retry-aware context.
+ *
+ * @param <T> the type of payload this message listener is expecting to receive
+ */
 public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultiplexingListener.class);
 	private final List<IMessageListener<T>> mySubListeners = new LinkedList<>();
@@ -87,10 +94,11 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 
 	private void checkState() {
 		if (myClosed) {
-			throw new BrokerListenerClosedException("Attempted to use a closed MultiplexingListener");
+			throw new BrokerListenerClosedException("Attempted to use a closed " + MultiplexingListener.class.getSimpleName());
 		}
 	}
 
+	@VisibleForTesting
 	public <L extends IMessageListener<T>> L getListenerOfTypeOrNull(Class<L> theMessageListenerClass) {
 		for (IMessageListener<T> next : mySubListeners) {
 			if (theMessageListenerClass.isAssignableFrom(next.getClass())) {

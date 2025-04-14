@@ -2,21 +2,21 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.jetbrains.annotations.NotNull;
 
 public class SubscriptionValidatingListener implements IRetryAwareMessageListener<ResourceDeliveryMessage> {
 	private final ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
-	private final ActiveSubscription myActiveSubscription;
+	private final IIdType mySubscriptionId;
 
 	public SubscriptionValidatingListener(
-			ISubscriptionDeliveryValidator theSubscriptionDeliveryValidator, ActiveSubscription theActiveSubscription) {
+			ISubscriptionDeliveryValidator theSubscriptionDeliveryValidator, IIdType theSubscriptionId) {
 		mySubscriptionDeliveryValidator = theSubscriptionDeliveryValidator;
-		myActiveSubscription = theActiveSubscription;
+		mySubscriptionId = theSubscriptionId;
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class SubscriptionValidatingListener implements IRetryAwareMessageListene
 		if (theMessageDeliveryContext != null
 				&& theMessageDeliveryContext.getRetryCount() > 0
 				&& mySubscriptionDeliveryValidator != null) {
-			mySubscriptionDeliveryValidator.validate(myActiveSubscription, theMessage.getPayload());
+			mySubscriptionDeliveryValidator.validate(mySubscriptionId, theMessage.getPayload());
 		}
 	}
 

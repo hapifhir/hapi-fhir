@@ -30,8 +30,10 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +71,7 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 	}
 
 	@Override
-	public void handleMessage(IMessage<ResourceModifiedMessage> theMessage) {
+	public void handleMessage(@Nonnull @NotNull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
 		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {

@@ -9,6 +9,9 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+/**
+ * Thrown when retrying a subscription message delivery and the subscription has been disabled.
+ */
 public class SubscriptionInactiveException extends RuntimeException {
 	public SubscriptionInactiveException(String theMessage) {
 		super(theMessage);

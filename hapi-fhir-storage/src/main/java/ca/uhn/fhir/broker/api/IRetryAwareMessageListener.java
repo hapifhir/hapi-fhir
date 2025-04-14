@@ -36,7 +36,7 @@ public interface IRetryAwareMessageListener<T> extends IMessageListener<T> {
 
 	/**
 	 *
-	 * Static helper method to call handleMessage on a message listener when it is not known in advance whether the
+	 * Static helper method to call handleMessage on a message listener when it is not known whether the
 	 * listener is an instance of {@link IRetryAwareMessageListener}
 	 *
 	 * @param theMessageListener the message listener to call

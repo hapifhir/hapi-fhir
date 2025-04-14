@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -108,7 +109,7 @@ public class SubscriptionChannelRegistry {
 		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
 				new SubscriptionResourceDeliveryMessageConsumer(deliveryConsumer);
 		SubscriptionValidatingListener subscriptionValidatingListener =
-				new SubscriptionValidatingListener(mySubscriptionDeliveryValidator, theActiveSubscription);
+				new SubscriptionValidatingListener(mySubscriptionDeliveryValidator, theActiveSubscription.getIdDt());
 		subscriptionResourceDeliveryMessageConsumer.addListener(subscriptionValidatingListener);
 		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
 		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);

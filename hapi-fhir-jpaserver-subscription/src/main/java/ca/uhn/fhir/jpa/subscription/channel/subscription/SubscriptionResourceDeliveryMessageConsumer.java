@@ -24,9 +24,11 @@ import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
- * This holds the Subscription ResourceDeliveryMessage consumer that receives Subscription matches and delivers them.
+ * This holds the Subscription ResourceDeliveryMessage consumer that receives ResourceDeliveryMessage messages
+ * and delivers them to listeners.
  */
 public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseable {
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
@@ -59,6 +61,7 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 		return myConsumer;
 	}
 
+	@VisibleForTesting
 	public <L extends IMessageListener<ResourceDeliveryMessage>> L getListenerOfTypeOrNull(
 			Class<L> theMessageListenerClass) {
 		return myMultiplexingListener.getListenerOfTypeOrNull(theMessageListenerClass);

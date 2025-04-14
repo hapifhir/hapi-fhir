@@ -23,6 +23,8 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteri
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -92,4 +94,8 @@ public class ActiveSubscription {
 	public long incrementDeliveriesCount() {
 		return myDeliveriesCount.incrementAndGet();
 	}
+
+    public IdDt getIdDt() {
+		return new IdDt("Subscription", myId);
+    }
 }
