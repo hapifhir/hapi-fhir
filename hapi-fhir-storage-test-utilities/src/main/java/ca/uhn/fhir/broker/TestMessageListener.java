@@ -2,6 +2,8 @@ package ca.uhn.fhir.broker;
 
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -18,6 +20,13 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+/**
+ * A Test Listener with a {@link PointcutLatch} that can be used to verify message delivery.
+ * A callback can be set on this test listener to simulate the listener throwing an exception.
+ *
+ * @param <M> The type IMessage<P> that will be handled e.g. {@link ResourceModifiedJsonMessage}
+ * @param <P> The type of payload of the message that will be handled e.g. {@link ResourceModifiedMessage}
+ */
 public class TestMessageListener<M extends IMessage<P>, P>
 		implements IMessageListener<P>, IPointcutLatch, AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestMessageListener.class);
