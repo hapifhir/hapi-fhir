@@ -2686,9 +2686,9 @@
 					<version>1.24</version>
 					<configuration>
 						<signature>
-							<groupId>net.sf.androidscents.signature</groupId>
-							<artifactId>android-api-level-26</artifactId>
-							<version>8.0.0_r2</version>
+							<groupId>com.toasttab.android</groupId>
+							<artifactId>gummy-bears-api-34</artifactId>
+							<version>0.12.0</version>
 						</signature>
 					</configuration>
 					<executions>
