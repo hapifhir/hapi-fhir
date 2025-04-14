@@ -162,7 +162,7 @@ public class JsonUtil {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
-			throw invalidRequestException(theJson, e);
+			throw newInvalidRequestException(theJson, e);
 		}
 	}
 
@@ -174,11 +174,11 @@ public class JsonUtil {
 		try {
 			return serialize(theObject, thePrettyPrint);
 		} catch (InternalErrorException e) {
-			throw invalidRequestException(theObject, e);
+			throw newInvalidRequestException(theObject, e);
 		}
 	}
 
-	private static InvalidRequestException invalidRequestException(Object theObject, Exception theCause)
+	private static InvalidRequestException newInvalidRequestException(Object theObject, Exception theCause)
 			throws InvalidRequestException {
 		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
 	}

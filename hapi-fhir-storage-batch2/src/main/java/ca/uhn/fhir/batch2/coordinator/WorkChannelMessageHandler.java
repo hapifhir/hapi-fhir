@@ -265,6 +265,10 @@ class WorkChannelMessageHandler implements MessageHandler {
 								.add(JobInstance.class, process.myJobInstance)
 								.add(WorkChunk.class, process.myWorkChunk);
 
+						/*
+						 * The executeStep() method actually performs the processing of a given work chunk, but
+						 * this execution can optionally be wrapped by interceptors wanting to influence the processing.
+						 */
 						Runnable runnable = () -> process.myStepExector.executeStep();
 
 						myInterceptorBroadcaster.runWithFilterHooks(
