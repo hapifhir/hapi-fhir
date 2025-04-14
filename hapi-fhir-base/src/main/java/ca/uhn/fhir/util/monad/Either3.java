@@ -44,7 +44,7 @@ public class Either3<L, M, R> {
 	}
 
 	/**
-	 * Swaps the position of the left and right types The middle type is unchanged.
+	 * Swaps the position of the left and right types. The middle type is unchanged.
 	 * The value is unchanged.
 	 *
 	 * @return a new Either3 with the left and right types swapped
