@@ -238,9 +238,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@RegisterExtension
 	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
 
-	@RegisterExtension
-	private LogbackTestExtension mySearchBuilderLogCapture = new LogbackTestExtension(SearchBuilder.class, Level.WARN);
-
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -739,13 +736,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private List<String> getLogMessagesOfType() {
-		return mySearchBuilderLogCapture.getLogEvents()
-			.stream()
-			.map(ILoggingEvent::getFormattedMessage)
-			.toList();
-	}
-
 	/**
 	 * @param theRefCountToResourceCount map where the key is the number of references (general-practitioner) the Patient should have, and the value is the number of such Patients to create
 	 * @param theOrganizationRefs the Organizations to use as references
@@ -773,7 +763,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
-		//todo change to do while as well
 		// 5 resources with 2 refs; 3 resources with 1 ref
 		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
 		// 10 resources with 2 refs; 2 resources with 1 ref
@@ -784,6 +773,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Map<Integer, Integer> m4 = Map.of(3, 4, 1, 1);
 		// 2 resources with 3 refs; 2 resources with 2 refs, 3 resources with 1 ref
 		Map<Integer, Integer> m5 = Map.of(3, 2, 2, 2,1, 3);
+		Map<Integer, Integer> m6 = Map.of(3, 3, 1,4);
+		Map<Integer, Integer> m7 = Map.of(2, 1, 1,11);
 
 
 		return Stream.of(
@@ -793,7 +784,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Arguments.of(m3, 500, null),
 			Arguments.of(m4, null, null),
 			Arguments.of(m5, null, null),
-			Arguments.of(m1, null, List.of(9, 13, 503, -1))
+			Arguments.of(m1, null, List.of(9, 13, 503, -1)),
+			Arguments.of(m6, null, null),
+			Arguments.of(m7, null, null)
 		);
 	}
 
