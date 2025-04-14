@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -91,7 +90,7 @@ public class SubscriptionChannelFactoryTest {
 
 	private class NpeThrowingListener implements IMessageListener<ResourceDeliveryMessage> {
 		@Override
-		public void handleMessage(@Nonnull @NotNull IMessage<ResourceDeliveryMessage> theMessage) {
+		public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage) {
 			throw new NullPointerException("THIS IS THE MESSAGE");
 		}
 

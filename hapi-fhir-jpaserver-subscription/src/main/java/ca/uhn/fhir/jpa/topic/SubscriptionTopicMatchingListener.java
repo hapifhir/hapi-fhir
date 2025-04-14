@@ -35,7 +35,6 @@ import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -79,7 +78,7 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 	}
 
 	@Override
-	public void handleMessage(@Nonnull @NotNull IMessage<ResourceModifiedMessage> theMessage) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage msg = theMessage.getPayload();
 
 		if (msg.getPayload(myFhirContext) == null) {

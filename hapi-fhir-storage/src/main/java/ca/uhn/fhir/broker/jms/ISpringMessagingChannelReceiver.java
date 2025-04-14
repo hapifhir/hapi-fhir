@@ -30,7 +30,7 @@ public interface ISpringMessagingChannelReceiver extends SubscribableChannel, In
 	/**
 	 * @return the name of the Queue this Channel Receiver consumes from
 	 */
-	String getName();
+	String getChannelName();
 
 	/**
 	 * Stop the service (e.g. stop subscriber threads)

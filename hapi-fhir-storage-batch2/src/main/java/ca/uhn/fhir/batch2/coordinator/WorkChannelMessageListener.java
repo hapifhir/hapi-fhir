@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -72,7 +71,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	}
 
 	@Override
-	public void handleMessage(@Nonnull @NotNull IMessage<JobWorkNotification> theMessage) {
+	public void handleMessage(@Nonnull IMessage<JobWorkNotification> theMessage) {
 		handleWorkChannelMessage(theMessage.getPayload());
 	}
 

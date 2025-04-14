@@ -74,7 +74,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public String getChannelName() {
-		return mySpringMessagingChannelReceiver.getName();
+		return mySpringMessagingChannelReceiver.getChannelName();
 	}
 
 	@Override

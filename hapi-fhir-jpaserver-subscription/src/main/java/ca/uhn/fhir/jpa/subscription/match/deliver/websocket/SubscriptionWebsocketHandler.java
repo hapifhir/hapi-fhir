@@ -32,7 +32,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,7 +156,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		}
 
 		@Override
-		public void handleMessage(@Nonnull @NotNull IMessage<ResourceDeliveryMessage> theMessage) {
+		public void handleMessage(@Nonnull IMessage<ResourceDeliveryMessage> theMessage) {
 			try {
 				ResourceDeliveryMessage msg = theMessage.getPayload();
 				handleSubscriptionPayload(msg);

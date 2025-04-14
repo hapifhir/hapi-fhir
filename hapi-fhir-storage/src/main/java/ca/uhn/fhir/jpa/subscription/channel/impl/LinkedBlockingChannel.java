@@ -36,18 +36,18 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel
 		implements ISpringMessagingChannelProducer, ISpringMessagingChannelReceiver {
 
-	private final String myName;
+	private final String myChannelName;
 	private final Supplier<Integer> myQueueSizeSupplier;
 
 	private final RetryPolicyProvider myRetryPolicyProvider;
 
 	public LinkedBlockingChannel(
-			String theName,
+			String theChannelName,
 			Executor theExecutor,
 			Supplier<Integer> theQueueSizeSupplier,
 			RetryPolicyProvider theRetryPolicyProvider) {
 		super(theExecutor);
-		myName = theName;
+		myChannelName = theChannelName;
 		myQueueSizeSupplier = theQueueSizeSupplier;
 		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
@@ -63,8 +63,8 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel
 	}
 
 	@Override
-	public String getName() {
-		return myName;
+	public String getChannelName() {
+		return myChannelName;
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel
 
 	@Override
 	public boolean subscribe(@Nonnull MessageHandler theHandler) {
-		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName(), myRetryPolicyProvider));
+		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getChannelName(), myRetryPolicyProvider));
 	}
 
 	@Override

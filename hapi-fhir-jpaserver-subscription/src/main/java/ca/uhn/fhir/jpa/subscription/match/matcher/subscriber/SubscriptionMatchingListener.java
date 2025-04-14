@@ -35,7 +35,6 @@ import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 	}
 
 	@Override
-	public void handleMessage(@Nonnull @NotNull IMessage<ResourceModifiedMessage> theMessage) {
+	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		ResourceModifiedMessage msg = theMessage.getPayload();
