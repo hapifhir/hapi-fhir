@@ -33,7 +33,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">1.0.2</td>
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
-        <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-release">4.0.1</td>
         <td class="versions-table-cell-draft">4.3.0</td>
         <td class="versions-table-cell-draft">5.0.0</td>
     </tr>
