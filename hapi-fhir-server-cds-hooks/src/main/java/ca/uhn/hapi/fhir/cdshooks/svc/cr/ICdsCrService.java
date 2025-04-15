@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.api.Repository;
 
 import java.util.Collections;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public interface ICdsCrService {
 	IBaseParameters encodeParams(CdsServiceRequestJson theJson);
 

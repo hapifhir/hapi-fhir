@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class QuestionnaireResponseExtractProvider {
 	@Autowired
 	IQuestionnaireResponseProcessorFactory myQuestionnaireResponseProcessorFactory;

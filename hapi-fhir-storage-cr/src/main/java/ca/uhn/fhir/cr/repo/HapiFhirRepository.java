@@ -57,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
  **/
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class HapiFhirRepository implements Repository {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
 	private final DaoRegistry myDaoRegistry;

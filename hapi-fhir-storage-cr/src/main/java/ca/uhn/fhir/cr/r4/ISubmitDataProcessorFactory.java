@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public interface ISubmitDataProcessorFactory {
 	R4SubmitDataService create(RequestDetails theRequestDetails);
 }

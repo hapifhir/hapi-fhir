@@ -54,6 +54,7 @@ import java.util.function.Function;
  * <p/>
  * Also used for various operations to serialize/deserialize dates to/from JSON classes.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class StringTimePeriodHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringTimePeriodHandler.class);
 

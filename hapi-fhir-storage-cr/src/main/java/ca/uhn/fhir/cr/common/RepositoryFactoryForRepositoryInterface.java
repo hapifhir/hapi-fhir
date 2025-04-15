@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.api.Repository;
 /**
  * Factory interface to return a {@link Repository} from a {@link RequestDetails}
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @FunctionalInterface
 public interface RepositoryFactoryForRepositoryInterface {
 	Repository create(RequestDetails theRequestDetails);

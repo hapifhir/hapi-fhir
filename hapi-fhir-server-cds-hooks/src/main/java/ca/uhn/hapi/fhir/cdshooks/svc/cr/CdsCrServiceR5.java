@@ -66,6 +66,7 @@ import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_PARAMETER_USER
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrServiceR5 implements ICdsCrService {
 	protected final RequestDetails myRequestDetails;
 	protected final Repository myRepository;

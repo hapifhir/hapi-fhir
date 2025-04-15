@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Import;
  * Adding the condition to the configs themselves causes issues with downstream projects.
  *
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Conditional(CrConfigCondition.class)
 @Import({RepositoryConfig.class, ApplyOperationConfig.class})

@@ -35,6 +35,7 @@ import java.util.Map;
  * RequestDetails object for reentrant calls. It retains header and tenancy information while
  * scrapping everything else.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 class RequestDetailsCloner {
 
 	static DetailsBuilder startWith(RequestDetails theDetails) {

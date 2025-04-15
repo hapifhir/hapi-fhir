@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.ZoneOffset;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 public class CrBaseConfig {
 

@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class RepositoryConfigCondition implements Condition {
 	private static final Logger ourLog = LoggerFactory.getLogger(RepositoryConfigCondition.class);
 

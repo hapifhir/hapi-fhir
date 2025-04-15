@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.common;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CanonicalHelper {
 	public static <C extends IPrimitiveType<String>> C getCanonicalType(
 			FhirVersionEnum fhirVersion, String theCanonical, String theUrl, String theVersion) {

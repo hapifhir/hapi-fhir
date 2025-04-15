@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class ProviderSelector {
 	private final FhirContext myFhirContext;
 	private final Map<FhirVersionEnum, List<Class<?>>> myProviderMap;
