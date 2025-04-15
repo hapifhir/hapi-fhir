@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
-import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
@@ -366,11 +366,12 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
 
 		// Subscription Validation
-		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class));
-		subscriptionCriteriaValidation.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
+		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(
+				myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class));
+		subscriptionCriteriaValidation.addAllowedCriteriaPattern(
+				SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		subscriptionCriteriaValidation.setValidateRestHookEndpointIsReachable(true);
 		registerInterceptor(subscriptionCriteriaValidation);
-
 	}
 
 	/**

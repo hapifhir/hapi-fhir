@@ -59,7 +59,8 @@ public class SubscriptionExpiryService {
 		IBundleProvider results = subscriptionDao.search(params, new SystemRequestDetails());
 		for (IBaseResource subscriptionToDeactivate : results.getAllResources()) {
 			ourLog.info("Deactivating Subscription (status=off): {}", subscriptionToDeactivate.getIdElement());
-			SubscriptionUtil.setStatus(myDaoRegistry.getFhirContext(), subscriptionToDeactivate, SubscriptionConstants.OFF_STATUS);
+			SubscriptionUtil.setStatus(
+					myDaoRegistry.getFhirContext(), subscriptionToDeactivate, SubscriptionConstants.OFF_STATUS);
 			subscriptionDao.update(subscriptionToDeactivate, new SystemRequestDetails());
 		}
 	}
