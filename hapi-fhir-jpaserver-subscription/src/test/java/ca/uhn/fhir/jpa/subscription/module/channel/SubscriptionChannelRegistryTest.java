@@ -1,12 +1,17 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryListenerFactory;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +38,8 @@ public class SubscriptionChannelRegistryTest {
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@MockBean
+	ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
+	@MockBean
     StorageSettings myStorageSettings;
 
 	@Test
@@ -45,6 +52,9 @@ public class SubscriptionChannelRegistryTest {
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
 		when(mySubscriptionDeliveryChannelFactory.newDeliveryProducer(any(), any())).thenAnswer(t -> mock(IChannelProducer.class));
+		IChannelConsumer<ResourceDeliveryMessage> consumer = mock(IChannelConsumer.class);
+		when(consumer.getMessageListener()).thenReturn(new MultiplexingListener<>(ResourceDeliveryMessage.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliveryConsumer(any(), any(), any())).thenAnswer(t -> consumer);
 
 		assertNull(mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
