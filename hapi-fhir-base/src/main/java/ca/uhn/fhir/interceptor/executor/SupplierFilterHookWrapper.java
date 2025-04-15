@@ -5,15 +5,15 @@ import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilte
 import java.util.function.Supplier;
 
 /**
- * Wraps a Supplier with a filter hook.
+ * Wraps a Supplier with advice from a filter hook.
  */
 public class SupplierFilterHookWrapper<T> implements Supplier<T> {
-	private final IInterceptorFilterHook<T> myAdvice;
+	private final IInterceptorFilterHook myAdvice;
 	private final Supplier<T> myTarget;
 	private final Supplier<String> myMessageSupplier;
 
 	public SupplierFilterHookWrapper(
-			Supplier<T> theTarget, IInterceptorFilterHook<T> theAdvice, Supplier<String> theCauseDescriptionSupplier) {
+			Supplier<T> theTarget, IInterceptorFilterHook theAdvice, Supplier<String> theCauseDescriptionSupplier) {
 		myAdvice = theAdvice;
 		myTarget = theTarget;
 		myMessageSupplier = theCauseDescriptionSupplier;
@@ -21,34 +21,43 @@ public class SupplierFilterHookWrapper<T> implements Supplier<T> {
 
 	@Override
 	public T get() {
-		TrackingSupplierWrapper<T> trackingSupplierWrapper = new TrackingSupplierWrapper<>(myTarget);
+		SupplierRunnable<T> trackingSupplierWrapper = new SupplierRunnable<>(myTarget);
 
-		T result = myAdvice.apply(trackingSupplierWrapper);
+		myAdvice.wrapCall(trackingSupplierWrapper);
 
 		if (!trackingSupplierWrapper.wasExecuted()) {
 			throw new IllegalStateException(
 					"Supplier was not executed in filter produced by " + myMessageSupplier.get());
 		}
 
-		return result;
+		return trackingSupplierWrapper.getResult();
 	}
 
-	static class TrackingSupplierWrapper<T> implements Supplier<T> {
+	/**
+	 * Adapt a Supplier to Runnable.
+	 * We use a Runnable for a simpler api for callers.
+	 * @param <T>
+	 */
+	static class SupplierRunnable<T> implements Runnable {
 		private final Supplier<T> myTarget;
 		private boolean myExecutedFlag = false;
+		private T myResult = null;
 
-		TrackingSupplierWrapper(Supplier<T> theTarget) {
+		SupplierRunnable(Supplier<T> theTarget) {
 			myTarget = theTarget;
 		}
 
-		@Override
-		public T get() {
+		public void run() {
 			myExecutedFlag = true;
-			return myTarget.get();
+			myResult = myTarget.get();
 		}
 
 		public boolean wasExecuted() {
 			return myExecutedFlag;
+		}
+
+		public T getResult() {
+			return myResult;
 		}
 	}
 }

@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import static ca.uhn.fhir.interceptor.executor.BaseInterceptorService.haveAppropriateParams;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,13 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class InterceptorServiceTest {
+class InterceptorServiceTest {
 	final InterceptorService myInterceptorService = new InterceptorService();
 
 	private final List<String> myInvocations = new ArrayList<>();
 
 	@Test
-	public void testInterceptorWithAnnotationDefinedOnInterface() {
+	void testInterceptorWithAnnotationDefinedOnInterface() {
 
 		InterceptorService svc = new InterceptorService();
 		TestInterceptorWithAnnotationDefinedOnInterface_Class interceptor = new TestInterceptorWithAnnotationDefinedOnInterface_Class();
@@ -48,7 +49,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorThrowsException() {
+	void testInterceptorThrowsException() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -70,7 +71,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorReturnsClass() {
+	void testInterceptorReturnsClass() {
 
 		class InterceptorReturningClass {
 
@@ -105,7 +106,7 @@ public class InterceptorServiceTest {
 	 * Hook methods with private access are ignored
 	 */
 	@Test
-	public void testInterceptorWithPrivateAccessHookMethod() {
+	void testInterceptorWithPrivateAccessHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -117,12 +118,11 @@ public class InterceptorServiceTest {
 		InterceptorService svc = new InterceptorService();
 		svc.registerInterceptor(new InterceptorThrowingException());
 
-		// Should not fail
-		svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
+		assertThatNoException().isThrownBy(()->svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B")));
 	}
 
 	@Test
-	public void testInterceptorWithDefaultAccessHookMethod() {
+	void testInterceptorWithDefaultAccessHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -144,7 +144,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorWithInheritedHookMethod() {
+	void testInterceptorWithInheritedHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -170,7 +170,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorWithNoHooks() {
+	void testInterceptorWithNoHooks() {
 
 		class InterceptorWithNoHooks {
 			// nothing
@@ -183,7 +183,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testRegisterHookFails() {
+	void testRegisterHookFails() {
 		InterceptorService svc = new InterceptorService();
 		int initialSize = svc.getGlobalInterceptorsForUnitTest().size();
 
@@ -199,7 +199,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testManuallyRegisterInterceptor() {
+	void testManuallyRegisterInterceptor() {
 		InterceptorService svc = new InterceptorService();
 
 		// Registered in opposite order to verify that the order on the annotation is used
@@ -250,7 +250,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInvokeGlobalInterceptorMethods() {
+	void testInvokeGlobalInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
 		// Registered in opposite order to verify that the order on the annotation is used
@@ -271,7 +271,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInvokeAnonymousInterceptorMethods() {
+	void testInvokeAnonymousInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestAnonymousInterceptorOne interceptor0 = new MyTestAnonymousInterceptorOne();
@@ -291,7 +291,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInvokeUsingSupplierArg() {
+	void testInvokeUsingSupplierArg() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
@@ -309,7 +309,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInvokeGlobalInterceptorMethods_MethodAbortsProcessing() {
+	void testInvokeGlobalInterceptorMethods_MethodAbortsProcessing() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
@@ -329,7 +329,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testCallHooksInvokedWithNullParameters() {
+	void testCallHooksInvokedWithNullParameters() {
 		InterceptorService svc = new InterceptorService();
 
 		class NullParameterInterceptor {
@@ -382,7 +382,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testCallHooksLogAndSwallowException() {
+	void testCallHooksLogAndSwallowException() {
 		InterceptorService svc = new InterceptorService();
 
 		class LogAndSwallowInterceptor0 {
@@ -439,7 +439,7 @@ public class InterceptorServiceTest {
 
 
 	@Test
-	public void testCallHooksInvokedWithWrongParameters() {
+	void testCallHooksInvokedWithWrongParameters() {
 		InterceptorService svc = new InterceptorService();
 
 		Integer msg = 123;
@@ -454,7 +454,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testValidateParamTypes() {
+	void testValidateParamTypes() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
@@ -464,7 +464,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testValidateParamTypesMissingParam() {
+	void testValidateParamTypesMissingParam() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
@@ -477,7 +477,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testValidateParamTypesExtraParam() {
+	void testValidateParamTypesExtraParam() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
@@ -497,7 +497,7 @@ public class InterceptorServiceTest {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
-	public void testValidateParamTypesWrongParam() {
+	void testValidateParamTypesWrongParam() {
 
 		HookParams params = new HookParams();
 		params.add((Class) String.class, 1);
@@ -684,12 +684,11 @@ public class InterceptorServiceTest {
 			// given no interceptors registered
 			myInterceptorService.registerInterceptor(new Object() {
 				@Hook(Pointcut.TEST_FILTER)
-				public IInterceptorFilterHook<?> testFilter(HookParams theParams) {
+				public IInterceptorFilterHook testFilter(HookParams theParams) {
 					// return a filter that does not call the supplier
-					return (supplier)->{
-						mySupplierLog.add("bad-boy ran but didn't call supplier");
+					return theContinuation ->{
+						mySupplierLog.add("bad-boy ran but didn't call continuation");
 						// supplier.get(); // not called
-						return null;
 					};
 				}
 
@@ -701,7 +700,7 @@ public class InterceptorServiceTest {
 				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
 
 			assertThat(mySupplierLog).containsExactly(
-				"bad-boy ran but didn't call supplier"
+				"bad-boy ran but didn't call continuation"
 			);
 		}
 
@@ -720,16 +719,16 @@ public class InterceptorServiceTest {
 			}
 
 			@Hook(Pointcut.TEST_FILTER)
-			public IInterceptorFilterHook<?> testFilter(String theParam) {
-				return new MyFilter<>();
+			public IInterceptorFilterHook testFilter(String theParam) {
+				return new MyFilter();
 			}
 
-			private class MyFilter<T> implements IInterceptorFilterHook<T> {
+			private class MyFilter implements IInterceptorFilterHook {
 				@Override
-				public T apply(Supplier<T> theSupplier) {
+				public void wrapCall(Runnable theContinuation) {
 					mySupplierLog.add(myName + "-before");
 					try {
-						return theSupplier.get();
+						theContinuation.run();
 					} finally {
 						mySupplierLog.add(myName + "-after");
 					}
@@ -739,7 +738,7 @@ public class InterceptorServiceTest {
 	}
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		myInvocations.clear();
 	}
 
