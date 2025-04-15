@@ -163,7 +163,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setWarningMessages(theJobInstance.getWarningMessages());
 		setTriggeringUsername(theJobInstance.getTriggeringUsername());
 		setTriggeringClientId(theJobInstance.getTriggeringClientId());
-		setUserData(theJobInstance.getUserData());
+		setUserData(theJobInstance.getOrInitializeUserData());
 	}
 
 	public String getJobDefinitionId() {
@@ -490,15 +490,19 @@ public class JobInstance implements IModelJson, IJobInstance {
 	 * @return myUserData as an Unmodifiable Map<String, Object>
 	 */
 	public Map<String, Object> getUserData() {
-		if (myUserData == null) {
-			myUserData = new HashMap<>();
-		}
-		return Collections.unmodifiableMap(myUserData);
+		return Collections.unmodifiableMap(getOrInitializeUserData());
 	}
 
 	public void addUserData(String theKey, Object theValue) {
-		getUserData().put(theKey, theValue);
+		getOrInitializeUserData().put(theKey, theValue);
 		validateUserDataIsSerializable();
+	}
+
+	private Map<String, Object> getOrInitializeUserData() {
+		if (myUserData == null) {
+			myUserData = new HashMap<>();
+		}
+		return myUserData;
 	}
 
 	public void setUserData(Map<String, Object> theUserData) {
