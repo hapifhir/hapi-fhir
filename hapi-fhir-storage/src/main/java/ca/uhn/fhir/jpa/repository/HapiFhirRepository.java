@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -182,7 +183,7 @@ public class HapiFhirRepository implements Repository {
 
 		var pagingProvider = restfulServer.getPagingProvider();
 		if (pagingProvider == null) {
-			throw new InvalidRequestException("This server does not support paging");
+			throw new InvalidRequestException(Msg.code(2638) + "This server does not support paging");
 		}
 
 		var pagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
@@ -214,7 +215,7 @@ public class HapiFhirRepository implements Repository {
 			ourLog.info("Client requested unknown paging ID[{}]", pagingAction);
 			String msg =
 					fhirContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", pagingAction);
-			throw new ResourceGoneException(msg);
+			throw new ResourceGoneException(Msg.code(2639) + msg);
 		}
 	}
 
@@ -325,7 +326,7 @@ public class HapiFhirRepository implements Repository {
 	}
 
 	private void notImplemented() {
-		throw new NotImplementedOperationException("history not yet implemented");
+		throw new NotImplementedOperationException(Msg.code(2640) + "history not yet implemented");
 	}
 
 	@Override
@@ -362,7 +363,7 @@ public class HapiFhirRepository implements Repository {
 			return unsafeCast(
 					restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details));
 		} catch (IOException exception) {
-			throw new InternalErrorException(exception);
+			throw new InternalErrorException(Msg.code(2641) + exception);
 		}
 	}
 
