@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
-	public void testCriteriaFilter() {
+	public void testCriteriaFilter() throws InterruptedException {
 		// Setup
 		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
@@ -37,7 +37,7 @@ public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test 
 		topicGoodTrigger.getQueryCriteria()
 			.setCurrent("Observation?code=http://foo|123") // acceptable
 			.setRequireBoth(false);
-		mySubscriptionTopicDao.update(topicGood, mySrd);
+		createResource(topicGood, false);
 
 		Subscription subsGood = new Subscription();
 		subsGood.setId("GOOD");
@@ -48,7 +48,7 @@ public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test 
 		subsGood.setTopic("http://good");
 		subsGood.setContentType(Constants.CT_FHIR_JSON_NEW);
 		subsGood.setEndpoint("http://localhost" + ourListenerPort);
-		mySubscriptionDao.update(subsGood, mySrd);
+		putSubscription(subsGood);
 
 		SubscriptionTopic topicBad = new SubscriptionTopic();
 		topicBad.setId("BAD");

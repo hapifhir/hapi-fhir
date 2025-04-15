@@ -186,6 +186,18 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return subscription;
 	}
 
+	@Nonnull
+	protected Subscription putSubscription(Subscription subscription) throws InterruptedException {
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		MethodOutcome methodOutcome = myClient.update().resource(subscription).execute();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+
+		subscription.setId(methodOutcome.getId().toVersionless());
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		return subscription;
+	}
+
 	protected Subscription newTopicSubscription(String theTopicUrl, String thePayload, String... theFilters) {
 
 		Subscription subscription = new Subscription();
