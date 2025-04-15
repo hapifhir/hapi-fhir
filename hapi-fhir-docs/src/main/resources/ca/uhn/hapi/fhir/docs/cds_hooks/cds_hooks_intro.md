@@ -17,7 +17,6 @@ In addition to simplifying the effort to build CDS Hooks, the HAPI FHIR CDS Hook
 * All access is logged in the HAPI FHIR Audit Trail.
 * Authorization is controlled by the HAPI FHIR security framework.
 * Management and monitoring capabilities are provided by the HAPI FHIR platform.
-* [CDS on FHIR](/docs/cds_hooks/#cds-on-fhir) implementation that auto-generates CDS Services from PlanDefinitions and executes via the $apply operation.
 
 # Auto Prefetch
 
@@ -129,15 +128,3 @@ A sample CDS Hooks project is available at the following links:
 
 * [cdr-endpoint-cds-hooks-demoproject-1.0.zip](/docs/downloads/cdr-endpoint-cds-hooks-demoproject-1.0.zip)
 * [cdr-endpoint-cds-hooks-demoproject-1.0.tar.gz](/docs/downloads/cdr-endpoint-cds-hooks-demoproject-1.0.tar.gz)
-
-# CDS on FHIR
-
-To create CDS Services from PlanDefinitions the dependencies for a FHIR Storage Module, FHIR Endpoint and CQL module must be set.  This will create a listener on the storage module so that any changes to PlanDefinition resources will update the CDS Service cache.
-
-Any PlanDefinition resource with an action that has a trigger of type [named-event](http://hl7.org/fhir/R4/codesystem-trigger-type.html#trigger-type-named-event) will have a CDS Service created using the PlanDefinition.id as the service id and the name of the trigger as the hook that the service is created for per the [CDS on FHIR Specification](https://hl7.org/fhir/clinicalreasoning-cds-on-fhir.html#surfacing-clinical-decision-support).
-
-CDS Services created this way will show up as registered services and can be called just as other services are called. The CDS Service request will be converted into parameters for the [$apply operation](/docs/clinical_reasoning/plan_definitions.html#apply), the results of which are then converted into a CDS Response per the [CDS on FHIR Specification](https://hl7.org/fhir/clinicalreasoning-cds-on-fhir.html#consuming-decision-support).
-
-These CDS Services will take advantage of the [Auto Prefetch](/docs/cds_hooks/#auto-prefetch) feature.  Prefetch data is included as a Bundle in the `data` parameter of the $apply call.
-
-The $apply operation is running against the FHIR Storage Module, so it will also have access to any data stored there.  Any CQL evaluation during the $apply operation that results in a retrieve will always pull from the Bundle and the FHIR Storage Module.  This is done regardless of what data is passed into the prefetch of the service request. 
