@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.TriggerDefinition;
 
 import java.util.stream.Collectors;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
 	protected PlanDefinition myPlanDefinition;
 	protected PrefetchUrlList myPrefetchUrlList;

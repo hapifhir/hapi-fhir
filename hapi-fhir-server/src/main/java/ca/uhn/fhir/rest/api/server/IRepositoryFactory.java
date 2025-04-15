@@ -9,5 +9,5 @@ import com.google.common.annotations.Beta;
 @FunctionalInterface
 @Beta
 public interface IRepositoryFactory {
-    Repository create(RequestDetails requestDetails);
+	Repository create(RequestDetails requestDetails);
 }

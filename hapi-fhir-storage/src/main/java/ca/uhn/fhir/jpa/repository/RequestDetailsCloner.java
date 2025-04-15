@@ -18,82 +18,82 @@ import java.util.Map;
  */
 class RequestDetailsCloner {
 
-    private RequestDetailsCloner() {}
+	private RequestDetailsCloner() {}
 
-    static DetailsBuilder startWith(RequestDetails details) {
-        var newDetails = new SystemRequestDetails(details);
-        newDetails.setRequestType(RequestTypeEnum.POST);
-        newDetails.setOperation(null);
-        newDetails.setResource(null);
-        newDetails.setParameters(new HashMap<>());
-        newDetails.setResourceName(null);
-        newDetails.setCompartmentName(null);
-        newDetails.setResponse(details.getResponse());
+	static DetailsBuilder startWith(RequestDetails details) {
+		var newDetails = new SystemRequestDetails(details);
+		newDetails.setRequestType(RequestTypeEnum.POST);
+		newDetails.setOperation(null);
+		newDetails.setResource(null);
+		newDetails.setParameters(new HashMap<>());
+		newDetails.setResourceName(null);
+		newDetails.setCompartmentName(null);
+		newDetails.setResponse(details.getResponse());
 
-        return new DetailsBuilder(newDetails);
-    }
+		return new DetailsBuilder(newDetails);
+	}
 
-    static class DetailsBuilder {
-        private final SystemRequestDetails details;
+	static class DetailsBuilder {
+		private final SystemRequestDetails details;
 
-        DetailsBuilder(SystemRequestDetails details) {
-            this.details = details;
-        }
+		DetailsBuilder(SystemRequestDetails details) {
+			this.details = details;
+		}
 
-        DetailsBuilder setAction(RestOperationTypeEnum restOperationType) {
-            details.setRestOperationType(restOperationType);
-            return this;
-        }
+		DetailsBuilder setAction(RestOperationTypeEnum restOperationType) {
+			details.setRestOperationType(restOperationType);
+			return this;
+		}
 
-        DetailsBuilder addHeaders(Map<String, String> headers) {
-            if (headers != null) {
-                for (var entry : headers.entrySet()) {
-                    details.addHeader(entry.getKey(), entry.getValue());
-                }
-            }
+		DetailsBuilder addHeaders(Map<String, String> headers) {
+			if (headers != null) {
+				for (var entry : headers.entrySet()) {
+					details.addHeader(entry.getKey(), entry.getValue());
+				}
+			}
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder setParameters(IBaseParameters parameters) {
-            IParser parser = details.getServer().getFhirContext().newJsonParser();
-            details.setRequestContents(parser.encodeResourceToString(parameters).getBytes());
+		DetailsBuilder setParameters(IBaseParameters parameters) {
+			IParser parser = details.getServer().getFhirContext().newJsonParser();
+			details.setRequestContents(parser.encodeResourceToString(parameters).getBytes());
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder setParameters(Map<String, String[]> parameters) {
-            details.setParameters(parameters);
+		DetailsBuilder setParameters(Map<String, String[]> parameters) {
+			details.setParameters(parameters);
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder withRestOperationType(RequestTypeEnum type) {
-            details.setRequestType(type);
+		DetailsBuilder withRestOperationType(RequestTypeEnum type) {
+			details.setRequestType(type);
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder setOperation(String operation) {
-            details.setOperation(operation);
+		DetailsBuilder setOperation(String operation) {
+			details.setOperation(operation);
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder setResourceType(String resourceName) {
-            details.setResourceName(resourceName);
+		DetailsBuilder setResourceType(String resourceName) {
+			details.setResourceName(resourceName);
 
-            return this;
-        }
+			return this;
+		}
 
-        DetailsBuilder setId(IIdType id) {
-            details.setId(id);
+		DetailsBuilder setId(IIdType id) {
+			details.setId(id);
 
-            return this;
-        }
+			return this;
+		}
 
-        SystemRequestDetails create() {
-            return details;
-        }
-    }
+		SystemRequestDetails create() {
+			return details;
+		}
+	}
 }
