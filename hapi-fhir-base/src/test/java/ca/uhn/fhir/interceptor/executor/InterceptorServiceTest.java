@@ -684,11 +684,11 @@ class InterceptorServiceTest {
 			// given no interceptors registered
 			myInterceptorService.registerInterceptor(new Object() {
 				@Hook(Pointcut.TEST_FILTER)
-				public IInterceptorFilterHook testFilter(HookParams theParams) {
-					// return a filter that does not call the supplier
+				public IInterceptorFilterHook testFilter(String theString) {
+					// return a filter that does not call the runnable
 					return theContinuation ->{
 						mySupplierLog.add("bad-boy ran but didn't call continuation");
-						// supplier.get(); // not called
+						// theContinuation.run(); // not called
 					};
 				}
 
