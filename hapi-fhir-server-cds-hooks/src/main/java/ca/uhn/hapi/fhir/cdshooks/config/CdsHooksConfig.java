@@ -215,12 +215,14 @@ public class CdsHooksConfig {
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
 			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			FhirContext theFhirContext,
 			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CdsPrefetchSvc(
 				theCdsResolutionStrategySvc,
 				theResourcePrefetchDao,
 				theResourcePrefetchFhirClient,
 				theCdsHooksDaoAuthorizationSvc,
+				theFhirContext,
 				theInterceptorBroadcaster);
 	}
 

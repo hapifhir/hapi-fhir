@@ -6,11 +6,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -3989,9 +3991,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
-		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		long patientIdentifierHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+			RequestPartitionId.defaultPartition(), "Patient", "identifier");
+		runInTransaction(() -> ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream()
+			.filter(t -> t.getHashIdentity().equals(patientIdentifierHashIdentity))
+			.map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * "))));
 
 		{
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
@@ -5258,12 +5262,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setCode("MR");
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
+		long patientIdentifierOfTypeHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+			new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", "identifier:of-type");
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
-				.filter(t -> t.getParamName().equals("identifier:of-type"))
-				.collect(Collectors.toList());
+				.filter(t -> t.getHashIdentity().equals(patientIdentifierOfTypeHashIdentity))
+				.toList();
 			assertEquals(1, params.size());
 			assertNotNull(params.get(0).getHashSystemAndValue());
 			assertNull(params.get(0).getHashSystem());
