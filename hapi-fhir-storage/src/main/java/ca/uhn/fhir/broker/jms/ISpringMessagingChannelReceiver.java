@@ -33,9 +33,16 @@ public interface ISpringMessagingChannelReceiver extends SubscribableChannel, In
 	String getChannelName();
 
 	/**
-	 * Stop the service (e.g. stop subscriber threads)
+	 * Pause the service (e.g. stop subscriber threads)
 	 */
-	default void stop() {
+	default void pause() {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Resume the service (e.g. start subscriber threads)
+	 */
+	default void resume() {
 		throw new UnsupportedOperationException();
 	}
 

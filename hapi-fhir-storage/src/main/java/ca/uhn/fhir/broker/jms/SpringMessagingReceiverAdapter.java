@@ -99,11 +99,12 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 
 	@Override
 	public void pause() {
-		mySpringMessagingChannelReceiver.stop();
+		mySpringMessagingChannelReceiver.pause();
 	}
 
 	@Override
 	public void resume() {
-		start();
+		checkState();
+		mySpringMessagingChannelReceiver.resume();
 	}
 }
