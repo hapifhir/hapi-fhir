@@ -34,6 +34,7 @@ import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -59,7 +60,10 @@ public abstract class BaseBatch2Config {
 	IChannelFactory myChannelFactory;
 
 	@Autowired
-	IHapiTransactionService myHapiTransactionService;
+	IHapiTransactionService myIHapiTransactionService;
+
+	@Autowired
+	HapiTransactionService myHapiTransactionService;
 
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
@@ -68,7 +72,7 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender, myHapiTransactionService);
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, myIHapiTransactionService);
 	}
 
 	@Bean
@@ -81,8 +85,7 @@ public abstract class BaseBatch2Config {
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			BatchJobSender theBatchJobSender,
 			WorkChunkProcessor theExecutor,
-			IJobMaintenanceService theJobMaintenanceService,
-			IHapiTransactionService theTransactionService) {
+			IJobMaintenanceService theJobMaintenanceService) {
 		return new JobCoordinatorImpl(
 				theBatchJobSender,
 				batch2ProcessingChannelReceiver(myChannelFactory),
@@ -90,7 +93,7 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theExecutor,
 				theJobMaintenanceService,
-				theTransactionService);
+				myIHapiTransactionService);
 	}
 
 	@Bean
@@ -108,7 +111,8 @@ public abstract class BaseBatch2Config {
 			JpaStorageSettings theStorageSettings,
 			BatchJobSender theBatchJobSender,
 			WorkChunkProcessor theExecutor,
-			IReductionStepExecutorService theReductionStepExecutorService) {
+			IReductionStepExecutorService theReductionStepExecutorService,
+			HapiTransactionService theHapiTransactionService) {
 		return new JobMaintenanceServiceImpl(
 				theSchedulerService,
 				myPersistence,
@@ -116,7 +120,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theExecutor,
-				theReductionStepExecutorService);
+				theReductionStepExecutorService,
+				myHapiTransactionService);
 	}
 
 	@Bean
