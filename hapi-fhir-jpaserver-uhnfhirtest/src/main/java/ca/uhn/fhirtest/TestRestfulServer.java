@@ -13,7 +13,9 @@ import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
@@ -93,7 +95,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		// These two parmeters are also declared in web.xml
 		String fhirVersionParam = getInitParameter("FhirVersion");
-		Validate.notNull(fhirVersionParam);
+		Validate.notNull(fhirVersionParam, "Init parameter FhirVersion must be specified");
 
 		setImplementationDescription("HAPI FHIR Test/Demo Server " + fhirVersionParam + " Endpoint");
 		setCopyright(
@@ -357,11 +359,18 @@ public class TestRestfulServer extends RestfulServer {
 		// Logging for request type
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setMessageFormat(
-				"${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
+				"${remoteAddr} ${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent} - ID: ${responseId}");
 		registerInterceptor(loggingInterceptor);
 
 		// SQL Capturing
 		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
+
+		// Subscription Validation
+		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class));
+		subscriptionCriteriaValidation.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
+		subscriptionCriteriaValidation.setValidateRestHookEndpointIsReachable(true);
+		registerInterceptor(subscriptionCriteriaValidation);
+
 	}
 
 	/**

@@ -1038,6 +1038,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void afterResetInterceptors() {
 		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
 		myRegisteredInterceptors.clear();
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 	}
 
 	/**

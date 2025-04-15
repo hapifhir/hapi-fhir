@@ -65,6 +65,11 @@
 			<artifactId>hapi-fhir-caching-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-converter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- TODO KHS remove jpa stuff from here -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
