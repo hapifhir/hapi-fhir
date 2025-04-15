@@ -496,7 +496,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return Collections.unmodifiableMap(myUserData);
 	}
 
-	public void addUserData(String theKey, Object theValue){
+	public void addUserData(String theKey, Object theValue) {
 		getUserData().put(theKey, theValue);
 		validateUserDataIsSerializable();
 	}
@@ -514,7 +514,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	 * Calls getUserDataAsString() in order to ensure that myUserData is serializable
 	 * throws an InvalidRequestException if myUserData can't be serialized
 	 */
-	public void validateUserDataIsSerializable(){
+	public void validateUserDataIsSerializable() {
 		getUserDataAsString();
 	}
 

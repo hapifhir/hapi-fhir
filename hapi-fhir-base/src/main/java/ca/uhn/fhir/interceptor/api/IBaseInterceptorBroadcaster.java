@@ -78,7 +78,9 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 	}
 
 	default <T> T runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Supplier<T> theSupplier) {
-		Validate.isTrue(thePointcut.getReturnType() == IInterceptorFilterHook.class, "Only pointcuts that return IInterceptorFilterHook can be used with this method");
+		Validate.isTrue(
+				thePointcut.getReturnType() == IInterceptorFilterHook.class,
+				"Only pointcuts that return IInterceptorFilterHook can be used with this method");
 
 		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
 
