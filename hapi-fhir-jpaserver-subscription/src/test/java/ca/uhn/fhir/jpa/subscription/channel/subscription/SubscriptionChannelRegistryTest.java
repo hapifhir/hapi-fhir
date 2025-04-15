@@ -6,6 +6,7 @@ import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -61,6 +62,8 @@ public class SubscriptionChannelRegistryTest {
 		when(messageListener.getPayloadType()).thenReturn(ResourceDeliveryMessage.class);
 		IChannelConsumer<ResourceDeliveryMessage> consumer = mock(IChannelConsumer.class);
 		IChannelProducer<ResourceDeliveryMessage> producer = mock(IChannelProducer.class);
+		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener = new MultiplexingListener<>(ResourceDeliveryMessage.class);
+		when(consumer.getMessageListener()).thenReturn(multiplexingListener);
 
 		// when
 		when(mySubscriptionChannelFactory.newDeliveryConsumer(
