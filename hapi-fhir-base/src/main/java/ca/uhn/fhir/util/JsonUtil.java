@@ -162,8 +162,25 @@ public class JsonUtil {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+			throw newInvalidRequestException(theJson, e);
 		}
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject) {
+		return serializeOrInvalidRequest(theObject, true);
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject, boolean thePrettyPrint) {
+		try {
+			return serialize(theObject, thePrettyPrint);
+		} catch (InternalErrorException e) {
+			throw newInvalidRequestException(theObject, e);
+		}
+	}
+
+	private static InvalidRequestException newInvalidRequestException(Object theObject, Exception theCause)
+			throws InvalidRequestException {
+		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
 	}
 
 	private static class SensitiveDataFilter extends SimpleBeanPropertyFilter {

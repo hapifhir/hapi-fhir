@@ -27,6 +27,8 @@ import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -71,6 +73,8 @@ import static org.mockito.Mockito.when;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
+	private final IInterceptorBroadcaster myInterceptorBroadcaster = new InterceptorService();
+
 
 	private static final String BATCH_CHANNEL_NAME = JobCoordinatorImplTest.class.getName()+"_BATCH_CHANNEL_NAME";
 
@@ -115,7 +119,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
-			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
+			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster);
 
 		myJobConsumer = myLinkedBlockingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
 
