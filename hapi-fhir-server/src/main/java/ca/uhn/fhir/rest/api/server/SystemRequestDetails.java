@@ -43,6 +43,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -76,6 +77,19 @@ public class SystemRequestDetails extends RequestDetails {
 			myServer = theDetails.getServer();
 			myFhirContext = theDetails.getFhirContext();
 		}
+	}
+
+	public SystemRequestDetails(SystemRequestDetails theOther) {
+		super(theOther);
+		if (nonNull(theOther.getServer())) {
+			myServer = theOther.getServer();
+			myFhirContext = theOther.getFhirContext();
+		}
+		if (nonNull(theOther.myHeaders)) {
+			initHeaderMap();
+			myHeaders.putAll(theOther.myHeaders);
+		}
+		myRequestPartitionId = theOther.myRequestPartitionId;
 	}
 
 	// TODO KHS use this everywhere we create a srd with only one partition

@@ -754,7 +754,7 @@ public abstract class BaseTransactionProcessor {
 			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
 					(ServletRequestDetails) theRequestDetails, transactionUrl, ArrayListMultimap.create());
 		} else if (theRequestDetails instanceof SystemRequestDetails) {
-			newRequestDetails = new SystemRequestDetails(theRequestDetails);
+			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
 		} else {
 			// RequestDetails is not a ServletRequestDetails or SystemRequestDetails, and I don't know how to properly
 			// clone such a RequestDetails. Use the original RequestDetails without making any entry specific
