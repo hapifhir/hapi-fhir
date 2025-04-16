@@ -75,7 +75,7 @@ public class TransactionUtil {
 	 * @since 8.2.0
 	 */
 	public static TransactionResponse parseTransactionResponse(
-		FhirContext theContext, IBaseBundle theTransactionRequestBundle, IBaseBundle theTransactionResponseBundle) {
+			FhirContext theContext, IBaseBundle theTransactionRequestBundle, IBaseBundle theTransactionResponseBundle) {
 		FhirTerser terser = theContext.newTerser();
 		List<StorageOutcome> storageOutcomes = new ArrayList<>();
 
@@ -130,7 +130,7 @@ public class TransactionUtil {
 					issues = terser.getValues(responseResponse, "outcome.issue");
 				} else {
 					IBaseResource responseResource =
-						terser.getSingleValueOrNull(responseEntry, "resource", IBaseResource.class);
+							terser.getSingleValueOrNull(responseEntry, "resource", IBaseResource.class);
 					if (responseResource instanceof IBaseOperationOutcome) {
 						issues = terser.getValues(responseResource, "issue");
 					}
@@ -151,7 +151,7 @@ public class TransactionUtil {
 					String issueSeverityString = terser.getSinglePrimitiveValueOrNull(issue, "severity");
 					if (isNotBlank(issueSeverityString)) {
 						IValidationSupport.IssueSeverity issueSeverity =
-							IValidationSupport.IssueSeverity.fromCode(issueSeverityString);
+								IValidationSupport.IssueSeverity.fromCode(issueSeverityString);
 						if (issueSeverity != null) {
 							if (issueSeverity.ordinal() <= IValidationSupport.IssueSeverity.ERROR.ordinal()) {
 								errorMessage = terser.getSinglePrimitiveValueOrNull(issue, "diagnostics");
@@ -174,15 +174,15 @@ public class TransactionUtil {
 						 */
 
 						targetId = ((IBaseHasExtensions) issue)
-							.getExtension().stream()
-							.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
-							.findFirst()
-							.map(t -> (IIdType) t.getValue())
-							.orElse(null);
+								.getExtension().stream()
+										.filter(t -> HapiExtensions.EXTENSION_PLACEHOLDER_ID.equals(t.getUrl()))
+										.findFirst()
+										.map(t -> (IIdType) t.getValue())
+										.orElse(null);
 						sourceId = groupSourceId;
 					} else {
 						String responseLocation =
-							terser.getSinglePrimitiveValueOrNull(responseEntry, "response.location");
+								terser.getSinglePrimitiveValueOrNull(responseEntry, "response.location");
 						if (isNotBlank(responseLocation)) {
 							targetId = theContext.getVersion().newIdType(responseLocation);
 							if (issueIndex == 0) {
@@ -194,13 +194,13 @@ public class TransactionUtil {
 					}
 
 					StorageOutcome outcome = new StorageOutcome(
-						statusCode,
-						statusMessage,
-						responseCode,
-						toUnqualified(sourceId),
-						toUnqualified(targetId),
-						errorMessage,
-						requestMetaSource);
+							statusCode,
+							statusMessage,
+							responseCode,
+							toUnqualified(sourceId),
+							toUnqualified(targetId),
+							errorMessage,
+							requestMetaSource);
 					storageOutcomes.add(outcome);
 				}
 			}
@@ -245,13 +245,13 @@ public class TransactionUtil {
 		private final String myStatusMessage;
 
 		public StorageOutcome(
-			int theStatusCode,
-			String theStatusMessage,
-			StorageResponseCodeEnum theStorageResponseCode,
-			IIdType theSourceId,
-			IIdType theTargetId,
-			String theErrorMessage,
-			String theRequestMetaSource) {
+				int theStatusCode,
+				String theStatusMessage,
+				StorageResponseCodeEnum theStorageResponseCode,
+				IIdType theSourceId,
+				IIdType theTargetId,
+				String theErrorMessage,
+				String theRequestMetaSource) {
 			myStatusCode = theStatusCode;
 			myStatusMessage = theStatusMessage;
 			myStorageResponseCode = theStorageResponseCode;
