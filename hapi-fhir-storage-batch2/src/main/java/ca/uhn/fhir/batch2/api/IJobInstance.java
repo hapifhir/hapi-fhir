@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
 import java.util.Date;
+import java.util.Map;
 
 public interface IJobInstance {
 	String getCurrentGatedStepId();
@@ -66,4 +67,8 @@ public interface IJobInstance {
 	boolean isFastTracking();
 
 	void setFastTracking(boolean theFastTracking);
+
+	Map<String, Object> getUserData();
+
+	void setUserData(Map<String, Object> theUserData);
 }

@@ -2664,7 +2664,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/**
 		 * The list of queries to use to find all results.
 		 * Normal JPA queries will normally have a single entry.
-		 * Queries that involve Hibernate Search/Elastisearch may have
+		 * Queries that involve Hibernate Search/Elasticsearch may have
 		 * multiple queries because of chunking.
 		 * The $everything operation also jams some extra results in.
 		 */

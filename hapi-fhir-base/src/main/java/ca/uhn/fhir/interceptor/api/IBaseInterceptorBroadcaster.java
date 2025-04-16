@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import ca.uhn.fhir.interceptor.executor.SupplierFilterHookWrapper;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.Validate;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -66,6 +70,32 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		return null;
 	}
 
+	default void runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Runnable theRunnable) {
+		runWithFilterHooks(thePointcut, theHookParams, () -> {
+			theRunnable.run();
+			return null;
+		});
+	}
+
+	default <T> T runWithFilterHooks(POINTCUT thePointcut, HookParams theHookParams, Supplier<T> theSupplier) {
+		Validate.isTrue(
+				thePointcut.getReturnType() == IInterceptorFilterHook.class,
+				"Only pointcuts that return IInterceptorFilterHook can be used with this method");
+
+		List<IInvoker> invokers = getInvokersForPointcut(thePointcut);
+
+		Supplier<T> supplier = theSupplier;
+
+		// Build a linked list of wrappers.
+		// We traverse the invokers in reverse order because the first wrapper will be called last in sequence.
+		for (IInvoker nextInvoker : Lists.reverse(invokers)) {
+			IInterceptorFilterHook filter = (IInterceptorFilterHook) nextInvoker.invoke(theHookParams);
+			supplier = new SupplierFilterHookWrapper<>(supplier, filter, nextInvoker::getHookDescription);
+		}
+
+		return supplier.get();
+	}
+
 	/**
 	 * Does this broadcaster have any hooks for the given pointcut?
 	 *
@@ -88,5 +118,16 @@ public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 		default String getHookDescription() {
 			return toString();
 		}
+	}
+	/**
+	 * A filter hook is a hook that wraps a system call, and
+	 * allows a hook to run code before and after the supplied function.
+	 * Filter hooks must call the runnable passed in themselves, similar to Java Servlet Filters.
+	 *
+	 * @see IInterceptorBroadcaster#runWithFilterHooks(IPointcut, HookParams, Supplier)
+	 */
+	@FunctionalInterface
+	interface IInterceptorFilterHook {
+		void wrapCall(Runnable theRunnable);
 	}
 }
