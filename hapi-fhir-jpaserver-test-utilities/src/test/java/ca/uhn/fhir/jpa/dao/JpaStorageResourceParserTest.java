@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -29,6 +31,10 @@ public class JpaStorageResourceParserTest {
 
 	@Mock
 	ResourceHistoryTable myEntity;
+
+	@SuppressWarnings("unused") // injected
+	@Spy
+	PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@InjectMocks
     private final JpaStorageResourceParser jpaStorageResourceParser = new JpaStorageResourceParser();

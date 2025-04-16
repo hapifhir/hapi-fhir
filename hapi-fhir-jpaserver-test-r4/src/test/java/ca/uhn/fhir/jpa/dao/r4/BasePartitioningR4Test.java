@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInter
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.helger.commons.lang.StackTraceHelper;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -241,30 +242,62 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}
 
-	protected void addNextTargetPartitionNTimesForCreate(Integer thePartitionId, Integer theNumberOfTimes) {
-		for (int i = 0; i < theNumberOfTimes; i++) {
-			addNextTargetPartitionForCreate(thePartitionId, null);
-		}
-	}
-
 	protected void addNextTargetPartitionForCreate(Integer thePartitionId) {
 		addNextTargetPartitionForCreate(thePartitionId, null);
+	}
+
+	// all the create-paths have a read path first for the tx boundary.
+	private void addNextTargetPartitionForCreate(RequestPartitionId requestPartitionId) {
+		myPartitionInterceptor.addNextTargetReadPartition(requestPartitionId);
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+	}
+
+	/**
+	 * the update path calls create 2 times: once for entry tx boundary, and then again to assign the partition
+	 */
+	private void addNextTargetPartitionForUpdate(RequestPartitionId requestPartitionId) {
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+	}
+
+	/**
+	 * We need lots of calls: pre-fetch, main tx boundary, redundant boundary for dao.update(), and finally the assign call
+	 */
+	private void addNextTargetPartitionForUpdateInTxBundle(RequestPartitionId requestPartitionId) {
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+		addNextTargetPartitionForUpdate(requestPartitionId);
+	}
+
+	protected void addNextTargetPartitionForUpdateInTxBundle(int thePartitionId) {
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId);
+		addNextTargetPartitionForUpdateInTxBundle(requestPartitionId);
 	}
 
 	protected void addNextTargetPartitionForCreate(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
-		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+		addNextTargetPartitionForCreate(requestPartitionId);
 	}
 
 	protected void addNextTargetPartitionForCreateDefaultPartition() {
-		myPartitionInterceptor.addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
+		addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
 	}
 
 	protected void addNextTargetPartitionForCreateDefaultPartition(LocalDate thePartitionDate) {
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, thePartitionDate);
-		myPartitionInterceptor.addNextTargetPartitionForCreate(requestPartitionId);
+		addNextTargetPartitionForCreate(requestPartitionId);
 	}
+
+
+	protected void addNextTargetPartitionForUpdate(int thePartitionId) {
+		addNextTargetPartitionForUpdate(RequestPartitionId.fromPartitionId(thePartitionId));
+	}
+
+	protected void addNextTargetPartitionForUpdateDefaultPartition() {
+		addNextTargetPartitionForUpdate(RequestPartitionId.defaultPartition());
+	}
+
 
 	protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
 		Validate.notNull(thePartitionId);
@@ -329,19 +362,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			// Just to be nice, figure out the first line in the stack that isn't a part of the
 			// partitioning or interceptor infrastructure, just so it's obvious who is asking
 			// for a partition ID
-			String stack;
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				stack = StackTraceHelper.getStackAsString(e);
-				stack = Arrays.stream(stack.split("\\n"))
-					.filter(t->t.contains("ca.uhn.fhir"))
-					.filter(t->!t.toLowerCase().contains("interceptor"))
-					.filter(t->!t.toLowerCase().contains("partitionhelper"))
-					.findFirst()
-					.orElse("UNKNOWN");
-			}
+			String stack = getCallerStackLine();
 
+			assertThat(myReadRequestPartitionIds).describedAs("read partition ids").isNotEmpty();
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
@@ -353,6 +376,24 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").hasSize(0);
 		}
 
+	}
+
+	@Nonnull
+	private static String getCallerStackLine() {
+		String stack;
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			stack = StackTraceHelper.getStackAsString(e);
+			stack = Arrays.stream(stack.split("\\n"))
+				.filter(t->t.contains("ca.uhn.fhir"))
+				.filter(t->!t.toLowerCase().contains("interceptor"))
+				.filter(t->!t.toLowerCase().contains("partitionhelper"))
+				.filter(t->!t.contains("Test"))
+				.findFirst()
+				.orElse("UNKNOWN");
+		}
+		return stack;
 	}
 
 	@Interceptor
@@ -367,9 +408,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
-			assertThat(!myCreateRequestPartitionIds.isEmpty()).as("No create partitions left in interceptor").isTrue();
+			String stack = getCallerStackLine();
+			assertThat(myCreateRequestPartitionIds).describedAs("create partitions").isNotEmpty();
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
-			ourLog.debug("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
+			ourLog.info("Returning partition [{}] for create of resource {} with date {}: {}", retVal, theResource, retVal.getPartitionDate(), stack);
 			return retVal;
 		}
 

@@ -162,22 +162,24 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
 
-		Bundle responseBundle1 = mySystemDao.transaction(mySrd, createPatientWithConditionalUrlOnPartition(1));
+		addNextTargetPartitionForUpdateInTxBundle(1);
+		Bundle responseBundle1 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition(1));
 		assertResourceCreated(responseBundle1);
 
-		Bundle responseBundle2 = mySystemDao.transaction(mySrd, createPatientWithConditionalUrlOnPartition(2));
+		addNextTargetPartitionForUpdateInTxBundle(2);
+		Bundle responseBundle2 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition(2));
 		assertResourceCreated(responseBundle2);
 	}
 
-	private Bundle createPatientWithConditionalUrlOnPartition(Integer thePartitionId) {
+	private Bundle conditionalUpdatePatientWithConditionalUrlOnPartition(Integer thePartitionId) {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		Patient p = new Patient();
 		p.setIdentifier(List.of(new Identifier().setSystem("foo").setValue("bar")));
 		p.setActive(true);
 		p.setName(List.of(new HumanName().setFamily("ABC").setGiven(List.of(new StringType("DEF")))));
+
 		bb.addTransactionUpdateEntry(p, "Patient?identifier=foo|bar");
-		addNextTargetPartitionNTimesForCreate(thePartitionId, 3);
 
 		return (Bundle) bb.getBundle();
 	}

@@ -133,6 +133,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
+
+		addNextTargetPartitionForReadDefaultPartition();
 		addNextTargetPartitionForCreateDefaultPartition();
 		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
