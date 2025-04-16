@@ -1111,9 +1111,9 @@
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
@@ -2686,14 +2686,14 @@
 					<version>1.24</version>
 					<configuration>
 						<signature>
-							<groupId>net.sf.androidscents.signature</groupId>
-							<artifactId>android-api-level-26</artifactId>
-							<version>8.0.0_r2</version>
+							<groupId>com.toasttab.android</groupId>
+							<artifactId>gummy-bears-api-34</artifactId>
+							<version>0.12.0</version>
 						</signature>
 					</configuration>
 					<executions>
 						<execution>
-							<id>check-android-26-compliance</id>
+							<id>check-android-34-compliance</id>
 							<phase>test</phase>
 							<goals>
 								<goal>check</goal>
