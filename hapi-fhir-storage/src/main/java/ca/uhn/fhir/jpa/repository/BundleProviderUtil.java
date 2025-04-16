@@ -40,15 +40,7 @@ public class BundleProviderUtil {
 
 	private BundleProviderUtil() {}
 
-	private static class OffsetLimitInfo {
-		private final Integer offset;
-		private final Integer limit;
-
-		OffsetLimitInfo(Integer offset, Integer limit) {
-			this.offset = offset;
-			this.limit = limit;
-		}
-
+	private record OffsetLimitInfo(Integer offset, Integer limit) {
 		int addOffsetAndLimit() {
 			return offsetOrZero() + limitOrZero();
 		}
@@ -70,56 +62,12 @@ public class BundleProviderUtil {
 		}
 	}
 
-	private static class InitialPagingResults {
-		int pageSize;
-		List<IBaseResource> resourceList;
-		int numToReturn;
-		String searchId;
-		Integer numTotalResults;
-
-		InitialPagingResults(
-				int pageSize,
-				List<IBaseResource> resourceList,
-				int numToReturn,
-				String searchId,
-				Integer numTotalResults) {
-			this.pageSize = pageSize;
-			this.resourceList = resourceList;
-			this.numToReturn = numToReturn;
-			this.searchId = searchId;
-			this.numTotalResults = numTotalResults;
-		}
-	}
-
-	// Once this package language level allows for them these records can be used in place of the inner static classes
-	//    private record OffsetLimitInfo(Integer offset, Integer limit) {
-	//        int addOffsetAndLimit() {
-	//            return offsetOrZero() + limitOrZero();
-	//        }
-	//
-	//        int maxOfDifference() {
-	//            return Math.max(offsetOrZero() - limitOrZero(), 0);
-	//        }
-	//
-	//        private int offsetOrZero() {
-	//            return defaultZeroIfNull(offset);
-	//        }
-	//
-	//        private int limitOrZero() {
-	//            return defaultZeroIfNull(offset);
-	//        }
-	//
-	//        private int defaultZeroIfNull(Integer value) {
-	//            return defaultIfNull(value, 0);
-	//        }
-	//    }
-	//
-	//    private record InitialPagingResults(
-	//            int pageSize,
-	//            List<IBaseResource> resourceList,
-	//            int numToReturn,
-	//            String searchId,
-	//            Integer numTotalResults) {}
+	private record InitialPagingResults(
+			int pageSize,
+			List<IBaseResource> resourceList,
+			int numToReturn,
+			String searchId,
+			Integer numTotalResults) {}
 
 	public static IBaseResource createBundleFromBundleProvider(
 			IRestfulServer<?> server,
