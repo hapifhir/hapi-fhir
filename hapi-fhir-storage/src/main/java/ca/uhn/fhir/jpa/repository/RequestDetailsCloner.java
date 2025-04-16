@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.parser.IParser;
@@ -20,80 +39,81 @@ class RequestDetailsCloner {
 
 	private RequestDetailsCloner() {}
 
-	static DetailsBuilder startWith(RequestDetails details) {
-		var newDetails = new SystemRequestDetails(details);
+	static DetailsBuilder startWith(RequestDetails theDetails) {
+		SystemRequestDetails newDetails = new SystemRequestDetails(theDetails);
 		newDetails.setRequestType(RequestTypeEnum.POST);
 		newDetails.setOperation(null);
 		newDetails.setResource(null);
 		newDetails.setParameters(new HashMap<>());
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
-		newDetails.setResponse(details.getResponse());
+		newDetails.setResponse(theDetails.getResponse());
 
 		return new DetailsBuilder(newDetails);
 	}
 
 	static class DetailsBuilder {
-		private final SystemRequestDetails details;
+		private final SystemRequestDetails myDetails;
 
-		DetailsBuilder(SystemRequestDetails details) {
-			this.details = details;
+		DetailsBuilder(SystemRequestDetails theDetails) {
+			myDetails = theDetails;
 		}
 
-		DetailsBuilder setAction(RestOperationTypeEnum restOperationType) {
-			details.setRestOperationType(restOperationType);
+		DetailsBuilder setAction(RestOperationTypeEnum theRestOperationType) {
+			myDetails.setRestOperationType(theRestOperationType);
 			return this;
 		}
 
-		DetailsBuilder addHeaders(Map<String, String> headers) {
-			if (headers != null) {
-				for (var entry : headers.entrySet()) {
-					details.addHeader(entry.getKey(), entry.getValue());
+		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
+			if (theHeaders != null) {
+				for (Map.Entry<String, String> entry : theHeaders.entrySet()) {
+					myDetails.addHeader(entry.getKey(), entry.getValue());
 				}
 			}
 
 			return this;
 		}
 
-		DetailsBuilder setParameters(IBaseParameters parameters) {
-			IParser parser = details.getServer().getFhirContext().newJsonParser();
-			details.setRequestContents(parser.encodeResourceToString(parameters).getBytes());
+		DetailsBuilder setParameters(IBaseParameters theParameters) {
+			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
+			myDetails.setRequestContents(
+					parser.encodeResourceToString(theParameters).getBytes());
 
 			return this;
 		}
 
-		DetailsBuilder setParameters(Map<String, String[]> parameters) {
-			details.setParameters(parameters);
+		DetailsBuilder setParameters(Map<String, String[]> theParameters) {
+			myDetails.setParameters(theParameters);
 
 			return this;
 		}
 
-		DetailsBuilder withRestOperationType(RequestTypeEnum type) {
-			details.setRequestType(type);
+		DetailsBuilder withRestOperationType(RequestTypeEnum theType) {
+			myDetails.setRequestType(theType);
 
 			return this;
 		}
 
-		DetailsBuilder setOperation(String operation) {
-			details.setOperation(operation);
+		DetailsBuilder setOperation(String theOperation) {
+			myDetails.setOperation(theOperation);
 
 			return this;
 		}
 
-		DetailsBuilder setResourceType(String resourceName) {
-			details.setResourceName(resourceName);
+		DetailsBuilder setResourceType(String theResourceName) {
+			myDetails.setResourceName(theResourceName);
 
 			return this;
 		}
 
-		DetailsBuilder setId(IIdType id) {
-			details.setId(id);
+		DetailsBuilder setId(IIdType theId) {
+			myDetails.setId(theId);
 
 			return this;
 		}
 
 		SystemRequestDetails create() {
-			return details;
+			return myDetails;
 		}
 	}
 }

@@ -88,7 +88,7 @@ class SearchConverterTest {
         String key = "theOrKey";
         UriOrListParam theValue = withUriOrListParam();
         myFixture.setParameterTypeValue(key, theValue);
-        String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
+        String result = myFixture.mySearchParameterMap.toNormalizedQueryString(withFhirContext());
         String expected = "?theOrKey=theSecondValue,theValue";
         assertEquals(expected, result);
     }
@@ -98,7 +98,7 @@ class SearchConverterTest {
         String key = "theAndKey";
         UriAndListParam theValue = withUriAndListParam();
         myFixture.setParameterTypeValue(key, theValue);
-        String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
+        String result = myFixture.mySearchParameterMap.toNormalizedQueryString(withFhirContext());
         String expected = "?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
         assertEquals(expected, result);
     }
@@ -109,22 +109,22 @@ class SearchConverterTest {
         UriParam theValue = new UriParam("theValue");
         String key = "key";
         myFixture.setParameterTypeValue(key, theValue);
-        String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
+        String result = myFixture.mySearchParameterMap.toNormalizedQueryString(withFhirContext());
         assertEquals(expected, result);
     }
 
     @Test
     void separateParameterTypesShouldSeparateSearchAndResultParams() {
         myFixture.separateParameterTypes(withParamList());
-        assertThat(myFixture.separatedSearchParameters.entries()).hasSize(2);
-        assertThat(myFixture.separatedResultParameters.entries()).hasSize(3);
+        assertThat(myFixture.mySeparatedSearchParameters.entries()).hasSize(2);
+        assertThat(myFixture.mySeparatedResultParameters.entries()).hasSize(3);
     }
 
     @Test
     void convertToStringMapShouldConvert() {
         Map<String, String[]> expected = withParamListAsStrings();
         myFixture.convertToStringMap(withParamList(), withFhirContext());
-        Map<String, String[]> result = myFixture.resultParameters;
+        Map<String, String[]> result = myFixture.myResultParameters;
         assertEquals(result.keySet(), expected.keySet());
         assertThat(result.entrySet().stream().allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))))
                 .isTrue();

@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,12 +31,14 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
@@ -42,82 +63,86 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @SuppressWarnings("squid:S1135")
 public class HapiFhirRepository implements Repository {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
-	private final DaoRegistry daoRegistry;
-	private final RequestDetails requestDetails;
-	private final RestfulServer restfulServer;
+	private final DaoRegistry myDaoRegistry;
+	private final RequestDetails myRequestDetails;
+	private final RestfulServer myRestfulServer;
 
-	public HapiFhirRepository(DaoRegistry daoRegistry, RequestDetails requestDetails, RestfulServer restfulServer) {
-		this.daoRegistry = daoRegistry;
-		this.requestDetails = requestDetails;
-		this.restfulServer = restfulServer;
+	public HapiFhirRepository(
+			DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
+		myDaoRegistry = theDaoRegistry;
+		myRequestDetails = theRequestDetails;
+		myRestfulServer = theRestfulServer;
 	}
 
 	@Override
 	public <T extends IBaseResource, I extends IIdType> T read(
-			Class<T> resourceType, I id, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.READ)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
-		return daoRegistry.getResourceDao(resourceType).read(id, details);
+		return myDaoRegistry.getResourceDao(theResourceType).read(theId, details);
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+	public <T extends IBaseResource> MethodOutcome create(T theResource, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.CREATE)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
-		return daoRegistry.getResourceDao(resource).create(resource, details);
+		return myDaoRegistry.getResourceDao(theResource).create(theResource, details);
 	}
 
 	@Override
 	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-			I id, P patchParameters, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			I theId, P thePatchParameters, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.PATCH)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
 		// TODO update FHIR patchType once FHIRPATCH bug has been fixed
-		return daoRegistry.getResourceDao(id.getResourceType()).patch(id, null, null, null, patchParameters, details);
+		return myDaoRegistry
+				.getResourceDao(theId.getResourceType())
+				.patch(theId, null, null, null, thePatchParameters, details);
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+	public <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.UPDATE)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
 
-		return daoRegistry.getResourceDao(resource).update(resource, details);
+		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
 	}
 
 	@Override
 	public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-			Class<T> resourceType, I id, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.DELETE)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
 
-		return daoRegistry.getResourceDao(resourceType).delete(id, details);
+		return myDaoRegistry.getResourceDao(theResourceType).delete(theId, details);
 	}
 
 	@Override
 	public <B extends IBaseBundle, T extends IBaseResource> B search(
-			Class<B> bundleType,
-			Class<T> resourceType,
-			Multimap<String, List<IQueryParameterType>> searchParameters,
-			Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			Class<B> theBundleType,
+			Class<T> theResourceType,
+			Multimap<String, List<IQueryParameterType>> theSearchParameters,
+			Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.SEARCH_TYPE)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
 		SearchConverter converter = new SearchConverter();
-		converter.convertParameters(searchParameters, fhirContext());
-		details.setParameters(converter.resultParameters);
-		details.setResourceName(restfulServer.getFhirContext().getResourceType(resourceType));
-		var bundleProvider = daoRegistry.getResourceDao(resourceType).search(converter.searchParameterMap, details);
+		converter.convertParameters(theSearchParameters, fhirContext());
+		details.setParameters(converter.myResultParameters);
+		details.setResourceName(myRestfulServer.getFhirContext().getResourceType(theResourceType));
+		IBundleProvider bundleProvider =
+				myDaoRegistry.getResourceDao(theResourceType).search(converter.mySearchParameterMap, details);
 
 		if (bundleProvider == null) {
 			return null;
@@ -127,29 +152,29 @@ public class HapiFhirRepository implements Repository {
 	}
 
 	private <B extends IBaseBundle> B createBundle(
-			RequestDetails requestDetails, IBundleProvider bundleProvider, String pagingAction) {
-		var count = RestfulServerUtils.extractCountParameter(requestDetails);
-		var linkSelf = RestfulServerUtils.createLinkSelf(requestDetails.getFhirServerBase(), requestDetails);
+			RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
+		Integer count = RestfulServerUtils.extractCountParameter(theRequestDetails);
+		String linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
 
 		Set<Include> includes = new HashSet<>();
-		var reqIncludes = requestDetails.getParameters().get(Constants.PARAM_INCLUDE);
+		String[] reqIncludes = theRequestDetails.getParameters().get(Constants.PARAM_INCLUDE);
 		if (reqIncludes != null) {
 			for (String nextInclude : reqIncludes) {
 				includes.add(new Include(nextInclude));
 			}
 		}
 
-		var offset = RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_PAGINGOFFSET);
+		Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequestDetails, Constants.PARAM_PAGINGOFFSET);
 		if (offset == null || offset < 0) {
 			offset = 0;
 		}
-		var start = offset;
-		if (bundleProvider.size() != null) {
-			start = Math.max(0, Math.min(offset, bundleProvider.size()));
+		int start = offset;
+		if (theBundleProvider.size() != null) {
+			start = Math.max(0, Math.min(offset, theBundleProvider.size()));
 		}
 
 		BundleTypeEnum bundleType = null;
-		var bundleTypeValues = requestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
+		String[] bundleTypeValues = theRequestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
 		if (bundleTypeValues != null) {
 			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
 		} else {
@@ -157,36 +182,36 @@ public class HapiFhirRepository implements Repository {
 		}
 
 		return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
-				restfulServer,
-				requestDetails,
+				myRestfulServer,
+				theRequestDetails,
 				count,
 				linkSelf,
 				includes,
-				bundleProvider,
+				theBundleProvider,
 				start,
 				bundleType,
-				pagingAction));
+				thePagingAction));
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically
 	// we ought to handle any old link. Maybe this is also an escape hatch for "custom non-FHIR
 	// repository action"?
 	@Override
-	public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+	public <B extends IBaseBundle> B link(Class<B> theBundleType, String theUrl, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.GET_PAGE)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
-		var urlParts = UrlUtil.parseUrl(url);
-		details.setCompleteUrl(url);
+		UrlUtil.UrlParts urlParts = UrlUtil.parseUrl(theUrl);
+		details.setCompleteUrl(theUrl);
 		details.setParameters(UrlUtil.parseQueryStrings(urlParts.getParams()));
 
-		var pagingProvider = restfulServer.getPagingProvider();
+		IPagingProvider pagingProvider = myRestfulServer.getPagingProvider();
 		if (pagingProvider == null) {
 			throw new InvalidRequestException(Msg.code(2638) + "This server does not support paging");
 		}
 
-		var pagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
+		String pagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
 
 		IBundleProvider bundleProvider;
 
@@ -209,59 +234,62 @@ public class HapiFhirRepository implements Repository {
 		return createBundle(details, bundleProvider, pagingAction);
 	}
 
-	private void validateHaveBundleProvider(String pagingAction, IBundleProvider bundleProvider) {
+	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
 		// Return an HTTP 410 if the search is not known
-		if (bundleProvider == null) {
-			ourLog.info("Client requested unknown paging ID[{}]", pagingAction);
-			String msg =
-					fhirContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", pagingAction);
+		if (theBundleProvider == null) {
+			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
+			String msg = fhirContext()
+					.getLocalizer()
+					.getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
 			throw new ResourceGoneException(Msg.code(2639) + msg);
 		}
 	}
 
 	@Override
-	public <C extends IBaseConformance> C capabilities(Class<C> capabilityStatementType, Map<String, String> headers) {
-		var method = restfulServer.getServerConformanceMethod();
+	public <C extends IBaseConformance> C capabilities(
+			Class<C> theCapabilityStatementType, Map<String, String> theHeaders) {
+		ConformanceMethodBinding method = myRestfulServer.getServerConformanceMethod();
 		if (method == null) {
 			return null;
 		}
-		var details = startWith(requestDetails)
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.METADATA)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
-		return unsafeCast(method.provideCapabilityStatement(restfulServer, details));
+		return unsafeCast(method.provideCapabilityStatement(myRestfulServer, details));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <B extends IBaseBundle> B transaction(B bundle, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+	public <B extends IBaseBundle> B transaction(B theBundle, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.TRANSACTION)
-				.addHeaders(headers)
+				.addHeaders(theHeaders)
 				.create();
-		return unsafeCast(daoRegistry.getSystemDao().transaction(details, bundle));
+		return unsafeCast(myDaoRegistry.getSystemDao().transaction(details, theBundle));
 	}
 
 	@Override
 	public <R extends IBaseResource, P extends IBaseParameters> R invoke(
-			String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+	public <P extends IBaseParameters> MethodOutcome invoke(
+			String theName, P theParameters, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
@@ -269,13 +297,17 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-			Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			Class<T> theResourceType,
+			String theName,
+			P theParameters,
+			Class<R> theReturnType,
+			Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setResourceType(resourceType.getSimpleName())
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setResourceType(theResourceType.getSimpleName())
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
@@ -283,13 +315,13 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-			Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			Class<T> theResourceType, String theName, P theParameters, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setResourceType(resourceType.getSimpleName())
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setResourceType(theResourceType.getSimpleName())
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
@@ -297,14 +329,14 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-			I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			I theId, String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setResourceType(id.getResourceType())
-				.setId(id)
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setResourceType(theId.getResourceType())
+				.setId(theId)
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
@@ -312,14 +344,14 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-			I id, String name, P parameters, Map<String, String> headers) {
-		var details = startWith(requestDetails)
+			I theId, String theName, P theParameters, Map<String, String> theHeaders) {
+		RequestDetails details = startWith(myRequestDetails)
 				.setAction(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER)
-				.addHeaders(headers)
-				.setOperation(name)
-				.setResourceType(id.getResourceType())
-				.setId(id)
-				.setParameters(parameters)
+				.addHeaders(theHeaders)
+				.setOperation(theName)
+				.setResourceType(theId.getResourceType())
+				.setId(theId)
+				.setParameters(theParameters)
 				.create();
 
 		return invoke(details);
@@ -331,7 +363,7 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters> B history(
-			P parameters, Class<B> bundleType, Map<String, String> headers) {
+			P theParameters, Class<B> theBundleType, Map<String, String> theHeaders) {
 		notImplemented();
 
 		return null;
@@ -339,7 +371,7 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-			Class<T> resourceType, P parameters, Class<B> bundleType, Map<String, String> headers) {
+			Class<T> theResourceType, P theParameters, Class<B> theBundleType, Map<String, String> theHeaders) {
 		notImplemented();
 
 		return null;
@@ -347,7 +379,7 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-			I id, P parameters, Class<B> bundleType, Map<String, String> headers) {
+			I theId, P theParameters, Class<B> theBundleType, Map<String, String> theHeaders) {
 		notImplemented();
 
 		return null;
@@ -355,20 +387,21 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public FhirContext fhirContext() {
-		return restfulServer.getFhirContext();
+		return myRestfulServer.getFhirContext();
 	}
 
-	protected <R> R invoke(RequestDetails details) {
+	protected <R> R invoke(RequestDetails theDetails) {
 		try {
-			return unsafeCast(
-					restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details));
+			return unsafeCast(myRestfulServer
+					.determineResourceMethod(theDetails, null)
+					.invokeServer(myRestfulServer, theDetails));
 		} catch (IOException exception) {
 			throw new InternalErrorException(Msg.code(2641) + exception);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T unsafeCast(Object object) {
-		return (T) object;
+	private static <T> T unsafeCast(Object theObject) {
+		return (T) theObject;
 	}
 }
