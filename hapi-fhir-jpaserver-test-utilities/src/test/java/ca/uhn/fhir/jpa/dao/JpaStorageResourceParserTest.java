@@ -19,9 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class JpaStorageResourceParserTest {
@@ -55,8 +54,7 @@ public class JpaStorageResourceParserTest {
                .populateResourceMetadata(myEntity, forHistoryOperation, tagList, version, resourceTarget);
 
        List<Coding> actualTagList = actualResult.getMeta().getTag();
-       assertFalse(actualTagList.isEmpty());
-       assertEquals(actualTagList.size(), 1);
-       assertTrue(actualTagList.get(0).equals(coding));
+       assertThat(actualTagList).hasSize(1);
+	   assertEquals(coding, actualTagList.get(0));
     }
 }

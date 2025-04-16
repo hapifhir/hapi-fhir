@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.BundleBuilder;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,18 +29,17 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSearchCacheR4Test.class);
 
 	@Test
 	public void testSearch_OnePartition_UseCache() {
-		createPatient(withPartition(null), withActiveTrue());
-		createPatient(withPartition(null), withActiveFalse());
-		IIdType patientId11 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId12 = createPatient(withPartition(1), withActiveFalse());
-		IIdType patientId21 = createPatient(withPartition(2), withActiveTrue());
-		IIdType patientId22 = createPatient(withPartition(2), withActiveFalse());
+		createPatient(withCreatePartition(null), withActiveTrue());
+		createPatient(withCreatePartition(null), withActiveFalse());
+		IIdType patientId11 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId12 = createPatient(withCreatePartition(1), withActiveFalse());
+		IIdType patientId21 = createPatient(withCreatePartition(2), withActiveTrue());
+		IIdType patientId22 = createPatient(withCreatePartition(2), withActiveFalse());
 		logAllResources();
 
 		{
@@ -47,7 +47,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			addNextTargetPartitionsForRead(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
-			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * "))) +
+			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "))) +
 				"\n\nActual IDs: " + toUnqualifiedVersionlessIdValues(outcome) +
 				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
 
@@ -98,12 +98,12 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_MultiplePartitions_UseCache() {
-		IIdType patientIdNull1 = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientIdNull2 = createPatient(withPartition(null), withActiveFalse());
-		IIdType patientId11 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId12 = createPatient(withPartition(1), withActiveFalse());
-		IIdType patientId21 = createPatient(withPartition(2), withActiveTrue());
-		IIdType patientId22 = createPatient(withPartition(2), withActiveFalse());
+		IIdType patientIdNull1 = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientIdNull2 = createPatient(withCreatePartition(null), withActiveFalse());
+		IIdType patientId11 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId12 = createPatient(withCreatePartition(1), withActiveFalse());
+		IIdType patientId21 = createPatient(withCreatePartition(2), withActiveTrue());
+		IIdType patientId22 = createPatient(withCreatePartition(2), withActiveFalse());
 
 		{
 			myCaptureQueriesListener.clear();
@@ -163,15 +163,15 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
 
 		addNextTargetPartitionForUpdateInTxBundle(1);
-		Bundle responseBundle1 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition(1));
+		Bundle responseBundle1 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition());
 		assertResourceCreated(responseBundle1);
 
 		addNextTargetPartitionForUpdateInTxBundle(2);
-		Bundle responseBundle2 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition(2));
+		Bundle responseBundle2 = mySystemDao.transaction(mySrd, conditionalUpdatePatientWithConditionalUrlOnPartition());
 		assertResourceCreated(responseBundle2);
 	}
 
-	private Bundle conditionalUpdatePatientWithConditionalUrlOnPartition(Integer thePartitionId) {
+	private Bundle conditionalUpdatePatientWithConditionalUrlOnPartition() {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		Patient p = new Patient();

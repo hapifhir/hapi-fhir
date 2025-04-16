@@ -148,7 +148,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void createUniqueComboSp() {
-		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForUpdateDefaultPartition();
 		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender");
@@ -159,7 +159,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForUpdateDefaultPartition();
 		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family");
@@ -170,7 +170,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addBase("Patient");
 		mySearchParameterDao.update(sp, mySrd);
 
-		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForUpdateDefaultPartition();
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-gender-family-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -290,6 +290,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 
+	protected void addNextTargetPartitionForUpdate(int thePartitionId, LocalDate thePartitionDate) {
+		addNextTargetPartitionForUpdate(RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate));
+	}
+
 	protected void addNextTargetPartitionForUpdate(int thePartitionId) {
 		addNextTargetPartitionForUpdate(RequestPartitionId.fromPartitionId(thePartitionId));
 	}
@@ -298,8 +302,13 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextTargetPartitionForUpdate(RequestPartitionId.defaultPartition());
 	}
 
+	protected void addNextTargetPartitionForUpdateDefaultPartition(LocalDate thePartitionDate) {
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, thePartitionDate);
+		addNextTargetPartitionForUpdate(requestPartitionId);
+	}
 
-	protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
+
+		protected void addNextTargetPartitionsForRead(Integer... thePartitionId) {
 		Validate.notNull(thePartitionId);
 		myPartitionInterceptor.addNextTargetReadPartition(RequestPartitionId.fromPartitionIds(thePartitionId));
 	}
@@ -322,7 +331,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
 	}
 
-	protected ICreationArgument withPartition(Integer thePartitionId) {
+	protected ICreationArgument withUpdatePartition(Integer thePartitionId) {
+		return t -> {
+			if (thePartitionId != null) {
+				addNextTargetPartitionForUpdate(thePartitionId);
+			} else {
+				addNextTargetPartitionForUpdateDefaultPartition();
+			}
+		};
+
+	}
+
+	protected ICreationArgument withCreatePartition(Integer thePartitionId) {
 		return t -> {
 			if (thePartitionId != null) {
 				addNextTargetPartitionForCreate(thePartitionId, null);
@@ -416,7 +436,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		public void assertNoRemainingIds() {
-			assertThat(myCreateRequestPartitionIds.size()).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEqualTo(0);
+			assertThat(myCreateRequestPartitionIds).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEmpty();
 		}
 
 	}
