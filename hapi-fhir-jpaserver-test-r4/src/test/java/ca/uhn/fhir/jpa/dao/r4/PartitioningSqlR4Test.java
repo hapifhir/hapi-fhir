@@ -216,7 +216,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
-		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForUpdateDefaultPartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
@@ -294,7 +294,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition NULL
-		addNextTargetPartitionForUpdateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -356,8 +356,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreate_AutoCreatePlaceholderTargets() {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
-		addNextTargetPartitionForCreate(1, null);
-		addNextTargetPartitionForCreate(1, null);
+		addNextTargetPartitionForCreate(1, null); // the patient
+		addNextTargetPartitionForUpdate(1, null); // the Organization placeholder
 		IIdType patientId1 = createPatient(withOrganization(new IdType("Organization/FOO")));
 
 		assertNoRemainingPartitionIds();
@@ -573,13 +573,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_WithPartition() {
-		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForUpdate(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForUpdate(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -599,13 +599,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_NoPartition() {
-		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForUpdateDefaultPartition();
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForUpdateDefaultPartition();
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -623,13 +623,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_DefaultPartition() {
-		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForUpdateDefaultPartition(myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForUpdateDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -810,11 +810,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Create a resource
 		addNextTargetPartitionForUpdate(myPartitionId, myPartitionDate);
-		addNextTargetPartitionsForRead(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId); // for conditional url
 		Patient p = new Patient();
 		p.setActive(false);
 		p.addIdentifier().setValue("12345");
 		JpaPid patientId = JpaPid.fromId(myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong());
+
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			assertEquals(1, myResourceTableDao.count());
@@ -830,8 +831,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		});
 
 		// Update that resource
-		addNextTargetPartitionsForRead(myPartitionId);
-		addNextTargetPartitionForCreate(myPartitionId);
+		addNextTargetPartitionForUpdate(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId); // the conditional url
 		p = new Patient();
 		p.setActive(true);
 		p.addIdentifier().setValue("12345");
@@ -2067,19 +2068,19 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_HasParam_SearchOnePartition() {
-		addNextTargetPartitionForCreate(1, null);
+		addNextTargetPartitionForUpdateDefaultPartition(1, null);
 		Organization org = new Organization();
 		org.setId("ORG");
 		org.setName("ORG");
 		myOrganizationDao.update(org, mySrd);
 
-		addNextTargetPartitionForCreate(1, null);
+		addNextTargetPartitionForUpdateDefaultPartition(1, null);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId("PRACT");
 		practitioner.addName().setFamily("PRACT");
 		myPractitionerDao.update(practitioner, mySrd);
 
-		addNextTargetPartitionForCreate(1, null);
+		addNextTargetPartitionForUpdateDefaultPartition(1, null);
 		PractitionerRole role = new PractitionerRole();
 		role.setId("ROLE");
 		role.getPractitioner().setReference("Practitioner/PRACT");
@@ -3471,7 +3472,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 
 			ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
-			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
+			verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
 
 			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
 			assertEquals(1, partitionId.getPartitionIds().get(0).intValue());
