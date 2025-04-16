@@ -653,38 +653,51 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			String theCanonicalUrl,
 			int thePageSize,
 			@Nullable String thePackageId,
-			@Nullable String theVersion) {
+			@Nullable String theVersionId) {
 		String canonicalUrl = theCanonicalUrl;
 
 		int versionSeparator = canonicalUrl.lastIndexOf('|');
 		Slice<NpmPackageVersionResourceEntity> slice;
+
+		final PageRequest pageRequest = PageRequest.of(0, thePageSize);
+
 		if (versionSeparator != -1) {
 			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
 			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
 
 			if (thePackageId != null) {
-				if (theVersion != null) {
+				if (theVersionId != null) {
 					slice =
 							myPackageVersionResourceDao
 									.findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
-											PageRequest.of(0, thePageSize),
+											pageRequest,
 											theFhirVersion,
 											canonicalUrl,
 											canonicalVersion,
 											thePackageId,
-											theVersion);
+											theVersionId);
 				} else {
-					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
-							PageRequest.of(0, thePageSize), theFhirVersion, canonicalUrl, thePackageId);
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersionAndPackageId(
+							pageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId);
 				}
 			} else {
 				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
-						PageRequest.of(0, thePageSize), theFhirVersion, canonicalUrl, canonicalVersion);
+						pageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
 			}
 
 		} else {
-			slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
-					PageRequest.of(0, thePageSize), theFhirVersion, canonicalUrl);
+			if (thePackageId != null) {
+				if (theVersionId != null) {
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
+							pageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
+				} else {
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageId(
+							pageRequest, theFhirVersion, canonicalUrl, thePackageId);
+				}
+			} else {
+				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
+						pageRequest, theFhirVersion, canonicalUrl);
+			}
 		}
 
 		if (slice.isEmpty()) {
