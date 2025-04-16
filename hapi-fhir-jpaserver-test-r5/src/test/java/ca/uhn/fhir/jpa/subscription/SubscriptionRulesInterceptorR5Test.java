@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
+import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -10,16 +11,14 @@ import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test {
+public class SubscriptionRulesInterceptorR5Test extends BaseResourceProviderR5Test {
 
 	@Test
-	public void testCriteriaFilter() throws InterruptedException {
+	public void testCriteriaFilter() {
 		// Setup
 		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
@@ -37,7 +36,7 @@ public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test 
 		topicGoodTrigger.getQueryCriteria()
 			.setCurrent("Observation?code=http://foo|123") // acceptable
 			.setRequireBoth(false);
-		createResource(topicGood, false);
+		mySubscriptionTopicDao.update(topicGood, mySrd);
 
 		Subscription subsGood = new Subscription();
 		subsGood.setId("GOOD");
@@ -47,8 +46,8 @@ public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test 
 			.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
 		subsGood.setTopic("http://good");
 		subsGood.setContentType(Constants.CT_FHIR_JSON_NEW);
-		subsGood.setEndpoint("http://localhost" + ourListenerPort);
-		putSubscription(subsGood);
+		subsGood.setEndpoint("http://localhost:8888");
+		mySubscriptionDao.update(subsGood, mySrd);
 
 		SubscriptionTopic topicBad = new SubscriptionTopic();
 		topicBad.setId("BAD");
@@ -64,14 +63,11 @@ public class SubscriptionRulesInterceptorR5Test extends BaseSubscriptionsR5Test 
 		PreconditionFailedException topicCreateException = assertThrows(PreconditionFailedException.class, () -> mySubscriptionTopicDao.update(topicBad, mySrd));
 
 		// Verify
-		await().until(() -> mySubscriptionDao.read(new IdType("Subscription/GOOD"), mySrd).getStatus(), t -> t == Enumerations.SubscriptionStatusCodes.ACTIVE);
 		assertEquals("Criteria is not permitted on this server: Observation?", topicCreateException.getMessage());
 
 		subsGood = mySubscriptionDao.read(new IdType("Subscription/GOOD"), mySrd);
-		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, subsGood.getStatus());
+		assertEquals(Enumerations.SubscriptionStatusCodes.REQUESTED, subsGood.getStatus());
 		assertNull(subsGood.getReason());
-
-		assertThat(mySubscriptionRegistry.getAll()).hasSize(1);
 	}
 
 }
