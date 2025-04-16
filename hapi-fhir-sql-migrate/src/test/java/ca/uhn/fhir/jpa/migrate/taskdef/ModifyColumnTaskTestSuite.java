@@ -19,7 +19,7 @@ public interface ModifyColumnTaskTestSuite extends BaseMigrationTaskTestSuite {
 		// given
 		Builder builder = getSupport().getBuilder();
 		String tableName = "TABLE_COLUMN_STRING" + System.currentTimeMillis();
-		String stringColumnName = "col1";
+		String stringColumnName = "COL1";
 		Builder.BuilderAddTableByColumns tableBuilder = builder.addTableByColumns("1", tableName, "id");
 		tableBuilder.addColumn("id").nonNullable().type(ColumnTypeEnum.LONG);
 		tableBuilder.addColumn(stringColumnName).nonNullable().type(ColumnTypeEnum.STRING, 1);
