@@ -16,9 +16,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-
-import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
-
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
@@ -30,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -39,23 +37,9 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -64,11 +48,13 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -80,28 +66,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-
-import static org.mockito.ArgumentMatchers.eq;
-
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,9 +98,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -1050,6 +1041,50 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 				assertEquals(4, counts.get("Patient"), counts.toString());
 			});
 		}
+
+		@Test
+		public void testCreateAndRead_PartitionableQuestionnaire() {
+			// Remove "Questionnaire" from the list of non-partitionable types
+			myPartitionSettings.getNonPartitionableResourceTypes().remove("Questionnaire");
+
+			// Create Questionnaire in partition A
+			myTenantClientInterceptor.setTenantId(TENANT_A);
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setTitle("My Partitioned Questionnaire");
+			IIdType id = myClient.create().resource(questionnaire).execute().getId();
+
+			// Verify: Resource is stored in the correct partition
+			runInTransaction(() -> {
+				ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+				assertThat(table.getPartitionId().getPartitionId()).isEqualTo(TENANT_A_ID);
+			});
+
+			// Read it back
+			Questionnaire read = myClient.read().resource(Questionnaire.class).withId(id).execute();
+			assertThat(read.getTitle()).isEqualTo("My Partitioned Questionnaire");
+		}
+
+		@Test
+		public void testCreateAndRead_NonPartitionableQuestionnaire() {
+			// Ensure "Questionnaire" is in the non-partitionable resource list
+			myPartitionSettings.getNonPartitionableResourceTypes().add("Questionnaire");
+
+			// Try to create Questionnaire in tenant partition
+			myTenantClientInterceptor.setTenantId(TENANT_A);
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setTitle("Invalid Partitioned Questionnaire");
+
+			try {
+				myClient.create().resource(questionnaire).execute();
+				fail("Expected UnprocessableEntityException");
+			} catch (UnprocessableEntityException e) {
+				// Expected exception: Resource type Questionnaire can not be partitioned
+				assertThat(e.getMessage()).contains("can not be partitioned");
+			}
+		}
+
 
 		private boolean executeTransactionOrThrow(SystemRequestDetails requestDetails, Bundle input) {
 			try {
