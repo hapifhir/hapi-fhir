@@ -115,7 +115,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		}
 	}
 
-	private static Stream<Arguments> findPackageAssets_duplicateResourcesParams() {
+	private static Stream<Arguments> findPackageAsset_duplicateResourcesParams() {
 		return Stream.of(
 			Arguments.of(
 				MEASURE_URL,
@@ -193,17 +193,17 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@MethodSource("findPackageAssets_duplicateResourcesParams")
-	void findPackageAssets_duplicateResources(String theCanonicalUrl, String thePackageId, @Nullable String theVersionId, IdType theExpectedId, String theExpectedName, CanonicalType theExpectedLibraryUrl, String theExpectedVersion, String theExpectedDescription) {
+	@MethodSource("findPackageAsset_duplicateResourcesParams")
+	void findPackageAsset_duplicateResources(String theCanonicalUrl, String thePackageId, @Nullable String theVersionId, IdType theExpectedId, String theExpectedName, CanonicalType theExpectedLibraryUrl, String theExpectedVersion, String theExpectedDescription) {
 
-		final FindPackageAssetsRequest request =
-			FindPackageAssetsRequest.withVersion(
+		final FindPackageAssetRequest request =
+			FindPackageAssetRequest.withVersion(
 				FhirVersionEnum.R4,
 				theCanonicalUrl,
 				thePackageId,
 				theVersionId);
 
-		final IBaseResource resource = myPackageCacheManager.findPackageAssets(request);
+		final IBaseResource resource = myPackageCacheManager.findPackageAsset(request);
 
 		assertThat(resource).isNotNull().isInstanceOf(Measure.class);
 
@@ -221,7 +221,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 		}
 	}
 
-	private static Stream<Arguments> findPackageAssets_duplicateResources_badInputParams() {
+	private static Stream<Arguments> findPackageAsset_duplicateResources_badInputParams() {
 		return Stream.of(
 			Arguments.of(
 				MEASURE_URL,
@@ -263,16 +263,16 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@MethodSource("findPackageAssets_duplicateResources_badInputParams")
-	void findPackageAssets_duplicateResources_badInput(String theCanonicalUrl, String thePackageId, @Nullable String theVersionId) {
-		final FindPackageAssetsRequest request =
-			FindPackageAssetsRequest.withVersion(
+	@MethodSource("findPackageAsset_duplicateResources_badInputParams")
+	void findPackageAsset_duplicateResources_badInput(String theCanonicalUrl, String thePackageId, @Nullable String theVersionId) {
+		final FindPackageAssetRequest request =
+			FindPackageAssetRequest.withVersion(
 				FhirVersionEnum.R4,
 				theCanonicalUrl,
 				thePackageId,
 				theVersionId);
 
-		final IBaseResource resource = myPackageCacheManager.findPackageAssets(request);
+		final IBaseResource resource = myPackageCacheManager.findPackageAsset(request);
 
 		assertThat(resource).isNull();
 	}

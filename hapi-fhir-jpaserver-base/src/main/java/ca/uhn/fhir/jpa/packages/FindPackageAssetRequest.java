@@ -26,9 +26,9 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Request parameters for {@link IHapiPackageCacheManager#findPackageAssets(FindPackageAssetsRequest)}
+ * Request parameters for {@link IHapiPackageCacheManager#findPackageAsset(FindPackageAssetRequest)}
  */
-public class FindPackageAssetsRequest {
+public class FindPackageAssetRequest {
 
 	private final FhirVersionEnum myFhirVersion;
 	private final String myCanonicalUrl;
@@ -37,17 +37,17 @@ public class FindPackageAssetsRequest {
 	@Nullable
 	private final String myVersion;
 
-	public static FindPackageAssetsRequest withVersion(
+	public static FindPackageAssetRequest withVersion(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId, String theVersion) {
-		return new FindPackageAssetsRequest(theFhirVersion, theCanonicalUrl, thePackageId, theVersion);
+		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, theVersion);
 	}
 
-	public static FindPackageAssetsRequest noVersion(
+	public static FindPackageAssetRequest noVersion(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId) {
-		return new FindPackageAssetsRequest(theFhirVersion, theCanonicalUrl, thePackageId, null);
+		return new FindPackageAssetRequest(theFhirVersion, theCanonicalUrl, thePackageId, null);
 	}
 
-	private FindPackageAssetsRequest(
+	private FindPackageAssetRequest(
 			FhirVersionEnum myFhirVersion, String myCanonicalUrl, String myPackageId, @Nullable String myVersion) {
 		this.myFhirVersion = myFhirVersion;
 		this.myCanonicalUrl = myCanonicalUrl;
@@ -77,7 +77,7 @@ public class FindPackageAssetsRequest {
 		if (object == null || getClass() != object.getClass()) {
 			return false;
 		}
-		FindPackageAssetsRequest that = (FindPackageAssetsRequest) object;
+		FindPackageAssetRequest that = (FindPackageAssetRequest) object;
 		return myFhirVersion == that.myFhirVersion
 				&& Objects.equals(myCanonicalUrl, that.myCanonicalUrl)
 				&& Objects.equals(myPackageId, that.myPackageId)
@@ -91,7 +91,7 @@ public class FindPackageAssetsRequest {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", FindPackageAssetsRequest.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", FindPackageAssetRequest.class.getSimpleName() + "[", "]")
 				.add("myFhirVersion=" + myFhirVersion)
 				.add("myCanonicalUrl='" + myCanonicalUrl + "'")
 				.add("myPackageId='" + myPackageId + "'")

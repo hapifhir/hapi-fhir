@@ -608,7 +608,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional(readOnly = true)
-	public IBaseResource findPackageAssets(FindPackageAssetsRequest theRequest) {
+	public IBaseResource findPackageAsset(FindPackageAssetRequest theRequest) {
 
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
 				theRequest.getFhirVersion(),
