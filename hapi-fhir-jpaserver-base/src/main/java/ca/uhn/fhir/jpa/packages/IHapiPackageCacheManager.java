@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -36,11 +35,9 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
-	List<NpmFhirIdPackageIdAndVersionJson> loadResourcePackageInfosByUrl(
-			FhirVersionEnum theFhirVersion, String theCanonicalUrl);
+	List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl);
 
-	IBaseResource loadResourceByUrlAndPackageIdVersion(
-			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId, @Nullable String theVersion);
+	IBaseResource findPackageAssets(FindPackageAssetsRequest theFindPackageAssetsRequest);
 
 	NpmPackageMetadataJson loadPackageMetadata(String thePackageId) throws ResourceNotFoundException;
 

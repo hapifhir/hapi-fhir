@@ -60,7 +60,6 @@ public interface INpmPackageVersionResourceDao
 			@Param("url") String theCanonicalUrl,
 			@Param("packageId") String thePackageId);
 
-	// LUKETOOD:  why is it taking a bad version?
 	@Query(
 			"SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myCanonicalVersion = :version AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true AND e.myPackageVersion.myPackageId = :packageId AND e.myPackageVersion.myVersionId = :versionId")
 	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(

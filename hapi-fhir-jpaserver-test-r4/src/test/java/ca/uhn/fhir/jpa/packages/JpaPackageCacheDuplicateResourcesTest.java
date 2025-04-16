@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+// LUKETODO:  address James' comment
 public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 
 	private static final String VERSION_0_1 = "0.1";
@@ -47,15 +48,15 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void loadResourcePackageInfosByUrl_duplicateResources() {
+	void findPackageAssetInfoByUrl_duplicateResources() {
 
-		final List<NpmFhirIdPackageIdAndVersionJson> jsons =
-			myPackageCacheManager.loadResourcePackageInfosByUrl(FhirVersionEnum.R4, MEASURE_URL);
+		final List<NpmPackageAssetInfoJson> jsons =
+			myPackageCacheManager.findPackageAssetInfoByUrl(FhirVersionEnum.R4, MEASURE_URL);
 
 		assertThat(jsons).isNotNull().isNotEmpty().hasSize(2);
 
-		final NpmFhirIdPackageIdAndVersionJson json1 = jsons.get(0);
-		final NpmFhirIdPackageIdAndVersionJson json2 = jsons.get(1);
+		final NpmPackageAssetInfoJson json1 = jsons.get(0);
+		final NpmPackageAssetInfoJson json2 = jsons.get(1);
 
 		assertThat(json1.getPackageId()).isEqualTo(SIMPLE_ALPHA_PACKAGE);
 		assertThat(json1.getFhirVersion()).isEqualTo(FhirVersionEnum.R4);
@@ -80,7 +81,7 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 
-	private static Stream<Arguments> loadResourceByUrlAndPackageIdVersion_duplicateResourcesParams() {
+	private static Stream<Arguments> findPackageAssets_duplicateResourcesParams() {
 		return Stream.of(
 			Arguments.of(SIMPLE_ALPHA_PACKAGE, null),
 			Arguments.of(SIMPLE_ALPHA_DUPE_PACKAGE, null),
@@ -90,10 +91,17 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 	}
 
 	@ParameterizedTest
-	@MethodSource("loadResourceByUrlAndPackageIdVersion_duplicateResourcesParams")
-	void loadResourceByUrlAndPackageIdVersion_duplicateResources(String thePackageId, @Nullable String theVersionId) {
+	@MethodSource("findPackageAssets_duplicateResourcesParams")
+	void findPackageAssets_duplicateResources(String thePackageId, @Nullable String theVersionId) {
 
-		final IBaseResource resource = myPackageCacheManager.loadResourceByUrlAndPackageIdVersion(FhirVersionEnum.R4, MEASURE_URL, thePackageId, theVersionId);
+		final FindPackageAssetsRequest request =
+			FindPackageAssetsRequest.withVersion(
+				FhirVersionEnum.R4,
+				MEASURE_URL,
+				thePackageId,
+				theVersionId);
+
+		final IBaseResource resource = myPackageCacheManager.findPackageAssets(request);
 
 		assertThat(resource).isNotNull().isInstanceOf(Measure.class);
 

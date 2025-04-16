@@ -608,11 +608,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional(readOnly = true)
-	public IBaseResource loadResourceByUrlAndPackageIdVersion(
-			FhirVersionEnum theFhirVersion, String theCanonicalUrl, String thePackageId, @Nullable String theVersion) {
+	public IBaseResource findPackageAssets(FindPackageAssetsRequest theRequest) {
 
-		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
-				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 2, thePackageId, theVersion);
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
+				theRequest.getFhirVersion(),
+				theRequest.getCanonicalUrl(),
+				2, // We set it to 2 so that if we get more than one we can warn
+				theRequest.getPackageId(),
+				theRequest.getVersion());
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
 			return null;
@@ -620,8 +623,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			if (npmPackageVersionResourceEntities.size() > 1) {
 				ourLog.warn(
 						"Found multiple package versions for FHIR version: {} and canonical URL: {}",
-						theFhirVersion,
-						theCanonicalUrl);
+						theRequest.getFhirVersion(),
+						theRequest.getCanonicalUrl());
 			}
 			final NpmPackageVersionResourceEntity contents = npmPackageVersionResourceEntities.get(0);
 			return loadPackageEntity(contents);
@@ -630,13 +633,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<NpmFhirIdPackageIdAndVersionJson> loadResourcePackageInfosByUrl(
+	public List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(
 			FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
 		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
 				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 20, null, null);
 
 		return npmPackageVersionResourceEntities.stream()
-				.map(entity -> new NpmFhirIdPackageIdAndVersionJson(
+				.map(entity -> new NpmPackageAssetInfoJson(
 						entity.getResourceBinary().asTypedFhirResourceId(),
 						entity.getCanonicalUrl(),
 						entity.getFhirVersion(),

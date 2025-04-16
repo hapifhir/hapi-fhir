@@ -33,28 +33,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class NpmFhirIdPackageIdAndVersionJson {
-	@JsonProperty("Resource ID")
+public class NpmPackageAssetInfoJson {
+	@JsonProperty("resourceId")
 	private String myFhirId;
 
-	@JsonProperty("Canonical URL")
+	@JsonProperty("canonicalUrl")
 	private String myCanonicalUrl;
 
-	@JsonProperty("FHIR Version")
+	@JsonProperty("fhirVersion")
 	private FhirVersionEnum myFhirVersion;
 
-	@JsonProperty("Package ID")
+	@JsonProperty("packageId")
 	private String myPackageId;
 
-	@JsonProperty("Package Version")
+	@JsonProperty("packageVersion")
 	private String myVersion;
 
-	public NpmFhirIdPackageIdAndVersionJson() {
+	public NpmPackageAssetInfoJson() {
 		// empty constructor for serialization
 		this(null, null, null, null, null);
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson(
+	public NpmPackageAssetInfoJson(
 			String theFhirId,
 			String theCanonicalUrl,
 			FhirVersionEnum theFhirVersion,
@@ -71,7 +71,7 @@ public class NpmFhirIdPackageIdAndVersionJson {
 		return myFhirId;
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson setFhirId(String theFhirId) {
+	public NpmPackageAssetInfoJson setFhirId(String theFhirId) {
 		this.myFhirId = theFhirId;
 		return this;
 	}
@@ -80,7 +80,7 @@ public class NpmFhirIdPackageIdAndVersionJson {
 		return myCanonicalUrl;
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson setCanonicalUrl(String theCanonicalUrl) {
+	public NpmPackageAssetInfoJson setCanonicalUrl(String theCanonicalUrl) {
 		this.myCanonicalUrl = theCanonicalUrl;
 		return this;
 	}
@@ -89,7 +89,7 @@ public class NpmFhirIdPackageIdAndVersionJson {
 		return myFhirVersion;
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson setFhirVersion(FhirVersionEnum theFhirVersion) {
+	public NpmPackageAssetInfoJson setFhirVersion(FhirVersionEnum theFhirVersion) {
 		this.myFhirVersion = theFhirVersion;
 		return this;
 	}
@@ -98,7 +98,7 @@ public class NpmFhirIdPackageIdAndVersionJson {
 		return myPackageId;
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson setPackageId(String thePackageId) {
+	public NpmPackageAssetInfoJson setPackageId(String thePackageId) {
 		this.myPackageId = thePackageId;
 		return this;
 	}
@@ -107,7 +107,7 @@ public class NpmFhirIdPackageIdAndVersionJson {
 		return myVersion;
 	}
 
-	public NpmFhirIdPackageIdAndVersionJson setVersion(String theVersion) {
+	public NpmPackageAssetInfoJson setVersion(String theVersion) {
 		this.myVersion = theVersion;
 		return this;
 	}

@@ -35,27 +35,25 @@ import java.util.List;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class NpmFhirIdPackageIdAndVersionListJson {
+public class NpmPackageAssetInfoListJson {
 
 	@JsonProperty("npmFhirIdPackageIdAndVersionJsons")
-	private List<NpmFhirIdPackageIdAndVersionJson> myNpmFhirIdPackageIdAndVersionJsons;
+	private List<NpmPackageAssetInfoJson> myAssets;
 
-	public NpmFhirIdPackageIdAndVersionListJson() {}
+	public NpmPackageAssetInfoListJson() {}
 
-	public NpmFhirIdPackageIdAndVersionListJson(
-			List<NpmFhirIdPackageIdAndVersionJson> myNpmFhirIdPackageIdAndVersionJsons) {
-		this.myNpmFhirIdPackageIdAndVersionJsons = myNpmFhirIdPackageIdAndVersionJsons;
+	public NpmPackageAssetInfoListJson(List<NpmPackageAssetInfoJson> theAssets) {
+		myAssets = theAssets;
 	}
 
-	public List<NpmFhirIdPackageIdAndVersionJson> getNpmFhirIdPackageIdAndVersionJsons() {
-		if (myNpmFhirIdPackageIdAndVersionJsons == null) {
-			myNpmFhirIdPackageIdAndVersionJsons = new ArrayList<>();
+	public List<NpmPackageAssetInfoJson> getAssets() {
+		if (myAssets == null) {
+			myAssets = new ArrayList<>();
 		}
-		return myNpmFhirIdPackageIdAndVersionJsons;
+		return myAssets;
 	}
 
-	public void setMyNpmFhirIdPackageIdAndVersionJsons(
-			List<NpmFhirIdPackageIdAndVersionJson> theNpmFhirIdPackageIdAndVersionJsons) {
-		myNpmFhirIdPackageIdAndVersionJsons = theNpmFhirIdPackageIdAndVersionJsons;
+	public void setAssets(List<NpmPackageAssetInfoJson> theAssets) {
+		myAssets = theAssets;
 	}
 }
