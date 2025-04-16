@@ -389,7 +389,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Override
 	public boolean isResourcePartitionable(String theResourceType) {
-		return theResourceType != null && !myPartitionSettings.getNonPartitionableResourceTypes().contains(theResourceType);
+		return theResourceType != null
+				&& !myPartitionSettings.getNonPartitionableResourceTypes().contains(theResourceType);
 	}
 
 	@Override
