@@ -49,7 +49,8 @@ public class ResourceRefs {
 		patient.addGeneralPractitioner(new Reference("#my-practitioner"));
 		patient.getContained().add(pract);
 
-		String encoded = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String encoded =
+				FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		System.out.println(encoded);
 		// END SNIPPET: manualContained
 	}
