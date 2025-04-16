@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.interceptor.partition;
 
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -9,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_ANY;
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE;
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_READ;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
@@ -20,8 +38,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RequestHeaderPartitionInterceptor {
 
 	public static final String PARTITIONS_HEADER = "X-Request-Partition-IDs";
-
-	// In BaseTransactionProcessor I need to create a SubRequestDetails for the create path
 
 	@Hook(STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyPartitionForCreate(RequestDetails theRequestDetails) {
@@ -40,13 +56,15 @@ public class RequestHeaderPartitionInterceptor {
 		if (isBlank(partitionHeader)) {
 			// TODO EMRE add Msg.code
 			String msg = String.format(
-				"%s header is missing or blank, it is required to identify the storage partition", PARTITIONS_HEADER);
+					"%s header is missing or blank, it is required to identify the storage partition",
+					PARTITIONS_HEADER);
 			throw new InvalidRequestException(msg);
 		}
 		return partitionHeader;
 	}
 
-	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(String thePartitionIds, boolean theIncludeOnlyTheFirst) {
+	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(
+			String thePartitionIds, boolean theIncludeOnlyTheFirst) {
 		String[] partitionIdStrings = thePartitionIds.split(",");
 		List<Integer> partitionIds = new ArrayList<>();
 		for (String partitionIdString : partitionIdStrings) {
@@ -59,15 +77,14 @@ public class RequestHeaderPartitionInterceptor {
 
 			if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
 				partitionIds.add(RequestPartitionId.defaultPartition().getFirstPartitionIdOrNull());
-			}
-			else {
+			} else {
 				try {
 					int partitionId = Integer.parseInt(trimmedPartitionId);
 					partitionIds.add(partitionId);
 				} catch (NumberFormatException e) {
 					String msg = String.format(
-						"Invalid partition ID: '%s' provided in header: %s",
-						trimmedPartitionId, RequestHeaderPartitionInterceptor.PARTITIONS_HEADER);
+							"Invalid partition ID: '%s' provided in header: %s",
+							trimmedPartitionId, RequestHeaderPartitionInterceptor.PARTITIONS_HEADER);
 					// TODO EMRE add Msg.code
 					throw new InvalidRequestException(msg);
 				}

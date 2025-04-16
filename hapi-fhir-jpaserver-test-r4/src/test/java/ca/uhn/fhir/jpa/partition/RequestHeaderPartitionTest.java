@@ -5,10 +5,12 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.servlet.Servlet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -21,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.stream.Stream;
 
@@ -41,7 +44,6 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 	private RequestHeaderPartitionInterceptor myPartitionInterceptor;
 
 	private IIdType myPatientIdInPartition1;
-	private IIdType myPatientIdInPartition2;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -51,16 +53,8 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		//myPartitionConfigSvc.createPartition(new PartitionEntity().setId(PARTITION_ID_1).setName(PARTITION_1), null);
-		//myPartitionConfigSvc.createPartition(new PartitionEntity().setId(PARTITION_ID_2).setName(PARTITION_2), null);
-
-
-
 		RequestDetails requestDetails = createRequestDetailsWithPartitionHeader("1");
 		myPatientIdInPartition1 = myPatientDao.create(new Patient(), requestDetails).getId().toVersionless();
-
-		requestDetails = createRequestDetailsWithPartitionHeader("2");
-		myPatientIdInPartition2 = myPatientDao.create(new Patient(), requestDetails).getId().toVersionless();
 	}
 
 	@ParameterizedTest
@@ -145,7 +139,7 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		Bundle transactionBundle = new Bundle();
 		transactionBundle.setType(Bundle.BundleType.TRANSACTION);
 		Bundle.BundleEntryComponent entry = transactionBundle.addEntry();
-		entry.setResource(new Patient().setId("Patient/1"));
+		entry.setResource(new Patient());
 		entry.getRequest().setMethod(Bundle.HTTPVerb.POST);
 		entry.getRequest().setUrl("Patient");
 		//                                  "http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids"
@@ -161,8 +155,11 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 	}
 
 	private RequestDetails createRequestDetailsWithPartitionHeader(String commaSeparatedPartitionIds) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails(mySrdInterceptorService);
+		ServletRequestDetails requestDetails = new ServletRequestDetails(mySrdInterceptorService);
+		MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+		requestDetails.setServletRequest(mockHttpServletRequest);
 		requestDetails.addHeader(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, commaSeparatedPartitionIds);
+		requestDetails.setServer(new RestfulServer(myFhirContext));
 		return requestDetails;
 	}
 
