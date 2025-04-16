@@ -97,7 +97,8 @@ public class TransactionUtil {
 
 			IBaseResource requestResource = terser.getSingleValueOrNull(requestEntry, "resource", IBaseResource.class);
 			String requestMetaSource = null;
-			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			if (requestResource != null
+					&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 				requestMetaSource = MetaUtil.getSource(theContext, requestResource);
 			}
 			if (isBlank(requestMetaSource)) {
