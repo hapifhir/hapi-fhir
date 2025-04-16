@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
-import ca.uhn.fhir.jpa.embedded.annotation.OracleTest;
+import ca.uhn.fhir.jpa.annotation.OracleTest;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.extension.RegisterExtension;
