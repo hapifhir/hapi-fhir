@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR Storage api
+ * %%
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.repository;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,7 +41,7 @@ import java.util.Map;
  */
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
-	private final List<String> searchResultParameters = Arrays.asList(
+	private final List<String> mySearchResultParameters = Arrays.asList(
 			"_sort",
 			"_count",
 			"_include",
@@ -32,36 +51,37 @@ public class SearchConverter {
 			"_elements",
 			"_contained",
 			"_containedType");
-	public final Multimap<String, List<IQueryParameterType>> separatedSearchParameters = ArrayListMultimap.create();
-	public final Multimap<String, List<IQueryParameterType>> separatedResultParameters = ArrayListMultimap.create();
-	public final SearchParameterMap searchParameterMap = new SearchParameterMap();
-	public final Map<String, String[]> resultParameters = new HashMap<>();
+	public final Multimap<String, List<IQueryParameterType>> mySeparatedSearchParameters = ArrayListMultimap.create();
+	public final Multimap<String, List<IQueryParameterType>> mySeparatedResultParameters = ArrayListMultimap.create();
+	public final SearchParameterMap mySearchParameterMap = new SearchParameterMap();
+	public final Map<String, String[]> myResultParameters = new HashMap<>();
 
-	public void convertParameters(Multimap<String, List<IQueryParameterType>> parameters, FhirContext fhirContext) {
-		if (parameters == null) {
+	public void convertParameters(
+			Multimap<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
+		if (theParameters == null) {
 			return;
 		}
-		separateParameterTypes(parameters);
-		convertToSearchParameterMap(separatedSearchParameters);
-		convertToStringMap(separatedResultParameters, fhirContext);
+		separateParameterTypes(theParameters);
+		convertToSearchParameterMap(mySeparatedSearchParameters);
+		convertToStringMap(mySeparatedResultParameters, theFhirContext);
 	}
 
 	public void convertToStringMap(
-			@Nonnull Multimap<String, List<IQueryParameterType>> parameters, @Nonnull FhirContext fhirContext) {
-		for (var entry : parameters.entries()) {
+			@Nonnull Multimap<String, List<IQueryParameterType>> theParameters, @Nonnull FhirContext theFhirContext) {
+		for (Map.Entry<String, List<IQueryParameterType>> entry : theParameters.entries()) {
 			String[] values = new String[entry.getValue().size()];
 			for (int i = 0; i < entry.getValue().size(); i++) {
-				values[i] = entry.getValue().get(i).getValueAsQueryToken(fhirContext);
+				values[i] = entry.getValue().get(i).getValueAsQueryToken(theFhirContext);
 			}
-			resultParameters.put(entry.getKey(), values);
+			myResultParameters.put(entry.getKey(), values);
 		}
 	}
 
-	public void convertToSearchParameterMap(Multimap<String, List<IQueryParameterType>> searchMap) {
-		if (searchMap == null) {
+	public void convertToSearchParameterMap(Multimap<String, List<IQueryParameterType>> theSearchMap) {
+		if (theSearchMap == null) {
 			return;
 		}
-		for (var entry : searchMap.entries()) {
+		for (Map.Entry<String, List<IQueryParameterType>> entry : theSearchMap.entries()) {
 			// if list of parameters is the value
 			if (entry.getValue().size() > 1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())) {
 				// is value a TokenParam
@@ -76,50 +96,50 @@ public class SearchConverter {
 		}
 	}
 
-	private void addTokenToSearchIfNeeded(Map.Entry<String, List<IQueryParameterType>> entry) {
-		if (isTokenParam(entry.getValue().get(0))) {
-			var tokenKey = entry.getKey();
-			var tokenList = new TokenOrListParam();
-			for (IQueryParameterType rec : entry.getValue()) {
+	private void addTokenToSearchIfNeeded(Map.Entry<String, List<IQueryParameterType>> theEntry) {
+		if (isTokenParam(theEntry.getValue().get(0))) {
+			String tokenKey = theEntry.getKey();
+			TokenOrListParam tokenList = new TokenOrListParam();
+			for (IQueryParameterType rec : theEntry.getValue()) {
 				tokenList.add((TokenParam) rec);
 			}
-			searchParameterMap.add(tokenKey, tokenList);
+			mySearchParameterMap.add(tokenKey, tokenList);
 		}
 	}
 
-	public <T> void setParameterTypeValue(@Nonnull String key, @Nonnull T parameterType) {
-		if (isOrList(parameterType)) {
-			searchParameterMap.add(key, (IQueryParameterOr<?>) parameterType);
-		} else if (isAndList(parameterType)) {
-			searchParameterMap.add(key, (IQueryParameterAnd<?>) parameterType);
+	public <T> void setParameterTypeValue(@Nonnull String theKey, @Nonnull T theParameterType) {
+		if (isOrList(theParameterType)) {
+			mySearchParameterMap.add(theKey, (IQueryParameterOr<?>) theParameterType);
+		} else if (isAndList(theParameterType)) {
+			mySearchParameterMap.add(theKey, (IQueryParameterAnd<?>) theParameterType);
 		} else {
-			searchParameterMap.add(key, (IQueryParameterType) parameterType);
+			mySearchParameterMap.add(theKey, (IQueryParameterType) theParameterType);
 		}
 	}
 
-	public void separateParameterTypes(@Nonnull Multimap<String, List<IQueryParameterType>> parameters) {
-		for (var entry : parameters.entries()) {
+	public void separateParameterTypes(@Nonnull Multimap<String, List<IQueryParameterType>> theParameters) {
+		for (Map.Entry<String, List<IQueryParameterType>> entry : theParameters.entries()) {
 			if (isSearchResultParameter(entry.getKey())) {
-				separatedResultParameters.put(entry.getKey(), entry.getValue());
+				mySeparatedResultParameters.put(entry.getKey(), entry.getValue());
 			} else {
-				separatedSearchParameters.put(entry.getKey(), entry.getValue());
+				mySeparatedSearchParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	public boolean isSearchResultParameter(String parameterName) {
-		return searchResultParameters.contains(parameterName);
+	public boolean isSearchResultParameter(String theParameterName) {
+		return mySearchResultParameters.contains(theParameterName);
 	}
 
-	public <T> boolean isOrList(@Nonnull T parameterType) {
-		return IQueryParameterOr.class.isAssignableFrom(parameterType.getClass());
+	public <T> boolean isOrList(@Nonnull T theParameterType) {
+		return IQueryParameterOr.class.isAssignableFrom(theParameterType.getClass());
 	}
 
-	public <T> boolean isAndList(@Nonnull T parameterType) {
-		return IQueryParameterAnd.class.isAssignableFrom(parameterType.getClass());
+	public <T> boolean isAndList(@Nonnull T theParameterType) {
+		return IQueryParameterAnd.class.isAssignableFrom(theParameterType.getClass());
 	}
 
-	public <T> boolean isTokenParam(@Nonnull T parameterType) {
-		return TokenParam.class.isAssignableFrom(parameterType.getClass());
+	public <T> boolean isTokenParam(@Nonnull T theParameterType) {
+		return TokenParam.class.isAssignableFrom(theParameterType.getClass());
 	}
 }
