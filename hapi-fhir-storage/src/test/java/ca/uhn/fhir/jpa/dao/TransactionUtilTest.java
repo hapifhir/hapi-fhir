@@ -3,10 +3,14 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,7 +30,7 @@ class TransactionUtilTest {
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@ParameterizedTest
-	@EnumSource(value = FhirVersionEnum.class, names = {"R4", "DSTU2_HL7ORG"})
+	@EnumSource(value = FhirVersionEnum.class, names = {"DSTU2", "DSTU3", "R4", "R5"})
 	public void testParseTransactionResponse_SuccessfulCreate(FhirVersionEnum theVersion) {
 		Resource requestPatient = new Patient();
 		requestPatient.getMeta().setSource("http://source#123");
@@ -56,7 +60,11 @@ class TransactionUtilTest {
 		assertEquals(storageOutcome, outcomes.get(0).getStorageResponseCode());
 		assertEquals("Patient/123", outcomes.get(0).getTargetId().getValue());
 		assertEquals(URN_UUID_VALUE, outcomes.get(0).getSourceId().getValue());
-		assertEquals("http://source#123", outcomes.get(0).getRequestMetaSource());
+		if (theVersion.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			assertEquals("http://source#123", outcomes.get(0).getRequestMetaSource());
+		} else {
+			assertNull(outcomes.get(0).getRequestMetaSource());
+		}
 		assertEquals(200, outcomes.get(0).getStatusCode());
 		assertEquals("200 OK", outcomes.get(0).getStatusMessage());
 	}
@@ -152,10 +160,38 @@ class TransactionUtilTest {
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private static IBaseBundle toVersion(Bundle theBundle, FhirVersionEnum theVersion) {
 		return switch (theVersion) {
+			case DSTU2 -> {
+				ca.uhn.fhir.model.dstu2.resource.Bundle dstu2Bundle = toDstu2(theBundle);
+				for (int i = 0; i < theBundle.getEntry().size(); i++) {
+					Resource outcome = theBundle.getEntry().get(i).getResponse().getOutcome();
+					if (outcome != null) {
+						dstu2Bundle.getEntry().get(i).setResource(toDstu2(outcome));
+					}
+				}
+				yield dstu2Bundle;
+			}
+			case DSTU3 -> {
+				org.hl7.fhir.dstu3.model.Bundle target = (org.hl7.fhir.dstu3.model.Bundle) VersionConvertorFactory_30_40.convertResource(theBundle);
+				MetaUtil.setSource(FhirContext.forDstu3Cached(), target, MetaUtil.getSource(FhirContext.forR4Cached(), theBundle));
+				for (int i = 0; i < theBundle.getEntry().size(); i++) {
+					Resource inputResource = theBundle.getEntry().get(i).getResource();
+					if (inputResource != null) {
+						org.hl7.fhir.dstu3.model.Resource outputResource = target.getEntry().get(i).getResource();
+						MetaUtil.setSource(FhirContext.forDstu3Cached(), outputResource, MetaUtil.getSource(FhirContext.forR4Cached(), inputResource));
+					}
+				}
+				yield target;
+			}
 			case R4 -> theBundle;
-			case DSTU2_HL7ORG -> (IBaseBundle) VersionConvertorFactory_10_40.convertResource(theBundle);
+			case R5 -> (IBaseBundle) VersionConvertorFactory_40_50.convertResource(theBundle);
 			default -> throw new IllegalArgumentException("Unsupported version " + theVersion);
 		};
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends IBaseResource> T toDstu2(org.hl7.fhir.r4.model.Resource theInput) {
+		IBaseResource hl7orgBundle = VersionConvertorFactory_10_40.convertResource(theInput);
+		return (T) FhirContext.forDstu2Cached().newJsonParser().parseResource(FhirContext.forDstu2Hl7OrgCached().newJsonParser().encodeToString(hl7orgBundle));
 	}
 
 }
