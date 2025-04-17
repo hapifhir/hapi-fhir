@@ -989,6 +989,10 @@
 			<name>Berkant Karduman</name>
 			<organization>TigaHealth</organization>
 		</developer>
+		<developer>
+			<id>xytis</id>
+			<name>Vytis Valentinavičius</name>
+		</developer>
 	</developers>
 
 	<licenses>
