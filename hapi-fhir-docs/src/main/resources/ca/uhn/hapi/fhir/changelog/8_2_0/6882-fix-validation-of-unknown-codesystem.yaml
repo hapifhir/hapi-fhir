@@ -3,4 +3,4 @@ type: fix
 issue: 6882
 jira: SMILE-9997
 title: "Previously, submitting a resource for validation with an unknown CodeSystem would always result in a validation 
-error, irregardless of the defined binding strength. This has now been fixed."
+error, regardless of the defined binding strength. This has now been fixed."
