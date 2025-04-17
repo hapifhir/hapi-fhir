@@ -95,9 +95,50 @@ This will give the following output:
 </Bundle>
 ````
 
-## Contained Resources
+<a name="contained"/>
 
-On the other hand, if the linked resource does not have an ID set, the linked resource will be included in the returned bundle as a "contained" resource. In this case, HAPI itself will define a local reference ID (e.g. `#1`).
+# Contained Resources
+
+The FHIR specification uses a feature called "containing" to nest one resource inside another resource. This is described [here](https://hl7.org/fhir/references.html#contained).
+
+This method is useful in cases where you do not have enough information available in order to uniquely identify a referenced resource. For example, suppose you know the name of the General Practitioner for a patient you want to store, but you do not have any unique identifiers. Adding a local contained Practitioner resource allows you to store the details you do know about that practitioner, without creating a separate resource.
+
+Containing resources should always be treated as a last resort; if you know enough information in order to create a standalone resource that is always preferable. However, contained resources are a useful tool in the right situation.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ResourceRefs.java|manualContained}}
+```
+
+This snippet produces the following output:
+
+```json
+{
+  "resourceType": "Patient",
+  "id": "1333",
+  "contained": [ {
+    "resourceType": "Practitioner",
+    "id": "my-practitioner",
+    "name": [ {
+      "family": "Smith",
+      "given": [ "Juanita" ]
+    } ],
+    "telecom": [ {
+      "value": "+1 (289) 555-1234"
+    } ]
+  } ],
+  "identifier": [ {
+    "system": "http://example.com/mrns",
+    "value": "253345"
+  } ],
+  "generalPractitioner": [ {
+    "reference": "#my-practitioner"
+  } ]
+}
+```
+
+It is also possible to lew HAPI FHIR handle containing automatically, by putting the target resource directly into the reference as shown below. In this case, HAPI itself will define a local reference ID (e.g. `#1`).
+
+Note that in this case, HAPI's parser will automatically modify the reference and the contained resource to contain a local ID. This automatic modification of the resource being serialized can be confusing.
 
 ```java
 // Create an organization, note that the organization does not have an ID
@@ -133,12 +174,6 @@ This will give the following output:
         <reference value="#1"/>
     </managingOrganization>
 </Patient>
-```
-
-Note that you may also "contain" resources manually in your own code if you prefer. The following example shows how to do this:
-
-```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ResourceRefs.java|manualContained}}
 ```
 
 # Versioned References
