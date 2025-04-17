@@ -229,10 +229,10 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			RequestDetails theRequestDetails,
 			ResourceHistoryTablePk theNextVersionId,
 			AtomicInteger theRemainingCount) {
-		ResourceHistoryTable version =
-			myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(() ->
-				new IllegalArgumentException(
-					MessageFormat.format("No historical version found for ResourceHistoryTablePk: {0} (partition {1})",
+		ResourceHistoryTable version = myResourceHistoryTableDao
+				.findById(theNextVersionId)
+				.orElseThrow(() -> new IllegalArgumentException(MessageFormat.format(
+						"No historical version found for ResourceHistoryTablePk: {0} (partition {1})",
 						theNextVersionId.getId(), theNextVersionId.getPartitionId())));
 
 		IdDt id = version.getIdDt();
