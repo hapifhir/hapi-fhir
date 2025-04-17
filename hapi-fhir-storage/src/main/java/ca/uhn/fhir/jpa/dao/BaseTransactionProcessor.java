@@ -908,7 +908,8 @@ public abstract class BaseTransactionProcessor {
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
 		String url = extractAndVerifyTransactionUrlForEntry(nextEntry, verb);
-		RequestDetails requestDetailsToUse = getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, url, verb);
+		RequestDetails requestDetailsToUse =
+				getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -1280,7 +1281,8 @@ public abstract class BaseTransactionProcessor {
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-				RequestDetails subRequestDetails = getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
+				RequestDetails subRequestDetails =
+						getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();

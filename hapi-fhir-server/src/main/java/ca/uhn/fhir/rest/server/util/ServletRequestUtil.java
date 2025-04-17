@@ -32,7 +32,10 @@ import java.util.Map;
 
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
-			ServletRequestDetails theRequestDetails, String url, String theVerb, ArrayListMultimap<String, String> theParamValues) {
+			ServletRequestDetails theRequestDetails,
+			String url,
+			String theVerb,
+			ArrayListMultimap<String, String> theParamValues) {
 		ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 		requestDetails.setRequestType(RequestTypeEnum.valueOf(theVerb));
