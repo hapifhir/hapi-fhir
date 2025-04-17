@@ -1280,14 +1280,18 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
-				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-				RequestDetails subRequestDetails =
-						getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
 				}
 				previousVerb = verb;
+				if (verb.equals("GET")) {
+					continue;
+				}
+
+				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+				RequestDetails subRequestDetails =
+						getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
@@ -2256,8 +2260,8 @@ public abstract class BaseTransactionProcessor {
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 		if (url.isEmpty()) {
-			// for POST requests, the url is allowed to be empty, which is checked in
-			// extractTransactionUrlOrThrowException
+			// for POST requests, the url is allowed to be null or empty, which is checked in
+			// extractTransactionUrlOrThrowException and an empty string is returned in that case
 			return url;
 		}
 
