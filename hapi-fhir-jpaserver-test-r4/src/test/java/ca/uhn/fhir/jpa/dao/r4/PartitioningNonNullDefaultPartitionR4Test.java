@@ -81,7 +81,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 	@Test
 	public void testCreateAndSearch_NonPartitionable_ForcedId() {
-		addNextTargetPartitionForUpdateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		addNextTargetPartitionForReadDefaultPartition(); // and one for the reindex job
@@ -114,7 +114,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 	@Test
 	public void testCreateAndSearch_Partitionable_ForcedId() {
-		addNextTargetPartitionForUpdateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		Patient patient = new Patient();
 		patient.setId("A");
 		patient.addIdentifier().setSystem("http://foo").setValue("123");
