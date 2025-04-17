@@ -2255,15 +2255,11 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
-		/*String url = myVersionAdapter.getEntryRequestUrl(theEntry);
-		if ("POST".equals(theVerb) && isBlank(url)) {
-			// returning empty string instead of null to not get NPE later
-			return "";
+		if (url.isEmpty()) {
+			// for POST requests, the url is allowed to be empty, which is checked in
+			// extractTransactionUrlOrThrowException
+			return url;
 		}
-		if (isBlank(url)) {
-			throw new InvalidRequestException(Msg.code(545)
-					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", theVerb));
-		}*/
 
 		if (!isValidResourceTypeUrl(url)) {
 			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
