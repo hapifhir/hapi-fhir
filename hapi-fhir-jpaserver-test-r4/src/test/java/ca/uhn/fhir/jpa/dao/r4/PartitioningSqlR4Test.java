@@ -3500,8 +3500,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myResourceReindexingSvc.forceReindexingPass();
 
 		runInTransaction(() -> {
-			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).get().getIndexStatus());
-			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).get().getIndexStatus());
+			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).orElseThrow().getIndexStatus());
+			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).orElseThrow().getIndexStatus());
 		});
 	}
 

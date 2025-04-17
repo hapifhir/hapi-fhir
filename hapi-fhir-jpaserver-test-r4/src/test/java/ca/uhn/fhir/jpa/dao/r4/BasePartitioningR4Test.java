@@ -436,7 +436,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").hasSize(0);
+			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").isEmpty();
 		}
 
 	}
