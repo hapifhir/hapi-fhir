@@ -69,6 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -229,7 +230,11 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			ResourceHistoryTablePk theNextVersionId,
 			AtomicInteger theRemainingCount) {
 		ResourceHistoryTable version =
-				myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
+			myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(() ->
+				new IllegalArgumentException(
+					MessageFormat.format("No historical version found for ResourceHistoryTablePk: {0} (partition {1})",
+						theNextVersionId.getId(), theNextVersionId.getPartitionId())));
+
 		IdDt id = version.getIdDt();
 		ourLog.info("Deleting resource version {}", id.getValue());
 

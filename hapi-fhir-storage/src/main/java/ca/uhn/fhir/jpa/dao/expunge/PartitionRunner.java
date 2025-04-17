@@ -126,7 +126,10 @@ public class PartitionRunner {
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			ourLog.error("Error while " + myProcessName, e);
-			throw new InternalErrorException(Msg.code(1085) + e);
+			Throwable cause = e.getCause() != null ? e.getCause() : e;
+			throw new InternalErrorException(
+				Msg.code(1085) + cause.getMessage(),
+				cause);
 		} finally {
 			executorService.shutdown();
 		}
