@@ -31,7 +31,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -122,6 +125,9 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@JsonProperty(value = "triggeringClientId", access = JsonProperty.Access.READ_ONLY)
 	private String myTriggeringClientId;
 
+	@JsonProperty("userData")
+	private Map<String, Object> myUserData;
+
 	/**
 	 * Constructor
 	 */
@@ -157,6 +163,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setWarningMessages(theJobInstance.getWarningMessages());
 		setTriggeringUsername(theJobInstance.getTriggeringUsername());
 		setTriggeringClientId(theJobInstance.getTriggeringClientId());
+		setUserData(theJobInstance.getOrInitializeUserData());
 	}
 
 	public String getJobDefinitionId() {
@@ -477,5 +484,49 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@Override
 	public void setFastTracking(boolean theFastTracking) {
 		myFastTracking = theFastTracking;
+	}
+
+	/**
+	 * @return myUserData as an Unmodifiable Map<String, Object>
+	 */
+	public Map<String, Object> getUserData() {
+		return Collections.unmodifiableMap(getOrInitializeUserData());
+	}
+
+	public void addUserData(String theKey, Object theValue) {
+		getOrInitializeUserData().put(theKey, theValue);
+		validateUserDataIsSerializable();
+	}
+
+	private Map<String, Object> getOrInitializeUserData() {
+		if (myUserData == null) {
+			myUserData = new HashMap<>();
+		}
+		return myUserData;
+	}
+
+	public void setUserData(Map<String, Object> theUserData) {
+		myUserData = theUserData;
+		validateUserDataIsSerializable();
+	}
+
+	public String getUserDataAsString() {
+		return JsonUtil.serializeOrInvalidRequest(getUserData());
+	}
+
+	/**
+	 * Calls getUserDataAsString() in order to ensure that myUserData is serializable
+	 * throws an InvalidRequestException if myUserData can't be serialized
+	 */
+	public void validateUserDataIsSerializable() {
+		getUserDataAsString();
+	}
+
+	public void setUserDataAsString(String theUserDataAsString) {
+		if (isBlank(theUserDataAsString)) {
+			myUserData = new HashMap<>();
+		} else {
+			myUserData = JsonUtil.deserialize(theUserDataAsString, Map.class);
+		}
 	}
 }

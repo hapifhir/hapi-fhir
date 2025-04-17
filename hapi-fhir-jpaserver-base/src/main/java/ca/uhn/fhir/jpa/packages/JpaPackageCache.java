@@ -95,6 +95,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
@@ -104,8 +105,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaPackageCache extends BasePackageCacheManager implements IHapiPackageCacheManager {
 
-	public static final String UTF8_BOM = "\uFEFF";
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCache.class);
+	private static final Pattern PATTERN_FHIR_VERSION = Pattern.compile("^[0-9]+\\.[0-9]+$");
+
 	private final Map<FhirVersionEnum, FhirContext> myVersionToContext = Collections.synchronizedMap(new HashMap<>());
 
 	@PersistenceContext
@@ -172,8 +174,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
+		return loadPackageFromCacheOnlyInner(theId, theVersion);
+	}
+
+	@Nullable
+	private NpmPackage loadPackageFromCacheOnlyInner(String theId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> packageVersion = loadPackageVersionEntity(theId, theVersion);
-		if (!packageVersion.isPresent() && theVersion.endsWith(".x")) {
+		if (theVersion != null && packageVersion.isEmpty() && theVersion.endsWith(".x")) {
 			String lookupVersion = theVersion;
 			do {
 				lookupVersion = lookupVersion.substring(0, lookupVersion.length() - 2);
@@ -181,14 +188,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			List<String> candidateVersionIds =
 					myPackageVersionDao.findVersionIdsByPackageIdAndLikeVersion(theId, lookupVersion + ".%");
-			if (candidateVersionIds.size() > 0) {
+			if (!candidateVersionIds.isEmpty()) {
 				candidateVersionIds.sort(PackageVersionComparator.INSTANCE);
 				packageVersion =
 						loadPackageVersionEntity(theId, candidateVersionIds.get(candidateVersionIds.size() - 1));
 			}
 		}
 
-		return packageVersion.map(t -> loadPackage(t)).orElse(null);
+		return packageVersion.map(this::loadPackage).orElse(null);
 	}
 
 	private Optional<NpmPackageVersionEntity> loadPackageVersionEntity(String theId, @Nullable String theVersion) {
@@ -223,12 +230,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				binaryDao.readByPid(thePackageVersion.getPackageBinary().getId());
 		try {
 			byte[] content = fetchBlobFromBinary(binary);
-			PackageContents retVal = new PackageContents()
+			return new PackageContents()
 					.setBytes(content)
 					.setPackageId(thePackageVersion.getPackageId())
 					.setVersion(thePackageVersion.getVersionId())
 					.setLastModified(thePackageVersion.getUpdatedTime());
-			return retVal;
 		} catch (IOException e) {
 			throw new InternalErrorException(
 					Msg.code(1295) + "Failed to load package. There was a problem reading binaries", e);
@@ -293,7 +299,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					.orElse(null);
 			if (packageVersion != null) {
 				NpmPackage existingPackage =
-						loadPackageFromCacheOnly(packageVersion.getPackageId(), packageVersion.getVersionId());
+						loadPackageFromCacheOnlyInner(packageVersion.getPackageId(), packageVersion.getVersionId());
+				if (existingPackage == null) {
+					return null;
+				}
 				String msg = "Package version already exists in local storage, no action taken: " + packageId + "#"
 						+ packageVersionId;
 				getProcessingMessages(existingPackage).add(msg);
@@ -375,7 +384,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 							.encodeResourceToString(resource)
 							.getBytes(StandardCharsets.UTF_8);
 
-					IBaseBinary resourceBinary = createPackageResourceBinary(nextFile, minimizedContents, contentType);
+					IBaseBinary resourceBinary = createPackageResourceBinary(minimizedContents, contentType);
 					ResourceTable persistedResource = createResourceBinary(resourceBinary);
 
 					NpmPackageVersionResourceEntity resourceEntity = new NpmPackageVersionResourceEntity();
@@ -420,7 +429,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: "
 							+ defaultString(url) + "|" + defaultString(version);
 					getProcessingMessages(npmPackage).add(msg);
-					ourLog.info("Package[{}#{}] " + msg, packageId, packageVersionId);
+					ourLog.info("{}: Package[{}#{}] ", msg, packageId, packageVersionId);
 				}
 			}
 
@@ -454,7 +463,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return (ResourceTable)
 					getBinaryDao().create(theResourceBinary, requestDetails).getEntity();
 		} else {
-			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
+			return (ResourceTable) getBinaryDao()
+					.create(theResourceBinary, new SystemRequestDetails())
+					.getEntity();
 		}
 	}
 
@@ -481,7 +492,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Nonnull
 	public FhirContext getFhirContext(FhirVersionEnum theFhirVersion) {
-		return myVersionToContext.computeIfAbsent(theFhirVersion, v -> new FhirContext(v));
+		return myVersionToContext.computeIfAbsent(theFhirVersion, FhirContext::new);
 	}
 
 	private IBaseBinary createPackageBinary(byte[] theBytes) {
@@ -490,7 +501,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return binary;
 	}
 
-	private IBaseBinary createPackageResourceBinary(String theFileName, byte[] theBytes, String theContentType) {
+	private IBaseBinary createPackageResourceBinary(byte[] theBytes, String theContentType) {
 		IBaseBinary binary = BinaryUtil.newBinary(myCtx);
 		BinaryUtil.setData(myCtx, binary, theBytes, theContentType);
 		return binary;
@@ -506,8 +517,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
+		return loadPackageInner(thePackageId, thePackageVersion);
+	}
+
+	@Nonnull
+	private NpmPackage loadPackageInner(String thePackageId, String thePackageVersion) throws IOException {
 		// check package cache
-		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
+		NpmPackage cachedPackage = loadPackageFromCacheOnlyInner(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
 			return cachedPackage;
 		}
@@ -530,8 +546,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
+	@Transactional
 	public NpmPackage loadPackage(String theS) throws FHIRException, IOException {
-		return loadPackage(theS, null);
+		return loadPackageInner(theS, null);
 	}
 
 	private TransactionTemplate newTxTemplate() {
@@ -561,7 +578,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return newTxTemplate().execute(tx -> {
 			try {
-				return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+				return loadPackageInner(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 			} catch (IOException e) {
 				throw new InternalErrorException(Msg.code(1302) + e);
 			}
@@ -572,40 +589,144 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Transactional(readOnly = true)
 	public IBaseResource loadPackageAssetByUrl(FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
 
-		String canonicalUrl = theCanonicalUrl;
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
+				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 2, null, null);
 
-		int versionSeparator = canonicalUrl.lastIndexOf('|');
-		Slice<NpmPackageVersionResourceEntity> slice;
-		if (versionSeparator != -1) {
-			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
-			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
-			slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
-					PageRequest.of(0, 1), theFhirVersion, canonicalUrl, canonicalVersion);
-		} else {
-			slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
-					PageRequest.of(0, 1), theFhirVersion, canonicalUrl);
-		}
-
-		if (slice.isEmpty()) {
+		if (npmPackageVersionResourceEntities.isEmpty()) {
 			return null;
 		} else {
-			NpmPackageVersionResourceEntity contents = slice.getContent().get(0);
+			if (npmPackageVersionResourceEntities.size() > 1) {
+				ourLog.warn(
+						"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+						theFhirVersion,
+						theCanonicalUrl);
+			}
+			final NpmPackageVersionResourceEntity contents = npmPackageVersionResourceEntities.get(0);
 			return loadPackageEntity(contents);
 		}
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public IBaseResource findPackageAsset(FindPackageAssetRequest theRequest) {
+
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities = loadPackageInfoByCanonicalUrl(
+				theRequest.getFhirVersion(),
+				theRequest.getCanonicalUrl(),
+				2, // We set it to 2 so that if we get more than one we can warn
+				theRequest.getPackageId(),
+				theRequest.getVersion());
+
+		if (npmPackageVersionResourceEntities.isEmpty()) {
+			return null;
+		} else {
+			if (npmPackageVersionResourceEntities.size() > 1) {
+				ourLog.warn(
+						"Found multiple package versions for FHIR version: {} and canonical URL: {}",
+						theRequest.getFhirVersion(),
+						theRequest.getCanonicalUrl());
+			}
+			final NpmPackageVersionResourceEntity contents = npmPackageVersionResourceEntities.get(0);
+			return loadPackageEntity(contents);
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(
+			FhirVersionEnum theFhirVersion, String theCanonicalUrl) {
+		final List<NpmPackageVersionResourceEntity> npmPackageVersionResourceEntities =
+				loadPackageInfoByCanonicalUrl(theFhirVersion, theCanonicalUrl, 20, null, null);
+
+		return npmPackageVersionResourceEntities.stream()
+				.map(entity -> new NpmPackageAssetInfoJson(
+						entity.getResourceBinary().asTypedFhirResourceId(),
+						entity.getCanonicalUrl(),
+						entity.getFhirVersion(),
+						entity.getPackageId(),
+						entity.getPackageVersion()))
+				.collect(Collectors.toUnmodifiableList());
+	}
+
+	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrl(
+			FhirVersionEnum theFhirVersion,
+			String theCanonicalUrl,
+			int thePageSize,
+			@Nullable String thePackageId,
+			@Nullable String theVersionId) {
+		String canonicalUrl = theCanonicalUrl;
+
+		int versionSeparator = canonicalUrl.lastIndexOf('|');
+		Slice<NpmPackageVersionResourceEntity> slice;
+
+		final PageRequest pageRequest = PageRequest.of(0, thePageSize);
+
+		if (versionSeparator != -1) {
+			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
+			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
+
+			if (thePackageId != null) {
+				if (theVersionId != null) {
+					slice =
+							myPackageVersionResourceDao
+									.findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
+											pageRequest,
+											theFhirVersion,
+											canonicalUrl,
+											canonicalVersion,
+											thePackageId,
+											theVersionId);
+				} else {
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersionAndPackageId(
+							pageRequest, theFhirVersion, canonicalUrl, canonicalVersion, thePackageId);
+				}
+			} else {
+				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndVersion(
+						pageRequest, theFhirVersion, canonicalUrl, canonicalVersion);
+			}
+
+		} else {
+			if (thePackageId != null) {
+				if (theVersionId != null) {
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
+							pageRequest, theFhirVersion, canonicalUrl, thePackageId, theVersionId);
+				} else {
+					slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrlAndPackageId(
+							pageRequest, theFhirVersion, canonicalUrl, thePackageId);
+				}
+			} else {
+				slice = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(
+						pageRequest, theFhirVersion, canonicalUrl);
+			}
+		}
+
+		if (slice.isEmpty()) {
+			return List.of();
+		} else {
+			return slice.getContent();
+		}
+	}
+
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
+		return loadPackageAssetByVersionAndId(
+				contents.getFhirVersion(), contents.getResourceBinary().getResourceId());
+	}
+
+	private IBaseResource loadPackageAssetByVersionAndId(FhirVersionEnum theFhirVersion, JpaPid theBinaryPid) {
 		try {
-			JpaPid binaryPid = contents.getResourceBinary().getId();
-			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+			IBaseBinary binary = getBinaryDao().readByPid(theBinaryPid);
 			byte[] resourceContentsBytes = fetchBlobFromBinary(binary);
 			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+			FhirContext packageContext = getFhirContext(theFhirVersion);
 			return EncodingEnum.detectEncoding(resourceContents)
 					.newParser(packageContext)
 					.parseResource(resourceContents);
-		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(1305) + "Failed to load package resource " + contents, e);
+		} catch (Exception exception) {
+			throw new InvalidRequestException(
+					String.format(
+							"%sFailed to load package resource for FHIR version: %s and binary PID: %s",
+							Msg.code(1305), theFhirVersion, theBinaryPid),
+					exception);
 		}
 	}
 
@@ -644,9 +765,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	@Transactional
-	public PackageContents loadPackageContents(String thePackageId, String theVersion) {
+	public PackageContents loadPackageContents(String thePackageId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> entity = loadPackageVersionEntity(thePackageId, theVersion);
-		return entity.map(t -> loadPackageContents(t)).orElse(null);
+		return entity.map(this::loadPackageContents).orElse(null);
 	}
 
 	@Override
@@ -657,56 +778,62 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 
 		// Query for total
-		{
-			CriteriaQuery<Long> countCriteriaQuery = cb.createQuery(Long.class);
-			Root<NpmPackageVersionEntity> countCriteriaRoot = countCriteriaQuery.from(NpmPackageVersionEntity.class);
-			countCriteriaQuery.multiselect(cb.countDistinct(countCriteriaRoot.get("myPackageId")));
-
-			List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, countCriteriaRoot);
-
-			countCriteriaQuery.where(toPredicateArray(predicates));
-			Long total = myEntityManager.createQuery(countCriteriaQuery).getSingleResult();
-			retVal.setTotal(Math.toIntExact(total));
-		}
+		queryForTool(thePackageSearchSpec, cb, retVal);
 
 		// Query for results
-		{
-			CriteriaQuery<NpmPackageVersionEntity> criteriaQuery = cb.createQuery(NpmPackageVersionEntity.class);
-			Root<NpmPackageVersionEntity> root = criteriaQuery.from(NpmPackageVersionEntity.class);
+		queryForResults(thePackageSearchSpec, cb, retVal);
 
-			List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, root);
+		return retVal;
+	}
 
-			criteriaQuery.where(toPredicateArray(predicates));
-			criteriaQuery.orderBy(cb.asc(root.get("myPackageId")));
-			TypedQuery<NpmPackageVersionEntity> query = myEntityManager.createQuery(criteriaQuery);
-			query.setFirstResult(thePackageSearchSpec.getStart());
-			query.setMaxResults(thePackageSearchSpec.getSize());
+	private void queryForTool(
+			PackageSearchSpec thePackageSearchSpec, CriteriaBuilder cb, NpmPackageSearchResultJson retVal) {
+		CriteriaQuery<Long> countCriteriaQuery = cb.createQuery(Long.class);
+		Root<NpmPackageVersionEntity> countCriteriaRoot = countCriteriaQuery.from(NpmPackageVersionEntity.class);
+		countCriteriaQuery.multiselect(cb.countDistinct(countCriteriaRoot.get("myPackageId")));
 
-			List<NpmPackageVersionEntity> resultList = query.getResultList();
-			for (NpmPackageVersionEntity next : resultList) {
+		List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, countCriteriaRoot);
 
-				if (!retVal.hasPackageWithId(next.getPackageId())) {
-					retVal.addObject()
-							.getPackage()
-							.setName(next.getPackageId())
-							.setAuthor(next.getAuthor())
-							.setDescription(next.getDescription())
-							.setVersion(next.getVersionId())
-							.addFhirVersion(next.getFhirVersionId())
-							.setBytes(next.getPackageSizeBytes());
-				} else {
-					NpmPackageSearchResultJson.Package retPackage = retVal.getPackageWithId(next.getPackageId());
-					retPackage.addFhirVersion(next.getFhirVersionId());
+		countCriteriaQuery.where(toPredicateArray(predicates));
+		Long total = myEntityManager.createQuery(countCriteriaQuery).getSingleResult();
+		retVal.setTotal(Math.toIntExact(total));
+	}
 
-					int cmp = PackageVersionComparator.INSTANCE.compare(next.getVersionId(), retPackage.getVersion());
-					if (cmp > 0) {
-						retPackage.setVersion(next.getVersionId());
-					}
+	private void queryForResults(
+			PackageSearchSpec thePackageSearchSpec, CriteriaBuilder cb, NpmPackageSearchResultJson retVal) {
+		CriteriaQuery<NpmPackageVersionEntity> criteriaQuery = cb.createQuery(NpmPackageVersionEntity.class);
+		Root<NpmPackageVersionEntity> root = criteriaQuery.from(NpmPackageVersionEntity.class);
+
+		List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, root);
+
+		criteriaQuery.where(toPredicateArray(predicates));
+		criteriaQuery.orderBy(cb.asc(root.get("myPackageId")));
+		TypedQuery<NpmPackageVersionEntity> query = myEntityManager.createQuery(criteriaQuery);
+		query.setFirstResult(thePackageSearchSpec.getStart());
+		query.setMaxResults(thePackageSearchSpec.getSize());
+
+		List<NpmPackageVersionEntity> resultList = query.getResultList();
+		for (NpmPackageVersionEntity next : resultList) {
+
+			if (!retVal.hasPackageWithId(next.getPackageId())) {
+				retVal.addObject()
+						.getPackage()
+						.setName(next.getPackageId())
+						.setAuthor(next.getAuthor())
+						.setDescription(next.getDescription())
+						.setVersion(next.getVersionId())
+						.addFhirVersion(next.getFhirVersionId())
+						.setBytes(next.getPackageSizeBytes());
+			} else {
+				NpmPackageSearchResultJson.Package retPackage = retVal.getPackageWithId(next.getPackageId());
+				retPackage.addFhirVersion(next.getFhirVersionId());
+
+				int cmp = PackageVersionComparator.INSTANCE.compare(next.getVersionId(), retPackage.getVersion());
+				if (cmp > 0) {
+					retPackage.setVersion(next.getVersionId());
 				}
 			}
 		}
-
-		return retVal;
 	}
 
 	@Override
@@ -743,12 +870,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					packageVersion.get().getPackageBinary().getIdDt().toVersionless(), options);
 
 			Collection<NpmPackageVersionEntity> remainingVersions = myPackageVersionDao.findByPackageId(thePackageId);
-			if (remainingVersions.size() == 0) {
+			if (remainingVersions.isEmpty()) {
 				msg = "No versions of package " + thePackageId + " remain";
 				ourLog.info(msg);
 				retVal.getMessage().add(msg);
 				Optional<NpmPackageEntity> pkgEntity = myPackageDao.findByPackageId(thePackageId);
-				myPackageDao.delete(pkgEntity.get());
+				pkgEntity.ifPresent(pkgEntityPresent -> myPackageDao.delete(pkgEntityPresent));
 			} else {
 
 				List<NpmPackageVersionEntity> versions = remainingVersions.stream()
@@ -776,10 +903,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
-		//		List<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findAll();
 		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(
 				PageRequest.of(0, 1000), theFhirVersion, theResourceType);
-		return outcome.stream().map(t -> loadPackageEntity(t)).collect(Collectors.toList());
+		return outcome.stream().map(this::loadPackageEntity).collect(Collectors.toList());
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
@@ -817,7 +943,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		if (isNotBlank(thePackageSearchSpec.getFhirVersion())) {
-			if (!thePackageSearchSpec.getFhirVersion().matches("([0-9]+\\.)+[0-9]+")) {
+			if (!PATTERN_FHIR_VERSION
+					.matcher(thePackageSearchSpec.getFhirVersion())
+					.matches()) {
 				FhirVersionEnum versionEnum = FhirVersionEnum.forVersionString(thePackageSearchSpec.getFhirVersion());
 				if (versionEnum != null) {
 					predicates.add(theCb.equal(theRoot.get("myFhirVersion").as(String.class), versionEnum.name()));

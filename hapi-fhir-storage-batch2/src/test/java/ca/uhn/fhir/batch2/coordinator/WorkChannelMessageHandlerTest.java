@@ -8,6 +8,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageHandler.*;
 
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
@@ -16,10 +17,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import jakarta.annotation.Nonnull;
 
-import java.util.Collection;
-
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import ch.qos.logback.classic.Logger;
@@ -42,6 +40,8 @@ class WorkChannelMessageHandlerTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	private WorkChunkProcessor jobStepExecutorSvc;
 
@@ -61,7 +61,14 @@ class WorkChannelMessageHandlerTest extends BaseBatch2Test {
 		((Logger) Logs.getBatchTroubleshootingLog()).addAppender(myAppender);
 
 		// When
-		WorkChannelMessageHandler handler = new WorkChannelMessageHandler(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
+		WorkChannelMessageHandler handler = new WorkChannelMessageHandler(
+			myJobInstancePersister,
+			myJobDefinitionRegistry,
+			myBatchJobSender,
+			jobStepExecutorSvc,
+			myJobMaintenanceService,
+			myTransactionService,
+			myInterceptorBroadcaster);
 		handler.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Then

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6865
+title: "Add new APIs to IHapiPackageCacheManager and JpaPackageCache to inspect and help mitigate duplicate resources
+        among different NPM packages."
