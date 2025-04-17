@@ -746,13 +746,13 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private RequestDetails getRequestDetailsToUseForWriteEntry(
-			RequestDetails theRequestDetails, IBase theEntry, String theUrl) {
+			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
 
 		RequestDetails newRequestDetails = null;
 		if (theRequestDetails instanceof ServletRequestDetails) {
 			// return theRequestDetails;
 			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
-					(ServletRequestDetails) theRequestDetails, theUrl, ArrayListMultimap.create());
+					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, ArrayListMultimap.create());
 		} else if (theRequestDetails instanceof SystemRequestDetails) {
 			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
 			// return theRequestDetails;
@@ -769,10 +769,11 @@ public abstract class BaseTransactionProcessor {
 	private ServletSubRequestDetails getRequestDetailsToUseForReadEntry(
 			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
 
-		String transactionUrl = extractAndVerifyTransactionUrlForEntry(theEntry, "GET");
+		final String verb = "GET";
+		String transactionUrl = extractAndVerifyTransactionUrlForEntry(theEntry, verb);
 
 		ServletSubRequestDetails subRequestDetails =
-				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, theParamValues);
+				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
 
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(theEntry))) {
 			subRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
@@ -906,7 +907,8 @@ public abstract class BaseTransactionProcessor {
 
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
-		RequestDetails requestDetailsToUse = getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, verb);
+		String url = extractAndVerifyTransactionUrlForEntry(nextEntry, verb);
+		RequestDetails requestDetailsToUse = getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -1278,7 +1280,7 @@ public abstract class BaseTransactionProcessor {
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-				RequestDetails subRequestDetails = getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url);
+				RequestDetails subRequestDetails = getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
