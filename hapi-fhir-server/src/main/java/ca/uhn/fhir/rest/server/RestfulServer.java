@@ -450,13 +450,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
+			//			ourLog.info("1234: findResourceMethods: findResourceMethodsOnInterfaces for provider class: {}",
+			// theProvider.getClass());
 			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
+			//			ourLog.info("1234: findResourceMethods: findResourceMethods for provider class: {}",
+			// theProvider.getClass());
 			count += findResourceMethods(theProvider, supertype);
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
+			//			ourLog.info("1234: findResourceMethodsOnInterfaces for provider class: {}", theProvider.getClass());
 			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
+			//			ourLog.info("1234: findResourceMethods for provider class: {}", theProvider.getClass());
 			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException(
@@ -472,7 +478,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
 		int count = 0;
 		for (Class<?> anInterface : interfaces) {
+			//			final List<Class<?>> innerInterfaces = Arrays.stream(anInterface.getInterfaces()).map(innerinterface ->
+			// innerinterface.getClass()).collect(Collectors.toUnmodifiableList());
+			//			ourLog.info("1234: findResourceMethodsOnInterfaces for provider class: {} and interface: {}",
+			// theProvider.getClass(), innerInterfaces);
 			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+			//			ourLog.info("1234: findResourceMethodsOnInterfaces for provider class: {} and interface: {}",
+			// theProvider.getClass(), anInterface.getClass());
 			count += findResourceMethods(theProvider, anInterface);
 		}
 		return count;
