@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTaskTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTaskITTestSuite;
+import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTaskTestSuite;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import jakarta.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.migrate.taskdef.containertests.BaseMigrationTaskTestSuite.Support;
 
@@ -35,12 +36,9 @@ public abstract class BaseCollectedMigrationTaskSuite {
 	@Nonnull
 	protected abstract DriverTypeEnum.ConnectionProperties getConnectionProperties();
 
-
-
 	final public BaseMigrationTaskTestSuite.Support getSupport() {
 		return mySupport;
 	}
-
 
 	@Nested
 	class AddIndexTaskTests implements AddIndexTaskITTestSuite {
@@ -60,6 +58,22 @@ public abstract class BaseCollectedMigrationTaskSuite {
 
 	@Nested
 	class AddIdGeneratorTaskTests implements AddIdGeneratorTaskITTestSuite {
+		@Override
+		public Support getSupport() {
+			return BaseCollectedMigrationTaskSuite.this.getSupport();
+		}
+	}
+
+	@Nested
+	class AddColumnTaskTests implements AddColumnTaskTestSuite {
+		@Override
+		public Support getSupport() {
+			return BaseCollectedMigrationTaskSuite.this.getSupport();
+		}
+	}
+
+	@Nested
+	class ModifyColumnTaskTests implements ModifyColumnTaskTestSuite {
 		@Override
 		public Support getSupport() {
 			return BaseCollectedMigrationTaskSuite.this.getSupport();

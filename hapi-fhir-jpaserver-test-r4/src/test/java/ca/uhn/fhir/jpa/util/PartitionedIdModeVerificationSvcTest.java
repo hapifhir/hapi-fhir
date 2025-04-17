@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.sql.SQLException;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,7 +30,7 @@ class PartitionedIdModeVerificationSvcTest {
 
 	private static final String MIGRATION_TABLE_NAME = "hapi_migrator";
 
-	private DriverTypeEnum.ConnectionProperties myConnectionProperties = DatabaseSupportUtil.newConnection();
+	private DriverTypeEnum.ConnectionProperties myConnectionProperties = newConnection();
 
 	@Mock
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
@@ -42,7 +42,7 @@ class PartitionedIdModeVerificationSvcTest {
 		"false, true",
 		"false, false"
 	})
-	void testPartitionedIdDatabase_WantPartitionedIdDatabase(boolean thePartitionedIdModeForSchema, boolean thePartitionedIdModeForSettings) throws SQLException {
+	void testPartitionedIdDatabase_WantPartitionedIdDatabase(boolean thePartitionedIdModeForSchema, boolean thePartitionedIdModeForSettings) {
 		Set<String> commandLineValue = thePartitionedIdModeForSchema ? Set.of(HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE.getCommandLineValue()) : Set.of();
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(commandLineValue);
 
@@ -83,4 +83,11 @@ class PartitionedIdModeVerificationSvcTest {
 		assertDoesNotThrow(svc::verifyPartitionedIdMode);
 	}
 
+	/**
+	 * Create a new connection to a randomized H2 database for testing
+	 */
+	private DriverTypeEnum.ConnectionProperties newConnection() {
+		String url = "jdbc:h2:mem:test_migration-" + UUID.randomUUID() + ";CASE_INSENSITIVE_IDENTIFIERS=TRUE;";
+		return DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+	}
 }
