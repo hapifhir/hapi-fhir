@@ -60,6 +60,22 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 	private final CDSHooksVersion myCdsHooksVersion;
 
+	// Constructor without deprecated arguments
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				null,
+				null,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
@@ -140,6 +156,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Override
 	public boolean registerCrService(String theServiceId) {
 		try {

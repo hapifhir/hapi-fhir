@@ -69,7 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Common hapi-fhir clinical reasoning config shared with downstream modules.
  */
-@Deprecated(since="8.1.4", forRemoval = true)
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {

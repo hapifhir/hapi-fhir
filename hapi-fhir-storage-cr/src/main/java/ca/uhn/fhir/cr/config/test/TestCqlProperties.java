@@ -29,7 +29,7 @@ import org.opencds.cqf.fhir.cql.CqlOptions;
 /**
  * Common CQL properties shared with downstream modules.
  */
-@Deprecated(since="8.1.4", forRemoval = true)
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class TestCqlProperties {
 
 	//cql settings

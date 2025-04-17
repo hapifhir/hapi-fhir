@@ -52,7 +52,7 @@ import java.util.concurrent.Executors;
 /**
  * Common hapi-fhir clinical reasoning config specifically for R4 shared with downstream modules.
  */
-@Deprecated(since="8.1.4", forRemoval = true)
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {
