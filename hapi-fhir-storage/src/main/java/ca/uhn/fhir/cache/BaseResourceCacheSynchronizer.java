@@ -246,7 +246,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 		/*
 		 * We are pretty lenient here, because any failure will block the server
-		 * from starting up.
+		 * from starting up. We should generally never fail to load here, but it
+		 * can potentially happen if a resource is manually deleted in the database
+		 * (ie. marked with a deletion time manually) but the indexes aren't cleaned
+		 * up.
 		 */
 		for (IIdType id : theResourceIds) {
 			IBaseResource read;

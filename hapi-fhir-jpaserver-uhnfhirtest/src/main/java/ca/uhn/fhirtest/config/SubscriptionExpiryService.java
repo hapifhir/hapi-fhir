@@ -27,6 +27,12 @@ import java.util.Date;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_LASTUPDATED;
 
+/**
+ * This service automatically moves subscriptions to "off" status one hour
+ * after they are created. This is currently just intended to be a
+ * failsafe/cleanup for the public server, but could be promoted to being
+ * a feature in the library if there was interest in the future.
+ */
 public class SubscriptionExpiryService {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionExpiryService.class);
 

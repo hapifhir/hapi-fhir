@@ -101,14 +101,21 @@ public class SubscriptionRulesInterceptor {
 	}
 
 	private void checkResource(IBaseResource theResource) {
-		if (myVersion.isEqualOrNewerThan(FhirVersionEnum.R5)) {
+
+		// From R4B onward, SubscriptionTopic exists and houses the criteria
+		if (myVersion.isEqualOrNewerThan(FhirVersionEnum.R4B)) {
 			if ("SubscriptionTopic".equals(myFhirContext.getResourceType(theResource))) {
-				ourLog.info("Validating SubscriptionTopic: {}", theResource.getIdElement());
 				validateSubscriptionTopic(theResource);
 			}
-		} else {
+		} else if (myVersion.equals(FhirVersionEnum.R4)) {
+			if ("Basic".equals(myFhirContext.getResourceType(theResource))) {
+				validateSubscriptionTopic(theResource);
+			}
+		}
+
+		// As of R5, there is no longer a criteria defined on the Subscription itself
+		if (myVersion.isOlderThan(FhirVersionEnum.R5)) {
 			if ("Subscription".equals(myFhirContext.getResourceType(theResource))) {
-				ourLog.info("Validating Subscription: {}", theResource.getIdElement());
 				validateSubscription(theResource);
 			}
 		}
@@ -116,13 +123,20 @@ public class SubscriptionRulesInterceptor {
 
 	private void validateSubscriptionTopic(IBaseResource theResource) {
 		SubscriptionTopic topic = SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, theResource);
-		for (SubscriptionTopic.SubscriptionTopicResourceTriggerComponent resourceTrigger : topic.getResourceTrigger()) {
-			String criteriaString = resourceTrigger.getQueryCriteria().getCurrent();
-			validateCriteriaString(criteriaString);
+
+		if (topic != null) {
+			ourLog.info("Validating SubscriptionTopic: {}", theResource.getIdElement());
+			for (SubscriptionTopic.SubscriptionTopicResourceTriggerComponent resourceTrigger :
+					topic.getResourceTrigger()) {
+				String criteriaString = resourceTrigger.getQueryCriteria().getCurrent();
+				validateCriteriaString(criteriaString);
+			}
 		}
 	}
 
 	private void validateSubscription(IBaseResource theResource) {
+		ourLog.info("Validating Subscription: {}", theResource.getIdElement());
+
 		CanonicalSubscription canonicalizedSubscription = mySubscriptionCanonicalizer.canonicalize(theResource);
 		validateCriteriaString(canonicalizedSubscription.getCriteriaString());
 		validateEndpointIsReachable(canonicalizedSubscription);
