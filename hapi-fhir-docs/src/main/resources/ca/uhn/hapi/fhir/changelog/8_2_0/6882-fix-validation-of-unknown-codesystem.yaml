@@ -2,6 +2,7 @@
 type: fix
 issue: 6882
 jira: SMILE-9997
+backport: 7.6.2
 title: "Previously, submitting a resource for validation with an unknown CodeSystem would always result in a validation 
 error, regardless of the defined binding strength. This has now been fixed such that, given an unknown CodeSystem: 
     <ul>
