@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * hapi-fhir-storage-batch2-jobs
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.batch2.jobs.imprt;
 
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Optional;
+public class BulkImportReportJson implements IModelJson {
 
-public interface ISearchParamHashIdentityRegistry {
-	Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity);
+	@JsonProperty("reportMsg")
+	private String myReportMsg;
+
+	public String getReportMsg() {
+		return myReportMsg;
+	}
+
+	public void setReportMsg(String theReportMsg) {
+		myReportMsg = theReportMsg;
+	}
 }

@@ -65,6 +65,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.Date;
 import java.util.List;
@@ -301,6 +302,10 @@ public class VersionCanonicalizer {
 			baseList.clear();
 		}
 		return baseExtensionValues;
+	}
+
+	public SubscriptionTopic subscriptionTopicToCanonical(IBaseResource theResource) {
+		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myContext, theResource);
 	}
 
 	private interface IStrategy {

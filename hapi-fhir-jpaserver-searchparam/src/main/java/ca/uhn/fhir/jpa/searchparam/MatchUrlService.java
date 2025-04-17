@@ -224,15 +224,24 @@ public class MatchUrlService {
 		return ReflectionUtil.newInstance(clazz);
 	}
 
-	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId) {
+	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId, Flag... theFlags) {
 		RuntimeResourceDefinition resourceDefinition;
 		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);
-		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition);
+		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition, theFlags);
 		return new ResourceSearch(resourceDefinition, searchParameterMap, theRequestPartitionId);
 	}
 
 	public ResourceSearch getResourceSearch(String theUrl) {
 		return getResourceSearch(theUrl, null);
+	}
+
+	/**
+	 * Parse a URL that contains _include or _revinclude parameters and return a {@link ResourceSearch} object
+	 * @param theUrl
+	 * @return the ResourceSearch object that can be used to create a SearchParameterMap
+	 */
+	public ResourceSearch getResourceSearchWithIncludesAndRevIncludes(String theUrl) {
+		return getResourceSearch(theUrl, null, MatchUrlService.processIncludes());
 	}
 
 	public interface Flag {

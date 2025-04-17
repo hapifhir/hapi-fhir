@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6863
+title: "Port in `Either` construction from Clinical Intelligence library."

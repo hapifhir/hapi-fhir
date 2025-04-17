@@ -77,12 +77,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
 
 	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
-	protected IRequestPartitionHelperSvc getRequestPartitionHelperService() {
-		// TODO JD change this to an abstract autowired on the next bump
-		return myRequestPartitionHelperSvc;
-	}
+	protected abstract IRequestPartitionHelperSvc getRequestPartitionHelperService();
 
 	@Override
 	public DaoMethodOutcome patch(
