@@ -256,6 +256,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
+	protected void addNextTargetPartitionForConditionalCreateMatch(RequestPartitionId requestPartitionId) {
+		// only read to find the existing resource
+		addNextInterceptorReadResult(requestPartitionId);
+	}
+
 	// all the create-paths have a read path first for the tx boundary.
 	protected void addNextTargetPartitionForConditionalUpdateNotExist(RequestPartitionId requestPartitionId) {
 		addNextInterceptorReadResult(requestPartitionId);
@@ -431,7 +436,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			// fixme
 			assertThat(myReadRequestPartitionIds).as("Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor").hasSize(0);
 		}
 
@@ -475,7 +479,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		public void assertNoRemainingIds() {
-			// fixme
 			assertThat(myCreateRequestPartitionIds).as(() -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor").isEmpty();
 		}
 
