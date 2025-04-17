@@ -263,6 +263,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addNextInterceptorCreateResult(requestPartitionId);
 	}
 
+	protected void addNextTargetPartitionForConditionalUpdateExist(RequestPartitionId requestPartitionId) {
+		addNextInterceptorReadResult(requestPartitionId);
+		addNextInterceptorCreateResult(requestPartitionId);
+	}
+
 	protected void addNextInterceptorCreateResult(RequestPartitionId requestPartitionId) {
 		myPartitionInterceptor.addNextInterceptorCreateResult(requestPartitionId);
 	}
@@ -291,8 +296,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void addNextTargetPartitionForUpdateInTxBundle(int thePartitionId) {
-		RequestPartitionId requestPartitionId = fromPartitionId(thePartitionId);
-		addNextTargetPartitionForUpdateInTxBundle(requestPartitionId);
+		addNextTargetPartitionForUpdateInTxBundle(fromPartitionId(thePartitionId));
 	}
 
 	protected void addNextTargetPartitionForCreate(Integer thePartitionId, LocalDate thePartitionDate) {
