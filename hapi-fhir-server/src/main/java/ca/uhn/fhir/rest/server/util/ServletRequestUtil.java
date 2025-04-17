@@ -40,6 +40,7 @@ public class ServletRequestUtil {
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 		requestDetails.setRequestType(RequestTypeEnum.valueOf(theVerb));
 		requestDetails.setServer(theRequestDetails.getServer());
+		requestDetails.setRestOperationType(theRequestDetails.getRestOperationType());
 
 		int qIndex = url.indexOf('?');
 		requestDetails.setParameters(new HashMap<>());

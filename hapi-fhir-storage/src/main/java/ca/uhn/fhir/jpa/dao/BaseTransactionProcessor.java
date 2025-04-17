@@ -770,7 +770,7 @@ public abstract class BaseTransactionProcessor {
 			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
 
 		final String verb = "GET";
-		String transactionUrl = extractAndVerifyTransactionUrlForEntry(theEntry, verb);
+		String transactionUrl = extractTransactionUrlOrThrowException(theEntry, verb);
 
 		ServletSubRequestDetails subRequestDetails =
 				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
@@ -907,7 +907,7 @@ public abstract class BaseTransactionProcessor {
 
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
-		String url = extractAndVerifyTransactionUrlForEntry(nextEntry, verb);
+		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
 		RequestDetails requestDetailsToUse =
 				getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
@@ -1693,7 +1693,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void setConditionalUrlToBeValidatedLater(
 			Map<String, IIdType> theConditionalUrlToIdMap, String theMatchUrl, IIdType theId) {
-		if (!isBlank(theMatchUrl)) {
+		if (!StringUtils.isBlank(theMatchUrl)) {
 			theConditionalUrlToIdMap.put(theMatchUrl, theId);
 		}
 	}
@@ -2211,7 +2211,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
-		IdType id = new IdType(theResourceType, theResourceId, theVersion);
+		org.hl7.fhir.r4.model.IdType id = new org.hl7.fhir.r4.model.IdType(theResourceType, theResourceId, theVersion);
 		return myContext.getVersion().newIdType().setValue(id.getValue());
 	}
 
@@ -2254,7 +2254,8 @@ public abstract class BaseTransactionProcessor {
 	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
-		String url = myVersionAdapter.getEntryRequestUrl(theEntry);
+		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
+		/*String url = myVersionAdapter.getEntryRequestUrl(theEntry);
 		if ("POST".equals(theVerb) && isBlank(url)) {
 			// returning empty string instead of null to not get NPE later
 			return "";
@@ -2262,7 +2263,7 @@ public abstract class BaseTransactionProcessor {
 		if (isBlank(url)) {
 			throw new InvalidRequestException(Msg.code(545)
 					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", theVerb));
-		}
+		}*/
 
 		if (!isValidResourceTypeUrl(url)) {
 			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
@@ -2303,6 +2304,23 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	/**
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank
+	 * and returns it
+	 */
+	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
+		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
+		if ("POST".equals(verb) && isBlank(url)) {
+			// returning empty string instead of null to not get NPE later
+			return "";
+		}
+		if (isBlank(url)) {
+			throw new InvalidRequestException(Msg.code(545)
+					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", verb));
+		}
+		return url;
+	}
+
 	private IFhirResourceDao<? extends IBaseResource> toDao(UrlUtil.UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
 		try {
@@ -2333,7 +2351,7 @@ public abstract class BaseTransactionProcessor {
 			case PUT:
 			case DELETE:
 			case PATCH:
-				String url = extractAndVerifyTransactionUrlForEntry(theEntry, verb);
+				String url = extractTransactionUrlOrThrowException(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {
 					return parts.getResourceType() + '?' + parts.getParams();
