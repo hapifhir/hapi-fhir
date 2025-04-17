@@ -746,15 +746,16 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private RequestDetails getRequestDetailsToUseForWriteEntry(
-			RequestDetails theRequestDetails, IBase theEntry, String theVerb) {
+			RequestDetails theRequestDetails, IBase theEntry, String theUrl) {
 
 		RequestDetails newRequestDetails = null;
 		if (theRequestDetails instanceof ServletRequestDetails) {
-			String transactionUrl = extractTransactionUrlOrThrowException(theEntry, theVerb);
+			// return theRequestDetails;
 			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
-					(ServletRequestDetails) theRequestDetails, transactionUrl, ArrayListMultimap.create());
+					(ServletRequestDetails) theRequestDetails, theUrl, ArrayListMultimap.create());
 		} else if (theRequestDetails instanceof SystemRequestDetails) {
 			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
+			// return theRequestDetails;
 		} else {
 			// RequestDetails is not a ServletRequestDetails or SystemRequestDetails, and I don't know how to properly
 			// clone such a RequestDetails. Use the original RequestDetails without making any entry specific
@@ -768,7 +769,7 @@ public abstract class BaseTransactionProcessor {
 	private ServletSubRequestDetails getRequestDetailsToUseForReadEntry(
 			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
 
-		String transactionUrl = extractTransactionUrlOrThrowException(theEntry, "GET");
+		String transactionUrl = extractAndVerifyTransactionUrlForEntry(theEntry, "GET");
 
 		ServletSubRequestDetails subRequestDetails =
 				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, theParamValues);
@@ -1276,7 +1277,8 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
-				RequestDetails subRequestDetails = getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, verb);
+				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+				RequestDetails subRequestDetails = getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url);
 
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
@@ -1302,16 +1304,6 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
-						/*
-						 * To preserve existing functionality,
-						 * we will only verify that the request url is
-						 * valid if it's provided at all.
-						 * Otherwise, we'll ignore it
-						 */
-						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
-						if (isNotBlank(url)) {
-							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-						}
 						validateResourcePresent(res, order, verb);
 
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -1350,7 +1342,6 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -1393,8 +1384,6 @@ public abstract class BaseTransactionProcessor {
 						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
-
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 
 						DaoMethodOutcome outcome;
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
@@ -1452,7 +1441,6 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
@@ -2255,13 +2243,22 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Extracts the transaction url from the entry and verifies it's:
-	 * * not null or blank
+	 * * not null or blank, unless it is a POST
 	 * * is a relative url matching the resourceType it is about
+	 * for POST requests, the url is allowed to be blank to preserve the existing behavior
 	 * <p>
-	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
-		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
+		String url = myVersionAdapter.getEntryRequestUrl(theEntry);
+		if ("POST".equals(theVerb) && isBlank(url)) {
+			// returning empty string instead of null to not get NPE later
+			return "";
+		}
+		if (isBlank(url)) {
+			throw new InvalidRequestException(Msg.code(545)
+					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", theVerb));
+		}
 
 		if (!isValidResourceTypeUrl(url)) {
 			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
@@ -2302,19 +2299,6 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	/**
-	 * Extracts the transaction url from the entry and verifies that it is not null/blank
-	 * and returns it
-	 */
-	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
-		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
-		if (isBlank(url)) {
-			throw new InvalidRequestException(Msg.code(545)
-					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", verb));
-		}
-		return url;
-	}
-
 	private IFhirResourceDao<? extends IBaseResource> toDao(UrlUtil.UrlParts theParts, String theVerb, String theUrl) {
 		RuntimeResourceDefinition resType;
 		try {
@@ -2345,7 +2329,7 @@ public abstract class BaseTransactionProcessor {
 			case PUT:
 			case DELETE:
 			case PATCH:
-				String url = extractTransactionUrlOrThrowException(theEntry, verb);
+				String url = extractAndVerifyTransactionUrlForEntry(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {
 					return parts.getResourceType() + '?' + parts.getParams();
