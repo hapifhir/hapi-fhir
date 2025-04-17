@@ -2208,7 +2208,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
 		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
-		// The validator will change the severity based on the binding strength
+		// The InstanceValidator (core) will change the severity based on the binding strength
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
