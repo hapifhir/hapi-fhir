@@ -292,6 +292,10 @@ public interface ITestDataBuilder {
 		}
 	}
 
+	default <T extends IBaseResource> T buildResource(Class<T> theResourceType, ICreationArgument... theModifiers) {
+		return buildResource(getFhirContext().getResourceType(theResourceType), theModifiers);
+	}
+
 	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		applyElementModifiers(resource, theModifiers);
