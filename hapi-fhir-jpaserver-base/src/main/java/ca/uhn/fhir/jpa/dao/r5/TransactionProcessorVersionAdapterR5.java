@@ -28,6 +28,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Resource;
 
@@ -169,5 +170,10 @@ public class TransactionProcessorVersionAdapterR5
 	@Override
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
+	}
+
+	@Override
+	public Extension getEntryRequestExtensionByUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+		return theEntry.getRequest().getExtensionByUrl(theUrl);
 	}
 }

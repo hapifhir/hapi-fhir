@@ -1490,7 +1490,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
 		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(o).getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("/Observation");
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 

@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -74,6 +75,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
@@ -102,6 +104,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -141,6 +144,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -154,6 +158,7 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
+
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	private static final String POST = "POST";
 	private static final String PUT = "PUT";
@@ -694,30 +699,14 @@ public abstract class BaseTransactionProcessor {
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
 
 				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-
-				String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
-
 				ServletSubRequestDetails requestDetails =
-						ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
+						getRequestDetailsToUseForReadEntry(srd, nextReqEntry, paramValues);
 
 				String url = requestDetails.getRequestPath();
 
 				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
-				}
-
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
-				}
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry));
-				}
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
 				}
 
 				Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
@@ -743,6 +732,64 @@ public abstract class BaseTransactionProcessor {
 			}
 			theTransactionStopWatch.endCurrentTask();
 		}
+	}
+
+	private void overrideRequestPartitionHeaderIfEntryHasTheExtension(
+			IBase theReqEntry, RequestDetails theRequestDetails) {
+		IBaseExtension<?, ?> partitionIdsExtension =
+				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
+		if (partitionIdsExtension != null && partitionIdsExtension.getValue() instanceof IPrimitiveType<?>) {
+			IPrimitiveType<?> valueAsPrimitiveType = (IPrimitiveType<?>) partitionIdsExtension.getValue();
+			String value = valueAsPrimitiveType.getValueAsString();
+			theRequestDetails.addHeader(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, value);
+		}
+	}
+
+	private RequestDetails getRequestDetailsToUseForWriteEntry(
+			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
+
+		RequestDetails newRequestDetails = null;
+		if (theRequestDetails instanceof ServletRequestDetails) {
+			// return theRequestDetails;
+			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
+					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, ArrayListMultimap.create());
+		} else if (theRequestDetails instanceof SystemRequestDetails) {
+			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
+			// return theRequestDetails;
+		} else {
+			// RequestDetails is not a ServletRequestDetails or SystemRequestDetails, and I don't know how to properly
+			// clone such a RequestDetails. Use the original RequestDetails without making any entry specific
+			// modifications
+			return theRequestDetails;
+		}
+		overrideRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
+		return newRequestDetails;
+	}
+
+	private ServletSubRequestDetails getRequestDetailsToUseForReadEntry(
+			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
+
+		final String verb = "GET";
+		String transactionUrl = extractTransactionUrlOrThrowException(theEntry, verb);
+
+		ServletSubRequestDetails subRequestDetails =
+				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
+
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(theEntry))) {
+			subRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
+		}
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(theEntry))) {
+			subRequestDetails.addHeader(
+					Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
+		}
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(theEntry))) {
+			subRequestDetails.addHeader(
+					Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
+		}
+
+		overrideRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);
+
+		return subRequestDetails;
 	}
 
 	/**
@@ -857,8 +904,12 @@ public abstract class BaseTransactionProcessor {
 
 	@Nullable
 	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
+
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+		RequestDetails requestDetailsToUse =
+				getRequestDetailsToUseForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -874,7 +925,7 @@ public abstract class BaseTransactionProcessor {
 								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
 						nextWriteEntryRequestPartitionId =
 								myRequestPartitionHelperService.determineReadPartitionForRequest(
-										theRequestDetails, details);
+										requestDetailsToUse, details);
 					}
 					break;
 				}
@@ -887,7 +938,7 @@ public abstract class BaseTransactionProcessor {
 								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
 						nextWriteEntryRequestPartitionId =
 								myRequestPartitionHelperService.determineReadPartitionForRequest(
-										theRequestDetails, details);
+										requestDetailsToUse, details);
 					}
 					break;
 				}
@@ -898,7 +949,7 @@ public abstract class BaseTransactionProcessor {
 						String resourceType = myContext.getResourceType(resource);
 						nextWriteEntryRequestPartitionId =
 								myRequestPartitionHelperService.determineCreatePartitionForRequest(
-										theRequestDetails, resource, resourceType);
+										requestDetailsToUse, resource, resourceType);
 					}
 				}
 			}
@@ -1227,14 +1278,22 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				IBase nextReqEntry = theEntries.get(i);
-				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+
 				if (previousVerb != null && !previousVerb.equals(verb)) {
 					handleVerbChangeInTransactionWriteOperations();
 				}
 				previousVerb = verb;
+				if (verb.equals("GET")) {
+					continue;
+				}
 
+				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+				RequestDetails subRequestDetails =
+						getRequestDetailsToUseForWriteEntry(theRequest, nextReqEntry, url, verb);
+
+				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
 
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
@@ -1253,16 +1312,6 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
-						/*
-						 * To preserve existing functionality,
-						 * we will only verify that the request url is
-						 * valid if it's provided at all.
-						 * Otherwise, we'll ignore it
-						 */
-						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
-						if (isNotBlank(url)) {
-							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-						}
 						validateResourcePresent(res, order, verb);
 
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -1272,7 +1321,7 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
-						outcome = resourceDao.create(res, matchUrl, false, theRequest, theTransactionDetails);
+						outcome = resourceDao.create(res, matchUrl, false, subRequestDetails, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						res.setId(outcome.getId());
 
@@ -1285,7 +1334,7 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									theRequest);
+									subRequestDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1301,7 +1350,6 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -1309,7 +1357,7 @@ public abstract class BaseTransactionProcessor {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
 							if (!deletedResources.contains(deleteId.getValueAsString())) {
 								DaoMethodOutcome outcome =
-										dao.delete(deleteId, deleteConflicts, theRequest, theTransactionDetails);
+										dao.delete(deleteId, deleteConflicts, subRequestDetails, theTransactionDetails);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
 									entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
@@ -1319,8 +1367,8 @@ public abstract class BaseTransactionProcessor {
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							DeleteMethodOutcome deleteOutcome =
-									dao.deleteByUrl(matchUrl, deleteConflicts, theRequest, theTransactionDetails);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(
+									matchUrl, deleteConflicts, subRequestDetails, theTransactionDetails);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
 							List<? extends IBasePersistedResource> allDeleted = deleteOutcome.getDeletedEntities();
 							for (IBasePersistedResource deleted : allDeleted) {
@@ -1345,8 +1393,6 @@ public abstract class BaseTransactionProcessor {
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-
 						DaoMethodOutcome outcome;
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						if (isNotBlank(parts.getResourceId())) {
@@ -1356,7 +1402,8 @@ public abstract class BaseTransactionProcessor {
 										myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
+							outcome = resourceDao.update(
+									res, null, false, false, subRequestDetails, theTransactionDetails);
 						} else {
 							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
 								res.setId((String) null);
@@ -1368,8 +1415,8 @@ public abstract class BaseTransactionProcessor {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome =
-									resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
+							outcome = resourceDao.update(
+									res, matchUrl, false, false, subRequestDetails, theTransactionDetails);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
@@ -1394,7 +1441,7 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								theRequest);
+								subRequestDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1402,7 +1449,6 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
@@ -1464,7 +1510,7 @@ public abstract class BaseTransactionProcessor {
 								patchType,
 								patchBody,
 								patchBodyParameters,
-								theRequest,
+								subRequestDetails,
 								theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
@@ -1480,7 +1526,7 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									theRequest);
+									subRequestDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
@@ -2205,13 +2251,19 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Extracts the transaction url from the entry and verifies it's:
-	 * * not null or blank
+	 * * not null or blank, unless it is a POST
 	 * * is a relative url matching the resourceType it is about
+	 * for POST requests, the url is allowed to be blank to preserve the existing behavior
 	 * <p>
-	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
+		if (url.isEmpty()) {
+			// for POST requests, the url is allowed to be null or empty, which is checked in
+			// extractTransactionUrlOrThrowException and an empty string is returned in that case
+			return url;
+		}
 
 		if (!isValidResourceTypeUrl(url)) {
 			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
@@ -2258,6 +2310,10 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
+		if ("POST".equals(verb) && isBlank(url)) {
+			// returning empty string instead of null to not get NPE later
+			return "";
+		}
 		if (isBlank(url)) {
 			throw new InvalidRequestException(Msg.code(545)
 					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", verb));

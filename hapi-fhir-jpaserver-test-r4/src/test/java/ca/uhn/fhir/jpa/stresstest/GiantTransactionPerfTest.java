@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -293,6 +294,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		ServletRequestDetails requestDetails = new ServletRequestDetails(myInterceptorSvc);
+		requestDetails.setServer(new RestfulServer());
 		requestDetails.setServletRequest(new MockServletRequest());
 
 		mySystemDao.transaction(requestDetails, input);
