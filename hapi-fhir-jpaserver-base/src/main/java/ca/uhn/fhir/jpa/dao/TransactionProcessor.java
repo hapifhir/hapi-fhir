@@ -81,8 +81,8 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -829,11 +829,37 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					updateCount);
 		} catch (PersistenceException e) {
 			if (myHapiFhirHibernateJpaDialect != null) {
-				List<String> types = theIdToPersistedOutcome.keySet().stream()
-						.filter(Objects::nonNull)
-						.map(IIdType::getResourceType)
-						.collect(Collectors.toList());
-				String message = "Error flushing transaction with resource types: " + types;
+				// Generate a list of the resource types in the request, and the number
+				// of resources for each type that were present. This is not used for
+				// anything other than returning to the client, but could help them
+				// understanding what went wrong or which of their requests led to
+				// the issue
+				TreeMap<String, Integer> types = new TreeMap<>();
+				for (IIdType t : theIdToPersistedOutcome.keySet()) {
+					if (t != null) {
+						String resourceType = t.getResourceType();
+						int count = types.getOrDefault(resourceType, 0);
+						types.put(resourceType, count + 1);
+					}
+				}
+
+				StringBuilder typesBuilder = new StringBuilder();
+				typesBuilder.append("[");
+				for (Iterator<Map.Entry<String, Integer>> iter =
+								types.entrySet().iterator();
+						iter.hasNext(); ) {
+					Map.Entry<String, Integer> entry = iter.next();
+					typesBuilder.append(entry.getKey());
+					if (entry.getValue() > 1) {
+						typesBuilder.append(" (x").append(entry.getValue() + ")");
+					}
+					if (iter.hasNext()) {
+						typesBuilder.append(", ");
+					}
+				}
+				typesBuilder.append("]");
+
+				String message = "Error flushing transaction with resource types: " + typesBuilder;
 				throw myHapiFhirHibernateJpaDialect.translate(e, message);
 			}
 			throw e;

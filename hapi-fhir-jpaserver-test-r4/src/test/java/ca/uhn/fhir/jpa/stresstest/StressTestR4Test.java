@@ -522,12 +522,16 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				p.setId("A" + finalI);
 				p.addIdentifier().setValue("A" + finalI);
 				input.addEntry().setResource(p).setFullUrl("Patient/A" + finalI).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/A" + finalI);
+				Patient p2 = new Patient();
+				p2.setId("B" + finalI);
+				p2.addIdentifier().setValue("B" + finalI);
+				input.addEntry().setResource(p2).setFullUrl("Patient/B" + finalI).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/A" + finalI);
 
 				try {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure");
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient (x2)] - The operation has failed with a client-assigned ID constraint failure");
 					return e.toString();
 				}
 			};
@@ -549,7 +553,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Results: {}", results);
 		assertThat(results).isNotEmpty();
 		assertThat(results.get(0)).contains("HTTP 409 Conflict");
-		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient (x2)]");
 	}
 
 	@Test

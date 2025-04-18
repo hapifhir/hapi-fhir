@@ -3,6 +3,8 @@ package ca.uhn.fhir.util;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -286,6 +288,22 @@ public class StopWatchTest {
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 10, 100);
 		assertEquals("PFX0000000100", b.toString());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"0             , 0.0    ",
+		"1.2345        , 1.23   ",
+		"-1.2345       , -1.23   ",
+		"99.88888      , 99.89  ",
+		"-99.88888     , -99.89  ",
+		"101.88888     , 101.9  ",
+		"-101.88888    , -101.9  ",
+		"1001.88888    , 1002   ",
+		"-1001.88888   , -1002   ",
+	})
+	public void testFormatDouble(double theInput, String theExpected) {
+		assertEquals(theExpected, StopWatch.formatDouble(theInput));
 	}
 
 }

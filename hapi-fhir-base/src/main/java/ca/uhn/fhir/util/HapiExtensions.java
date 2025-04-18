@@ -195,6 +195,13 @@ public class HapiExtensions {
 			"http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
+	 * When an OperationOutcome returned by the JPA server includes a declaration that a placeholder
+	 * reference was automatically created, this extension indicates the ID of the placeholder.
+	 */
+	public static final String EXTENSION_PLACEHOLDER_ID =
+			"http://hapifhir.io/fhir/StructureDefinition/oo-placeholder-id";
+
+	/**
 	 * When a resource is replacing another resource, this extension can be added
 	 * to include a reference to the resource that is being replaced.
 	 */

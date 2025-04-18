@@ -53,6 +53,13 @@ public class MetaUtil {
 		return StringUtils.substringBefore(sanitizedProvenance, "#");
 	}
 
+	/**
+	 * @since 8.2.0
+	 */
+	public static String getSource(FhirContext theContext, IBaseResource theResource) {
+		return getSource(theContext, theResource.getMeta());
+	}
+
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
 		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 			return getSourceR4Plus(theContext, theMeta);

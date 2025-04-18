@@ -128,7 +128,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 		if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
 			ourLog.debug("No batch 2 bulk export jobs found!  Nothing to do!");
-			ourLog.info("Finished bulk export job deletion with nothing to do");
 			return;
 		}
 

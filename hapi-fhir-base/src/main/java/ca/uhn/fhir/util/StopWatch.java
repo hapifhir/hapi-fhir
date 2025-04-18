@@ -285,7 +285,18 @@ public class StopWatch {
 	 * Format a throughput number (output does not include units)
 	 */
 	public static String formatThroughput(double throughput) {
-		return new DecimalFormat("0.0").format(throughput);
+		return formatDouble(throughput);
+	}
+
+	static String formatDouble(double theDouble) {
+		double abs = Math.abs(theDouble);
+		if (abs > 1000) {
+			return Long.toString(Math.round(theDouble));
+		}
+		if (abs > 100) {
+			return Double.toString(Math.round(theDouble * 10.0) / 10.0);
+		}
+		return Double.toString(Math.round(theDouble * 100.0) / 100.0);
 	}
 
 	/**
