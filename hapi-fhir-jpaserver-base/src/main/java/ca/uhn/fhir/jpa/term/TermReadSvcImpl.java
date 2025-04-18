@@ -2202,12 +2202,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, append);
+		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
 	}
 
-	private CodeValidationResult createFailureCodeValidationResult(
+	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
 		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
+		// The InstanceValidator (core) will change the severity based on the binding strength
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
@@ -2215,8 +2216,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.addIssue(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
-						CodeValidationIssueCode.CODE_INVALID,
-						CodeValidationIssueCoding.INVALID_CODE));
+						CodeValidationIssueCode.NOT_FOUND,
+						CodeValidationIssueCoding.NOT_FOUND));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(
@@ -2905,7 +2906,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
-		return createFailureCodeValidationResult(
+		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
@@ -2955,7 +2956,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						valueSet);
 			} else {
 				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+				retVal = createCodeNotFoundErrorForValidationResult(theCodeSystem, theCode, null, append);
 			}
 		}
 
