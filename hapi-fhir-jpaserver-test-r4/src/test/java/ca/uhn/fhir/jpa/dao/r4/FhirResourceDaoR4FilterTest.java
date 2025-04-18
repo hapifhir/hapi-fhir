@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
@@ -1023,6 +1024,28 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
 		assertThat(found).containsExactlyInAnyOrder(raId1, raId2);
 
+	}
+
+	@Test
+	public void testPlanDefinition() {
+		IFhirResourceDao<PlanDefinition> planDefDao = myDaoRegistry.getResourceDaoOrNull(PlanDefinition.class);
+
+		for (int i = 0; i < 3; i++) {
+			PlanDefinition planDefinition = new PlanDefinition();
+			planDefinition.setTitle(i + "cbe" + i);
+			planDefDao.create(planDefinition);
+		}
+
+		myCaptureQueriesListener.clear();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.setCount(4);
+		map.add(Constants.PARAM_FILTER, new StringParam("name sw \"cbe\" or title co \"cbe\""));
+
+		List<String> found = toUnqualifiedVersionlessIdValues(planDefDao.search(map));
+		assertThat(found).hasSize(3);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 	}
 
 	@Test
