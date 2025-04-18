@@ -48,9 +48,7 @@ public class TestDstu3Config extends BaseConfig {
 	@Bean
 	public SubscriptionSettings subscriptionSettings() {
 		SubscriptionSettings retVal = new SubscriptionSettings();
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		retVal.setWebsocketContextPath("/websocketDstu3");
 		return retVal;
 	}
