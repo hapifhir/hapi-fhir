@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class StructureDefinitionQuestionnaireProvider {
 	@Autowired
 	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;

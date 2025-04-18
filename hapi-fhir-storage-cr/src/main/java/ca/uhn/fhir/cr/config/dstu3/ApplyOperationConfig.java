@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 import java.util.Arrays;
 import java.util.Map;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import(CrProcessorConfig.class)
 public class ApplyOperationConfig {

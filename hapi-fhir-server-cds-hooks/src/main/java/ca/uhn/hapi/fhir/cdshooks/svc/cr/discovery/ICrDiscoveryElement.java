@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public interface ICrDiscoveryElement {
 	CdsServiceJson getCdsServiceJson();
 

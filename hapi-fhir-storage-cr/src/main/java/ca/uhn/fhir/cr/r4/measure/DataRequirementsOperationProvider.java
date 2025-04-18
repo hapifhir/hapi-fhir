@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class DataRequirementsOperationProvider {
 	@Autowired
 	IDataRequirementsServiceFactory myR4DataRequirementsServiceFactory;

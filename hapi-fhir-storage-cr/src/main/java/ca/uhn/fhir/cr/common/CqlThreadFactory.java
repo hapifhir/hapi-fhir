@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadFactory;
  * This class resolves issues with loading JAXB in a server environment and using CompletableFutures
  * https://stackoverflow.com/questions/49113207/completablefuture-forkjoinpool-set-class-loader
  **/
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CqlThreadFactory implements ThreadFactory {
 	@Override
 	public Thread newThread(Runnable r) {

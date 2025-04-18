@@ -24,6 +24,7 @@ import jakarta.annotation.Nonnull;
 
 import java.util.Optional;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public interface ICdsCrDiscoveryServiceRegistry {
 	void register(
 			@Nonnull FhirVersionEnum theFhirVersion, @Nonnull Class<? extends ICrDiscoveryService> ICrDiscoveryService);

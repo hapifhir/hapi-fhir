@@ -36,6 +36,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Component
 public class MeasureOperationsProvider {
 	@Autowired

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrDiscoveryServiceRegistry implements ICdsCrDiscoveryServiceRegistry {
 	private final Map<FhirVersionEnum, Class<? extends ICrDiscoveryService>> myCrDiscoveryServices;
 

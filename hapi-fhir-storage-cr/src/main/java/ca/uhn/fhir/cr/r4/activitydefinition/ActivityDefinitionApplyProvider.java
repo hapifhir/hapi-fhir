@@ -41,6 +41,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Component
 public class ActivityDefinitionApplyProvider {
 	@Autowired
