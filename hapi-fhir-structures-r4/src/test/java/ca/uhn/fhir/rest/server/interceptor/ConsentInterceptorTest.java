@@ -2,12 +2,16 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -15,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -61,11 +66,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
@@ -999,6 +1004,34 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(2, response.getTotal());
+	}
+
+	@Nested
+	class BulkExport {
+
+		class CanSeeResourceRejectingConsentService implements IConsentService {
+			@Override
+			public ConsentOutcome canSeeResource(
+				 RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+				return ConsentOutcome.REJECT;
+			}
+		}
+
+		@Test
+		void testBulkExportPointcut(){
+			ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+			consentInterceptor.registerConsentService(new CanSeeResourceRejectingConsentService());
+
+			InterceptorService interceptorService = new InterceptorService();
+			interceptorService.registerInterceptor(consentInterceptor);
+
+			HookParams hookParams = new HookParams()
+				 .add(BulkExportJobParameters.class, new BulkExportJobParameters())
+				  .add(IBaseResource.class, new Patient());
+
+			boolean isResourceIncluded = interceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, hookParams);
+			assertFalse(isResourceIncluded);
+		}
 	}
 
 	@Nested
