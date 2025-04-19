@@ -18,6 +18,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
@@ -96,7 +97,7 @@ public class MetadataCapabilityStatementDstu3Test {
 			status = ourClient.execute(httpPost);
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -131,6 +132,15 @@ public class MetadataCapabilityStatementDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+	}
+
+	@Test
+	public void testHeadElements() throws Exception {
+
+		HttpRequestBase httpHead = new HttpHead(ourServer.getBaseUrl() + "/metadata?_elements=fhirVersion&_pretty=true");
+		CloseableHttpResponse status = ourClient.execute(httpHead);
+		status.getAllHeaders();
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
