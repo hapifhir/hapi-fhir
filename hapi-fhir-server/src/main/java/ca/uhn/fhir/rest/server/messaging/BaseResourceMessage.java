@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @SuppressWarnings("WeakerAccess")
 public abstract class BaseResourceMessage implements IResourceMessage, IModelJson {
 
@@ -51,11 +49,8 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@JsonProperty("mediaType")
 	private String myMediaType;
 
-	/**
-	 * This is used by any message going to kafka for topic partition selection purposes.
-	 */
 	@JsonProperty("messageKey")
-	private String myMessageKey;
+	private String myPayloadMessageKey;
 
 	/**
 	 * Returns an attribute stored in this message.
@@ -96,7 +91,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	 */
 	public void setAttribute(String theKey, String theValue) {
 		Validate.notBlank(theKey);
-		Validate.notNull(theValue);
+		Objects.requireNonNull(theValue);
 		if (myAttributes == null) {
 			myAttributes = new HashMap<>();
 		}
@@ -167,39 +162,15 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
-	@Deprecated
+	@Override
 	@Nullable
-	public String getMessageKeyOrNull() {
-		return getMessageKey();
+	public String getPayloadMessageKey() {
+		return myPayloadMessageKey;
 	}
 
-	@Nullable
-	public String getMessageKey() {
-		return myMessageKey;
-	}
-
-	public void setMessageKey(String theMessageKey) {
-		myMessageKey = theMessageKey;
-	}
-
-	/**
-	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns <code>null</code>.
-	 *
-	 * @return the message key value or default
-	 */
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
-	}
-
-	/**
-	 * Provides a fallback value when method {@link #getMessageKey()} returns <code>null</code>.
-	 *
-	 * @return null by default
-	 */
-	@Nullable
-	protected String getMessageKeyDefaultValue() {
-		return null;
+	@Override
+	public void setPayloadMessageKey(String thePayloadMessageKey) {
+		myPayloadMessageKey = thePayloadMessageKey;
 	}
 
 	public enum OperationTypeEnum {
@@ -248,7 +219,7 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 				&& Objects.equals(getAttributes(), that.getAttributes())
 				&& Objects.equals(getTransactionId(), that.getTransactionId())
 				&& Objects.equals(getMediaType(), that.getMediaType())
-				&& Objects.equals(getMessageKey(), that.getMessageKey());
+				&& Objects.equals(getPayloadMessageKey(), that.getPayloadMessageKey());
 	}
 
 	@Override

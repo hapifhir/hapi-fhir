@@ -13,13 +13,15 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -39,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.Message;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -96,11 +97,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private JobMaintenanceServiceImpl mySvc;
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
-	private IChannelProducer myWorkChannelProducer;
+	private IChannelProducer<JobWorkNotification> myWorkChannelProducer;
 	@Mock
 	private PlatformTransactionManager myTransactionService;
 	@Captor
-	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
+	private ArgumentCaptor<IMessage<JobWorkNotification>> myMessageCaptor;
 	@Captor
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
 	@Mock
@@ -435,7 +436,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// verify never updated (should remain in ready state)
 		verify(myJobPersistence, never()).fetchAllWorkChunkMetadataForJobInStates(any(), anyString(), any());
 		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
-		verify(myWorkChannelProducer, never()).send(any());
+		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
 		verify(myReductionStepExecutorService)
 			.triggerReductionStep(anyString(), any());
 	}
@@ -464,8 +465,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// verify
 		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
-		List<Message<JobWorkNotification>> sentMessages = myMessageCaptor.getAllValues();
-		for (Message<JobWorkNotification> msg : sentMessages) {
+		List<IMessage<JobWorkNotification>> sentMessages = myMessageCaptor.getAllValues();
+		for (IMessage<JobWorkNotification> msg : sentMessages) {
 			JobWorkNotification payload = msg.getPayload();
 			assertEquals(STEP_2, payload.getTargetStepId());
 			assertEquals(CHUNK_ID, payload.getChunkId());
@@ -507,7 +508,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// verify
 		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
-		verify(myWorkChannelProducer, never()).send(any());
+		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
 
 		List<ILoggingEvent> events = myLogCapture.getLogEvents();
 		assertEquals(2, events.size());

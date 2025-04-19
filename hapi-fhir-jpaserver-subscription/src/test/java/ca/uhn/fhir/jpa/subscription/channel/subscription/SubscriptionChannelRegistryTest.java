@@ -1,22 +1,23 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.BaseChannelSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.api.BaseChannelSettings;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.impl.MultiplexingListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class SubscriptionChannelRegistryTest {
 
 	@Mock
-	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+	private SubscriptionDeliveryListenerFactory mySubscriptionDeliveryListenerFactory;
 
 	@Mock
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -57,45 +58,50 @@ public class SubscriptionChannelRegistryTest {
 		ActiveSubscription activeSubscription = createActiveSubscription(channelName, retryCount);
 
 		// mocks
-		MessageHandler messageHandler = mock(MessageHandler.class);
-		IChannelReceiver receiver = mock(IChannelReceiver.class);
-		IChannelProducer producer = mock(IChannelProducer.class);
+		IMessageListener<ResourceDeliveryMessage> messageListener = mock(IMessageListener.class);
+		when(messageListener.getPayloadType()).thenReturn(ResourceDeliveryMessage.class);
+		IChannelConsumer<ResourceDeliveryMessage> consumer = mock(IChannelConsumer.class);
+		IChannelProducer<ResourceDeliveryMessage> producer = mock(IChannelProducer.class);
+		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener = new MultiplexingListener<>(ResourceDeliveryMessage.class);
+		when(consumer.getMessageListener()).thenReturn(multiplexingListener);
 
 		// when
-		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(
+		when(mySubscriptionChannelFactory.newDeliveryConsumer(
 			anyString(),
+			any(IMessageListener.class),
 			any(ChannelConsumerSettings.class)
-		)).thenReturn(receiver);
-		when(mySubscriptionChannelFactory.newDeliverySendingChannel(
+		)).thenReturn(consumer);
+		when(mySubscriptionChannelFactory.newDeliveryProducer(
 			anyString(),
 			any(ChannelProducerSettings.class)
 		)).thenReturn(producer);
-		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(CanonicalSubscriptionChannelType.class)))
-			.thenReturn(Optional.of(messageHandler));
+		when(mySubscriptionDeliveryListenerFactory.createDeliveryListener(any(CanonicalSubscriptionChannelType.class)))
+			.thenReturn(Optional.of(messageListener));
 
 		// test
 		mySubscriptionChannelRegistry.add(activeSubscription);
 
 		// verify
 		// the receiver and sender should've been added to the maps
-		SubscriptionChannelWithHandlers receiverChannel = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(channelName);
-		MessageChannel senderChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(channelName);
+		SubscriptionResourceDeliveryMessageConsumer channelWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(channelName);
+		IChannelProducer<ResourceDeliveryMessage> producer2 = mySubscriptionChannelRegistry.getDeliveryChannelProducer(channelName);
 
-		assertEquals(producer, senderChannel);
-		assertEquals(receiver, receiverChannel.getChannel());
+		assertEquals(producer, producer2);
+		assertEquals(consumer, channelWithListeners.getConsumer());
 
 		// verify the creation of the sender/receiver
 		// both have retry values provided
 		ArgumentCaptor<ChannelConsumerSettings> consumerCaptor = ArgumentCaptor.forClass(ChannelConsumerSettings.class);
 		verify(mySubscriptionChannelFactory)
-			.newDeliveryReceivingChannel(anyString(),
+			.newDeliveryConsumer(anyString(),
+				any(IMessageListener.class),
 				consumerCaptor.capture());
 		ChannelConsumerSettings consumerSettings = consumerCaptor.getValue();
 		verifySettingsHaveRetryConfig(consumerSettings, retryCount);
 
 		ArgumentCaptor<ChannelProducerSettings> producerCaptor = ArgumentCaptor.forClass(ChannelProducerSettings.class);
 		verify(mySubscriptionChannelFactory)
-			.newDeliverySendingChannel(anyString(),
+			.newDeliveryProducer(anyString(),
 				producerCaptor.capture());
 		verifySettingsHaveRetryConfig(producerCaptor.getValue(), retryCount);
 	}
