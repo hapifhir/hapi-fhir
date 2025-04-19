@@ -84,6 +84,7 @@ public class MdmQueueConsumerLoader {
 	@PreDestroy
 	public void stop() throws Exception {
 		CloseUtil.close(myMdmConsumer);
+		ourLog.info("MDM Matching Consumer closed");
 	}
 
 	@VisibleForTesting

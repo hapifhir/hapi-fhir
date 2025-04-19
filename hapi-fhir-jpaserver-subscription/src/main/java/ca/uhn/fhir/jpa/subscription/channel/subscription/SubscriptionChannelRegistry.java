@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,6 +99,20 @@ public class SubscriptionChannelRegistry {
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
+		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer = buildSubscriptionResourceDeliveryMessageConsumer(theActiveSubscription, receivingParameters);
+		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);
+
+		// create the producing channel.
+		// channel used for sending to subscription matcher
+		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
+		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
+
+		IChannelProducer<ResourceDeliveryMessage> producer = newProducer(producingChannelParameters);
+		myChannelProducers.put(channelName, producer);
+	}
+
+	@Nonnull
+	private SubscriptionResourceDeliveryMessageConsumer buildSubscriptionResourceDeliveryMessageConsumer(ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
 		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
 				new MultiplexingListener<>(ResourceDeliveryMessage.class);
 		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =
@@ -111,15 +126,7 @@ public class SubscriptionChannelRegistry {
 				new SubscriptionValidatingListener(mySubscriptionDeliveryValidator, theActiveSubscription.getIdDt());
 		subscriptionResourceDeliveryMessageConsumer.addListener(subscriptionValidatingListener);
 		oDeliveryListener.ifPresent(subscriptionResourceDeliveryMessageConsumer::addListener);
-		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);
-
-		// create the producing channel.
-		// channel used for sending to subscription matcher
-		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
-		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
-
-		IChannelProducer<ResourceDeliveryMessage> producer = newProducer(producingChannelParameters);
-		myChannelProducers.put(channelName, producer);
+		return subscriptionResourceDeliveryMessageConsumer;
 	}
 
 	protected IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(
