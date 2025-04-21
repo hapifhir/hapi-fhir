@@ -618,7 +618,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				theRequest.getVersion());
 
 		if (npmPackageVersionResourceEntities.isEmpty()) {
-			return null;
+			throw new ResourceNotFoundException("%s Could not find asset for FHIR version: %s, canonical URL: %s, package ID: %s and package version: %s"
+				.formatted(
+					Msg.code(2644),
+					theRequest.getFhirVersion(),
+					theRequest.getCanonicalUrl(),
+					theRequest.getPackageId(),
+					Optional.ofNullable(theRequest.getVersion()).orElse("[none]")));
 		} else {
 			if (npmPackageVersionResourceEntities.size() > 1) {
 				ourLog.warn(
