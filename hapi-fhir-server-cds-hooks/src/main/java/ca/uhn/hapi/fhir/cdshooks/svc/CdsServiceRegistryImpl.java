@@ -60,7 +60,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 	private final CDSHooksVersion myCdsHooksVersion;
 
-	// Constructor without deprecated arguments
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
@@ -70,12 +69,26 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				theCdsHooksContextBooter,
 				theCdsPrefetchSvc,
 				theObjectMapper,
-				null,
-				null,
 				theCdsServiceRequestJsonDeserializer,
 				CDSHooksVersion.DEFAULT);
 	}
 
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
+		myCdsHooksContextBooter = theCdsHooksContextBooter;
+		myCdsPrefetchSvc = theCdsPrefetchSvc;
+		myObjectMapper = theObjectMapper;
+		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
+		myCdsCrServiceFactory = null;
+		myCrDiscoveryServiceFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
@@ -93,6 +106,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				CDSHooksVersion.DEFAULT);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
