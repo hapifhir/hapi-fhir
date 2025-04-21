@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.repository.Repository;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
  **/
 @SuppressWarnings("squid:S1135")
-public class HapiFhirRepository implements Repository {
+public class HapiFhirRepository implements IRepository {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
