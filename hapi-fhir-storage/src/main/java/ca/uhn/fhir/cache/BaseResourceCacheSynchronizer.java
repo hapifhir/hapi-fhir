@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.IResourceRepositoryCache;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,11 +48,11 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public abstract class BaseResourceCacheSynchronizer implements IResourceChangeListener, IResourceRepositoryCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseResourceCacheSynchronizer.class);
@@ -241,9 +242,25 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 		}
 		IFhirResourceDao<?> resourceDao = getResourceDao();
 		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
-		List<IBaseResource> resourceList = theResourceIds.stream()
-				.map(n -> resourceDao.read(n, systemRequestDetails))
-				.collect(Collectors.toList());
+		List<IBaseResource> resourceList = new ArrayList<>();
+
+		/*
+		 * We are pretty lenient here, because any failure will block the server
+		 * from starting up. We should generally never fail to load here, but it
+		 * can potentially happen if a resource is manually deleted in the database
+		 * (ie. marked with a deletion time manually) but the indexes aren't cleaned
+		 * up.
+		 */
+		for (IIdType id : theResourceIds) {
+			IBaseResource read;
+			try {
+				read = resourceDao.read(id, systemRequestDetails);
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Unable to fetch resource {}", id, e);
+				continue;
+			}
+			resourceList.add(read);
+		}
 		handleInit(resourceList);
 	}
 
