@@ -193,7 +193,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myCompletionHandler = details -> {
 		};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
 
 		// reset

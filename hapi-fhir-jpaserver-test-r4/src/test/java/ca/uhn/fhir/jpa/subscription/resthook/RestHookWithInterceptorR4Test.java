@@ -73,7 +73,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 	}
 
 	@AfterEach

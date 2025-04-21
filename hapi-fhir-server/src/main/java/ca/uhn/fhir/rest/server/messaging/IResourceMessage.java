@@ -22,7 +22,8 @@ package ca.uhn.fhir.rest.server.messaging;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
- * IMessage implementations that deliver a FHIR Resource payload should implement this interface.
+ * IMessage implementations that deliver a FHIR Resource payload can implement this interface to
+ * make the resource id available to loggers.
  */
 public interface IResourceMessage extends IHasPayloadMessageKey {
 	/**

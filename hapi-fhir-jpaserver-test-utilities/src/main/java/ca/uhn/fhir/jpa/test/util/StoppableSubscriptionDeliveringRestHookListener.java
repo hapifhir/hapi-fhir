@@ -57,7 +57,7 @@ public class StoppableSubscriptionDeliveringRestHookListener extends Subscriptio
 		myPauseEveryMessage = true;
 	}
 
-	public synchronized void unPause() {
+	public synchronized void resume() {
 		myPauseEveryMessage = false;
 		notifyAll();
 	}

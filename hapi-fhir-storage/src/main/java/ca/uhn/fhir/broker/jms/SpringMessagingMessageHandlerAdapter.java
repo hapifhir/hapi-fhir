@@ -22,6 +22,8 @@ package ca.uhn.fhir.broker.jms;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -32,6 +34,7 @@ import org.springframework.messaging.MessagingException;
  * @param <T> the type of payload this message handler is expecting to receive
  */
 public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
+	private static final Logger ourLog = LoggerFactory.getLogger(SpringMessagingMessageHandlerAdapter.class);
 	private final IMessageListener<T> myMessageListener;
 	private final Class<? extends IMessage<T>> myMessageType;
 
@@ -44,13 +47,19 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
 		if (!IMessage.class.isAssignableFrom(theMessage.getClass())) {
-			throw new InternalErrorException("Expecting message of type " + IMessage.class
-					+ ". But received message of type: " + theMessage.getClass());
+			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
+			// clog up the channel.
+			ourLog.warn(
+				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.", IMessage.class, theMessage.getClass());
+			return;
 		}
 
 		if (!getMessageType().isAssignableFrom(theMessage.getClass())) {
-			throw new InternalErrorException("Expecting message payload of type " + getMessageType()
-					+ ". But received message of type: " + theMessage.getClass());
+			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
+			// clog up the channel.
+			ourLog.warn(
+				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.", getMessageType(), theMessage.getClass());
+			return;
 		}
 
 		IMessage<T> message = (IMessage<T>) theMessage;

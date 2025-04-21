@@ -96,7 +96,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		storeNewInstance(ourJobDef);
 
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		myChannelInterceptor.clear();
 		myWorkChannel.addInterceptor(myChannelInterceptor);
 	}

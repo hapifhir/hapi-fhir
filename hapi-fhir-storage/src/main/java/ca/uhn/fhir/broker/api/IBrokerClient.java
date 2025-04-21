@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 /**
  * IBrokerClient implementations communicate with Message Brokers to exchange messages. HAPI-FHIR uses a Message Broker for asynchronous
  * processing tasks such as Batch Jobs, Subscription Processing, and MDM. HAPI-FHIR uses the term "Channel" to represent a Queue (JMS)
- * or Topic (Kafka etc.) Services that send messages create a {@link IChannelProducer} to submit messages to the channel. Services that
+ * or Topic (Kafka etc.) Services that send messages create a {@link IChannelProducer}. Services that
  * receive messages from a channel create a {@link IChannelConsumer}. Each {@link IChannelConsumer} is created with a single
  * {@link IMessageListener} that defines how messages are handled. A {@link IChannelConsumer} creates threads that are notified by the broker
  * when new messages arrive so {@link IChannelConsumer} instances need to be properly closed when shutting down.
@@ -39,7 +39,7 @@ public interface IBrokerClient {
 	 * </p>
 	 *
 	 * @param theChannelName             The actual underlying channel name
-	 * @param theMessageType             The object type that will be placed on this chanel. Objects will usually be Jackson-annotated structures.
+	 * @param theMessageType             The object type that will be placed on this chanel. Objects will usually be a Jackson-annotated class.
 	 * @param theMessageListener		 The message handler that will be called for each arriving message. If more than one message listeners is required for a single consumer, {@link ca.uhn.fhir.broker.impl.MultiplexingListener} can be used for the listener.
 	 * @param theChannelConsumerSettings Defines the consumer configuration (e.g. number of listening threads)
 	 */

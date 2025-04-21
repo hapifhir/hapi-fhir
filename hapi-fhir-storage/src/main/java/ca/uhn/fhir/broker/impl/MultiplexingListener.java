@@ -23,7 +23,7 @@ import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.broker.util.CloseUtil;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import com.google.common.annotations.VisibleForTesting;
@@ -59,8 +59,11 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 
 		Class<?> messageClass = theMessage.getPayload().getClass();
 		if (!getPayloadType().isAssignableFrom(messageClass)) {
-			throw new InternalErrorException("Expecting message of type " + getPayloadType()
-					+ ". But received message of type: " + messageClass);
+			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
+			// clog up the channel.
+			ourLog.warn(
+				"Received unexpected payload type. Expecting payload of type {}, but received payload of type {}. Skipping message.", getPayloadType(), messageClass);
+			return;
 		}
 		mySubListeners.forEach(
 				listener -> IRetryAwareMessageListener.handleMessage(listener, theMessageDeliveryContext, theMessage));
@@ -75,7 +78,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 		checkState();
 
 		if (!getPayloadType().isAssignableFrom(theListener.getPayloadType())) {
-			throw new InternalErrorException("Expecting listener of type " + getPayloadType()
+			throw new ConfigurationException("Expecting listener of type " + getPayloadType()
 					+ ". But listener was for type: " + theListener.getPayloadType());
 		}
 		return mySubListeners.add(theListener);

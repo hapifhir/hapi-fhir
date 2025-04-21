@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.server.messaging;
 import jakarta.annotation.Nullable;
 
 /**
- * Some broker implementations require a message key. An IMessage implementation should implement this interface if it is possible to derive the message
+ * Some broker implementations require a message key. An IMessage implementation can implement this interface if it is possible to derive a message
  * key from the message payload.
  */
 public interface IHasPayloadMessageKey {

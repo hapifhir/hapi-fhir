@@ -27,7 +27,7 @@ import jakarta.annotation.Nonnull;
 
 /**
  * An implementation of {@link LinkedBlockingChannelFactory} that forces
- * synchronous message processing. Useful for testing.
+ * synchronous message processing. Used for testing.
  */
 public class SynchronousLinkedBlockingChannelFactory extends LinkedBlockingChannelFactory {
 

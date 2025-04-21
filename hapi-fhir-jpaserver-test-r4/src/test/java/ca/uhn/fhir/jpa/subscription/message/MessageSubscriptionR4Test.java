@@ -73,7 +73,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myConsumer.close();

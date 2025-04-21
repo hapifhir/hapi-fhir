@@ -95,7 +95,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel
 	}
 
 	/**
-	 * Creates a synchronous channel, mostly intended for testing
+	 * Creates a synchronous channel for testing
 	 */
 	@VisibleForTesting
 	public static LinkedBlockingChannel newSynchronous(String theName, RetryPolicyProvider theRetryPolicyProvider) {

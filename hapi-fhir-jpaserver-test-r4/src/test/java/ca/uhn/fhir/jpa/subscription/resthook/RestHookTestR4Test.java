@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -72,8 +71,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
     StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
-	@Autowired(required = false)
-	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
@@ -81,7 +78,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
@@ -550,7 +547,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -624,7 +621,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());

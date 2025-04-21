@@ -30,7 +30,8 @@ import java.util.UUID;
  * This interface is implemented by serializable "wrapper" message classes that are exchanged with Massage Brokers. HAPI-FHIR
  * message classes implement both {@link org.springframework.messaging.Message} and {@link IMessage} so that they can
  * be exchanged with both JMS and non-JMS brokers. These message wrappers wrap a serializable payload that is the main content
- * of the message. This wrapper also contains meta-data about the message such as headers and a message key.
+ * of the message. This wrapper also contains meta-data about the message such as headers and a message key. The message key
+ * is used by non-JMS brokers for partition selection.
  *
  * @param <T> the type of the message payload. In most cases, T will be a subclass of {@link BaseJsonMessage}
  */

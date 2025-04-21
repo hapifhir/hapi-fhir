@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import org.springframework.messaging.MessageDeliveryException;
 
@@ -38,7 +39,7 @@ public interface IResourceModifiedConsumer {
 	 * @param theMsg The message to submit
 	 *               <p>
 	 *               This is an internal API - Use with caution!
-	 * @return
+	 * @return the result of the {@link ca.uhn.fhir.broker.api.IChannelProducer#send(IMessage)}
 	 */
 	ISendResult submitResourceModified(ResourceModifiedMessage theMsg);
 }

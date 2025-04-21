@@ -49,10 +49,10 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 			Class<? extends IMessage<T>> theMessageType,
 			IMessageListener<T> theMessageListener,
 			ChannelConsumerSettings theChannelConsumerSettings) {
-		LinkedBlockingChannel legacyChannelReceiver =
+		LinkedBlockingChannel springMessagingChannelReceiver =
 				myLinkedBlockingChannelFactory.getOrCreateReceiver(theChannelName, theChannelConsumerSettings);
 		SpringMessagingReceiverAdapter<T> retval =
-				new SpringMessagingReceiverAdapter<>(theMessageType, legacyChannelReceiver, theMessageListener);
+				new SpringMessagingReceiverAdapter<>(theMessageType, springMessagingChannelReceiver, theMessageListener);
 		MessageHandler handler = new SpringMessagingMessageHandlerAdapter<>(theMessageType, theMessageListener);
 		retval.subscribe(handler);
 		return retval;
@@ -74,7 +74,7 @@ public class LinkedBlockingBrokerClient implements IBrokerClient {
 	}
 
 	@Autowired
-	public void setLinkedBlockingChannelFactory(LinkedBlockingChannelFactory theLegacyChannelFactory) {
-		myLinkedBlockingChannelFactory = theLegacyChannelFactory;
+	public void setLinkedBlockingChannelFactory(LinkedBlockingChannelFactory theLinkedBlockingChannelFactory) {
+		myLinkedBlockingChannelFactory = theLinkedBlockingChannelFactory;
 	}
 }

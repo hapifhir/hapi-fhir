@@ -65,9 +65,6 @@ public abstract class BaseBatch2Config {
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
 
-	@Autowired
-	IInterceptorBroadcaster myInterceptorBroadcaster;
-
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
 		return new JobDefinitionRegistry();

@@ -61,7 +61,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 	}
 
 	@Test
@@ -381,7 +381,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionDeliveredLatch.awaitExpected();
 
 		awaitUntilReceivedTransactionCount(2);
@@ -429,7 +429,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionDeliveredLatch.awaitExpected();
 
 		assertTrue(getReceivedObservations().stream().allMatch(t -> "2".equals(t.getIdElement().getVersionIdPart())));

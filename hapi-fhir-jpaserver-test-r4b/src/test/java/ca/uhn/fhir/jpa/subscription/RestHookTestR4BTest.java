@@ -61,7 +61,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
@@ -512,7 +512,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -586,7 +586,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookListener.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());

@@ -91,7 +91,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	public void before() {
 		myStorageSettings.setJobFastTrackingEnabled(true);
 		myCompletionHandler = details -> {};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 			ourLog.info("Batch maintenance job started");

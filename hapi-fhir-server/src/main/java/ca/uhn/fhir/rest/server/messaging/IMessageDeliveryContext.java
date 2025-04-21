@@ -20,13 +20,15 @@
 package ca.uhn.fhir.rest.server.messaging;
 
 /**
- * If the Message Listener registered with a Channel Consumer is retry aware, then the Channel Consumer can
+ * If a Message Listener registered with a Channel Consumer is retry aware, then the Channel Consumer can
  * pass an instance of this interface to provide delivery context details to the listener. For example,
- * some listeners may want to respond to the handle request differently after several retries.
+ * some listeners may want to handle a request differently if it is being redelivered because the first delivery failed.
  */
 public interface IMessageDeliveryContext {
 	/**
 	 * @return the number of retries for this message delivery. The first delivery has a retry count of 0.
 	 */
 	int getRetryCount();
+
+	// TODO KHS lastExceptionType could potentially be useful here as well
 }

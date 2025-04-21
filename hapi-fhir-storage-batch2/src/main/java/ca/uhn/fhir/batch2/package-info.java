@@ -108,7 +108,7 @@
  *        {@link ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl#startInstance}
  *        </li>
  *    <li> When workers dequeue a chunk, they trigger a QUEUED->IN_PROGRESS transition to report status.
- *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.MessageProcess#updateAndValidateJobStatus}
+ *        {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.MessageProcess#updateAndValidateJobStatus()}
  *        </li>
  *    <li> As a special case, if the first chunk produces no children, the job advances IN_PROGRESS->COMPLETE
  *         {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}

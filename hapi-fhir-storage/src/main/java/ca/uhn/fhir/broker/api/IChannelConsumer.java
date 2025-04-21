@@ -38,7 +38,7 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	void start();
 	/**
-	 * Close the consumer and release any resources.
+	 * Close this consumer's listener and this consumer, releasing any resources.
 	 */
 	void close();
 
@@ -53,12 +53,12 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	Class<? extends IMessage<T>> getMessageType();
 
 	/**
-	 * @return the {@link IMessageListener} this consumer was created with.
+	 * @return the {@link IMessageListener} this consumer is sending messages to (i.e. the one it was created with).
 	 */
 	IMessageListener<T> getMessageListener();
 
 	/**
-	 * Stop requesting new messages from the broker until resume() is called.
+	 * Pause requesting new messages from the broker until resume() is called.
 	 */
 	default void pause() {
 		throw new UnsupportedOperationException();
@@ -72,7 +72,7 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	}
 
 	/**
-	 * Consumers should call this method at the top of any method attempting to use the consumer
+	 * Consumers should call this method at the top of any method that attempts to use the consumer
 	 */
 	default void checkState() {
 		if (isClosed()) {
