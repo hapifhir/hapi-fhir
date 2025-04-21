@@ -23,8 +23,6 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliverin
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 
 import java.util.concurrent.CountDownLatch;
 

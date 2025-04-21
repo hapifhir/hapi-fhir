@@ -34,6 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// TODO KHS delete this test after code review
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionChannelFactoryTest {
 
@@ -43,6 +44,7 @@ public class SubscriptionChannelFactoryTest {
 	private IChannelNamer myChannelNamer;
 	@Captor
 	private ArgumentCaptor<Exception> myExceptionCaptor;
+
 	private LinkedBlockingChannelFactory myLinkedBlockingChannelFactory;
 
 	@BeforeEach

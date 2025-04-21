@@ -72,7 +72,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		if (!payload.hasPayloadType(myFhirContext, "SubscriptionTopic")) {
+		if (!payload.hasResourceType(myFhirContext, "SubscriptionTopic")) {
 			return;
 		}
 
@@ -99,7 +99,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
 			if (payloadResource == null) {
 				// Only for unit test
-				payloadResource = payload.getPayload(myFhirContext);
+				payloadResource = payload.getResource(myFhirContext);
 			}
 		} catch (ResourceGoneException e) {
 			mySubscriptionTopicRegistry.unregister(payloadId.getIdPart());

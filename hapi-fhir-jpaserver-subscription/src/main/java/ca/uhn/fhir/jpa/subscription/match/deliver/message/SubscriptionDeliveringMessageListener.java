@@ -69,7 +69,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		String payloadId = theSourceMessage.getPayloadId();
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(
-					theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+					theSubscription, theWrappedMessageToSend.getPayload().getResource(myFhirContext));
 			ResourceModifiedJsonMessage newWrappedMessageToSend =
 					convertDeliveryMessageToResourceModifiedJsonMessage(theSourceMessage, payloadResource);
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
@@ -107,7 +107,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 			if (inflatedMsg.isEmpty()) {
 				return;
 			}
-			payloadResource = inflatedMsg.get().getPayload(myFhirContext);
+			payloadResource = inflatedMsg.get().getResource(myFhirContext);
 		}
 
 		ResourceModifiedJsonMessage messageWrapperToSend =

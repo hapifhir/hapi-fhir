@@ -56,10 +56,10 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	protected String myPayloadVersion;
 
 	@JsonIgnore
-	protected transient IBaseResource myPayloadDecoded;
+	protected transient IBaseResource myResourceDecoded;
 
 	@JsonIgnore
-	protected transient String myPayloadType;
+	protected transient String myResourceType;
 
 	/**
 	 * Constructor
@@ -162,20 +162,20 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	}
 
 	@Nullable
-	public IBaseResource getNewPayload(FhirContext theCtx) {
-		if (myPayloadDecoded == null && isNotBlank(myPayload)) {
-			myPayloadDecoded = theCtx.newJsonParser().parseResource(myPayload);
+	public IBaseResource getNewResource(FhirContext theCtx) {
+		if (myResourceDecoded == null && isNotBlank(myPayload)) {
+			myResourceDecoded = theCtx.newJsonParser().parseResource(myPayload);
 		}
-		return myPayloadDecoded;
+		return myResourceDecoded;
 	}
 
 	@Nullable
-	public IBaseResource getPayload(FhirContext theCtx) {
-		IBaseResource retVal = myPayloadDecoded;
+	public IBaseResource getResource(FhirContext theCtx) {
+		IBaseResource retVal = myResourceDecoded;
 		if (retVal == null && isNotBlank(myPayload)) {
 			IParser parser = EncodingEnum.detectEncoding(myPayload).newParser(theCtx);
 			retVal = parser.parseResource(myPayload);
-			myPayloadDecoded = retVal;
+			myResourceDecoded = retVal;
 		}
 		return retVal;
 	}
@@ -266,22 +266,22 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return Objects.toString(super.getPayloadMessageKey(), myPayloadId);
 	}
 
-	public boolean hasPayloadType(FhirContext theFhirContext, @Nonnull String theResourceName) {
-		if (myPayloadType == null) {
-			myPayloadType = getPayloadType(theFhirContext);
+	public boolean hasResourceType(FhirContext theFhirContext, @Nonnull String theResourceName) {
+		if (myResourceType == null) {
+			myResourceType = getResourceType(theFhirContext);
 		}
-		return theResourceName.equals(myPayloadType);
+		return theResourceName.equals(myResourceType);
 	}
 
 	@Nullable
-	public String getPayloadType(FhirContext theFhirContext) {
+	public String getResourceType(FhirContext theFhirContext) {
 		String retval = null;
 		IIdType payloadId = getPayloadId(theFhirContext);
 		if (payloadId != null) {
 			retval = payloadId.getResourceType();
 		}
 		if (isBlank(retval)) {
-			IBaseResource payload = getNewPayload(theFhirContext);
+			IBaseResource payload = getNewResource(theFhirContext);
 			if (payload != null) {
 				retval = theFhirContext.getResourceType(payload);
 			}

@@ -270,7 +270,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
 		assertEquals(receivedMessage.getPayloadId(), "Bundle");
 
-		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
+		Bundle receivedBundle = (Bundle) receivedMessage.getResource(myCtx);
 		assertThat(receivedBundle.getEntry()).hasSize(2);
 		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
 		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());

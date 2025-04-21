@@ -83,14 +83,14 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		if (!payload.hasPayloadType(myFhirContext, "Subscription")) {
+		if (!payload.hasResourceType(myFhirContext, "Subscription")) {
 			return;
 		}
 
 		switch (payload.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-				if (payload.getPayload(myFhirContext) == null) {
+				if (payload.getResource(myFhirContext) == null) {
 					Optional<ResourceModifiedMessage> inflatedMsg =
 							myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(
 									payload);
@@ -100,7 +100,7 @@ public class SubscriptionActivatingListener implements IMessageListener<Resource
 					payload = inflatedMsg.get();
 				}
 
-				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
+				activateSubscriptionIfRequired(payload.getNewResource(myFhirContext));
 				break;
 			case TRANSACTION:
 			case DELETE:

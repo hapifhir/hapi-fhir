@@ -79,26 +79,26 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 
 	@Override
 	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
-		ResourceModifiedMessage msg = theMessage.getPayload();
+		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		if (msg.getPayload(myFhirContext) == null) {
+		if (payload.getResource(myFhirContext) == null) {
 			// inflate the message and ignore any resource that cannot be found.
-			Optional<ResourceModifiedMessage> inflatedMsg =
-					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(msg);
-			if (inflatedMsg.isEmpty()) {
+			Optional<ResourceModifiedMessage> inflatedPayload =
+					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payload);
+			if (inflatedPayload.isEmpty()) {
 				return;
 			}
-			msg = inflatedMsg.get();
+			payload = inflatedPayload.get();
 		}
 
 		// Interceptor call: SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED
-		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+		HookParams params = new HookParams().add(ResourceModifiedMessage.class, payload);
 		if (!myInterceptorBroadcaster.callHooks(
 				Pointcut.SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
 			return;
 		}
 		try {
-			matchActiveSubscriptionTopicsAndDeliver(msg);
+			matchActiveSubscriptionTopicsAndDeliver(payload);
 		} finally {
 			// Interceptor call: SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, params);
@@ -124,13 +124,13 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 	}
 
 	private int deliverToTopicSubscriptions(
-			ResourceModifiedMessage theMsg,
+			ResourceModifiedMessage thePayload,
 			SubscriptionTopic theSubscriptionTopic,
 			InMemoryMatchResult theInMemoryMatchResult) {
 		String topicUrl = theSubscriptionTopic.getUrl();
-		IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
+		IBaseResource matchedResource = thePayload.getNewResource(myFhirContext);
 		List<IBaseResource> matchedResourceList = Collections.singletonList(matchedResource);
-		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
+		RestOperationTypeEnum restOperationType = thePayload.getOperationType().asRestOperationType();
 
 		return mySubscriptionTopicDispatcher.dispatch(new SubscriptionTopicDispatchRequest(
 				topicUrl,
@@ -138,7 +138,7 @@ public class SubscriptionTopicMatchingListener implements IMessageListener<Resou
 				myInMemoryTopicFilterMatcher,
 				restOperationType,
 				theInMemoryMatchResult,
-				theMsg.getPartitionId(),
-				theMsg.getTransactionId()));
+				thePayload.getPartitionId(),
+				thePayload.getTransactionId()));
 	}
 }

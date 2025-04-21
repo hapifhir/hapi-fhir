@@ -111,7 +111,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
 		} catch (ResourceNotFoundException e) {
 			IdDt idDt = new IdDt(
-					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getResourceType(myFhirContext),
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 

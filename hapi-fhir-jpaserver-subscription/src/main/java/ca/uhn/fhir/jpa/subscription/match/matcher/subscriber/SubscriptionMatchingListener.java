@@ -99,7 +99,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 				return;
 		}
 
-		if (theMsg.getPayload(myFhirContext) == null) {
+		if (theMsg.getResource(myFhirContext) == null) {
 			// inflate the message and ignore any resource that cannot be found.
 			Optional<ResourceModifiedMessage> inflatedMsg =
 					myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(theMsg);
@@ -207,7 +207,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 			matchResult.setInMemory(true);
 		}
 
-		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+		IBaseResource payload = theMsg.getNewResource(myFhirContext);
 		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
 	}
 

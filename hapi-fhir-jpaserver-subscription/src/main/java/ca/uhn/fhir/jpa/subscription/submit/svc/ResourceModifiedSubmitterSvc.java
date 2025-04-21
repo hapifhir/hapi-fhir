@@ -94,10 +94,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
-	 * @return
 	 * @inheritDoc Submit a message to the broker without retries.
 	 * <p>
 	 * Implementation of the {@link IResourceModifiedConsumer}
+	 * @return the result of the send operation
 	 */
 	@Override
 	public ISendResult submitResourceModified(ResourceModifiedMessage theMsg) {
@@ -107,8 +107,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		Validate.notNull(
 				myMatchingChannel,
 				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
-		return null;
+		return myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
 	}
 
 	/**

@@ -73,7 +73,7 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 	public void handleMessage(@Nonnull IMessage<ResourceModifiedMessage> theMessage) {
 		ResourceModifiedMessage payload = theMessage.getPayload();
 
-		if (!payload.hasPayloadType(this.myFhirContext, "Subscription")) {
+		if (!payload.hasResourceType(this.myFhirContext, "Subscription")) {
 			return;
 		}
 
@@ -98,7 +98,7 @@ public class SubscriptionRegisteringListener implements IMessageListener<Resourc
 		IBaseResource payloadResource = subscriptionDao.read(payloadId, systemRequestDetails, true);
 		if (payloadResource == null) {
 			// Only for unit test
-			payloadResource = payload.getPayload(myFhirContext);
+			payloadResource = payload.getResource(myFhirContext);
 		}
 		if (payloadResource.isDeleted()) {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());

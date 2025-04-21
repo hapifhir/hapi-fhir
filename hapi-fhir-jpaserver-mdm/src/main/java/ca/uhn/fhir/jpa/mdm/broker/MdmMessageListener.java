@@ -97,7 +97,7 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	}
 
 	private IBaseResource extractSourceResource(ResourceModifiedMessage theResourceModifiedMessage) {
-		IBaseResource sourceResource = theResourceModifiedMessage.getNewPayload(myFhirContext);
+		IBaseResource sourceResource = theResourceModifiedMessage.getNewResource(myFhirContext);
 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R5 && sourceResource instanceof IBaseBundle) {
 			return SubscriptionTopicUtil.extractResourceFromBundle(myFhirContext, (IBaseBundle) sourceResource);
 		} else {
@@ -204,7 +204,7 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 	}
 
 	private ResourceOperationMessage getOutgoingMessage(ResourceModifiedMessage theMsg) {
-		IBaseResource targetResource = theMsg.getPayload(myFhirContext);
+		IBaseResource targetResource = theMsg.getResource(myFhirContext);
 		ResourceOperationMessage outgoingMsg =
 				new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 		outgoingMsg.setTransactionId(theMsg.getTransactionId());
