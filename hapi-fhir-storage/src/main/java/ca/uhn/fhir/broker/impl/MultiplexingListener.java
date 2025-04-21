@@ -62,7 +62,9 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
-				"Received unexpected payload type. Expecting payload of type {}, but received payload of type {}. Skipping message.", getPayloadType(), messageClass);
+					"Received unexpected payload type. Expecting payload of type {}, but received payload of type {}. Skipping message.",
+					getPayloadType(),
+					messageClass);
 			return;
 		}
 		mySubListeners.forEach(

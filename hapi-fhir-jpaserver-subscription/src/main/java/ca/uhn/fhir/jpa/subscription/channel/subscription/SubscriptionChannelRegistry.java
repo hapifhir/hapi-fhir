@@ -40,10 +40,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 
 public class SubscriptionChannelRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
@@ -99,7 +99,8 @@ public class SubscriptionChannelRegistry {
 		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
-		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer = buildSubscriptionResourceDeliveryMessageConsumer(theActiveSubscription, receivingParameters);
+		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
+				buildSubscriptionResourceDeliveryMessageConsumer(theActiveSubscription, receivingParameters);
 		myDeliveryConsumerCache.put(channelName, subscriptionResourceDeliveryMessageConsumer);
 
 		// create the producing channel.
@@ -112,7 +113,8 @@ public class SubscriptionChannelRegistry {
 	}
 
 	@Nonnull
-	private SubscriptionResourceDeliveryMessageConsumer buildSubscriptionResourceDeliveryMessageConsumer(ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
+	private SubscriptionResourceDeliveryMessageConsumer buildSubscriptionResourceDeliveryMessageConsumer(
+			ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
 		MultiplexingListener<ResourceDeliveryMessage> multiplexingListener =
 				new MultiplexingListener<>(ResourceDeliveryMessage.class);
 		IChannelConsumer<ResourceDeliveryMessage> deliveryConsumer =

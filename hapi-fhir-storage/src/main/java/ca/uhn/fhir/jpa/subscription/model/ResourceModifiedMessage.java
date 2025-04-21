@@ -34,7 +34,8 @@ import java.util.Objects;
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
  * that doesn't require knowledge of subscriptions.
  */
-// TODO KHS rename classes like this to ResourceModifiedPayload so they're not confused with the actual message wrapper class
+// TODO KHS rename classes like this to ResourceModifiedPayload so they're not confused with the actual message wrapper
+// class
 public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	/**

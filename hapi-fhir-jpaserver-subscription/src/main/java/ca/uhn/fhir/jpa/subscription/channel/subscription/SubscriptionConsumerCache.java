@@ -47,7 +47,8 @@ class SubscriptionConsumerCache {
 	synchronized void closeAndRemove(String theChannelName) {
 		Validate.notBlank(theChannelName);
 
-		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer = myCache.get(theChannelName);
+		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
+				myCache.get(theChannelName);
 		if (subscriptionResourceDeliveryMessageConsumer == null) {
 			return;
 		}

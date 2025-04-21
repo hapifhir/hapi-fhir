@@ -20,7 +20,6 @@
 package ca.uhn.fhir.broker.jms;
 
 import ca.uhn.fhir.broker.api.IMessageListener;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,9 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
-				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.", IMessage.class, theMessage.getClass());
+					"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
+					IMessage.class,
+					theMessage.getClass());
 			return;
 		}
 
@@ -58,7 +59,9 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
-				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.", getMessageType(), theMessage.getClass());
+					"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
+					getMessageType(),
+					theMessage.getClass());
 			return;
 		}
 
