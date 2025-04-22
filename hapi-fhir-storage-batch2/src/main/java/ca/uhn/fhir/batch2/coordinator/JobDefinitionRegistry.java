@@ -121,7 +121,7 @@ public class JobDefinitionRegistry {
 	public Optional<JobDefinition<?>> getJobDefinition(
 			@Nonnull String theJobDefinitionId, int theJobDefinitionVersion) {
 		return Optional.ofNullable(myJobDefinitions.get(theJobDefinitionId))
-			.map(versionMap -> versionMap.get(theJobDefinitionVersion));
+				.map(versionMap -> versionMap.get(theJobDefinitionVersion));
 	}
 
 	/**
