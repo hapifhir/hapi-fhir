@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 import static ca.uhn.fhir.cr.common.IdHelper.getIdType;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class LibraryDataRequirementsProvider {
 	@Autowired
 	ILibraryProcessorFactory myLibraryProcessorFactory;

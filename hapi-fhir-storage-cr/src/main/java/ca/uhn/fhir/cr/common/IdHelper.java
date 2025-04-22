@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class IdHelper {
 	public static IIdType getIdType(FhirVersionEnum fhirVersion, String resourceType, String theId) {
 		if (StringUtils.isBlank(theId)) {

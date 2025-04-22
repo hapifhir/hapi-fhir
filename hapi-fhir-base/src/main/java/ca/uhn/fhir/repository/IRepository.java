@@ -55,7 +55,7 @@ import java.util.Map;
  * <p>
  * One particularly odd case are FHIR Bundle links. The specification describes these as opaque to
  * the end-user, so a given FHIR repository implementation must be able to resolve those directly.
- * See {@link Repository#link(Class, String)}
+ * See {@link IRepository#link(Class, String)}
  * </p>
  *
  * <p>
@@ -84,7 +84,7 @@ import java.util.Map;
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
  */
 @Beta
-public interface Repository {
+public interface IRepository {
 
 	// CRUD starts here
 

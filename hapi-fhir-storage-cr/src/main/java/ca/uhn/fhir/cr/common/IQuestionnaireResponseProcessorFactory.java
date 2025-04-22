@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 /**
  * This interface takes a RequestDetails object and uses it to create a Repository which is passed to the constructor of the processor class being instantiated.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @FunctionalInterface
 public interface IQuestionnaireResponseProcessorFactory {
 	QuestionnaireResponseProcessor create(RequestDetails theRequestDetails);
