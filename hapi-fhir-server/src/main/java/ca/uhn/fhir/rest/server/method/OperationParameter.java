@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OperationParameterRangeType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -85,12 +87,15 @@ public class OperationParameter implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 
 	private int myMax;
-	private int myMin;
+	private final int myMin;
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
-	private String myDescription;
-	private List<String> myExampleValues;
+	private final String myDescription;
+	private final List<String> myExampleValues;
+	private final Class<?> mySourceType;
+	// LUKETODO:  just pass the whole thing?
+	private final OperationParameterRangeType myRangeType;
 
 	OperationParameter(
 			FhirContext theCtx,
@@ -99,13 +104,22 @@ public class OperationParameter implements IParameter {
 			int theMin,
 			int theMax,
 			String theDescription,
-			List<String> theExampleValues) {
+			List<String> theExampleValues,
+			Class<?> theSourceType,
+			OperationParameterRangeType theRangeType) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
 		myDescription = theDescription;
+		// LUKETODO:  is this wise?
+		if (theSourceType == Void.class && myParameterType != null) {
+			mySourceType = myParameterType;
+		} else {
+			mySourceType = theSourceType;
+		}
+		myRangeType = theRangeType;
 
 		List<String> exampleValues = new ArrayList<>();
 		if (theExampleValues != null) {
@@ -117,7 +131,7 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addValueToList(List<Object> matchingParamValues, Object values) {
 		if (values != null) {
-			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
+			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && !matchingParamValues.isEmpty()) {
 				BaseAndListParam existing = (BaseAndListParam<?>) matchingParamValues.get(0);
 				BaseAndListParam<?> newAndList = (BaseAndListParam<?>) values;
 				for (IQueryParameterOr nextAnd : newAndList.getValuesAsQueryTokens()) {
@@ -149,11 +163,30 @@ public class OperationParameter implements IParameter {
 		return myParamType;
 	}
 
+	@VisibleForTesting
+	public Class<? extends Collection> getInnerCollectionType() {
+		return myInnerCollectionType;
+	}
+
 	public String getSearchParamType() {
 		if (mySearchParameterBinding != null) {
 			return mySearchParameterBinding.getParamType().getCode();
 		}
 		return null;
+	}
+
+	@VisibleForTesting
+	Class<?> getSourceType() {
+		return mySourceType;
+	}
+
+	@VisibleForTesting
+	String getOperationName() {
+		return myOperationName;
+	}
+
+	public OperationParameterRangeType getRangeType() {
+		return myRangeType;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -197,6 +230,7 @@ public class OperationParameter implements IParameter {
 
 		myAllowGet = IPrimitiveType.class.isAssignableFrom(myParameterType)
 				|| String.class.equals(myParameterType)
+				|| String.class.equals(mySourceType)
 				|| isSearchParam
 				|| ValidationModeEnum.class.equals(myParameterType);
 
@@ -204,7 +238,9 @@ public class OperationParameter implements IParameter {
 		 * The parameter can be of type string for validation methods - This is a bit weird. See ValidateDstu2Test. We
 		 * should probably clean this up..
 		 */
-		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
+		if (!myParameterType.equals(IBase.class)
+				&& !myParameterType.equals(String.class)
+				&& !EmbeddedOperationUtils.isValidSourceTypeConversion(mySourceType, myParameterType, myRangeType)) {
 			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
 				myParamType = "Resource";
 			} else if (IBaseReference.class.isAssignableFrom(myParameterType)) {
@@ -231,8 +267,12 @@ public class OperationParameter implements IParameter {
 						myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException(Msg.code(361) + "Invalid type for @OperationParam on method "
-						+ theMethod + ": " + myParameterType.getName());
+				// LUKETODO:  claim new code
+				// LUKETODO:  test the rangeType NOT_APPLICABLE scenario
+				final String error = String.format(
+						"%sInvalid type for @OperationParam on method: %s with sourceType: %s, parameterType: %s, and rangeType: %s",
+						Msg.code(361), theMethod.getName(), mySourceType, myParameterType.getName(), myRangeType);
+				throw new ConfigurationException(error);
 			}
 		}
 	}
@@ -302,7 +342,7 @@ public class OperationParameter implements IParameter {
 			RequestDetails theRequest, List<Object> matchingParamValues) {
 		if (mySearchParameterBinding != null) {
 
-			List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
+			List<QualifiedParamList> params = new ArrayList<>();
 			String nameWithQualifierColon = myName + ":";
 
 			for (String nextParamName : theRequest.getParameters().keySet()) {
@@ -365,7 +405,9 @@ public class OperationParameter implements IParameter {
 							matchingParamValues.add(param);
 						});
 
-					} else if (String.class.isAssignableFrom(myParameterType)) {
+						// LUKETODO: comment to explain
+						// LUKETODO: call EmbeddedOperationUtils.isValidSourceTypeConversion ????
+					} else if (String.class.isAssignableFrom(myParameterType) || String.class.equals(mySourceType)) {
 
 						matchingParamValues.addAll(Arrays.asList(paramValues));
 
@@ -438,7 +480,7 @@ public class OperationParameter implements IParameter {
 				List<IBase> values = paramChildAccessor.getValues(requestContents);
 				for (IBase nextParameter : values) {
 					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-					if (nextNames != null && nextNames.size() > 0) {
+					if (nextNames != null && !nextNames.isEmpty()) {
 						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
 						if (myName.equals(nextName.getValueAsString())) {
 
@@ -449,9 +491,9 @@ public class OperationParameter implements IParameter {
 										valueChild.getAccessor().getValues(nextParameter);
 								List<IBase> paramResources =
 										resourceChild.getAccessor().getValues(nextParameter);
-								if (paramValues != null && paramValues.size() > 0) {
+								if (paramValues != null && !paramValues.isEmpty()) {
 									tryToAddValues(paramValues, matchingParamValues);
-								} else if (paramResources != null && paramResources.size() > 0) {
+								} else if (paramResources != null && !paramResources.isEmpty()) {
 									tryToAddValues(paramResources, matchingParamValues);
 								}
 							}
@@ -477,7 +519,9 @@ public class OperationParameter implements IParameter {
 			if (myConverter != null) {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
-			if (myParameterType.equals(String.class)) {
+			// LUKETODO:  test this
+			if (myParameterType.equals(String.class)
+					|| EmbeddedOperationUtils.isValidSourceTypeConversion(mySourceType, myParameterType, myRangeType)) {
 				if (nextValue instanceof IPrimitiveType<?>) {
 					IPrimitiveType<?> source = (IPrimitiveType<?>) nextValue;
 					theMatchingParamValues.add(source.getValueAsString());
@@ -515,7 +559,7 @@ public class OperationParameter implements IParameter {
 		return myExampleValues;
 	}
 
-	interface IOperationParamConverter {
+	public interface IOperationParamConverter {
 
 		Object incomingServer(Object theObject);
 

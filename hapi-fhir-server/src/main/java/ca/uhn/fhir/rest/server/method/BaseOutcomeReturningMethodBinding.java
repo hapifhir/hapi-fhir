@@ -163,7 +163,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
 			throws BaseServerResponseException, IOException {
 
-		Object[] params = createParametersForServerRequest(theRequest);
+		Object[] params = createMethodParams(theRequest);
 		addParametersForServerRequest(theRequest, params);
 
 		/*

@@ -25,11 +25,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -40,6 +42,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ReflectionUtil {
 
@@ -163,6 +166,28 @@ public class ReflectionUtil {
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;
 		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	public static Class<?> getGenericCollectionTypeOfConstructorParameter(
+			Constructor<?> theConstructor, Parameter theConstructorParameter) {
+		final int theParamIndex = getIndexOfElement(theConstructor.getParameters(), theConstructorParameter);
+		final Type genericParameterType = theConstructor.getGenericParameterTypes()[theParamIndex];
+
+		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
+			return null;
+		}
+
+		final ParameterizedType collectionType = (ParameterizedType) genericParameterType;
+		return getGenericCollectionTypeOf(collectionType.getActualTypeArguments()[0]);
+	}
+
+	private static <T> int getIndexOfElement(T[] array, T element) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(element)) {
+				return i;
+			}
+		}
+		return -1; // Return -1 if the element is not found
 	}
 
 	public static Class<?> getGenericCollectionTypeOfMethodReturnType(Method theMethod) {
@@ -289,5 +314,24 @@ public class ReflectionUtil {
 		} catch (ClassNotFoundException theE) {
 			return false;
 		}
+	}
+
+	public static List<Class<?>> getMethodParamsWithClassesWithFieldsWithAnnotation(
+			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(theMethod.getParameterTypes())
+				.filter(paramType -> hasAnyFieldsWithAnnotation(paramType, theAnnotationClass))
+				.collect(Collectors.toList());
+	}
+
+	public static boolean hasAnyMethodParamsWithClassesWithFieldsWithAnnotation(
+			Method theMethod, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(theMethod.getParameterTypes())
+				.anyMatch(paramType -> hasAnyFieldsWithAnnotation(paramType, theAnnotationClass));
+	}
+
+	private static boolean hasAnyFieldsWithAnnotation(
+			Class<?> paramType, Class<? extends Annotation> theAnnotationClass) {
+		return Arrays.stream(paramType.getDeclaredFields())
+				.anyMatch(field -> field.isAnnotationPresent(theAnnotationClass));
 	}
 }

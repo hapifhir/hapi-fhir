@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
-import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
 import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -42,6 +41,7 @@ import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.method.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
@@ -144,9 +144,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	CareGapsOperationProvider r4CareGapsOperationProvider(
-			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
-		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
+	CareGapsOperationProvider r4CareGapsOperationProvider(ICareGapsServiceFactory theR4CareGapsProcessorFactory) {
+		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory);
 	}
 
 	@Bean
@@ -155,10 +154,8 @@ public class CrR4Config {
 	}
 
 	@Bean
-	MeasureOperationsProvider r4MeasureOperationsProvider(
-			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
-			StringTimePeriodHandler theStringTimePeriodHandler) {
-		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
+	MeasureOperationsProvider r4MeasureOperationsProvider(R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory);
 	}
 
 	@Bean
