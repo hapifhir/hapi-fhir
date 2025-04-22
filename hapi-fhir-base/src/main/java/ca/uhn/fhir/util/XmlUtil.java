@@ -84,6 +84,7 @@ public class XmlUtil {
 	private static volatile XMLInputFactory ourInputFactory;
 	private static Throwable ourNextException;
 	private static volatile XMLOutputFactory ourOutputFactory;
+	private static volatile TransformerFactory ourTransformerFactory;
 
 	static {
 		HashMap<String, Integer> validEntityNames = new HashMap<>(1448);
@@ -1925,7 +1926,14 @@ public class XmlUtil {
 	}
 
 	public static String encodeDocument(Node theElement, boolean theIndent) throws TransformerException {
-		TransformerFactory transFactory = TransformerFactory.newInstance();
+		TransformerFactory transFactory = ourTransformerFactory;
+		if (transFactory == null) {
+			// This call is surprisingly expensive at large scale, so we lazy-initialize it
+			// as opposed to calling it each time
+			transFactory = TransformerFactory.newInstance();
+			ourTransformerFactory = transFactory;
+		}
+
 		Transformer transformer = transFactory.newTransformer();
 		StringWriter buffer = new StringWriter();
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
