@@ -27,6 +27,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 abstract class BaseCdsCrMethod implements ICdsMethod {
 	private ICdsCrServiceFactory myCdsCrServiceFactory;
 

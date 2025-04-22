@@ -40,6 +40,20 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	public CdsConfigServiceImpl(
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ObjectMapper theObjectMapper,
+			@Nullable DaoRegistry theDaoRegistry,
+			@Nullable RestfulServer theRestfulServer) {
+		myFhirContext = theFhirContext;
+		myObjectMapper = theObjectMapper;
+		myDaoRegistry = theDaoRegistry;
+		myRestfulServer = theRestfulServer;
+		myCdsCrSettings = new CdsCrSettings();
+		myRepositoryFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
+	public CdsConfigServiceImpl(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull ObjectMapper theObjectMapper,
 			@Nonnull CdsCrSettings theCdsCrSettings,
 			@Nullable DaoRegistry theDaoRegistry,
 			@Nullable IRepositoryFactory theRepositoryFactory,

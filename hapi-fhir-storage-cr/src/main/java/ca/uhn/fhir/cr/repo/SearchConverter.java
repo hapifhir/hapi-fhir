@@ -38,6 +38,7 @@ import java.util.Map;
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
  * lists. This class (will eventually) convert between them
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
 	private final List<String> searchResultParameters = Arrays.asList(
