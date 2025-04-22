@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.stresstest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -39,6 +41,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -66,6 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
@@ -420,6 +424,87 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * This tests that the SQL statement generated in DeleteExpungeSqlBuilder.findResourceLinksWithTargetPidIn()
+	 * doesn't throw an error due to too many query parameters in the IN clause.
+	 */
+	@Disabled("Stress test")
+	@Test
+	public void testDeleteExpungeWithCascadingDeletesWithLargeDataSet() {
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
+		//Given: A database with 5 patients and 100s of other resources referencing the 5 patients.
+		myStorageSettings.setExpungeBatchSize(1000);
+		int numOfRecords = 2505;
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType p2 = createPatient(withActiveTrue());
+		IIdType p3 = createPatient(withActiveTrue());
+		IIdType p4 = createPatient(withActiveTrue());
+		IIdType p5 = createPatient(withActiveTrue());
+		for (int i = 0; i < numOfRecords; ++i) {
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+		}
+
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"}
+		));
+
+		//When: A delete expunge operation is initiated with cascading deletes
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+
+		//validate: Records are deleted
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		myBatch2JobHelper.awaitJobCompletion(jobId, 120);
+		assertEquals(100205, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(defaultStorageSettings.isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
+		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
+	}
+
 	@Test
 	public void testMultiThreadedCreateWithDuplicateClientAssignedIdsInTransaction() throws Exception {
 		ExecutorService executor = Executors.newFixedThreadPool(20);
@@ -664,6 +749,13 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Loaded {} searches", total);
+	}
+
+	private String jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
+		OperationOutcome operationOutcome = (OperationOutcome) theResult.getOperationOutcome();
+		String diagnostics = operationOutcome.getIssueFirstRep().getDiagnostics();
+		String[] parts = diagnostics.split("Delete job submitted with id ");
+		return parts[1];
 	}
 
 	private final class SearchTask extends BaseTask {

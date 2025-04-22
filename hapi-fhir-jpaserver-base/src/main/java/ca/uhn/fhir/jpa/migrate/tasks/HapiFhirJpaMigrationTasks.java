@@ -128,6 +128,35 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init740();
 		init760();
 		init780();
+		init820();
+	}
+
+	protected void init820() {
+		Builder version = forVersion(VersionEnum.V8_2_0);
+		// Add HFJ_SPIDX_IDENTITY table
+		{
+			version.addIdGenerator("20250324.1", "SEQ_SPIDX_IDENTITY", 1);
+			Builder.BuilderAddTableByColumns spidxIdentity =
+					version.addTableByColumns("20250324.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
+
+			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
+			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
+			spidxIdentity.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 256);
+
+			spidxIdentity
+					.addIndex("20250324.3", "IDX_HASH_IDENTITY")
+					.unique(true)
+					.withColumns("HASH_IDENTITY");
+		}
+
+		// Add USER_DATA_JSON column to BT2_JOB_INSTANCE
+		{
+			version.onTable("BT2_JOB_INSTANCE")
+					.addColumn("20250408.1", "USER_DATA_JSON")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+		}
 	}
 
 	protected void init780() {

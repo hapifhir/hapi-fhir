@@ -74,7 +74,13 @@ public class Retrier<T> {
 					RetryContext context, RetryCallback<TT, E> callback, Throwable throwable) {
 				if (throwable instanceof NullPointerException
 						|| throwable instanceof UnsupportedOperationException
-						|| HapiSystemProperties.isUnitTestModeEnabled()) {
+						|| HapiSystemProperties.isUnitTestModeEnabled()
+						|| context.getRetryCount() == 1) {
+					/*
+					 * Log the stack trace only on the first retry in order to
+					 * avoid noise in the logs (except for unit test mode, and for
+					 * exceptions that indicate a bug)
+					 */
 					ourLog.error(
 							"Retry failure {}/{}: {}",
 							context.getRetryCount(),

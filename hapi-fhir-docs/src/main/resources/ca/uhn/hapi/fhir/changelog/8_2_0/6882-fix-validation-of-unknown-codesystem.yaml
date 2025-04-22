@@ -1,0 +1,12 @@
+---
+type: fix
+issue: 6882
+jira: SMILE-9997
+title: "Previously, submitting a resource for validation with an unknown CodeSystem would always result in a validation 
+error, regardless of the defined binding strength. This has now been fixed such that, given an unknown CodeSystem: 
+    <ul>
+        <li>A <code>required</code> binding strength will still result in a validation error.</li>
+        <li>An <code>extensible</code> binding strength will now result in a validation warning.</li>
+        <li>A <code>preferred</code> binding strength will now result in a validation warning.</li>
+        <li>An <code>example</code> binding strength will result in no issues.</li>
+    </ul>"

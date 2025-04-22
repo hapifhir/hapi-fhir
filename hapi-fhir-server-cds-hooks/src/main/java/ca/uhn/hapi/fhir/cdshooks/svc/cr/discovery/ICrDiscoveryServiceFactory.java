@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public interface ICrDiscoveryServiceFactory {
 	ICrDiscoveryService create(String theServiceId);
 }

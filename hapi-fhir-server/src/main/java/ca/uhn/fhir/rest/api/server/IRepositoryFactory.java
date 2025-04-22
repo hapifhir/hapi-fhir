@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,12 +17,16 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.rest.api.server;
 
-import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
+import ca.uhn.fhir.repository.IRepository;
+import com.google.common.annotations.Beta;
 
-import java.util.Optional;
-
-public interface ISearchParamHashIdentityRegistry {
-	Optional<IndexedSearchParam> getIndexedSearchParamByHashIdentity(Long theHashIdentity);
+/**
+ * Factory interface to return a {@link IRepository} from a {@link RequestDetails}
+ */
+@FunctionalInterface
+@Beta
+public interface IRepositoryFactory {
+	IRepository create(RequestDetails theRequestDetails);
 }

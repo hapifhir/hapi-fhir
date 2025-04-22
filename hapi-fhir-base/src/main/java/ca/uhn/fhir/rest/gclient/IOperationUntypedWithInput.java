@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.StringOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
@@ -51,4 +52,11 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 * will contain details
 	 */
 	IOperationUntypedWithInput<MethodOutcome> returnMethodOutcome();
+
+	/**
+	 * Request that the method chain returns a {@link StringOutcome} object. This is useful for certain
+	 * operations (e.g. <code>$export-poll-status</code>) which return a plain json object instead of
+	 * a Parameters resource.
+	 */
+	IOperationUntypedWithInput<StringOutcome> returnForStringOutcome();
 }
