@@ -172,70 +172,82 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(true)
 					.withColumns("RES_TYPE");
 
-			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE, HFJ_RES_VER, HFJ_RES_TAG, HFJ_HISTORY_TAG, HFJ_RES_LINK
-			version.onTable("HFJ_RESOURCE")
-					.addColumn("20250422.11", "RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
+			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE
+			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
+			resource.addColumn("20250422.11", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			version.onTable("HFJ_RESOURCE")
-					.addForeignKey("20250422.12", "FK_RESOURCE_RES_TYPE")
+			resource.addForeignKey("20250422.12", "FK_RESOURCE_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resource.addIndex("20250422.13", "IDX_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RES_VER
-			version.onTable("HFJ_RES_VER")
-					.addColumn("20250422.21", "RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
+			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
+			resVer.addColumn("20250422.21", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			version.onTable("HFJ_RES_VER")
-					.addForeignKey("20250422.22", "FK_RESVER_RES_TYPE")
+			resVer.addForeignKey("20250422.22", "FK_RESVER_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resVer.addIndex("20250422.23", "IDX_RESVER_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RES_TAG
-			version.onTable("HFJ_RES_TAG")
-					.addColumn("20250422.31", "RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
+			Builder.BuilderWithTableName resTag = version.onTable("HFJ_RES_TAG");
+			resTag.addColumn("20250422.31", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			version.onTable("HFJ_RES_TAG")
-					.addForeignKey("20250422.32", "FK_RESTAG_RES_TYPE")
+			resTag.addForeignKey("20250422.32", "FK_RESTAG_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			// Add column RES_TYPE_ID and FK to HFJ_HISTORY_TAG
-			version.onTable("HFJ_HISTORY_TAG")
-					.addColumn("20250422.41", "RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
+			resTag.addIndex("20250422.33", "IDX_RESTAG_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
-			version.onTable("HFJ_HISTORY_TAG")
+			// Add column RES_TYPE_ID and FK to HFJ_HISTORY_TAG
+			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
+			historyTag.addColumn("20250422.41", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			historyTag
 					.addForeignKey("20250422.42", "FK_HISTORYTAG_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
+			historyTag
+					.addIndex("20250422.43", "IDX_HISTORYTAG_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
 			// Add column RES_TYPE_ID and FK to HFJ_RES_LINK
-			version.onTable("HFJ_RES_LINK")
-					.addColumn("20250422.51", "SRC_RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
+			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
+			resLink.addColumn("20250422.51", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250422.52", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			version.onTable("HFJ_RES_LINK")
-					.addColumn("20250422.52", "TARGET_RES_TYPE_ID")
-					.nullable()
-					.type(ColumnTypeEnum.SMALLINT);
-
-			version.onTable("HFJ_RES_LINK")
-					.addForeignKey("20250422.53", "FK_RESLINK_SRC_RES_TYPE")
+			resLink.addForeignKey("20250422.53", "FK_RESLINK_SRC_RES_TYPE")
 					.toColumn("SRC_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			version.onTable("HFJ_RES_LINK")
-					.addForeignKey("20250422.54", "FK_RESLINK_TARGET_RES_TYPE")
+			resLink.addForeignKey("20250422.54", "FK_RESLINK_TARGET_RES_TYPE")
 					.toColumn("TARGET_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resLink.addIndex("20250422.55", "IDX_RESLINK_SRC_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("SRC_RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+			resLink.addIndex("20250422.56", "IDX_RESLINK_TARGET_RES_TYPE_ID")
+					.unique(false)
+					.withColumns("TARGET_RES_TYPE_ID")
+					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 		}
 	}
 
