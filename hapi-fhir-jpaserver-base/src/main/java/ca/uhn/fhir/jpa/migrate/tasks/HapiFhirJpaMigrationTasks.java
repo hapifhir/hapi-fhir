@@ -234,7 +234,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version.onTable("HFJ_RES_LINK")
 					.addForeignKey("20250422.54", "FK_RESLINK_TARGET_RES_TYPE")
-					.toColumn("TARGET_RESOURCE_ID")
+					.toColumn("TARGET_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 		}
 	}
