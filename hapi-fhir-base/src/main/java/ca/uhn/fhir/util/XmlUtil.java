@@ -84,6 +84,7 @@ public class XmlUtil {
 	private static volatile XMLInputFactory ourInputFactory;
 	private static Throwable ourNextException;
 	private static volatile XMLOutputFactory ourOutputFactory;
+	private static volatile TransformerFactory ourTransformerFactory;
 
 	static {
 		HashMap<String, Integer> validEntityNames = new HashMap<>(1448);
@@ -1544,69 +1545,6 @@ public class XmlUtil {
 	 */
 	private XmlUtil() {}
 
-	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
-		@Override
-		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
-			if (thePublicID == null && theSystemID == null) {
-				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
-					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
-				}
-			}
-
-			return null;
-		}
-	}
-
-	public static class MyEscaper implements EscapingWriterFactory {
-
-		@Override
-		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
-			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
-		}
-
-		@Override
-		public Writer createEscapingWriterFor(final Writer theW, String theEnc) {
-			return new Writer() {
-
-				@Override
-				public void close() throws IOException {
-					theW.close();
-				}
-
-				@Override
-				public void flush() throws IOException {
-					theW.flush();
-				}
-
-				@Override
-				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
-					boolean hasEscapable = false;
-					for (int i = 0; i < theLen && !hasEscapable; i++) {
-						char nextChar = theCbuf[i + theOff];
-						switch (nextChar) {
-							case '<':
-							case '>':
-							case '"':
-							case '&':
-								hasEscapable = true;
-								break;
-							default:
-								break;
-						}
-					}
-
-					if (!hasEscapable) {
-						theW.write(theCbuf, theOff, theLen);
-						return;
-					}
-
-					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
-					theW.write(escaped.toCharArray());
-				}
-			};
-		}
-	}
-
 	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
 		try {
 			// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
@@ -1929,7 +1867,7 @@ public class XmlUtil {
 	}
 
 	public static String encodeDocument(Node theElement, boolean theIndent) throws TransformerException {
-		TransformerFactory transFactory = TransformerFactory.newInstance();
+		TransformerFactory transFactory = getTransformerFactory();
 		Transformer transformer = transFactory.newTransformer();
 		StringWriter buffer = new StringWriter();
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -1941,9 +1879,86 @@ public class XmlUtil {
 	}
 
 	/**
+	 * Returns a singleton transformer factory with lazy initialization
+	 */
+	private static TransformerFactory getTransformerFactory() {
+		TransformerFactory transFactory = ourTransformerFactory;
+		if (transFactory == null) {
+			// This call is surprisingly expensive at large scale, so we lazy-initialize it
+			// as opposed to calling it each time
+			transFactory = TransformerFactory.newInstance();
+			ourTransformerFactory = transFactory;
+		}
+		return transFactory;
+	}
+
+	/**
 	 * FOR UNIT TESTS ONLY - Used to reset OutputFactory for test cases that customize OutputFactory
 	 */
 	public static void resetOutputFactoryForTest() {
 		ourOutputFactory = null;
+	}
+
+	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
+		@Override
+		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
+			if (thePublicID == null && theSystemID == null) {
+				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
+					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
+				}
+			}
+
+			return null;
+		}
+	}
+
+	public static class MyEscaper implements EscapingWriterFactory {
+
+		@Override
+		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
+			return createEscapingWriterFor(new OutputStreamWriter(theOut, theEnc), theEnc);
+		}
+
+		@Override
+		public Writer createEscapingWriterFor(final Writer theW, String theEnc) {
+			return new Writer() {
+
+				@Override
+				public void close() throws IOException {
+					theW.close();
+				}
+
+				@Override
+				public void flush() throws IOException {
+					theW.flush();
+				}
+
+				@Override
+				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
+					boolean hasEscapable = false;
+					for (int i = 0; i < theLen && !hasEscapable; i++) {
+						char nextChar = theCbuf[i + theOff];
+						switch (nextChar) {
+							case '<':
+							case '>':
+							case '"':
+							case '&':
+								hasEscapable = true;
+								break;
+							default:
+								break;
+						}
+					}
+
+					if (!hasEscapable) {
+						theW.write(theCbuf, theOff, theLen);
+						return;
+					}
+
+					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
+					theW.write(escaped.toCharArray());
+				}
+			};
+		}
 	}
 }
