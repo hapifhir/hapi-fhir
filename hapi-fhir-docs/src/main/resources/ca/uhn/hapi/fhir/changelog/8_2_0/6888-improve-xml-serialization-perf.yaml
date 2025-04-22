@@ -1,7 +1,7 @@
 ---
 type: perf
 issue: 6888
-#backport: 7.6.3
+backport: 7.6.3
 title: "The `XmlUtil.encodeDocument(Node)` method contained an expensive
   TransformerFactory lookup which was performed on each invocation. This
   value is now cached for better performance."
