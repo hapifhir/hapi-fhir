@@ -1539,8 +1539,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference("#" + specimen.getId()));
-		// FIXME: restore
-//		myObservationDao.update(o, mySrd);
+		myObservationDao.update(o, mySrd);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("specimencollectedtime", new DateParam("2011-01-01"));
