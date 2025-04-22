@@ -739,10 +739,12 @@ public abstract class BaseTransactionProcessor {
 	 * If the extension is present, this method will set the partition ids header in the given request details.
 	 */
 	private void setRequestPartitionHeaderIfEntryHasTheExtension(IBase theReqEntry, RequestDetails theRequestDetails) {
-		IBaseExtension<?, ?> partitionIdsExtension =
+		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
-		if (partitionIdsExtension != null && partitionIdsExtension.getValue() instanceof IPrimitiveType<?>) {
-			IPrimitiveType<?> valueAsPrimitiveType = (IPrimitiveType<?>) partitionIdsExtension.getValue();
+		if (partitionIdsExtensionOptional.isPresent()
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
+			IPrimitiveType<?> valueAsPrimitiveType =
+					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
 			String value = valueAsPrimitiveType.getValueAsString();
 			theRequestDetails.setHeaders(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, List.of(value));
 		}

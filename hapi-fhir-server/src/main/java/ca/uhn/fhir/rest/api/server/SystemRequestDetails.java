@@ -78,6 +78,10 @@ public class SystemRequestDetails extends RequestDetails {
 		}
 	}
 
+	/**
+	 * Copy constructor
+	 * @param theOther The request details to copy from
+	 */
 	public SystemRequestDetails(SystemRequestDetails theOther) {
 		super(theOther);
 		if (nonNull(theOther.getServer())) {

@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {
 
@@ -78,5 +79,5 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
 
-	IBaseExtension<?, ?> getEntryRequestExtensionByUrl(BUNDLEENTRY theEntry, String theUrl);
+	Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(BUNDLEENTRY theEntry, String theUrl);
 }

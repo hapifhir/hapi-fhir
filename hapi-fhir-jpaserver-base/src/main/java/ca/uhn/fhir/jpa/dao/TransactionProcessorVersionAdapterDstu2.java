@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class TransactionProcessorVersionAdapterDstu2
 		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
@@ -177,8 +178,8 @@ public class TransactionProcessorVersionAdapterDstu2
 	}
 
 	@Override
-	public IBaseExtension<?, ?> getEntryRequestExtensionByUrl(Bundle.Entry theEntry, String theUrl) {
+	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(Bundle.Entry theEntry, String theUrl) {
 		List<ExtensionDt> extensions = theEntry.getRequest().getUndeclaredExtensionsByUrl(theUrl);
-		return extensions.isEmpty() ? null : extensions.get(0);
+		return extensions.isEmpty() ? Optional.empty() : Optional.ofNullable(extensions.get(0));
 	}
 }

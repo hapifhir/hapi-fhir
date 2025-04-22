@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 
 	private static final String PARTITION_EXTENSION_URL = "http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
+	private static RestfulServer ourServer = new RestfulServer();
 
 	private IIdType myPatientIdInPartition1;
 
@@ -243,7 +244,7 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		ServletRequestDetails requestDetails = new ServletRequestDetails(mySrdInterceptorService);
 		MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
 		requestDetails.setServletRequest(mockHttpServletRequest);
-		requestDetails.setServer(new RestfulServer(myFhirContext));
+		requestDetails.setServer(ourServer);
 		return requestDetails;
 	}
 

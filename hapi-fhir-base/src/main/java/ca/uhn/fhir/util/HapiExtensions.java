@@ -206,6 +206,12 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_REPLACED_BY = "http://hapifhir.io/fhir/StructureDefinition/replaced-by";
 
+	/**
+	 * This extension is to specify the partition IDs for a request entry in a transaction bundle.
+	 * This allows overriding partition id for a request entry in a transaction bundle so that a single transaction can
+	 * have entries destined for different storage partitions. The expected value is a comma-separated string
+	 * of partition IDs.
+	 */
 	public static final String EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS =
 			"http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
 	/**

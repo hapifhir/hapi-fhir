@@ -25,15 +25,16 @@ import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Resource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class TransactionProcessorVersionAdapterR5
 		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
@@ -173,7 +174,8 @@ public class TransactionProcessorVersionAdapterR5
 	}
 
 	@Override
-	public Extension getEntryRequestExtensionByUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
-		return theEntry.getRequest().getExtensionByUrl(theUrl);
+	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(
+			Bundle.BundleEntryComponent theEntry, String theUrl) {
+		return Optional.ofNullable(theEntry.getRequest().getExtensionByUrl(theUrl));
 	}
 }
