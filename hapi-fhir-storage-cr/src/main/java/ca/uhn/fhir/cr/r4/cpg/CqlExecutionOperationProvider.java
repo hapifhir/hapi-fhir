@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CqlExecutionOperationProvider {
 
 	@Autowired
