@@ -700,7 +700,7 @@ public abstract class BaseTransactionProcessor {
 
 				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
 				ServletSubRequestDetails requestDetailsForEntry =
-						getRequestDetailsForReadEntry(srd, nextReqEntry, paramValues);
+						createRequestDetailsForReadEntry(srd, nextReqEntry, paramValues);
 
 				String url = requestDetailsForEntry.getRequestPath();
 
@@ -759,7 +759,7 @@ public abstract class BaseTransactionProcessor {
 	 *
 	 * @return the newly created request details
 	 */
-	private RequestDetails getRequestDetailsForWriteEntry(
+	private RequestDetails createRequestDetailsForWriteEntry(
 			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
 
 		RequestDetails newRequestDetails = null;
@@ -772,6 +772,10 @@ public abstract class BaseTransactionProcessor {
 			// RequestDetails is not a ServletRequestDetails or SystemRequestDetails, and I don't know how to properly
 			// clone such a RequestDetails. Use the original RequestDetails without making any entry specific
 			// modifications
+			ourLog.warn(
+					"Cannot create a new RequestDetails for transaction entry out of the existing RequestDetails which is of type '{}'"
+							+ "Using the original RequestDetails for transaction entries without any entry specific modifications.",
+					theRequestDetails.getClass().getSimpleName());
 			return theRequestDetails;
 		}
 		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
@@ -784,7 +788,7 @@ public abstract class BaseTransactionProcessor {
 	 * It sets the headers in the newly request details according to the information from entry.request if needed.
 	 * Currently, GET entries only support ServletRequestDetails so it handles only that type.
 	 */
-	private ServletSubRequestDetails getRequestDetailsForReadEntry(
+	private ServletSubRequestDetails createRequestDetailsForReadEntry(
 			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
 
 		final String verb = "GET";
@@ -926,7 +930,8 @@ public abstract class BaseTransactionProcessor {
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
 		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-		RequestDetails requestDetailsForEntry = getRequestDetailsForWriteEntry(theRequestDetails, nextEntry, url, verb);
+		RequestDetails requestDetailsForEntry =
+				createRequestDetailsForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -1308,7 +1313,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 				RequestDetails requestDetailsForEntry =
-						getRequestDetailsForWriteEntry(theRequest, nextReqEntry, url, verb);
+						createRequestDetailsForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
