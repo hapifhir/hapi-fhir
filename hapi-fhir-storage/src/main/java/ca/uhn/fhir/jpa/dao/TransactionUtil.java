@@ -87,6 +87,12 @@ public class TransactionUtil {
 		List<IBase> requestEntries = terser.getValues(theTransactionRequestBundle, "entry");
 		List<IBase> responseEntries = terser.getValues(theTransactionResponseBundle, "entry");
 		for (int i = 0; i < responseEntries.size(); i++) {
+
+			/*
+			 * Transaction response bundles will always have one entry per request
+			 * bundle entry, and those entries will always be in the same order. This
+			 * is a FHIR rule, and HAPI makes sure to always honour it.
+			 */
 			IBase requestEntry = requestEntries.get(i);
 			IBase responseEntry = responseEntries.get(i);
 

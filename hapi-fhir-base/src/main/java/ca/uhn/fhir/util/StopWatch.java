@@ -282,12 +282,25 @@ public class StopWatch {
 	}
 
 	/**
-	 * Format a throughput number (output does not include units)
+	 * Format a throughput number (output does not include units) into
+	 * a number suitable for logging.
+	 * <p>
+	 * This method tries to use a suitable amount of precision for logging.
+	 * For numbers above 1000 it includes no decimal.
+	 * For numbers between 100 and 1000 it includes one decimal.
+	 * For numbers below 100 it includes two decimals.
+	 * </p>
 	 */
 	public static String formatThroughput(double throughput) {
 		return formatDouble(throughput);
 	}
 
+	/**
+	 * This method tries to use a suitable amount of precision for logging.
+	 * For numbers above 1000 it includes no decimal.
+	 * For numbers between 100 and 1000 it includes one decimal.
+	 * For numbers below 100 it includes two decimals.
+	 */
 	static String formatDouble(double theDouble) {
 		double abs = Math.abs(theDouble);
 		if (abs > 1000) {

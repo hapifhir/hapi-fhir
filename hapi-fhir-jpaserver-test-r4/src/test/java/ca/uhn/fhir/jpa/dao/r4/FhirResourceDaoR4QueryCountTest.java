@@ -4370,7 +4370,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
-		// Test 2 - Use the same URLs and see whether
+		// Test 2 - Use the same URLs (caching should now reduce the number of selects needed)
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 
