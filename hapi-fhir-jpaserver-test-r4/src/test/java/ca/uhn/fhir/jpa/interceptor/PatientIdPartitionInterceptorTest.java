@@ -35,8 +35,6 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -138,7 +136,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
 
@@ -463,7 +461,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID", e.getMessage());
 		}
 	}
 
@@ -623,6 +621,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	void testSyntheaLoad() throws IOException {
 	    // given
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(true);
 		myServer.getFhirClient().transaction().withBundle(Resources.toString(Resources.getResource("transaction-bundles/synthea/hospitalInformation1743689610792.json"), Charsets.UTF_8)).execute();
@@ -633,6 +632,20 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		assertDoesNotThrow(() -> myServer.getFhirClient().transaction().withBundle(patientBundle).execute());
 
 	}
+
+	@Test
+	void testIdReferenceToDefaultPartition_resolvesWithoutError() {
+	    // given
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		IIdType practitionerId = createPractitioner();
+		Patient patient = buildResource(Patient.class,
+			withReference("generalPractitioner", practitionerId));
+
+		// when
+		assertDoesNotThrow(() -> myServer.getFhirClient().create().resource(patient).execute());
+	}
+
 
 	@Test
 	void testLoadBundle_resourceInCompartmentReferencesExistingNonCompartmentResource() {

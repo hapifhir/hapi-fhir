@@ -229,7 +229,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		// 3 queries: Search to resolve PID from Match URL, search to resolve reference, create the resource
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {

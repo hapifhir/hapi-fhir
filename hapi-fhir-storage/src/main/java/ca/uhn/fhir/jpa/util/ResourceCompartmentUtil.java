@@ -71,7 +71,8 @@ public class ResourceCompartmentUtil {
 			String compartmentIdentity = theResource.getIdElement().getIdPart();
 			if (isBlank(compartmentIdentity)) {
 				throw new MethodNotAllowedException(
-						Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(2475)
+								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
 			return Optional.of(compartmentIdentity);
 		}

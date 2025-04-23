@@ -99,7 +99,8 @@ public class PatientIdPartitionInterceptor {
 			IIdType idElement = theResource.getIdElement();
 			if (idElement.getIdPart() == null || idElement.isUuid()) {
 				throw new MethodNotAllowedException(
-						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(1321)
+								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
 			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
 		} else {
