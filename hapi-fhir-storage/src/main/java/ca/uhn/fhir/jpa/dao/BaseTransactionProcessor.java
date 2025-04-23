@@ -762,7 +762,13 @@ public abstract class BaseTransactionProcessor {
 	private RequestDetails createRequestDetailsForWriteEntry(
 			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
 
-		RequestDetails newRequestDetails = null;
+		if (theRequestDetails == null) {
+			ourLog.warn(
+					"The RequestDetails passed in to the transaction is null. Cannot create a new RequestDetails for transaction entry.");
+			return null;
+		}
+
+		RequestDetails newRequestDetails;
 		if (theRequestDetails instanceof ServletRequestDetails) {
 			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
 					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, ArrayListMultimap.create());
@@ -2274,8 +2280,8 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Extracts the transaction url from the entry and verifies it's:
-	 *  <li>not null or blank (unless it is a POST), and</li>
-	 *  <li>is a relative url matching the resourceType it is about</li>
+	 * <li>not null or blank (unless it is a POST), and</li>
+	 * <li>is a relative url matching the resourceType it is about</li>
 	 * <p>
 	 * For POST requests, the url is allowed to be blank to preserve the existing behavior.
 	 * <p>
