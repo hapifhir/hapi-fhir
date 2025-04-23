@@ -117,11 +117,13 @@ public class CdsHooksConfig {
 				CDSHooksVersion.getOrDefault(theCDSHooksVersion));
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceRegistry cdsCrServiceRegistry() {
 		return new CdsCrServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceFactory cdsCrServiceFactory(
 			FhirContext theFhirContext,
@@ -153,11 +155,13 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrDiscoveryServiceRegistry cdsCrDiscoveryServiceRegistry() {
 		return new CdsCrDiscoveryServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(
 			FhirContext theFhirContext,
@@ -189,6 +193,7 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public CdsServiceInterceptor cdsServiceInterceptor() {
 		if (myResourceChangeListenerRegistry == null) {

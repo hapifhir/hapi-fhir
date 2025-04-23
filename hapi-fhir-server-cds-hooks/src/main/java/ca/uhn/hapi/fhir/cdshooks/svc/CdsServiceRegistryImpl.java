@@ -64,6 +64,35 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
+		myCdsHooksContextBooter = theCdsHooksContextBooter;
+		myCdsPrefetchSvc = theCdsPrefetchSvc;
+		myObjectMapper = theObjectMapper;
+		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
+		myCdsCrServiceFactory = null;
+		myCrDiscoveryServiceFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
@@ -77,6 +106,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				CDSHooksVersion.DEFAULT);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
@@ -140,6 +170,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Override
 	public boolean registerCrService(String theServiceId) {
 		try {

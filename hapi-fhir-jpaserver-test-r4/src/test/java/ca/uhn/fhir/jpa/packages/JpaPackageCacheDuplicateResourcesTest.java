@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -17,9 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -272,8 +275,9 @@ public class JpaPackageCacheDuplicateResourcesTest extends BaseJpaR4Test {
 				thePackageId,
 				theVersionId);
 
-		final IBaseResource resource = myPackageCacheManager.findPackageAsset(request);
-
-		assertThat(resource).isNull();
+		assertThatExceptionOfType(ResourceNotFoundException.class)
+			.isThrownBy(() -> myPackageCacheManager.findPackageAsset(request))
+			.withMessage("HAPI-2644:  Could not find asset for FHIR version: R4, canonical URL: %s, package ID: %s and package version: %s"
+				.formatted(theCanonicalUrl, thePackageId, Optional.ofNullable(theVersionId).orElse("[none]")));
 	}
 }
