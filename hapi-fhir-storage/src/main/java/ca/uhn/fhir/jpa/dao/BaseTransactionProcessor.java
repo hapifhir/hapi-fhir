@@ -80,6 +80,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AsyncUtil;
@@ -697,10 +698,9 @@ public abstract class BaseTransactionProcessor {
 				IBase nextRespEntry =
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
 
-				String entryReqUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
 				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-				RequestDetails requestDetailsForEntry =
-						getRequestDetailsForEntry(srd, nextReqEntry, entryReqUrl, "GET", paramValues);
+				ServletSubRequestDetails requestDetailsForEntry =
+						getRequestDetailsForReadEntry(srd, nextReqEntry, paramValues);
 
 				String url = requestDetailsForEntry.getRequestPath();
 
@@ -752,26 +752,20 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Creates a new RequestDetails object based on the given RequestDetails. The new RequestDetails is to be used
-	 * when processing a transaction entry.
-	 * It sets the headers in the newly request details according to the information from entry.request if needed.
-	 * Especially, If the entry.request has the extension to override the partition ids, this method
+	 * when processing a write entry.
+	 * If the entry.request has the extension to override the partition ids, this method
 	 * sets the partition ids header in the newly created request details with the values from extension.
 	 * This allows using different partitions for different entries in the same transaction.
 	 *
-	 * @param theQueryParameters this is an output parameter that will be filled with the query parameters of the entry request url
 	 * @return the newly created request details
 	 */
-	private RequestDetails getRequestDetailsForEntry(
-			RequestDetails theRequestDetails,
-			IBase theEntry,
-			String theUrl,
-			String theVerb,
-			ArrayListMultimap<String, String> theQueryParameters) {
+	private RequestDetails getRequestDetailsForWriteEntry(
+			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
 
 		RequestDetails newRequestDetails = null;
 		if (theRequestDetails instanceof ServletRequestDetails) {
 			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
-					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, theQueryParameters);
+					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, ArrayListMultimap.create());
 		} else if (theRequestDetails instanceof SystemRequestDetails) {
 			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
 		} else {
@@ -780,21 +774,40 @@ public abstract class BaseTransactionProcessor {
 			// modifications
 			return theRequestDetails;
 		}
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
+		return newRequestDetails;
+	}
 
-		// modify the request details based on the entry.request
+	/**
+	 * Creates a new RequestDetails based on the given one. The returned RequestDetails is to be used when processing
+	 * a GET entry of transaction.
+	 * It sets the headers in the newly request details according to the information from entry.request if needed.
+	 * Currently, GET entries only support ServletRequestDetails so it handles only that type.
+	 */
+	private ServletSubRequestDetails getRequestDetailsForReadEntry(
+			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
+
+		final String verb = "GET";
+		String transactionUrl = extractTransactionUrlOrThrowException(theEntry, verb);
+
+		ServletSubRequestDetails subRequestDetails =
+				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
+
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(theEntry))) {
-			newRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
+			subRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(theEntry))) {
-			newRequestDetails.addHeader(
+			subRequestDetails.addHeader(
 					Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(theEntry))) {
-			newRequestDetails.addHeader(
+			subRequestDetails.addHeader(
 					Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
 		}
-		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
-		return newRequestDetails;
+
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);
+
+		return subRequestDetails;
 	}
 
 	/**
@@ -913,8 +926,7 @@ public abstract class BaseTransactionProcessor {
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
 		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-		RequestDetails requestDetailsForEntry =
-				getRequestDetailsForEntry(theRequestDetails, nextEntry, url, verb, ArrayListMultimap.create());
+		RequestDetails requestDetailsForEntry = getRequestDetailsForWriteEntry(theRequestDetails, nextEntry, url, verb);
 		if (isNotBlank(verb)) {
 			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
 			switch (verbEnum) {
@@ -1294,9 +1306,9 @@ public abstract class BaseTransactionProcessor {
 					continue;
 				}
 
-				String entryReqUrl = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-				RequestDetails requestDetailsForEntry = getRequestDetailsForEntry(
-						theRequest, nextReqEntry, entryReqUrl, verb, ArrayListMultimap.create());
+				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+				RequestDetails requestDetailsForEntry =
+						getRequestDetailsForWriteEntry(theRequest, nextReqEntry, url, verb);
 
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
@@ -1356,8 +1368,8 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						UrlUtil.UrlParts parts = UrlUtil.parseUrl(entryReqUrl);
-						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, entryReqUrl);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
@@ -1400,7 +1412,7 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
 						DaoMethodOutcome outcome;
-						UrlUtil.UrlParts parts = UrlUtil.parseUrl(entryReqUrl);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						if (isNotBlank(parts.getResourceId())) {
 							String version = null;
 							if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
@@ -1455,7 +1467,7 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						UrlUtil.UrlParts parts = UrlUtil.parseUrl(entryReqUrl);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
@@ -1494,13 +1506,13 @@ public abstract class BaseTransactionProcessor {
 							}
 						}
 
-						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, entryReqUrl);
+						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId =
 								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {
-							conditionalUrl = entryReqUrl;
+							conditionalUrl = url;
 						} else {
 							conditionalUrl = matchUrl;
 							String ifMatch = myVersionAdapter.getEntryRequestIfMatch(nextReqEntry);
