@@ -23,6 +23,7 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.Beta;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @FunctionalInterface
 @Beta
 public interface IRepositoryFactory {

@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrSettings {
 	private final String DEFAULT_CLIENT_ID_HEADER_NAME = "client_id";
 	private String myClientIdHeaderName;

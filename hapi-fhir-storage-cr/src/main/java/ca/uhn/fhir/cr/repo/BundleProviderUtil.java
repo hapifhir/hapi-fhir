@@ -54,6 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * the results of a BundleProvider and turning it into a Bundle.  It is intended to be used only by the
  * HapiFhirRepository.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class BundleProviderUtil {
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
