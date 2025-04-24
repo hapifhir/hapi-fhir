@@ -88,6 +88,8 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Integer myResourceTypeId;
 	/**
 	 * Constructor
 	 */
@@ -124,6 +126,14 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public void setResourceId(Long theResourceId) {
 		myResourceId = theResourceId;
+	}
+
+	public Integer getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Integer theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
 	}
 
 	public ResourceHistoryTable getResourceHistory() {

@@ -91,6 +91,9 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Integer myResourceTypeId;
+
 	/**
 	 * Constructor
 	 */
@@ -134,6 +137,14 @@ public class ResourceTag extends BaseTag {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	public Integer getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Integer theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
 	}
 
 	@PrePersist

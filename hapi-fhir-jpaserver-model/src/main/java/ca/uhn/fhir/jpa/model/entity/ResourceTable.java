@@ -394,6 +394,9 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Integer myResourceTypeId;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
 
@@ -660,6 +663,16 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 
 	public ResourceTable setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+		return this;
+	}
+
+	@Override
+	public Integer getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public ResourceTable setResourceTypeId(Integer theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
 		return this;
 	}
 

@@ -165,6 +165,11 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "TARGET_RES_PARTITION_DATE", nullable = true)
 	private LocalDate myTargetResourcePartitionDate;
 
+	@Column(name = "SRC_RES_TYPE_ID", nullable = true)
+	private Integer mySourceResourceTypeId;
+
+	@Column(name = "TARGET_RES_TYPE_ID", nullable = true)
+	private Integer myTargetResourceTypeId;
 	/**
 	 * Constructor
 	 */
@@ -350,6 +355,22 @@ public class ResourceLink extends BaseResourceIndex {
 			myTargetResourcePartitionDate = theTargetResourcePartitionId.getPartitionDate();
 		}
 		return this;
+	}
+
+	public Integer getSourceResourceTypeId() {
+		return mySourceResourceTypeId;
+	}
+
+	public void setSourceResourceTypeId(Integer theSourceResourceTypeId) {
+		mySourceResourceTypeId = theSourceResourceTypeId;
+	}
+
+	public Integer getTargetResourceTypeId() {
+		return myTargetResourceTypeId;
+	}
+
+	public void setTargetResourceTypeId(Integer theTargetResourceTypeId) {
+		myTargetResourceTypeId = theTargetResourceTypeId;
 	}
 
 	@Override

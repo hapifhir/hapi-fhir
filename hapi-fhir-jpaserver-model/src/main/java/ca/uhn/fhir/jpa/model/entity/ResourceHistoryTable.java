@@ -152,6 +152,9 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
 
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Integer myResourceTypeId;
+
 	@Transient
 	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
 	/**
@@ -297,6 +300,15 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@Override
+	public Integer getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Integer theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
 	}
 
 	@Override

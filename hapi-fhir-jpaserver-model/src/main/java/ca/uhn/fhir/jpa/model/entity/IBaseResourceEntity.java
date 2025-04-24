@@ -48,6 +48,8 @@ public interface IBaseResourceEntity<T> {
 
 	String getResourceType();
 
+	Integer getResourceTypeId();
+
 	InstantDt getUpdated();
 
 	Date getUpdatedDate();
