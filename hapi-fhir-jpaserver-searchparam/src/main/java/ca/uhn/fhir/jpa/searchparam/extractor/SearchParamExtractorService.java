@@ -125,12 +125,25 @@ public class SearchParamExtractorService {
 			TransactionDetails theTransactionDetails,
 			boolean theFailOnInvalidReference,
 			@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+
+		/*
+		 * The FHIRPath evaluator doesn't know how to handle reference which are
+		 * stored by value in Reference#setResource(IBaseResource) as opposed to being
+		 * stored by reference in Reference#setReference(String). It also doesn't know
+		 * how to handle contained resources where the ID contains a hash mark (which
+		 * was the default in HAPI FHIR until 8.2.0 but became disallowed by the
+		 * FHIRPath evaluator in that version. So prior to indexing we will now always
+		 * clean references up.
+		 */
+		myContext.newTerser().containResources(theResource, null, true);
+
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = ResourceIndexedSearchParams.withSets();
 		getExtractionUtil()
 				.extractSearchIndexParameters(theRequestDetails, normalParams, theResource, theSearchParamFilter);
 		mergeParams(normalParams, theNewParams);
 
+		// Reference search parameters
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences =
 				mySearchParamExtractor.extractResourceLinks(theResource, indexOnContainedResources);
@@ -462,7 +475,13 @@ public class SearchParamExtractorService {
 
 	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
-			if (resource.getIdElement().equals(reference.getReferenceElement())) return resource;
+			String referenceString = reference.getReferenceElement().getValue();
+			if (referenceString.length() > 1) {
+				referenceString = referenceString.substring(1);
+				if (resource.getIdElement().getValue().equals(referenceString)) {
+					return resource;
+				}
+			}
 		}
 		return null;
 	}

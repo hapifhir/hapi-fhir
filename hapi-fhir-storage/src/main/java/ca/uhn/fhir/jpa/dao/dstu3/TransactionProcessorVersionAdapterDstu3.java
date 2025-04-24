@@ -29,11 +29,13 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -185,5 +187,11 @@ public class TransactionProcessorVersionAdapterDstu3
 	@Override
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
+	}
+
+	@Override
+	public Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(
+			Bundle.BundleEntryComponent theEntry, String theUrl) {
+		return Optional.ofNullable(theEntry.getRequest().getExtensionByUrl(theUrl));
 	}
 }
