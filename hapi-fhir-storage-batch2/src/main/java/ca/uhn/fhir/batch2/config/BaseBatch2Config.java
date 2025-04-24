@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -60,6 +61,9 @@ public abstract class BaseBatch2Config {
 
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
+
+	@Autowired
+	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
@@ -90,7 +94,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theExecutor,
 				theJobMaintenanceService,
-				theTransactionService);
+				theTransactionService,
+				myInterceptorBroadcaster);
 	}
 
 	@Bean

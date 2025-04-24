@@ -23,8 +23,9 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -33,16 +34,18 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.function.Function;
 
 public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
@@ -53,16 +56,72 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
+	private final ICdsCrServiceFactory myCdsCrServiceFactory;
+	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
+	private final CDSHooksVersion myCdsHooksVersion;
 
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			ObjectMapper theObjectMapper,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
+		myCdsCrServiceFactory = null;
+		myCrDiscoveryServiceFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsCrServiceFactory,
+				theCrDiscoveryServiceFactory,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
+		myCdsHooksContextBooter = theCdsHooksContextBooter;
+		myCdsPrefetchSvc = theCdsPrefetchSvc;
+		myObjectMapper = theObjectMapper;
+		myCdsCrServiceFactory = theCdsCrServiceFactory;
+		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
+		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
 	}
 
 	@PostConstruct
@@ -80,6 +139,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		final CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
 		final CdsServiceRequestJson deserializedRequest =
 				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
+		validateHookRequestFhirServer(deserializedRequest);
 		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
 		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
 		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
@@ -102,19 +162,33 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theModuleId) {
+			String theServiceGroupId) {
 		if (theCdsServiceJson.getExtensionClass() == null) {
 			theCdsServiceJson.setExtensionClass(CdsHooksExtension.class);
 		}
 		myServiceCache.registerDynamicService(
-				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
+				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Override
-	public void unregisterService(String theServiceId, String theModuleId) {
-		Objects.requireNonNull(theServiceId);
+	public boolean registerCrService(String theServiceId) {
+		try {
+			myServiceCache.registerCrService(theServiceId, myCrDiscoveryServiceFactory, myCdsCrServiceFactory);
+		} catch (Exception e) {
+			ourLog.error("Error received during CR CDS Service registration: {}", e.getMessage());
+			return false;
+		}
+		return true;
+	}
 
-		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
+	/**
+	 * @see ICdsServiceRegistry#unregisterService
+	 */
+	@Override
+	public void unregisterService(@Nonnull String theServiceId, String theServiceGroupId) {
+		Validate.notNull(theServiceId, "CDS Hook Service Id cannot be null");
+		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theServiceGroupId);
 		if (activeService != null) {
 			ourLog.info("Unregistered active service {}", theServiceId);
 		}
@@ -125,7 +199,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	 */
 	@Override
 	public void unregisterServices(@Nonnull String theServiceGroupId) {
-		Objects.requireNonNull(theServiceGroupId, "CDS Hook Service Group Id cannot be null");
+		Validate.notNull(theServiceGroupId, "CDS Hook Service Group Id cannot be null");
 		myServiceCache.unregisterServices(theServiceGroupId);
 	}
 
@@ -216,14 +290,24 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(theResponse, CdsServiceFeedbackJson.class);
 		} catch (JsonProcessingException e) {
-			throw new InternalErrorException(
-					Msg.code(2538) + "Failed to serialize json Cds Feedback response for service " + theServiceId + ". "
-							+ e.getMessage());
+			throw new RuntimeException(Msg.code(2538) + "Failed to serialize json Cds Feedback response for service "
+					+ theServiceId + ". " + e.getMessage());
 		}
 	}
 
 	@VisibleForTesting
 	void setServiceCache(CdsServiceCache theCdsServiceCache) {
 		myServiceCache = theCdsServiceCache;
+	}
+
+	private void validateHookRequestFhirServer(CdsServiceRequestJson theCdsServiceRequestJson) {
+		if (myCdsHooksVersion != CDSHooksVersion.V_1_1) {
+			// for a version greater than V_1_1 (which is the base version supported),
+			// the fhirServer is required to use https scheme
+			String fhirServer = theCdsServiceRequestJson.getFhirServer();
+			if (fhirServer != null && !fhirServer.startsWith("https")) {
+				throw new InvalidRequestException(Msg.code(2632) + "The scheme for the fhirServer must be https");
+			}
+		}
 	}
 }

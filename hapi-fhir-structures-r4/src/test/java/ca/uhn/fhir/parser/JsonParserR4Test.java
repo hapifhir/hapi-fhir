@@ -1452,6 +1452,29 @@ public class JsonParserR4Test extends BaseTest {
 		assertThat(patientString).doesNotContain("fhir_comment");
 	}
 
+	@Test
+	public void testNestedModifierExtensions() {
+		// Claim: modifier extensions may have nested extensions. Even if they are
+		// automatically treated as modifier extensions themselves, their key in serialized
+		// output must be "extension" and not "modifierExtension".
+		final Extension nestedExtension = new Extension();
+		nestedExtension.setUrl("http://example.com/nested-extension");
+		nestedExtension.setValue(new StringType("value"));
+
+		final Extension extension = new Extension();
+		extension.setUrl("http://example.com/extension");
+		extension.addExtension(nestedExtension);
+
+		final Patient patient = new Patient();
+		patient.addModifierExtension(extension);
+
+		final String patientStringJSON = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientStringJSON).containsOnlyOnce("\"modifierExtension\"");
+
+		final String patientStringXML = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(patientStringXML).containsOnlyOnce("<modifierExtension");
+	}
+
 	static List<String> patientStrs() {
 		List<String> resources = new ArrayList<>();
 

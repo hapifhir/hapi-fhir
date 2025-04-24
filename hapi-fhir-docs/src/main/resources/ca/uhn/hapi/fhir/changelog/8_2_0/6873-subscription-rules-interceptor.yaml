@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6873
+title: "A new built-in interceptor called SubscriptionRulesInterceptor has been added, 
+    which can enforce rules on newly created subscriptions, such as mandatory criteria 
+    patterns and ensuring that target URLs are reachable."

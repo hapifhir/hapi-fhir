@@ -20,6 +20,7 @@
 package ca.uhn.fhir.subscription;
 
 public final class SubscriptionConstants {
+
 	private SubscriptionConstants() {}
 
 	/**
@@ -45,6 +46,7 @@ public final class SubscriptionConstants {
 	public static final String REQUESTED_STATUS = "requested";
 	public static final String ACTIVE_STATUS = "active";
 	public static final String ERROR_STATUS = "error";
+	public static final String OFF_STATUS = "off";
 	public static final String SUBSCRIPTION_TOPIC_PROFILE_URL =
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription";
 	public static final String SUBSCRIPTION_TOPIC_FILTER_URL =
