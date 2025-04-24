@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -13,6 +15,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -394,8 +398,9 @@ public class FhirPatchDiffR4Test {
 	}
 
 
-	@Test
-	public void testIgnoreElementComposite_Resource() {
+	@ParameterizedTest
+	@ValueSource(strings = {"Patient.meta", "*.meta", "Patient.meta.resource"})
+	public void testIgnoreElementComposite_Resource(String thePathToIgnore) {
 		Patient oldValue = new Patient();
 		oldValue.setActive(true);
 		oldValue.getMeta().setSource("123");
@@ -405,51 +410,7 @@ public class FhirPatchDiffR4Test {
 		newValue.getMeta().setSource("456");
 
 		FhirPatch svc = new FhirPatch(ourCtx);
-		svc.addIgnorePath("Patient.meta");
-		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
-
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-
-		assertThat(diff.getParameter()).hasSize(1);
-		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
-		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
-		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
-	}
-
-	@Test
-	public void testIgnoreElementComposite_Star() {
-		Patient oldValue = new Patient();
-		oldValue.setActive(true);
-		oldValue.getMeta().setSource("123");
-
-		Patient newValue = new Patient();
-		newValue.setActive(false);
-		newValue.getMeta().setSource("456");
-
-		FhirPatch svc = new FhirPatch(ourCtx);
-		svc.addIgnorePath("*.meta");
-		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
-
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-
-		assertThat(diff.getParameter()).hasSize(1);
-		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
-		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
-		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
-	}
-
-	@Test
-	public void testIgnoreElementPrimitive() {
-		Patient oldValue = new Patient();
-		oldValue.setActive(true);
-		oldValue.getMeta().setSource("123");
-
-		Patient newValue = new Patient();
-		newValue.setActive(false);
-		newValue.getMeta().setSource("456");
-
-		FhirPatch svc = new FhirPatch(ourCtx);
-		svc.addIgnorePath("Patient.meta.source");
+		svc.addIgnorePath(thePathToIgnore);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
@@ -503,27 +464,17 @@ public class FhirPatchDiffR4Test {
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
 
-	public void validateDiffProducesSameResults(Patient theOldValue, Patient theNewValue, FhirPatch theSvc, Parameters theDiff) {
+	public void validateDiffProducesSameResults(IBaseResource theOldValue, IBaseResource theNewValue, FhirPatch theSvc, Parameters theDiff) {
+		IParser iParser = ourCtx.newJsonParser();
+
 		theSvc.apply(theOldValue, theDiff);
-		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
-		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
+		String expected = iParser.encodeResourceToString(theNewValue);
+		String actual = iParser.encodeResourceToString(theOldValue);
 		assertEquals(expected, actual);
 
-		expected = ourCtx.newXmlParser().encodeResourceToString(theNewValue);
-		actual = ourCtx.newXmlParser().encodeResourceToString(theOldValue);
+		expected = iParser.encodeResourceToString(theNewValue);
+		actual = iParser.encodeResourceToString(theOldValue);
 		assertEquals(expected, actual);
 	}
-
-	public void validateDiffProducesSameResults(Encounter theOldValue, Encounter theNewValue, FhirPatch theSvc, Parameters theDiff) {
-		theSvc.apply(theOldValue, theDiff);
-		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
-		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
-		assertEquals(expected, actual);
-
-		expected = ourCtx.newXmlParser().encodeResourceToString(theNewValue);
-		actual = ourCtx.newXmlParser().encodeResourceToString(theOldValue);
-		assertEquals(expected, actual);
-	}
-
 
 }

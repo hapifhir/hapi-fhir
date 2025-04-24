@@ -587,10 +587,6 @@ public class FhirPatchApplyR4Test {
 		Parameters patch = new Parameters();
 		patch.addParameter(createPatchReplaceOperation("Patient.identifier",  theValue));
 
-
-		ourLog.info(FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
-
-
 		//When: We apply the patch
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
@@ -770,9 +766,7 @@ public class FhirPatchApplyR4Test {
 			.setName("value")
 			.setValue(encounterLocationStatus);
 
-		String patchString = FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(patch);
-		ourLog.info(patchString);
-		patch = FhirContext.forR4().newJsonParser().parseResource(Parameters.class, patchString);
+		logResource(patch);
 
 		svc.apply(encounter, patch);
 		assertThat(encounter.getStatus()).isEqualTo(Encounter.EncounterStatus.ARRIVED);
@@ -810,8 +804,7 @@ public class FhirPatchApplyR4Test {
 		Enumeration<Encounter.EncounterLocationStatus> encounterLocationStatus = new Enumeration<>(encounterLocationStatusEnumFactory, "active");
 		partList.addPart().setName("status").setValue(encounterLocationStatus);
 
-		String patchString = logResource(patch);
-		patch = FhirContext.forR4().newJsonParser().parseResource(Parameters.class, patchString);
+		logResource(patch);
 
 		svc.apply(encounter, patch);
 		logResource(encounter);
@@ -831,7 +824,7 @@ public class FhirPatchApplyR4Test {
 
 	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(IllegalArgumentException::new);
 		return ((IPrimitiveType) part.getValue()).getValueAsString();
 	}
 
