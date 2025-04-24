@@ -397,10 +397,8 @@ public class FhirPatchDiffR4Test {
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
 
-
-	@ParameterizedTest
-	@ValueSource(strings = {"Patient.meta", "*.meta", "Patient.meta.resource"})
-	public void testIgnoreElementComposite_Resource(String thePathToIgnore) {
+	@Test
+	public void testIgnoreElementComposite_Resource() {
 		Patient oldValue = new Patient();
 		oldValue.setActive(true);
 		oldValue.getMeta().setSource("123");
@@ -410,7 +408,51 @@ public class FhirPatchDiffR4Test {
 		newValue.getMeta().setSource("456");
 
 		FhirPatch svc = new FhirPatch(ourCtx);
-		svc.addIgnorePath(thePathToIgnore);
+		svc.addIgnorePath("Patient.meta");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertThat(diff.getParameter()).hasSize(1);
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testIgnoreElementComposite_Star() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getMeta().setSource("123");
+
+		Patient newValue = new Patient();
+		newValue.setActive(false);
+		newValue.getMeta().setSource("456");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("*.meta");
+		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
+
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+
+		assertThat(diff.getParameter()).hasSize(1);
+		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
+		assertEquals("Patient.active", extractPartValuePrimitive(diff, 0, "operation", "path"));
+		assertEquals("false", extractPartValuePrimitive(diff, 0, "operation", "value"));
+	}
+
+	@Test
+	public void testIgnoreElementPrimitive() {
+		Patient oldValue = new Patient();
+		oldValue.setActive(true);
+		oldValue.getMeta().setSource("123");
+
+		Patient newValue = new Patient();
+		newValue.setActive(false);
+		newValue.getMeta().setSource("456");
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		svc.addIgnorePath("Patient.meta.source");
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
