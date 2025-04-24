@@ -10,7 +10,7 @@ ROBOGARY_URL = "https://slack-bots.azure.smilecdr.com/"
 complete_statuses = ["failed", "success", "canceled"]
 current_hapi_branch = os.getenv("HAPI_BRANCH")
 target_cdr_branch = os.getenv("CDR_BRANCH")
-github_pr = os.getenv("GITHUB_PR", "manual-trigger")
+github_pr = os.getenv("PR_NUMBER", "manual-trigger")
 github_requester = os.getenv("REQUESTING_USER", "manual-user")
 github_token = os.getenv("GITHUB_TOKEN", "")
 
