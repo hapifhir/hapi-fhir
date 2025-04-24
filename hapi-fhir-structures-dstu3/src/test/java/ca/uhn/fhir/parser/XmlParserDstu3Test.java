@@ -585,7 +585,7 @@ public class XmlParserDstu3Test {
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#" + organizationUuid, org.getIdElement().getValue());
+		assertEquals(organizationUuid, org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -597,8 +597,10 @@ public class XmlParserDstu3Test {
 
 		// And re-encode once more, with the references cleared
 		patient.getContained().clear();
+		patient.getManagingOrganization().getResource().setId((String)null);
 		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
+		organizationUuid = UuidUtils.findFirstUUID(encoded);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"" + organizationUuid + "\"/>", "</Organization", "</contained>", "<reference value=\"#" + organizationUuid + "\"/>"));
 		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
@@ -607,7 +609,8 @@ public class XmlParserDstu3Test {
 		// And re-encode once more, with the references cleared and a manually set local ID
 		patient.getContained().clear();
 		patient.getManagingOrganization().setReference(null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
+		patient.getManagingOrganization().setResource(org);
+		org.setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
@@ -3410,10 +3413,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertEquals("#2", obs.getId());
+		assertEquals("2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertEquals("#3", performer.getId());
+		assertEquals("3", performer.getId());
 	}
 
 	/**
