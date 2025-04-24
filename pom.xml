@@ -101,7 +101,6 @@
 		<module>hapi-fhir-storage-batch2</module>
 		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
-		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
 		<module>hapi-fhir-storage-test-utilities</module>
 		<module>hapi-fhir-jpaserver-model</module>
@@ -1110,9 +1109,6 @@
 		<elasticsearch_version>8.15.3</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 
-		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
-
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -1946,12 +1942,6 @@
 				<groupId>org.jscience</groupId>
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
-			</dependency>
-			<!-- TODO KHS remove hamcrest -->
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest</artifactId>
-				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.htmlunit</groupId>
@@ -2799,7 +2789,6 @@
 								<copy todir="target/site/xref-base">
 									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
-								<!-- <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy> -->
 								<copy todir="target/site">
 									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
@@ -2854,7 +2843,6 @@
 			<br clear="both"/>
 	]]></replacevalue>
 								</replace>
-								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
 						</configuration>
 					</execution>

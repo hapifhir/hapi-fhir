@@ -1,16 +1,16 @@
 package ca.uhn.hapi.fhir.cdshooks.controller;
 
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeebackOutcomeEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig;
-import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
+import ca.uhn.hapi.fhir.cdshooks.config.TestCdsConfig;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CdsHooksConfig.class, TestCdsHooksConfig.class})
+@ContextConfiguration(classes = {CdsHooksConfig.class, TestCdsConfig.class})
 public class CdsHooksControllerTest {
 	public static final String TEST_FHIR_SERVER = "http://localhost:9999/";
 	public static final String TEST_PATIENT_ID = "P2401";
@@ -53,7 +53,7 @@ public class CdsHooksControllerTest {
 	public static final String OUTCOME_TIMESTAMP = "2020-12-16";
 	private static final String TEST_KEY = "CdsServiceRegistryImplTest.testKey";
 	private static final String TEST_SERVICE_ID = "CdsServiceRegistryImplTest.testServiceId";
-	private final String SERVICE_GROUP_ID = "ServiceGroupId";
+	private static final String SERVICE_GROUP_ID = "ServiceGroupId";
 
 	@Autowired
 	ICdsServiceRegistry myCdsHooksRegistry;
@@ -276,5 +276,4 @@ public class CdsHooksControllerTest {
 		cdsServiceRequestContextJson.put("patientId", "Patient/123");
 		return cdsServiceRequestContextJson;
 	}
-
 }
