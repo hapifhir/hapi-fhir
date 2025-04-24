@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.embedded.annotation;
+package ca.uhn.fhir.jpa.annotation;
 
-import ca.uhn.fhir.jpa.embedded.OracleCondition;
+import ca.uhn.fhir.jpa.OracleCondition;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
