@@ -14,7 +14,6 @@ github_pr = os.getenv("PR_NUMBER", "manual-trigger")
 github_requester = os.getenv("REQUESTING_USER", "manual-user")
 github_token = os.getenv("GITHUB_TOKEN", "")
 
-
 def poll_for_pipeline_status(pipe_id):
     """
     Poll Robogary for pipeline status
