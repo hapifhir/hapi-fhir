@@ -5,7 +5,7 @@ import json
 from time import sleep
 import requests
 
-ROBOGARY_URL = "https://slack-bots.azure.smilecdr.com/"
+ROBOGARY_URL = "https://slack-bots.azure.smilecdr.com/robogary/"
 
 complete_statuses = ["failed", "success", "canceled"]
 current_hapi_branch = os.getenv("HAPI_BRANCH")
