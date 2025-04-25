@@ -15,8 +15,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,17 +151,14 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertThat(diff.getParameter()).hasSize(1);
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.active.extension", extractPartValuePrimitive(diff, 0, "operation", "path"));
 		assertEquals("0", extractPartValuePrimitive(diff, 0, "operation", "index"));
-
-		Extension extension = extractPartValue(diff, 0, "operation", "value", Extension.class);
-
-		assertEquals("http://foo", extension.getUrl());
-		assertEquals("a value", extension.getValueAsPrimitive().getValueAsString());
+		assertEquals("http://foo", extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
+		assertEquals("a value", extractPartValue(diff, 0, "operation", "value", Extension.class).getValueAsPrimitive().getValueAsString());
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
