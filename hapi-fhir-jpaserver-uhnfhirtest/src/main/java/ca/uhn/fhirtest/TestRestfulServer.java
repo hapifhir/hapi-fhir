@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestAuditConfig;
 import ca.uhn.fhirtest.config.TestDstu2Config;
@@ -252,7 +251,6 @@ public class TestRestfulServer extends RestfulServer {
 			registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 		}
 		 */
-
 
 		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
 		providers.add(myAppCtx.getBean(InstanceReindexProvider.class));
