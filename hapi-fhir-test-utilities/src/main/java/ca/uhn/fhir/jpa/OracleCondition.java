@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.embedded;
+package ca.uhn.fhir.jpa;
 
 import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;

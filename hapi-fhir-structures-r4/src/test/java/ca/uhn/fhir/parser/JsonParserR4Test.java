@@ -341,12 +341,27 @@ public class JsonParserR4Test extends BaseTest {
 
 		b.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("/Observation");
 
+		/*
+		 * Pass 1
+		 */
+
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		//Then: Diag should contain one local contained specimen
 		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"" + specimen.getId().replaceFirst("#", "") + "\"}]");
 		//Then: Obs should contain one local contained specimen, and one local contained pract
-		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"" + specimen.getId().replaceFirst("#", "") + "\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId().replaceAll("#", "") + "\"}]");
-		assertThat(encoded).contains("\"performer\":[{\"reference\":\"" + practitioner.getId() + "\"}],\"specimen\":{\"reference\":\"" + specimen.getId() + "\"}");
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"" + specimen.getId() + "\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId() + "\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\"#" + practitioner.getId() + "\"}],\"specimen\":{\"reference\":\"#" + specimen.getId() + "\"}");
+
+		/*
+		 * Pass 2 - Make sure that multiple encode passes work correctly
+		 */
+
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		//Then: Diag should contain one local contained specimen
+		assertThat(encoded).contains("[{\"resource\":{\"resourceType\":\"DiagnosticReport\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"" + specimen.getId().replaceFirst("#", "") + "\"}]");
+		//Then: Obs should contain one local contained specimen, and one local contained pract
+		assertThat(encoded).contains("\"resource\":{\"resourceType\":\"Observation\",\"contained\":[{\"resourceType\":\"Specimen\",\"id\":\"" + specimen.getId() + "\"},{\"resourceType\":\"Practitioner\",\"id\":\"" + practitioner.getId() + "\"}]");
+		assertThat(encoded).contains("\"performer\":[{\"reference\":\"#" + practitioner.getId() + "\"}],\"specimen\":{\"reference\":\"#" + specimen.getId() + "\"}");
 
 		//Also, reverting the operation should work too!
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
@@ -372,8 +387,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
-		String guidWithHash = med.getId();
-		String withoutHash = guidWithHash.replace("#", "");
+		String withoutHash = med.getId();
+		String guidWithHash = "#" + withoutHash;
 		assertThat(encoded).contains("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"" + withoutHash + "\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"" + guidWithHash + "\"}}"); //Note we dont check exact ID since its a GUID
 	}
 
@@ -650,7 +665,7 @@ public class JsonParserR4Test extends BaseTest {
 		Observation obs = new Observation();
 
 		Patient pt = new Patient();
-		pt.setId("#1");
+		pt.setId("1");
 		pt.addName().setFamily("FAM");
 		obs.getSubject().setReference("#1");
 		obs.getContained().add(pt);
@@ -663,7 +678,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals("1", obs.getContained().get(0).getId());
 		assertEquals(enc.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
@@ -692,7 +707,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		obs = ourCtx.newJsonParser().parseResource(Observation.class, encoded);
-		assertEquals("#1", obs.getContained().get(0).getId());
+		assertEquals("1", obs.getContained().get(0).getId());
 		assertEquals(pt.getId(), obs.getContained().get(1).getId());
 
 		pt = (Patient) obs.getSubject().getResource();
@@ -719,7 +734,7 @@ public class JsonParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 		mr = ourCtx.newJsonParser().parseResource(MedicationRequest.class, encoded);
 
-		assertEquals(pract.getId(), mr.getContained().get(0).getId());
+		assertEquals(pract.getId(),mr.getContained().get(0).getId());
 		assertEquals(med.getId(), mr.getContained().get(1).getId());
 
 	}
@@ -1229,8 +1244,8 @@ public class JsonParserR4Test extends BaseTest {
 
 		ourLog.info("Input: {}", auditEvent);
 		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("#A", ae.getContained().get(0).getId());
-		assertEquals("#B", ae.getContained().get(1).getId());
+		assertEquals("A", ae.getContained().get(0).getId());
+		assertEquals("B", ae.getContained().get(1).getId());
 		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
 		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
 
@@ -1450,6 +1465,29 @@ public class JsonParserR4Test extends BaseTest {
 
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertThat(patientString).doesNotContain("fhir_comment");
+	}
+
+	@Test
+	public void testNestedModifierExtensions() {
+		// Claim: modifier extensions may have nested extensions. Even if they are
+		// automatically treated as modifier extensions themselves, their key in serialized
+		// output must be "extension" and not "modifierExtension".
+		final Extension nestedExtension = new Extension();
+		nestedExtension.setUrl("http://example.com/nested-extension");
+		nestedExtension.setValue(new StringType("value"));
+
+		final Extension extension = new Extension();
+		extension.setUrl("http://example.com/extension");
+		extension.addExtension(nestedExtension);
+
+		final Patient patient = new Patient();
+		patient.addModifierExtension(extension);
+
+		final String patientStringJSON = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientStringJSON).containsOnlyOnce("\"modifierExtension\"");
+
+		final String patientStringXML = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(patientStringXML).containsOnlyOnce("<modifierExtension");
 	}
 
 	static List<String> patientStrs() {

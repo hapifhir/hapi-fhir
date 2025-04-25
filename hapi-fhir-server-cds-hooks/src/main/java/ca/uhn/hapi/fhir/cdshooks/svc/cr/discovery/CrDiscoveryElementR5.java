@@ -26,6 +26,7 @@ import org.hl7.fhir.r5.model.PlanDefinition;
 
 import java.util.stream.Collectors;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
 	protected PlanDefinition myPlanDefinition;
 	protected PrefetchUrlList myPrefetchUrlList;

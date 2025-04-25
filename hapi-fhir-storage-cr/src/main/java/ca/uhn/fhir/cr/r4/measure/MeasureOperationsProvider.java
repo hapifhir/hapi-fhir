@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class MeasureOperationsProvider {
 
 	private final R4MeasureEvaluatorSingleFactory myR4MeasureServiceFactory;

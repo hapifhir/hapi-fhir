@@ -31,6 +31,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 /**
  * The purpose of this Condition is to verify that the CR dependent beans RestfulServer and EvaluationSettings exist.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CrConfigCondition implements Condition {
 	private static final Logger ourLog = LoggerFactory.getLogger(CrConfigCondition.class);
 

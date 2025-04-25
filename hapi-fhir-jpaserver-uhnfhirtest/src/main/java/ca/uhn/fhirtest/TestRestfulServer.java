@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
@@ -93,7 +95,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		// These two parmeters are also declared in web.xml
 		String fhirVersionParam = getInitParameter("FhirVersion");
-		Validate.notNull(fhirVersionParam);
+		Validate.notNull(fhirVersionParam, "Init parameter FhirVersion must be specified");
 
 		setImplementationDescription("HAPI FHIR Test/Demo Server " + fhirVersionParam + " Endpoint");
 		setCopyright(
@@ -125,7 +127,6 @@ public class TestRestfulServer extends RestfulServer {
 				JpaConformanceProviderDstu2 confProvider =
 						new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
 				setServerConformanceProvider(confProvider);
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "DSTU3": {
@@ -147,7 +148,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4": {
@@ -172,7 +172,6 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4B": {
@@ -196,7 +195,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R5": {
@@ -220,7 +218,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "AUDIT": {
@@ -248,6 +245,14 @@ public class TestRestfulServer extends RestfulServer {
 				throw new ServletException(Msg.code(1975)
 						+ "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
+
+		// Disabling audit for now as it's overwhelming the server
+		/*
+		if (!"AUDIT".equals(fhirVersionParam.trim().toUpperCase())) {
+			registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+		}
+		 */
+
 
 		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
 		providers.add(myAppCtx.getBean(InstanceReindexProvider.class));
@@ -357,11 +362,19 @@ public class TestRestfulServer extends RestfulServer {
 		// Logging for request type
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setMessageFormat(
-				"${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
+				"${remoteAddr} ${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent} - ID: ${responseId}");
 		registerInterceptor(loggingInterceptor);
 
 		// SQL Capturing
 		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
+
+		// Subscription Validation
+		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(
+				myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class));
+		subscriptionCriteriaValidation.addAllowedCriteriaPattern(
+				SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
+		subscriptionCriteriaValidation.setValidateRestHookEndpointIsReachable(true);
+		registerInterceptor(subscriptionCriteriaValidation);
 	}
 
 	/**

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6873
+title: "The server LoggingInterceptor now has a substitution variable `responseId` which
+    contains the value of the Location header for write operations"

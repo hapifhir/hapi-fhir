@@ -149,6 +149,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(true)
 					.withColumns("HASH_IDENTITY");
 		}
+
+		{
+			version.executeRawSqls(
+					"20250404.10",
+					Map.of(
+							DriverTypeEnum.ORACLE_12C,
+							List.of(
+									"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_EXACT varchar2(768 char) )",
+									"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_NORMALIZED varchar2(768 char) )")));
+		}
+
+		// Add USER_DATA_JSON column to BT2_JOB_INSTANCE
+		{
+			version.onTable("BT2_JOB_INSTANCE")
+					.addColumn("20250408.1", "USER_DATA_JSON")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+		}
 	}
 
 	protected void init780() {

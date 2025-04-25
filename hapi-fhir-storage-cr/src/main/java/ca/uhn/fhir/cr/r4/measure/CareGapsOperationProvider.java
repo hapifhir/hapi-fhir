@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CareGapsOperationProvider {
 	private final ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;
