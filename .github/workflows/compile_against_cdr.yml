@@ -34,5 +34,4 @@ jobs:
         REQUESTING_USER: ${{ github.event.pull_request.user.login }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # When run via the manual run, this will be set. When run in a PR, it will be blank.
         CDR_BRANCH: ${{ inputs.cdr_branch }}
