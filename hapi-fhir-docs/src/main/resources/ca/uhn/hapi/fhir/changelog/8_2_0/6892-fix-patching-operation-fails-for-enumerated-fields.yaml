@@ -3,4 +3,4 @@ type: fix
 issue: 6892
 jira: SMILE-10009
 title: "Previously, attempting to PATCH an enumerated field of a resource's composite member (Encounter.location.status)
- could throw an exception based on the PATCH Parameters construction.  This issue is fixed."
+ could throw an exception based on the PATCH Parameters construction. This issue is fixed."
