@@ -404,11 +404,11 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(patient.getContained()).hasSize(2);
 
 		provenance = (Provenance) patient.getContained().get(0);
-		assertEquals("#1", provenance.getId());
+		assertEquals("1", provenance.getId());
 		assertEquals("#", provenance.getTargetFirstRep().getReference());
 
 		observation = (Observation) patient.getContained().get(1);
-		assertEquals("#2", observation.getId());
+		assertEquals("2", observation.getId());
 		assertEquals("#", observation.getSubject().getReference());
 	}
 
