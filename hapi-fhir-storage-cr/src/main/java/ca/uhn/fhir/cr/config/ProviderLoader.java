@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class ProviderLoader {
 	private static final Logger myLogger = LoggerFactory.getLogger(ProviderLoader.class);
 	private final ApplicationContext myApplicationContext;

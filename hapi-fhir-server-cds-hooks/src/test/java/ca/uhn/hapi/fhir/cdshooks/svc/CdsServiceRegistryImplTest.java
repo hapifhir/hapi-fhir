@@ -9,8 +9,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -39,10 +36,6 @@ class CdsServiceRegistryImplTest {
 	@Mock
 	private CdsPrefetchSvc myCdsPrefetchSvc;
 	@Mock
-	private ICdsCrServiceFactory myCdsCrServiceFactory;
-	@Mock
-	private ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
-	@Mock
 	private CdsServiceCache myCdsServiceCache;
 	@Mock
 	private CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
@@ -51,7 +44,7 @@ class CdsServiceRegistryImplTest {
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsCrServiceFactory, myCrDiscoveryServiceFactory, myCdsServiceRequestJsonDeserializer);
+		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsServiceRequestJsonDeserializer);
 	}
 
 	@Test
@@ -228,8 +221,6 @@ class CdsServiceRegistryImplTest {
 			myCdsHooksContextBooter,
 			myCdsPrefetchSvc,
 			myObjectMapper,
-			myCdsCrServiceFactory,
-			myCrDiscoveryServiceFactory,
 			myCdsServiceRequestJsonDeserializer,
 			theCdsHooksVersion);
 

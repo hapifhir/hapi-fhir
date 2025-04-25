@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrConstants {
 	private CdsCrConstants() {}
 

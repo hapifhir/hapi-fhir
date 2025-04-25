@@ -55,7 +55,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		ourLog.info(encoded);
 
 		o = (Observation) p.parseResource(encoded);
-		assertThat(o.getSpecimen().getReference()).isEqualTo(o.getContained().get(0).getId());
+		assertThat(o.getSpecimen().getReference()).isEqualTo("#" + o.getContained().get(0).getId());
 
 		List<Base> value;
 
