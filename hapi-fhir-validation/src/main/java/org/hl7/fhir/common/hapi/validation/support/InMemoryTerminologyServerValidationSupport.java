@@ -1180,22 +1180,24 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 
 		boolean retVal = false;
+		ValueSetExpansionFilterContext valueSetExpansionFilterContext =
+				new ValueSetExpansionFilterContext(includeOrExcludeSystemResource, theInclude.getFilter());
 
 		for (FhirVersionIndependentConcept next : nextCodeList) {
 			if (includeOrExcludeSystemResource != null && theWantCode != null) {
-				boolean matches;
-				if (includeOrExcludeSystemResource.getCaseSensitive()) {
-					matches = theWantCode.equals(next.getCode());
-				} else {
-					matches = theWantCode.equalsIgnoreCase(next.getCode());
-				}
+				boolean matches = includeOrExcludeSystemResource.getCaseSensitive()
+						? theWantCode.equals(next.getCode())
+						: theWantCode.equalsIgnoreCase(next.getCode());
+
 				if (!matches) {
 					continue;
 				}
 			}
 
-			theConsumer.accept(next);
-			retVal = true;
+			if (!valueSetExpansionFilterContext.isFiltered(next)) {
+				theConsumer.accept(next);
+				retVal = true;
+			}
 		}
 
 		return retVal;
