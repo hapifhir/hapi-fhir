@@ -39,6 +39,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import jakarta.annotation.Nonnull;
@@ -792,6 +793,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(srd.getUserData()).thenReturn(new HashMap<>());
 		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
+		when(srd.getServletRequest()).thenReturn(new MockHttpServletRequest());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
@@ -844,6 +846,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		when(srd.getUserData()).thenReturn(new HashMap<>());
 		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
+		when(srd.getServletRequest()).thenReturn(new MockHttpServletRequest());
 
 		List<Future<?>> futures = new ArrayList<>();
 		int repetitionCount = 3;
