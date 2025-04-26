@@ -187,21 +187,21 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Map<DriverTypeEnum, String> resTypeInsertion = new HashMap<>();
 			String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES ";
 
-			String resTypeStr = getResourceTypes(DriverTypeEnum.H2_EMBEDDED);
-			resTypeInsertion.put(DriverTypeEnum.H2_EMBEDDED, sql + resTypeStr);
+			String resTypeData = getResourceTypeData(DriverTypeEnum.H2_EMBEDDED);
+			resTypeInsertion.put(DriverTypeEnum.H2_EMBEDDED, sql + resTypeData);
 
-			resTypeStr = getResourceTypes(DriverTypeEnum.MSSQL_2012);
-			resTypeInsertion.put(DriverTypeEnum.MSSQL_2012, sql + resTypeStr);
+			resTypeData = getResourceTypeData(DriverTypeEnum.MSSQL_2012);
+			resTypeInsertion.put(DriverTypeEnum.MSSQL_2012, sql + resTypeData);
 
-			resTypeStr = getResourceTypes(DriverTypeEnum.POSTGRES_9_4);
-			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, sql + resTypeStr);
+			resTypeData = getResourceTypeData(DriverTypeEnum.POSTGRES_9_4);
+			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, sql + resTypeData);
 
-			resTypeStr = getResourceTypes(DriverTypeEnum.ORACLE_12C);
+			resTypeData = getResourceTypeData(DriverTypeEnum.ORACLE_12C);
 			resTypeInsertion.put(
 					DriverTypeEnum.ORACLE_12C,
-					"INSERT INTO EMPLOYEE WITH types AS (SELECT " + resTypeStr + " str FROM DUAL)"
+					"INSERT INTO EMPLOYEE WITH types AS (SELECT " + resTypeData + " str FROM DUAL)"
 							+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
-							+ "  CONNECT BY LEVEL <= LENGTH(str) - LENGTH(REPLACE(str, ',')) + 1");
+							+ "  CONNECT BY LEVEL <= REGEXP_COUNT(str, ',') + 1");
 
 			// DERBY_EMBEDDED, MySQL and MariaDB needed ???
 
@@ -4461,7 +4461,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	// can also load the resource type from a file
 	// String resourceTypes = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/resource-type-data.txt");
 
-	public String getResourceTypes(DriverTypeEnum theDriverType) {
+	protected String getResourceTypeData(DriverTypeEnum theDriverType) {
 		var resTypeStream = RESOURCE_TYPES.stream().map(String::trim).filter(t -> !t.isEmpty());
 
 		return switch (theDriverType) {
