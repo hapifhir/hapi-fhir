@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.RESOURCE_TYPES;
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection", "java:S1192"})
@@ -172,79 +173,103 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(true)
 					.withColumns("RES_TYPE");
 
+			// Populate HFJ_RESOURCE_TYPE table
+			Map<DriverTypeEnum, String> resTypeInsertion = new HashMap<>();
+			String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES ";
+
+			String resTypeStr = getResourceTypes(DriverTypeEnum.H2_EMBEDDED);
+			resTypeInsertion.put(DriverTypeEnum.H2_EMBEDDED, sql + resTypeStr);
+
+			resTypeStr = getResourceTypes(DriverTypeEnum.MSSQL_2012);
+			resTypeInsertion.put(DriverTypeEnum.MSSQL_2012, sql + resTypeStr);
+
+			resTypeStr = getResourceTypes(DriverTypeEnum.POSTGRES_9_4);
+			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, sql + resTypeStr);
+
+			resTypeStr = getResourceTypes(DriverTypeEnum.ORACLE_12C);
+			resTypeInsertion.put(
+					DriverTypeEnum.ORACLE_12C,
+					"INSERT INTO EMPLOYEE WITH types AS (SELECT " + resTypeStr + " str FROM DUAL)"
+							+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
+							+ "  CONNECT BY LEVEL <= LENGTH(str) - LENGTH(REPLACE(str, ',')) + 1");
+
+			// DERBY_EMBEDDED, MySQL and MariaDB needed ???
+
+			version.executeRawSql("20250422.10", resTypeInsertion);
+
 			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE
 			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
-			resource.addColumn("20250422.11", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resource.addColumn("20250422.101", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			resource.addForeignKey("20250422.12", "FK_RESOURCE_RES_TYPE")
+			resource.addForeignKey("20250422.102", "FK_RESOURCE_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			resource.addIndex("20250422.13", "IDX_RES_TYPE_ID")
+			resource.addIndex("20250422.103", "IDX_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RES_VER
 			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
-			resVer.addColumn("20250422.21", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resVer.addColumn("20250422.201", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			resVer.addForeignKey("20250422.22", "FK_RESVER_RES_TYPE")
+			resVer.addForeignKey("20250422.202", "FK_RESVER_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			resVer.addIndex("20250422.23", "IDX_RESVER_RES_TYPE_ID")
+			resVer.addIndex("20250422.203", "IDX_RESVER_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RES_TAG
 			Builder.BuilderWithTableName resTag = version.onTable("HFJ_RES_TAG");
-			resTag.addColumn("20250422.31", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resTag.addColumn("20250422.301", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			resTag.addForeignKey("20250422.32", "FK_RESTAG_RES_TYPE")
+			resTag.addForeignKey("20250422.302", "FK_RESTAG_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			resTag.addIndex("20250422.33", "IDX_RESTAG_RES_TYPE_ID")
+			resTag.addIndex("20250422.303", "IDX_RESTAG_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_HISTORY_TAG
 			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
-			historyTag.addColumn("20250422.41", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			historyTag.addColumn("20250422.401", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
 			historyTag
-					.addForeignKey("20250422.42", "FK_HISTORYTAG_RES_TYPE")
+					.addForeignKey("20250422.402", "FK_HISTORYTAG_RES_TYPE")
 					.toColumn("RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
 			historyTag
-					.addIndex("20250422.43", "IDX_HISTORYTAG_RES_TYPE_ID")
+					.addIndex("20250422.403", "IDX_HISTORYTAG_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RES_LINK
 			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
-			resLink.addColumn("20250422.51", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
-			resLink.addColumn("20250422.52", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250422.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250422.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			resLink.addForeignKey("20250422.53", "FK_RESLINK_SRC_RES_TYPE")
+			resLink.addForeignKey("20250422.503", "FK_RESLINK_SRC_RES_TYPE")
 					.toColumn("SRC_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			resLink.addForeignKey("20250422.54", "FK_RESLINK_TARGET_RES_TYPE")
+			resLink.addForeignKey("20250422.504", "FK_RESLINK_TARGET_RES_TYPE")
 					.toColumn("TARGET_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
-			resLink.addIndex("20250422.55", "IDX_RESLINK_SRC_RES_TYPE_ID")
+			resLink.addIndex("20250422.505", "IDX_RESLINK_SRC_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("SRC_RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
-			resLink.addIndex("20250422.56", "IDX_RESLINK_TARGET_RES_TYPE_ID")
+			resLink.addIndex("20250422.506", "IDX_RESLINK_TARGET_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("TARGET_RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
@@ -4421,6 +4446,27 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
 		hfjResVer.modifyColumn("20180115.3", "RES_ENCODING").nullable();
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
+	}
+
+	// can also load the resource type from a file
+	// String resourceTypes = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/resource-type-data.txt");
+
+	public String getResourceTypes(DriverTypeEnum theDriverType) {
+		var resTypeStream = RESOURCE_TYPES.stream().map(String::trim).filter(t -> !t.isEmpty());
+
+		return switch (theDriverType) {
+			case H2_EMBEDDED, MSSQL_2012 -> resTypeStream
+					.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
+					.collect(Collectors.joining(","));
+			case POSTGRES_9_4 -> resTypeStream
+					.map(t -> "(NEXTVAL('SEQ_RESOURCE_TYPE'),'" + t + "')")
+					.collect(Collectors.joining(","));
+			case MYSQL_5_7, MARIADB_10_1 -> resTypeStream
+					.map(t -> "(" + t + ")")
+					.collect(Collectors.joining(","));
+			case ORACLE_12C -> "'" + resTypeStream.collect(Collectors.joining(",")) + "'";
+			default -> throw new IllegalArgumentException("Unsupported driver type: " + theDriverType);
+		};
 	}
 
 	public Set<FlagEnum> getFlags() {
