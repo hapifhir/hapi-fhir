@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestAuditConfig;
 import ca.uhn.fhirtest.config.TestDstu2Config;
@@ -127,7 +126,6 @@ public class TestRestfulServer extends RestfulServer {
 				JpaConformanceProviderDstu2 confProvider =
 						new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
 				setServerConformanceProvider(confProvider);
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "DSTU3": {
@@ -149,7 +147,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4": {
@@ -174,7 +171,6 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4B": {
@@ -198,7 +194,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R5": {
@@ -222,7 +217,6 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
-				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "AUDIT": {
@@ -250,6 +244,13 @@ public class TestRestfulServer extends RestfulServer {
 				throw new ServletException(Msg.code(1975)
 						+ "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
+
+		// Disabling audit for now as it's overwhelming the server
+		/*
+		if (!"AUDIT".equals(fhirVersionParam.trim().toUpperCase())) {
+			registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+		}
+		 */
 
 		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
 		providers.add(myAppCtx.getBean(InstanceReindexProvider.class));
