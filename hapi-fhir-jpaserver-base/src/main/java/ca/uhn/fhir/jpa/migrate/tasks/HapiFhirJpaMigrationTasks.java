@@ -199,11 +199,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resTypeData = getResourceTypeData(DriverTypeEnum.ORACLE_12C);
 			resTypeInsertion.put(
 					DriverTypeEnum.ORACLE_12C,
-					"INSERT INTO EMPLOYEE WITH types AS (SELECT " + resTypeData + " str FROM DUAL)"
+					"INSERT INTO HFJ_RESOURCE_TYPE WITH types AS (SELECT " + resTypeData + " str FROM DUAL)"
 							+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
 							+ "  CONNECT BY LEVEL <= REGEXP_COUNT(str, ',') + 1");
 
-			// DERBY_EMBEDDED, MySQL and MariaDB needed ???
+			// ?? DERBY_EMBEDDED, MySQL and MariaDB needed ??
 
 			version.executeRawSql("20250422.10", resTypeInsertion);
 
@@ -269,7 +269,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resLink.addForeignKey("20250422.503", "FK_RESLINK_SRC_RES_TYPE")
 					.toColumn("SRC_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
-
 			resLink.addForeignKey("20250422.504", "FK_RESLINK_TARGET_RES_TYPE")
 					.toColumn("TARGET_RES_TYPE_ID")
 					.references("HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
@@ -278,7 +277,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.unique(false)
 					.withColumns("SRC_RES_TYPE_ID")
 					.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
-
 			resLink.addIndex("20250422.506", "IDX_RESLINK_TARGET_RES_TYPE_ID")
 					.unique(false)
 					.withColumns("TARGET_RES_TYPE_ID")
