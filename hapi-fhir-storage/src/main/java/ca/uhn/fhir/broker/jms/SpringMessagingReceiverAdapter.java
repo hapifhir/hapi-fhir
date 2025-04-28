@@ -22,6 +22,7 @@ package ca.uhn.fhir.broker.jms;
 import ca.uhn.fhir.broker.api.ChannelConsumerStartFailureException;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.IoUtils;
@@ -80,7 +81,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 			try {
 				((DisposableBean) theMessageHandler).destroy();
 			} catch (Exception e) {
-				throw new InternalErrorException("Failed to destroy MessageHandler", e);
+				throw new InternalErrorException(Msg.code(2647) + "Failed to destroy MessageHandler", e);
 			}
 		}
 	}
