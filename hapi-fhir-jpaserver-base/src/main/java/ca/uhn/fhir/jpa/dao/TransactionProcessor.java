@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
@@ -94,8 +95,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	/**
 	 * Matches conditional URLs in the form of [resourceType]?[paramName]=[paramValue]{...more params...}
-	 *
-	 *
 	 */
 	public static final Pattern MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
 
@@ -500,18 +499,18 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * This method attempts to resolve a collection of conditional URLs that were found
 	 * in a FHIR transaction bundle being processed.
 	 *
-	 * @param theRequestDetails        The active request
-	 * @param theTransactionDetails    The active transaction details
-	 * @param theRequestPartitionId    The active partition
-	 * @param theInputParameters       These are the conditional URLs that will actually be resolved
+	 * @param theRequestDetails              The active request
+	 * @param theTransactionDetails          The active transaction details
+	 * @param theRequestPartitionId          The active partition
+	 * @param theInputParameters             These are the conditional URLs that will actually be resolved
 	 * @param theOutputPidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
-	 *                                 preloaded (i.e. fetch the actual resource body since we're presumably
-	 *                                 going to update it and will need to see its current state eventually)
+	 *                                       preloaded (i.e. fetch the actual resource body since we're presumably
+	 *                                       going to update it and will need to see its current state eventually)
 	 * @param theOutputPidsToLoadVersionsFor This list will be added to with any resource PIDs that need to have
-	 *                                 their current version resolved. This is used for conditional creates,
-	 *                                 where we don't actually care about the body of the resource, only
-	 *                                 the version it has (since the version is returned in the response,
-	 *                                 and potentially used if we're auto-versioning references).
+	 *                                       their current version resolved. This is used for conditional creates,
+	 *                                       where we don't actually care about the body of the resource, only
+	 *                                       the version it has (since the version is returned in the response,
+	 *                                       and potentially used if we're auto-versioning references).
 	 */
 	@VisibleForTesting
 	public void preFetchSearchParameterMaps(
@@ -829,37 +828,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					updateCount);
 		} catch (PersistenceException e) {
 			if (myHapiFhirHibernateJpaDialect != null) {
-				// Generate a list of the resource types in the request, and the number
-				// of resources for each type that were present. This is not used for
-				// anything other than returning to the client, but could help them
-				// understanding what went wrong or which of their requests led to
-				// the issue
-				TreeMap<String, Integer> types = new TreeMap<>();
-				for (IIdType t : theIdToPersistedOutcome.keySet()) {
-					if (t != null) {
-						String resourceType = t.getResourceType();
-						int count = types.getOrDefault(resourceType, 0);
-						types.put(resourceType, count + 1);
-					}
-				}
-
-				StringBuilder typesBuilder = new StringBuilder();
-				typesBuilder.append("[");
-				for (Iterator<Map.Entry<String, Integer>> iter =
-								types.entrySet().iterator();
-						iter.hasNext(); ) {
-					Map.Entry<String, Integer> entry = iter.next();
-					typesBuilder.append(entry.getKey());
-					if (entry.getValue() > 1) {
-						typesBuilder.append(" (x").append(entry.getValue() + ")");
-					}
-					if (iter.hasNext()) {
-						typesBuilder.append(", ");
-					}
-				}
-				typesBuilder.append("]");
-
-				String message = "Error flushing transaction with resource types: " + typesBuilder;
+				String transactionTypes = createDescriptionOfResourceTypesInBundle(theIdToPersistedOutcome);
+				String message = "Error flushing transaction with resource types: " + transactionTypes;
 				throw myHapiFhirHibernateJpaDialect.translate(e, message);
 			}
 			throw e;
@@ -874,6 +844,48 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@VisibleForTesting
 	public void setApplicationContextForUnitTest(ApplicationContext theAppCtx) {
 		myApplicationContext = theAppCtx;
+	}
+
+	/**
+	 * Creates a description of resource types in the provided bundle, indicating the types of resources
+	 * and their counts within the input map. This is intended only to be helpful for troubleshooting, since
+	 * it can be helpful to see details about the transaction which failed in the logs.
+	 * <p>
+	 * Example output: <code>[Patient (x3), Observation (x14)]</code>
+	 * </p>
+	 *
+	 * @param theIdToPersistedOutcome A map where the key is an {@code IIdType} object representing a resource ID
+	 *                                and the value is a {@code DaoMethodOutcome} object representing the outcome
+	 *                                of the persistence operation for that resource.
+	 * @return A string describing the resource types and their respective counts in a formatted list.
+	 */
+	@Nonnull
+	private static String createDescriptionOfResourceTypesInBundle(
+			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+		TreeMap<String, Integer> types = new TreeMap<>();
+		for (IIdType t : theIdToPersistedOutcome.keySet()) {
+			if (t != null) {
+				String resourceType = t.getResourceType();
+				int count = types.getOrDefault(resourceType, 0);
+				types.put(resourceType, count + 1);
+			}
+		}
+
+		StringBuilder typesBuilder = new StringBuilder();
+		typesBuilder.append("[");
+		for (Iterator<Map.Entry<String, Integer>> iter = types.entrySet().iterator(); iter.hasNext(); ) {
+			Map.Entry<String, Integer> entry = iter.next();
+			typesBuilder.append(entry.getKey());
+			if (entry.getValue() > 1) {
+				typesBuilder.append(" (x").append(entry.getValue() + ")");
+			}
+			if (iter.hasNext()) {
+				typesBuilder.append(", ");
+			}
+		}
+		typesBuilder.append("]");
+		String transactionTypes = typesBuilder.toString();
+		return transactionTypes;
 	}
 
 	public static class MatchUrlToResolve {
