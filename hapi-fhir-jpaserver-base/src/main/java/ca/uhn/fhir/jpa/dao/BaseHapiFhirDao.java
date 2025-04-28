@@ -81,6 +81,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
@@ -930,6 +931,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ResourceIndexedSearchParams newParams = null;
 
+		boolean isUpdateWithNoChanges = false;
+
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			// DELETE
@@ -1010,6 +1013,38 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(getEntityIndexedStatusEnum());
 				}
+				else if (!Objects.equals(entity.getPublished(),
+						new InstantDt(theTransactionDetails.getTransactionDate()))) { // the first creation is not considered a change
+					// TODO:
+					// There is probably a better way to do this check
+					isUpdateWithNoChanges = true;
+					// If it's not changed, we want to updated res_updated _anyway_
+					// So that we can easily identify resources based on when they were last received,
+					// which we are correlating with the resource's relevance for data expiration purposes
+
+					// Stolen from the guts of updateHistoryEntity
+					// Force hfj_resource column res_updated to be updated
+					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					ResourceHistoryTable historyEntity;
+
+					// Get current history entity from DB
+					historyEntity = ((ResourceTable) readEntity(theResource.getIdElement(), theRequest))
+							.getCurrentVersionEntity();
+					// Force hfj_res_ver column res_updated to be updated
+					historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
+					// Update version/lastUpdated so that interceptors see the correct version
+					// myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
+					// Populate the PID in the resource, so it is available to hooks
+					// addPidToResource(entity, theResource);
+
+					/*
+					 * Save the resource itself to the resourceHistoryTable
+					 */
+					historyEntity = myEntityManager.merge(historyEntity);
+					myResourceHistoryTableDao.save(historyEntity);
+
+					// myJpaStorageResourceParser.updateResourceMetadata(historyEntity, theResource);
+				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
 					populateFullTextFields(myContext, theResource, entity, newParams);
@@ -1024,7 +1059,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		if (thePerformIndexing
+		if (!isUpdateWithNoChanges){
+			if (thePerformIndexing
 				&& changed != null
 				&& !changed.isChanged()
 				&& !theForceUpdate
@@ -1040,35 +1076,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return entity;
 		}
 
-		if (entity.getId().getId() != null && theUpdateVersion) {
-			entity.markVersionUpdatedInCurrentTransaction();
-		}
-
-		/*
-		 * Save the resource itself
-		 */
-		if (entity.getId().getId() == null) {
-			myEntityManager.persist(entity);
-
-			if (entity.getFhirId() == null) {
-				entity.setFhirId(Long.toString(entity.getId().getId()));
+			if (entity.getId().getId() != null && theUpdateVersion) {
+				entity.markVersionUpdatedInCurrentTransaction();
 			}
 
-			postPersist(entity, (T) theResource, theRequest);
+			/*
+			* Save the resource itself
+			*/
+			if (entity.getId().getId() == null) {
+				myEntityManager.persist(entity);
 
-		} else if (entity.getDeleted() != null) {
-			entity = myEntityManager.merge(entity);
+				if (entity.getFhirId() == null) {
+					entity.setFhirId(Long.toString(entity.getId().getId()));
+				}
 
-			postDelete(entity);
+				postPersist(entity, (T) theResource, theRequest);
 
-		} else {
-			entity = myEntityManager.merge(entity);
+			} else if (entity.getDeleted() != null) {
+				entity = myEntityManager.merge(entity);
 
-			postUpdate(entity, (T) theResource, theRequest);
-		}
+				postDelete(entity);
 
-		if (theCreateNewHistoryEntry) {
-			createHistoryEntry(theRequest, theResource, entity, changed);
+			} else {
+				entity = myEntityManager.merge(entity);
+
+				postUpdate(entity, (T) theResource, theRequest);
+			}
+
+			if (theCreateNewHistoryEntry) {
+				createHistoryEntry(theRequest, theResource, entity, changed);
+			}
 		}
 
 		/*
