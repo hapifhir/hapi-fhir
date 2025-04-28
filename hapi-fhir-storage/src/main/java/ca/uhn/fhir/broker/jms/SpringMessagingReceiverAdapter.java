@@ -78,7 +78,7 @@ public class SpringMessagingReceiverAdapter<T> implements IChannelConsumer<T> {
 		}
 		if (theMessageHandler instanceof DisposableBean) {
 			try {
-				((DisposableBean)theMessageHandler).destroy();
+				((DisposableBean) theMessageHandler).destroy();
 			} catch (Exception e) {
 				throw new InternalErrorException("Failed to destroy MessageHandler", e);
 			}
