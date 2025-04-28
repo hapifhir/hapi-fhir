@@ -153,7 +153,6 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGE
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -751,7 +750,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
-		if (!sqlBuilder.haveAtLeastOnePredicate() || isOnlySourcePredicate(theRequest)) {
+		if (!sqlBuilder.haveAtLeastOnePredicate()) {
 			Condition partitionIdPredicate = sqlBuilder
 					.getOrCreateResourceTablePredicateBuilder()
 					.createPartitionIdPredicate(myRequestPartitionId);
@@ -815,11 +814,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * Now perform the search
 		 */
 		executeSearch(theSearchProperties, theSearchQueryExecutors, sqlBuilder);
-	}
-
-	private boolean isOnlySourcePredicate(RequestDetails theRequestDetails) {
-		return theRequestDetails.getParameters().size() == 1
-				&& theRequestDetails.getParameters().containsKey(PARAM_SOURCE);
 	}
 
 	private void executeSearch(
