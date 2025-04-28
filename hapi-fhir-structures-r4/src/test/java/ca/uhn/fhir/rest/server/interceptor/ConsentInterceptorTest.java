@@ -643,6 +643,7 @@ public class ConsentInterceptorTest {
 		// Now perform a page request
 		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
 			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
@@ -660,6 +661,11 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
+
+			verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
+			verify(myConsentSvc, timeout(10000).times(1)).canSeeResource(any(), any(), any());
+			verify(myConsentSvc, timeout(10000).times(3)).willSeeResource(any(), any(), any());
+
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
