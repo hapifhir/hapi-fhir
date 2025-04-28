@@ -62,7 +62,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
-	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatch;
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatchWithLatch;
 
 	@Autowired
 	private IResourceModifiedDao myResourceModifiedDao;
@@ -81,8 +81,8 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	public void beforeRegisterRestHookListenerAndSchedulePoisonPillInterceptor() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myTestMessageListenerWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatch, new ChannelConsumerSettings());
+		myTestMessageListenerWithLatchWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatchWithLatch, new ChannelConsumerSettings());
 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 	}
@@ -146,9 +146,9 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 		// since scheduled tasks are disabled during tests, let's trigger a submission
 		// just like the AsyncResourceModifiedProcessingSchedulerSvc would.
-		myTestMessageListenerWithLatch.setExpectedCount(1);
+		myTestMessageListenerWithLatchWithLatch.setExpectedCount(1);
 		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
-		myTestMessageListenerWithLatch.awaitExpected();
+		myTestMessageListenerWithLatchWithLatch.awaitExpected();
 
 		//then
 		assertCountOfResourcesNeedingSubmission(0);
@@ -189,16 +189,16 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myTestMessageListenerWithLatch.getReceivedMessages()).hasSize(1);
-		ResourceModifiedMessage payload = myTestMessageListenerWithLatch.getLastReceivedMessagePayload();
+		assertThat(myTestMessageListenerWithLatchWithLatch.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = myTestMessageListenerWithLatchWithLatch.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myTestMessageListenerWithLatch.clear();
+		myTestMessageListenerWithLatchWithLatch.clear();
 		return resource;
 	}
 
 	private void assertCountOfResourcesReceivedAtSubscriptionTerminalEndpoint(int expectedCount) {
-		assertThat(myTestMessageListenerWithLatch.getReceivedMessages()).hasSize(expectedCount);
+		assertThat(myTestMessageListenerWithLatchWithLatch.getReceivedMessages()).hasSize(expectedCount);
 	}
 
 	@Configuration

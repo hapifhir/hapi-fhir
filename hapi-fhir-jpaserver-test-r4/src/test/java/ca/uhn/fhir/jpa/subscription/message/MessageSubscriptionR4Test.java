@@ -61,7 +61,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatch;
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatchWithLatch;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -84,8 +84,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myTestMessageListenerWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatch, new ChannelConsumerSettings());
+		myTestMessageListenerWithLatchWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatchWithLatch, new ChannelConsumerSettings());
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
@@ -124,9 +124,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myTestMessageListenerWithLatch.setExpectedCount(1);
+		myTestMessageListenerWithLatchWithLatch.setExpectedCount(1);
 		Observation obs = sendObservation("zoop", "SNOMED-CT", theExplicitSource, theRequestId);
-		myTestMessageListenerWithLatch.awaitExpected();
+		myTestMessageListenerWithLatchWithLatch.awaitExpected();
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
@@ -167,9 +167,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		patient.setActive(true);
 		patient.getMeta().setTag(toSimpleCodingList(theTagsForCreate));
 
-		myTestMessageListenerWithLatch.setExpectedCount(1);
+		myTestMessageListenerWithLatchWithLatch.setExpectedCount(1);
 		IIdType id = myClient.create().resource(patient).execute().getId();
-		myTestMessageListenerWithLatch.awaitExpected();
+		myTestMessageListenerWithLatchWithLatch.awaitExpected();
 
 		Patient receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(receivedPatient.getMeta().getTag()).hasSize(theTagsForCreate.size());
@@ -181,9 +181,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		maybeAddHeaderInterceptor(myClient, theHeaders);
 
-		myTestMessageListenerWithLatch.setExpectedCount(1);
+		myTestMessageListenerWithLatchWithLatch.setExpectedCount(1);
 		myClient.update().resource(patient).execute();
-		myTestMessageListenerWithLatch.awaitExpected();
+		myTestMessageListenerWithLatchWithLatch.awaitExpected();
 
 		receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();;
 
@@ -320,11 +320,11 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myTestMessageListenerWithLatch.getReceivedMessages()).hasSize(1);
-		ResourceModifiedMessage payload = myTestMessageListenerWithLatch.getLastReceivedMessagePayload();
+		assertThat(myTestMessageListenerWithLatchWithLatch.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = myTestMessageListenerWithLatchWithLatch.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myTestMessageListenerWithLatch.clear();
+		myTestMessageListenerWithLatchWithLatch.clear();
 		return (T) resource;
 	}
 
