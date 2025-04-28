@@ -27,30 +27,34 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.type.SqlTypes;
 
-@Entity()
+import static ca.uhn.fhir.rest.api.Constants.MAX_RESOURCE_NAME_LENGTH;
+
+@Entity
 @Table(
 		name = "HFJ_RESOURCE_TYPE",
-		uniqueConstraints = {@UniqueConstraint(name = "IDX_RES_TYPE_NAME", columnNames = "RES_TYPE")})
+		uniqueConstraints = @UniqueConstraint(name = "IDX_RES_TYPE_NAME", columnNames = "RES_TYPE"))
 public class ResourceTypeEntity {
-	public static final int MAX_RES_TYPE_LENGTH = 255;
 
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_TYPE", sequenceName = "SEQ_RESOURCE_TYPE", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_TYPE")
+	@JdbcTypeCode(SqlTypes.SMALLINT)
 	@Column(name = "RES_TYPE_ID")
-	private Integer myResourceTypeId;
+	private Short myResourceTypeId;
 
 	@FullTextField
-	@Column(name = "RES_TYPE", nullable = false, length = MAX_RES_TYPE_LENGTH)
+	@Column(name = "RES_TYPE", nullable = false, length = MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
-	public Integer getResourceTypeId() {
+	public Short getResourceTypeId() {
 		return myResourceTypeId;
 	}
 
-	public void setResourceTypeId(Integer myResourceTypeId) {
+	public void setResourceTypeId(Short myResourceTypeId) {
 		this.myResourceTypeId = myResourceTypeId;
 	}
 
@@ -60,5 +64,15 @@ public class ResourceTypeEntity {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append("ResourceTypeEntity[");
+		b.append("resourceTypeId=").append(myResourceTypeId);
+		b.append(", resourceType=").append(myResourceType);
+		b.append("]");
+		return b.toString();
 	}
 }

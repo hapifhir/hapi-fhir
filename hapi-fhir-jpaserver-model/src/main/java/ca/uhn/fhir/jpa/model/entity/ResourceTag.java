@@ -91,8 +91,12 @@ public class ResourceTag extends BaseTag {
 	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE_ID", nullable = true)
-	private Integer myResourceTypeId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RES_TYPE_ID", foreignKey = @ForeignKey(name = "FK_RESTAG_RES_TYPE"), nullable = true)
+	private ResourceTypeEntity myResourceTypeEntity;
+
+	@Column(name = "RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	private Short myResourceTypeId;
 
 	/**
 	 * Constructor
@@ -110,6 +114,7 @@ public class ResourceTag extends BaseTag {
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId().getId());
 		setResourceType(theResourceTable.getResourceType());
+		setResourceTypeId(theResourceTable.getResourceTypeId());
 		setPartitionId(theRequestPartitionId);
 	}
 
@@ -139,12 +144,16 @@ public class ResourceTag extends BaseTag {
 		myResourceType = theResourceType;
 	}
 
-	public Integer getResourceTypeId() {
+	public Short getResourceTypeId() {
 		return myResourceTypeId;
 	}
 
-	public void setResourceTypeId(Integer theResourceTypeId) {
+	public void setResourceTypeId(Short theResourceTypeId) {
 		myResourceTypeId = theResourceTypeId;
+	}
+
+	public ResourceTypeEntity getResourceTypeEntity() {
+		return myResourceTypeEntity;
 	}
 
 	@PrePersist
@@ -186,6 +195,7 @@ public class ResourceTag extends BaseTag {
 			b.append("partition", getPartitionId().getPartitionId());
 		}
 		b.append("resId", getResourceId());
+		b.append("resTypeId", getResourceTypeId());
 		b.append("tag", getTagId());
 		return b.build();
 	}

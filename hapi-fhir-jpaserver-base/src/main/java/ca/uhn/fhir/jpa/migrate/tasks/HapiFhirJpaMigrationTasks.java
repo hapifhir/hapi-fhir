@@ -176,7 +176,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					version.addTableByColumns("20250422.2", "HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
 
 			resourceType.addColumn("RES_TYPE_ID").nonNullable().type(ColumnTypeEnum.SMALLINT);
-			resourceType.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 255);
+			resourceType.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
 
 			resourceType
 					.addIndex("20250422.3", "IDX_RES_TYPE_NAME")
@@ -187,25 +187,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Map<DriverTypeEnum, String> resTypeInsertion = new HashMap<>();
 			String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES ";
 
-			String resTypeData = getResourceTypeData(DriverTypeEnum.H2_EMBEDDED);
-			resTypeInsertion.put(DriverTypeEnum.H2_EMBEDDED, sql + resTypeData);
-
-			resTypeData = getResourceTypeData(DriverTypeEnum.MSSQL_2012);
-			resTypeInsertion.put(DriverTypeEnum.MSSQL_2012, sql + resTypeData);
-
-			resTypeData = getResourceTypeData(DriverTypeEnum.POSTGRES_9_4);
-			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, sql + resTypeData);
-
-			resTypeData = getResourceTypeData(DriverTypeEnum.ORACLE_12C);
+			resTypeInsertion.put(DriverTypeEnum.H2_EMBEDDED, sql + getResourceTypeData(DriverTypeEnum.H2_EMBEDDED));
+			resTypeInsertion.put(DriverTypeEnum.MSSQL_2012, sql + getResourceTypeData(DriverTypeEnum.MSSQL_2012));
+			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, sql + getResourceTypeData(DriverTypeEnum.POSTGRES_9_4));
 			resTypeInsertion.put(
 					DriverTypeEnum.ORACLE_12C,
-					"INSERT INTO HFJ_RESOURCE_TYPE WITH types AS (SELECT " + resTypeData + " str FROM DUAL)"
+					"INSERT INTO HFJ_RESOURCE_TYPE WITH types AS (SELECT "
+							+ getResourceTypeData(DriverTypeEnum.ORACLE_12C) + " str FROM DUAL)"
 							+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
 							+ "  CONNECT BY LEVEL <= REGEXP_COUNT(str, ',') + 1");
-
-			// ?? DERBY_EMBEDDED, MySQL and MariaDB needed ??
+			// ?? MySQL and MariaDB needed ??
+			resTypeInsertion.put(DriverTypeEnum.MYSQL_5_7, sql + getResourceTypeData(DriverTypeEnum.MYSQL_5_7));
+			resTypeInsertion.put(DriverTypeEnum.MARIADB_10_1, sql + getResourceTypeData(DriverTypeEnum.MARIADB_10_1));
 
 			version.executeRawSql("20250422.10", resTypeInsertion);
+			version.executeRawSql(
+							"20250422.20",
+							"UPDATE SEQ_RESOURCE_TYPE SET next_val = %d'".formatted(RESOURCE_TYPES.size() + 1))
+					.onlyAppliesToPlatforms(DriverTypeEnum.MYSQL_5_7, DriverTypeEnum.MARIADB_10_1);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE
 			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
@@ -4466,11 +4465,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			case H2_EMBEDDED, MSSQL_2012 -> resTypeStream
 					.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
 					.collect(Collectors.joining(","));
+			case MARIADB_10_1, MYSQL_5_7 -> {
+				var data = new StringBuilder();
+				for (int i = 0; i < RESOURCE_TYPES.size(); i++) {
+					data.append("('%d','%s'),".formatted(i + 1, RESOURCE_TYPES.get(i)));
+				}
+				yield data.substring(0, data.length() - 1);
+			}
 			case POSTGRES_9_4 -> resTypeStream
 					.map(t -> "(NEXTVAL('SEQ_RESOURCE_TYPE'),'" + t + "')")
-					.collect(Collectors.joining(","));
-			case MYSQL_5_7, MARIADB_10_1 -> resTypeStream
-					.map(t -> "(" + t + ")")
 					.collect(Collectors.joining(","));
 			case ORACLE_12C -> "'" + resTypeStream.collect(Collectors.joining(",")) + "'";
 			default -> throw new IllegalArgumentException("Unsupported driver type: " + theDriverType);

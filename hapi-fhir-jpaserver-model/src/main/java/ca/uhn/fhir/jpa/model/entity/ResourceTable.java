@@ -38,7 +38,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostPersist;
@@ -394,8 +397,12 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
-	@Column(name = "RES_TYPE_ID", nullable = true)
-	private Integer myResourceTypeId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RES_TYPE_ID", foreignKey = @ForeignKey(name = "FK_RESOURCE_RES_TYPE"), nullable = true)
+	private ResourceTypeEntity myResourceTypeEntity;
+
+	@Column(name = "RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	private Short myResourceTypeId;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
@@ -667,13 +674,17 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	}
 
 	@Override
-	public Integer getResourceTypeId() {
+	public Short getResourceTypeId() {
 		return myResourceTypeId;
 	}
 
-	public ResourceTable setResourceTypeId(Integer theResourceTypeId) {
+	public ResourceTable setResourceTypeId(Short theResourceTypeId) {
 		myResourceTypeId = theResourceTypeId;
 		return this;
+	}
+
+	public ResourceTypeEntity getMyResourceTypeEntity() {
+		return myResourceTypeEntity;
 	}
 
 	@Override
@@ -893,6 +904,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 
 		retVal.setResourceId(myPid.getId());
 		retVal.setResourceType(myResourceType);
+		retVal.setResourceTypeId(myResourceTypeId);
 		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
@@ -937,6 +949,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		b.append("pid", getId().getId());
 		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
+		b.append("resourceTypeId", getResourceTypeId());
 		b.append("version", myVersion);
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
