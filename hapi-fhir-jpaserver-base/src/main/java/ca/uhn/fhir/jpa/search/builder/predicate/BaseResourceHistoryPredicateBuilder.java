@@ -21,14 +21,16 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftAndRightMatchLikeExpression;
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 
-public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder implements ISourcePredicateBuilder {
+public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder
+		implements ISourcePredicateBuilder {
 	protected DbColumn myColumnSourceUri;
 	protected DbColumn myColumnRequestId;
 	protected DbColumn myResourceIdColumn;
 
-	public BaseResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, String theResourceIdColumn) {
+	public BaseResourceHistoryPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, String theResourceIdColumn) {
 		super(theSearchSqlBuilder, theTable);
-		myColumnSourceUri = getTable().addColumn ("SOURCE_URI");
+		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
 		myResourceIdColumn = getTable().addColumn(theResourceIdColumn);
 	}
@@ -41,31 +43,28 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	@Override
 	public Condition createPredicateSourceUri(String theSourceUri) {
 		return combineWithRequestPartitionIdPredicate(
-			getRequestPartitionId(),
-			BinaryCondition.equalTo(myColumnSourceUri, generatePlaceholder(theSourceUri)));
-
+				getRequestPartitionId(), BinaryCondition.equalTo(myColumnSourceUri, generatePlaceholder(theSourceUri)));
 	}
 
 	@Override
 	public Condition createPredicateMissingSourceUri() {
 		return combineWithRequestPartitionIdPredicate(
-			getRequestPartitionId(),
-			UnaryCondition.isNull(myColumnSourceUri));
+				getRequestPartitionId(), UnaryCondition.isNull(myColumnSourceUri));
 	}
 
 	@Override
 	public Condition createPredicateSourceUriWithModifiers(
-		IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
+			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
 
 		Condition condition;
 		if (theQueryParameter.getMissing() != null && !theQueryParameter.getMissing()) {
 			condition = UnaryCondition.isNotNull(myColumnSourceUri);
-		} else if (theQueryParameter instanceof UriParam uriParam && theQueryParameter.getQueryParameterQualifier() != null) {
+		} else if (theQueryParameter instanceof UriParam uriParam
+				&& theQueryParameter.getQueryParameterQualifier() != null) {
 			condition = switch (uriParam.getQualifier()) {
 				case ABOVE -> createPredicateSourceAbove(theSourceUri);
 				case BELOW -> createPredicateSourceBelow(theSourceUri);
-				case CONTAINS -> createPredicateSourceContains(theStorageSetting, theSourceUri);
-			};
+				case CONTAINS -> createPredicateSourceContains(theStorageSetting, theSourceUri);};
 		} else {
 			condition = createPredicateSourceUri(theSourceUri);
 		}
@@ -92,7 +91,8 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 			String containsLikeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			return BinaryCondition.like(upperFunction, generatePlaceholder(containsLikeExpression));
 		} else {
-			throw new MethodNotAllowedException(Msg.code(getContainsModifierDisabledCode()) + ":contains modifier is disabled on this server");
+			throw new MethodNotAllowedException(
+					Msg.code(getContainsModifierDisabledCode()) + ":contains modifier is disabled on this server");
 		}
 	}
 
@@ -101,7 +101,6 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	@Override
 	public Condition createPredicateRequestId(String theRequestId) {
 		return combineWithRequestPartitionIdPredicate(
-			getRequestPartitionId(),
-			BinaryCondition.equalTo(myColumnRequestId, generatePlaceholder(theRequestId)));
+				getRequestPartitionId(), BinaryCondition.equalTo(myColumnRequestId, generatePlaceholder(theRequestId)));
 	}
 }

@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
-public class ResourceHistoryPredicateBuilder extends BaseResourceHistoryPredicateBuilder implements ISourcePredicateBuilder {
+public class ResourceHistoryPredicateBuilder extends BaseResourceHistoryPredicateBuilder
+		implements ISourcePredicateBuilder {
 
 	public static final int CONTAINS_MODIFIER_DISABLED_MSG_CODE = 2417;
 
