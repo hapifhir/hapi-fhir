@@ -112,6 +112,12 @@ public class SubscriptionChannelRegistry {
 		myChannelProducers.put(channelName, producer);
 	}
 
+	/**
+	 * We package the consumer together with its listeners so it can be reused when possible without expensive teardown/rebuild.
+	 * @param theActiveSubscription The active subscription being delivered to
+	 * @param receivingParameters retry parameters
+	 * @return a SubscriptionResourceDeliveryMessageConsumer that packages the consumer with listeners and an api to add/remove listeners
+	 */
 	@Nonnull
 	private SubscriptionResourceDeliveryMessageConsumer buildSubscriptionResourceDeliveryMessageConsumer(
 			ActiveSubscription theActiveSubscription, ReceivingChannelParameters receivingParameters) {
