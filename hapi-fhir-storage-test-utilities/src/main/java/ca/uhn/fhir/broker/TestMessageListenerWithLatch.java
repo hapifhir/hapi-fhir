@@ -46,16 +46,16 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
  * @param <M> The type IMessage<P> that will be handled e.g. {@link ResourceModifiedJsonMessage}
  * @param <P> The type of payload of the message that will be handled e.g. {@link ResourceModifiedMessage}
  */
-public class TestMessageListener<M extends IMessage<P>, P>
+public class TestMessageListenerWithLatch<M extends IMessage<P>, P>
 		implements IMessageListener<P>, IPointcutLatch, AutoCloseable {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestMessageListener.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(TestMessageListenerWithLatch.class);
 	private final PointcutLatch myMessageHandledLatch;
 	private Consumer<IMessage<P>> myCallback;
 	private final Class<P> myPayloadType;
 	private final List<M> myReceivedMessages = Collections.synchronizedList(new ArrayList<>());
 	private final Class<M> myMessageType;
 
-	public TestMessageListener(Class<M> theMessageType, Class<P> thePayloadType) {
+	public TestMessageListenerWithLatch(Class<M> theMessageType, Class<P> thePayloadType) {
 		this(
 				theMessageType,
 				thePayloadType,
@@ -63,11 +63,11 @@ public class TestMessageListener<M extends IMessage<P>, P>
 				null);
 	}
 
-	public TestMessageListener(Class<M> theMessageType, Class<P> thePayloadType, PointcutLatch theMessageHandledLatch) {
+	public TestMessageListenerWithLatch(Class<M> theMessageType, Class<P> thePayloadType, PointcutLatch theMessageHandledLatch) {
 		this(theMessageType, thePayloadType, theMessageHandledLatch, null);
 	}
 
-	public TestMessageListener(
+	public TestMessageListenerWithLatch(
 			Class<M> theMessageType,
 			Class<P> thePayloadType,
 			PointcutLatch theMessageHandledLatch,

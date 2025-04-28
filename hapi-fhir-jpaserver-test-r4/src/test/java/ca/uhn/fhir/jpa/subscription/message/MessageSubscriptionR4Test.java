@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
-import ca.uhn.fhir.broker.TestMessageListener;
+import ca.uhn.fhir.broker.TestMessageListenerWithLatch;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -61,7 +61,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
-	private TestMessageListener<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListener;
+	private TestMessageListenerWithLatch<ResourceModifiedJsonMessage, ResourceModifiedMessage> myTestMessageListenerWithLatch;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -84,8 +84,8 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		myTestMessageListener = new TestMessageListener<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
-		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListener, new ChannelConsumerSettings());
+		myTestMessageListenerWithLatch = new TestMessageListenerWithLatch<>(ResourceModifiedJsonMessage.class, ResourceModifiedMessage.class);
+		myConsumer = myChannelFactory.newMatchingConsumer("my-queue-name", myTestMessageListenerWithLatch, new ChannelConsumerSettings());
 	}
 
 	private Subscription createSubscriptionWithCriteria(String theCriteria) {
@@ -124,9 +124,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myTestMessageListener.setExpectedCount(1);
+		myTestMessageListenerWithLatch.setExpectedCount(1);
 		Observation obs = sendObservation("zoop", "SNOMED-CT", theExplicitSource, theRequestId);
-		myTestMessageListener.awaitExpected();
+		myTestMessageListenerWithLatch.awaitExpected();
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
@@ -167,9 +167,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		patient.setActive(true);
 		patient.getMeta().setTag(toSimpleCodingList(theTagsForCreate));
 
-		myTestMessageListener.setExpectedCount(1);
+		myTestMessageListenerWithLatch.setExpectedCount(1);
 		IIdType id = myClient.create().resource(patient).execute().getId();
-		myTestMessageListener.awaitExpected();
+		myTestMessageListenerWithLatch.awaitExpected();
 
 		Patient receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(receivedPatient.getMeta().getTag()).hasSize(theTagsForCreate.size());
@@ -181,9 +181,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		maybeAddHeaderInterceptor(myClient, theHeaders);
 
-		myTestMessageListener.setExpectedCount(1);
+		myTestMessageListenerWithLatch.setExpectedCount(1);
 		myClient.update().resource(patient).execute();
-		myTestMessageListener.awaitExpected();
+		myTestMessageListenerWithLatch.awaitExpected();
 
 		receivedPatient = fetchSingleResourceFromSubscriptionTerminalEndpoint();;
 
@@ -320,11 +320,11 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myTestMessageListener.getReceivedMessages()).hasSize(1);
-		ResourceModifiedMessage payload = myTestMessageListener.getLastReceivedMessagePayload();
+		assertThat(myTestMessageListenerWithLatch.getReceivedMessages()).hasSize(1);
+		ResourceModifiedMessage payload = myTestMessageListenerWithLatch.getLastReceivedMessagePayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
-		myTestMessageListener.clear();
+		myTestMessageListenerWithLatch.clear();
 		return (T) resource;
 	}
 
