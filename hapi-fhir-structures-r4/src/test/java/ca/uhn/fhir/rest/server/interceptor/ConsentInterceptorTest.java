@@ -394,7 +394,6 @@ public class ConsentInterceptorTest {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
-		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
@@ -628,51 +627,48 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource instanceof Patient) {
+				Patient replacement = new Patient();
+				String idPart = resource.getIdElement().getIdPart();
+				replacement.setId(idPart);
+				replacement.addIdentifier().setSystem("REPLACEMENT-" + idPart);
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+			}
+			return ConsentOutcome.PROCEED;
+		});
 
+		// Perform initial page search
 		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			nextPageLink = bundle.getLink(Constants.LINK_NEXT).getUrl();
+			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT-PTA", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			nextPageLink = response.getLink(Constants.LINK_NEXT).getUrl();
 		}
 
 		// Now perform a page request
-		reset(myConsentSvc);
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
-			if (resource.getIdElement().getIdPart().equals("PTB")) {
-				Patient replacement = new Patient();
-				replacement.setId("PTB");
-				replacement.addIdentifier().setSystem("REPLACEMENT");
-				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
-			}
-			return ConsentOutcome.PROCEED;
-		});
-
 		httpGet = new HttpGet(nextPageLink);
+		String responseContent;
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-
-			verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
-			verify(myConsentSvc, timeout(10000).times(1)).canSeeResource(any(), any(), any());
-			verify(myConsentSvc, timeout(10000).times(3)).willSeeResource(any(), any(), any());
-
-			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
-			assertEquals("REPLACEMENT", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
 		}
 
-		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(2)).startOperation(any(), any());
+		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
+
+		Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+		assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals("REPLACEMENT-PTB", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
 	}
 
 

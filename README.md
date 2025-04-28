@@ -43,4 +43,3 @@ Please see [Smile CDR][Link-SmileCDR] for information on commercial support.
 [Badge-MavenCentral]: https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg
 [Badge-CodeCov]: https://codecov.io/gh/hapifhir/hapi-fhir/branch/master/graph/badge.svg?token=zHfnKfQB9X
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
-
