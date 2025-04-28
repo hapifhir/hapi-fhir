@@ -739,7 +739,7 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
-	public void testPatchResource_withEnamerationAsPrimitiveValue() {
+	public void testPatchResource_withEnumerationAsPrimitiveValue() {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Encounter encounter = new Encounter();
 

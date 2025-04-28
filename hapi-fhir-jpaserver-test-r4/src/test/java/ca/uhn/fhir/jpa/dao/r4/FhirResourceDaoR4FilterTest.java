@@ -297,38 +297,25 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("family ne smith"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 
-		assertThat(found)
-			.hasSize(1)
-			.containsExactlyInAnyOrder(id2)
-			.doesNotContain(id1);
+		assertThat(found).containsExactly(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("family ne jones"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found)
-			.hasSize(1)
-			.containsExactlyInAnyOrder(id1)
-			.doesNotContain(id2);
+		assertThat(found).containsExactly(id1);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ne john"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found)
-			.containsExactlyInAnyOrder(id2)
-			.doesNotContain(id1)
-			.hasSize(1)
-			.containsExactlyInAnyOrder(id2)
-			.doesNotContain(id1);
+		assertThat(found).containsExactly(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("given ne frank"));
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found)
-			.containsExactlyInAnyOrder(id1)
-			.doesNotContain(id2);
+		assertThat(found).containsExactly(id1);
 	}
 
 	@Test
