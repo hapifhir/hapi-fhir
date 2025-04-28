@@ -1021,6 +1021,23 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			boolean isIncludeCodeSystemIgnored = includeOrExcludeSystemResource != null
 					&& includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
 
+			boolean isIncludeFromSystem = isNotBlank(theInclude.getSystem()) && theInclude.getValueSet().isEmpty();
+			boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
+
+			// if we can’t load the CS and we’re configured to ignore it...
+			if (isIncludeCodeSystemIgnored && !theInclude.getFilter().isEmpty()) {
+				// We can’t apply any structural (ISA/DESCENDENT-OF/etc..) filters if the CS is absent → fail
+				String msg = "Unable to expand ValueSet: cannot apply filters '" +
+					theInclude.getFilter() + "' because CodeSystem '" +
+					theInclude.getSystem() + "' is ignored/not-present";
+
+				throw new ExpansionCouldNotBeCompletedInternallyException(
+					Msg.code(2646) + msg,
+					new CodeValidationIssue(msg, IssueSeverity.ERROR,
+						CodeValidationIssueCode.NOT_FOUND,
+						CodeValidationIssueCoding.NOT_FOUND));
+			}
+
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
@@ -1097,9 +1114,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						}
 					}
 				} else {
-					boolean isIncludeFromSystem = isNotBlank(theInclude.getSystem())
-							&& theInclude.getValueSet().isEmpty();
-					boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 					if (isIncludeFromSystem && !isIncludeWithFilter) {
 						if (isIncludeWithDeclaredConcepts) {
 							theInclude.getConcept().stream()
