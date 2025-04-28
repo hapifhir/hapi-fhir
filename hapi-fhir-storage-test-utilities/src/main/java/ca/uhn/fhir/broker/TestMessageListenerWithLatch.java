@@ -63,7 +63,8 @@ public class TestMessageListenerWithLatch<M extends IMessage<P>, P>
 				null);
 	}
 
-	public TestMessageListenerWithLatch(Class<M> theMessageType, Class<P> thePayloadType, PointcutLatch theMessageHandledLatch) {
+	public TestMessageListenerWithLatch(
+			Class<M> theMessageType, Class<P> thePayloadType, PointcutLatch theMessageHandledLatch) {
 		this(theMessageType, thePayloadType, theMessageHandledLatch, null);
 	}
 
