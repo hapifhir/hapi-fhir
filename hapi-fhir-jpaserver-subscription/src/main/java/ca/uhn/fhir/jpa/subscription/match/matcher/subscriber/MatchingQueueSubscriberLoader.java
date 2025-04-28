@@ -23,12 +23,12 @@ import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
-import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringListener;
+import ca.uhn.fhir.util.IoUtils;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,10 +108,10 @@ public class MatchingQueueSubscriberLoader {
 					"Destroying matching Channel {} with name {}",
 					myMatchingConsumer.getClass().getName(),
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
-			CloseUtil.close(myMatchingConsumer);
+			IoUtils.closeQuietly(myMatchingConsumer, ourLog);
 		}
 		if (myMultiplexingListener != null) {
-			CloseUtil.close(myMultiplexingListener);
+			IoUtils.closeQuietly(myMultiplexingListener, ourLog);
 		}
 	}
 }

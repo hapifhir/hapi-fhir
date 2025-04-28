@@ -22,10 +22,10 @@ package ca.uhn.fhir.broker.impl;
 import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
-import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -92,9 +92,15 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 
 	@Override
 	public void close() {
-		mySubListeners.forEach(CloseUtil::close);
+		mySubListeners.forEach(this::closeQuietly);
 		mySubListeners.clear();
 		myClosed = true;
+	}
+
+	private void closeQuietly(IMessageListener<T> theMessageListener) {
+		if (theMessageListener instanceof AutoCloseable) {
+			IoUtils.closeQuietly((AutoCloseable) theMessageListener, ourLog);
+		}
 	}
 
 	private void checkState() {

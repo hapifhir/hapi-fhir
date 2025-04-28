@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.mdm.broker;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
-import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -83,7 +83,7 @@ public class MdmQueueConsumerLoader {
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void stop() throws Exception {
-		CloseUtil.close(myMdmConsumer);
+		IoUtils.closeQuietly(myMdmConsumer, ourLog);
 		ourLog.info("MDM Matching Consumer closed");
 	}
 

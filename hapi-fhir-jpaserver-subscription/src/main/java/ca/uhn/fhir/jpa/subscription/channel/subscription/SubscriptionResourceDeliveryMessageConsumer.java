@@ -22,15 +22,19 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.impl.MultiplexingListener;
-import ca.uhn.fhir.broker.util.CloseUtil;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This holds the Subscription ResourceDeliveryMessage consumer that receives ResourceDeliveryMessage messages
  * and delivers them to listeners.
  */
 public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseable {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionResourceDeliveryMessageConsumer.class);
+
 	private final IChannelConsumer<ResourceDeliveryMessage> myConsumer;
 	private final MultiplexingListener<ResourceDeliveryMessage> myMultiplexingListener;
 
@@ -44,13 +48,15 @@ public class SubscriptionResourceDeliveryMessageConsumer implements AutoCloseabl
 	}
 
 	public boolean removeListener(IMessageListener<ResourceDeliveryMessage> theListener) {
-		CloseUtil.close(theListener);
+		if (theListener instanceof AutoCloseable) {
+			IoUtils.closeQuietly((AutoCloseable) theListener, ourLog);
+		}
 		return myMultiplexingListener.removeListener(theListener);
 	}
 
 	@Override
 	public void close() {
-		CloseUtil.close(myConsumer);
+		IoUtils.closeQuietly(myConsumer, ourLog);
 	}
 
 	public String getChannelName() {
