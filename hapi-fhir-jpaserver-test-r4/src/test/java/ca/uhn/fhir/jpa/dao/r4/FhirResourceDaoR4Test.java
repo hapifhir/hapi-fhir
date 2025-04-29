@@ -4249,7 +4249,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			.toList();
 	}
 
-	//TODO jdjd test if missing end period means ongoing (eg search up to now should include it?)
 	private static Stream<Arguments> timingDateRangeSearchParams() {
 		Date feb6 = new DateTimeType("2025-02-06T14:00:00Z").setTimeZoneZulu(true).getValue();
 		Date feb7 = new DateTimeType("2025-02-07T14:00:00Z").setTimeZoneZulu(true).getValue();
