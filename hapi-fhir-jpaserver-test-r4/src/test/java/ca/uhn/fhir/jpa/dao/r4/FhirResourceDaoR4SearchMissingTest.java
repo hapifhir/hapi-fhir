@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -325,17 +328,19 @@ public class FhirResourceDaoR4SearchMissingTest {
 				notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			}
 
+			long valueQuantityHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+				RequestPartitionId.defaultPartition(), "Observation", "value-quantity");
 			runInTransaction(() -> {
 				ourLog.info("Quantity Indexes:\n * {}",
-						myResourceIndexedSearchParamQuantityDao.findAll().stream()
-								.filter(t -> t.getParamName().equals("value-quantity")).map(ResourceIndexedSearchParamQuantity::toString).collect(Collectors.joining("\n * ")
-								)
-				);
+					myResourceIndexedSearchParamQuantityDao.findAll().stream()
+						.filter(t -> t.getHashIdentity().equals(valueQuantityHashIdentity))
+						.map(ResourceIndexedSearchParamQuantity::toString)
+						.collect(Collectors.joining("\n * ")));
 				ourLog.info("Normalized Quantity Indexes:\n * {}",
-						myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().
-								filter(t -> t.getParamName().equals("value-quantity")).map(ResourceIndexedSearchParamQuantityNormalized::toString).collect(Collectors.joining("\n * ")
-								)
-				);
+					myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().
+						filter(t -> t.getHashIdentity().equals(valueQuantityHashIdentity))
+						.map(ResourceIndexedSearchParamQuantityNormalized::toString)
+						.collect(Collectors.joining("\n * ")));
 			});
 
 			// Quantity Param

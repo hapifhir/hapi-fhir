@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class SubmitDataProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubmitDataProvider.class);
 

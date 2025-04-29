@@ -119,6 +119,13 @@ public class CdsServiceRequestJson extends BaseCdsServiceJson {
 		return myPrefetch.get(theKey);
 	}
 
+	public void removePrefetch(String theKey) {
+		if (myPrefetch == null) {
+			return;
+		}
+		myPrefetch.remove(theKey);
+	}
+
 	public void addContext(String theKey, Object theValue) {
 		getContext().put(theKey, theValue);
 	}

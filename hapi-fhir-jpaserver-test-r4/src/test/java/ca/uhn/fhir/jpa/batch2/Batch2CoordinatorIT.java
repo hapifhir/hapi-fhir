@@ -51,6 +51,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -88,6 +89,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 
 @ContextConfiguration(classes = {
@@ -162,8 +165,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
-	@Autowired
-	IJobPersistence myJobPersistence;
+	@SpyBean
+	private IJobPersistence myJobPersistence;
 
 	@Autowired
 	private RetryPolicyProvider myRetryPolicyProvider;
@@ -713,6 +716,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
 
+		// block deletion for the test
+		doNothing().when(myJobPersistence).deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
+
 		// waiting for the multitude of failures
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
@@ -732,6 +738,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// should contain some of the original error msg, but not all
 		assertTrue(workChunk.getErrorMessage().contains(errorMsg.substring(0, 100)));
 		assertTrue(workChunk.getErrorMessage().startsWith("Too many errors"));
+
+		// now we can delete the job/instance/work chunks
+		myJobDefinitionRegistry.removeJobDefinition(jd.getJobDefinitionId(), jd.getJobDefinitionVersion());
+		myJobPersistence.deleteInstanceAndChunks(instanceId);
 	}
 
 	@Test
@@ -1039,6 +1049,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
 				theHandler.reductionStepConsume(theChunkDetails, null);
 				return ChunkOutcome.SUCCESS();
+			}
+
+			@Override
+			public IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> newInstance() {
+				return this;
 			}
 
 			@Nonnull

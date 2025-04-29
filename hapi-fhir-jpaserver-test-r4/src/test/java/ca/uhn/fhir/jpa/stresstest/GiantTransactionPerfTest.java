@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -124,6 +126,8 @@ public class GiantTransactionPerfTest {
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
 	private JpaStorageSettings myStorageSettings;
+	@Mock
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 	private HapiTransactionService myHapiTransactionService;
 	private DaoRegistry myDaoRegistry;
 	private JpaResourceDao<ExplanationOfBenefit> myEobDao;
@@ -148,7 +152,7 @@ public class GiantTransactionPerfTest {
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 	private final ResourceHistoryCalculator myResourceHistoryCalculator = new ResourceHistoryCalculator(FhirContext.forR4Cached(), false);
@@ -228,6 +232,7 @@ public class GiantTransactionPerfTest {
 		myResourceChangeListenerCacheRefresher.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
+		mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
@@ -250,6 +255,7 @@ public class GiantTransactionPerfTest {
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
 		myDaoSearchParamSynchronizer.setStorageSettings(myStorageSettings);
+		myDaoSearchParamSynchronizer.setSearchParamIdentityCacheSvc(mySearchParamIdentityCacheSvc);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);
@@ -288,6 +294,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		ServletRequestDetails requestDetails = new ServletRequestDetails(myInterceptorSvc);
+		requestDetails.setServer(new RestfulServer());
 		requestDetails.setServletRequest(new MockServletRequest());
 
 		mySystemDao.transaction(requestDetails, input);

@@ -118,12 +118,16 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.persistence.EntityManager;
+
+import java.util.Objects;
+
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.Bundle;
@@ -195,6 +199,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.instance.advisor.BasePolicyAdvisorForFullValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -203,6 +208,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
@@ -487,6 +493,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
 	@Autowired
+	@Qualifier("myBasicDaoR4")
+	protected IFhirResourceDao<Basic> myBasicDao;
+	@Autowired
 	@Qualifier("mySubstanceDaoR4")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
 	@Autowired
@@ -562,6 +571,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
+	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
@@ -1018,11 +1028,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
 		@Override
-		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
-			return ReferenceValidationPolicy.CHECK_VALID;
-		}
-
-		@Override
 		public EnumSet<ResourceValidationAction> policyForResource(IResourceValidator validator, Object appContext,
 																   org.hl7.fhir.r5.model.StructureDefinition type, String path) {
 			return EnumSet.allOf(ResourceValidationAction.class);
@@ -1047,6 +1052,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+		public SpecialValidationAction policyForSpecialValidation(IResourceValidator validator, Object appContext, SpecialValidationRule rule, String stackPath, Element resource, Element element) {
+			return null;
+		}
+
+		@Override
 		public List<org.hl7.fhir.r5.model.StructureDefinition> getImpliedProfilesForResource(IResourceValidator validator, Object appContext, String stackPath, ElementDefinition definition, org.hl7.fhir.r5.model.StructureDefinition structure, Element resource, boolean valid, IMessagingServices msgServices, List<ValidationMessage> messages) {
 			return List.of();
 		}
@@ -1067,6 +1077,25 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		@Override
 		public boolean isSuppressMessageId(String path, String messageId) {
 			return false;
+		}
+
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url, ReferenceDestinationType destinationType) {
+			return ReferenceValidationPolicy.CHECK_VALID;
+		}
+
+		@Override
+		public IValidationPolicyAdvisor getPolicyAdvisor() {
+		  if (Objects.isNull(policyAdvisor)) {
+			  return new BasePolicyAdvisorForFullValidation(getReferencePolicy());
+		  }
+
+		  return policyAdvisor;
+	  }
+
+		@Override
+		public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+			return this;
 		}
 
 		@Override
