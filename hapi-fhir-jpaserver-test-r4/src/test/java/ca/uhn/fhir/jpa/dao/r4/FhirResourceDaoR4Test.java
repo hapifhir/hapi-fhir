@@ -59,6 +59,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
+
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -112,6 +116,7 @@ import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -125,6 +130,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -4186,6 +4193,93 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		params = new SearchParameterMap();
 		params.add(CarePlan.SP_ACTIVITY_DATE, new DateRangeParam("2012-01-01T10:00:00Z", null));
 		assertThat(toUnqualifiedVersionlessIdValues(myCarePlanDao.search(params))).isEmpty();
+	}
+
+	@ParameterizedTest
+	@MethodSource("timingDateRangeSearchParams")
+	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(List<Date> theEventDates, Period period, List<Date> theExpectedDates) {
+		// Given
+		ServiceRequest sr = new ServiceRequest();
+		sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+
+		for (Date date : theEventDates) {
+			Timing.TimingRepeatComponent repeat = new Timing.TimingRepeatComponent();
+			repeat.setBounds(period);
+
+			Timing timing = new Timing();
+			timing.addEvent(date);
+			timing.setRepeat(repeat);
+
+			sr.setOccurrence(timing);
+			myServiceRequestDao.create(sr, mySrd);
+		}
+
+		SearchParameterMap params;
+
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08T14:00:00Z", "2025-02-09T14:00:00Z"));
+		IBundleProvider datetimeSearchResponse =  myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromDatetimeSearch = getEventDatesFromServiceRequestsInSearchResponse(datetimeSearchResponse);
+		assertThat(eventDatesFromDatetimeSearch).containsExactlyElementsOf(theExpectedDates);
+
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08", "2025-02-09"));
+		IBundleProvider ordinalDateSearchResponse = myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(ordinalDateSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromOrdinalSearch = getEventDatesFromServiceRequestsInSearchResponse(ordinalDateSearchResponse);
+		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
+	}
+
+	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider ordinalDateSearchResponse) {
+		return ordinalDateSearchResponse.getAllResources().stream()
+			.filter(res -> res instanceof ServiceRequest)
+			.map(resource -> {
+				ServiceRequest serviceRequest = (ServiceRequest) resource;
+				return serviceRequest.getOccurrenceTiming().getEvent().stream().findFirst().orElse(null);
+			}).filter(Objects::nonNull)
+			.map(DateTimeType::getValue)
+			.toList();
+	}
+
+	//TODO jdjd test if missing end period means ongoing (eg search up to now should include it?)
+	private static Stream<Arguments> timingDateRangeSearchParams() {
+		Date feb6 = new DateTimeType("2025-02-06T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb7 = new DateTimeType("2025-02-07T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb8 = new DateTimeType("2025-02-08T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb9 = new DateTimeType("2025-02-09T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb10 = new DateTimeType("2025-02-10T14:00:00Z").setTimeZoneZulu(true).getValue();
+		Date feb11 = new DateTimeType("2025-02-11T14:00:00Z").setTimeZoneZulu(true).getValue();
+
+		Period periodNoStart = new Period();
+		periodNoStart.setEnd(feb11);
+
+		Period periodNoEnd = new Period();
+		periodNoEnd.setStart(feb7);
+
+		Period periodStartEnd = new Period();
+		periodStartEnd.setStart(feb7);
+		periodStartEnd.setEnd(feb10);
+
+		return Stream.of(
+			// Timing period with no start
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
+			// Timing period with no end
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
+			// Timing period with start and end, event falls within date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls before date range
+			Arguments.of(List.of(feb6, feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb6, feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls after date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10, feb11), periodStartEnd, List.of(feb7, feb8, feb9, feb10, feb11))
+		);
 	}
 
 	@Test
