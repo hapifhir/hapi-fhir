@@ -200,9 +200,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			resTypeInsertion.put(DriverTypeEnum.POSTGRES_9_4, postGresSql);
 
 			String oracleSql = "INSERT INTO HFJ_RESOURCE_TYPE WITH types AS (SELECT "
-				+ getResourceTypeSqlData(DriverTypeEnum.ORACLE_12C, resTypes) + " str FROM DUAL)"
-				+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
-				+ "  CONNECT BY LEVEL <= REGEXP_COUNT(str, ',') + 1";
+					+ getResourceTypeSqlData(DriverTypeEnum.ORACLE_12C, resTypes) + " str FROM DUAL)"
+					+ "  SELECT SEQ_RESOURCE_TYPE.NEXTVAL, REGEXP_SUBSTR(str, '[^,]+', 1, LEVEL) FROM types"
+					+ "  CONNECT BY LEVEL <= REGEXP_COUNT(str, ',') + 1";
 			resTypeInsertion.put(DriverTypeEnum.ORACLE_12C, oracleSql);
 
 			String mySql = sql + getResourceTypeSqlData(DriverTypeEnum.MYSQL_5_7, resTypes);
@@ -213,8 +213,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version.executeRawSql("20250422.10", resTypeInsertion);
 			version.executeRawSql(
-							"20250422.20",
-							"UPDATE SEQ_RESOURCE_TYPE SET next_val = %d'".formatted(resTypes.size() + 1))
+							"20250422.20", "UPDATE SEQ_RESOURCE_TYPE SET next_val = %d'".formatted(resTypes.size() + 1))
 					.onlyAppliesToPlatforms(DriverTypeEnum.MYSQL_5_7, DriverTypeEnum.MARIADB_10_1);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE
