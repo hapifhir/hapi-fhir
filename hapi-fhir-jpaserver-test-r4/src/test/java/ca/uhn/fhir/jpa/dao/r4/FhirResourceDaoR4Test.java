@@ -4197,7 +4197,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("timingDateRangeSearchParams")
-	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(List<Date> theEventDates, Period period, List<Date> theExpectedDates) {
+	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(List<Date> theEventDates, Period thePeriod, List<Date> theExpectedDates) {
 		// Given
 		ServiceRequest sr = new ServiceRequest();
 		sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
@@ -4205,7 +4205,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		for (Date date : theEventDates) {
 			Timing.TimingRepeatComponent repeat = new Timing.TimingRepeatComponent();
-			repeat.setBounds(period);
+			repeat.setBounds(thePeriod);
 
 			Timing timing = new Timing();
 			timing.addEvent(date);
@@ -4238,8 +4238,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
 	}
 
-	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider ordinalDateSearchResponse) {
-		return ordinalDateSearchResponse.getAllResources().stream()
+	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
+		return theDateSearchResponse.getAllResources().stream()
 			.filter(res -> res instanceof ServiceRequest)
 			.map(resource -> {
 				ServiceRequest serviceRequest = (ServiceRequest) resource;
