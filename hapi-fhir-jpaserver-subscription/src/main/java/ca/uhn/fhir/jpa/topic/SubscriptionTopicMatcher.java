@@ -42,7 +42,7 @@ public class SubscriptionTopicMatcher {
 	}
 
 	public InMemoryMatchResult match(ResourceModifiedMessage theMsg) {
-		IBaseResource resource = theMsg.getPayload(mySubscriptionTopicSupport.getFhirContext());
+		IBaseResource resource = theMsg.getResource(mySubscriptionTopicSupport.getFhirContext());
 		String resourceName = resource.fhirType();
 
 		List<SubscriptionTopic.SubscriptionTopicResourceTriggerComponent> triggers = myTopic.getResourceTrigger();

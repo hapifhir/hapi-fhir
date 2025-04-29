@@ -111,7 +111,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
 		} catch (ResourceNotFoundException e) {
 			IdDt idDt = new IdDt(
-					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getResourceType(myFhirContext),
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 
@@ -219,7 +219,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			setOperationType(theMsg.getOperationType());
 			setPartitionId(theMsg.getPartitionId());
 			setTransactionId(theMsg.getTransactionId());
-			setMessageKey(theMsg.getMessageKeyOrNull());
+			setPayloadMessageKey(theMsg.getPayloadMessageKey());
 			copyAdditionalPropertiesFrom(theMsg);
 		}
 	}

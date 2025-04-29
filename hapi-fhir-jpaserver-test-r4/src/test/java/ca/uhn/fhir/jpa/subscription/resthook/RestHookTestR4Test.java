@@ -4,9 +4,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -71,17 +70,15 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	public static final String PATIENT_REFERENCE = "Patient/" + TEST_PATIENT_ID;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
-	@Autowired(required = false)
-	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired
 	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
@@ -533,9 +530,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -550,7 +547,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -607,9 +604,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -624,7 +621,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
