@@ -29,9 +29,16 @@ import ca.uhn.fhir.batch2.coordinator.DefaultJobPartitionProvider;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
+import ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -39,11 +46,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,13 +60,10 @@ public abstract class BaseBatch2Config {
 	IJobPersistence myPersistence;
 
 	@Autowired
-	IChannelFactory myChannelFactory;
+	IBrokerClient myBrokerClient;
 
 	@Autowired
 	IHapiTransactionService myHapiTransactionService;
-
-	@Autowired
-	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
@@ -77,25 +77,13 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public BatchJobSender batchJobSender() {
-		return new BatchJobSender(batch2ProcessingChannelProducer(myChannelFactory));
+		return new BatchJobSender(batch2ProcessingChannelProducer(myBrokerClient));
 	}
 
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(
-			JobDefinitionRegistry theJobDefinitionRegistry,
-			BatchJobSender theBatchJobSender,
-			WorkChunkProcessor theExecutor,
-			IJobMaintenanceService theJobMaintenanceService,
-			IHapiTransactionService theTransactionService) {
-		return new JobCoordinatorImpl(
-				theBatchJobSender,
-				batch2ProcessingChannelReceiver(myChannelFactory),
-				myPersistence,
-				theJobDefinitionRegistry,
-				theExecutor,
-				theJobMaintenanceService,
-				theTransactionService,
-				myInterceptorBroadcaster);
+			JobDefinitionRegistry theJobDefinitionRegistry, IHapiTransactionService theTransactionService) {
+		return new JobCoordinatorImpl(myPersistence, theJobDefinitionRegistry, theTransactionService);
 	}
 
 	@Bean
@@ -125,17 +113,38 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IChannelProducer batch2ProcessingChannelProducer(IChannelFactory theChannelFactory) {
+	public IChannelProducer<JobWorkNotification> batch2ProcessingChannelProducer(IBrokerClient theBrokerClient) {
 		ChannelProducerSettings settings =
 				new ChannelProducerSettings().setConcurrentConsumers(getConcurrentConsumers());
-		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
+		return theBrokerClient.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
-	public IChannelReceiver batch2ProcessingChannelReceiver(IChannelFactory theChannelFactory) {
+	public WorkChannelMessageListener workChannelMessageListener(
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull BatchJobSender theBatchJobSender,
+			@Nonnull WorkChunkProcessor theExecutorSvc,
+			@Nonnull IJobMaintenanceService theJobMaintenanceService,
+			IHapiTransactionService theHapiTransactionService,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new WorkChannelMessageListener(
+				theJobPersistence,
+				theJobDefinitionRegistry,
+				theBatchJobSender,
+				theExecutorSvc,
+				theJobMaintenanceService,
+				theHapiTransactionService,
+				theInterceptorBroadcaster);
+	}
+
+	@Bean
+	public IChannelConsumer<JobWorkNotification> batch2ProcessingChannelConsumer(
+			IBrokerClient theBrokerClient, WorkChannelMessageListener theWorkChannelMessageListener) {
 		ChannelConsumerSettings settings =
 				new ChannelConsumerSettings().setConcurrentConsumers(getConcurrentConsumers());
-		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
+		return theBrokerClient.getOrCreateConsumer(
+				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, theWorkChannelMessageListener, settings);
 	}
 
 	@Bean

@@ -29,9 +29,9 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -54,9 +54,9 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -79,9 +79,9 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
@@ -105,9 +105,9 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
 		Subscription subscription1 = makeActiveSubscription(criteria1, payload, ourListenerServerBase);
-		sendSubscription(subscription1, null, false);
+		sendSubscription(subscription1, null);
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
-		sendSubscription(subscription2, null, false);
+		sendSubscription(subscription2, null);
 
 		assertEquals(2, mySubscriptionRegistry.size());
 
