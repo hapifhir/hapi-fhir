@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server Test Utilities
+ * HAPI FHIR Test Utilities
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
