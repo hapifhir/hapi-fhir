@@ -31,6 +31,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.type.SqlTypes;
 
+import java.util.Objects;
+
 import static ca.uhn.fhir.rest.api.Constants.MAX_RESOURCE_NAME_LENGTH;
 
 @Entity
@@ -64,6 +66,19 @@ public class ResourceTypeEntity {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass()) return false;
+		ResourceTypeEntity that = (ResourceTypeEntity) o;
+		return Objects.equals(myResourceTypeId, that.myResourceTypeId)
+				&& Objects.equals(myResourceType, that.myResourceType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myResourceTypeId, myResourceType);
 	}
 
 	@Override

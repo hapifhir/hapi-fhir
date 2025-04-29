@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
-import java.util.List;
 import java.util.Set;
 
 public class JpaConstants {
