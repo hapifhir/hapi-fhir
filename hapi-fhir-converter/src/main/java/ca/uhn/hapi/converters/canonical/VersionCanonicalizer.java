@@ -195,6 +195,13 @@ public class VersionCanonicalizer {
 	/**
 	 * Canonical version: R4
 	 */
+	public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+		return myStrategy.codeSystemFromCanonical(theCodeSystem);
+	}
+
+	/**
+	 * Canonical version: R4
+	 */
 	public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 		return myStrategy.conceptMapToCanonical(theConceptMap);
 	}
@@ -322,6 +329,8 @@ public class VersionCanonicalizer {
 
 		IBaseResource valueSetFromCanonical(ValueSet theValueSet);
 
+		IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem);
+
 		ConceptMap conceptMapToCanonical(IBaseResource theConceptMap);
 
 		SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter);
@@ -441,6 +450,12 @@ public class VersionCanonicalizer {
 		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
 			Resource valueSetDstu2Hl7Org = VersionConvertorFactory_10_40.convertResource(theValueSet, ADVISOR_10_40);
 			return reencodeFromHl7Org(valueSetDstu2Hl7Org);
+		}
+
+		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			Resource codeSystemDstu2Hl7Org = VersionConvertorFactory_10_40.convertResource(theCodeSystem, ADVISOR_10_40);
+			return reencodeFromHl7Org(codeSystemDstu2Hl7Org);
 		}
 
 		@Override
@@ -591,6 +606,11 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			return VersionConvertorFactory_14_40.convertResource(theCodeSystem, ADVISOR_14_40);
+		}
+
+		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 			return (ConceptMap) VersionConvertorFactory_14_40.convertResource(
 					(org.hl7.fhir.dstu2016may.model.Resource) theConceptMap, ADVISOR_14_40);
@@ -695,6 +715,11 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			return VersionConvertorFactory_30_40.convertResource(theCodeSystem, ADVISOR_30_40);
+		}
+
+		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(
 					(org.hl7.fhir.dstu3.model.Resource) theConceptMap, ADVISOR_30_40);
@@ -791,6 +816,11 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
 			return theValueSet;
+		}
+
+		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			return theCodeSystem;
 		}
 
 		@Override
@@ -909,6 +939,13 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			org.hl7.fhir.r5.model.CodeSystem codeSystemR5 = (org.hl7.fhir.r5.model.CodeSystem)
+				VersionConvertorFactory_40_50.convertResource(theCodeSystem, ADVISOR_40_50);
+			return VersionConvertorFactory_43_50.convertResource(codeSystemR5, ADVISOR_43_50);
+		}
+
+		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 			org.hl7.fhir.r5.model.ConceptMap conceptMapR5 =
 					(org.hl7.fhir.r5.model.ConceptMap) VersionConvertorFactory_43_50.convertResource(
@@ -1015,6 +1052,11 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
 			return VersionConvertorFactory_40_50.convertResource(theValueSet, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
+			return VersionConvertorFactory_40_50.convertResource(theCodeSystem, ADVISOR_40_50);
 		}
 
 		@Override
