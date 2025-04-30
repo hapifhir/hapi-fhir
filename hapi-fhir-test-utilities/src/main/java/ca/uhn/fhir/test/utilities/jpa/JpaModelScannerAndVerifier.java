@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.ClassPath;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
@@ -352,23 +353,26 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
-				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
-
-				// Validate FK naming.
-				// temporarily allow two hibernate legacy sp fk names until we fix them
-				List<String> legacySPHibernateFKNames = Arrays.asList(
-					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
-				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
-					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
-
-				if (ourIndexNameToColumn.containsKey(fk.name())) {
-					// this foreign key has the same name as an existing index
-					// let's make sure it's on the same column
-					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
-					assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
+				if (fk.value() == ConstraintMode.NO_CONSTRAINT) {
+					Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " is NO_CONSTRAINT so it should have no name()");
 				} else {
-					// verify it's not a duplicate
-					assertNotADuplicateName(fk.name(), theNames);
+					Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
+					// Validate FK naming.
+					// temporarily allow two hibernate legacy sp fk names until we fix them
+					List<String> legacySPHibernateFKNames = Arrays.asList(
+						"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+					Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
+						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
+
+					if (ourIndexNameToColumn.containsKey(fk.name())) {
+						// this foreign key has the same name as an existing index
+						// let's make sure it's on the same column
+						Collection<String> columns = ourIndexNameToColumn.get(fk.name());
+						assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
+					} else {
+						// verify it's not a duplicate
+						assertNotADuplicateName(fk.name(), theNames);
+					}
 				}
 			}
 		}
