@@ -56,20 +56,22 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	public Condition createPredicateSourceUriWithModifiers(
 			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
 
-		Condition condition;
 		if (theQueryParameter.getMissing() != null && !theQueryParameter.getMissing()) {
-			condition = UnaryCondition.isNotNull(myColumnSourceUri);
-		} else if (theQueryParameter instanceof UriParam uriParam
-				&& theQueryParameter.getQueryParameterQualifier() != null) {
-			condition = switch (uriParam.getQualifier()) {
-				case ABOVE -> createPredicateSourceAbove(theSourceUri);
-				case BELOW -> createPredicateSourceBelow(theSourceUri);
-				case CONTAINS -> createPredicateSourceContains(theStorageSetting, theSourceUri);};
-		} else {
-			condition = createPredicateSourceUri(theSourceUri);
+			UnaryCondition condition = UnaryCondition.isNotNull(myColumnSourceUri);
+			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), condition);
 		}
 
-		return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), condition);
+		if (theQueryParameter instanceof UriParam uriParam && theQueryParameter.getQueryParameterQualifier() != null) {
+			Condition condition =
+					switch (uriParam.getQualifier()) {
+						case ABOVE -> createPredicateSourceAbove(theSourceUri);
+						case BELOW -> createPredicateSourceBelow(theSourceUri);
+						case CONTAINS -> createPredicateSourceContains(theStorageSetting, theSourceUri);
+					};
+			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), condition);
+		}
+
+		return createPredicateSourceUri(theSourceUri);
 	}
 
 	private Condition createPredicateSourceAbove(String theSourceUri) {
