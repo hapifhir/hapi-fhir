@@ -971,11 +971,11 @@ public abstract class BaseTransactionProcessor {
 					break;
 				}
 				case POST: {
-					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
 							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-									theRequestDetails, requestUrl);
-
+									theRequestDetails, resourceType);
 					break;
 				}
 				case PUT: {
