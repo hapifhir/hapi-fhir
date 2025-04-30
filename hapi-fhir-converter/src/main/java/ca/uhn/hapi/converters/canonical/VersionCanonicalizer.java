@@ -454,7 +454,8 @@ public class VersionCanonicalizer {
 
 		@Override
 		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
-			Resource codeSystemDstu2Hl7Org = VersionConvertorFactory_10_40.convertResource(theCodeSystem, ADVISOR_10_40);
+			Resource codeSystemDstu2Hl7Org =
+					VersionConvertorFactory_10_40.convertResource(theCodeSystem, ADVISOR_10_40);
 			return reencodeFromHl7Org(codeSystemDstu2Hl7Org);
 		}
 
@@ -545,9 +546,7 @@ public class VersionCanonicalizer {
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
 			}
-			return (Resource) myDstu2Hl7OrgContext
-					.newJsonParser()
-					.parseResource(encodeAsString(theInput));
+			return (Resource) myDstu2Hl7OrgContext.newJsonParser().parseResource(encodeAsString(theInput));
 		}
 
 		private IBaseResource reencodeFromHl7Org(Resource theInput) {
@@ -557,16 +556,14 @@ public class VersionCanonicalizer {
 			if (myHl7OrgStructures) {
 				return theInput;
 			}
-			return myDstu2Context
-					.newJsonParser()
-					.parseResource(encodeAsString(theInput));
+			return myDstu2Context.newJsonParser().parseResource(encodeAsString(theInput));
 		}
 
-		private String encodeAsString(IBaseResource theResource){
+		private String encodeAsString(IBaseResource theResource) {
 			FhirVersionEnum version = theResource.getStructureFhirVersionEnum();
-			if (myDstu2Context.getVersion().getVersion().equals(version)){
+			if (myDstu2Context.getVersion().getVersion().equals(version)) {
 				return myDstu2Context.newJsonParser().encodeResourceToString(theResource);
-			} else if (myDstu2Hl7OrgContext.getVersion().getVersion().equals(version)){
+			} else if (myDstu2Hl7OrgContext.getVersion().getVersion().equals(version)) {
 				return myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theResource);
 			} else {
 				throw new IllegalArgumentException("Cannot encode resource with version: %s".formatted(version));
@@ -947,7 +944,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource codeSystemFromCanonical(CodeSystem theCodeSystem) {
 			org.hl7.fhir.r5.model.CodeSystem codeSystemR5 = (org.hl7.fhir.r5.model.CodeSystem)
-				VersionConvertorFactory_40_50.convertResource(theCodeSystem, ADVISOR_40_50);
+					VersionConvertorFactory_40_50.convertResource(theCodeSystem, ADVISOR_40_50);
 			return VersionConvertorFactory_43_50.convertResource(codeSystemR5, ADVISOR_43_50);
 		}
 

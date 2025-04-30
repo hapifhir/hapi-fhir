@@ -1041,18 +1041,18 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	private Function<String, org.hl7.fhir.r5.model.ValueSet> newValueSetLoader(
 			ValidationSupportContext theValidationSupportContext) {
 		return t -> {
-			IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+			IBaseResource valueSet =
+					theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
 		};
 	}
 
 	private Function<String, CodeSystem> newCodeSystemLoader(ValidationSupportContext theValidationSupportContext) {
 		FhirVersionEnum version = myCtx.getVersion().getVersion();
-		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)){
+		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)) {
 			return t -> {
-				IBaseResource codeSystem = theValidationSupportContext
-					.getRootValidationSupport()
-					.fetchCodeSystem(t);
+				IBaseResource codeSystem =
+						theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 				CodeSystem retVal = null;
 				if (codeSystem != null) {
 					retVal = new CodeSystem();
@@ -1061,7 +1061,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						addCodesDstu2(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
 					} else {
 						org.hl7.fhir.dstu2.model.ValueSet codeSystemCasted =
-							(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
+								(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
 						retVal.setUrl(codeSystemCasted.getUrl());
 						addCodesDstu2Hl7Org(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
 					}
@@ -1070,7 +1070,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			};
 		} else {
 			return t -> {
-				IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+				IBaseResource codeSystem =
+						theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 				return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
 			};
 		}

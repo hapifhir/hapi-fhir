@@ -438,9 +438,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		IBaseResource normalized = myVersionCanonicalizer.codeSystemFromCanonical(retVal);
-		Set<FhirVersionEnum> nullableVersions = Set.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2_1);
-		boolean isNullableVersion = nullableVersions.contains(getFhirContext().getVersion().getVersion());
-		if (!isNullableVersion){
+		Set<FhirVersionEnum> nullableVersions =
+				Set.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2_1);
+		boolean isNullableVersion =
+				nullableVersions.contains(getFhirContext().getVersion().getVersion());
+		if (!isNullableVersion) {
 			Objects.requireNonNull(normalized);
 		}
 
