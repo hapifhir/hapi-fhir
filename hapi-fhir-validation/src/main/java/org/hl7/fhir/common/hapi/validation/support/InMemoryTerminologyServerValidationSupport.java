@@ -142,64 +142,18 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode)
 			throws ExpansionCouldNotBeCompletedInternallyException {
-		ValueSetAndMessages expansion;
-		switch (getFhirVersionEnum(
-				theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand)) {
-			case DSTU2: {
-				expansion = expandValueSetDstu2(
-						theValidationSupportContext,
-						(ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				expansion = expandValueSetDstu2Hl7Org(
-						theValidationSupportContext,
-						(ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU3: {
-				expansion = expandValueSetDstu3(
-						theValidationSupportContext,
-						(org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R4: {
-				expansion = expandValueSetR4(
-						theValidationSupportContext,
-						(org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R4B: {
-				expansion = expandValueSetR4B(
-						theValidationSupportContext,
-						(org.hl7.fhir.r4b.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R5: {
-				expansion = expandValueSetR5(
-						theValidationSupportContext,
-						(org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(Msg.code(698) + "Can not handle version: "
-						+ myCtx.getVersion().getVersion());
+		FhirVersionEnum version = getFhirVersionEnum(
+			theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand);
+		if (FhirVersionEnum.DSTU2.equals(version)) {
+			return expandValueSetDstu2(
+				theValidationSupportContext,
+				(ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand,
+				theWantSystemUrlAndVersion,
+				theWantCode);
+		} else {
+			org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theValueSetToExpand);
+			return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 		}
-
-		return expansion;
 	}
 
 	@Override
@@ -663,17 +617,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	@Nullable
-	private ValueSetAndMessages expandValueSetDstu2Hl7Org(
-			ValidationSupportContext theValidationSupportContext,
-			ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theInput);
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
-	@Nullable
 	private ValueSetAndMessages expandValueSetDstu2(
 			ValidationSupportContext theValidationSupportContext,
 			ca.uhn.fhir.model.dstu2.resource.ValueSet theInput,
@@ -739,39 +682,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			theTargetList.add(targetConcept);
 			addCodesDstu2(nextSource.getConcept(), targetConcept.getConcept());
 		}
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetDstu3(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.dstu3.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theInput);
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetR4(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.r4.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theInput);
-		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetR4B(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.r4b.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theInput);
-		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 	}
 
 	@Nullable
