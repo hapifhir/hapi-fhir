@@ -43,8 +43,10 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.cache.ResourceTypeCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
@@ -62,6 +64,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -592,6 +595,14 @@ public class JpaConfig {
 			@Autowired MemoryCacheService theMemoryCacheService) {
 		return new SearchParamIdentityCacheSvcImpl(
 				myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
+	}
+
+	@Bean
+	public IResourceTypeCacheSvc resourceTypeCacheSvc(
+			@Autowired IResourceTypeDao theResourceTypeDao,
+			@Autowired PlatformTransactionManager theTxManager,
+			@Autowired MemoryCacheService theMemoryCacheService) {
+		return new ResourceTypeCacheSvcImpl(theResourceTypeDao, theTxManager, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *
