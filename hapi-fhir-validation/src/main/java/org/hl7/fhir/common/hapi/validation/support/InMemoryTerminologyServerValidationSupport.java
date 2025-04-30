@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
@@ -606,22 +605,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return codeValidationResult.asLookupCodeResult(system, code);
 	}
 
-	@Nullable
-	private ValueSetAndMessages expandValueSetDstu2(
-			ValidationSupportContext theValidationSupportContext,
-			ca.uhn.fhir.model.dstu2.resource.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG).newJsonParser();
-		IParser parserHapi = FhirContext.forDstu2Cached().newJsonParser();
-
-		org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(
-				org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(theInput));
-		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(valueSetRi);
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		if (isBlank(theSystem)) {
@@ -1057,35 +1040,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private Function<String, org.hl7.fhir.r5.model.ValueSet> newValueSetLoader(
 			ValidationSupportContext theValidationSupportContext) {
-		FhirVersionEnum version = myCtx.getVersion().getVersion();
-		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)){
-				return t -> {
-					IBaseResource vs = theValidationSupportContext
-							.getRootValidationSupport()
-							.fetchValueSet(t);
-					if (vs instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet) {
-						IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG)
-								.newJsonParser();
-						IParser parserHapi = FhirContext.forDstu2Cached().newJsonParser();
-						ca.uhn.fhir.model.dstu2.resource.ValueSet valueSet =
-								(ca.uhn.fhir.model.dstu2.resource.ValueSet) vs;
-						org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(
-								org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(valueSet));
-						return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSetRi);
-					} else {
-						org.hl7.fhir.dstu2.model.ValueSet valueSet =
-								(org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext
-										.getRootValidationSupport()
-										.fetchValueSet(t);
-						return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
-					}
-				};
-		} else {
-			return t -> {
-				IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
-				return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
-			};
-		}
+		return t -> {
+			IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+			return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
+		};
 	}
 
 	private Function<String, CodeSystem> newCodeSystemLoader(ValidationSupportContext theValidationSupportContext) {
