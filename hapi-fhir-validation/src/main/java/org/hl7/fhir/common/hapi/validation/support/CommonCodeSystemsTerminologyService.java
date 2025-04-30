@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -437,7 +438,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		IBaseResource normalized = myVersionCanonicalizer.codeSystemFromCanonical(retVal);
-		Objects.requireNonNull(normalized);
+		Set<FhirVersionEnum> nullableVersions = Set.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2_1);
+		boolean isNullableVersion = nullableVersions.contains(getFhirContext().getVersion().getVersion());
+		if (!isNullableVersion){
+			Objects.requireNonNull(normalized);
+		}
 
 		return normalized;
 	}

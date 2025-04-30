@@ -539,6 +539,9 @@ public class VersionCanonicalizer {
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
+			if (theInput == null) {
+				return null;
+			}
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
 			}
@@ -548,6 +551,9 @@ public class VersionCanonicalizer {
 		}
 
 		private IBaseResource reencodeFromHl7Org(Resource theInput) {
+			if (theInput == null) {
+				return null;
+			}
 			if (myHl7OrgStructures) {
 				return theInput;
 			}
