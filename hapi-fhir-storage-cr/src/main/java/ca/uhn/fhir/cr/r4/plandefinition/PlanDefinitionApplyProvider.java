@@ -253,7 +253,7 @@ public class PlanDefinitionApplyProvider {
 				.create(theRequestDetails)
 				.applyR5(
 						Eithers.for3(canonicalType, theId, thePlanDefinition),
-						theSubject,
+						List.of(theSubject),
 						theEncounter,
 						thePractitioner,
 						theOrganization,
@@ -300,7 +300,7 @@ public class PlanDefinitionApplyProvider {
 				.create(theRequestDetails)
 				.applyR5(
 						Eithers.for3(canonicalType, null, thePlanDefinition),
-						theSubject,
+						List.of(theSubject),
 						theEncounter,
 						thePractitioner,
 						theOrganization,
