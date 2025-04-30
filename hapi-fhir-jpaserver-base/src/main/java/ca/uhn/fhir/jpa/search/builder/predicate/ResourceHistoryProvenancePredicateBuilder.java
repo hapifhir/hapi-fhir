@@ -51,7 +51,8 @@ public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredic
 	/**
 	 * Constructor
 	 */
-	public ResourceHistoryProvenancePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+	public ResourceHistoryProvenancePredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER_PROV"), thePartitionSettings);
 
 		myResourceIdColumn = getTable().addColumn("RES_PID");

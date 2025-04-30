@@ -41,9 +41,8 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	private final DbTable myTable;
 	private final DbColumn myColumnPartitionId;
 
-	BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder,
-								DbTable theTable,
-								PartitionSettings thePartitionSettings) {
+	BaseJoiningPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
 		super(theSearchSqlBuilder, thePartitionSettings);
 		myTable = theTable;
 		myColumnPartitionId = theTable.addColumn("PARTITION_ID");

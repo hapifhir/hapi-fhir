@@ -50,7 +50,8 @@ public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder
 	/**
 	 * Constructor
 	 */
-	public ResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+	public ResourceHistoryPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"), thePartitionSettings);
 
 		myResourceIdColumn = getTable().addColumn("RES_ID");

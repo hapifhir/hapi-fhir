@@ -64,14 +64,16 @@ public class SubscriptionRulesInterceptor {
 	private boolean myValidateRestHookEndpointIsReachable;
 
 	public SubscriptionRulesInterceptor(
-		@Nonnull FhirContext theFhirContext, @Nonnull SubscriptionSettings theSubscriptionSettings,
-		PartitionSettings thePartitionSettings) {
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			PartitionSettings thePartitionSettings) {
 		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		Validate.notNull(theSubscriptionSettings, "SubscriptionSettings must not be null");
 
 		myFhirContext = theFhirContext;
 		myVersion = myFhirContext.getVersion().getVersion();
-		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, theSubscriptionSettings, thePartitionSettings);
+		mySubscriptionCanonicalizer =
+				new SubscriptionCanonicalizer(myFhirContext, theSubscriptionSettings, thePartitionSettings);
 	}
 
 	/**

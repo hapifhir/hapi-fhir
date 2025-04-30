@@ -36,10 +36,12 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 	/**
 	 * Constructor
 	 */
-	public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+	public ComboUniqueSearchParameterPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		super(
 				theSearchSqlBuilder,
-				theSearchSqlBuilder.addTable(ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ), thePartitionSettings);
+				theSearchSqlBuilder.addTable(ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ),
+				thePartitionSettings);
 
 		myColumnString = getTable().addColumn("IDX_STRING");
 	}

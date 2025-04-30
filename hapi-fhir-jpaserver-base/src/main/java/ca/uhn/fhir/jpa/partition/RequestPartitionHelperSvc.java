@@ -40,9 +40,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	public RequestPartitionHelperSvc() {
-	}
-
+	public RequestPartitionHelperSvc() {}
 	;
 
 	@Override
@@ -66,11 +64,11 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 					partition = myPartitionConfigSvc.getPartitionById(id);
 				} catch (IllegalArgumentException e) {
 					String msg = myFhirContext
-						.getLocalizer()
-						.getMessage(
-							BaseRequestPartitionHelperSvc.class,
-							"unknownPartitionId",
-							theRequestPartitionId.getPartitionIds().get(i));
+							.getLocalizer()
+							.getMessage(
+									BaseRequestPartitionHelperSvc.class,
+									"unknownPartitionId",
+									theRequestPartitionId.getPartitionIds().get(i));
 					throw new ResourceNotFoundException(Msg.code(1316) + msg);
 				}
 			}
@@ -78,16 +76,16 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			if (theRequestPartitionId.hasPartitionNames()) {
 				if (partition == null) {
 					Validate.isTrue(
-						theRequestPartitionId.getPartitionIds().get(i) == null,
-						"Partition %s must not have an ID",
-						JpaConstants.DEFAULT_PARTITION_NAME);
+							theRequestPartitionId.getPartitionIds().get(i) == null,
+							"Partition %s must not have an ID",
+							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
 					Validate.isTrue(
-						Objects.equals(
-							theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
-						"Partition name %s does not match ID %s",
-						theRequestPartitionId.getPartitionNames().get(i),
-						theRequestPartitionId.getPartitionIds().get(i));
+							Objects.equals(
+									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
+							"Partition name %s does not match ID %s",
+							theRequestPartitionId.getPartitionNames().get(i),
+							theRequestPartitionId.getPartitionIds().get(i));
 				}
 			} else {
 				if (names == null) {
@@ -107,7 +105,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				partitionIdsToUse = partitionIds;
 			}
 			return RequestPartitionId.forPartitionIdsAndNames(
-				names, partitionIdsToUse, theRequestPartitionId.getPartitionDate());
+					names, partitionIdsToUse, theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;
@@ -121,14 +119,14 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			PartitionEntity partition;
 			try {
 				partition = myPartitionConfigSvc.getPartitionByName(
-					theRequestPartitionId.getPartitionNames().get(i));
+						theRequestPartitionId.getPartitionNames().get(i));
 			} catch (IllegalArgumentException e) {
 				String msg = myFhirContext
-					.getLocalizer()
-					.getMessage(
-						BaseRequestPartitionHelperSvc.class,
-						"unknownPartitionName",
-						theRequestPartitionId.getPartitionNames().get(i));
+						.getLocalizer()
+						.getMessage(
+								BaseRequestPartitionHelperSvc.class,
+								"unknownPartitionName",
+								theRequestPartitionId.getPartitionNames().get(i));
 				throw new ResourceNotFoundException(Msg.code(1317) + msg);
 			}
 
@@ -136,15 +134,15 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				Integer partitionId = theRequestPartitionId.getPartitionIds().get(i);
 				if (partition == null) {
 					Validate.isTrue(
-						partitionId == null || partitionId.equals(myPartitionSettings.getDefaultPartitionId()),
-						"Partition %s must not have an ID",
-						JpaConstants.DEFAULT_PARTITION_NAME);
+							partitionId == null || partitionId.equals(myPartitionSettings.getDefaultPartitionId()),
+							"Partition %s must not have an ID",
+							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
 					Validate.isTrue(
-						Objects.equals(partitionId, partition.getId()),
-						"Partition ID %s does not match name %s",
-						partitionId,
-						theRequestPartitionId.getPartitionNames().get(i));
+							Objects.equals(partitionId, partition.getId()),
+							"Partition ID %s does not match name %s",
+							partitionId,
+							theRequestPartitionId.getPartitionNames().get(i));
 				}
 			} else {
 				if (ids == null) {
@@ -160,7 +158,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 		if (ids != null) {
 			return RequestPartitionId.forPartitionIdsAndNames(
-				theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
+					theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;

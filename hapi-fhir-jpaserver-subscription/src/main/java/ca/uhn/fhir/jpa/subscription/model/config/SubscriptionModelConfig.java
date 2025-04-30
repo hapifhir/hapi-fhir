@@ -32,8 +32,9 @@ public class SubscriptionModelConfig {
 
 	@Bean
 	public SubscriptionCanonicalizer subscriptionCanonicalizer(
-		FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings,
-		PartitionSettings thePartitionSettings) {
+			FhirContext theFhirContext,
+			SubscriptionSettings theSubscriptionSettings,
+			PartitionSettings thePartitionSettings) {
 		return new SubscriptionCanonicalizer(theFhirContext, theSubscriptionSettings, thePartitionSettings);
 	}
 

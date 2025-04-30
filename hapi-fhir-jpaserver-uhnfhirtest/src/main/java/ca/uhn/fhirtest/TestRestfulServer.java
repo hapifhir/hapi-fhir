@@ -369,7 +369,9 @@ public class TestRestfulServer extends RestfulServer {
 
 		// Subscription Validation
 		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(
-				myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class), myAppCtx.getBean(PartitionSettings.class));
+				myAppCtx.getBean(FhirContext.class),
+				myAppCtx.getBean(SubscriptionSettings.class),
+				myAppCtx.getBean(PartitionSettings.class));
 		subscriptionCriteriaValidation.addAllowedCriteriaPattern(
 				SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		subscriptionCriteriaValidation.setValidateRestHookEndpointIsReachable(true);

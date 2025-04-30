@@ -58,7 +58,8 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
 	}
 
-	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
+	public BaseSearchParamPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
 		super(theSearchSqlBuilder, theTable, thePartitionSettings);
 
 		myColumnResId = getTable().addColumn("RES_ID");

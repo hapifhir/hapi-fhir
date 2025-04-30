@@ -76,7 +76,10 @@ public class SubscriptionCanonicalizer {
 	private IRequestPartitionHelperSvc myHelperSvc;
 
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings, PartitionSettings thePartitionSettings) {
+	public SubscriptionCanonicalizer(
+			FhirContext theFhirContext,
+			SubscriptionSettings theSubscriptionSettings,
+			PartitionSettings thePartitionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
 	}

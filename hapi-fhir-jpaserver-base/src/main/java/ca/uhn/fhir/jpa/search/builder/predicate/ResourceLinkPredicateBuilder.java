@@ -137,7 +137,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(
-		QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings, boolean theReversed) {
+			QueryStack theQueryStack,
+			SearchQueryBuilder theSearchSqlBuilder,
+			PartitionSettings thePartitionSettings,
+			boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"), thePartitionSettings);
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");

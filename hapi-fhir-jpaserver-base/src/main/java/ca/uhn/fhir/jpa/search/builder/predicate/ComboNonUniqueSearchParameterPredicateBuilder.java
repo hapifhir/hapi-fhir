@@ -38,7 +38,8 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 	/**
 	 * Constructor
 	 */
-	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+	public ComboNonUniqueSearchParameterPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"), thePartitionSettings);
 
 		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");
