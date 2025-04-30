@@ -142,18 +142,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode)
 			throws ExpansionCouldNotBeCompletedInternallyException {
-		FhirVersionEnum version = getFhirVersionEnum(
-			theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand);
-		if (FhirVersionEnum.DSTU2.equals(version)) {
-			return expandValueSetDstu2(
-				theValidationSupportContext,
-				(ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand,
-				theWantSystemUrlAndVersion,
-				theWantCode);
-		} else {
-			org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theValueSetToExpand);
-			return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
-		}
+		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theValueSetToExpand);
+		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 	}
 
 	@Override
