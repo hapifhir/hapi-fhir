@@ -1157,9 +1157,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private Function<String, org.hl7.fhir.r5.model.ValueSet> newValueSetLoader(
 			ValidationSupportContext theValidationSupportContext) {
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
+		FhirVersionEnum version = myCtx.getVersion().getVersion();
+		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)){
 				return t -> {
 					IBaseResource vs = theValidationSupportContext
 							.getRootValidationSupport()
@@ -1181,92 +1180,41 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
 					}
 				};
-			case DSTU3:
-				return t -> {
-					org.hl7.fhir.dstu3.model.ValueSet valueSet =
-							(org.hl7.fhir.dstu3.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
-				};
-			case R4:
-				return t -> {
-					org.hl7.fhir.r4.model.ValueSet valueSet =
-							(org.hl7.fhir.r4.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
-				};
-			case R4B:
-				return t -> {
-					org.hl7.fhir.r4b.model.ValueSet valueSet =
-							(org.hl7.fhir.r4b.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
-				};
-			default:
-			case DSTU2_1:
-			case R5:
-				return t -> (org.hl7.fhir.r5.model.ValueSet)
-						theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+		} else {
+			return t -> {
+				IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+				return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
+			};
 		}
 	}
 
 	private Function<String, CodeSystem> newCodeSystemLoader(ValidationSupportContext theValidationSupportContext) {
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-				return t -> {
-					IBaseResource codeSystem = theValidationSupportContext
-							.getRootValidationSupport()
-							.fetchCodeSystem(t);
-					CodeSystem retVal = null;
-					if (codeSystem != null) {
-						retVal = new CodeSystem();
-						if (codeSystem instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet) {
-							ca.uhn.fhir.model.dstu2.resource.ValueSet codeSystemCasted =
-									(ca.uhn.fhir.model.dstu2.resource.ValueSet) codeSystem;
-							retVal.setUrl(codeSystemCasted.getUrl());
-							addCodesDstu2(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
-						} else {
-							org.hl7.fhir.dstu2.model.ValueSet codeSystemCasted =
-									(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
-							retVal.setUrl(codeSystemCasted.getUrl());
-							addCodesDstu2Hl7Org(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
-						}
+		FhirVersionEnum version = myCtx.getVersion().getVersion();
+		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)){
+			return t -> {
+				IBaseResource codeSystem = theValidationSupportContext
+					.getRootValidationSupport()
+					.fetchCodeSystem(t);
+				CodeSystem retVal = null;
+				if (codeSystem != null) {
+					retVal = new CodeSystem();
+					if (codeSystem instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet codeSystemCasted) {
+						retVal.setUrl(codeSystemCasted.getUrl());
+						addCodesDstu2(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
+					} else {
+						org.hl7.fhir.dstu2.model.ValueSet codeSystemCasted =
+							(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
+						retVal.setUrl(codeSystemCasted.getUrl());
+						addCodesDstu2Hl7Org(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
 					}
-					return retVal;
-				};
-			case DSTU3:
-				return t -> {
-					org.hl7.fhir.dstu3.model.CodeSystem codeSystem =
-							(org.hl7.fhir.dstu3.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
-				};
-			case R4:
-				return t -> {
-					org.hl7.fhir.r4.model.CodeSystem codeSystem =
-							(org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
-				};
-			case R4B:
-				return t -> {
-					org.hl7.fhir.r4b.model.CodeSystem codeSystem =
-							(org.hl7.fhir.r4b.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
-				};
-			case DSTU2_1:
-			case R5:
-			default:
-				return t -> (org.hl7.fhir.r5.model.CodeSystem)
-						theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+				}
+				return retVal;
+			};
+		} else {
+			return t -> {
+				IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+				return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
+			};
 		}
 	}
 
