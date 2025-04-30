@@ -153,10 +153,15 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	private String myRequestId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_TYPE_ID", foreignKey = @ForeignKey(name = "FK_RESVER_RES_TYPE"), nullable = true)
+	@JoinColumn(
+			name = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(name = "FK_RESVER_RES_TYPE"),
+			insertable = false,
+			updatable = false,
+			nullable = true)
 	private ResourceTypeEntity myResourceTypeEntity;
 
-	@Column(name = "RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "RES_TYPE_ID", nullable = true)
 	private Short myResourceTypeId;
 
 	@Transient

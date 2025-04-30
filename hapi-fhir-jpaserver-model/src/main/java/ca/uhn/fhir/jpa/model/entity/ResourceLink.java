@@ -166,20 +166,27 @@ public class ResourceLink extends BaseResourceIndex {
 	private LocalDate myTargetResourcePartitionDate;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "SRC_RES_TYPE_ID", foreignKey = @ForeignKey(name = "FK_RESLINK_SRC_RES_TYPE"), nullable = true)
+	@JoinColumn(
+			name = "SRC_RES_TYPE_ID",
+			foreignKey = @ForeignKey(name = "FK_RESLINK_SRC_RES_TYPE"),
+			insertable = false,
+			updatable = false,
+			nullable = true)
 	private ResourceTypeEntity mySourceResTypeEntity;
 
-	@Column(name = "SRC_RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "SRC_RES_TYPE_ID", nullable = true)
 	private Short mySourceResourceTypeId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "TARGET_RES_TYPE_ID",
 			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET_RES_TYPE"),
+			insertable = false,
+			updatable = false,
 			nullable = true)
 	private ResourceTypeEntity myTargetResTypeEntity;
 
-	@Column(name = "TARGET_RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "TARGET_RES_TYPE_ID", nullable = true)
 	private Short myTargetResourceTypeId;
 	/**
 	 * Constructor

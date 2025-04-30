@@ -398,10 +398,15 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	private long myVersion;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_TYPE_ID", foreignKey = @ForeignKey(name = "FK_RESOURCE_RES_TYPE"), nullable = true)
+	@JoinColumn(
+			name = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(name = "FK_RESOURCE_RES_TYPE"),
+			insertable = false,
+			updatable = false,
+			nullable = true)
 	private ResourceTypeEntity myResourceTypeEntity;
 
-	@Column(name = "RES_TYPE_ID", insertable = false, updatable = false, nullable = true)
+	@Column(name = "RES_TYPE_ID", nullable = true)
 	private Short myResourceTypeId;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
@@ -678,9 +683,8 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		return myResourceTypeId;
 	}
 
-	public ResourceTable setResourceTypeId(Short theResourceTypeId) {
+	public void setResourceTypeId(Short theResourceTypeId) {
 		myResourceTypeId = theResourceTypeId;
-		return this;
 	}
 
 	public ResourceTypeEntity getMyResourceTypeEntity() {
