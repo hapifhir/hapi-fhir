@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -47,6 +48,7 @@ public class ResourceLinkPredicateBuilderTest {
 	private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
 
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private SearchQueryBuilder mySearchQueryBuilder;
@@ -63,7 +65,7 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
-		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
+		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, myPartitionSettings, false);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
 	}
