@@ -529,7 +529,7 @@ public class VersionCanonicalizer {
 			}
 			return (Resource) myDstu2Hl7OrgContext
 					.newJsonParser()
-					.parseResource(myDstu2Context.newJsonParser().encodeResourceToString(theInput));
+					.parseResource(encodeAsString(theInput));
 		}
 
 		private IBaseResource reencodeFromHl7Org(Resource theInput) {
@@ -538,7 +538,18 @@ public class VersionCanonicalizer {
 			}
 			return myDstu2Context
 					.newJsonParser()
-					.parseResource(myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theInput));
+					.parseResource(encodeAsString(theInput));
+		}
+
+		private String encodeAsString(IBaseResource theResource){
+			FhirVersionEnum version = theResource.getStructureFhirVersionEnum();
+			if (myDstu2Context.getVersion().getVersion().equals(version)){
+				return myDstu2Context.newJsonParser().encodeResourceToString(theResource);
+			} else if (myDstu2Hl7OrgContext.getVersion().getVersion().equals(version)){
+				return myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theResource);
+			} else {
+				throw new IllegalArgumentException("Cannot encode resource with version: %s".formatted(version));
+			}
 		}
 	}
 
