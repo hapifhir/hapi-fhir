@@ -332,6 +332,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		// Value: TRUE if we should prefetch the existing resource details and all stored indexes,
 		//        FALSE if we should prefetch only the identity (resource ID and deleted status)
 		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
+		Set<IIdType> idsDirectlyInTheTransaction = new HashSet<>(theEntries.size());
 
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
@@ -348,6 +349,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
 						idsToPreResolve.put(unqualifiedVersionless, Boolean.TRUE);
+						idsDirectlyInTheTransaction.add(id);
 					}
 				}
 
@@ -384,7 +386,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 */
 		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
 		ResolveIdentityMode resolveMode = preFetchIncludesReferences
-				? ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled()
+				? ResolveIdentityMode.excludeDeleted().withAllowDeletedForResurrectedResources(idsDirectlyInTheTransaction).noCacheUnlessDeletesDisabled()
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(

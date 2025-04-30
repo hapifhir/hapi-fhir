@@ -143,4 +143,45 @@ public class IdHelperServiceTest {
 			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource Patient/1 is not known");
 		}
 	}
+
+	@Test
+	public void testResolveResourceIdentities_allowsDeletedResurrected() {
+		// Setup
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
+		String resourceType = "Patient";
+		String resourceForcedId = "AAA";
+
+		Object[] tuple = new Object[] {
+			JpaPid.fromId(1L),
+			resourceType,
+			resourceForcedId,
+			new Date(), // Deleted date
+			null
+		};
+
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(myTypedQuery);
+		when(myTypedQuery.getResultList()).thenReturn(List.of(
+			new TupleImpl(null, tuple)
+		));
+
+		// Mock ResolveIdentityMode to allow deleted resurrected
+		ResolveIdentityMode mode = mock(ResolveIdentityMode.class);
+		when(mode.isAllowedDeletedResurrected(any())).thenReturn(true);
+		when(mode.isFailOnDeleted()).thenReturn(false);
+		when(mode.isIncludeDeleted()).thenReturn(false);
+
+		// Execute
+		Map<IIdType, IResourceLookup<JpaPid>> result = myHelperSvc.resolveResourceIdentities(
+			partitionId,
+			List.of(myFhirCtx.getVersion().newIdType(resourceType + "/" + resourceForcedId)),
+			mode
+		);
+
+		// Verify
+		assertEquals(1, result.size());
+		IResourceLookup<JpaPid> lookup = result.values().iterator().next();
+		assertEquals(tuple[0], lookup.getPersistentId());
+		assertEquals(tuple[1], lookup.getResourceType());
+		assertEquals(tuple[3], lookup.getDeleted());
+	}
 }

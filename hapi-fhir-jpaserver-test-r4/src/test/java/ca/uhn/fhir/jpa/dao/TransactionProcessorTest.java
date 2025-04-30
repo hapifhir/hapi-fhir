@@ -198,6 +198,83 @@ public class TransactionProcessorTest {
 		assertThat(logs.get(1).getFormattedMessage()).matches("Transaction processing attempt 2/3 failed. Sleeping for [0-9]+ ms. Performing final retry using batch semantics. $");
 	}
 
+	@Test
+	public void testTransactionWithCreateDeleteAndUpdate() {
+		// Step 1: Create transaction with Resource A (Patient) and B (Observation)
+		Bundle createTransaction = new Bundle();
+		createTransaction.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient patientA = new Patient();
+		patientA.setId("Patient/A");
+		patientA.addIdentifier().setSystem("http://example.com").setValue("A");
+		patientA.addGeneralPractitioner().setReference("Observation/B");
+
+		Observation observationB = new Observation();
+		observationB.setId("Observation/B");
+		observationB.setStatus(Observation.ObservationStatus.FINAL);
+
+		createTransaction.addEntry()
+			.setResource(observationB)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Observation");
+
+		createTransaction.addEntry()
+			.setResource(patientA)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("Patient");
+
+		when(myPatientDao.update(any(), any(), anyBoolean(), anyBoolean(), any(), any()))
+			.thenReturn(new DaoMethodOutcome().setCreated(true));
+
+		Bundle createOutcome = myTransactionProcessor.transaction(null, createTransaction, false);
+
+		// Verify creation
+		assertThat(createOutcome.getEntry()).hasSize(2);
+		assertThat(createOutcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
+		assertThat(createOutcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
+
+		// Step 2: Create transaction to delete Resource A
+		Bundle deleteTransaction = new Bundle();
+		deleteTransaction.setType(Bundle.BundleType.TRANSACTION);
+
+		deleteTransaction.addEntry()
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.DELETE)
+			.setUrl("Patient/A");
+
+		Bundle deleteOutcome = myTransactionProcessor.transaction(null, deleteTransaction, false);
+
+		// Verify deletion
+		assertThat(deleteOutcome.getEntry()).hasSize(1);
+		assertThat(deleteOutcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
+
+		// Step 3: Create transaction to update Resource A
+		Bundle updateTransaction = new Bundle();
+		updateTransaction.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient updatedPatientA = new Patient();
+		updatedPatientA.setId("Patient/A");
+		updatedPatientA.addIdentifier().setSystem("http://example.com").setValue("UpdatedA");
+		updatedPatientA.addGeneralPractitioner().setReference("Observation/B");
+
+		updateTransaction.addEntry()
+			.setResource(updatedPatientA)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl("Patient/A");
+
+		when(myPatientDao.update(any(), any(), anyBoolean(), anyBoolean(), any(), any()))
+			.thenReturn(new DaoMethodOutcome().setUpdated(true));
+
+		Bundle updateOutcome = myTransactionProcessor.transaction(null, updateTransaction, false);
+
+		// Verify update
+		assertThat(updateOutcome.getEntry()).hasSize(1);
+		assertThat(updateOutcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("200 OK");
+	}
+
 
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)

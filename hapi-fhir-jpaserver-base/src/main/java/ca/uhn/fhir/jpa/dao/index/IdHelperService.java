@@ -226,6 +226,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Map<IIdType, IResourceLookup<JpaPid>> retVal = new HashMap<>(idToLookup.size());
 		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> next : idToLookup.entries()) {
 			IResourceLookup<JpaPid> nextLookup = next.getValue();
+			boolean isResurrected = theMode.isAllowedDeletedResurrected(next.getKey());
 
 			IIdType resourceId = myFhirCtx.getVersion().newIdType(nextLookup.getResourceType(), nextLookup.getFhirId());
 			if (nextLookup.getDeleted() != null) {
@@ -235,7 +236,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 							.getMessageSanitized(IdHelperService.class, "deletedId", resourceId.getValue());
 					throw new ResourceGoneException(Msg.code(2572) + msg);
 				}
-				if (!theMode.isIncludeDeleted()) {
+				if (!theMode.isIncludeDeleted() && !isResurrected) {
 					continue;
 				}
 			}
@@ -291,7 +292,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				if (cachedLookups != null && !cachedLookups.isEmpty()) {
 					idIterator.remove();
 					for (IResourceLookup<JpaPid> cachedLookup : cachedLookups) {
-						if (theMode.isIncludeDeleted() || cachedLookup.getDeleted() == null) {
+						if (theMode.isIncludeDeleted() || theMode.isAllowedDeletedResurrected(nextForcedId) || cachedLookup.getDeleted() == null) {
 							theMapToPopulate.put(nextKey.toIdType(myFhirCtx), cachedLookup);
 						}
 					}

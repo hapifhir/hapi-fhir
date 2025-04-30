@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Set;
+
 /**
  * Resolution mode parameter for methods on {@link IIdHelperService}
  */
@@ -27,14 +31,20 @@ public class ResolveIdentityMode {
 	private final boolean myIncludeDeleted;
 	private final boolean myUseCache;
 	private final boolean myFailOnDeleted;
+	private final Set<IIdType> myAllowDeletedForResurrectedResources;
 
 	/**
 	 * Non-instantiable. Use the factory methods on this class.
 	 */
 	private ResolveIdentityMode(boolean theIncludeDeleted, boolean theFailOnDeleted, boolean theUseCache) {
+		this(theIncludeDeleted, theFailOnDeleted, theUseCache, null);
+	}
+
+	private ResolveIdentityMode(boolean theIncludeDeleted, boolean theFailOnDeleted, boolean theUseCache, Set<IIdType> theAllowDeletedForResurrectedResources) {
 		myIncludeDeleted = theIncludeDeleted;
 		myUseCache = theUseCache;
 		myFailOnDeleted = theFailOnDeleted;
+		myAllowDeletedForResurrectedResources = theAllowDeletedForResurrectedResources;
 	}
 
 	public boolean isUseCache(boolean theDeleteEnabled) {
@@ -51,6 +61,15 @@ public class ResolveIdentityMode {
 
 	public boolean isFailOnDeleted() {
 		return myFailOnDeleted;
+	}
+
+	public Set<IIdType> getAllowDeletedForResurrectedResources() {
+		return myAllowDeletedForResurrectedResources;
+	}
+
+	public boolean isAllowedDeletedResurrected(IIdType id) {
+		return myAllowDeletedForResurrectedResources != null &&
+			myAllowDeletedForResurrectedResources.contains(id);
 	}
 
 	/**
@@ -79,10 +98,19 @@ public class ResolveIdentityMode {
 
 		private final boolean myIncludeDeleted;
 		private final boolean myFailOnDeleted;
+		private Set<IIdType> myAllowDeletedForResurrectedResources;
 
 		private Builder(boolean theIncludeDeleted, boolean theFailOnDeleted) {
 			myIncludeDeleted = theIncludeDeleted;
 			myFailOnDeleted = theFailOnDeleted;
+		}
+
+		/**
+		 * Provide specific deleted resource IDs that are permitted to be treated as active.
+		 */
+		public Builder withAllowDeletedForResurrectedResources(Set<IIdType> theIds) {
+			myAllowDeletedForResurrectedResources = theIds;
+			return this;
 		}
 
 		/**
@@ -91,7 +119,7 @@ public class ResolveIdentityMode {
 		 * deleted status has changed for a resource.
 		 */
 		public ResolveIdentityMode cacheOk() {
-			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, true);
+			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, true, myAllowDeletedForResurrectedResources);
 		}
 
 		/**
@@ -99,7 +127,7 @@ public class ResolveIdentityMode {
 		 * (meaning that the deleted status of a resource is not able to change)
 		 */
 		public ResolveIdentityMode noCacheUnlessDeletesDisabled() {
-			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, false);
+			return new ResolveIdentityMode(myIncludeDeleted, myFailOnDeleted, false, myAllowDeletedForResurrectedResources);
 		}
 	}
 }
