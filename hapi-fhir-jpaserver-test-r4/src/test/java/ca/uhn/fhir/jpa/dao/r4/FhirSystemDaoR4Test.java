@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.RequestGroup;
 
@@ -424,6 +426,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Unknown search parameter");
+
+		// Verify that TransactionUtil parses the response correctly
+		TransactionUtil.TransactionResponse parsedOutcome = TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
+		assertEquals(1, parsedOutcome.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE, parsedOutcome.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals(201, parsedOutcome.getStorageOutcomes().get(0).getStatusCode());
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getSourceId());
+		assertThat( parsedOutcome.getStorageOutcomes().get(0).getTargetId().getValue()).matches("Patient/[0-9]++/_history/1");
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getErrorMessage());
+
 	}
 
 	@Test
@@ -1214,6 +1226,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
 		assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
 		validate(outcome);
+
+		// Verify that TransactionUtil parses the response correctly
+		TransactionUtil.TransactionResponse parsedOutcome = TransactionUtil.parseTransactionResponse(myFhirContext, request, outcome);
+		assertEquals(1, parsedOutcome.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.FAILURE, parsedOutcome.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals(400, parsedOutcome.getStorageOutcomes().get(0).getStatusCode());
+		assertEquals("Patient/123", parsedOutcome.getStorageOutcomes().get(0).getSourceId().getValue());
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getTargetId());
+		assertEquals("HAPI-0543: Missing required resource in Bundle.entry[0].resource for operation PUT", parsedOutcome.getStorageOutcomes().get(0).getErrorMessage());
 	}
 
 	@Test

@@ -69,7 +69,10 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -762,7 +765,7 @@ public abstract class BaseStorageDao {
 		String detailSystem = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getSystem();
 		String detailCode = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getCode();
 		String detailDescription = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getDisplay();
-		OperationOutcomeUtil.addIssue(
+		IBase issue = OperationOutcomeUtil.addIssue(
 				theFhirContext,
 				theOperationOutcomeToPopulate,
 				OO_SEVERITY_INFO,
@@ -772,6 +775,12 @@ public abstract class BaseStorageDao {
 				detailSystem,
 				detailCode,
 				detailDescription);
+		if (issue instanceof IBaseHasExtensions) {
+			IBaseExtension<?, ?> resourceIdExtension = ((IBaseHasExtensions) issue).addExtension();
+			resourceIdExtension.setUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID);
+			resourceIdExtension.setValue(theFhirContext.getVersion().newIdType(thePlaceholderId.getValue()));
+		}
+
 		return msg;
 	}
 
