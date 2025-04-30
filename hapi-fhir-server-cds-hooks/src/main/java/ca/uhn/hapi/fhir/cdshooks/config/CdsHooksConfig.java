@@ -61,14 +61,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @Configuration
-@Import(CdsCrConfig.class)
 public class CdsHooksConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksConfig.class);
 
