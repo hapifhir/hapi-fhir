@@ -37,8 +37,11 @@ public abstract class BasePredicateBuilder {
 
 	private final SearchQueryBuilder mySearchSqlBuilder;
 
-	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	protected final PartitionSettings myPartitionSettings;
+
+	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	protected SearchQueryBuilder getSearchQueryBuilder() {

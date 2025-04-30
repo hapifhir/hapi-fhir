@@ -81,9 +81,9 @@ public interface IResourceTableDao
 			@Param("partition_ids") List<Integer> theRequestPartitionIds);
 
 	@Query(
-			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+			"SELECT t.myPid, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND ((:dpid IS NULL AND t.myPartitionIdValue IS NULL) OR (t.myPartitionId = :dpid)) ORDER BY t.myUpdated ASC")
 	Stream<Object[]> streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
-			@Param("low") Date theLow, @Param("high") Date theHigh);
+			@Param("low") Date theLow, @Param("high") Date theHigh, @Param("dpid") Integer theDefaultPartitionId);
 
 	@Query(
 			"SELECT t.myPid FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")

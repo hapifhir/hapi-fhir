@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -35,10 +36,10 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 	/**
 	 * Constructor
 	 */
-	public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+	public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
 		super(
 				theSearchSqlBuilder,
-				theSearchSqlBuilder.addTable(ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ));
+				theSearchSqlBuilder.addTable(ResourceIndexedComboStringUnique.HFJ_IDX_CMP_STRING_UNIQ), thePartitionSettings);
 
 		myColumnString = getTable().addColumn("IDX_STRING");
 	}

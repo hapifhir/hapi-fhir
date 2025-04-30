@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -48,8 +49,8 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnTagId;
 	private final DbColumn myTagDefinitionColumnTagType;
 
-	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"));
+	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"), thePartitionSettings);
 
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnTagId = getTable().addColumn("TAG_ID");

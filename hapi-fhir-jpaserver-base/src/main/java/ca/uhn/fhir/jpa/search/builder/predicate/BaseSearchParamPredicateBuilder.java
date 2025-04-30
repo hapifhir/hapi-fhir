@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -57,8 +58,8 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
 	}
 
-	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
-		super(theSearchSqlBuilder, theTable);
+	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
+		super(theSearchSqlBuilder, theTable, thePartitionSettings);
 
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnMissing = theTable.addColumn("SP_MISSING");

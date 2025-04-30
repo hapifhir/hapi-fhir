@@ -250,6 +250,9 @@ public class JpaConfig {
 	public JpaStorageSettings myStorageSettings;
 
 	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	@Autowired
 	private FhirContext myFhirContext;
 
 	@Bean
@@ -632,108 +635,108 @@ public class JpaConfig {
 	@Scope("prototype")
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
-		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
-		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public CoordsPredicateBuilder newCoordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new CoordsPredicateBuilder(theSearchBuilder);
+		return new CoordsPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public DatePredicateBuilder newDatePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new DatePredicateBuilder(theSearchBuilder);
+		return new DatePredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public NumberPredicateBuilder newNumberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new NumberPredicateBuilder(theSearchBuilder);
+		return new NumberPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public QuantityPredicateBuilder newQuantityPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new QuantityPredicateBuilder(theSearchBuilder);
+		return new QuantityPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
+		return new QuantityNormalizedPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
 			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, myPartitionSettings, theReversed);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder);
+		return new ResourceTablePredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TagPredicateBuilder(theSearchBuilder);
+		return new TagPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceIdPredicateBuilder newResourceIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceIdPredicateBuilder(theSearchBuilder);
+		return new ResourceIdPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
+		return new SearchParamPresentPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public StringPredicateBuilder newStringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new StringPredicateBuilder(theSearchBuilder);
+		return new StringPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TokenPredicateBuilder(theSearchBuilder);
+		return new TokenPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceHistoryPredicateBuilder newResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceHistoryPredicateBuilder(theSearchBuilder);
+		return new ResourceHistoryPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
+		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public UriPredicateBuilder newUriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new UriPredicateBuilder(theSearchBuilder);
+		return new UriPredicateBuilder(theSearchBuilder, myPartitionSettings);
 	}
 
 	@Bean
