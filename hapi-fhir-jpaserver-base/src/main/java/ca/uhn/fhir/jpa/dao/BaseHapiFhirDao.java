@@ -1012,9 +1012,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(getEntityIndexedStatusEnum());
-				}
-				else if (!Objects.equals(entity.getPublished(),
-						new InstantDt(theTransactionDetails.getTransactionDate()))) { // the first creation is not considered a change
+				} else if (!entity.getPublished().equals(new InstantDt(theTransactionDetails.getTransactionDate()))) {
+					// the first creation is not considered a change
 					// TODO:
 					// There is probably a better way to do this check
 					isUpdateWithNoChanges = true;
@@ -1059,30 +1058,30 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		if (!isUpdateWithNoChanges){
+		if (!isUpdateWithNoChanges) {
 			if (thePerformIndexing
-				&& changed != null
-				&& !changed.isChanged()
-				&& !theForceUpdate
-				&& myStorageSettings.isSuppressUpdatesWithNoChange()
-				&& (entity.getVersion() > 1 || theUpdateVersion)) {
-			ourLog.debug(
-					"Resource {} has not changed",
-					entity.getIdDt().toUnqualified().getValue());
-			if (theResource != null) {
-				myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
+					&& changed != null
+					&& !changed.isChanged()
+					&& !theForceUpdate
+					&& myStorageSettings.isSuppressUpdatesWithNoChange()
+					&& (entity.getVersion() > 1 || theUpdateVersion)) {
+				ourLog.debug(
+						"Resource {} has not changed",
+						entity.getIdDt().toUnqualified().getValue());
+				if (theResource != null) {
+					myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
+				}
+				entity.setUnchangedInCurrentOperation(true);
+				return entity;
 			}
-			entity.setUnchangedInCurrentOperation(true);
-			return entity;
-		}
 
 			if (entity.getId().getId() != null && theUpdateVersion) {
 				entity.markVersionUpdatedInCurrentTransaction();
 			}
 
 			/*
-			* Save the resource itself
-			*/
+			 * Save the resource itself
+			 */
 			if (entity.getId().getId() == null) {
 				myEntityManager.persist(entity);
 
