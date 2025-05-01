@@ -762,6 +762,34 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	}
 
 
+	@Test
+	public void testDeleteThenRestoreResource() {
+		// Setup
+		createOrganization(withId("O"), withName("Org"));
+		createPatient(withId("A"), withActiveTrue(), withReference("managingOrganization", new IdType("Organization/O")));
+
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(false);
+		p.setManagingOrganization(new Reference("Organization/O"));
+		bb.addTransactionUpdateEntry(p);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		Patient actual = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertFalse(actual.isDeleted());
+		assertFalse(actual.getActive());
+	}
+
+
+
+
 	/**
 	 * See #5110
 	 */
