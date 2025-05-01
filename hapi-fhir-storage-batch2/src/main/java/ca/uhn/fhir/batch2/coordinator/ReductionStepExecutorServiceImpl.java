@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
@@ -225,8 +227,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		PT parameters =
 				instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
+
+		// Clone the worker so that we start with no built-up state
+		reductionStepWorker = reductionStepWorker.newInstance();
 
 		instance.setStatus(FINALIZE);
 
@@ -287,11 +293,26 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
-					reductionStepWorker.run(chunkDetails, dataSink);
+					try {
+						reductionStepWorker.run(chunkDetails, dataSink);
 
-					// the ReductionStepDataSink will update the job status to COMPLETED
-					// we should update instance here to keep it consistent with the newest version in persistence
-					instance.setStatus(COMPLETED);
+						// the ReductionStepDataSink will update the job status to COMPLETED
+						// we should update instance here to keep it consistent with the newest version in persistence
+						instance.setStatus(COMPLETED);
+					} catch (ReductionStepFailureException e) {
+
+						myJobPersistence.updateInstance(instance.getInstanceId(), i -> {
+							i.setErrorMessage(e.getMessage());
+							i.setEndTime(new Date());
+							i.setStatus(StatusEnum.FAILED);
+
+							if (e.getReportMsg() != null) {
+								i.setReport(JsonUtil.serialize(e.getReportMsg()));
+							}
+
+							return true;
+						});
+					}
 				}
 
 				if (response.hasSuccessfulChunksIds()) {

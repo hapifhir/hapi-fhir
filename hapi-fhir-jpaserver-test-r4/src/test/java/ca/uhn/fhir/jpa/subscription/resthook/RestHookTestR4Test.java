@@ -4,9 +4,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -71,24 +70,16 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	public static final String PATIENT_REFERENCE = "Patient/" + TEST_PATIENT_ID;
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
-	@Autowired(required = false)
-	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired
 	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
-	}
-
-	@Test
-	public void testSubscriptionTopicRegistryBean() {
-		// This bean should not exist in R4
-		assertNull(mySubscriptionTopicRegistry);
 	}
 
 	/**
@@ -96,7 +87,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 * that changes the database mode we don't store both versioning modes
 	 */
 	@Test
-	public void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
+	void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		String payload = "application/fhir+json";
@@ -120,7 +111,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
+	void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -142,7 +133,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testUpdatesHaveCorrectMetadata() throws Exception {
+	void testUpdatesHaveCorrectMetadata() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -193,7 +184,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
+	void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
 
 		String payload = "application/fhir+json";
 		String code = "1000000050";
@@ -226,7 +217,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
+	void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -287,7 +278,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRepeatedDeliveries() throws Exception {
+	void testRepeatedDeliveries() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -309,7 +300,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 
 	@Test
-	public void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
+	void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -336,7 +327,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testActiveSubscriptionShouldntReActivate() throws Exception {
+	void testActiveSubscriptionShouldntReActivate() throws Exception {
 		String criteria = "Observation?code=111111111&_format=xml";
 		String payload = "application/fhir+json";
 		createSubscription(criteria, payload);
@@ -349,7 +340,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
+	void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -379,7 +370,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNotNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -393,7 +383,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -401,7 +390,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
+	void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
 		String payload = "application/fhir+json";
@@ -431,7 +420,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNotNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(3);
@@ -445,7 +433,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(5);
@@ -453,7 +440,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
+	void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -477,7 +464,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myClient.update().resource(obs).execute();
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -486,7 +472,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
+	void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -534,7 +520,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
+	void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -544,9 +530,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -561,7 +547,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -579,7 +565,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
-	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
+	void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
 		String payload = "application/json";
 
 		Extension sendDeleteMessagesExtension = new Extension()
@@ -602,7 +588,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 
 	@Test
-	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
+	void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -618,9 +604,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -635,7 +621,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -651,7 +637,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationJson() throws Exception {
+	void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";

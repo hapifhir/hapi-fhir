@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 public class RepositoryConfig {
 

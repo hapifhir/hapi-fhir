@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6855
+title: "The `IConsentService#canSeeResource()` method is now executed in the `STORAGE_BULK_EXPORT_RESOURCE_INCLUSION` 
+pointcut of the `ConsentInterceptor`"

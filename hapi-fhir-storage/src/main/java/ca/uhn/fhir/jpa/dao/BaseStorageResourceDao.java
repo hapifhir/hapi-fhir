@@ -20,12 +20,14 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
@@ -74,6 +76,9 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Autowired
 	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
 
+	@Autowired
+	protected abstract IRequestPartitionHelperSvc getRequestPartitionHelperService();
+
 	@Override
 	public DaoMethodOutcome patch(
 			IIdType theId,
@@ -114,8 +119,17 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
+			RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
+					.determineReadPartitionForRequestForSearchType(
+							theRequestDetails, getResourceType().getTypeName());
+
 			Set<IResourcePersistentId> match = getMatchResourceUrlService()
-					.processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
+					.processMatchUrl(
+							theConditionalUrl,
+							getResourceType(),
+							theTransactionDetails,
+							theRequestDetails,
+							theRequestPartitionId);
 			if (match.size() > 1) {
 				String msg = getContext()
 						.getLocalizer()

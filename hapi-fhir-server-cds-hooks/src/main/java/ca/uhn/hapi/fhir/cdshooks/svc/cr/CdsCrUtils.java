@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrUtils {
 	public static IBaseResource readPlanDefinitionFromRepository(
 			FhirVersionEnum theFhirVersion, Repository theRepository, IIdType theId) {

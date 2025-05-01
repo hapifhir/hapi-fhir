@@ -1,0 +1,17 @@
+---
+type: perf
+issue: 6840
+title: "The Bulk Import ($import) operation has been reworked for much improved performance and functionality:
+   <ul>
+   <li>
+      The storage step now uses FHIR transactions to ingest chunks of data, with automatic retry and 
+      a batch failure mode. This should result in both better performance, and better job stability for
+      large jobs.
+   </li>
+   <li>
+      The job will now produce a report at the end of the process which details the outcome of the job.
+   </li>
+   <li>
+      The HAPI FHIR CLI bulk-import job will now output this report at the end of execution.
+   </li>
+   </ul>"

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -102,7 +103,8 @@ public class CdsHooksConfig {
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			@Nullable CDSHooksVersion theCDSHooksVersion) {
 		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
 				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
@@ -111,14 +113,17 @@ public class CdsHooksConfig {
 				theObjectMapper,
 				theCdsCrServiceFactory,
 				theCrDiscoveryServiceFactory,
-				cdsServiceRequestJsonDeserializer);
+				cdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.getOrDefault(theCDSHooksVersion));
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceRegistry cdsCrServiceRegistry() {
 		return new CdsCrServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceFactory cdsCrServiceFactory(
 			FhirContext theFhirContext,
@@ -150,11 +155,13 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrDiscoveryServiceRegistry cdsCrDiscoveryServiceRegistry() {
 		return new CdsCrDiscoveryServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(
 			FhirContext theFhirContext,
@@ -186,6 +193,7 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public CdsServiceInterceptor cdsServiceInterceptor() {
 		if (myResourceChangeListenerRegistry == null) {
@@ -212,12 +220,14 @@ public class CdsHooksConfig {
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
 			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			FhirContext theFhirContext,
 			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CdsPrefetchSvc(
 				theCdsResolutionStrategySvc,
 				theResourcePrefetchDao,
 				theResourcePrefetchFhirClient,
 				theCdsHooksDaoAuthorizationSvc,
+				theFhirContext,
 				theInterceptorBroadcaster);
 	}
 

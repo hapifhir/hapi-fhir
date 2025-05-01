@@ -112,7 +112,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	/**
-	 * Set SP_NAME, RES_TYPE, SP_UPDATED to null without clearing hashes
+	 * Set SP_NAME, RES_TYPE to null without clearing hashes
 	 */
 	public void optimizeIndexStorage() {
 		if (isNotBlank(myParamName)) {
@@ -120,11 +120,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			myParamName = null;
 		}
 		myResourceType = null;
-		myUpdated = null;
 	}
 
 	public boolean isIndexStorageOptimized() {
-		return myParamName == null || myResourceType == null || myUpdated == null;
+		return myParamName == null || myResourceType == null;
 	}
 
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation

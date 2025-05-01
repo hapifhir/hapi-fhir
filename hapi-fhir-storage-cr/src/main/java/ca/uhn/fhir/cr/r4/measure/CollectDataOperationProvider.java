@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CollectDataOperationProvider {
 	private final ICollectDataServiceFactory myR4CollectDataServiceFactory;
 	private final StringTimePeriodHandler myStringTimePeriodHandler;

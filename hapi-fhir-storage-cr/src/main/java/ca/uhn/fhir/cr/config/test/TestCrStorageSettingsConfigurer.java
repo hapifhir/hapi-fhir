@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.config.test;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class TestCrStorageSettingsConfigurer {
 
 	private final JpaStorageSettings myStorageSettings;

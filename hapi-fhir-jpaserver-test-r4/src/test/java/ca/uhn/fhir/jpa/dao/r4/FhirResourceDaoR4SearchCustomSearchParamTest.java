@@ -26,6 +26,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+
+import java.util.Objects;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
@@ -1518,31 +1521,31 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 
 		Specimen specimen = new Specimen();
-		specimen.setId("#FOO");
+		specimen.setId("FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
 		Observation o = new Observation();
 		o.setId("O1");
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference("#FOO"));
+		o.setSpecimen(new Reference("#" + specimen.getId()));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
-		myObservationDao.update(o);
+		myObservationDao.update(o, mySrd);
 
 		specimen = new Specimen();
-		specimen.setId("#FOO");
+		specimen.setId("FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-03"));
 		o = new Observation();
 		o.setId("O2");
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference("#FOO"));
-		myObservationDao.update(o);
+		o.setSpecimen(new Reference("#" + specimen.getId()));
+		myObservationDao.update(o, mySrd);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("specimencollectedtime", new DateParam("2011-01-01"));
 		IBundleProvider outcome = myObservationDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		ourLog.info("IDS: " + ids);
+		ourLog.info("IDS: {}", ids);
 		assertThat(ids).containsExactly("Observation/O1");
 	}
 

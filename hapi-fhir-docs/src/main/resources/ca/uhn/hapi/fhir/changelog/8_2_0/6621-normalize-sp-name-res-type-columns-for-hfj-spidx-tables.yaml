@@ -1,0 +1,8 @@
+---
+type: add
+issue: 6621
+title: "A new table, `HFJ_SPIDX_IDENTITY`, has been introduced. This table stores unique hash identities along with 
+the corresponding `sp_name` and `res_type` values from all `HFJ_SPIDX_xxx` tables. It is populated during read, write, 
+or update operations on the `HFJ_SPIDX_xxx` tables. 
+If the `StorageSettings#isIndexStorageOptimized()` setting is enabled, this table can be used to reconstruct 
+`sp_name` and `res_type` values for hash identities stored in the `HFJ_SPIDX_xxx tables` for debugging purposes."
