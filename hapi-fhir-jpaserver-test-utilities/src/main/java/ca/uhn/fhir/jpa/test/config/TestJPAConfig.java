@@ -27,18 +27,18 @@ import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
@@ -103,8 +103,8 @@ public class TestJPAConfig {
 
 	@Bean
 	@Primary
-	public SubscriptionDeliveringRestHookSubscriber stoppableSubscriptionDeliveringRestHookSubscriber() {
-		return new StoppableSubscriptionDeliveringRestHookSubscriber();
+	public SubscriptionDeliveringRestHookListener stoppableSubscriptionDeliveringRestHookListener() {
+		return new StoppableSubscriptionDeliveringRestHookListener();
 	}
 
 	@Bean

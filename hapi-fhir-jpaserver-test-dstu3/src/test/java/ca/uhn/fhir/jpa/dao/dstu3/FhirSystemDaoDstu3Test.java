@@ -6,12 +6,14 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -841,6 +843,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateMatchUrlWithOneMatch() {
+		// Setup
 		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
 
@@ -861,7 +864,11 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		o.getSubject().setReference("Patient/" + methodName);
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
+		// Test
 		Bundle resp = mySystemDao.transaction(mySrd, request);
+		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		// Verify
 		assertThat(resp.getEntry()).hasSize(2);
 
 		BundleEntryComponent respEntry = resp.getEntry().get(0);
@@ -879,6 +886,13 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
+		// Verify that TransactionUtil can parse the response
+		TransactionUtil.TransactionResponse txResp = TransactionUtil.parseTransactionResponse(myFhirContext, request, resp);
+		assertEquals(2, txResp.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, txResp.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals("Patient/testTransactionCreateMatchUrlWithOneMatch/_history/1", txResp.getStorageOutcomes().get(0).getTargetId().getValue());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE, txResp.getStorageOutcomes().get(1).getStorageResponseCode());
+		assertThat(txResp.getStorageOutcomes().get(1).getTargetId().getValue()).matches("Observation/[0-9]++/_history/1");
 	}
 
 	@Test

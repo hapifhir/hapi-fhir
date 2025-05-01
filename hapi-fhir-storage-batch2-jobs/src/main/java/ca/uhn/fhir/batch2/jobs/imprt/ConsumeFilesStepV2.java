@@ -137,6 +137,6 @@ public class ConsumeFilesStepV2
 		IBaseBundle requestBundle = bb.getBundleTyped();
 		IBaseBundle responseBundle = (IBaseBundle) mySystemDao.transaction(requestDetails, requestBundle);
 
-		return TransactionUtil.parseTransactionResponse(myCtx, responseBundle);
+		return TransactionUtil.parseTransactionResponse(myCtx, requestBundle, responseBundle);
 	}
 }

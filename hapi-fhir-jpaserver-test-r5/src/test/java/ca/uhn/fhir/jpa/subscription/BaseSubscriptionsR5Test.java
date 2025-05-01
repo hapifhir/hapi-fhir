@@ -109,13 +109,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
 		}
 		myCountingInterceptor = new CountingInterceptor();
-		if (processingChannel != null) {
-			processingChannel.addInterceptor(myCountingInterceptor);
+		if (matchingChannel != null) {
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
