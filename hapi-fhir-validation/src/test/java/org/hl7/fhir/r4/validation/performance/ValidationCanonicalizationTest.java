@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.validation;
+package org.hl7.fhir.r4.validation.performance;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -8,13 +8,13 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import ca.uhn.hapi.converters.test.MetricCapturingVersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.convertors.factory.test.ConverterMetricUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
@@ -33,12 +33,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ValidationSandboxTest {
+public class ValidationCanonicalizationTest {
 
 	public static final int NUM_RUNS = 10;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSandboxTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ValidationCanonicalizationTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
+	private static final MetricCapturingVersionCanonicalizer ourVersionCanonicalizer = new MetricCapturingVersionCanonicalizer(ourFhirContext);
+
 	private FhirValidator myValidator;
 
 	@BeforeEach
@@ -51,13 +53,14 @@ public class ValidationSandboxTest {
 		validationTestCase(false);
 	}
 
-	@Test
-	public void testConversionCache_enabled() {
-		validationTestCase(true);
-	}
+//	@Test
+//	public void testConversionCache_enabled() {
+//		validationTestCase(true);
+//	}
 
 	private void validationTestCase(boolean theUseConversionCache) {
-		ConverterMetricUtil.setUseCache(theUseConversionCache);
+		// FIXME
+//		ConverterMetricUtil.setUseCache(theUseConversionCache);
 
 		Procedure procedure = new Procedure();
 		procedure.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Empty</div>");
@@ -89,7 +92,7 @@ public class ValidationSandboxTest {
 			ourLog.info("=== Run #{} - Validated resource in: {}ms ===", run, millis);
 
 			totalTime += millis;
-			ConverterMetricUtil.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getTime()));
+			ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getTime()));
 
 			if (millis > max){
 				max = millis;
@@ -128,28 +131,20 @@ public class ValidationSandboxTest {
 	}
 
 	private void resetMetrics(){
-		ConverterMetricUtil.resetMetrics();
-		ConverterMetricUtil.getMetrics().forEach(metric -> {
-			assertEquals(0, metric.getTime());
-			assertEquals(0, metric.getCount());
-			assertTrue(metric.getInvocations().isEmpty());
-		});
+		ourVersionCanonicalizer.resetMetrics();
+		assertTrue(ourVersionCanonicalizer.getMetrics().isEmpty());
 	}
 
 	private void logMetrics(){
-		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
+		ourVersionCanonicalizer.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(10_000)));
 	}
 
 	private FhirValidator configureValidator(){
-		return configureValidator(true);
-	}
-
-	private FhirValidator configureValidator(boolean theAddCaching) {
 		ValidationSupportChain supportChain = new ValidationSupportChain();
 		supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
-		supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext));
-		supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(ourFhirContext));
-		supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(ourFhirContext));
+		supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext, ourVersionCanonicalizer));
+		supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(ourFhirContext, ourVersionCanonicalizer));
+		supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(ourFhirContext, ourVersionCanonicalizer));
 
 		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
 		addCodeSystems(prePopulatedSupport);
@@ -158,7 +153,7 @@ public class ValidationSandboxTest {
 
 		supportChain.addValidationSupport(prePopulatedSupport);
 
-		FhirInstanceValidator module = new FhirInstanceValidator(supportChain);
+		FhirInstanceValidator module = new FhirInstanceValidator(supportChain, ourVersionCanonicalizer);
 		FhirValidator validator = ourFhirContext.newValidator();
 		validator.registerValidatorModule(module);
 		return validator;

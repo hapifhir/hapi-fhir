@@ -6,8 +6,10 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -42,6 +44,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
 	private boolean myAllowExamples;
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -58,11 +61,26 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
+		this(theValidationSupport, null);
+	}
+
+	/**
+	 * Constructor which uses the given validation support
+	 *
+	 * @param theValidationSupport The validation support
+	 * @param theVersionCanonicalizer The version canonicalizer
+	 */
+	public FhirInstanceValidator(
+			IValidationSupport theValidationSupport, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
 		if (theValidationSupport.getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 			myValidationSupport = new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupport);
 		} else {
 			myValidationSupport = theValidationSupport;
 		}
+
+		myVersionCanonicalizer = theVersionCanonicalizer != null
+				? theVersionCanonicalizer
+				: new VersionCanonicalizer(theValidationSupport.getFhirContext());
 	}
 
 	/**
@@ -247,8 +265,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			wrappedWorkerContext =
-					VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+			wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(
+					myValidationSupport, myVersionCanonicalizer);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;

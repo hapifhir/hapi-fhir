@@ -988,7 +988,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Nonnull
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport) {
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
+		return newVersionSpecificWorkerContextWrapper(theValidationSupport, null);
+	}
+
+	@Nonnull
+	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
+			IValidationSupport theValidationSupport, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
+
+		VersionCanonicalizer versionCanonicalizer = theVersionCanonicalizer != null ? theVersionCanonicalizer :
+			new VersionCanonicalizer(theValidationSupport.getFhirContext());
+
 		return new VersionSpecificWorkerContextWrapper(
 				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
 	}
@@ -1106,8 +1115,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								.getFhirContext();
 						SnapshotGeneratingValidationSupport snapshotGenerator =
 								new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
-						resource = snapshotGenerator.generateSnapshot(
-								myValidationSupportContext, resource, "", null, "");
+						resource =
+								snapshotGenerator.generateSnapshot(myValidationSupportContext, resource, "", null, "");
 						Validate.isTrue(
 								resource != null,
 								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",

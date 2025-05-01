@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -47,16 +48,39 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	 * Constructor
 	 */
 	public SnapshotGeneratingValidationSupport(FhirContext theFhirContext) {
-		this(theFhirContext, null, null);
+		this(theFhirContext, null);
 	}
 
+	/**
+	 * Constructor
+	 */
+	public SnapshotGeneratingValidationSupport(
+			FhirContext theFhirContext, VersionCanonicalizer theVersionCanonicalizer) {
+		this(theFhirContext, null, null, theVersionCanonicalizer);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public SnapshotGeneratingValidationSupport(
 			FhirContext theFhirContext, IWorkerContext theWorkerContext, FHIRPathEngine theFHIRPathEngine) {
+		this(theFhirContext, theWorkerContext, theFHIRPathEngine, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public SnapshotGeneratingValidationSupport(
+			FhirContext theFhirContext,
+			@Nullable IWorkerContext theWorkerContext,
+			@Nullable FHIRPathEngine theFHIRPathEngine,
+			@Nullable VersionCanonicalizer theVersionCanonicalizer) {
 		Validate.notNull(theFhirContext);
 		myCtx = theFhirContext;
-		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
 		myFHIRPathEngine = theFHIRPathEngine;
+		myVersionCanonicalizer =
+				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theFhirContext);
 	}
 
 	@SuppressWarnings("EnhancedSwitchMigration")

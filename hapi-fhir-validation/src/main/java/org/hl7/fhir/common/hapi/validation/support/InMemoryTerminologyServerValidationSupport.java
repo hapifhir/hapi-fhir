@@ -58,9 +58,21 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	 * @param theCtx A FhirContext for the FHIR version being validated
 	 */
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
+		this(theCtx, null);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theCtx A FhirContext for the FHIR version being validated
+	 * @param theVersionCanonicalizer the version canonicalizer
+	 */
+	public InMemoryTerminologyServerValidationSupport(
+			FhirContext theCtx, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		myCtx = theCtx;
-		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
+		myVersionCanonicalizer =
+				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theCtx);
 	}
 
 	@Override

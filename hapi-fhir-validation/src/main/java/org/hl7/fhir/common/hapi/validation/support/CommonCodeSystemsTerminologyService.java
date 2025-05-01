@@ -77,9 +77,18 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	 * Constructor
 	 */
 	public CommonCodeSystemsTerminologyService(FhirContext theFhirContext) {
+		this(theFhirContext, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public CommonCodeSystemsTerminologyService(
+			FhirContext theFhirContext, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
 		Objects.requireNonNull(theFhirContext);
 		myFhirContext = theFhirContext;
-		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
+		myVersionCanonicalizer =
+				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theFhirContext);
 	}
 
 	@Override

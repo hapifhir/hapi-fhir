@@ -56,7 +56,6 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.convertors.factory.test.ConverterMetricUtil;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -359,17 +358,18 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			@Validate.Profile String theProfile,
 			RequestDetails theRequestDetails) {
 
-		ConverterMetricUtil.setUseCache(true);
-		ConverterMetricUtil.resetMetrics();
-		ourLog.info("===Start Metrics===");
-		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
+//		FIXME
+//		ConverterMetricUtil.setUseCache(true);
+//		ConverterMetricUtil.resetMetrics();
+//		ourLog.info("===Start Metrics===");
+//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
 
 		StopWatch sw = new StopWatch();
 		MethodOutcome outcome = validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
-		ourLog.info("===Validated resource in {} ms===", sw.getMillis());
-
-		ourLog.info("===End Metrics===");
-		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
+//		ourLog.info("===Validated resource in {} ms===", sw.getMillis());
+//
+//		ourLog.info("===End Metrics===");
+//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
 
 		return outcome;
 	}
