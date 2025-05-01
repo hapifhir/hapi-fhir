@@ -1085,64 +1085,65 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
-		Resource canonical;
 		synchronized (theResource) {
-			canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
-			if (canonical == null) {
-				boolean storeCanonical = true;
-				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
+			Resource canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
+			if (canonical != null) {
+				return canonical;
+			}
 
-				if (canonical instanceof StructureDefinition) {
-					StructureDefinition canonicalSd = (StructureDefinition) canonical;
-					if (canonicalSd.getSnapshot().isEmpty()) {
-						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-						IBaseResource resource = theResource;
-						try {
+			boolean storeCanonical = true;
+			canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
 
-							FhirContext fhirContext = myValidationSupportContext
-									.getRootValidationSupport()
-									.getFhirContext();
-							SnapshotGeneratingValidationSupport snapshotGenerator =
-									new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
-							resource = snapshotGenerator.generateSnapshot(
-									myValidationSupportContext, resource, "", null, "");
-							Validate.isTrue(
-									resource != null,
-									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-									canonicalSd.getUrl());
+			if (canonical instanceof StructureDefinition) {
+				StructureDefinition canonicalSd = (StructureDefinition) canonical;
+				if (canonicalSd.getSnapshot().isEmpty()) {
+					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+					IBaseResource resource = theResource;
+					try {
 
-						} catch (BaseServerResponseException e) {
-							if (thePropagateSnapshotException) {
-								throw e;
-							}
-							String message = e.toString();
-							Throwable rootCause = ExceptionUtils.getRootCause(e);
-							if (rootCause != null) {
-								message = rootCause.getMessage();
-							}
-							ourLog.warn(
-									"Failed to generate snapshot for profile with URL[{}]: {}",
-									canonicalSd.getUrl(),
-									message);
-							storeCanonical = false;
+						FhirContext fhirContext = myValidationSupportContext
+								.getRootValidationSupport()
+								.getFhirContext();
+						SnapshotGeneratingValidationSupport snapshotGenerator =
+								new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
+						resource = snapshotGenerator.generateSnapshot(
+								myValidationSupportContext, resource, "", null, "");
+						Validate.isTrue(
+								resource != null,
+								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+								canonicalSd.getUrl());
+
+					} catch (BaseServerResponseException e) {
+						if (thePropagateSnapshotException) {
+							throw e;
 						}
-
-						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
+						String message = e.toString();
+						Throwable rootCause = ExceptionUtils.getRootCause(e);
+						if (rootCause != null) {
+							message = rootCause.getMessage();
+						}
+						ourLog.warn(
+								"Failed to generate snapshot for profile with URL[{}]: {}",
+								canonicalSd.getUrl(),
+								message);
+						storeCanonical = false;
 					}
-				}
 
-				String sourcePackageId =
-						(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
-				if (sourcePackageId != null) {
-					canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
-				}
-
-				if (storeCanonical) {
-					theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
 				}
 			}
+
+			String sourcePackageId =
+					(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
+			if (sourcePackageId != null) {
+				canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
+			}
+
+			if (storeCanonical) {
+				theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+			}
+			return canonical;
 		}
-		return canonical;
 	}
 
 	private FHIRPathEngine getFHIRPathEngine() {
