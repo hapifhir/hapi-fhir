@@ -124,9 +124,6 @@ public class DropPrimaryKeyTask extends BaseTableTask {
 						+ "AND table_name = ?";
 			case MSSQL_2012:
 				return "SELECT tc.constraint_name " + "FROM information_schema.table_constraints tc "
-						// REMOVED 2025-01: join caused issues with multi-part pkeys, appears unnecessary
-						// + "JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name =
-						// ccu.constraint_name "
 						+ "WHERE tc.constraint_type = 'PRIMARY KEY' "
 						+ "AND  tc.table_name = ?";
 			default:
