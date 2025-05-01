@@ -77,17 +77,16 @@ public class ValidationSandboxTest {
 		AtomicLong totalConversionTime = new AtomicLong();
 		long max = 0L;
 
-		ourLog.info("=== F ===");
 		logMetrics();
 
-		for (int i = 0; i < NUM_RUNS; i++){
+		for (int run = 1; run <= NUM_RUNS; run++){
 			resetMetrics();
 
 			StopWatch sw = new StopWatch();
 			ValidationResult validationResult = myValidator.validateWithResult(procedure);
 			long millis = sw.getMillis();
 
-			ourLog.info("=== Validated resource in: {}ms ===", millis);
+			ourLog.info("=== Run #{} - Validated resource in: {}ms ===", run, millis);
 
 			totalTime += millis;
 			ConverterMetricUtil.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getTime()));
