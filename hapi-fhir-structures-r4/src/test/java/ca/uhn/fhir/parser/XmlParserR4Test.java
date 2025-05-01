@@ -9,10 +9,12 @@ import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
@@ -28,12 +30,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Instant;
 
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -114,8 +118,8 @@ public class XmlParserR4Test extends BaseTest {
 
 		ourLog.info("Input: {}", auditEvent);
 		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("#A", ae.getContained().get(0).getId());
-		assertEquals("#B", ae.getContained().get(1).getId());
+		assertEquals("A", ae.getContained().get(0).getId());
+		assertEquals("B", ae.getContained().get(1).getId());
 		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
 		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
 
@@ -251,6 +255,54 @@ public class XmlParserR4Test extends BaseTest {
 		assertEquals(expected, actual);
 	}
 
+
+	@Test
+	public void testParseIntoObject() {
+		String expected = "<element><system value=\"http://system.org\"/><value value=\"123\"/><assigner><reference value=\"Organization/1\"/></assigner></element>";
+
+		// Test
+		Identifier target = new Identifier();
+		ourCtx.newXmlParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals("http://system.org", target.getSystem());
+		assertEquals("123", target.getValue());
+		assertEquals("Organization/1", target.getAssigner().getReference());
+	}
+
+	@Test
+	public void testParseIntoObject_InvalidValue() {
+		// Test
+		Patient target = new Patient();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newXmlParser().parseInto("2020-01-01", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Failed to parse XML content: Unexpected character '2'");
+	}
+
+	@Test
+	public void testParseIntoPrimitive() {
+		String expected = "2020-02-20T12:12:01.123-05:00";
+
+		// Test
+		DateTimeType target = new DateTimeType();
+		ourCtx.newXmlParser().parseInto(expected, target);
+
+		// Verify
+		assertEquals(expected, target.getValueAsString());
+		assertThat(target.getValue()).isAfter(Instant.parse("2020-02-19T12:12:01.123-05:00"));
+		assertThat(target.getValue()).isBefore(Instant.parse("2020-02-21T12:12:01.123-05:00"));
+	}
+
+	@Test
+	public void testParseIntoPrimitive_InvalidValue() {
+		// Test
+		DateTimeType target = new DateTimeType();
+		DataFormatException e = assertThrows(DataFormatException.class, () -> ourCtx.newXmlParser().parseInto("\"birthDate\":\"2020-01-01\"", target));
+
+		// Verify
+		assertThat(e.getMessage()).contains("Invalid date/time");
+	}
 
 	/**
 	 * Ensure that a contained bundle doesn't cause a crash

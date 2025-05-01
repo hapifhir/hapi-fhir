@@ -1,6 +1,7 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
@@ -49,6 +50,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		myCtx.setNarrativeGenerator(null);
 
 		CustomPatient patient = new CustomPatient();
+		patient.setMeta(new Meta().addProfile("http://custom_patient"));
 		patient.setActive(true);
 		FavouritePizzaExtension parentExtension = new FavouritePizzaExtension();
 		parentExtension.setToppings(new StringType("Mushrooms, Onions"));

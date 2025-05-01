@@ -36,6 +36,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.annotation.Testable;
 
 import java.io.IOException;
@@ -1152,14 +1155,73 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals("Patient/RED/_history/1", versionedPatientReference);
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		"0, false",
+		"0, true",
+		"1, false",
+		"1, true",
+		"2, false",
+		"2, true"
+	})
+	public void testAutoVersionReferenceToConditionalCreate(int theExistingVersion, boolean theMatchUrlCacheEnabled) {
+		// Setup
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+		myStorageSettings.setAutoVersionReferenceAtPaths(
+			"Patient.managingOrganization"
+		);
+
+		// If theExistingVersion == 0 we don't create it at all
+		// If theExistingVersion >= 1 we update it that number of times
+		for (int i = 1; i <= theExistingVersion; i++) {
+			Organization org = new Organization();
+			org.setId("ORG");
+			org.setName("V" + i);
+			org.addIdentifier().setSystem("http://foo").setValue("ORG");
+			myOrganizationDao.update(org, mySrd);
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Organization org = new Organization();
+		IdType orgId = IdType.newRandomUuid();
+		org.setId(orgId);
+		org.setName("ORG999");
+		org.addIdentifier().setSystem("http://foo").setValue("ORG");
+		bb.addTransactionCreateEntry(org).conditional("Organization?identifier=http://foo|ORG");
+		Patient p = new Patient();
+		p.setId("P");
+		p.setManagingOrganization(new Reference(orgId));
+		bb.addTransactionUpdateEntry(p);
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		Bundle output = mySystemDao.transaction(new SystemRequestDetails(), input);
+
+		// Verify
+		if (theExistingVersion == 0) {
+			assertThat(output.getEntry().get(0).getResponse().getStatus()).startsWith("201 Created");
+		} else {
+			assertThat(output.getEntry().get(0).getResponse().getStatus()).startsWith("200 OK");
+		}
+		String actualOrgId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+
+		Patient actualPatient = myPatientDao.read(new IdType("Patient/P"), mySrd);
+
+
+		String expected = actualOrgId + "/_history/" + (theExistingVersion > 0 ? theExistingVersion : 1);
+		assertEquals(expected, actualPatient.getManagingOrganization().getReference());
+	}
+
+
+
 	@Test
 	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() throws IOException {
 		Bundle bundle = loadResourceFromClasspath(Bundle.class, "/transaction-bundles/transaction-with-full-request-url.json");
 
 		try {
 			// test
-			mySystemDao.transaction(new ServletRequestDetails(),
-				bundle);
+			mySystemDao.transaction(new SystemRequestDetails(), bundle);
 			fail("We expect invalid full urls to fail");
 		} catch (InvalidRequestException ex) {
 			assertThat(ex.getMessage()).contains("Unable to perform POST, URL provided is invalid:");

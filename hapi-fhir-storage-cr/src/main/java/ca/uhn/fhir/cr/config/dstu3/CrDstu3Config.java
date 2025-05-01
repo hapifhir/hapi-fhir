@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Import;
 import java.util.Arrays;
 import java.util.Map;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrDstu3Config {

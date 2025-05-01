@@ -1,0 +1,7 @@
+---
+type: add
+issue: 6810
+title: "The Pointcut `STORAGE_PRESEARCH_REGISTERED` will now also be called before the 
+   internal FHIR searches being performed in order to resolve conditional create/update/etc
+   URLs when processing FHIR transactions. Previously this pointcut was not called for
+   these specific searches."

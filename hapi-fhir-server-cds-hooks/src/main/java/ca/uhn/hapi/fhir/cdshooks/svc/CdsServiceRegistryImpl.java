@@ -23,7 +23,9 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -56,7 +58,37 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final ObjectMapper myObjectMapper;
 	private final ICdsCrServiceFactory myCdsCrServiceFactory;
 	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
+	private final CDSHooksVersion myCdsHooksVersion;
 
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
+		myCdsHooksContextBooter = theCdsHooksContextBooter;
+		myCdsPrefetchSvc = theCdsPrefetchSvc;
+		myObjectMapper = theObjectMapper;
+		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
+		myCdsCrServiceFactory = null;
+		myCrDiscoveryServiceFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public CdsServiceRegistryImpl(
 			CdsHooksContextBooter theCdsHooksContextBooter,
 			CdsPrefetchSvc theCdsPrefetchSvc,
@@ -64,12 +96,32 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
 			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
+		this(
+				theCdsHooksContextBooter,
+				theCdsPrefetchSvc,
+				theObjectMapper,
+				theCdsCrServiceFactory,
+				theCrDiscoveryServiceFactory,
+				theCdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.DEFAULT);
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper,
+			ICdsCrServiceFactory theCdsCrServiceFactory,
+			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
+			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
+			CDSHooksVersion theCDSHooksVersion) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 		myCdsCrServiceFactory = theCdsCrServiceFactory;
 		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
+		myCdsHooksVersion = theCDSHooksVersion;
 	}
 
 	@PostConstruct
@@ -87,6 +139,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		final CdsServiceJson cdsServiceJson = getCdsServiceJson(theServiceId);
 		final CdsServiceRequestJson deserializedRequest =
 				myCdsServiceRequestJsonDeserializer.deserialize(cdsServiceJson, theCdsServiceRequestJson);
+		validateHookRequestFhirServer(deserializedRequest);
 		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
 		myCdsPrefetchSvc.augmentRequest(deserializedRequest, serviceMethod);
 		Object response = serviceMethod.invoke(myObjectMapper, deserializedRequest, theServiceId);
@@ -117,6 +170,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Override
 	public boolean registerCrService(String theServiceId) {
 		try {
@@ -244,5 +298,16 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	@VisibleForTesting
 	void setServiceCache(CdsServiceCache theCdsServiceCache) {
 		myServiceCache = theCdsServiceCache;
+	}
+
+	private void validateHookRequestFhirServer(CdsServiceRequestJson theCdsServiceRequestJson) {
+		if (myCdsHooksVersion != CDSHooksVersion.V_1_1) {
+			// for a version greater than V_1_1 (which is the base version supported),
+			// the fhirServer is required to use https scheme
+			String fhirServer = theCdsServiceRequestJson.getFhirServer();
+			if (fhirServer != null && !fhirServer.startsWith("https")) {
+				throw new InvalidRequestException(Msg.code(2632) + "The scheme for the fhirServer must be https");
+			}
+		}
 	}
 }

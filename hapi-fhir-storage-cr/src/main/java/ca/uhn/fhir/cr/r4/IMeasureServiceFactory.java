@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @FunctionalInterface
 public interface IMeasureServiceFactory {
 	R4MeasureService create(RequestDetails theRequestDetails);

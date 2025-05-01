@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.ByteProvider;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
@@ -64,7 +64,8 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 	private void loadBinariesFromPackage(NpmPackage thePackage) throws IOException {
 		List<String> binaries = thePackage.list("other");
 		for (String binaryName : binaries) {
-			addBinary(TextFile.streamToBytes(thePackage.load("other", binaryName)), binaryName);
+			addBinary(
+					ByteProvider.forStream(thePackage.load("other", binaryName)).getBytes(), binaryName);
 		}
 	}
 }

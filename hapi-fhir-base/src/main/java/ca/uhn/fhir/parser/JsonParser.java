@@ -237,6 +237,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	@Override
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		JsonLikeStructure jsonStructure = new JacksonStructure();
+		jsonStructure.load(theSource);
+
+		ParserState<IBase> state =
+				ParserState.getComplexObjectState(this, getContext(), getContext(), true, theTarget, getErrorHandler());
+		state.enteringNewElement(null, null);
+
+		parseChildren(jsonStructure.getRootObject(), state);
+
+		state.endingElement();
+	}
+
+	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
 		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(theReader);
@@ -1992,11 +2006,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				// Write child extensions
 				if (!ext.getExtension().isEmpty()) {
 
-					if (myModifier) {
-						beginArray(theEventWriter, "modifierExtension");
-					} else {
-						beginArray(theEventWriter, "extension");
-					}
+					beginArray(theEventWriter, "extension");
 
 					for (Object next : ext.getExtension()) {
 						writeUndeclaredExtension(

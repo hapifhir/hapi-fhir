@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -35,7 +32,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Task;
@@ -46,9 +42,13 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.List;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -450,8 +450,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 
 		/*
-* Should have a single identifier populated.
- */
+		 * Should have a single identifier populated.
+		 */
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
@@ -712,16 +712,30 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
-		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		Bundle input = (Bundle) builder.getBundle();
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		OperationOutcome oo = (OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome();
 		assertEquals("SUCCESSFUL_UPDATE_AS_CREATE", oo.getIssue().get(0).getDetails().getCodingFirstRep().getCode());
 		assertEquals("AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE", oo.getIssue().get(1).getDetails().getCodingFirstRep().getCode());
 		assertEquals("Automatically created placeholder resource with ID: Patient/RED/_history/1", oo.getIssue().get(1).getDiagnostics());
 
+		Extension placeholderIdExtension = oo.getIssue().get(1).getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID);
+		IdType placeholderId = (IdType) placeholderIdExtension.getValue();
+		assertEquals("Patient/RED/_history/1", placeholderId.getValue());
+
 		// verify subresource is created
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
+
+		List<TransactionUtil.StorageOutcome> outcomes = TransactionUtil.parseTransactionResponse(myFhirContext, input, outcome).getStorageOutcomes();
+		assertEquals(2, outcomes.size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, outcomes.get(0).getStorageResponseCode());
+		assertEquals("Observation/DEF/_history/1", outcomes.get(0).getTargetId().getValue());
+		assertEquals("Observation/DEF", outcomes.get(0).getSourceId().getValue());
+		assertEquals(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE, outcomes.get(1).getStorageResponseCode());
+		assertEquals("Patient/RED/_history/1", outcomes.get(1).getTargetId().getValue());
+		assertEquals("Observation/DEF/_history/1", outcomes.get(1).getSourceId().getValue());
 	}
 
 
@@ -735,11 +749,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType(patientId));
-		myPatientDao.update(patient); // use update to use forcedid
+		myPatientDao.update(patient, mySrd); // use update to use forcedid
 
 		// update
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 		logAllResources();
 		logAllResourceVersions();
@@ -752,14 +766,14 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
-		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 		assertTrue(returned.getActive());
 		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
-		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		Observation retObservation = myObservationDao.read(obs.getIdElement(), mySrd);
 		assertNotNull(retObservation);
 	}
 
@@ -774,11 +788,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// create
 		Patient patient = new Patient();
 		patient.setIdElement(new IdType("Patient"));
-		DaoMethodOutcome ret = myPatientDao.create(patient); // use create to use server id
+		DaoMethodOutcome ret = myPatientDao.create(patient, mySrd); // use create to use server id
 
 		// update - to update our version
 		patient.setActive(true);
-		myPatientDao.update(patient);
+		myPatientDao.update(patient, mySrd);
 
 		// observation (with version 2)
 		Observation obs = new Observation();
@@ -790,11 +804,11 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
-		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
+		Patient returned = myPatientDao.read(patientRef.getReferenceElement(), mySrd);
 		assertNotNull(returned);
 		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
-		Observation retObservation = myObservationDao.read(obs.getIdElement());
+		Observation retObservation = myObservationDao.read(obs.getIdElement(), mySrd);
 		assertNotNull(retObservation);
 	}
 
@@ -820,7 +834,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
 		// verify links created to Patient placeholder from both Observations
-		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
 		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 
@@ -842,7 +856,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
 
 		// verify links created to Patient placeholder from both Observations
-		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
 		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 

@@ -250,7 +250,7 @@ public class LoggingInterceptorDstu2Test {
 	public void testRequestBodyCreate() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
-		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir} - ${responseId}");
 		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
@@ -270,7 +270,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient> - Patient/1", captor.getValue());
 	}
 
 	@Test

@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
+import ca.uhn.fhir.broker.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
-import ca.uhn.fhir.jpa.subscription.channel.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -73,10 +72,12 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 	private void doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
 		try {
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
-		} catch (MessageDeliveryException e) {
-			if (e.getCause() instanceof PayloadTooLargeException) {
+		} catch (Exception e) {
+			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
 				theResourceModifiedMessage.setPayloadToNull();
 				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+			} else {
+				throw e;
 			}
 		}
 	}

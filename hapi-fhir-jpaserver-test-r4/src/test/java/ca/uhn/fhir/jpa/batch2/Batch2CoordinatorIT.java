@@ -19,15 +19,14 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -90,7 +89,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 
 @ContextConfiguration(classes = {
@@ -163,7 +161,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	private LinkedBlockingChannelFactory myChannelFactory;
 
 	@SpyBean
 	private IJobPersistence myJobPersistence;
@@ -195,7 +193,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myCompletionHandler = details -> {
 		};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
 
 		// reset
@@ -1049,6 +1047,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
 				theHandler.reductionStepConsume(theChunkDetails, null);
 				return ChunkOutcome.SUCCESS();
+			}
+
+			@Override
+			public IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> newInstance() {
+				return this;
 			}
 
 			@Nonnull

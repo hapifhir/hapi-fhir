@@ -75,6 +75,7 @@ public class CdsServiceCache {
 		}
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public void registerCrService(
 			String theServiceId,
 			ICrDiscoveryServiceFactory theDiscoveryServiceFactory,
