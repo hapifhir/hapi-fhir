@@ -326,7 +326,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Set<String> foundIds,
 			Set<JpaPid> theIdsToPreFetchBodiesFor) {
 
-
 		FhirTerser terser = myFhirContext.newTerser();
 
 		enum PrefetchReasonEnum {
@@ -344,7 +343,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			 * to prefetch the current body so we can tell how it has changed.
 			 */
 			DIRECT_TARGET
-
 		}
 		Map<IIdType, PrefetchReasonEnum> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 
@@ -385,7 +383,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							// We use putIfAbsent here because if we're already fetching
 							// as a direct target we don't want to downgrade to just a
 							// reference target
-							idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), PrefetchReasonEnum.REFERENCE_TARGET);
+							idsToPreResolve.putIfAbsent(
+									reference.toUnqualifiedVersionless(), PrefetchReasonEnum.REFERENCE_TARGET);
 						}
 					}
 				}
@@ -407,22 +406,25 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * modify. In that case it doesn't even matter if the resource is currently
 		 * deleted because we're going to resurrect it in that case.
 		 */
-		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> t == PrefetchReasonEnum.REFERENCE_TARGET);
+		boolean preFetchIncludesReferences =
+				idsToPreResolve.values().stream().anyMatch(t -> t == PrefetchReasonEnum.REFERENCE_TARGET);
 		ResolveIdentityMode resolveMode = preFetchIncludesReferences
 				? ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled()
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
-		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator = outcomes.entrySet().iterator(); iterator.hasNext(); ) {
+		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
+						outcomes.entrySet().iterator();
+				iterator.hasNext(); ) {
 			Map.Entry<IIdType, IResourceLookup<JpaPid>> entry = iterator.next();
 			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
 			switch (idsToPreResolve.get(unqualifiedVersionlessId)) {
 				case DIRECT_TARGET -> {
 					if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-						|| (next.getAssociatedResourceId() != null
-						&& !next.getAssociatedResourceId().isIdPartValidLong())) {
+							|| (next.getAssociatedResourceId() != null
+									&& !next.getAssociatedResourceId().isIdPartValidLong())) {
 						theIdsToPreFetchBodiesFor.add(next);
 					}
 				}
@@ -949,6 +951,4 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			myResolved = theResolved;
 		}
 	}
-
-
 }
