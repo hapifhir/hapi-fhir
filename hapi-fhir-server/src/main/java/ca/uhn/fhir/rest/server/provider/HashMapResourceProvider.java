@@ -506,6 +506,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				isBlank(theConditional), "This server doesn't support conditional update");
 
 		boolean created = updateInternal(theResource, theRequestDetails, transactionDetails);
+		// FIXME KHS
+		ourLog.info("Updating resource {}", theResource.getIdElement());
 		myUpdateCount.incrementAndGet();
 
 		return new MethodOutcome().setCreated(created).setResource(theResource).setId(theResource.getIdElement());

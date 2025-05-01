@@ -24,6 +24,8 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -136,9 +138,16 @@ public class HookParams {
 			b.append("  ")
 					.append(key.getSimpleName())
 					.append(": ")
-					.append(value)
+					.append(log(value))
 					.append("\n");
 		});
 		return b.toString();
+	}
+
+	private String log(Object theValue) {
+		if (theValue instanceof IBaseResource) {
+			return ((IBaseResource) theValue).getIdElement().toString();
+		}
+		return theValue.toString();
 	}
 }
