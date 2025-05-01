@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					try {
 						next.get();
 					} catch (Exception e) {
-						throw new SQLException(Msg.code(69) + e);
+						throw new SQLException(Msg.code(69) + e, e);
 					}
 				}
 			}
@@ -168,8 +168,9 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 				rejectedExecutionHandler);
 	}
 
-	public void setPidColumnName(String thePidColumnName) {
+	public BaseColumnCalculatorTask setPidColumnName(String thePidColumnName) {
 		myPidColumnName = thePidColumnName;
+		return this;
 	}
 
 	private Future<?> updateRows(List<Map<String, Object>> theRows) {

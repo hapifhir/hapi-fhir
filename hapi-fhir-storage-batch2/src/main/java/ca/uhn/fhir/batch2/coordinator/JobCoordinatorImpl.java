@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -39,21 +41,20 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -79,7 +80,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull WorkChunkProcessor theExecutorSvc,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			@Nonnull IHapiTransactionService theTransactionService) {
+			@Nonnull IHapiTransactionService theTransactionService,
+			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -93,7 +95,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				theBatchJobSender,
 				theExecutorSvc,
 				theJobMaintenanceService,
-				theTransactionService);
+				theTransactionService,
+				theInterceptorBroadcaster);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 		myTransactionService = theTransactionService;
@@ -142,41 +145,16 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
+		// we only create the first chunk amd job here
+		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
-				.withSystemRequest()
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
-
-		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(
-				jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
-		sendBatchJobWorkNotificationAfterCommit(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
 		return response;
-	}
-
-	/**
-	 * In order to make sure that the data is actually in the DB when JobWorkNotification is handled,
-	 * this method registers a transaction synchronization that sends JobWorkNotification to Job WorkChannel
-	 * if and when the current database transaction is successfully committed.
-	 * If the transaction is rolled back, the JobWorkNotification will not be sent to the job WorkChannel.
-	 */
-	private void sendBatchJobWorkNotificationAfterCommit(final JobWorkNotification theJobWorkNotification) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public int getOrder() {
-					return 0;
-				}
-
-				@Override
-				public void afterCommit() {
-					myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
-				}
-			});
-		} else {
-			myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
-		}
 	}
 
 	/**
@@ -220,6 +198,16 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	public List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
 		return getJobInstancesByJobDefinitionIdAndStatuses(
 				theJobDefinitionId, new HashSet<>(Arrays.asList(StatusEnum.values())), theCount, theStart);
+	}
+
+	@Override
+	public List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String theInstanceId) {
+		return myJobPersistence.fetchWorkChunkStatusForInstance(theInstanceId);
+	}
+
+	@Override
+	public BatchInstanceStatusDTO getBatchInstanceStatus(String theInstanceId) {
+		return myJobPersistence.fetchBatchInstanceStatus(theInstanceId);
 	}
 
 	@Override

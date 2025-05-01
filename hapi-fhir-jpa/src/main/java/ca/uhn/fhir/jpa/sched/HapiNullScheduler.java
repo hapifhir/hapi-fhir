@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,16 @@ public class HapiNullScheduler implements IHapiScheduler {
 
 	@Override
 	public void logStatusForUnitTest() {}
+
+	@Override
+	public void pause() {
+		// nothing to do
+	}
+
+	@Override
+	public void unpause() {
+		// nothing to do
+	}
 
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {

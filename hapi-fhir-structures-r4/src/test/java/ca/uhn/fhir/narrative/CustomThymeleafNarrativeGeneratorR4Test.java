@@ -1,23 +1,20 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomThymeleafNarrativeGeneratorR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorR4Test.class);
 
-	/**
-	 * Don't use cached here since we modify the context
-	 */
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@AfterEach
@@ -30,7 +27,6 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 	 */
 	@Test
 	public void testStandardType() {
-
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/standardtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
 
@@ -45,14 +41,16 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		String actual = p.getText().getDiv().getValueAsString();
 		ourLog.info(actual);
 
-		assertThat(actual, containsString("<h1>Name</h1><div class=\"nameElement\">given <b>FAM1 </b></div><h1>Address</h1><div><span>line1 </span><br/><span>line2 </span><br/></div></div>"));
+		assertThat(actual).contains("<h1>Name</h1><div class=\"nameElement\">given <b>FAM1 </b></div><h1>Address</h1><div><span>line1 </span><br/><span>line2 </span><br/></div></div>");
 
 	}
 
 	@Test
 	public void testCustomType() {
+		myCtx.setNarrativeGenerator(null);
 
 		CustomPatient patient = new CustomPatient();
+		patient.setMeta(new Meta().addProfile("http://custom_patient"));
 		patient.setActive(true);
 		FavouritePizzaExtension parentExtension = new FavouritePizzaExtension();
 		parentExtension.setToppings(new StringType("Mushrooms, Onions"));

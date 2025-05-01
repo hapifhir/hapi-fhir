@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,11 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public final class SctHandlerRelationship implements IZipContentsHandlerCsv {
 	private final Map<String, TermConcept> myCode2concept;
@@ -88,10 +92,6 @@ public final class SctHandlerRelationship implements IZipContentsHandlerCsv {
 						}
 					}
 				}
-			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
-				// ignore
-			} else {
-				// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 			}
 		}
 	}

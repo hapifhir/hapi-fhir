@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,16 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
@@ -32,32 +38,23 @@ import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Arrays;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
+import java.util.Objects;
 
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
-	private static final Long NO_MORE = -1L;
+	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
 	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
-	private final Integer myMaxResultsToFetch;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
 	private boolean myQueryInitialized;
-	private Connection myConnection;
-	private PreparedStatement myStatement;
-	private ScrollableResultsIterator<Number> myResultSet;
-	private Long myNext;
+	private ScrollableResultsIterator<Object> myResultSet;
+	private JpaPid myNext;
 
 	/**
 	 * Constructor
@@ -66,7 +63,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		Validate.notNull(theGeneratedSql, "theGeneratedSql must not be null");
 		myGeneratedSql = theGeneratedSql;
 		myQueryInitialized = false;
-		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	/**
@@ -76,7 +72,6 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 		assert NO_MORE != null;
 
 		myGeneratedSql = null;
-		myMaxResultsToFetch = null;
 		myNext = NO_MORE;
 	}
 
@@ -92,10 +87,10 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 	}
 
 	@Override
-	public Long next() {
+	public JpaPid next() {
 		fetchNext();
 		Validate.isTrue(hasNext(), "Can not call next() right now, no data remains");
-		Long next = myNext;
+		JpaPid next = myNext;
 		myNext = null;
 		return next;
 	}
@@ -113,14 +108,13 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					HapiTransactionService.requireTransaction();
+					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
 					for (int i = 1; i <= args.length; i++) {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
-
-					ourLog.trace("About to execute SQL: {}. Parameters: {}", sql, Arrays.toString(args));
 
 					/*
 					 * These settings help to ensure that we use a search cursor
@@ -151,14 +145,49 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					Number next = myResultSet.next();
-					myNext = next.longValue();
+					myNext = getNextPid(myResultSet);
 				}
 
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
 				throw new InternalErrorException(Msg.code(1262) + e, e);
+			}
+		}
+	}
+
+	private JpaPid getNextPid(ScrollableResultsIterator<Object> theResultSet) {
+		Object nextRow = Objects.requireNonNull(theResultSet.next());
+		// We should typically get two columns back, the first is the partition ID and the second
+		// is the resource ID. But if we're doing a count query, we'll get a single column in an array
+		// or maybe even just a single non array value depending on how the platform handles it.
+		if (nextRow instanceof Number) {
+			return JpaPid.fromId(((Number) nextRow).longValue());
+		} else {
+			Object[] nextRowAsArray = (Object[]) nextRow;
+			if (nextRowAsArray.length == 1) {
+				return JpaPid.fromId((Long) nextRowAsArray[0]);
+			} else {
+				int i;
+				// TODO MB add a strategy object to GeneratedSql to describe the result set.
+				// or make SQE generic
+				// Comment to reviewer: this will be cleaner with the next
+				// merge from ja_20240718_pk_schema_selector
+
+				// We have some cases to distinguish:
+				// - res_id
+				// - count
+				// - partition_id, res_id
+				// - res_id, coord-dist
+				// - partition_id, res_id, coord-dist
+				// Assume res_id is first Long in row, and is in first two columns
+				if (nextRowAsArray[0] instanceof Long) {
+					return JpaPid.fromId((Long) nextRowAsArray[0]);
+				} else {
+					Integer partitionId = (Integer) nextRowAsArray[0];
+					Long pid = (Long) nextRowAsArray[1];
+					return JpaPid.fromId(pid, partitionId);
+				}
 			}
 		}
 	}

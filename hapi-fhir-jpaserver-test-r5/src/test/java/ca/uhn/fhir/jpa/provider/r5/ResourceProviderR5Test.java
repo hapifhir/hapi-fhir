@@ -1,12 +1,29 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -15,7 +32,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
@@ -23,31 +39,38 @@ import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.MedicationRequest;
+import org.hl7.fhir.r5.model.MedicinalProductDefinition;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
-import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StringType;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.comparator.Comparators;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
+import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -105,7 +128,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(pt1id));
+		assertThat(ids).containsExactlyInAnyOrder(pt1id);
 
 		output = myClient
 			.search()
@@ -114,7 +137,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(pt1id));
+		assertThat(ids).containsExactlyInAnyOrder(pt1id);
 
 	}
 
@@ -130,7 +153,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, response0.getEntry().size());
+		assertThat(response0.getEntry()).hasSize(1);
 
 		// Perform the search again (should return the same)
 		Bundle response1 = myClient.search()
@@ -138,7 +161,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, response1.getEntry().size());
+		assertThat(response1.getEntry()).hasSize(1);
 		assertEquals(response0.getId(), response1.getId());
 
 		// Pretend the search was errored out
@@ -150,8 +173,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, response3.getEntry().size());
-		assertNotEquals(response0.getId(), response3.getId());
+		assertThat(response3.getEntry()).hasSize(1);
+		assertThat(response3.getId()).isNotEqualTo(response0.getId());
 
 	}
 
@@ -191,7 +214,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.count(1)
 			.execute();
-		assertEquals(1, response0.getEntry().size());
+		assertThat(response0.getEntry()).hasSize(1);
 
 		// Make sure it works for now
 		myClient.loadPage().next(response0).execute();
@@ -204,9 +227,182 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			myClient.loadPage().next(response0).execute();
 		} catch (NotImplementedOperationException e) {
 			assertEquals(501, e.getStatusCode());
-			assertThat(e.getMessage(), containsString("Some Failure Message"));
+			assertThat(e.getMessage()).contains("Some Failure Message");
 		}
+	}
 
+	@Test
+	public void searchForNewerResources_fullTextSearchWithFilterAndCount_shouldReturnAccurateResults() {
+		IParser parser = myFhirContext.newJsonParser();
+		int count = 10;
+
+		boolean presetFilterParameterEnabled = myStorageSettings.isFilterParameterEnabled();
+		boolean presetAdvancedHSearchIndexing = myStorageSettings.isAdvancedHSearchIndexing();
+
+		try {
+			// fullTextSearch means Advanced Hibernate Search
+			myStorageSettings.setFilterParameterEnabled(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
+
+			// create custom search parameters - the _filter and _include are needed
+			{
+				@SuppressWarnings("unchecked")
+				IFhirResourceDao<SearchParameter> spDao = myDaoRegistry.getResourceDao("SearchParameter");
+				SearchParameter sp;
+
+				@Language("JSON")
+				String includeParam = """
+						{
+						  "resourceType": "SearchParameter",
+						  "id": "9905463e-e817-4db0-9a3e-ff6aa3427848",
+						  "meta": {
+						    "versionId": "2",
+						    "lastUpdated": "2024-03-28T12:53:57.874+00:00",
+						    "source": "#7b34a4bfa42fe3ae"
+						  },
+						  "title": "Medicinal Product Manfacturer",
+						  "status": "active",
+						  "publisher": "MOH-IDMS",
+						  "code": "productmanufacturer",
+						  "base": [
+						    "MedicinalProductDefinition"
+						  ],
+						  "type": "reference",
+						  "expression": "MedicinalProductDefinition.operation.organization"
+						}
+					""";
+				sp = parser.parseResource(SearchParameter.class, includeParam);
+				spDao.create(sp, new SystemRequestDetails());
+				sp = null;
+				@Language("JSON")
+				String filterParam = """
+						{
+						  "resourceType": "SearchParameter",
+						  "id": "SEARCH-PARAMETER-MedicinalProductDefinition-SearchableString",
+						  "meta": {
+						    "versionId": "2",
+						    "lastUpdated": "2024-03-27T19:20:25.200+00:00",
+						    "source": "#384dd6bccaeafa6c"
+						  },
+						  "url": "https://health.gov.on.ca/idms/fhir/SearchParameter/MedicinalProductDefinition-SearchableString",
+						  "name": "MedicinalProductDefinitionSearchableString",
+						  "status": "active",
+						  "publisher": "MOH-IDMS",
+						  "description": "Search Parameter for the MedicinalProductDefinition Searchable String Extension",
+						  "code": "MedicinalProductDefinitionSearchableString",
+						  "base": [
+						    "MedicinalProductDefinition"
+						  ],
+						  "type": "string",
+						  "expression": "MedicinalProductDefinition.extension('https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString')",
+						  "target": [
+						    "MedicinalProductDefinition"
+						  ]
+						}
+					""";
+				sp = parser.parseResource(SearchParameter.class, filterParam);
+				spDao.create(sp, new SystemRequestDetails());
+			}
+			// create MedicinalProductDefinitions
+			MedicinalProductDefinition mdr;
+			{
+				@Language("JSON")
+				String mpdstr = """
+					{
+					                "resourceType": "MedicinalProductDefinition",
+					                "id": "36fb418b-4b1f-414c-bbb1-731bc8744b93",
+					                "meta": {
+					                    "versionId": "17",
+					                    "lastUpdated": "2024-06-10T16:52:23.907+00:00",
+					                    "source": "#3a309416d5f52c5b",
+					                    "profile": [
+					                        "https://health.gov.on.ca/idms/fhir/StructureDefinition/IDMS_MedicinalProductDefinition"
+					                    ]
+					                },
+					                "extension": [
+					                    {
+					                        "url": "https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString",
+					                        "valueString": "zahidbrand0610-2up|genupuu|qwewqe2 111|11111115|DF other des|Biologic|Oncology|Private Label"
+					                    }
+					                ],
+					                "status": {
+					                    "coding": [
+					                        {
+					                            "system": "http://hl7.org/fhir/ValueSet/publication-status",
+					                            "code": "active",
+					                            "display": "Active"
+					                        }
+					                    ]
+					                },
+					                "name": [
+					                    {
+					                        "productName": "zahidbrand0610-2up"
+					                    }
+					                ]
+					            }
+					""";
+				mdr = parser.parseResource(MedicinalProductDefinition.class, mpdstr);
+			}
+			IFhirResourceDao<MedicinalProductDefinition> mdrdao = myDaoRegistry.getResourceDao(MedicinalProductDefinition.class);
+
+			/*
+			 * We actually want a bunch of non-matching resources in the db
+			 * that won't match the filter before we get to the one that will.
+			 *
+			 * To this end, we're going to insert more than we plan
+			 * on retrieving to ensure the _filter is being used in both the
+			 * count query and the actual db hit
+			 */
+			List<MedicinalProductDefinition.MedicinalProductDefinitionNameComponent> productNames = mdr.getName();
+			mdr.setName(null);
+			List<Extension> extensions = mdr.getExtension();
+			mdr.setExtension(null);
+			// we need at least 10 of these; 20 should be good
+			for (int i = 0; i < 2 * count; i++) {
+				mdr.addName(new MedicinalProductDefinition.MedicinalProductDefinitionNameComponent("Product " + i));
+				mdr.addExtension()
+					.setUrl("https://health.gov.on.ca/idms/fhir/StructureDefinition/SearchableExtraString")
+					.setValue(new StringType("Non-matching string " + i));
+				mdrdao.create(mdr, new SystemRequestDetails());
+			}
+			mdr.setName(productNames);
+			mdr.setExtension(extensions);
+			mdrdao.create(mdr, new SystemRequestDetails());
+
+			// do a reindex
+			ReindexJobParameters jobParameters = new ReindexJobParameters();
+			jobParameters.addPartitionedUrl(new PartitionedUrl().setRequestPartitionId(RequestPartitionId.allPartitions()));
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_REINDEX);
+			request.setParameters(jobParameters);
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+
+			myBatch2JobHelper.awaitJobCompletion(response);
+
+			// query like:
+			// MedicinalProductDefinition?_getpagesoffset=0&_count=10&_total=accurate&_sort:asc=name&status=active&_include=MedicinalProductDefinition:productmanufacturer&_filter=MedicinalProductDefinitionSearchableString%20co%20%22zah%22
+			SearchParameterMap map = new SearchParameterMap();
+			map.setCount(10);
+			map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+			map.setSort(new SortSpec().setOrder(SortOrderEnum.ASC).setParamName("name"));
+			map.setIncludes(Set.of(
+				new Include("MedicinalProductDefinition:productmanufacturer")
+			));
+			map.add("_filter", new StringParam("MedicinalProductDefinitionSearchableString co \"zah\""));
+
+			// test
+			IBundleProvider result = mdrdao.search(map, new SystemRequestDetails());
+
+			// validate
+			// we expect to find our 1 matching resource
+			assertEquals(1, result.getAllResources().size());
+			assertNotNull(result.size());
+			assertEquals(1, result.size());
+		} finally {
+			// reset values
+			myStorageSettings.setFilterParameterEnabled(presetFilterParameterEnabled);
+			myStorageSettings.setAdvancedHSearchIndexing(presetAdvancedHSearchIndexing);
+		}
 	}
 
 	@Test
@@ -249,7 +445,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		List<IIdType> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualified()).collect(Collectors.toList());
-		assertThat(ids, containsInAnyOrder(oid));
+		assertThat(ids).containsExactlyInAnyOrder(oid);
 	}
 
 
@@ -273,12 +469,12 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(2, output.getTotal());
-		assertEquals(0, output.getEntry().size());
+		assertThat(output.getEntry()).isEmpty();
 	}
 
 	@Test
 	public void testSearchWithCompositeSort() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -294,78 +490,78 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
+
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertEquals(4, found.getEntry().size());
+		assertThat(found.getEntry()).hasSize(4);
 		assertEquals(oid3, list.get(0));
 		assertEquals(oid1, list.get(1));
 		assertEquals(oid4, list.get(2));
@@ -398,9 +594,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -429,9 +625,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
 	}
 
 	@Test
@@ -468,11 +664,11 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
-		assertThat(ids, Matchers.not(hasItem(o1Id)));
-		assertThat(ids, Matchers.not(hasItem(m1Id)));
-		assertThat(ids, Matchers.not(hasItem(p2Id)));
-		assertThat(ids, Matchers.not(hasItem(o2Id)));
+		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).doesNotContain(o1Id);
+		assertThat(ids).doesNotContain(m1Id);
+		assertThat(ids).doesNotContain(p2Id);
+		assertThat(ids).doesNotContain(o2Id);
 	}
 
 
@@ -495,6 +691,66 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
 		myClient.transaction().withResources(carePlans).execute();
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHistoryPaging(boolean theTypeLevel) {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		List<String> expectedIdentifiers = new ArrayList<>();
+		for (int i = 0; i < 500; i++) {
+			Patient p = new Patient();
+			String identifier = leftPad(Integer.toString(i), 4, '0');
+			expectedIdentifiers.add(identifier);
+			p.addIdentifier().setValue(identifier);
+			bb.addTransactionCreateEntry(p);
+		}
+
+		ourLog.info("Starting transaction with {} entries...", expectedIdentifiers.size());
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Test
+		ourLog.info("Loading type history, expecting identifiers from {} to {}...", expectedIdentifiers.get(0), expectedIdentifiers.get(expectedIdentifiers.size() - 1));
+		List<String> actualIdentifiers = new ArrayList<>();
+		Bundle historyBundle;
+		if (theTypeLevel) {
+			historyBundle = myClient.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		} else {
+			historyBundle = myClient.history().onServer().returnBundle(Bundle.class).execute();
+		}
+        while (true) {
+			historyBundle
+				.getEntry()
+				.stream()
+				.map(t -> (Patient) t.getResource())
+				.map(t -> t.getIdentifierFirstRep().getValue())
+				.forEach(actualIdentifiers::add);
+
+			BundleEntryComponent firstEntry = historyBundle.getEntry().get(0);
+			BundleEntryComponent lastEntry = historyBundle.getEntry().get(historyBundle.getEntry().size() - 1);
+			ourLog.info("""
+                            Loaded history page:
+                             * First ID[ {} ] LastUpdated: {}
+                             * Last  ID[ {} ] LastUpdated: {}""",
+				((Patient) firstEntry.getResource()).getIdentifierFirstRep().getValue(),
+				firstEntry.getResource().getMeta().getLastUpdatedElement().getValueAsString(),
+				((Patient) lastEntry.getResource()).getIdentifierFirstRep().getValue(),
+				lastEntry.getResource().getMeta().getLastUpdatedElement().getValueAsString()
+			);
+
+			if (historyBundle.getLink(Constants.LINK_NEXT) != null) {
+				historyBundle = myClient.loadPage().next(historyBundle).execute();
+			} else {
+				break;
+			}
+		}
+
+		// Verify
+		actualIdentifiers.sort(Comparators.comparable());
+
+		assertEquals(expectedIdentifiers, actualIdentifiers);
+	}
+
 
 	private IIdType createOrganization(String methodName, String s) {
 		Organization o1 = new Organization();
@@ -543,10 +799,11 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
-			if (next.getResource()!= null) {
+			if (next.getResource() != null) {
 				retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			}
 		}
 		return retVal;
 	}
+
 }

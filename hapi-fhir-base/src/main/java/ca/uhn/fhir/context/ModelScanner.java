@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -67,7 +68,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -441,6 +441,18 @@ class ModelScanner {
 					providesMembershipInCompartments.add(name);
 				}
 
+				/**
+				 * In the base FHIR R4 specification, the Device resource is not a part of the Patient compartment.
+				 * However, it is a patient-specific resource that most users expect to be, and several derivative
+				 * specifications including g(10) testing expect it to be, and the fact that it is not has led to many
+				 * bug reports in HAPI FHIR. As of HAPI FHIR 8.0.0 it is being manually added in response to those
+				 * requests.
+				 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
+				 */
+				if (searchParam.name().equals("patient") && searchParam.path().equals("Device.patient")) {
+					providesMembershipInCompartments.add("Patient");
+				}
+
 				List<RuntimeSearchParam.Component> components = null;
 				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 					components = new ArrayList<>();
@@ -498,7 +510,7 @@ class ModelScanner {
 			nextElementType = ReflectionUtil.getGenericCollectionTypeOfField(next);
 		} else if (Collection.class.isAssignableFrom(nextElementType)) {
 			throw new ConfigurationException(Msg.code(1722) + "Field '" + next.getName() + "' in type '"
-					+ next.getClass().getCanonicalName()
+					+ nextElementType.getCanonicalName()
 					+ "' is a Collection - Only java.util.List curently supported");
 		}
 		return nextElementType;

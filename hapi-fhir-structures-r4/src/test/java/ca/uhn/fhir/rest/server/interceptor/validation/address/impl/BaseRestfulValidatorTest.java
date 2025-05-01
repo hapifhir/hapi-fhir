@@ -1,16 +1,22 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class BaseRestfulValidatorTest {
 
@@ -35,8 +41,7 @@ class BaseRestfulValidatorTest {
 		TestRestfulValidator val = new TestRestfulValidator(responseEntity);
 		try {
 			assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
-			fail();
-		} catch (Exception e) {
+			fail();		} catch (Exception e) {
 		}
 	}
 

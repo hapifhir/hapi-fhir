@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,18 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The IHE Basic Audit Logging Pattern (BALP) interceptor can be used to autopmatically generate
@@ -198,8 +200,11 @@ public class BalpAuditCaptureInterceptor {
 		Set<String> compartmentOwners = determinePatientCompartmentOwnersForResources(resources, theRequestDetails);
 
 		if (!compartmentOwners.isEmpty()) {
-			AuditEvent auditEvent = createAuditEventPatientQuery(theRequestDetails, compartmentOwners);
-			myAuditEventSink.recordAuditEvent(auditEvent);
+			for (String owner : compartmentOwners) {
+				AuditEvent auditEvent = createAuditEventPatientQuery(theRequestDetails, Set.of(owner));
+				myAuditEventSink.recordAuditEvent(auditEvent);
+			}
+
 		} else {
 			AuditEvent auditEvent = createAuditEventBasicQuery(theRequestDetails);
 			myAuditEventSink.recordAuditEvent(auditEvent);
@@ -306,6 +311,10 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.getMeta().addProfile(theProfile.getProfileUrl());
 		auditEvent
+				.getText()
+				.setDiv(new XhtmlNode().setValue("<div>Audit Event</div>"))
+				.setStatus(org.hl7.fhir.r4.model.Narrative.NarrativeStatus.GENERATED);
+		auditEvent
 				.getType()
 				.setSystem(BalpConstants.CS_AUDIT_EVENT_TYPE)
 				.setCode("rest")
@@ -319,7 +328,7 @@ public class BalpAuditCaptureInterceptor {
 		auditEvent.setOutcome(AuditEvent.AuditEventOutcome._0);
 		auditEvent.setRecorded(new Date());
 
-		auditEvent.getSource().getObserver().setDisplay(theRequestDetails.getServerBaseForRequest());
+		auditEvent.getSource().getObserver().setDisplay(theRequestDetails.getFhirServerBase());
 
 		AuditEvent.AuditEventAgentComponent clientAgent = auditEvent.addAgent();
 		clientAgent.setWho(myContextServices.getAgentClientWho(theRequestDetails));
@@ -333,8 +342,8 @@ public class BalpAuditCaptureInterceptor {
 
 		AuditEvent.AuditEventAgentComponent serverAgent = auditEvent.addAgent();
 		serverAgent.getType().addCoding(theProfile.getAgentServerTypeCoding());
-		serverAgent.getWho().setDisplay(theRequestDetails.getServerBaseForRequest());
-		serverAgent.getNetwork().setAddress(theRequestDetails.getServerBaseForRequest());
+		serverAgent.getWho().setDisplay(theRequestDetails.getFhirServerBase());
+		serverAgent.getNetwork().setAddress(theRequestDetails.getFhirServerBase());
 		serverAgent.setRequestor(false);
 
 		AuditEvent.AuditEventAgentComponent userAgent = auditEvent.addAgent();
@@ -374,19 +383,14 @@ public class BalpAuditCaptureInterceptor {
 
 		// Description
 		StringBuilder description = new StringBuilder();
-		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
-		description.append(servletRequest.getMethod());
+		description.append(theRequestDetails.getRequestType().name());
 		description.append(" ");
-		description.append(servletRequest.getRequestURI());
-		if (isNotBlank(servletRequest.getQueryString())) {
-			description.append("?");
-			description.append(servletRequest.getQueryString());
-		}
+		description.append(theRequestDetails.getCompleteUrl());
 		queryEntity.setDescription(description.toString());
 
 		// Query String
 		StringBuilder queryString = new StringBuilder();
-		queryString.append(theRequestDetails.getServerBaseForRequest());
+		queryString.append(theRequestDetails.getFhirServerBase());
 		queryString.append("/");
 		queryString.append(theRequestDetails.getRequestPath());
 		boolean first = true;

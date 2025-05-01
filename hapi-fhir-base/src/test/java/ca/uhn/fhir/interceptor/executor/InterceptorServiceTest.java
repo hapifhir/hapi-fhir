@@ -4,6 +4,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -11,28 +13,33 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static ca.uhn.fhir.interceptor.executor.BaseInterceptorService.haveAppropriateParams;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class InterceptorServiceTest {
+class InterceptorServiceTest {
+	final InterceptorService myInterceptorService = new InterceptorService();
 
 	private final List<String> myInvocations = new ArrayList<>();
 
 	@Test
-	public void testInterceptorWithAnnotationDefinedOnInterface() {
+	void testInterceptorWithAnnotationDefinedOnInterface() {
 
 		InterceptorService svc = new InterceptorService();
 		TestInterceptorWithAnnotationDefinedOnInterface_Class interceptor = new TestInterceptorWithAnnotationDefinedOnInterface_Class();
@@ -42,7 +49,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorThrowsException() {
+	void testInterceptorThrowsException() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -64,7 +71,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorReturnsClass() {
+	void testInterceptorReturnsClass() {
 
 		class InterceptorReturningClass {
 
@@ -99,7 +106,7 @@ public class InterceptorServiceTest {
 	 * Hook methods with private access are ignored
 	 */
 	@Test
-	public void testInterceptorWithPrivateAccessHookMethod() {
+	void testInterceptorWithPrivateAccessHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -111,12 +118,11 @@ public class InterceptorServiceTest {
 		InterceptorService svc = new InterceptorService();
 		svc.registerInterceptor(new InterceptorThrowingException());
 
-		// Should not fail
-		svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
+		assertThatNoException().isThrownBy(()->svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B")));
 	}
 
 	@Test
-	public void testInterceptorWithDefaultAccessHookMethod() {
+	void testInterceptorWithDefaultAccessHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -138,7 +144,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorWithInheritedHookMethod() {
+	void testInterceptorWithInheritedHookMethod() {
 
 		class InterceptorThrowingException {
 			@Hook(Pointcut.TEST_RB)
@@ -164,7 +170,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInterceptorWithNoHooks() {
+	void testInterceptorWithNoHooks() {
 
 		class InterceptorWithNoHooks {
 			// nothing
@@ -177,7 +183,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testRegisterHookFails() {
+	void testRegisterHookFails() {
 		InterceptorService svc = new InterceptorService();
 		int initialSize = svc.getGlobalInterceptorsForUnitTest().size();
 
@@ -188,12 +194,12 @@ public class InterceptorServiceTest {
 			// good
 		}
 
-		assertEquals(initialSize, svc.getGlobalInterceptorsForUnitTest().size());
+		assertThat(svc.getGlobalInterceptorsForUnitTest()).hasSize(initialSize);
 
 	}
 
 	@Test
-	public void testManuallyRegisterInterceptor() {
+	void testManuallyRegisterInterceptor() {
 		InterceptorService svc = new InterceptorService();
 
 		// Registered in opposite order to verify that the order on the annotation is used
@@ -209,31 +215,31 @@ public class InterceptorServiceTest {
 		MyTestInterceptorManual myInterceptorManual = new MyTestInterceptorManual();
 		svc.registerInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertEquals(3, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
-		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorManual, globalInterceptors.get(1).getClass().toString());
-		assertTrue(globalInterceptors.get(2) instanceof MyTestInterceptorTwo, globalInterceptors.get(2).getClass().toString());
+		assertThat(globalInterceptors).hasSize(3);
+        assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
+        assertInstanceOf(MyTestInterceptorManual.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
+        assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(2), globalInterceptors.get(2).getClass().toString());
 
 		// Try to register again (should have no effect
 		svc.registerInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertEquals(3, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
-		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorManual, globalInterceptors.get(1).getClass().toString());
-		assertTrue(globalInterceptors.get(2) instanceof MyTestInterceptorTwo, globalInterceptors.get(2).getClass().toString());
+		assertThat(globalInterceptors).hasSize(3);
+        assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
+        assertInstanceOf(MyTestInterceptorManual.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
+        assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(2), globalInterceptors.get(2).getClass().toString());
 
 		// Make sure we have the right invokers in the right order
 		List<Object> invokers = svc.getInterceptorsWithInvokersForPointcut(Pointcut.TEST_RB);
-		assertSame(interceptor0, invokers.get(0));
-		assertSame(myInterceptorManual, invokers.get(1));
-		assertSame(interceptor1, invokers.get(2));
+		assertThat(invokers.get(0)).isSameAs(interceptor0);
+		assertThat(invokers.get(1)).isSameAs(myInterceptorManual);
+		assertThat(invokers.get(2)).isSameAs(interceptor1);
 
 		// Finally, unregister it
 		svc.unregisterInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertEquals(2, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
-		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorTwo, globalInterceptors.get(1).getClass().toString());
+		assertThat(globalInterceptors).hasSize(2);
+        assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
+        assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
 
 		// Unregister the two others
 		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
@@ -244,7 +250,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testInvokeGlobalInterceptorMethods() {
+	void testInvokeGlobalInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
 		// Registered in opposite order to verify that the order on the annotation is used
@@ -258,14 +264,14 @@ public class InterceptorServiceTest {
 			assertTrue(outcome);
 		}
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
-		assertSame("A", interceptor0.myLastString0);
-		assertSame("A", interceptor1.myLastString0);
-		assertSame("B", interceptor1.myLastString1);
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
+		assertThat(interceptor0.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString1).isSameAs("B");
 	}
 
 	@Test
-	public void testInvokeAnonymousInterceptorMethods() {
+	void testInvokeAnonymousInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestAnonymousInterceptorOne interceptor0 = new MyTestAnonymousInterceptorOne();
@@ -278,14 +284,14 @@ public class InterceptorServiceTest {
 			assertTrue(outcome);
 		}
 
-		assertThat(myInvocations, contains("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb"));
-		assertSame("A", interceptor0.myLastString0);
-		assertSame("A", interceptor1.myLastString0);
-		assertSame("B", interceptor1.myLastString1);
+		assertThat(myInvocations).containsExactly("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb");
+		assertThat(interceptor0.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString1).isSameAs("B");
 	}
 
 	@Test
-	public void testInvokeUsingSupplierArg() {
+	void testInvokeUsingSupplierArg() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
@@ -296,14 +302,14 @@ public class InterceptorServiceTest {
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertTrue(outcome);
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
-		assertSame("A", interceptor0.myLastString0);
-		assertSame("A", interceptor1.myLastString0);
-		assertSame("B", interceptor1.myLastString1);
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
+		assertThat(interceptor0.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString1).isSameAs("B");
 	}
 
 	@Test
-	public void testInvokeGlobalInterceptorMethods_MethodAbortsProcessing() {
+	void testInvokeGlobalInterceptorMethods_MethodAbortsProcessing() {
 		InterceptorService svc = new InterceptorService();
 
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
@@ -316,14 +322,14 @@ public class InterceptorServiceTest {
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertFalse(outcome);
 
-		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb"));
-		assertSame("A", interceptor0.myLastString0);
-		assertSame(null, interceptor1.myLastString0);
-		assertSame(null, interceptor1.myLastString1);
+		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb");
+		assertThat(interceptor0.myLastString0).isSameAs("A");
+		assertThat(interceptor1.myLastString0).isSameAs(null);
+		assertThat(interceptor1.myLastString1).isSameAs(null);
 	}
 
 	@Test
-	public void testCallHooksInvokedWithNullParameters() {
+	void testCallHooksInvokedWithNullParameters() {
 		InterceptorService svc = new InterceptorService();
 
 		class NullParameterInterceptor {
@@ -376,7 +382,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testCallHooksLogAndSwallowException() {
+	void testCallHooksLogAndSwallowException() {
 		InterceptorService svc = new InterceptorService();
 
 		class LogAndSwallowInterceptor0 {
@@ -433,7 +439,7 @@ public class InterceptorServiceTest {
 
 
 	@Test
-	public void testCallHooksInvokedWithWrongParameters() {
+	void testCallHooksInvokedWithWrongParameters() {
 		InterceptorService svc = new InterceptorService();
 
 		Integer msg = 123;
@@ -443,29 +449,27 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("Invalid params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found "));
+			assertThat(e.getMessage()).contains("Invalid params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found ");
 		}
 	}
 
 	@Test
-	public void testValidateParamTypes() {
-		InterceptorService svc = new InterceptorService();
+	void testValidateParamTypes() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
 		params.add(String.class, "B");
-		boolean validated = svc.haveAppropriateParams(Pointcut.TEST_RB, params);
+		boolean validated = haveAppropriateParams(Pointcut.TEST_RB, params);
 		assertTrue(validated);
 	}
 
 	@Test
-	public void testValidateParamTypesMissingParam() {
-		InterceptorService svc = new InterceptorService();
+	void testValidateParamTypesMissingParam() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
 		try {
-			svc.haveAppropriateParams(Pointcut.TEST_RB, params);
+			haveAppropriateParams(Pointcut.TEST_RB, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found [String]", e.getMessage());
@@ -473,8 +477,7 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
-	public void testValidateParamTypesExtraParam() {
-		InterceptorService svc = new InterceptorService();
+	void testValidateParamTypesExtraParam() {
 
 		HookParams params = new HookParams();
 		params.add(String.class, "A");
@@ -485,7 +488,7 @@ public class InterceptorServiceTest {
 		params.add(String.class, "F");
 		params.add(String.class, "G");
 		try {
-			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+			haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum,ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String, String]", e.getMessage());
@@ -494,8 +497,7 @@ public class InterceptorServiceTest {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
-	public void testValidateParamTypesWrongParam() {
-		InterceptorService svc = new InterceptorService();
+	void testValidateParamTypesWrongParam() {
 
 		HookParams params = new HookParams();
 		params.add((Class) String.class, 1);
@@ -505,15 +507,238 @@ public class InterceptorServiceTest {
 		params.add((Class) String.class, 5);
 		params.add((Class) String.class, 6);
 		try {
-			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+			haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String", e.getMessage());
 		}
 	}
 
+	/**
+	 * Verify the ifPresent methods match the base behaviour.
+	 */
+	@Nested
+	class SupplierDefaultMethods {
+		HookParams params = new HookParams("1", "2");
+
+		@Test
+		void testBooleanWithNoHooks_returnsTrue() {
+			InterceptorService svc = new InterceptorService();
+
+			assertTrue(svc.callHooks(Pointcut.TEST_RB, params));
+			assertTrue(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
+		}
+
+		@Test
+		void testBooleanWithAllHooksReturnTrue_returnsTrue() {
+			InterceptorService svc = new InterceptorService();
+			svc.registerInterceptor(new BooleanHook(true));
+			svc.registerInterceptor(new BooleanHook(true));
+
+			assertTrue(svc.callHooks(Pointcut.TEST_RB, params));
+			assertTrue(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
+		}
+
+		@Test
+		void testBooleanWithAHookReturnFalse_returnsFalse() {
+			InterceptorService svc = new InterceptorService();
+			svc.registerInterceptor(new BooleanHook(true));
+			svc.registerInterceptor(new BooleanHook(false));
+			svc.registerInterceptor(new BooleanHook(true));
+
+			assertFalse(svc.callHooks(Pointcut.TEST_RB, params));
+			assertFalse(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
+		}
+
+
+		@Test
+		void testObjectWithNoHooks_returnsNull() {
+			InterceptorService svc = new InterceptorService();
+
+			assertNull(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params));
+			assertNull(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params));
+		}
+
+		@Test
+		void testObjectWithAllHooksReturnNull_returnsNull() {
+			InterceptorService svc = new InterceptorService();
+			svc.registerInterceptor(new ObjectHook<>(null));
+			svc.registerInterceptor(new ObjectHook<>(null));
+
+			assertNull(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params));
+			assertNull(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params));
+		}
+
+		@Test
+		void testObjectWithAHookReturnValue_returnsFirstValue() {
+			InterceptorService svc = new InterceptorService();
+			svc.registerInterceptor(new ObjectHook<>(null));
+			svc.registerInterceptor(new ObjectHook<>(new ResourceNotFoundException("first")));
+			svc.registerInterceptor(new ObjectHook<>(new ResourceNotFoundException("second")));
+
+			assertEquals("first", ((BaseServerResponseException) svc.callHooksAndReturnObject(Pointcut.TEST_RO, params)).getMessage());
+			assertEquals("first", ((BaseServerResponseException) svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params)).getMessage());
+		}
+
+		static class BooleanHook {
+
+			final boolean myResult;
+
+            BooleanHook(boolean theResult) {
+                myResult = theResult;
+            }
+
+            @Hook(Pointcut.TEST_RB)
+			boolean doIt() {
+				return myResult;
+			}
+		}
+
+		static class ObjectHook<T extends BaseServerResponseException> {
+			final T myResult;
+
+            ObjectHook(T theResult) {
+                myResult = theResult;
+            }
+
+            @Hook(Pointcut.TEST_RO)
+			T doIt() {
+				return myResult;
+			}
+
+		}
+	}
+
+
+	@Nested
+	class FilterHooks {
+		List<String> mySupplierLog = new ArrayList<>();
+		HookParams myParams = new HookParams("1");
+		MySupplier mySupplier = new MySupplier();
+
+		@Test
+		void testNoHooks_callsSupplierNormally() {
+		    // given no interceptors registered
+
+		    // when
+			myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, ()->{
+				mySupplierLog.add("I run!");
+			});
+
+		    // then
+			assertThat(mySupplierLog).containsExactly("I run!");
+		}
+
+
+		@Test
+		void testNoHooks_callsSupplierNormallyAndReturnsValue() {
+			// given no interceptors registered
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(mySupplierLog).containsExactly("MySupplier runs!");
+			assertThat(result).isEqualTo(42);
+		}
+		@Test
+		void testOneHook_calledAroundSupplier() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(result).isEqualTo(42);
+			assertThat(mySupplierLog).containsExactly(
+				"filter1-before",
+				"MySupplier runs!",
+				"filter1-after"
+			);
+		}
+
+		@Test
+		void testTwoHooks_calledInOrderAroundSupplier() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter1"));
+			myInterceptorService.registerInterceptor(new MyFilterHookInterceptor("filter2"));
+
+			// when
+			Integer result = myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier);
+
+			// then
+			assertThat(result).isEqualTo(42);
+			assertThat(mySupplierLog).containsExactly(
+				"filter1-before",
+				"filter2-before",
+				"MySupplier runs!",
+				"filter2-after",
+				"filter1-after"
+			);
+		}
+
+
+		@Test
+		void testFilterHookWhichDoesNotCallSupplier_throwsError() {
+			// given no interceptors registered
+			myInterceptorService.registerInterceptor(new Object() {
+				@Hook(Pointcut.TEST_FILTER)
+				public IInterceptorFilterHook testFilter(String theString) {
+					// return a filter that does not call the runnable
+					return theContinuation ->{
+						mySupplierLog.add("bad-boy ran but didn't call continuation");
+						// theContinuation.run(); // not called
+					};
+				}
+
+			});
+
+			// when
+			assertThatThrownBy(() -> myInterceptorService.runWithFilterHooks(Pointcut.TEST_FILTER, myParams, mySupplier))
+				.hasMessageContaining("Supplier was not executed in filter")
+				.hasMessageContaining("InterceptorServiceTest$FilterHooks$1.testFilter");
+
+			assertThat(mySupplierLog).containsExactly(
+				"bad-boy ran but didn't call continuation"
+			);
+		}
+
+		class MySupplier implements Supplier<Integer> {
+			public Integer get() {
+				mySupplierLog.add("MySupplier runs!");
+				return 42;
+			}
+		}
+
+		class MyFilterHookInterceptor {
+			final String myName;
+
+			MyFilterHookInterceptor(String theName) {
+				myName = theName;
+			}
+
+			@Hook(Pointcut.TEST_FILTER)
+			public IInterceptorFilterHook testFilter(String theParam) {
+				return new MyFilter();
+			}
+
+			private class MyFilter implements IInterceptorFilterHook {
+				@Override
+				public void wrapCall(Runnable theContinuation) {
+					mySupplierLog.add(myName + "-before");
+					try {
+						theContinuation.run();
+					} finally {
+						mySupplierLog.add(myName + "-after");
+					}
+				}
+			}
+		}
+	}
+
 	@BeforeEach
-	public void before() {
+	void before() {
 		myInvocations.clear();
 	}
 
@@ -616,5 +841,28 @@ public class InterceptorServiceTest {
 
 	}
 
+	static class BaseHook {
+		@Hook(Pointcut.JPA_PERFTRACE_INFO)
+		public void hook1() {
+		}
+	}
+
+	static class HookClass1 extends BaseHook {
+	}
+
+	@Test
+	void testHookDescription() {
+	    // given
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new HookClass1());
+
+	    // when
+		List<IBaseInterceptorBroadcaster.IInvoker> invokers = svc.getInvokersForPointcut(Pointcut.JPA_PERFTRACE_INFO);
+
+		// then
+		assertThat(invokers).hasSize(1);
+		assertThat(invokers.get(0).getHookDescription()).isEqualTo("ca.uhn.fhir.interceptor.executor.InterceptorServiceTest$HookClass1.hook1");
+	}
+	
 
 }

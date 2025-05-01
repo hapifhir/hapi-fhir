@@ -4,7 +4,7 @@ package ca.uhn.fhir.cr.repo;
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,20 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.annotation.Nonnull;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
  * lists. This class (will eventually) convert between them
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
 	private final List<String> searchResultParameters = Arrays.asList(
@@ -53,7 +56,7 @@ public class SearchConverter {
 	public final SearchParameterMap searchParameterMap = new SearchParameterMap();
 	public final Map<String, String[]> resultParameters = new HashMap<>();
 
-	void convertParameters(Map<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
+	public void convertParameters(Map<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
 		if (theParameters == null) {
 			return;
 		}
@@ -78,8 +81,23 @@ public class SearchConverter {
 			return;
 		}
 		for (var entry : theSearchMap.entrySet()) {
-			for (IQueryParameterType value : entry.getValue()) {
-				setParameterTypeValue(entry.getKey(), value);
+			// if list of parameters is the value
+			if (entry.getValue().size() > 1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())) {
+				// is value a TokenParam
+				if (isTokenParam(entry.getValue().get(0))) {
+					var tokenKey = entry.getKey();
+					var tokenList = new TokenOrListParam();
+					for (IQueryParameterType rec : entry.getValue()) {
+						tokenList.add((TokenParam) rec);
+					}
+					searchParameterMap.add(tokenKey, tokenList);
+				}
+
+				// parameter type is single value list
+			} else {
+				for (IQueryParameterType value : entry.getValue()) {
+					setParameterTypeValue(entry.getKey(), value);
+				}
 			}
 		}
 	}
@@ -114,5 +132,9 @@ public class SearchConverter {
 
 	public <T> boolean isAndList(@Nonnull T theParameterType) {
 		return IQueryParameterAnd.class.isAssignableFrom(theParameterType.getClass());
+	}
+
+	public <T> boolean isTokenParam(@Nonnull T theParameterType) {
+		return TokenParam.class.isAssignableFrom(theParameterType.getClass());
 	}
 }

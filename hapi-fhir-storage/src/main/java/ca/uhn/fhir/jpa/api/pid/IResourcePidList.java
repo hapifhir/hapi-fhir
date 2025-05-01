@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
  * List of IResourcePersistentId along with a resource type each id
  */
-public interface IResourcePidList {
+public interface IResourcePidList<T extends IResourcePersistentId<?>> {
 
 	RequestPartitionId getRequestPartitionId();
 
@@ -42,7 +42,7 @@ public interface IResourcePidList {
 
 	String getResourceType(int i);
 
-	List<IResourcePersistentId> getIds();
+	List<T> getIds();
 
 	boolean isEmpty();
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
@@ -28,6 +29,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 public interface IMdmSurvivorshipService {
 
 	/**
+	 * Merges two golden resources by overwriting all field values on theGoldenResource param for CREATE_RESOURCE,
+	 * UPDATE_RESOURCE, SUBMIT_RESOURCE_TO_MDM, UPDATE_LINK (when setting to MATCH) and MANUAL_MERGE_GOLDEN_RESOURCES.
+	 * PID, identifiers and meta values are not affected by this operation.
+	 *
 	 * Applies survivorship rules to merge fields from the specified target resource to the golden resource. Survivorship
 	 * rules may include, but not limited to the following data consolidation methods:
 	 *
@@ -60,4 +65,19 @@ public interface IMdmSurvivorshipService {
 	 */
 	<T extends IBase> void applySurvivorshipRulesToGoldenResource(
 			T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+
+	/**
+	 * GoldenResources can have non-empty field data created from changes to the various
+	 * resources that are matched to it (using some pre-defined survivorship rules).
+	 *
+	 * If a match link between a source and golden resource is broken, this method
+	 * will rebuild/repopulate the GoldenResource based on the current links
+	 * and current survivorship rules.
+	 *
+	 * @param theGoldenResource - the golden resource to rebuild
+	 * @param theMdmTransactionContext - the transaction context
+	 * @param <T> - Resource type to apply the survivorship rules to
+	 */
+	<T extends IBase> T rebuildGoldenResourceWithSurvivorshipRules(
+			RequestDetails theRequestDetails, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

@@ -73,7 +73,11 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 				} else {
 					String location = getFilePath() + ":" + instantiation.getLineNo() + ":"
 							+ instantiation.getColumnNo() + "(" + code + ")";
-					ourCache.put(code, location);
+					// Ignore errors thrown in test for duplicates, as some fake implementations are throwing the same
+					// codes for test purpsoes.
+					if (!location.contains("/test/")) {
+						ourCache.put(code, location);
+					}
 				}
 			} else {
 				log(theAst.getLineNo(), "Called Msg.code() with a non-integer argument");

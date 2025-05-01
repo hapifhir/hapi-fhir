@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import jakarta.annotation.PreDestroy;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -44,7 +45,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,7 +85,6 @@ public class TestHSearchAddInConfig {
 			Path tempDirPath = Files.createTempDirectory(null);
 			String dirPath = tempDirPath.toString();
 
-
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
@@ -116,7 +115,6 @@ public class TestHSearchAddInConfig {
 		}
 
 	}
-
 
 	/**
 	 * Our default config - Lucene in-memory.

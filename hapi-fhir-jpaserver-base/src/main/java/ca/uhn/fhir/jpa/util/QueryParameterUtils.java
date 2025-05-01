@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
+import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -37,6 +39,11 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
@@ -51,11 +58,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -116,6 +118,12 @@ public class QueryParameterUtils {
 	@Nullable
 	public static Condition toAndPredicate(Condition... theAndPredicates) {
 		return toAndPredicate(Arrays.asList(theAndPredicates));
+	}
+
+	@Nonnull
+	public static Condition toInPredicate(
+			ColumnTupleObject theColumns, JpaPidValueTuples theValues, boolean theInverse) {
+		return new InCondition(theColumns, theValues).setNegate(theInverse);
 	}
 
 	@Nonnull

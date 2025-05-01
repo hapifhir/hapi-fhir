@@ -1,0 +1,6 @@
+---
+type: add
+backport: 7.2.3
+issue: 6070
+jira: SMILE-8503
+title: "Added paging support for `$everything` operation in synchronous search mode."

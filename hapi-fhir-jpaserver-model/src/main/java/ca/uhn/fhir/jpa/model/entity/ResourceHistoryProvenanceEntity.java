@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,32 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.rest.api.Constants;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGTH;
 
+/**
+ * This entity is deprecated - It stores the source URI and Request ID
+ * fields so that they can be indexed and searched discretely. In
+ * HAPI FHIR 6.8.0 we added equivalent columns to {@link ResourceHistoryTable}
+ * and started populating both those columns and the ones in this table.
+ * As of HAPI FHIR 8.0.0 we are no longer using this table unless
+ * the "AccessMetaSourceInformationFromProvenanceTable" on JpaStorageSettings
+ * is enabled (it's disabled by default). In the future we will remove
+ * this table entirely.
+ */
 @Table(
 		name = "HFJ_RES_VER_PROV",
 		indexes = {
@@ -45,30 +54,34 @@ import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.SOURCE_URI_LENGT
 			@Index(name = "IDX_RESVERPROV_RES_PID", columnList = "RES_PID")
 		})
 @Entity
+@IdClass(IdAndPartitionId.class)
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	@Id
 	@Column(name = "RES_VER_PID")
 	private Long myId;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_VER_PID",
-			referencedColumnName = "PID",
-			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"),
-			nullable = false,
-			insertable = false,
-			updatable = false)
-	@MapsId
-	private ResourceHistoryTable myResourceHistoryTable;
-
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_PID",
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"),
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_PID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"))
 	private ResourceTable myResourceTable;
+
+	@Column(name = "RES_PID", nullable = false)
+	private Long myResourceId;
 
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
@@ -94,10 +107,13 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	public void setResourceTable(ResourceTable theResourceTable) {
 		myResourceTable = theResourceTable;
+		myResourceId = theResourceTable.getId().getId();
+		myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 	}
 
 	public void setResourceHistoryTable(ResourceHistoryTable theResourceHistoryTable) {
-		myResourceHistoryTable = theResourceHistoryTable;
+		myId = theResourceHistoryTable.getId().getId();
+		assert myId != null;
 	}
 
 	public String getSourceUri() {

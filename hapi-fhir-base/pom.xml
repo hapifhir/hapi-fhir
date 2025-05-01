@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -52,23 +52,17 @@
 
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-api</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-xslt</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
+		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId>
 			<version>2.11.0</version> <optional>true</optional> </dependency> -->
 
 		<!-- General -->
@@ -122,9 +116,15 @@
 		</dependency>
 
 		<!-- @Nonnull annotation -->
+
+		<!-- We need to leave this in because otherwise hapi-fhir-structures-dstu3: will fail to generate javadoc -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -137,6 +137,11 @@
 			<groupId>uk.org.webcompere</groupId>
 			<artifactId>system-stubs-jupiter</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- OpenTelemetry -->
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -193,6 +198,9 @@
 							<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
 							<versionPropertyName>hapifhir.version</versionPropertyName>
 							<revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+							<properties>
+								<hapi.scmbranch>${scmBranch}</hapi.scmbranch>
+							</properties>
 						</configuration>
 					</execution>
 				</executions>
@@ -203,7 +211,7 @@
 				<version>1.8</version>
 				<configuration>
 					<target>
-						<!--suppress UnresolvedMavenProperty -->
+<!--						suppress UnresolvedMavenProperty-->
 						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>
 					</target>
 				</configuration>
@@ -218,41 +226,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>${maven_checkstyle_version}</version>
-				<configuration>
-					<!--suppress UnresolvedMavenProperty -->
-					<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
-					<!--suppress UnresolvedMavenProperty -->
-					<suppressionsLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
-					<inputEncoding>UTF-8</inputEncoding>
-					<consoleOutput>true</consoleOutput>
-				</configuration>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>hapi-single-module-checkstyle</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-checkstyle</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.puppycrawl.tools</groupId>
-						<artifactId>checkstyle</artifactId>
-						<version>${checkstyle_version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
+
 		</plugins>
 		<resources>
 			<resource>

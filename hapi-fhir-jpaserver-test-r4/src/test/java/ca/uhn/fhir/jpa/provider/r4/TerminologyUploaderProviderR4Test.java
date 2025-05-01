@@ -55,13 +55,10 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -94,7 +91,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Did not find file matching concepts.csv"));
+			assertThat(e.getMessage()).contains("Did not find file matching concepts.csv");
 		}
 	}
 
@@ -113,8 +110,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
 	}
 
 		@Test
@@ -132,8 +129,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9\\.\\-]+"));
+			assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
+			assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference()).matches("CodeSystem\\/[a-zA-Z0-9\\.\\-]+");
 
 		/*
 		 * Try uploading a second time
@@ -180,7 +177,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
 
 	}
@@ -200,7 +197,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
 	}
 
 	@Test
@@ -224,7 +221,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue()).isGreaterThan(1);
 	}
 
 	@Test
@@ -255,12 +252,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 	}
 
 	@Test
@@ -296,12 +293,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
@@ -343,20 +340,51 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"CHEM seq=0",
 			" HB seq=0",
 			" NEUT seq=1",
 			"MICRO seq=0",
 			" C&S seq=0"
 		);
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystemWithElasticSearch() {
+		//Given: Advance HSearch indexing is enabled
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+		myStorageSettings.setHibernateSearchIndexSearchParams(true);
+		myStorageSettings.setStoreResourceInHSearchIndex(true);
+
+		//Given: We have a non-existent code system
+		CodeSystem codeSystem = new CodeSystem();
+		myClient.create().resource(codeSystem).execute();
+		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
+		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
+		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+
+		//Execute
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://example.com/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+
+		//Validate
+		IntegerType conceptCount = (IntegerType) outcome.getParameter("conceptCount").getValue();
+		assertThat(conceptCount.getValue()).isEqualTo(5);
 	}
 
 	@Test
@@ -383,14 +411,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"CHEM seq=0",
 			" HB seq=0",
 			" NEUT seq=1",
@@ -453,14 +481,14 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"1111222233 seq=0",
 			" 1111222234 seq=0"
 		);
@@ -523,17 +551,49 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
-		assertHierarchyContains(
+		assertHierarchyContainsExactly(
 			"CHEM seq=0",
 			" HB seq=0",
 			"  HBA seq=0"
+		);
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystem_NoDisplaySetOnConcepts() throws IOException {
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo/cs");
+		// setting codes are enough, no need to call setDisplay etc
+		codeSystem.addConcept().setCode("Code1");
+		codeSystem.addConcept().setCode("Code2");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded).contains("\"valueInteger\": 2");
+
+		// assert other codes remain, and HB and NEUT is removed
+		assertHierarchyContainsExactly(
+			"Code1 seq=0",
+			"Code2 seq=0"
 		);
 	}
 
@@ -558,7 +618,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
 		myClient.unregisterInterceptor(interceptor);
 
@@ -579,36 +639,18 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Missing mandatory parameter: file"));
+			assertThat(e.getMessage()).contains("Missing mandatory parameter: file");
 		}
 		myClient.unregisterInterceptor(interceptor);
 	}
 
 	@Test
-	public void testApplyDeltaRemove() throws IOException {
-		String conceptsCsv = loadResource("/custom_term/concepts.csv");
-		Attachment conceptsAttachment = new Attachment()
-			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
-			.setContentType("text/csv")
-			.setUrl("file:/foo/concepts.csv");
-		String hierarchyCsv = loadResource("/custom_term/hierarchy.csv");
-		Attachment hierarchyAttachment = new Attachment()
-			.setData(hierarchyCsv.getBytes(Charsets.UTF_8))
-			.setContentType("text/csv")
-			.setUrl("file:/foo/hierarchy.csv");
+	public void testApplyDeltaRemove_UsingCsvFiles_RemoveAllCodes() throws IOException {
 
 		// Add the codes
-		myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
-			.prettyPrint()
-			.execute();
+		applyDeltaAddCustomTermCodes();
 
-		// And remove them
+		// And remove all of them using the same set of csv files
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		myClient.registerInterceptor(interceptor);
 		Parameters outcome = myClient
@@ -616,17 +658,138 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
-			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, getCustomTermConceptsAttachment())
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, getCustomTermHierarchyAttachment())
 			.prettyPrint()
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 5"));
+		assertThat(encoded).contains("\"valueInteger\": 5");
+
+
+		// providing no arguments, since there should be no code left
+		assertHierarchyContainsExactly();
 	}
 
+	@Test
+	public void testApplyDeltaRemove_UsingConceptsCsvFileOnly() throws IOException {
+
+		//add some concepts
+		applyDeltaAddCustomTermCodes();
+
+		// And remove 2 of them, providing values for DISPLAY is not necessary
+		String conceptsToRemoveCsvData = """
+  		CODE,DISPLAY
+  		HB,
+  		NEUT,
+  		""";
+
+		Attachment conceptsAttachment = createCsvAttachment(conceptsToRemoveCsvData, "file:/concepts.csv");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			// submitting concepts is enough (no need to submit hierarchy)
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded).contains("\"valueInteger\": 2");
+
+		// assert other codes remain, and HB and NEUT is removed
+		assertHierarchyContainsExactly(
+			"CHEM seq=0",
+			"MICRO seq=0",
+			" C&S seq=0"
+		);
+	}
+	
+	@Test
+	public void testApplyDeltaRemove_UsingCodeSystemPayload() throws IOException {
+
+		// add some custom codes
+		applyDeltaAddCustomTermCodes();
+
+
+		// remove 2 of them using CodeSystemPayload
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo/cs");
+		// setting codes are enough for remove, no need to call setDisplay etc
+		codeSystem.addConcept().setCode("HB");
+		codeSystem.addConcept().setCode("NEUT");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		myClient.registerInterceptor(interceptor);
+		Parameters outcome = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+		myClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded).contains("\"valueInteger\": 2");
+
+		// assert other codes remain, and HB and NEUT is removed
+		assertHierarchyContainsExactly(
+			"CHEM seq=0",
+			"MICRO seq=0",
+			" C&S seq=0"
+		);
+	}
+
+
+	private Attachment createCsvAttachment(String theData, String theUrl) {
+		return new Attachment()
+			.setData(theData.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl(theUrl);
+	}
+
+	private Attachment getCustomTermConceptsAttachment() throws IOException {
+		String conceptsCsv = loadResource("/custom_term/concepts.csv");
+		return createCsvAttachment(conceptsCsv, "file:/foo/concepts.csv");
+	}
+
+	private Attachment getCustomTermHierarchyAttachment() throws IOException {
+		String hierarchyCsv = loadResource("/custom_term/hierarchy.csv");
+		return createCsvAttachment(hierarchyCsv, "file:/foo/hierarchy.csv");
+	}
+
+	private void applyDeltaAddCustomTermCodes() throws IOException {
+		myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, getCustomTermConceptsAttachment())
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, getCustomTermHierarchyAttachment())
+			.prettyPrint()
+			.execute();
+
+		assertHierarchyContainsExactly(
+			"CHEM seq=0",
+			" HB seq=0",
+			" NEUT seq=1",
+			"MICRO seq=0",
+			" C&S seq=0"
+		);
+
+
+	}
 
 	private static void addFile(ZipOutputStream theZos, String theFileName) throws IOException {
 		theZos.putNextEntry(new ZipEntry(theFileName));

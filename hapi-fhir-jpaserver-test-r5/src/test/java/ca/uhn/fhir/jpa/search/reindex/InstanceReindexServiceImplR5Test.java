@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.BooleanType;
@@ -20,12 +21,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"SqlDialectInspection"})
@@ -62,7 +64,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<Parameters.ParametersParameterComponent> sections = outcome.getParameters("MissingIndexes");
-		assertEquals(1, sections.size());
+		assertThat(sections).hasSize(1);
 
 		List<String> indexInstances = sections
 			.get(0)
@@ -71,28 +73,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.map(t -> t.getName() + " " + getPartValue("Action", t) + " " + getPartValue("Type", t) + " " + getPartValue("Missing", t))
 			.sorted()
 			.toList();
-		assertThat(indexInstances.toString(), indexInstances, contains(
-			"_id NO_CHANGE Token true",
-			"active NO_CHANGE Token true",
-			"address NO_CHANGE String true",
-			"address-city NO_CHANGE String true",
-			"address-country NO_CHANGE String true",
-			"address-postalcode NO_CHANGE String true",
-			"address-state NO_CHANGE String true",
-			"address-use NO_CHANGE Token true",
-			"birthdate NO_CHANGE Date true",
-			"death-date NO_CHANGE Date true",
-			"email NO_CHANGE Token true",
-			"gender NO_CHANGE Token true",
-			"general-practitioner NO_CHANGE Reference true",
-			"identifier NO_CHANGE Token true",
-			"language NO_CHANGE Token true",
-			"link NO_CHANGE Reference true",
-			"organization NO_CHANGE Reference true",
-			"part-agree NO_CHANGE Reference true",
-			"phone NO_CHANGE Token true",
-			"telecom NO_CHANGE Token true"
-		));
+		assertThat(indexInstances).as(indexInstances.toString()).containsExactly("active NO_CHANGE Token true", "address NO_CHANGE String true", "address-city NO_CHANGE String true", "address-country NO_CHANGE String true", "address-postalcode NO_CHANGE String true", "address-state NO_CHANGE String true", "address-use NO_CHANGE Token true", "birthdate NO_CHANGE Date true", "death-date NO_CHANGE Date true", "email NO_CHANGE Token true", "gender NO_CHANGE Token true", "general-practitioner NO_CHANGE Reference true", "identifier NO_CHANGE Token true", "language NO_CHANGE Token true", "link NO_CHANGE Reference true", "organization NO_CHANGE Reference true", "part-agree NO_CHANGE Reference true", "phone NO_CHANGE Token true", "telecom NO_CHANGE Token true");
 	}
 
 
@@ -153,7 +134,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		assertEquals("Quantity", getPartValue("Type", index));
 		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
 		assertEquals("kg", getPartValue("Units", index));
-		assertEquals(1.2d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValueDecimal(index)).isCloseTo(1.2d, within(0.001d));
 	}
 
 	@Test
@@ -172,14 +153,14 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		assertEquals("Quantity", getPartValue("Type", index));
 		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
 		assertEquals("mg", getPartValue("Units", index));
-		assertEquals(1.2d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValueDecimal(index)).isCloseTo(1.2d, within(0.001d));
 
 		index = findIndexes(outcome, "value-quantity", 2, "QuantityIndexes").get(1);
 		assertEquals("NO_CHANGE", getPartValue("Action", index));
 		assertEquals("QuantityNormalized", getPartValue("Type", index));
 		assertEquals("http://unitsofmeasure.org", getPartValue("System", index));
 		assertEquals("g", getPartValue("Units", index));
-		assertEquals(0.0012d, getPartValueDecimal(index), 0.001d);
+		assertThat(getPartValueDecimal(index)).isCloseTo(0.0012d, within(0.001d));
 	}
 
 	@Test
@@ -202,10 +183,12 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		IIdType id = createObservation(withSubject("Patient/A"));
 
 		runInTransaction(() -> {
-			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_ID = null").executeUpdate());
+			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set (TARGET_RESOURCE_ID,TARGET_RES_PARTITION_ID) = (null, null)").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_URL = 'http://foo'").executeUpdate());
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_VERSION = 1").executeUpdate());
 		});
+
+		myEntityManager.clear();
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
@@ -365,18 +348,19 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 	}
 
 	@Nonnull
-	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, String theParamName, int theExpectedSize, String theSectionName) {
+	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, @Nonnull String theParamName, int theExpectedSize, String theSectionName) {
+		Validate.notBlank(theParamName, "theParamName must not be blank");
 		List<Parameters.ParametersParameterComponent> indexes = theResponse.getParameters(theSectionName);
-		assertEquals(1, indexes.size());
+		assertThat(indexes).hasSize(1);
 
 		List<Parameters.ParametersParameterComponent> indexInstances = indexes
 			.get(0)
 			.getPart()
 			.stream()
-			.filter(t -> t.getName().equals(theParamName))
+			.filter(t -> Objects.equals(theParamName, t.getName()))
 			.toList();
 
-		assertEquals(theExpectedSize, indexInstances.size());
+		assertThat(indexInstances).hasSize(theExpectedSize);
 		return indexInstances;
 	}
 

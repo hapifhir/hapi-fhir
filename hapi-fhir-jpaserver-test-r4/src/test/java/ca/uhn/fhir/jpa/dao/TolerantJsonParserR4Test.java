@@ -1,14 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TolerantJsonParserR4Test {
 
@@ -24,7 +24,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -40,7 +40,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -56,7 +56,7 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		Observation obs = parser.parseResource(Observation.class, input);
 
 		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
@@ -72,11 +72,11 @@ public class TolerantJsonParserR4Test {
 			"}";
 
 
-		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
+		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), JpaPid.fromId(123L));
 		try {
 			parser.parseResource(Observation.class, input);
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage(), containsString("[element=\"value\"] Invalid attribute value \".\""));
+			assertThat(e.getMessage()).contains("[element=\"value\"] Invalid attribute value \".\"");
 		}
 
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -61,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -74,7 +74,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final String PATIENT_RESOURCE = "Patient";
 	private static final String PRACTITIONER_RESOURCE = "Practitioner";
 
-	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
 	private final MdmControllerHelper myMdmControllerHelper;
@@ -97,29 +96,11 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			IMdmSubmitSvc theMdmSubmitSvc,
 			IInterceptorBroadcaster theIInterceptorBroadcaster,
 			IMdmSettings theIMdmSettings) {
-		super(theFhirContext);
-		myMdmControllerSvc = theMdmControllerSvc;
+		super(theFhirContext, theMdmControllerSvc);
 		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;
 		myMdmSettings = theIMdmSettings;
-	}
-
-	/**
-	 * Searches for matches for the provided patient resource
-	 * @param thePatient - the patient resource
-	 * @param theRequestDetails - the request details
-	 * @return - any matches to the provided patient resource
-	 */
-	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
-	public IBaseBundle match(
-			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
-					IAnyResource thePatient,
-			RequestDetails theRequestDetails) {
-		if (thePatient == null) {
-			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
-		}
-		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient", theRequestDetails);
 	}
 
 	/**

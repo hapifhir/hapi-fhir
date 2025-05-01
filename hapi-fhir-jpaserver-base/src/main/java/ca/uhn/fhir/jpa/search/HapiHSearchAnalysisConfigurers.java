@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,68 +60,68 @@ public class HapiHSearchAnalysisConfigurers {
 			theLuceneCtx
 					.analyzer("autocompleteEdgeAnalyzer")
 					.custom()
-					.tokenizer(PatternTokenizerFactory.class)
-					.param("pattern", "(.*)")
-					.param("group", "1")
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(StopFilterFactory.class)
-					.tokenFilter(EdgeNGramFilterFactory.class)
+					.tokenizer(PatternTokenizerFactory.NAME)
+					.param(PatternTokenizerFactory.PATTERN, "(.*)")
+					.param(PatternTokenizerFactory.GROUP, "1")
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(StopFilterFactory.NAME)
+					.tokenFilter(EdgeNGramFilterFactory.NAME)
 					.param("minGramSize", "3")
 					.param("maxGramSize", "50");
 
 			theLuceneCtx
 					.analyzer("autocompletePhoneticAnalyzer")
 					.custom()
-					.tokenizer(StandardTokenizerFactory.class)
-					.tokenFilter(StopFilterFactory.class)
-					.tokenFilter(PhoneticFilterFactory.class)
-					.param("encoder", "DoubleMetaphone")
-					.tokenFilter(SnowballPorterFilterFactory.class)
+					.tokenizer(StandardTokenizerFactory.NAME)
+					.tokenFilter(StopFilterFactory.NAME)
+					.tokenFilter(PhoneticFilterFactory.NAME)
+					.param(PhoneticFilterFactory.ENCODER, "DoubleMetaphone")
+					.tokenFilter(SnowballPorterFilterFactory.NAME)
 					.param("language", "English");
 
 			theLuceneCtx
 					.analyzer("autocompleteNGramAnalyzer")
 					.custom()
-					.tokenizer(StandardTokenizerFactory.class)
-					.tokenFilter(WordDelimiterGraphFilterFactory.class)
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(NGramFilterFactory.class)
+					.tokenizer(StandardTokenizerFactory.NAME)
+					.tokenFilter(WordDelimiterGraphFilterFactory.NAME)
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(NGramFilterFactory.NAME)
 					.param("minGramSize", "3")
 					.param("maxGramSize", "20");
 
 			theLuceneCtx
 					.analyzer("autocompleteWordEdgeAnalyzer")
 					.custom()
-					.tokenizer(StandardTokenizerFactory.class)
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(StopFilterFactory.class)
-					.tokenFilter(EdgeNGramFilterFactory.class)
+					.tokenizer(StandardTokenizerFactory.NAME)
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(StopFilterFactory.NAME)
+					.tokenFilter(EdgeNGramFilterFactory.NAME)
 					.param("minGramSize", "3")
 					.param("maxGramSize", "20");
 
 			theLuceneCtx
 					.analyzer(STANDARD_ANALYZER)
 					.custom()
-					.tokenizer(StandardTokenizerFactory.class)
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(ASCIIFoldingFilterFactory.class);
+					.tokenizer(StandardTokenizerFactory.NAME)
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(ASCIIFoldingFilterFactory.NAME);
 
 			theLuceneCtx
 					.analyzer(NORM_STRING_ANALYZER)
 					.custom()
-					.tokenizer(KeywordTokenizerFactory.class)
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(ASCIIFoldingFilterFactory.class);
+					.tokenizer(KeywordTokenizerFactory.NAME)
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(ASCIIFoldingFilterFactory.NAME);
 
-			theLuceneCtx.analyzer(EXACT_ANALYZER).custom().tokenizer(KeywordTokenizerFactory.class);
+			theLuceneCtx.analyzer(EXACT_ANALYZER).custom().tokenizer(KeywordTokenizerFactory.NAME);
 
-			theLuceneCtx.analyzer("conceptParentPidsAnalyzer").custom().tokenizer(WhitespaceTokenizerFactory.class);
+			theLuceneCtx.analyzer("conceptParentPidsAnalyzer").custom().tokenizer(WhitespaceTokenizerFactory.NAME);
 
 			theLuceneCtx
 					.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER)
 					.custom()
-					.tokenFilter(LowerCaseFilterFactory.class)
-					.tokenFilter(ASCIIFoldingFilterFactory.class);
+					.tokenFilter(LowerCaseFilterFactory.NAME)
+					.tokenFilter(ASCIIFoldingFilterFactory.NAME);
 		}
 	}
 

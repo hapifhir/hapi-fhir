@@ -9,10 +9,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -44,7 +45,7 @@ public class CandidateListTest {
 
 		// verify
 		if (theStrategyEnum == CandidateStrategyEnum.ANY) {
-			assertThrows(InternalErrorException.class, () -> {
+			assertThatExceptionOfType(InternalErrorException.class).isThrownBy(() -> {
 				list.addAll(theStrategyEnum, candidatesToAdd);
 			});
 		} else {
@@ -116,6 +117,6 @@ public class CandidateListTest {
 		// tests
 		assertEquals(size, candidateList.size());
 		List<MatchedGoldenResourceCandidate> candidates = candidateList.getCandidates();
-		assertEquals(size, candidates.size());
+		assertThat(candidates).hasSize(size);
 	}
 }

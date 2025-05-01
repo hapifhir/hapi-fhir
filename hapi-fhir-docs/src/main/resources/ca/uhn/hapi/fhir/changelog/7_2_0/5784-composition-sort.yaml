@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5784
+title: "Add support to _sort for chained `composition` Bundle SearchParameters"

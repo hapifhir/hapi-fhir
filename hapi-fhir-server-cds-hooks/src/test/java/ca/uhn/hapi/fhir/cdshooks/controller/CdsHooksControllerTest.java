@@ -1,26 +1,21 @@
-package ca.uhn.hapi.fhir.cdshooks.controller;/*-
- * #%L
- * Smile CDR - CDR
- * %%
- * Copyright (C) 2016 - 2017 Simpatico Intelligent Systems Inc
- * %%
- * All rights reserved.
- * #L%
- */
+package ca.uhn.hapi.fhir.cdshooks.controller;
 
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeebackOutcomeEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
+import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,16 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,7 +53,7 @@ public class CdsHooksControllerTest {
 	public static final String OUTCOME_TIMESTAMP = "2020-12-16";
 	private static final String TEST_KEY = "CdsServiceRegistryImplTest.testKey";
 	private static final String TEST_SERVICE_ID = "CdsServiceRegistryImplTest.testServiceId";
-	private final String MODULE_ID = "moduleId";
+	private final String SERVICE_GROUP_ID = "ServiceGroupId";
 
 	@Autowired
 	ICdsServiceRegistry myCdsHooksRegistry;
@@ -75,7 +71,9 @@ public class CdsHooksControllerTest {
 
 	@BeforeEach
 	public void before() {
-		myMockMvc = MockMvcBuilders.standaloneSetup(new CdsHooksController(myCdsHooksRegistry)).build();
+		myMockMvc = MockMvcBuilders.standaloneSetup(new CdsHooksController(myCdsHooksRegistry))
+			.setMessageConverters(new MappingJackson2HttpMessageConverter(myObjectMapper))
+			.build();
 	}
 
 	@Test
@@ -90,25 +88,29 @@ public class CdsHooksControllerTest {
 			.andExpect(jsonPath("services[2].title").value(GreeterCdsService.TEST_HOOK_TITLE))
 			.andExpect(jsonPath("services[2].id").value(GreeterCdsService.TEST_HOOK_STRING_ID))
 			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_USER_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_USER_QUERY))
-			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_QUERY));
+			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_QUERY))
+			.andExpect(jsonPath("services[5].extension.example-client-conformance").value("http://hooks.example.org/fhir/102/Conformance/patientview"));
 	}
 
 	@Test
 	void testExampleFeedback() throws Exception {
-		CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
+		// setup
+		final CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
 		request.setCard(TEST_HOOK_INSTANCE);
 		request.setOutcome(CdsServiceFeebackOutcomeEnum.accepted);
 		request.setOutcomeTimestamp(OUTCOME_TIMESTAMP);
-
-		String requestBody = myObjectMapper.writeValueAsString(request);
-
-		myMockMvc
+		final String requestBody = myObjectMapper.writeValueAsString(request);
+		// execute
+		final MvcResult actual = myMockMvc
 			.perform(post(CdsHooksController.BASE + "/example-service/feedback").contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("message").value("Thank you for your feedback dated " + OUTCOME_TIMESTAMP + "!"))
-		;
+			.andReturn();
+		// validate
+		final CdsServiceFeedbackJson cdsServiceFeedbackJson = myObjectMapper.readValue(actual.getResponse().getContentAsString(), CdsServiceFeedbackJson.class);
+		assertThat(cdsServiceFeedbackJson.getAcceptedSuggestions()).hasSize(1);
+		assertThat(cdsServiceFeedbackJson).usingRecursiveComparison().ignoringFields("myAcceptedSuggestions").isEqualTo(request);
 	}
 
 	@Test
@@ -117,6 +119,7 @@ public class CdsHooksControllerTest {
 		request.setHookInstance(TEST_HOOK_INSTANCE);
 		request.setHook(HelloWorldService.TEST_HOOK);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setContext( withCdsServiceRequestContext());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -135,8 +138,15 @@ public class CdsHooksControllerTest {
 
 	@Test
 	void testCallHelloUniverse() throws Exception {
+		RequestExtension requestExtension = new RequestExtension();
+		requestExtension.setConfigItem("request-config-item");
+
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.setExtension(requestExtension);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setHook(HelloWorldService.TEST_HOOK);
+		request.setContext(withCdsServiceRequestContext());
+		request.setHookInstance(UUID.randomUUID().toString());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -147,7 +157,7 @@ public class CdsHooksControllerTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("cards[0].summary").value("Hello Universe!"))
 			.andExpect(jsonPath("cards[0].indicator").value("critical"))
-		;
+			.andExpect(jsonPath("cards[0].extension.example-config-item").value("request-config-item"));
 	}
 
 	@Test
@@ -156,6 +166,7 @@ public class CdsHooksControllerTest {
 		request.setHookInstance(TEST_HOOK_INSTANCE);
 		request.setHook(HelloWorldService.TEST_HOOK);
 		request.setFhirServer(TEST_FHIR_SERVER);
+		request.setContext(withCdsServiceRequestContext());
 
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
@@ -171,21 +182,24 @@ public class CdsHooksControllerTest {
 
 	@Test
 	void testHelloWorldFeedback() throws Exception {
-		CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
+		// setup
+		final CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
 		request.setCard(TEST_HOOK_INSTANCE);
 		request.setOutcome(CdsServiceFeebackOutcomeEnum.accepted);
 		request.setOutcomeTimestamp(OUTCOME_TIMESTAMP);
-
 		String requestBody = myObjectMapper.writeValueAsString(request);
-
 		TestServerAppCtx.ourHelloWorldService.setExpectedCount(1);
-		myMockMvc
+		// execute
+		MvcResult actual = myMockMvc
 			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_WORLD_ID + "/feedback").contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("message").value("Thank you for your feedback dated " + OUTCOME_TIMESTAMP + "!"))
-		;
+			.andReturn();
+		// validate
+		final CdsServiceFeedbackJson cdsServiceFeedbackJson = myObjectMapper.readValue(actual.getResponse().getContentAsString(), CdsServiceFeedbackJson.class);
+		assertThat(cdsServiceFeedbackJson.getAcceptedSuggestions()).hasSize(1);
+		assertThat(cdsServiceFeedbackJson).usingRecursiveComparison().ignoringFields("myAcceptedSuggestions").isEqualTo(request);
 		TestServerAppCtx.ourHelloWorldService.awaitExpected();
 	}
 
@@ -203,7 +217,7 @@ public class CdsHooksControllerTest {
 		cdsServiceJson.setId(TEST_SERVICE_ID);
 		boolean allowAutoFhirClientPrefetch = false;
 
-		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, cdsServiceJson, allowAutoFhirClientPrefetch, MODULE_ID);
+		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, cdsServiceJson, allowAutoFhirClientPrefetch, SERVICE_GROUP_ID);
 
 		// Call hook
 		String hookInstance = UUID.randomUUID().toString();
@@ -219,14 +233,13 @@ public class CdsHooksControllerTest {
 		;
 	}
 
-
 	@Test
 	void testEmptyCardsResponse() throws Exception {
 		//setup
 		final String expected = "{ \"cards\" : [ ]}";
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = (CdsServiceRequestJson theCdsServiceRequestJson) -> new CdsServiceResponseJson();
-		myCdsServiceRegistry.unregisterService(TEST_SERVICE_ID, MODULE_ID);
-		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, new CdsServiceJson().setId(TEST_SERVICE_ID), false, MODULE_ID);
+		myCdsServiceRegistry.unregisterService(TEST_SERVICE_ID, SERVICE_GROUP_ID);
+		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, new CdsServiceJson().setId(TEST_SERVICE_ID), false, SERVICE_GROUP_ID);
 		final CdsServiceRequestJson request = buildRequest(UUID.randomUUID().toString());
 		final String requestBody = myObjectMapper.writeValueAsString(request);
 		//execute
@@ -240,7 +253,6 @@ public class CdsHooksControllerTest {
 		final String actual = result.getResponse().getContentAsString();
 		assertEquals(prettyJson(expected), prettyJson(actual));
 	}
-
 
 	@Nonnull
 	protected CdsServiceRequestJson buildRequest(String hookInstance) {
@@ -256,6 +268,13 @@ public class CdsHooksControllerTest {
 	public static String prettyJson(String theInput) {
 		JsonNode input = JsonUtil.deserialize(theInput, JsonNode.class);
 		return JsonUtil.serialize(input, true);
+	}
+
+	@Nonnull
+	private static CdsServiceRequestContextJson withCdsServiceRequestContext() {
+		CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
+		cdsServiceRequestContextJson.put("patientId", "Patient/123");
+		return cdsServiceRequestContextJson;
 	}
 
 }

@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -71,7 +72,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	protected static IIdType patient2Id = null;
 	// Using static variables including the flag below so that we can initalize the database and indexes once
 	// (all of the tests only read from the DB and indexes and so no need to re-initialze them for each test).
-	private static Calendar observationDate = new GregorianCalendar();
+	private static final Calendar observationDate = new GregorianCalendar();
 	protected final String observationCd0 = "code0";
 	protected final String observationCd1 = "code1";
 	protected final String observationCd2 = "code2";
@@ -119,9 +120,10 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// enabled to also create extended lucene index during creation of test data
 		boolean hsearchSaved = myStorageSettings.isAdvancedHSearchIndexing();
 		myStorageSettings.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setDeleteEnabled(false);
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
-		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
+		// Creating this data and the index is time-consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 
 		Patient pt = new Patient();
@@ -225,7 +227,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
-		assertEquals(4, actual.size());
+		assertThat(actual).hasSize(4);
 	}
 
 	private void executeTestCase(SearchParameterMap params, List<String> sortedPatients, List<String> sortedObservationCodes, List<String> theCategories, int expectedObservationCount) {
@@ -235,7 +237,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
-		assertEquals(expectedObservationCount, actual.size());
+		assertThat(actual).hasSize(expectedObservationCount);
 
 		validateSorting(actual, sortedPatients, sortedObservationCodes, theCategories);
 	}
@@ -244,7 +246,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		int theNextObservationIdx = 0;
 		// Validate patient grouping
 		for (String patientId : thePatientIds) {
-			assertEquals(patientId, observationPatientMap.get(theObservationIds.get(theNextObservationIdx)));
+			assertThat(observationPatientMap).containsEntry(theObservationIds.get(theNextObservationIdx), patientId);
 			theNextObservationIdx = validateSortingWithinPatient(theObservationIds, theNextObservationIdx, theCodes, theCategores, patientId);
 		}
 		assertEquals(theObservationIds.size(), theNextObservationIdx);
@@ -254,7 +256,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 														  List<String> theCategories, String thePatientId) {
 		int theNextObservationIdx = theFirstObservationIdxForPatient;
 		for (String codeValue : theCodes) {
-			assertEquals(codeValue, observationCodeMap.get(theObservationIds.get(theNextObservationIdx)));
+			assertThat(observationCodeMap).containsEntry(theObservationIds.get(theNextObservationIdx), codeValue);
 			// Validate sorting within code group
 			theNextObservationIdx = validateSortingWithinCode(theObservationIds, theNextObservationIdx,
 				observationCodeMap.get(theObservationIds.get(theNextObservationIdx)), theCategories, thePatientId);
@@ -275,7 +277,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 			// Check that observation is in one of the specified categories (if applicable)
 			if (theCategories != null && !theCategories.isEmpty()) {
-				assertTrue(theCategories.contains(observationCategoryMap.get(theObservationIds.get(theNextObservationIdx))));
+				assertThat(theCategories).contains(observationCategoryMap.get(theObservationIds.get(theNextObservationIdx)));
 			}
 			theNextObservationIdx++;
 			if (theNextObservationIdx >= theObservationIds.size()) {

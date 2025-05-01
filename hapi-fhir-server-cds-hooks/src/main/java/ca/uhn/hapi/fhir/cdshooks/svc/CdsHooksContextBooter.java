@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
@@ -28,6 +29,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.CdsServicePrefetch;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +41,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.PreDestroy;
 
 /**
  * This bean creates a customer-defined spring context which will
@@ -51,13 +52,13 @@ import javax.annotation.PreDestroy;
  * is complete so that other beans can use the stuff it creates.
  */
 public class CdsHooksContextBooter {
-	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksContextBooter.class);
-	private static final String CDS_SERVICES_BEAN_NAME = "cdsServices";
-	private Class<?> myDefinitionsClass;
-	private AnnotationConfigApplicationContext myAppCtx;
+	protected static final Logger ourLog = LoggerFactory.getLogger(CdsHooksContextBooter.class);
+	protected static final String CDS_SERVICES_BEAN_NAME = "cdsServices";
+	protected Class<?> myDefinitionsClass;
+	protected AnnotationConfigApplicationContext myAppCtx;
 
-	private List<Object> myCdsServiceBeans = new ArrayList<>();
-	private final CdsServiceCache myCdsServiceCache = new CdsServiceCache();
+	protected List<Object> myCdsServiceBeans = new ArrayList<>();
+	protected final CdsServiceCache myCdsServiceCache = new CdsServiceCache();
 
 	public void setDefinitionsClass(Class<?> theDefinitionsClass) {
 		myDefinitionsClass = theDefinitionsClass;
@@ -70,7 +71,7 @@ public class CdsHooksContextBooter {
 		return myCdsServiceCache;
 	}
 
-	private void extractCdsServices(Object theServiceBean) {
+	protected void extractCdsServices(Object theServiceBean) {
 		Method[] methods = theServiceBean.getClass().getMethods();
 		// Sort alphabetically so service list output is deterministic (to ensure GET /cds-services is idempotent).
 		// This also simplifies testing :-)
@@ -85,10 +86,12 @@ public class CdsHooksContextBooter {
 				cdsServiceJson.setHook(annotation.hook());
 				cdsServiceJson.setDescription(annotation.description());
 				cdsServiceJson.setTitle(annotation.title());
-				cdsServiceJson.setExtension(validateJson(annotation.extension()));
+				cdsServiceJson.setExtension(serializeExtensions(annotation.extension(), annotation.extensionClass()));
+				cdsServiceJson.setExtensionClass(annotation.extensionClass());
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
+					cdsServiceJson.addPrefetchFailureMode(prefetch.value(), prefetch.failureMode());
 				}
 				myCdsServiceCache.registerService(
 						cdsServiceJson.getId(),
@@ -104,14 +107,13 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	String validateJson(String theExtension) {
+	CdsHooksExtension serializeExtensions(String theExtension, Class<? extends CdsHooksExtension> theClass) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}
 		try {
 			final ObjectMapper mapper = new ObjectMapper();
-			mapper.readTree(theExtension);
-			return theExtension;
+			return mapper.readValue(theExtension, theClass);
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -18,12 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"unchecked", "ConstantConditions"})
+@SuppressWarnings({"ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningNonNullDefaultPartitionR4Test.class);
 
@@ -33,6 +33,10 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		super.before();
 
 		myPartitionSettings.setDefaultPartitionId(1);
+
+		// This test relies on this interceptor already being in place, which it should be unless
+		// another test misbehaved
+		assertEquals(1, myInterceptorRegistry.getAllRegisteredInterceptors().stream().filter(t->t instanceof SearchParamValidatingInterceptor).count());
 	}
 
 	@AfterEach
@@ -45,11 +49,10 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 	@Test
 	public void testCreateAndSearch_NonPartitionable() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
-		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForReadDefaultPartition(); // and one for the reindex job
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -65,24 +68,23 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
 		// Search on All Resources
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
+		assertThat(outcome).containsExactly("SearchParameter/" + id);
 
 	}
 
 	@Test
 	public void testCreateAndSearch_NonPartitionable_ForcedId() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
-		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForReadDefaultPartition(); // and one for the reindex job
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/A");
 		sp.addBase("Patient");
@@ -99,20 +101,20 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+		assertThat(outcome).containsExactly("SearchParameter/A");
 
 		// Search on All Resources
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("SearchParameter/A"));
+		assertThat(outcome).containsExactly("SearchParameter/A");
 
 	}
 
 	@Test
 	public void testCreateAndSearch_Partitionable_ForcedId() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		Patient patient = new Patient();
 		patient.setId("A");
 		patient.addIdentifier().setSystem("http://foo").setValue("123");
@@ -125,21 +127,21 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/A"));
+		assertThat(outcome).containsExactly("Patient/A");
 
 		// Search on All Resources
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/A"));
+		assertThat(outcome).containsExactly("Patient/A");
 
 	}
 
 
 	@Test
 	public void testCreateAndSearch_Partitionable() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 		Patient patient = new Patient();
 		patient.getMeta().addTag().setSystem("http://foo").setCode("TAG");
 		patient.addIdentifier().setSystem("http://foo").setValue("123");
@@ -154,19 +156,19 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		});
 
 		// Search on Token
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 		// Search on Tag
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("_tag", new TokenParam("http://foo", "TAG")), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 		// Search on All Resources
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
-		assertThat(outcome, Matchers.contains("Patient/" + id));
+		assertThat(outcome).containsExactly("Patient/" + id);
 
 	}
 
@@ -174,19 +176,19 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 	@Test
 	public void testRead_Partitionable() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 		Patient patient = new Patient();
 		patient.getMeta().addTag().setSystem("http://foo").setCode("TAG");
 		patient.addIdentifier().setSystem("http://foo").setValue("123");
 		patient.setActive(true);
 		Long id = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		patient = myPatientDao.read(new IdType("Patient/" + id), mySrd);
 		assertTrue(patient.getActive());
 
 		// Wrong partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		try {
 			myPatientDao.read(new IdType("Patient/" + id), mySrd);
 			fail();

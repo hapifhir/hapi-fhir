@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MethodMatchEnumTest {
 

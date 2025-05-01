@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public enum BundleEntryTransactionMethodEnum {
 	GET("GET", "http://hl7.org/fhir/http-verb"),
 	POST("POST", "http://hl7.org/fhir/http-verb"),
 	PUT("PUT", "http://hl7.org/fhir/http-verb"),
-	DELETE("DELETE", "http://hl7.org/fhir/http-verb"),
-	;
+	PATCH("PATCH", "http://hl7.org/fhir/http-verb"),
+	DELETE("DELETE", "http://hl7.org/fhir/http-verb");
 
 	/**
 	 * Identifier for this Value Set:

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class IdSubstitutionMap {
@@ -85,6 +86,22 @@ public class IdSubstitutionMap {
 
 	public boolean isEmpty() {
 		return myMap.isEmpty();
+	}
+
+	/**
+	 * Updates all targets of the map with a new id value if the input id has
+	 * the same ResourceType and IdPart as the target id.
+	 */
+	public void updateTargets(IIdType theNewId) {
+		if (theNewId == null) {
+			return;
+		}
+		String newUnqualifiedVersionLessId = theNewId.toUnqualifiedVersionless().getValue();
+		entrySet().stream()
+				.map(Pair::getValue)
+				.filter(targetId ->
+						Objects.equals(targetId.toUnqualifiedVersionless().getValue(), newUnqualifiedVersionLessId))
+				.forEach(targetId -> targetId.setValue(theNewId.getValue()));
 	}
 
 	private static class Entry {

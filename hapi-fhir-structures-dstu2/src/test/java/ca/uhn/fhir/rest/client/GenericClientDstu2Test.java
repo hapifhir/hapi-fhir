@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
@@ -72,7 +73,6 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -84,12 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -174,19 +169,19 @@ public class GenericClientDstu2Test {
 		client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 		idx++;
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
 		assertEquals("http://example.com/fhir/metadata?_format=json", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_JSON);
 		idx++;
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
 		assertEquals("http://example.com/fhir/metadata?_format=xml", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
+		assertThat(capt.getAllValues().get(idx).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_XML);
 		idx++;
 	}
 
@@ -223,14 +218,14 @@ public class GenericClientDstu2Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("http://" + methodName + ".example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(0).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_JSON);
 		assertEquals("http://" + methodName + ".example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(1).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY));
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_XML));
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_XML);
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
@@ -267,12 +262,12 @@ public class GenericClientDstu2Test {
 		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
 		assertEquals("http://" + methodName + ".example.com/fhir/metadata?_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(0).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).doesNotContain(Constants.CT_FHIR_XML);
 		assertEquals("http://" + methodName + ".example.com/fhir/Patient/123?_format=json", capt.getAllValues().get(1).getURI().toASCIIString());
 		assertEquals(1, capt.getAllValues().get(1).getHeaders("Accept").length);
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), containsString(Constants.CT_FHIR_JSON));
-		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue(), not(containsString(Constants.CT_FHIR_XML)));
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue()).contains(Constants.CT_FHIR_JSON);
+		assertThat(capt.getAllValues().get(1).getHeaders("Accept")[0].getValue()).doesNotContain(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -333,7 +328,7 @@ public class GenericClientDstu2Test {
 
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		idx++;
@@ -344,8 +339,8 @@ public class GenericClientDstu2Test {
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		String body = extractBody(capt, idx);
-		assertThat(body, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertThat(body, not(containsString("123")));
+		assertThat(body).contains("<family value=\"FOOFAMILY\"/>");
+		assertThat(body).doesNotContain("123");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		idx++;
@@ -374,7 +369,7 @@ public class GenericClientDstu2Test {
 		client.create().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
@@ -383,7 +378,7 @@ public class GenericClientDstu2Test {
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("http://example.com/fhir/Patient?name=http%3A//foo%7Cbar", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
@@ -392,7 +387,7 @@ public class GenericClientDstu2Test {
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
@@ -424,7 +419,7 @@ public class GenericClientDstu2Test {
 
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		idx++;
@@ -557,36 +552,31 @@ public class GenericClientDstu2Test {
 
 		try {
 			client.delete().resource(pat).execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1369) + "theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: 123", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById(new IdDt("123")).execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1370) + "theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: 123", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById("", "123").execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theResourceType can not be blank/null", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById("Patient", "").execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals("theLogicalId can not be blank/null", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceConditionalByType("InvalidType");
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidType\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
@@ -682,7 +672,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -695,7 +685,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -707,7 +697,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -718,7 +708,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -729,7 +719,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -741,9 +731,10 @@ public class GenericClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z"))
 			.execute();
 		//@formatter:on
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), either(equalTo("http://example.com/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123"))
-			.or(equalTo("http://example.com/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
-		assertEquals(1, response.getEntry().size());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isIn(
+			"http://example.com/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123",
+			"http://example.com/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z");
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		//@formatter:off
@@ -754,8 +745,8 @@ public class GenericClientDstu2Test {
 			.since(new InstantDt("2001-01-02T11:22:33Z").getValue())
 			.execute();
 		//@formatter:on
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), containsString("_since=2001-01"));
-		assertEquals(1, response.getEntry().size());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).contains("_since=2001-01");
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 	}
 
@@ -763,8 +754,7 @@ public class GenericClientDstu2Test {
 	public void testInvalidClient() {
 		try {
 			ourCtx.getRestfulClientFactory().newClient(RestfulClientInstance.class, "http://foo");
-			fail();
-		} catch (ConfigurationException e) {
+			fail();		} catch (ConfigurationException e) {
 			assertEquals("ca.uhn.fhir.context.ConfigurationException: " + Msg.code(1354) + "ca.uhn.fhir.rest.client.GenericClientDstu2Test.RestfulClientInstance is not an interface", e.toString());
 		}
 	}
@@ -806,8 +796,7 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/123/$meta-add", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>",
-			extractBody(capt, idx));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", extractBody(capt, idx));
 		idx++;
 
 	}
@@ -1118,7 +1107,7 @@ public class GenericClientDstu2Test {
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals(1, resp.getParameter().size());
+		assertThat(resp.getParameter()).hasSize(1);
 		assertEquals(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp.getParameter().get(0).getResource().getClass());
 		idx++;
 	}
@@ -1160,9 +1149,7 @@ public class GenericClientDstu2Test {
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals(
-			"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>",
-			(extractBody(capt, idx)));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (extractBody(capt, idx)));
 		idx++;
 
 		/*
@@ -1183,9 +1170,7 @@ public class GenericClientDstu2Test {
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals(
-			"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"name1\",\"valueIdentifier\":{\"system\":\"system1\",\"value\":\"value1\"}},{\"name\":\"name2\",\"valueString\":\"value1\"}]}",
-			(extractBody(capt, idx)));
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"name1\",\"valueIdentifier\":{\"system\":\"system1\",\"value\":\"value1\"}},{\"name\":\"name2\",\"valueString\":\"value1\"}]}", (extractBody(capt, idx)));
 		idx++;
 
 		/*
@@ -1206,9 +1191,7 @@ public class GenericClientDstu2Test {
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals(
-			"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"name1\",\"valueIdentifier\":{\"system\":\"system1\",\"value\":\"value1\"}},{\"name\":\"name2\",\"resource\":{\"resourceType\":\"Patient\",\"active\":true}}]}",
-			(extractBody(capt, idx)));
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"name1\",\"valueIdentifier\":{\"system\":\"system1\",\"value\":\"value1\"}},{\"name\":\"name2\",\"resource\":{\"resourceType\":\"Patient\",\"active\":true}}]}", (extractBody(capt, idx)));
 		idx++;
 
 	}
@@ -1259,8 +1242,7 @@ public class GenericClientDstu2Test {
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", weirdBase)
 				.execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1380) + "Don't know how to handle parameter of type class ca.uhn.fhir.rest.client.GenericClientDstu2Test$22", e.getMessage());
 		}
 	}
@@ -1525,7 +1507,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals("http://foo.bar/next", capt.getAllValues().get(idx).getURI().toASCIIString());
 		idx++;
 
@@ -1539,7 +1521,7 @@ public class GenericClientDstu2Test {
 		try {
 			client.loadPage().next(sourceBundle).execute();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), containsString("Can not perform paging operation because no link was found in Bundle with relation \"next\""));
+			assertThat(e.getMessage()).contains("Can not perform paging operation because no link was found in Bundle with relation \"next\"");
 		}
 	}
 
@@ -1570,7 +1552,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals("http://foo.bar/prev", capt.getAllValues().get(idx).getURI().toASCIIString());
 		idx++;
 
@@ -1588,7 +1570,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		assertEquals("http://foo.bar/prev", capt.getAllValues().get(idx).getURI().toASCIIString());
 		idx++;
 
@@ -1603,8 +1585,7 @@ public class GenericClientDstu2Test {
 
 		try {
 			ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
-			fail();
-		} catch (IllegalStateException e) {
+			fail();		} catch (IllegalStateException e) {
 			assertEquals(Msg.code(1355) + "ApacheRestfulClientFactory does not have FhirContext defined. This must be set via ApacheRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
@@ -1672,15 +1653,13 @@ public class GenericClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
 			client.read(new UriDt("1"));
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail();		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1365) + "The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
 		}
 
 		try {
 			client.read(new UriDt("http://example.com/InvalidResource/1"));
-			fail();
-		} catch (DataFormatException e) {
+			fail();		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
@@ -1751,8 +1730,9 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(capt.getValue().getURI().toString(),
-			either(equalTo("http://example.com/fhir/Patient/123?_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient/123?_elements=identifier%2Cname")));
+		assertThat(capt.getValue().getURI().toString()).isIn(
+			"http://example.com/fhir/Patient/123?_elements=name%2Cidentifier",
+			"http://example.com/fhir/Patient/123?_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getClass());
 
 	}
@@ -1776,9 +1756,8 @@ public class GenericClientDstu2Test {
 				.withId("123")
 				.summaryMode(SummaryEnum.TEXT)
 				.execute();
-			fail();
-		} catch (InvalidResponseException e) {
-			assertThat(e.getMessage(), containsString("String does not appear to be valid"));
+			fail();		} catch (InvalidResponseException e) {
+			assertThat(e.getMessage()).contains("String does not appear to be valid");
 		}
 		//@formatter:on
 	}
@@ -1899,7 +1878,9 @@ public class GenericClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/_search?_elements=identifier%2Cname", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isIn(
+				"http://example.com/fhir/Patient/_search?_elements=identifier%2Cname",
+				"http://example.com/fhir/Patient/_search?_elements=name%2Cidentifier");
 
 		// assertThat(capt.getValue().getURI().toString(),
 		// either(equalTo("http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -1915,7 +1896,7 @@ public class GenericClientDstu2Test {
 
 		assertEquals("application/x-www-form-urlencoded;charset=utf-8", v.getEntity().getContentType().getValue().replace(" ", "").toLowerCase());
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, capt.getValue().getFirstHeader("accept").getValue());
-		assertThat(capt.getValue().getFirstHeader("user-agent").getValue(), not(emptyString()));
+		assertThat(capt.getValue().getFirstHeader("user-agent").getValue()).isNotEmpty();
 	}
 
 	@Test
@@ -1939,9 +1920,12 @@ public class GenericClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient/_search?"));
-		assertThat(capt.getValue().getURI().toString(), containsString("_elements=identifier%2Cname"));
-		assertThat(capt.getValue().getURI().toString(), not(containsString("_format=json")));
+		assertThat(capt.getValue().getURI().toString()).contains("http://example.com/fhir/Patient/_search?");
+		assertThat(capt.getValue().getURI().toString()).satisfiesAnyOf(
+			s -> assertThat(s).contains("_elements=identifier%2Cname"),
+			s -> assertThat(s).contains("_elements=name%2Cidentifier")
+		);
+		assertThat(capt.getValue().getURI().toString()).doesNotContain("_format=json");
 
 		// assertThat(capt.getValue().getURI().toString(),
 		// either(equalTo("http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname")));
@@ -2112,8 +2096,9 @@ public class GenericClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(capt.getValue().getURI().toString(),
-			either(equalTo("http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo("http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname")));
+		assertThat(capt.getValue().getURI().toString()).isIn(
+			"http://example.com/fhir/Patient?name=james&_elements=name%2Cidentifier",
+			"http://example.com/fhir/Patient?name=james&_elements=identifier%2Cname");
 		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
 	}
@@ -2279,12 +2264,12 @@ public class GenericClientDstu2Test {
 		//@formatter:on
 
 		assertEquals("http://example.com/fhir?_pretty=true", capt.getValue().getURI().toString());
-		assertEquals(2, response.size());
+		assertThat(response).hasSize(2);
 
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
 		ourLog.info(requestString);
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
-		assertEquals(2, requestBundle.getEntry().size());
+		assertThat(requestBundle.getEntry()).hasSize(2);
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
 		assertEquals("http://foo.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
@@ -2390,7 +2375,7 @@ public class GenericClientDstu2Test {
 		//@formatter:on
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		assertEquals(2, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(2);
 
 		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
@@ -2418,7 +2403,7 @@ public class GenericClientDstu2Test {
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
@@ -2426,7 +2411,7 @@ public class GenericClientDstu2Test {
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=http%3A//foo%7Cbar", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
@@ -2434,7 +2419,7 @@ public class GenericClientDstu2Test {
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
@@ -2442,7 +2427,7 @@ public class GenericClientDstu2Test {
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo&address=AAA%5C%7CBBB", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
@@ -2450,7 +2435,7 @@ public class GenericClientDstu2Test {
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
+		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo&address=AAA%5C%7CBBB", capt.getAllValues().get(idx).getURI().toString());
 		idx++;
@@ -2479,7 +2464,7 @@ public class GenericClientDstu2Test {
 		client.update(new IdDt("Patient/123"), p);
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("{\"family\":[\"FOOFAMILY\"]}"));
+		assertThat(extractBody(capt, idx)).contains("{\"family\":[\"FOOFAMILY\"]}");
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		idx++;
@@ -2487,7 +2472,7 @@ public class GenericClientDstu2Test {
 		client.update("123", p);
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertThat(extractBody(capt, idx), containsString("{\"family\":[\"FOOFAMILY\"]}"));
+		assertThat(extractBody(capt, idx)).contains("{\"family\":[\"FOOFAMILY\"]}");
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		idx++;
@@ -2583,9 +2568,7 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/$validate", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("application/xml+fhir", capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(
-			"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>",
-			extractBody(capt, idx));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		idx++;
@@ -2594,9 +2577,7 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/$validate", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("application/xml+fhir", capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(
-			"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>",
-			extractBody(capt, idx));
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		idx++;
@@ -2614,7 +2595,7 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/$validate?_pretty=true", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("application/json+fhir", capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertThat(extractBody(capt, idx), containsString("\"resourceType\": \"Parameters\",\n"));
+		assertThat(extractBody(capt, idx)).contains("\"resourceType\": \"Parameters\",\n");
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		idx++;
@@ -2650,9 +2631,7 @@ public class GenericClientDstu2Test {
 
 		assertEquals("http://example.com/fhir/Patient/$validate", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
-		assertEquals(
-			"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}",
-			extractBody(capt, idx));
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		idx++;

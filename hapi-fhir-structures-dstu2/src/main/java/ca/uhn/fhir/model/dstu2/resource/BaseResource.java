@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			public IBaseCoding addSecurity() {
 				List<BaseCodingDt> tagList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(BaseResource.this);
 				if (tagList == null) {
-					tagList = new ArrayList<BaseCodingDt>();
+					tagList = new ArrayList<>();
 					ResourceMetadataKeyEnum.SECURITY_LABELS.put(BaseResource.this, tagList);
 				}
 				CodingDt tag = new CodingDt();
@@ -185,7 +185,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public List<? extends IPrimitiveType<String>> getProfile() {
-				ArrayList<IPrimitiveType<String>> retVal = new ArrayList<IPrimitiveType<String>>();
+				ArrayList<IPrimitiveType<String>> retVal = new ArrayList<>();
 				List<IdDt> profilesList = ResourceMetadataKeyEnum.PROFILES.get(BaseResource.this);
 				if (profilesList == null) {
 					return Collections.emptyList();
@@ -198,16 +198,19 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public List<? extends IBaseCoding> getSecurity() {
-				ArrayList<CodingDt> retVal = new ArrayList<CodingDt>();
+				ArrayList<CodingDt> retVal = new ArrayList<>();
 				List<BaseCodingDt> labelsList = ResourceMetadataKeyEnum.SECURITY_LABELS.get(BaseResource.this);
 				if (labelsList == null) {
 					return Collections.emptyList();
 				}
 				for (BaseCodingDt next : labelsList) {
-					retVal.add(new CodingDt(
-									next.getSystemElement().getValue(),
-									next.getCodeElement().getValue())
-							.setDisplay(next.getDisplayElement().getValue()));
+					CodingDt c = new CodingDt(
+							next.getSystemElement().getValue(),
+							next.getCodeElement().getValue());
+					c.setDisplay(next.getDisplayElement().getValue());
+					c.setUserSelected(next.getUserSelectedElement());
+					c.setVersion(next.getVersionElement());
+					retVal.add(c);
 				}
 				return retVal;
 			}
@@ -224,7 +227,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public List<? extends IBaseCoding> getTag() {
-				ArrayList<IBaseCoding> retVal = new ArrayList<IBaseCoding>();
+				ArrayList<IBaseCoding> retVal = new ArrayList<>();
 				TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(BaseResource.this);
 				if (tagList == null) {
 					return Collections.emptyList();

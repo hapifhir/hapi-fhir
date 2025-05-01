@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class MethodOutcome {
+public class MethodOutcome implements IHasHeaders {
 
 	private Boolean myCreated;
 	private IIdType myId;
@@ -238,7 +238,7 @@ public class MethodOutcome {
 	 */
 	public void fireResourceViewCallbacks() {
 		if (myResourceViewCallbacks != null) {
-			myResourceViewCallbacks.forEach(t -> t.run());
+			myResourceViewCallbacks.forEach(Runnable::run);
 			myResourceViewCallbacks.clear();
 		}
 	}

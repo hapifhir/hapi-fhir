@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.entity.ContentType;
@@ -44,10 +45,6 @@ import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
-
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
 
 /**
  * For more details regarind the API refer to

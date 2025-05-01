@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ import java.time.ZoneId;
 @Scope("prototype")
 public class ResourceChangeListenerCache implements IResourceChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
+	/**
+	 * Max number of retries to do for cache refreshing
+	 */
 	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
@@ -123,7 +126,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return myNextRefreshTime.isBefore(now());
 	}
 
-	private static Instant now() {
+	static Instant now() {
 		if (ourNowForUnitTests != null) {
 			return ourNowForUnitTests;
 		}
@@ -153,7 +156,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 						return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
 					}
 				},
-				MAX_RETRIES);
+				getMaxRetries());
 		return refreshCacheRetrier.runWithRetry();
 	}
 
@@ -222,5 +225,9 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 				.append("mySearchParameterMap", mySearchParameterMap)
 				.append("myInitialized", myInitialized)
 				.toString();
+	}
+
+	static int getMaxRetries() {
+		return MAX_RETRIES;
 	}
 }

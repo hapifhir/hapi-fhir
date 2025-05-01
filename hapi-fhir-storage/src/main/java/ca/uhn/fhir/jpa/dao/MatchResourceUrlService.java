@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 @Service
 public class MatchResourceUrlService<T extends IResourcePersistentId> {
@@ -88,8 +89,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			String theMatchUrl,
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
-			RequestDetails theRequest) {
-		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null);
+			RequestDetails theRequest,
+			RequestPartitionId thePartitionId) {
+		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null, thePartitionId);
 	}
 
 	/**
@@ -100,7 +102,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
 			RequestDetails theRequest,
-			IBaseResource theConditionalOperationTargetOrNull) {
+			IBaseResource theConditionalOperationTargetOrNull,
+			RequestPartitionId thePartitionId) {
 		Set<T> retVal = null;
 
 		String resourceType = myContext.getResourceType(theResourceType);
@@ -117,7 +120,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 		}
 
-		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl, thePartitionId);
+
+		ourLog.debug("Resolving match URL from cache {} found: {}", theMatchUrl, resolvedInCache);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
 		}
@@ -134,9 +139,38 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
 		}
 
+		/*
+		 * We don't invoke the STORAGE_PRE_SHOW_RESOURCES hooks if we're either in mass ingestion mode,
+		 * or the match URL cache is enabled. This is a performance optimization with the following
+		 * justification:
+		 * Invoking this hook can be good since it means the AuthorizationInterceptor and ConsentInterceptor
+		 * are able to block actions where conditional URLs might reveal existence of a resource. But
+		 * it is bad because it means we need to fetch and parse the body associated with the resource
+		 * ID which can really hurt performance if we're doing a lot of conditional operations, and
+		 * most people don't need to defend against things being revealed by conditional URL
+		 * evaluation.
+		 */
+		if (!myStorageSettings.isMassIngestionMode() && !myStorageSettings.isMatchUrlCacheEnabled()) {
+			retVal = invokePreShowInterceptorForMatchUrlResults(theResourceType, theRequest, retVal, matchUrl);
+		}
+
+		if (retVal.size() == 1) {
+			T pid = retVal.iterator().next();
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
+			if (myStorageSettings.isMatchUrlCacheEnabled()) {
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
+			}
+		}
+
+		return retVal;
+	}
+
+	private <R extends IBaseResource> Set<T> invokePreShowInterceptorForMatchUrlResults(
+			Class<R> theResourceType, RequestDetails theRequest, Set<T> retVal, String matchUrl) {
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 			Map<IBaseResource, T> resourceToPidMap = new HashMap<>();
 
 			IFhirResourceDao<R> dao = getResourceDao(theResourceType);
@@ -146,14 +180,14 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resourceToPidMap.keySet());
+
 			HookParams params = new HookParams()
 					.add(IPreResourceShowDetails.class, accessDetails)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 
 			try {
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 				retVal = accessDetails.toList().stream()
 						.map(resourceToPidMap::get)
@@ -169,15 +203,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 				retVal = new HashSet<>();
 			}
 		}
-
-		if (retVal.size() == 1) {
-			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
-			if (myStorageSettings.isMatchUrlCacheEnabled()) {
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
-			}
-		}
-
 		return retVal;
 	}
 
@@ -202,11 +227,18 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	}
 
 	@Nullable
-	public T processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
+	public T processMatchUrlUsingCacheOnly(
+			String theResourceType, String theMatchUrl, RequestPartitionId thePartitionId) {
 		T existing = null;
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
-			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
+			T potentialMatch = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
+			if (potentialMatch != null
+					&& (thePartitionId.isAllPartitions()
+							|| (thePartitionId.hasPartitionIds()
+									&& thePartitionId.hasPartitionId(potentialMatch.getPartitionId())))) {
+				existing = potentialMatch;
+			}
 		}
 		return existing;
 	}
@@ -222,16 +254,16 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		List<T> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw);
 			HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, message);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return new HashSet<>(retVal);

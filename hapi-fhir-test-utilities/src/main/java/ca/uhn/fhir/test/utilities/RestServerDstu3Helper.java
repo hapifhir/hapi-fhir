@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.servlet.ServletException;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -45,7 +46,6 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

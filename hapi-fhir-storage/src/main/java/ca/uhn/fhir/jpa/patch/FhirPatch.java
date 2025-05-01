@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,12 @@ import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -45,11 +47,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirPatch {
 
@@ -127,7 +127,7 @@ public class FhirPatch {
 		for (IBase nextElement : containingElements) {
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+			IBase newValue = getNewValue(theParameters, childDefinition);
 
 			childDefinition.getChildDef().getMutator().addValue(nextElement, newValue);
 		}
@@ -149,7 +149,7 @@ public class FhirPatch {
 
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+			IBase newValue = getNewValue(theParameters, childDefinition);
 
 			List<IBase> existingValues =
 					new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
@@ -173,34 +173,20 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		String containingPath;
-		String elementName;
+		ParsedPath parsedPath = ParsedPath.parse(path);
+		List<IBase> containingElements = myContext
+				.newFhirPath()
+				.evaluate(
+						theResource,
+						parsedPath.getEndsWithAFilterOrIndex() ? parsedPath.getContainingPath() : path,
+						IBase.class);
 
-		if (path.endsWith(")")) {
-			// This is probably a filter, so we're probably dealing with a list
-			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
-			int lastDotIndex = path.lastIndexOf(
-					'.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
-			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
-			containingPath = path.substring(0, secondLastDotIndex);
-			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
-		} else if (path.endsWith("]")) {
-			// This is almost definitely a list
-			int openBracketIndex = path.lastIndexOf('[');
-			int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
-			containingPath = path.substring(0, lastDotIndex);
-			elementName = path.substring(lastDotIndex + 1, openBracketIndex);
-		} else {
-			containingPath = path;
-			elementName = null;
-		}
-
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 		for (IBase nextElement : containingElements) {
-			if (elementName == null) {
-				deleteSingleElement(nextElement);
+			if (parsedPath.getEndsWithAFilterOrIndex()) {
+				// if the path ends with a filter or index, we must be dealing with a list
+				deleteFromList(theResource, nextElement, parsedPath.getLastElementName(), path);
 			} else {
-				deleteFromList(theResource, nextElement, elementName, path);
+				deleteSingleElement(nextElement);
 			}
 		}
 	}
@@ -228,18 +214,51 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-		int lastDot = path.lastIndexOf(".");
-		String containingPath = path.substring(0, lastDot);
-		String elementName = path.substring(lastDot + 1);
+		ParsedPath parsedPath = ParsedPath.parse(path);
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-		for (IBase nextElement : containingElements) {
+		List<IBase> containingElements =
+				myContext.newFhirPath().evaluate(theResource, parsedPath.getContainingPath(), IBase.class);
+		for (IBase containingElement : containingElements) {
 
-			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
+			ChildDefinition childDefinition = findChildDefinition(containingElement, parsedPath.getLastElementName());
+			IBase newValue = getNewValue(theParameters, childDefinition);
+			if (parsedPath.getEndsWithAFilterOrIndex()) {
+				// if the path ends with a filter or index, we must be dealing with a list
+				replaceInList(newValue, theResource, containingElement, childDefinition, path);
+			} else {
+				childDefinition.getChildDef().getMutator().setValue(containingElement, newValue);
+			}
+		}
+	}
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+	private void replaceInList(
+			IBase theNewValue,
+			IBaseResource theResource,
+			IBase theContainingElement,
+			ChildDefinition theChildDefinitionForTheList,
+			String theFullReplacePath) {
 
-			childDefinition.getChildDef().getMutator().setValue(nextElement, newValue);
+		List<IBase> existingValues = new ArrayList<>(
+				theChildDefinitionForTheList.getChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> valuesToReplace = myContext.newFhirPath().evaluate(theResource, theFullReplacePath, IBase.class);
+		if (valuesToReplace.isEmpty()) {
+			String msg = myContext
+					.getLocalizer()
+					.getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
+			throw new InvalidRequestException(Msg.code(2617) + msg);
+		}
+
+		BaseRuntimeChildDefinition.IMutator listMutator =
+				theChildDefinitionForTheList.getChildDef().getMutator();
+		// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
+		// replaced
+		listMutator.setValue(theContainingElement, null);
+		for (IBase existingValue : existingValues) {
+			if (valuesToReplace.contains(existingValue)) {
+				listMutator.addValue(theContainingElement, theNewValue);
+			} else {
+				listMutator.addValue(theContainingElement, existingValue);
+			}
 		}
 	}
 
@@ -310,22 +329,26 @@ public class FhirPatch {
 		return new ChildDefinition(childDef, childElement);
 	}
 
-	private IBase getNewValue(IBase theParameters, IBase theElement, ChildDefinition theChildDefinition) {
+	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {
 		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
 		Optional<IBase> valuePartValue =
 				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
 		IBase newValue;
 		if (valuePartValue.isPresent()) {
-			newValue = valuePartValue.get();
-		} else {
-			newValue = theChildDefinition.getChildElement().newInstance();
+			newValue = maybeMassageToEnumeration(valuePartValue.get(), theChildDefinition);
 
-			if (valuePart.isPresent()) {
-				IBase theValueElement = valuePart.get();
-				populateNewValue(theChildDefinition, newValue, theValueElement);
-			}
+		} else {
+			List<IBase> partParts = valuePart.map(this::extractPartsFromPart).orElse(Collections.emptyList());
+
+			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
+
+		return newValue;
+	}
+
+	private IBase maybeMassageToEnumeration(IBase theValue, ChildDefinition theChildDefinition) {
+		IBase retVal = theValue;
 
 		if (IBaseEnumeration.class.isAssignableFrom(
 						theChildDefinition.getChildElement().getImplementingClass())
@@ -343,38 +366,79 @@ public class FhirPatch {
 				newValueInstance =
 						(IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
 			}
-			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
-			theChildDefinition.getChildDef().getMutator().setValue(theElement, newValueInstance);
-			newValue = newValueInstance;
+			newValueInstance.setValueAsString(((IPrimitiveType<?>) theValue).getValueAsString());
+			retVal = newValueInstance;
 		}
-		return newValue;
+
+		return retVal;
 	}
 
-	private void populateNewValue(ChildDefinition theChildDefinition, IBase theNewValue, IBase theValueElement) {
-		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
-		for (IBase nextValuePartPart : valuePartParts) {
+	@Nonnull
+	private List<IBase> extractPartsFromPart(IBase theParametersParameterComponent) {
+		return myContext.newTerser().getValues(theParametersParameterComponent, "part");
+	}
+
+	/**
+	 * this method will instantiate an element according to the provided Definition and initialize its fields
+	 * from the values provided in thePartParts.  a part usually represent a datatype as a name/value[X] pair.
+	 * it may also represent a complex type like an Extension.
+	 *
+	 * @param theDefinition wrapper around the runtime definition of the element to be populated
+	 * @param thePartParts list of Part to populate the element that will be created from theDefinition
+	 * @return an element that was created from theDefinition and populated with the parts
+	 */
+	private IBase createAndPopulateNewElement(ChildDefinition theDefinition, List<IBase> thePartParts) {
+		IBase newElement = theDefinition.getChildElement().newInstance();
+
+		for (IBase nextValuePartPart : thePartParts) {
 
 			String name = myContext
 					.newTerser()
 					.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
 					.map(IPrimitiveType::getValueAsString)
 					.orElse(null);
-			if (isNotBlank(name)) {
 
-				Optional<IBase> value =
-						myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
-				if (value.isPresent()) {
+			if (StringUtils.isBlank(name)) {
+				continue;
+			}
 
-					BaseRuntimeChildDefinition partChildDef =
-							theChildDefinition.getChildElement().getChildByName(name);
-					if (partChildDef == null) {
-						name = name + "[x]";
-						partChildDef = theChildDefinition.getChildElement().getChildByName(name);
-					}
-					partChildDef.getMutator().addValue(theNewValue, value.get());
+			Optional<IBase> optionalValue =
+					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+
+			if (optionalValue.isPresent()) {
+				// we have a dataType. let's extract its value and assign it.
+
+				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+				IBase newValue = maybeMassageToEnumeration(optionalValue.get(), childDefinition);
+
+				BaseRuntimeChildDefinition partChildDef =
+						theDefinition.getChildElement().getChildByName(name);
+
+				if (isNull(partChildDef)) {
+					name = name + "[x]";
+					partChildDef = theDefinition.getChildElement().getChildByName(name);
 				}
+
+				partChildDef.getMutator().setValue(newElement, newValue);
+
+				// a part represent a datatype or a complexType but not both at the same time.
+				continue;
+			}
+
+			List<IBase> part = extractPartsFromPart(nextValuePartPart);
+
+			if (!part.isEmpty()) {
+				// we have a complexType.  let's find its definition and recursively process
+				// them till all complexTypes are processed.
+				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+
+				IBase childNewValue = createAndPopulateNewElement(childDefinition, part);
+
+				childDefinition.getChildDef().getMutator().setValue(newElement, childNewValue);
 			}
 		}
+
+		return newElement;
 	}
 
 	private void deleteSingleElement(IBase theElementToDelete) {
@@ -388,17 +452,6 @@ public class FhirPatch {
 				if (theElement instanceof IPrimitiveType) {
 					((IPrimitiveType<?>) theElement).setValueAsString(null);
 				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				theNextExt.setUrl(null);
-				theNextExt.setValue(null);
 				return true;
 			}
 		});
@@ -565,7 +618,7 @@ public class FhirPatch {
 		 * If the value is a Resource or a datatype, we can put it into the part.value and that will cover
 		 * all of its children. If it's an infrastructure element though, such as Patient.contact we can't
 		 * just put it into part.value because it isn't an actual type. So we have to put all of its
-		 * childen in instead.
+		 * children in instead.
 		 */
 		if (valueDef.isStandardType()) {
 			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, value);
@@ -646,6 +699,89 @@ public class FhirPatch {
 
 		public BaseRuntimeElementDefinition<?> getChildElement() {
 			return myChildElement;
+		}
+	}
+
+	/**
+	 * This class helps parse a FHIR path into its component parts for easier patch operation processing.
+	 * It has 3 components:
+	 *  - The last element name, which is the last element in the path (not including any list index or filter)
+	 *  - The containing path, which is the prefix of the path up to the last element
+	 *  - A flag indicating whether the path has a filter or index on the last element of the path, which indicates
+	 *  that the path we are dealing is probably for a list element.
+	 * Examples:
+	 * 1. For path "Patient.identifier[2].system",
+	 *   - the lastElementName is "system",
+	 *   - the containingPath is "Patient.identifier[2]",
+	 *   - and endsWithAFilterOrIndex flag is false
+	 *
+	 *  2. For path "Patient.identifier[2]" or for path "Patient.identifier.where('system'='sys1')"
+	 *  - the lastElementName is "identifier",
+	 *  - the containingPath is "Patient",
+	 *  - and the endsWithAFilterOrIndex is true
+	 */
+	protected static class ParsedPath {
+		private final String myLastElementName;
+		private final String myContainingPath;
+		private final boolean myEndsWithAFilterOrIndex;
+
+		public ParsedPath(String theLastElementName, String theContainingPath, boolean theEndsWithAFilterOrIndex) {
+			myLastElementName = theLastElementName;
+			myContainingPath = theContainingPath;
+			myEndsWithAFilterOrIndex = theEndsWithAFilterOrIndex;
+		}
+
+		/**
+		 * returns the last element of the path
+		 */
+		public String getLastElementName() {
+			return myLastElementName;
+		}
+
+		/**
+		 * Returns the prefix of the path up to the last FHIR resource element
+		 */
+		public String getContainingPath() {
+			return myContainingPath;
+		}
+
+		/**
+		 * Returns whether the path has a filter or index on the last element of the path, which indicates
+		 * that the path we are dealing is probably a list element.
+		 */
+		public boolean getEndsWithAFilterOrIndex() {
+			return myEndsWithAFilterOrIndex;
+		}
+
+		public static ParsedPath parse(String path) {
+			String containingPath;
+			String elementName;
+			boolean endsWithAFilterOrIndex = false;
+
+			if (path.endsWith(")")) {
+				// This is probably a filter, so we're probably dealing with a list
+				endsWithAFilterOrIndex = true;
+				int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
+				int lastDotIndex = path.lastIndexOf(
+						'.',
+						filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+				int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
+				containingPath = path.substring(0, secondLastDotIndex);
+				elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
+			} else if (path.endsWith("]")) {
+				// This is almost definitely a list
+				endsWithAFilterOrIndex = true;
+				int openBracketIndex = path.lastIndexOf('[');
+				int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
+				containingPath = path.substring(0, lastDotIndex);
+				elementName = path.substring(lastDotIndex + 1, openBracketIndex);
+			} else {
+				int lastDot = path.lastIndexOf(".");
+				containingPath = path.substring(0, lastDot);
+				elementName = path.substring(lastDot + 1);
+			}
+
+			return new ParsedPath(elementName, containingPath, endsWithAFilterOrIndex);
 		}
 	}
 }

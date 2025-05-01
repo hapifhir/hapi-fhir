@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class DaoTestUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestUtils.class);
@@ -37,11 +36,10 @@ public final class DaoTestUtils {
 	private DaoTestUtils() {}
 
 	public static void assertConflictException(ResourceVersionConflictException e) {
-		assertThat(
-				e.getMessage(),
-				matchesPattern(
+		assertThat(e.getMessage())
+				.matches(
 						Msg.code(550) + Msg.code(515)
-								+ "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+								+ "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+");
 	}
 
 	public static void logAllInterceptors(IInterceptorService theInterceptorRegistry) {

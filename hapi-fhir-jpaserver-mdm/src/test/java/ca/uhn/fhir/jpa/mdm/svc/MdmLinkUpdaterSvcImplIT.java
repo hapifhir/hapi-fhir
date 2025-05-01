@@ -25,10 +25,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
@@ -41,7 +41,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	private MessageHelper myMessageHelper;
@@ -129,7 +129,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
 	private Patient getGoldenFor(Patient thePatient) {
 		Optional<? extends IMdmLink> patientALink = myMdmLinkDaoSvc.findMdmLinkBySource(thePatient);
-		assertTrue(patientALink.isPresent());
+		assertThat(patientALink).isPresent();
 		Patient golden = (Patient) myMdmResourceDaoSvc.readGoldenResourceByPid(patientALink.get().getGoldenResourcePersistenceId(), "Patient");
 		assertNotNull(golden);
 		return golden;

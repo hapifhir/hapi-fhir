@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -43,6 +43,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client-apache-http5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client-okhttp</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -73,10 +78,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>ejb-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
 			<version>1.1.1</version>
@@ -104,8 +105,8 @@
 		</dependency>
 		<!-- Needed for JEE/Servlet support -->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -128,7 +129,7 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>

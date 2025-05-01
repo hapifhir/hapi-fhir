@@ -6,6 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -18,6 +19,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -39,7 +42,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"), any())).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
@@ -60,7 +63,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
 		assertEquals(1, map.size());
 		assertNotNull(nearDistanceParam);
-		assertEquals(kmDistance, nearDistanceParam.getValue().doubleValue(), 0.0);
+		assertThat(nearDistanceParam.getValue().doubleValue()).isCloseTo(kmDistance, within(0.0));
 	}
 
 	@Test
@@ -74,7 +77,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
@@ -91,10 +94,30 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
+	}
+
+	@Test
+	void testTotal_fromStandardLowerCase() {
+		// given
+		// when
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=none", ourCtx.getResourceDefinition("Patient"));
+
+		// then
+		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
+	}
+
+	@Test
+	void testTotal_fromUpperCase() {
+		// given
+		// when
+		var map = myMatchUrlService.translateMatchUrl("Patient?family=smith&_total=NONE", ourCtx.getResourceDefinition("Patient"));
+
+		// then
+		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
 	}
 
 	@Override

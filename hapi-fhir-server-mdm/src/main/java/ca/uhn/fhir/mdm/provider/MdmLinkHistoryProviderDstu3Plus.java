@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.provider;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -47,28 +48,27 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmLinkHistoryProviderDstu3Plus.class);
 
-	private final IMdmControllerSvc myMdmControllerSvc;
-
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public MdmLinkHistoryProviderDstu3Plus(
 			FhirContext theFhirContext,
 			IMdmControllerSvc theMdmControllerSvc,
 			IInterceptorBroadcaster theIInterceptorBroadcaster) {
-		super(theFhirContext);
-		myMdmControllerSvc = theMdmControllerSvc;
+		super(theFhirContext, theMdmControllerSvc);
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;
 	}
 
 	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
 	public IBaseParameters historyLinks(
-			@OperationParam(
+			@Description(value = "The id of the Golden Resource (e.g. Golden Patient Resource).")
+					@OperationParam(
 							name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID,
 							min = 0,
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theMdmGoldenResourceIds,
-			@OperationParam(
+			@Description(value = "The id of the source resource (e.g. Patient resource).")
+					@OperationParam(
 							name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID,
 							min = 0,
 							max = OperationParam.MAX_UNLIMITED,
@@ -90,7 +90,7 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc =
 				myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
-		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
+		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc, theRequestDetails);
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_LINK_HISTORY)) {
 			// MDM_POST_LINK_HISTORY hook

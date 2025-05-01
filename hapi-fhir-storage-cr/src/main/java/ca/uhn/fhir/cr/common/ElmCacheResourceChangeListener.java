@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.cqframework.cql.elm.execution.Library;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.Reflections;
+import org.opencds.cqf.fhir.utility.Reflections;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,18 +39,19 @@ import java.util.function.Function;
 /**
  * This class listens for changes to Library resources and invalidates the CodeCache. The CodeCache is used in CQL evaluatuon to speed up the measure operations. If underlying values change in the library then cache requires updating.
  **/
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(ElmCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myLibraryDao;
-	private final Map<VersionedIdentifier, Library> myGlobalLibraryCache;
+	private final Map<VersionedIdentifier, CompiledLibrary> myGlobalLibraryCache;
 	private final Function<IBaseResource, String> myNameFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
 	public ElmCacheResourceChangeListener(
-			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, Library> theGlobalLibraryCache) {
+			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, CompiledLibrary> theGlobalLibraryCache) {
 		this.myLibraryDao = theDaoRegistry.getResourceDao("Library");
 		this.myGlobalLibraryCache = theGlobalLibraryCache;
 		this.myNameFunction = Reflections.getNameFunction(myLibraryDao.getResourceType());

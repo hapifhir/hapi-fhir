@@ -25,10 +25,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -88,12 +85,12 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		TreeSet<String> allCodes = toCodes(csv, true);
 		ourLog.info(allCodes.toString());
 
-		assertThat(allCodes, hasItem("116680003"));
-		assertThat(allCodes, not(hasItem("207527008")));
+		assertThat(allCodes).contains("116680003");
+		assertThat(allCodes).doesNotContain("207527008");
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());
-		assertThat(allCodes, hasItem("126816002"));
+		assertThat(allCodes).contains("126816002");
 	}
 
 	@Test
@@ -111,12 +108,12 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		TreeSet<String> allCodes = toCodes(csv, true);
 		ourLog.info(allCodes.toString());
 
-		assertThat(allCodes, hasItem("116680003"));
-		assertThat(allCodes, not(hasItem("207527008")));
+		assertThat(allCodes).contains("116680003");
+		assertThat(allCodes).doesNotContain("207527008");
 
 		allCodes = toCodes(csv, false);
 		ourLog.info(allCodes.toString());
-		assertThat(allCodes, hasItem("126816002"));
+		assertThat(allCodes).contains("126816002");
 	}
 
 	/**
@@ -144,7 +141,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 			mySvc.loadSnomedCt(list(bos.toByteArray()), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input: "));
+			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input: ");
 		}
 	}
 

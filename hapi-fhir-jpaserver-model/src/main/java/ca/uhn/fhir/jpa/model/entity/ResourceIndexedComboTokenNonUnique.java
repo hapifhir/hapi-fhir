@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,51 +21,73 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(
-		name = "HFJ_IDX_CMB_TOK_NU",
+		name = ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU,
 		indexes = {
+			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
 			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
+@IdClass(IdAndPartitionId.class)
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndexedCombo
 		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
-	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
+	public static final String HFJ_IDX_CMB_TOK_NU = "HFJ_IDX_CMB_TOK_NU";
+
+	@GenericGenerator(
+			name = "SEQ_IDXCMBTOKNU_ID",
+			type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = true)
+			},
 			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = true)
 	private Long myResourceId;
 
 	@Column(name = "HASH_COMPLETE", nullable = false)
@@ -76,9 +98,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
-
-	@Transient
-	private IIdType mySearchParameterId;
 
 	/**
 	 * Constructor
@@ -106,6 +125,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public boolean equals(Object theO) {
+		calculateHashes();
+
 		if (this == theO) {
 			return true;
 		}
@@ -117,7 +138,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myIndexString, that.myIndexString);
+		b.append(getHashComplete(), that.getHashComplete());
 		return b.isEquals();
 	}
 
@@ -127,6 +148,11 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		myPartitionSettings = source.myPartitionSettings;
 		myHashComplete = source.myHashComplete;
 		myIndexString = source.myIndexString;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -158,7 +184,11 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
+		calculateHashes();
+
+		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		builder.append(getHashComplete());
+		return builder.toHashCode();
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -207,27 +237,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	public static long calculateHashComplete(
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
-	}
-
-	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hash(partitionSettings, partitionId, queryString);
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public void setSearchParameterId(IIdType theSearchParameterId) {
-		mySearchParameterId = theSearchParameterId;
-	}
-
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
+		return SearchParamHash.hashSearchParam(partitionSettings, requestPartitionId, queryString);
 	}
 }

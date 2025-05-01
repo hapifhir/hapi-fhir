@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.util.DatabaseSupportUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MSSQLServerContainer;
@@ -43,9 +44,19 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private final MSSQLServerContainer myContainer;
 
 	public MsSqlEmbeddedDatabase() {
-		DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
-				.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
-		myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
+
+		// azure-sql-edge docker image does not support kernel 6.7+
+		// as a result, mssql container fails to start most of the time
+		// mssql/server:2019 image support kernel 6.7+, so use it for amd64 architecture
+		// See: https://github.com/microsoft/mssql-docker/issues/868
+		if (DatabaseSupportUtil.canUseMsSql2019()) {
+			myContainer = new MSSQLServerContainer("mcr.microsoft.com/mssql/server:2019-latest").acceptLicense();
+		} else {
+			DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
+					.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
+			myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
+		}
+
 		myContainer.start();
 		super.initialize(
 				DriverTypeEnum.MSSQL_2012,

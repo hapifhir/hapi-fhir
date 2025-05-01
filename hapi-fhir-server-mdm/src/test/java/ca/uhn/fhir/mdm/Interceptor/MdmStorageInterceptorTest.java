@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class MdmStorageInterceptorTest {
@@ -57,8 +57,6 @@ public class MdmStorageInterceptorTest {
 			.stream()
 			.filter(event -> Level.WARN.equals(event.getLevel()))
 			.toList();
-		assertEquals(0, warningLogs.size());
-
+		assertThat(warningLogs).isEmpty();
 	}
-
 }

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -70,7 +71,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 		// Verify
 
-		assertEquals(1, outcome.size());
+		assertThat(outcome).hasSize(1);
 
 	}
 

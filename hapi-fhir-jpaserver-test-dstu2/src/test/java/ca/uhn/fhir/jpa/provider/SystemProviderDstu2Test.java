@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
@@ -37,8 +39,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,15 +52,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -156,7 +153,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, (containsString("_format=json")));
+			assertThat(response).contains("_format=json");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			http.close();
@@ -168,7 +165,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testConformanceImplementationDescriptionGetsPopulated() {
 		Conformance conf = ourClient.capabilities().ofType(Conformance.class).execute();
-		assertThat(conf.getImplementation().getDescription(), not(emptyOrNullString()));
+		assertThat(conf.getImplementation().getDescription()).isNotBlank();
 	}
 
 
@@ -191,7 +188,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, not(containsString("_format")));
+			assertThat(response).doesNotContain("_format");
 			assertEquals(200, http.getStatusLine().getStatusCode());
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -245,7 +242,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			try {
 				myPatientDao.read(new IdType("Patient/Patient1063259"));
-				fail();
+				fail("");
 			} catch (ResourceGoneException e) {
 				// good
 			}
@@ -299,7 +296,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		IdDt id2_3 = new IdDt(resp.getEntry().get(2).getResponse().getLocation());
 		IdDt id2_4 = new IdDt(resp.getEntry().get(3).getResponse().getLocation());
 
-		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
+		assertThat(id2_1.toVersionless()).isNotEqualTo(id1_1.toVersionless());
 		assertEquals("Provenance", id2_1.getResourceType());
 		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
 		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
@@ -340,7 +337,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
@@ -354,8 +351,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
-		// fail();
-		// } catch (InvalidRequestException e) {
+		// fail("");		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());
@@ -376,13 +372,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals("self", respSub.getLink().get(0).getRelation());
 		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
 		assertEquals("next", respSub.getLink().get(1).getRelation());
-		assertThat(respSub.getLink().get(1).getUrl(), containsString("/fhir/context?_getpages"));
-		assertThat(respSub.getEntry().get(0).getFullUrl(), startsWith(ourServerBase + "/Patient/"));
+		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
+		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
 		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
 	}
 
@@ -400,10 +396,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal().intValue());
-		assertEquals(0, respSub.getEntry().size());
+		assertThat(respSub.getEntry()).isEmpty();
 	}
 
 	@Test

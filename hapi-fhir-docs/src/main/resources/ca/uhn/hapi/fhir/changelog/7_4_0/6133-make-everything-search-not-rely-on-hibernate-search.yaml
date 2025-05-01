@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6083
+backport: 7.2.2
+title: "A bug with $everything operation was discovered when trying to search using hibernate search, this change makes
+all $everything operation rely on database search until hibernate search fully supports the operation."

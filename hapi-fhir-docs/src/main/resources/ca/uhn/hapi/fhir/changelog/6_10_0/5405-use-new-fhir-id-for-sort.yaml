@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 5405
+title: "Sorting by _id now uses the FHIR_ID column on HFJ_RESOURCE and avoid joins."

@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -22,10 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -39,34 +41,27 @@ public class RestfulClientFactoryDstu2Test {
 	@SuppressWarnings({ "unchecked", "cast" })
 	@Test
 	public void testMissingCapabilityStatementDstu2() throws Exception {
-		FhirContext ctx = mock(FhirContext.class);
+		FhirContext ctx = spy(ourCtx);
 		IRestfulClientFactory restfulClientFactory = mock(IRestfulClientFactory.class);
 		IHttpClient httpClient = mock(IHttpClient.class);
-		
-		when(ctx.getResourceDefinition(Mockito.eq("CapabilityStatement"))).thenThrow(new DataFormatException());
-		when(ctx.getResourceDefinition(Mockito.eq("Conformance"))).thenReturn(ourCtx.getResourceDefinition("Conformance"));
-		when(ctx.getResourceDefinition(Conformance.class)).thenReturn(ourCtx.getResourceDefinition("Conformance"));
-		when(ctx.getVersion()).thenReturn(FhirVersionEnum.DSTU2.getVersionImplementation());
-		when(ctx.getRestfulClientFactory()).thenReturn(restfulClientFactory);
-
-		when(restfulClientFactory.getHttpClient(nullable(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), nullable(RequestTypeEnum.class), nullable(List.class))).thenReturn(httpClient);
-		
 		IHttpRequest httpRequest = mock(IHttpRequest.class);
-		when(httpClient.createGetRequest(any(FhirContext.class), nullable(EncodingEnum.class))).thenReturn(httpRequest);
-	
 		IHttpResponse httpResponse = mock(IHttpResponse.class);
+
+		when(ctx.getRestfulClientFactory()).thenReturn(restfulClientFactory);
+		when(restfulClientFactory.getHttpClient(nullable(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), nullable(RequestTypeEnum.class), nullable(List.class)))
+			.thenReturn(httpClient);
+		when(httpClient.createGetRequest(any(FhirContext.class), nullable(EncodingEnum.class))).thenReturn(httpRequest);
 		when(httpRequest.execute()).thenReturn(httpResponse);
-		
 		when(httpResponse.getStatus()).thenReturn(404);
-		
+
 		ApacheRestfulClientFactory cf = new ApacheRestfulClientFactory(ctx);
-		IHttpClient client = mock(IHttpClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
-		BaseClient baseClient = mock(BaseClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+		IHttpClient client = mock(IHttpClient.class);
+		BaseClient baseClient = mock(BaseClient.class);
+		when(baseClient.getInterceptorService()).thenReturn(mock(InterceptorService.class));
 		
 		try {
 			cf.validateServerBase("http://localhost:9999", client, baseClient);
-			fail();
-		} catch (ResourceNotFoundException e) {
+			fail();		} catch (ResourceNotFoundException e) {
 			// ok
 		}
 		

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,10 +47,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
+import static ca.uhn.fhir.context.FhirVersionEnum.R5;
 
 @Service
 public class GoldenResourceHelper {
@@ -58,23 +59,24 @@ public class GoldenResourceHelper {
 
 	static final String FIELD_NAME_IDENTIFIER = "identifier";
 
-	@Autowired
-	private IMdmSettings myMdmSettings;
+	private final IMdmSettings myMdmSettings;
 
-	@Autowired
-	private EIDHelper myEIDHelper;
+	private final EIDHelper myEIDHelper;
 
-	@Autowired
-	private IMdmSurvivorshipService myMdmSurvivorshipService;
-
-	@Autowired
-	private MdmPartitionHelper myMdmPartitionHelper;
+	private final MdmPartitionHelper myMdmPartitionHelper;
 
 	private final FhirContext myFhirContext;
 
 	@Autowired
-	public GoldenResourceHelper(FhirContext theFhirContext) {
+	public GoldenResourceHelper(
+			FhirContext theFhirContext,
+			IMdmSettings theMdmSettings,
+			EIDHelper theEIDHelper,
+			MdmPartitionHelper theMdmPartitionHelper) {
 		myFhirContext = theFhirContext;
+		myMdmSettings = theMdmSettings;
+		myEIDHelper = theEIDHelper;
+		myMdmPartitionHelper = theMdmPartitionHelper;
 	}
 
 	/**
@@ -82,20 +84,28 @@ public class GoldenResourceHelper {
 	 * a randomly generated UUID EID will be created.
 	 *
 	 * @param <T>                      Supported MDM resource type (e.g. Patient, Practitioner)
-	 * @param theIncomingResource      The resource that will be used as the starting point for the MDM linking.
-	 * @param theMdmTransactionContext
+	 * @param theIncomingResource 	  The resource to build the golden resource off of.
+	 *                                 Could be the source resource or another golden resource.
+	 *                                 If a golden resource, do not provide an IMdmSurvivorshipService
+	 * @param theMdmTransactionContext The mdm transaction context
+	 * @param theMdmSurvivorshipService IMdmSurvivorshipSvc. Provide only if survivorshipskills are desired
+	 *                                  to be applied. Provide null otherwise.
 	 */
 	@Nonnull
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(
-			T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
+			T theIncomingResource,
+			MdmTransactionContext theMdmTransactionContext,
+			IMdmSurvivorshipService theMdmSurvivorshipService) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
 		IBaseResource newGoldenResource = resourceDefinition.newInstance();
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-				theIncomingResource, newGoldenResource, theMdmTransactionContext);
+		if (theMdmSurvivorshipService != null) {
+			theMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					theIncomingResource, newGoldenResource, theMdmTransactionContext);
+		}
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
@@ -106,6 +116,14 @@ public class GoldenResourceHelper {
 
 		MdmResourceUtil.setMdmManaged(newGoldenResource);
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
+
+		// TODO - on updating links, if resolving a link, this should go away?
+		// blocked resource's golden resource will be marked special
+		// they are not part of MDM matching algorithm (will not link to other resources)
+		// but other resources can link to them
+		if (theMdmTransactionContext.getIsBlocked()) {
+			MdmResourceUtil.setGoldenResourceAsBlockedResourceGoldenResource(newGoldenResource);
+		}
 
 		// add the partition id to the new resource
 		newGoldenResource.setUserData(
@@ -141,7 +159,7 @@ public class GoldenResourceHelper {
 	private void cloneMDMEidsIntoNewGoldenResource(
 			BaseRuntimeChildDefinition theGoldenResourceIdentifier,
 			IAnyResource theIncomingResource,
-			IBase theNewGoldenResource) {
+			IBaseResource theNewGoldenResource) {
 		String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
 		String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
 
@@ -164,7 +182,7 @@ public class GoldenResourceHelper {
 					ourLog.debug(
 							"Incoming resource EID System {} matches EID system in the MDM rules.  Copying to Golden Resource.",
 							incomingIdentifierSystemString);
-					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+					ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 							myFhirContext,
 							theGoldenResourceIdentifier,
 							incomingResourceIdentifier,
@@ -183,7 +201,7 @@ public class GoldenResourceHelper {
 
 	private void validateContextSupported() {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
-		if (fhirVersion == R4 || fhirVersion == DSTU3) {
+		if (fhirVersion == R4 || fhirVersion == DSTU3 || fhirVersion == R5) {
 			return;
 		}
 		throw new UnsupportedOperationException(Msg.code(1489) + "Version not supported: "
@@ -322,14 +340,6 @@ public class GoldenResourceHelper {
 				myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
 	}
 
-	public void mergeNonIdentiferFields(
-			IBaseResource theFromGoldenResource,
-			IBaseResource theToGoldenResource,
-			MdmTransactionContext theMdmTransactionContext) {
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
-				theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
-	}
-
 	/**
 	 * An incoming resource is a potential duplicate if it matches a source that has a golden resource with an official
 	 * EID, but the incoming resource also has an EID that does not match.
@@ -372,7 +382,7 @@ public class GoldenResourceHelper {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceToCloneInto);
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(
+		ca.uhn.fhir.util.TerserUtil.cloneIdentifierIntoResource(
 				theFhirContext,
 				resourceIdentifier,
 				IdentifierUtil.toId(theFhirContext, theEid),

@@ -21,8 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,7 +44,7 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 
 		// hack the link into a NO_MATCH
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
-		assertThat(links, hasSize(1));
+		assertThat(links).hasSize(1);
 		MdmLink link = links.get(0);
 		link.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		link.setLinkSource(MdmLinkSourceEnum.MANUAL);

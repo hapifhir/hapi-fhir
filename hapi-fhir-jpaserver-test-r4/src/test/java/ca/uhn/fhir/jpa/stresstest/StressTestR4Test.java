@@ -1,8 +1,11 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -23,7 +26,6 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,6 +41,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -64,13 +67,9 @@ import java.util.concurrent.Future;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
@@ -195,7 +194,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			searchResult = fhirClient.loadPage().next(searchResult).execute();
 		}
 
-		assertEquals(resourceCount, ids.size());
+		assertThat(ids).hasSize(resourceCount);
 	}
 
 	@Disabled("Stress test")
@@ -240,8 +239,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs
 		ids = new ArrayList<>();
@@ -253,8 +252,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs starting half way through
 		ids = new ArrayList<>();
@@ -266,8 +265,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count - 1000, ids.size());
-		assertEquals(count - 1000, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count - 1000);
+		assertThat(Sets.newHashSet(ids)).hasSize(count - 1000);
 	}
 
 	@Disabled("Stress test")
@@ -301,8 +300,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 	}
 
@@ -343,7 +342,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes).hasSize(1001);
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -352,7 +351,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes).hasSize(1001);
 	}
 
 	@Disabled("Stress test")
@@ -425,6 +424,87 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	/**
+	 * This tests that the SQL statement generated in DeleteExpungeSqlBuilder.findResourceLinksWithTargetPidIn()
+	 * doesn't throw an error due to too many query parameters in the IN clause.
+	 */
+	@Disabled("Stress test")
+	@Test
+	public void testDeleteExpungeWithCascadingDeletesWithLargeDataSet() {
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
+		//Given: A database with 5 patients and 100s of other resources referencing the 5 patients.
+		myStorageSettings.setExpungeBatchSize(1000);
+		int numOfRecords = 2505;
+		IIdType p1 = createPatient(withActiveTrue());
+		IIdType p2 = createPatient(withActiveTrue());
+		IIdType p3 = createPatient(withActiveTrue());
+		IIdType p4 = createPatient(withActiveTrue());
+		IIdType p5 = createPatient(withActiveTrue());
+		for (int i = 0; i < numOfRecords; ++i) {
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p1));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p2));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p3));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p4));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createObservation(withSubject(p5));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p1));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p2));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p3));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p4));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+			createEncounter(withReference("subject", p5));
+		}
+
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"}
+		));
+
+		//When: A delete expunge operation is initiated with cascading deletes
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+
+		//validate: Records are deleted
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		myBatch2JobHelper.awaitJobCompletion(jobId, 120);
+		assertEquals(100205, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(defaultStorageSettings.isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
+		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
+	}
+
 	@Test
 	public void testMultiThreadedCreateWithDuplicateClientAssignedIdsInTransaction() throws Exception {
 		ExecutorService executor = Executors.newFixedThreadPool(20);
@@ -447,7 +527,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure");
 					return e.toString();
 				}
 			};
@@ -467,9 +547,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results).isNotEmpty();
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	@Test
@@ -499,7 +579,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					myClient.transaction().withBundle(input).execute();
 					return null;
 				} catch (ResourceVersionConflictException e) {
-					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."));
+					assertThat(e.toString()).contains("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.");
 					return e.toString();
 				}
 			};
@@ -519,9 +599,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Results: {}", results);
-		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
-		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
+		assertThat(results).isNotEmpty();
+		assertThat(results.get(0)).contains("HTTP 409 Conflict");
+		assertThat(results.get(0)).contains("Error flushing transaction with resource types: [Patient]");
 	}
 
 	/**
@@ -610,7 +690,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(59)));
+		assertEquals(59, deleteCount);
 	}
 
 	@Disabled("Stress test")
@@ -652,7 +732,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(30)));
+		assertEquals(30, deleteCount);
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {
@@ -665,6 +745,13 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Loaded {} searches", total);
+	}
+
+	private String jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
+		OperationOutcome operationOutcome = (OperationOutcome) theResult.getOperationOutcome();
+		String diagnostics = operationOutcome.getIssueFirstRep().getDiagnostics();
+		String[] parts = diagnostics.split("Delete job submitted with id ");
+		return parts[1];
 	}
 
 	private final class SearchTask extends BaseTask {
@@ -682,7 +769,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					getResp = ourHttpClient.execute(get);
 					try {
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						assertEquals(200, getResp.getStatusLine().getStatusCode(), respBundleString);
+						assertThat(getResp.getStatusLine().getStatusCode()).as(respBundleString).isEqualTo(200);
 						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {

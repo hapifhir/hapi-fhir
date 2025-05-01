@@ -11,45 +11,43 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivat
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionLoaderTest {
 
-	private Logger ourLogger;
-
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
-	@Mock
-	private Appender<ILoggingEvent> myAppender;
+	@RegisterExtension
+	LogbackTestExtension myLogCapture = new LogbackTestExtension(SubscriptionLoader.class);
 
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
@@ -81,15 +79,8 @@ public class SubscriptionLoaderTest {
 	@InjectMocks
 	private SubscriptionLoader mySubscriptionLoader;
 
-	private Level myStoredLogLevel;
-
 	@BeforeEach
 	public void init() {
-		ourLogger = (Logger) LoggerFactory.getLogger(SubscriptionLoader.class);
-
-		myStoredLogLevel = ourLogger.getLevel();
-		ourLogger.addAppender(myAppender);
-
 		when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 			anyString(),
 			any(SearchParameterMap.class),
@@ -102,12 +93,6 @@ public class SubscriptionLoaderTest {
 		mySubscriptionLoader.registerListener();
 	}
 
-	@AfterEach
-	public void end() {
-		ourLogger.detachAppender(myAppender);
-		ourLogger.setLevel(myStoredLogLevel);
-	}
-
 	private IBundleProvider getSubscriptionList(List<IBaseResource> theReturnedResource) {
 		IBundleProvider subscriptionList = new SimpleBundleProvider(theReturnedResource);
 
@@ -116,48 +101,65 @@ public class SubscriptionLoaderTest {
 	}
 
 	@Test
-	public void syncSubscriptions_withInactiveSubscriptionFailing_Syncs() {
+	public void testUnfetchableResourceDoesntBlockLoading() {
+		// setup
+		Subscription subscription = new Subscription();
+		subscription.setId("Subscription/A");
+
+		// when
+		when(myDaoRegistry.getResourceDao("Subscription"))
+			.thenReturn(mySubscriptionDao);
+		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
+			.thenReturn(true);
+		when(mySubscriptionDao.read(eq(new IdType("Subscription/123")), any())).thenThrow(new ResourceGoneException(new IdType("Subscription/123")));
+		when(mySubscriptionDao.read(eq(new IdType("Subscription/A")), any())).thenReturn(subscription);
+
+		// test
+		mySubscriptionLoader.handleInit(List.of(new IdType("Subscription/123"), new IdType("Subscription/A")));
+
+		// verify
+		verify(mySubscriptionDao).read(eq(new IdType("Subscription/123")), any());
+		verify(mySubscriptionDao).read(eq(new IdType("Subscription/A")), any());
+		verifyNoMoreInteractions(mySubscriptionDao);
+		verify(mySubscriptionRegistry, times(1)).unregisterAllSubscriptionsNotInCollection(any());
+		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(subscription);
+		verifyNoMoreInteractions(mySubscriptionRegistry);
+	}
+
+
+
+	@Test
+	public void refreshCache_withInactiveSubscriptionFailing_Syncs() {
 		// setup
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
 		subscription.setError("THIS IS AN ERROR");
 
-		ourLogger.setLevel(Level.ERROR);
-
 		// when
 		when(myDaoRegistry.getResourceDao("Subscription"))
-				.thenReturn(mySubscriptionDao);
+			.thenReturn(mySubscriptionDao);
 		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
 				.thenReturn(true);
-		when(mySubscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
-			.thenReturn(getSubscriptionList(
-				Collections.singletonList(subscription)
-			));
+		when(mySubscriptionDao.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
+			.thenReturn(List.of(subscription));
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
-				.thenReturn(false);
+			.thenReturn(false);
 
 		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
 			.thenReturn(true);
 
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
-		
+
 		// test
-		mySubscriptionLoader.syncDatabaseToCache();
+		mySubscriptionLoader.requestRefresh();
 
 		// verify
 		verify(mySubscriptionDao)
-			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
+			.searchForResources(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
-		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myAppender).doAppend(eventCaptor.capture());
-		String actual = "Subscription "
-			+ subscription.getIdElement().getIdPart()
-			+ " could not be activated.";
-		String msg = eventCaptor.getValue().getMessage();
-		Assertions.assertTrue(msg
-			.contains(actual),
-			String.format("Expected %s, actual %s", msg, actual));
-		Assertions.assertTrue(msg.contains(subscription.getError()));
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(
+			"Subscription " + subscription.getIdElement().getIdPart() + " could not be activated.");
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasMessage(subscription.getError());
 	}
 }

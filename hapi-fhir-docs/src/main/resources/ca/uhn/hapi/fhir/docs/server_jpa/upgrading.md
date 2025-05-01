@@ -20,15 +20,36 @@ You may use the following command to get detailed help on the options:
 
 Note the arguments:
 
-* `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options
+* `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options.
+* `--enable-heavyweight-migrations` &ndash; If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.
+
+<a name="database-partition-mode"/>
+
+# Database Partition Mode
+
+If you are using [Database Partition Mode](../server_jpa_partitioning/db_partition_mode.md), add the flag `--flags database-partition-mode` to your command.
+
+With this flag added to the command line, the migrator will initialize an empty database with a schema suitable for Database Partition Mode, and will appropriately migrate an existing schema that was initialized with Database Partition Mode. This flag should not be used when migrating an existing schema that was not initially created in Database Partition Mode. It can not be used to convert an existing schema into one that is suitable for this new mode.    
+
+For example:
+
+```bash
+./hapi-fhir-cli migrate-database --flags database-partition-mode -d POSTGRES_9_4 -u "[url]" -n "[username]" -p "[password]"
+```
 
 # Oracle Support
 
 Note that the Oracle JDBC drivers are not distributed in the Maven Central repository, so they are not included in HAPI FHIR. In order to use this command with an Oracle database, you will need to invoke the CLI as follows:
 
 ```bash
-java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
+./hapi-fhir-cli migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]"
 ```
+
+# Oracle and Sql Server Locking Note
+
+Some versions of Oracle and Sql Server (e.g. Oracle Standard or Sql Server Standard) do NOT support adding or removing an index without locking the underlying table.
+If you run migrations while these systems are running,
+they will have unavoidable long pauses in activity during these changes.
 
 ## Migrating 3.4.0 to 3.5.0+
 

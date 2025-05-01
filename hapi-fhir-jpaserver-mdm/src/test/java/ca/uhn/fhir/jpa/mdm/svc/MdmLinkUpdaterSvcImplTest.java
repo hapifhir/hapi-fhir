@@ -19,9 +19,8 @@ import java.util.List;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 	@Autowired
@@ -52,7 +51,7 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		myMdmLinkUpdaterSvc.updateLink(params);
 		Patient newJaneGolden = getGoldenResourceFromTargetResource(jane);
 
-		assertNotEquals(newJaneGolden.getId(), originalJaneGolden.getId());
+		assertThat(originalJaneGolden.getId()).isNotEqualTo(newJaneGolden.getId());
 
 		assertLinkCount(2);
 
@@ -71,8 +70,8 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, matchOutcome, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertFalse(targets.isEmpty());
-		assertEquals(1, targets.size());
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 		final MdmLink mdmLink = targets.get(0);
 
 		assertEquals(matchOutcome.getNormalizedScore(), mdmLink.getScore());
@@ -100,8 +99,8 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		myMdmLinkUpdaterSvc.updateLink(params);
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertFalse(targets.isEmpty());
-		assertEquals(1, targets.size());
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 
 		final MdmLink mdmLink = targets.get(0);
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -96,6 +96,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
 	private final IReductionStepExecutorService myReductionStepExecutorService;
+
+	private boolean myEnabledBool = true;
 
 	/**
 	 * Constructor
@@ -197,7 +199,16 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	}
 
 	@Override
+	public void enableMaintenancePass(boolean theToEnable) {
+		myEnabledBool = theToEnable;
+	}
+
+	@Override
 	public void runMaintenancePass() {
+		if (!myEnabledBool) {
+			ourLog.error("Maintenance job is disabled! This will affect all batch2 jobs!");
+		}
+
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
 			ourLog.debug("Another maintenance pass is already in progress.  Ignoring request.");
 			return;

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -21,15 +23,12 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
@@ -66,7 +65,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		params.setLoadSynchronous(true);
 		params.add(Constants.PARAM_SOURCE, new TokenParam("urn:source:0"));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
 		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getSource());
 	}
@@ -87,7 +86,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
 			.addAnd(new TokenParam("urn:source:0"), new TokenParam("#" + requestId)));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 	}
 
@@ -107,7 +106,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getSource());
+		assertNull(pt0.getMeta().getSource());
 
 	}
 
@@ -122,20 +121,20 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals(null, pt0.getMeta().getSource());
+		assertNull(pt0.getMeta().getSource());
 
 		pt0.getMeta().setSource("urn:source:1");
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getSource());
+		assertNull(pt0.getMeta().getSource());
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 
 		// Search with source param
 		 params = new SearchParameterMap();
@@ -162,7 +161,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_SOURCE, new StringParam(source));
 		{
 			IBundleProvider result = myPatientDao.search(map);
-			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(patientId));
+			assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(patientId);
 		}
 		myPatientDao.delete(new IdType(patientId));
 		{
@@ -190,8 +189,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern(
-			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+		assertThat(e.getMessage()).matches("Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+");
 
 	}
 

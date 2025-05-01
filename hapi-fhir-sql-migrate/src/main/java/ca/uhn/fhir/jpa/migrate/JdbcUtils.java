@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.relational.QualifiedSequenceName;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
@@ -39,13 +42,16 @@ import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.sql.ast.SqlAstTranslatorFactory;
 import org.hibernate.tool.schema.extract.spi.ExtractionContext;
 import org.hibernate.tool.schema.extract.spi.SequenceInformation;
 import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -57,14 +63,45 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 
 public class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);
+
+	/**
+	 * Retrieve all index names
+	 */
+	public static Set<String> getPrimaryKeyColumns(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
+
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		try (Connection connection = dataSource.getConnection()) {
+			return theConnectionProperties.getTxTemplate().execute(t -> {
+				DatabaseMetaData metadata;
+				Set<String> retVal = new HashSet<>();
+				try {
+					metadata = connection.getMetaData();
+
+					try (ResultSet results =
+							metadata.getPrimaryKeys(connection.getCatalog(), connection.getSchema(), theTableName)) {
+						while (results.next()) {
+							String columnName = results.getString("COLUMN_NAME");
+							retVal.add(columnName);
+						}
+					}
+
+				} catch (SQLException e) {
+					throw new InternalErrorException(Msg.code(2562) + e);
+				}
+				return retVal;
+			});
+		}
+	}
 
 	/**
 	 * Retrieve all index names
@@ -83,19 +120,16 @@ public class JdbcUtils {
 				try {
 					metadata = connection.getMetaData();
 
-					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
 					Set<String> indexNames = new HashSet<>();
-					while (indexes.next()) {
-						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-						String indexName = indexes.getString("INDEX_NAME");
-						indexNames.add(indexName);
-					}
 
-					indexes = getIndexInfo(theTableName, connection, metadata, true);
-					while (indexes.next()) {
-						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-						String indexName = indexes.getString("INDEX_NAME");
-						indexNames.add(indexName);
+					for (boolean unique : Set.of(false, true)) {
+						try (ResultSet indexes = getIndexInfo(theTableName, connection, metadata, unique)) {
+							while (indexes.next()) {
+								ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
+								String indexName = indexes.getString("INDEX_NAME");
+								indexNames.add(indexName);
+							}
+						}
 					}
 
 					indexNames = indexNames.stream()
@@ -122,13 +156,14 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
+					try (ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false)) {
 
-					while (indexes.next()) {
-						String indexName = indexes.getString("INDEX_NAME");
-						if (theIndexName.equalsIgnoreCase(indexName)) {
-							boolean nonUnique = indexes.getBoolean("NON_UNIQUE");
-							return !nonUnique;
+						while (indexes.next()) {
+							String indexName = indexes.getString("INDEX_NAME");
+							if (theIndexName.equalsIgnoreCase(indexName)) {
+								boolean nonUnique = indexes.getBoolean("NON_UNIQUE");
+								return !nonUnique;
+							}
 						}
 					}
 
@@ -169,70 +204,69 @@ public class JdbcUtils {
 					metadata = connection.getMetaData();
 					String catalog = connection.getCatalog();
 					String schema = connection.getSchema();
-					ResultSet indexes =
-							metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null);
+					try (ResultSet indexes =
+							metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null)) {
 
-					while (indexes.next()) {
+						while (indexes.next()) {
 
-						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
-						}
-						String columnName = indexes.getString("COLUMN_NAME").toUpperCase(Locale.US);
-						if (!theColumnName.equalsIgnoreCase(columnName)) {
-							continue;
-						}
+							String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+							String columnName = indexes.getString("COLUMN_NAME").toUpperCase(Locale.US);
+							if (!theColumnName.equalsIgnoreCase(columnName)) {
+								continue;
+							}
 
-						int dataType = indexes.getInt("DATA_TYPE");
-						Long length = indexes.getLong("COLUMN_SIZE");
-						switch (dataType) {
-							case Types.LONGVARCHAR:
-								return new ColumnType(ColumnTypeEnum.TEXT, length);
-							case Types.BIT:
-							case Types.BOOLEAN:
-								return new ColumnType(ColumnTypeEnum.BOOLEAN, length);
-							case Types.VARCHAR:
-								return new ColumnType(ColumnTypeEnum.STRING, length);
-							case Types.NUMERIC:
-							case Types.BIGINT:
-							case Types.DECIMAL:
-								return new ColumnType(ColumnTypeEnum.LONG, length);
-							case Types.INTEGER:
-								return new ColumnType(ColumnTypeEnum.INT, length);
-							case Types.TIMESTAMP:
-							case Types.TIMESTAMP_WITH_TIMEZONE:
-								return new ColumnType(ColumnTypeEnum.DATE_TIMESTAMP, length);
-							case Types.BLOB:
-								return new ColumnType(ColumnTypeEnum.BLOB, length);
-							case Types.LONGVARBINARY:
-								if (DriverTypeEnum.MYSQL_5_7.equals(theConnectionProperties.getDriverType())) {
-									// See git
+							int dataType = indexes.getInt("DATA_TYPE");
+							Long length = indexes.getLong("COLUMN_SIZE");
+							switch (dataType) {
+								case Types.LONGVARCHAR:
+									return new ColumnType(ColumnTypeEnum.TEXT, length);
+								case Types.BIT:
+								case Types.BOOLEAN:
+									return new ColumnType(ColumnTypeEnum.BOOLEAN, length);
+								case Types.VARCHAR:
+									return new ColumnType(ColumnTypeEnum.STRING, length);
+								case Types.NUMERIC:
+								case Types.BIGINT:
+								case Types.DECIMAL:
+									return new ColumnType(ColumnTypeEnum.LONG, length);
+								case Types.INTEGER:
+									return new ColumnType(ColumnTypeEnum.INT, length);
+								case Types.TIMESTAMP:
+								case Types.TIMESTAMP_WITH_TIMEZONE:
+									return new ColumnType(ColumnTypeEnum.DATE_TIMESTAMP, length);
+								case Types.BLOB:
 									return new ColumnType(ColumnTypeEnum.BLOB, length);
-								} else {
-									throw new IllegalArgumentException(
-											Msg.code(32) + "Don't know how to handle datatype " + dataType
-													+ " for column " + theColumnName + " on table " + theTableName);
-								}
-							case Types.VARBINARY:
-								if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
-									// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers, so we need
-									// to reverse that mapping
-									return new ColumnType(ColumnTypeEnum.BLOB, length);
+								case Types.LONGVARBINARY:
+									return new ColumnType(ColumnTypeEnum.BINARY, length);
+								case Types.VARBINARY:
+									if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
+										// MS SQLServer seems to be mapping BLOB to VARBINARY under the covers,
+										// so we need to reverse that mapping
+										return new ColumnType(ColumnTypeEnum.BLOB, length);
 
-								} else {
+									} else {
+										throw new IllegalArgumentException(
+												Msg.code(33) + "Don't know how to handle datatype " + dataType
+														+ " for column " + theColumnName
+														+ " on table " + theTableName);
+									}
+								case Types.CLOB:
+									return new ColumnType(ColumnTypeEnum.CLOB, length);
+								case Types.DOUBLE:
+									return new ColumnType(ColumnTypeEnum.DOUBLE, length);
+								case Types.FLOAT:
+									return new ColumnType(ColumnTypeEnum.FLOAT, length);
+								case Types.TINYINT:
+									return new ColumnType(ColumnTypeEnum.TINYINT, length);
+								default:
 									throw new IllegalArgumentException(
-											Msg.code(33) + "Don't know how to handle datatype " + dataType
-													+ " for column " + theColumnName + " on table " + theTableName);
-								}
-							case Types.CLOB:
-								return new ColumnType(ColumnTypeEnum.CLOB, length);
-							case Types.DOUBLE:
-								return new ColumnType(ColumnTypeEnum.DOUBLE, length);
-							case Types.FLOAT:
-								return new ColumnType(ColumnTypeEnum.FLOAT, length);
-							default:
-								throw new IllegalArgumentException(Msg.code(34) + "Don't know how to handle datatype "
-										+ dataType + " for column " + theColumnName + " on table " + theTableName);
+											Msg.code(34) + "Don't know how to handle datatype " + dataType
+													+ " for column " + theColumnName
+													+ " on table " + theTableName);
+							}
 						}
 					}
 
@@ -247,7 +281,8 @@ public class JdbcUtils {
 	}
 
 	/**
-	 * Retrieve all index names
+	 * Retrieve all index names. The returned names will be in upper case
+	 * always.
 	 */
 	public static Set<String> getForeignKeys(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties,
@@ -277,13 +312,13 @@ public class JdbcUtils {
 
 					Set<String> fkNames = new HashSet<>();
 					for (String nextParentTable : parentTables) {
-						ResultSet indexes = metadata.getCrossReference(
-								catalog, schema, nextParentTable, catalog, schema, foreignTable);
-
-						while (indexes.next()) {
-							String fkName = indexes.getString("FK_NAME");
-							fkName = fkName.toUpperCase(Locale.US);
-							fkNames.add(fkName);
+						try (ResultSet indexes = metadata.getCrossReference(
+								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
+							while (indexes.next()) {
+								String fkName = indexes.getString("FK_NAME");
+								fkName = fkName.toUpperCase(Locale.US);
+								fkNames.add(fkName);
+							}
 						}
 					}
 
@@ -320,14 +355,14 @@ public class JdbcUtils {
 
 					Set<String> fkNames = new HashSet<>();
 					for (String nextParentTable : parentTables) {
-						ResultSet indexes = metadata.getCrossReference(
-								catalog, schema, nextParentTable, catalog, schema, foreignTable);
-
-						while (indexes.next()) {
-							if (theForeignKeyColumn.equals(indexes.getString("FKCOLUMN_NAME"))) {
-								String fkName = indexes.getString("FK_NAME");
-								fkName = fkName.toUpperCase(Locale.US);
-								fkNames.add(fkName);
+						try (ResultSet indexes = metadata.getCrossReference(
+								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
+							while (indexes.next()) {
+								if (theForeignKeyColumn.equals(indexes.getString("FKCOLUMN_NAME"))) {
+									String fkName = indexes.getString("FK_NAME");
+									fkName = fkName.toUpperCase(Locale.US);
+									fkNames.add(fkName);
+								}
 							}
 						}
 					}
@@ -351,25 +386,27 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(
+					LinkedCaseInsensitiveMap<String> columnNames = new LinkedCaseInsensitiveMap<>();
+
+					try (ResultSet indexes = metadata.getColumns(
 							connection.getCatalog(),
 							connection.getSchema(),
 							massageIdentifier(metadata, theTableName),
-							null);
+							null)) {
 
-					Set<String> columnNames = new HashSet<>();
-					while (indexes.next()) {
-						String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
+						while (indexes.next()) {
+							String tableName = indexes.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+
+							String columnName = indexes.getString("COLUMN_NAME");
+							columnName = columnName.toUpperCase(Locale.US);
+							columnNames.put(columnName, columnName);
 						}
-
-						String columnName = indexes.getString("COLUMN_NAME");
-						columnName = columnName.toUpperCase(Locale.US);
-						columnNames.add(columnName);
 					}
 
-					return columnNames;
+					return columnNames.keySet();
 				} catch (SQLException e) {
 					throw new InternalErrorException(Msg.code(38) + e);
 				}
@@ -379,94 +416,45 @@ public class JdbcUtils {
 
 	public static Set<String> getSequenceNames(DriverTypeEnum.ConnectionProperties theConnectionProperties)
 			throws SQLException {
+		List<SequenceInformation> sequenceInformation = getSequenceInformation(theConnectionProperties);
+
+		return sequenceInformation.stream()
+				.map(SequenceInformation::getSequenceName)
+				.map(QualifiedSequenceName::getSequenceName)
+				.map(Identifier::getText)
+				.collect(Collectors.toSet());
+	}
+
+	@Nonnull
+	public static List<SequenceInformation> getSequenceInformation(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
-			return theConnectionProperties.getTxTemplate().execute(t -> {
-				try {
-					DialectResolver dialectResolver = new StandardDialectResolver();
-					Dialect dialect = dialectResolver.resolveDialect(
-							new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
+			return Objects.requireNonNull(
+					theConnectionProperties.getTxTemplate().execute(t -> {
+						try {
+							DialectResolver dialectResolver = new StandardDialectResolver();
+							Dialect dialect = dialectResolver.resolveDialect(
+									new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
 
-					Set<String> sequenceNames = new HashSet<>();
-					if (dialect.supportsSequences()) {
+							List<SequenceInformation> sequenceInformation = new ArrayList<>();
+							if (dialect.getSequenceSupport().supportsSequences()) {
 
-						// Use Hibernate to get a list of current sequences
-						SequenceInformationExtractor sequenceInformationExtractor =
-								dialect.getSequenceInformationExtractor();
-						ExtractionContext extractionContext = new ExtractionContext.EmptyExtractionContext() {
-							@Override
-							public Connection getJdbcConnection() {
-								return connection;
+								// Use Hibernate to get a list of current sequences
+								SequenceInformationExtractor sequenceInformationExtractor =
+										dialect.getSequenceInformationExtractor();
+								ExtractionContext extractionContext = new EmptyExtractionContext(connection, dialect);
+								Iterable<SequenceInformation> sequenceInformationIterator =
+										sequenceInformationExtractor.extractMetadata(extractionContext);
+
+								return StreamSupport.stream(sequenceInformationIterator.spliterator(), false)
+										.collect(Collectors.toList());
 							}
-
-							@Override
-							public ServiceRegistry getServiceRegistry() {
-								return super.getServiceRegistry();
-							}
-
-							@Override
-							public JdbcEnvironment getJdbcEnvironment() {
-								return new JdbcEnvironment() {
-									@Override
-									public Dialect getDialect() {
-										return dialect;
-									}
-
-									@Override
-									public ExtractedDatabaseMetaData getExtractedDatabaseMetaData() {
-										return null;
-									}
-
-									@Override
-									public Identifier getCurrentCatalog() {
-										return null;
-									}
-
-									@Override
-									public Identifier getCurrentSchema() {
-										return null;
-									}
-
-									@Override
-									public QualifiedObjectNameFormatter getQualifiedObjectNameFormatter() {
-										return null;
-									}
-
-									@Override
-									public IdentifierHelper getIdentifierHelper() {
-										return new NormalizingIdentifierHelperImpl(
-												this, null, true, true, true, null, null, null);
-									}
-
-									@Override
-									public NameQualifierSupport getNameQualifierSupport() {
-										return null;
-									}
-
-									@Override
-									public SqlExceptionHelper getSqlExceptionHelper() {
-										return null;
-									}
-
-									@Override
-									public LobCreatorBuilder getLobCreatorBuilder() {
-										return null;
-									}
-								};
-							}
-						};
-						Iterable<SequenceInformation> sequences =
-								sequenceInformationExtractor.extractMetadata(extractionContext);
-						for (SequenceInformation next : sequences) {
-							sequenceNames.add(
-									next.getSequenceName().getSequenceName().getText());
+							return sequenceInformation;
+						} catch (SQLException e) {
+							throw new InternalErrorException(Msg.code(39) + e);
 						}
-					}
-					return sequenceNames;
-				} catch (SQLException e) {
-					throw new InternalErrorException(Msg.code(39) + e);
-				}
-			});
+					}));
 		}
 	}
 
@@ -478,22 +466,25 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
-
 					Set<String> columnNames = new HashSet<>();
-					while (tables.next()) {
-						String tableName = tables.getString("TABLE_NAME");
-						tableName = tableName.toUpperCase(Locale.US);
 
-						String tableType = tables.getString("TABLE_TYPE");
-						if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
-							continue;
-						}
-						if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
-							continue;
-						}
+					try (ResultSet tables =
+							metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null)) {
 
-						columnNames.add(tableName);
+						while (tables.next()) {
+							String tableName = tables.getString("TABLE_NAME");
+							tableName = tableName.toUpperCase(Locale.US);
+
+							String tableType = tables.getString("TABLE_TYPE");
+							if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
+								continue;
+							}
+							if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
+								continue;
+							}
+
+							columnNames.add(tableName);
+						}
 					}
 
 					return columnNames;
@@ -514,26 +505,27 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(
+					try (ResultSet tables = metadata.getColumns(
 							connection.getCatalog(),
 							connection.getSchema(),
 							massageIdentifier(metadata, theTableName),
-							null);
+							null)) {
 
-					while (tables.next()) {
-						String tableName = tables.getString("TABLE_NAME").toUpperCase(Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
-						}
+						while (tables.next()) {
+							String tableName = tables.getString("TABLE_NAME").toUpperCase(Locale.US);
+							if (!theTableName.equalsIgnoreCase(tableName)) {
+								continue;
+							}
 
-						if (theColumnName.equalsIgnoreCase(tables.getString("COLUMN_NAME"))) {
-							String nullable = tables.getString("IS_NULLABLE");
-							if ("YES".equalsIgnoreCase(nullable)) {
-								return true;
-							} else if ("NO".equalsIgnoreCase(nullable)) {
-								return false;
-							} else {
-								throw new IllegalStateException(Msg.code(41) + "Unknown nullable: " + nullable);
+							if (theColumnName.equalsIgnoreCase(tables.getString("COLUMN_NAME"))) {
+								String nullable = tables.getString("IS_NULLABLE");
+								if ("YES".equalsIgnoreCase(nullable)) {
+									return true;
+								} else if ("NO".equalsIgnoreCase(nullable)) {
+									return false;
+								} else {
+									throw new IllegalStateException(Msg.code(41) + "Unknown nullable: " + nullable);
+								}
 							}
 						}
 					}
@@ -546,9 +538,28 @@ public class JdbcUtils {
 		}
 	}
 
-	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
-		String retVal = theCatalog;
-		if (theCatalog == null) {
+	public static void executeSql(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties,
+			@Language("SQL") String theSql,
+			Object... theArgs) {
+		theConnectionProperties.getTxTemplate().execute(t -> {
+			theConnectionProperties.newJdbcTemplate().update(theSql, theArgs);
+			return null;
+		});
+	}
+
+	public static List<Map<String, Object>> executeQuery(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties,
+			@Language("SQL") String theSql,
+			Object... theArgs) {
+		return theConnectionProperties.getTxTemplate().execute(t -> theConnectionProperties
+				.newJdbcTemplate()
+				.query(theSql, theArgs, new ColumnMapRowMapper()));
+	}
+
+	public static String massageIdentifier(DatabaseMetaData theMetadata, String theIdentifier) throws SQLException {
+		String retVal = theIdentifier;
+		if (theIdentifier == null) {
 			return null;
 		} else if (theMetadata.storesLowerCaseIdentifiers()) {
 			retVal = retVal.toLowerCase();
@@ -628,6 +639,83 @@ public class JdbcUtils {
 					theTaskColumnLength);
 			return myColumnTypeEnum == theTaskColumnType
 					&& (theTaskColumnLength == null || theTaskColumnLength.equals(myLength));
+		}
+	}
+
+	private static class EmptyExtractionContext extends ExtractionContext.EmptyExtractionContext {
+
+		private final Connection myConnection;
+		private final Dialect myDialect;
+
+		public EmptyExtractionContext(Connection theConnection, Dialect theDialect) {
+			this.myConnection = theConnection;
+			this.myDialect = theDialect;
+		}
+
+		@Override
+		public Connection getJdbcConnection() {
+			return myConnection;
+		}
+
+		@Override
+		public ServiceRegistry getServiceRegistry() {
+			return super.getServiceRegistry();
+		}
+
+		@Override
+		public JdbcEnvironment getJdbcEnvironment() {
+			return new JdbcEnvironment() {
+
+				@Override
+				public Dialect getDialect() {
+					return myDialect;
+				}
+
+				@Override
+				public SqlAstTranslatorFactory getSqlAstTranslatorFactory() {
+					return null;
+				}
+
+				@Override
+				public ExtractedDatabaseMetaData getExtractedDatabaseMetaData() {
+					return null;
+				}
+
+				@Override
+				public Identifier getCurrentCatalog() {
+					return null;
+				}
+
+				@Override
+				public Identifier getCurrentSchema() {
+					return null;
+				}
+
+				@Override
+				public QualifiedObjectNameFormatter getQualifiedObjectNameFormatter() {
+					return null;
+				}
+
+				@Override
+				public IdentifierHelper getIdentifierHelper() {
+					return new NormalizingIdentifierHelperImpl(this, null, true, true, true, true, null, null, null);
+				}
+
+				@Override
+				public NameQualifierSupport getNameQualifierSupport() {
+					return null;
+				}
+
+				@Override
+				public SqlExceptionHelper getSqlExceptionHelper() {
+					return null;
+				}
+
+				@Override
+				public LobCreatorBuilder getLobCreatorBuilder() {
+					return null;
+				}
+			};
 		}
 	}
 }

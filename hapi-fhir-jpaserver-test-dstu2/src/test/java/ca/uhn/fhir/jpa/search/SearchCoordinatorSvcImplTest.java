@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -29,7 +30,6 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -56,12 +56,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -76,6 +76,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked"})
@@ -91,7 +92,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	private Search myCurrentSearch;
-	@Mock
+	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
@@ -157,8 +158,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		try {
 			mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("FAILED"));
-			assertThat(e.getMessage(), containsString("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest"));
+			assertThat(e.getMessage()).contains("FAILED");
+			assertThat(e.getMessage()).contains("at ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImplTest");
 		}
 
 	}
@@ -201,14 +202,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(790, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
-		assertEquals(790, resources.size());
+		assertThat(resources).hasSize(790);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
-		assertEquals(790, allResults.size());
+		assertThat(allResults).hasSize(790);
 		assertEquals(10, allResults.get(0).getId());
 		assertEquals(799, allResults.get(789).getId());
 
@@ -232,7 +233,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
 		}
@@ -254,9 +255,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString("Request timed out"));
+			assertThat(e.getMessage()).contains("Request timed out");
 		}
 	}
 
@@ -282,23 +283,22 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<IBaseResource> resources;
 
 		resources = result.getResources(0, 30);
-		assertEquals(30, resources.size());
+		assertThat(resources).hasSize(30);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
 	}
 
 	private void initSearches() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 	}
 
 	private void initAsyncSearches() {
-		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchTask.class), nullable(ISearchBuilder.class), nullable(RequestPartitionId.class))).thenAnswer(t -> {
+		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(SearchTask.class), nullable(ISearchBuilder.class), nullable(RequestPartitionId.class))).thenAnswer(t -> {
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
-			Search search = t.getArgument(1, Search.class);
-			SearchTask searchTask = t.getArgument(2, SearchTask.class);
-			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(3, ISearchBuilder.class);
-			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails, null);
+			SearchTask searchTask = t.getArgument(1, SearchTask.class);
+			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(2, ISearchBuilder.class);
+			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(searchTask, searchBuilder, requestDetails, null);
 			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
@@ -319,12 +319,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
-		when(myInterceptorBroadcaster.callHooks(any(), any()))
-			.thenReturn(true);
+		when(myInterceptorBroadcaster.hasHooks(any())).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(any())).thenReturn(List.of());
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
-		await().until(iter::getCountReturned, Matchers.greaterThan(0));
+		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);
@@ -334,7 +334,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 				ourLog.info("About to pull the first resource");
 				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
-				assertEquals(1, resources.size());
+				assertThat(resources).hasSize(1);
 			} finally {
 				completionLatch.countDown();
 			}
@@ -394,7 +394,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		resources = result.getResources(0, 10);
 		assertEquals(790, result.size());
-		assertEquals(10, resources.size());
+		assertThat(resources).hasSize(10);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
 
@@ -422,7 +422,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
 		List<IBaseResource> resources = result.getResources(0, 30);
-		assertEquals(30, resources.size());
+		assertThat(resources).hasSize(30);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
@@ -438,7 +438,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		final String uuid = UUID.randomUUID().toString();
 
@@ -480,7 +480,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		 */
 		provider = newPersistedJpaBundleProvider(uuid);
 		resources = provider.getResources(10, 20);
-		assertEquals(10, resources.size());
+		assertThat(resources).hasSize(10);
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
@@ -494,7 +494,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
-		assertEquals(20, resources.size());
+		assertThat(resources).hasSize(20);
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("49", resources.get(19).getIdElement().getValueAsString());
 
@@ -518,7 +518,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -532,7 +532,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setOffset(10);
@@ -545,7 +545,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		int loadUpto = 30;
 		SearchParameterMap params = new SearchParameterMap();
@@ -572,7 +572,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
@@ -585,7 +585,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Test
 	public void testFetchAllResultsReturnsNull() {
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
-		when(myCallingDao.getContext()).thenReturn(ourCtx);
 
 		Search search = new Search();
 		search.setUuid("0000-1111");
@@ -605,7 +604,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}

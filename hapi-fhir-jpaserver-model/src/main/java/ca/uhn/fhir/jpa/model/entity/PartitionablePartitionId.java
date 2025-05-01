@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,20 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.LocalDate;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 
 @Embeddable
 public class PartitionablePartitionId implements Cloneable {
 
-	static final String PARTITION_ID = "PARTITION_ID";
+	public static final String PARTITION_ID = "PARTITION_ID";
+	static final String PARTITION_DATE = "PARTITION_DATE";
 
 	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
 	private Integer myPartitionId;
@@ -131,5 +132,10 @@ public class PartitionablePartitionId implements Cloneable {
 			partitionId = thePartitionSettings.getDefaultPartitionId();
 		}
 		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
+	}
+
+	public static PartitionablePartitionId with(
+			@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
+		return new PartitionablePartitionId(thePartitionId, thePartitionDate);
 	}
 }

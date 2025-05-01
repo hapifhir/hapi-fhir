@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4803
+title: "Internal client-assigned ids are now resolved within the HFJ_RESOURCE table, avoiding a join to HFJ_FORCED_ID"

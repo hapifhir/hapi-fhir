@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,18 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -44,6 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,7 +57,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -72,6 +75,9 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 	@Autowired
 	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
+
+	@Autowired
+	protected abstract IRequestPartitionHelperSvc getRequestPartitionHelperService();
 
 	@Override
 	public DaoMethodOutcome patch(
@@ -113,8 +119,17 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
+			RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
+					.determineReadPartitionForRequestForSearchType(
+							theRequestDetails, getResourceType().getTypeName());
+
 			Set<IResourcePersistentId> match = getMatchResourceUrlService()
-					.processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
+					.processMatchUrl(
+							theConditionalUrl,
+							getResourceType(),
+							theTransactionDetails,
+							theRequestDetails,
+							theRequestPartitionId);
 			if (match.size() > 1) {
 				String msg = getContext()
 						.getLocalizer()
@@ -122,6 +137,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 								BaseStorageDao.class,
 								"transactionOperationWithMultipleMatchFailure",
 								"PATCH",
+								getResourceName(),
 								theConditionalUrl,
 								match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
@@ -187,16 +203,19 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		preProcessResourceForStorage(destinationCasted, theRequestDetails, theTransactionDetails, true);
 
-		return doUpdateForUpdateOrPatch(
-				theRequestDetails,
-				resourceId,
-				theConditionalUrl,
-				thePerformIndexing,
-				false,
-				destinationCasted,
-				entityToUpdate,
-				RestOperationTypeEnum.PATCH,
-				theTransactionDetails);
+		UpdateParameters updateParameters = new UpdateParameters<>()
+				.setRequestDetails(theRequestDetails)
+				.setResourceIdToUpdate(resourceId)
+				.setMatchUrl(theConditionalUrl)
+				.setShouldPerformIndexing(thePerformIndexing)
+				.setShouldForceUpdateVersion(false)
+				.setResource(destinationCasted)
+				.setEntity(entityToUpdate)
+				.setOperationType(RestOperationTypeEnum.PATCH)
+				.setTransactionDetails(theTransactionDetails)
+				.setShouldForcePopulateOldResourceForProcessing(false);
+
+		return doUpdateForUpdateOrPatch(updateParameters);
 	}
 
 	@Override
@@ -215,33 +234,32 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	protected abstract IBasePersistedResource readEntityLatestVersion(
 			IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
-	protected DaoMethodOutcome doUpdateForUpdateOrPatch(
-			RequestDetails theRequest,
-			IIdType theResourceId,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			T theResource,
-			IBasePersistedResource theEntity,
-			RestOperationTypeEnum theOperationType,
-			TransactionDetails theTransactionDetails) {
-		if (theResourceId.hasVersionIdPart()
-				&& Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
-			throw new ResourceVersionConflictException(
-					Msg.code(989) + "Trying to update " + theResourceId + " but this is not the current version");
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(UpdateParameters<T> theUpdateParameters) {
+
+		if (theUpdateParameters.getResourceIdToUpdate().hasVersionIdPart()
+				&& Long.parseLong(theUpdateParameters.getResourceIdToUpdate().getVersionIdPart())
+						!= theUpdateParameters.getEntity().getVersion()) {
+			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update "
+					+ theUpdateParameters.getResourceIdToUpdate() + " but this is not the current version");
 		}
 
-		if (theResourceId.hasResourceType() && !theResourceId.getResourceType().equals(getResourceName())) {
+		if (theUpdateParameters.getResourceIdToUpdate().hasResourceType()
+				&& !theUpdateParameters
+						.getResourceIdToUpdate()
+						.getResourceType()
+						.equals(getResourceName())) {
 			throw new UnprocessableEntityException(Msg.code(990) + "Invalid resource ID["
-					+ theEntity.getIdDt().toUnqualifiedVersionless() + "] of type[" + theEntity.getResourceType()
+					+ theUpdateParameters.getEntity().getIdDt().toUnqualifiedVersionless() + "] of type["
+					+ theUpdateParameters.getEntity().getResourceType()
 					+ "] - Does not match expected [" + getResourceName() + "]");
 		}
 
 		IBaseResource oldResource;
-		if (getStorageSettings().isMassIngestionMode()) {
+		if (getStorageSettings().isMassIngestionMode()
+				&& !theUpdateParameters.shouldForcePopulateOldResourceForProcessing()) {
 			oldResource = null;
 		} else {
-			oldResource = getStorageResourceParser().toResource(theEntity, false);
+			oldResource = getStorageResourceParser().toResource(theUpdateParameters.getEntity(), false);
 		}
 
 		/*
@@ -255,8 +273,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
 		 * for a test that needs this.
 		 */
-		boolean wasDeleted = theEntity.isDeleted();
-		theEntity.setNotDeleted();
+		boolean wasDeleted = theUpdateParameters.getEntity().isDeleted();
+		theUpdateParameters.getEntity().setNotDeleted();
 
 		/*
 		 * If we aren't indexing, that means we're doing this inside a transaction.
@@ -264,10 +282,16 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
 		 * directly. So we just bail now.
 		 */
-		if (!thePerformIndexing) {
-			theResource.setId(theEntity.getIdDt().getValue());
+		if (!theUpdateParameters.shouldPerformIndexing()) {
+			theUpdateParameters
+					.getResource()
+					.setId(theUpdateParameters.getEntity().getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(
-							theRequest, theEntity, theResource, theMatchUrl, theOperationType)
+							theUpdateParameters.getRequest(),
+							theUpdateParameters.getEntity(),
+							theUpdateParameters.getResource(),
+							theUpdateParameters.getMatchUrl(),
+							theUpdateParameters.getOperationType())
 					.setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
 			if (!outcome.isNop()) {
@@ -283,19 +307,19 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		 * Otherwise, we're not in a transaction
 		 */
 		return updateInternal(
-				theRequest,
-				theResource,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theEntity,
-				theResourceId,
+				theUpdateParameters.getRequest(),
+				theUpdateParameters.getResource(),
+				theUpdateParameters.getMatchUrl(),
+				theUpdateParameters.shouldPerformIndexing(),
+				theUpdateParameters.shouldForceUpdateVersion(),
+				theUpdateParameters.getEntity(),
+				theUpdateParameters.getResourceIdToUpdate(),
 				oldResource,
-				theOperationType,
-				theTransactionDetails);
+				theUpdateParameters.getOperationType(),
+				theUpdateParameters.getTransactionDetails());
 	}
 
-	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
+	public static void validateResourceType(IBasePersistedResource<?> theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID "
 					+ theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName

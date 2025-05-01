@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -13,7 +13,7 @@
 	<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Search Parameters</name>
+	<name>HAPI FHIR JPA - Search Parameters</name>
 
 	<dependencies>
 		<!-- HAPI -->
@@ -160,8 +160,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 

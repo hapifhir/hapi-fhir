@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,19 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringSubscriber;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
-
-import javax.annotation.PreDestroy;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
@@ -64,7 +63,7 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@EventListener(ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
@@ -93,7 +92,8 @@ public class MatchingQueueSubscriberLoader {
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {
 		ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
-		channelConsumerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
+		channelConsumerSettings.setQualifyChannelName(
+				mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
 		return channelConsumerSettings;
 	}
 

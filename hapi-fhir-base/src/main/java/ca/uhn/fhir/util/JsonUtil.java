@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,70 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.PropertyWriter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.Nonnull;
+import org.thymeleaf.util.Validate;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class JsonUtil {
 
 	private static final ObjectMapper ourMapperPrettyPrint;
 	private static final ObjectMapper ourMapperNonPrettyPrint;
+	private static final ObjectMapper ourMapperIncludeSensitive;
+
+	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
+
+	public static final SimpleFilterProvider SENSITIVE_DATA_FILTER_PROVIDER =
+			new SimpleFilterProvider().addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SIMPLE_BEAN_PROPERTY_FILTER);
+	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider()
+			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
 		ourMapperPrettyPrint = new ObjectMapper();
 		ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperPrettyPrint.registerModule(new JavaTimeModule());
 
 		ourMapperNonPrettyPrint = new ObjectMapper();
 		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperNonPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
 		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperNonPrettyPrint.registerModule(new JavaTimeModule());
+
+		ourMapperIncludeSensitive = new ObjectMapper();
+		ourMapperIncludeSensitive.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
+		ourMapperIncludeSensitive.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		ourMapperIncludeSensitive.disable(SerializationFeature.INDENT_OUTPUT);
+		// Needed to handle ZonedDateTime
+		ourMapperIncludeSensitive.registerModule(new JavaTimeModule());
 	}
 
 	/**
 	 * Parse JSON
 	 */
 	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
+		Validate.notEmpty(theInput, "theInput must not be blank or null");
 		try {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 		} catch (IOException e) {
@@ -66,6 +98,24 @@ public class JsonUtil {
 	 */
 	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
+	}
+	/**
+	 * Parse JSON
+	 */
+	public static <T> T deserialize(@Nonnull InputStream theInput, @Nonnull Class<T> theType) throws IOException {
+		return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
+	}
+
+	/**
+	 * Includes fields which are annotated with {@link SensitiveNoDisplay}. Currently only meant to be used for serialization
+	 * for batch job parameters.
+	 */
+	public static String serializeWithSensitiveData(@Nonnull IModelJson theInput) {
+		try {
+			return ourMapperIncludeSensitive.writeValueAsString(theInput);
+		} catch (JsonProcessingException e) {
+			throw new InvalidRequestException(Msg.code(2487) + "Failed to encode " + theInput.getClass(), e);
+		}
 	}
 
 	/**
@@ -93,6 +143,10 @@ public class JsonUtil {
 		}
 	}
 
+	public FilterProvider getSensitiveDataFilterProvider() {
+		return SENSITIVE_DATA_FILTER_PROVIDER;
+	}
+
 	/**
 	 * Encode JSON
 	 */
@@ -108,7 +162,46 @@ public class JsonUtil {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+			throw newInvalidRequestException(theJson, e);
+		}
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject) {
+		return serializeOrInvalidRequest(theObject, true);
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject, boolean thePrettyPrint) {
+		try {
+			return serialize(theObject, thePrettyPrint);
+		} catch (InternalErrorException e) {
+			throw newInvalidRequestException(theObject, e);
+		}
+	}
+
+	private static InvalidRequestException newInvalidRequestException(Object theObject, Exception theCause)
+			throws InvalidRequestException {
+		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
+	}
+
+	private static class SensitiveDataFilter extends SimpleBeanPropertyFilter {
+
+		@Override
+		protected boolean include(PropertyWriter writer) {
+			return true; // Default include all except explicitly checked and excluded
+		}
+
+		@Override
+		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer)
+				throws Exception {
+			if (include(writer)) {
+				if (!isFieldSensitive(writer)) {
+					super.serializeAsField(pojo, gen, provider, writer);
+				}
+			}
+		}
+
+		private boolean isFieldSensitive(PropertyWriter writer) {
+			return writer.getAnnotation(SensitiveNoDisplay.class) != null;
 		}
 	}
 }

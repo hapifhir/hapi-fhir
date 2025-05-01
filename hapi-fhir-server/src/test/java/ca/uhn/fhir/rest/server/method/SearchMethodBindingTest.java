@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,40 +40,31 @@ public class SearchMethodBindingTest {
 	@Test // fails
 	public void methodShouldNotMatchWhenUnderscoreQueryParameter() throws NoSuchMethodException {
 		assertThat(getBinding("param", String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 		assertThat(getBinding("paramAndTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 		assertThat(getBinding("paramAndUnderscoreTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 	}
 
 	@Test
 	public void methodShouldNotMatchWhenExtraQueryParameter() throws NoSuchMethodException {
 		assertThat(getBinding("param", String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 		assertThat(getBinding("paramAndTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 		assertThat(getBinding("paramAndUnderscoreTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "extra", new String[]{"test"})))).isEqualTo(MethodMatchEnum.NONE);
 	}
 
 	@Test
 	public void methodMatchesOwnParams() throws NoSuchMethodException {
 		assertThat(getBinding("param", String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}))),
-			Matchers.is(MethodMatchEnum.EXACT));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"})))).isEqualTo(MethodMatchEnum.EXACT);
 		assertThat(getBinding("paramAndTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "test", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.EXACT));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "test", new String[]{"test"})))).isEqualTo(MethodMatchEnum.EXACT);
 		assertThat(getBinding("paramAndUnderscoreTest", String.class, String.class).incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_test", new String[]{"test"}))),
-			Matchers.is(MethodMatchEnum.EXACT));
+			mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_test", new String[]{"test"})))).isEqualTo(MethodMatchEnum.EXACT);
 	}
 
 	@Test
@@ -82,11 +72,9 @@ public class SearchMethodBindingTest {
 		SearchMethodBinding binding = getBinding("withChainBlacklist", ReferenceParam.class);
 		ourLog.info("Testing binding: {}", binding);
 		assertThat(binding.incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("refChainBlacklist.badChain", new String[]{"foo"}))),
-			Matchers.is(MethodMatchEnum.NONE));
+			mockSearchRequest(ImmutableMap.of("refChainBlacklist.badChain", new String[]{"foo"})))).isEqualTo(MethodMatchEnum.NONE);
 		assertThat(binding.incomingServerRequestMatchesMethod(
-			mockSearchRequest(ImmutableMap.of("refChainBlacklist.goodChain", new String[]{"foo"}))),
-			Matchers.is(MethodMatchEnum.EXACT));
+			mockSearchRequest(ImmutableMap.of("refChainBlacklist.goodChain", new String[]{"foo"})))).isEqualTo(MethodMatchEnum.EXACT);
 	}
 
 	private SearchMethodBinding getBinding(String name, Class<?>... parameters) throws NoSuchMethodException {

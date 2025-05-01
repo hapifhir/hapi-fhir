@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private final Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<>());
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
+	private int myConnectionTimeToLive = DEFAULT_CONNECTION_TTL;
 	private FhirContext myContext;
 	private final Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers =
 			new HashMap<>();
@@ -89,6 +90,11 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized int getConnectTimeout() {
 		return myConnectTimeout;
+	}
+
+	@Override
+	public synchronized int getConnectionTimeToLive() {
+		return myConnectionTimeToLive;
 	}
 
 	/**
@@ -207,6 +213,12 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized void setConnectTimeout(int theConnectTimeout) {
 		myConnectTimeout = theConnectTimeout;
+		resetHttpClient();
+	}
+
+	@Override
+	public synchronized void setConnectionTimeToLive(int theConnectionTimeToLive) {
+		myConnectionTimeToLive = theConnectionTimeToLive;
 		resetHttpClient();
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -48,6 +47,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -78,6 +78,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnHashValue;
 	private final DbColumn myColumnSystem;
 	private final DbColumn myColumnValue;
+	private final DbColumn myColumnHashIdentity;
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -97,11 +98,22 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	public TokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_TOKEN"));
 		myColumnResId = getTable().addColumn("RES_ID");
+		myColumnHashIdentity = getTable().addColumn("HASH_IDENTITY");
 		myColumnHashSystem = getTable().addColumn("HASH_SYS");
 		myColumnHashSystemAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
 		myColumnHashValue = getTable().addColumn("HASH_VALUE");
 		myColumnSystem = getTable().addColumn("SP_SYSTEM");
 		myColumnValue = getTable().addColumn("SP_VALUE");
+	}
+
+	@Override
+	public DbColumn getColumnHashIdentity() {
+		return myColumnHashIdentity;
+	}
+
+	@VisibleForTesting
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@Override
@@ -245,18 +257,20 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			 * For a token :not search, we look for index rows that have the right identity (i.e. it's the right resource and
 			 * param name) but not the actual provided token value.
 			 */
-
-			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
 			Condition hashIdentityPredicate =
-					BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
-
+					createHashIdentityPredicate(theRequestPartitionId, theResourceName, paramName);
 			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
 			predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, hashValuePredicate);
 
 		} else {
 
 			predicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, true);
+
+			if (myStorageSettings.isIncludeHashIdentityForTokenSearches()) {
+				Condition hashIdentityPredicate =
+						createHashIdentityPredicate(theRequestPartitionId, theResourceName, paramName);
+				predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, predicate);
+			}
 		}
 
 		return predicate;

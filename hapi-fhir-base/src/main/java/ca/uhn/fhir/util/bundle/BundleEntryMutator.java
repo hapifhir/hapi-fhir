@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,5 +68,13 @@ public class BundleEntryMutator {
 	public void setResource(IBaseResource theUpdatedResource) {
 		BaseRuntimeChildDefinition resourceChild = myEntryDefinition.getChildByName("resource");
 		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
+	}
+
+	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneExist");
+		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfNoneExist);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
 	}
 }

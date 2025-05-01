@@ -4,12 +4,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -23,12 +31,18 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.TestUtil;
-import org.hamcrest.Matchers;
+import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -44,16 +58,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -77,14 +90,18 @@ public class SearchNarrowingInterceptorTest {
 	private static List<Resource> ourReturn;
 	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
+	private static String ourLastConditionalUrl;
+
 	private IGenericClient myClient;
 	@Mock
 	private IValidationSupport myValidationSupport;
 	private MySearchNarrowingInterceptor myInterceptor;
+
 	@RegisterExtension
 	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
 		.registerProvider(new DummyObservationResourceProvider())
 		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummyDeviceResourceProvider())
 		.registerProvider(new DummySystemProvider())
 		.withPagingProvider(new FifoMemoryPagingProvider(100));
 
@@ -99,8 +116,11 @@ public class SearchNarrowingInterceptorTest {
 		ourLastPerformerParam = null;
 		ourLastCodeParam = null;
 		ourNextAuthorizedList = null;
+		ourLastConditionalUrl = null;
 
 		myInterceptor = new MySearchNarrowingInterceptor();
+		myInterceptor.setNarrowConditionalUrls(true);
+
 		myRestfulServerExtension.registerInterceptor(myInterceptor);
 
 		myClient = myRestfulServerExtension.getFhirClient();
@@ -144,7 +164,7 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
 		assertEquals(TokenParamModifier.NOT_IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
 		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -166,7 +186,7 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
 		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
 		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -240,11 +260,11 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
 		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
 		assertEquals("http://othervs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(1).size());
 		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getModifier());
 		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -262,7 +282,43 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
-		assertEquals(null, ourLastCodeParam);
+		assertNull(ourLastCodeParam);
+	}
+
+	@Test
+	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .search()
+			 .forResource("Device")
+			 .execute();
+
+		assertEquals("Device.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
+	}
+
+	@Test
+	public void testNarrowCompartment_DevicesByPatientContext_ClientRequestedWithParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123");
+
+		myClient
+			 .search()
+			 .byUrl("Device?patient=Patient/123")
+			 .execute();
+
+		assertEquals("Device.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123");
 	}
 
 	@Test
@@ -280,7 +336,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
 	}
 
 	@Test
@@ -299,7 +355,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertEquals("transaction", ourLastHitMethod);
-		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
+		assertEquals("Patient?_id=" + UrlUtil.escapeUrlParam("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
 	}
 	@Test
 	public void testNarrow_OnlyAppliesToSearches() {
@@ -339,7 +395,7 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
 
 	@Test
@@ -355,7 +411,7 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123");
 	}
 
 	@Test
@@ -375,7 +431,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/456", "Patient/456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/456", "Patient/456");
 	}
 
 	@Test
@@ -395,7 +451,7 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("456", "456"));
+		assertThat(toStrings(ourLastPatientParam)).containsExactly("456", "456");
 	}
 
 	@Test
@@ -413,7 +469,7 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
 		assertNull(ourLastCodeParam);
-		assertThat(toStrings(ourLastSubjectParam), Matchers.contains("Patient/456", "Patient/456"));
+		assertThat(toStrings(ourLastSubjectParam)).containsExactly("Patient/456", "Patient/456");
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
 	}
@@ -536,8 +592,321 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
+		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Patient() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+
+		myClient
+			 .create()
+			 .resource(new Patient().setActive(true))
+			 .conditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.create", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("/Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Patient_Disabled() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+		myInterceptor.setNarrowConditionalUrls(false);
+
+		myClient
+			 .create()
+			 .resource(new Patient().setActive(true))
+			 .conditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.create", ourLastHitMethod);
+		assertEquals("/Patient?active=true", ourLastConditionalUrl);
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Patient_ReturnNull() {
+		ourNextAuthorizedList = null;
+
+		myClient
+			 .create()
+			 .resource(new Patient().setActive(true))
+			 .conditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.create", ourLastHitMethod);
+		assertEquals("/Patient?active=true", ourLastConditionalUrl);
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Observation() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .create()
+			 .resource(new Observation().setStatus(Observation.ObservationStatus.FINAL))
+			 .conditionalByUrl("Observation?status=final")
+			 .execute();
+
+		assertEquals("Observation.create", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("/Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Observation_InTransaction() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionCreateEntry(new Observation().setStatus(Observation.ObservationStatus.FINAL)).conditional("Observation?status=final");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Observation", ourLastBundleRequest.getUrl());
+		assertThat(ourLastBundleRequest.getIfNoneExist()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getIfNoneExist()).contains("status=final");
+		assertThat(ourLastBundleRequest.getIfNoneExist()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalCreate_Observation_InTransaction_Disabled() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+		myInterceptor.setNarrowConditionalUrls(false);
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionCreateEntry(new Observation().setStatus(Observation.ObservationStatus.FINAL)).conditional("Observation?status=final");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Observation", ourLastBundleRequest.getUrl());
+		assertEquals("Observation?status=final", ourLastBundleRequest.getIfNoneExist());
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalUpdate_Patient() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+
+		myClient
+			 .update()
+			 .resource(new Patient().setActive(true))
+			 .conditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.update", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalUpdate_Patient_Disabled() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+		myInterceptor.setNarrowConditionalUrls(false);
+
+		myClient
+			 .update()
+			 .resource(new Patient().setActive(true))
+			 .conditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.update", ourLastHitMethod);
+		assertEquals("Patient?active=true", ourLastConditionalUrl);
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalUpdate_Observation() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .update()
+			 .resource(new Observation().setStatus(Observation.ObservationStatus.FINAL))
+			 .conditionalByUrl("Observation?status=final")
+			 .execute();
+
+		assertEquals("Observation.update", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalUpdate_Observation_InTransaction() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionUpdateEntry(new Observation().setStatus(Observation.ObservationStatus.FINAL)).conditional("Observation?status=final");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalUpdate_Observation_InTransaction_NoConditionalUrl() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionUpdateEntry(new Observation().setStatus(Observation.ObservationStatus.FINAL).setId("Observation/ABC"));
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Observation/ABC", ourLastBundleRequest.getUrl());
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalDelete_Patient() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+
+		myClient
+			 .delete()
+			 .resourceConditionalByUrl("Patient?active=true")
+			 .execute();
+
+		assertEquals("Patient.delete", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalDelete_Observation() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .delete()
+			 .resourceConditionalByUrl("Observation?status=final")
+			 .execute();
+
+		assertEquals("Observation.delete", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalDelete_Observation_InTransaction() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionDeleteConditionalEntry("Observation?status=final");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalPatch_Patient() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addResources("Patient/123", "Patient/456");
+
+		myClient
+			 .patch()
+			 .withFhirPatch(new Parameters())
+			 .conditional(Patient.class)
+			 .whereMap(Map.of("active", List.of("true")))
+			 .execute();
+
+		assertEquals("Patient.patch", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalPatch_Observation() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		myClient
+			 .patch()
+			 .withFhirPatch(new Parameters())
+			 .conditional(Observation.class)
+			 .whereMap(Map.of("status", List.of("final")))
+			 .execute();
+
+		assertEquals("Observation.patch", ourLastHitMethod);
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowCompartment_ConditionalPatch_Observation_InTransaction() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionFhirPatchEntry(new Parameters()).conditional("Observation?status=final");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testTransactionWithNonConditionalDeleteNotModified() {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.addTransactionDeleteEntry("Patient", "ABC");
+
+		myClient
+			 .transaction()
+			 .withBundle(bb.getBundle())
+			 .execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Patient/ABC", ourLastBundleRequest.getUrl());
+	}
+
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
 		List<? extends IQueryParameterOr<? extends IQueryParameterType>> valuesAsQueryTokens = theParams.getValuesAsQueryTokens();
@@ -572,6 +941,7 @@ public class SearchNarrowingInterceptorTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+	@SuppressWarnings("unused")
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -590,8 +960,140 @@ public class SearchNarrowingInterceptorTest {
 			return ourReturn;
 		}
 
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Patient.create";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Patient/123"), true);
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Patient.update";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Patient/123"), true);
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Patient.delete";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Patient/123"), true);
+		}
+
+		@Patch
+		public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+			ourLastHitMethod = "Patient.patch";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Patient/123"), true);
+		}
+
+		@SuppressWarnings("unused")
+		public static class DummyObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<? extends IBaseResource> getResourceType() {
+				return Observation.class;
+			}
+
+
+			@Search()
+			public List<Resource> search(
+				 @OptionalParam(name = "_id") TokenAndListParam theIdParam,
+				 @OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam theSubjectParam,
+				 @OptionalParam(name = Observation.SP_PATIENT) ReferenceAndListParam thePatientParam,
+				 @OptionalParam(name = Observation.SP_PERFORMER) ReferenceAndListParam thePerformerParam,
+				 @OptionalParam(name = Observation.SP_CODE) TokenAndListParam theCodeParam
+			) {
+				ourLastHitMethod = "Observation.search";
+				ourLastIdParam = theIdParam;
+				ourLastSubjectParam = theSubjectParam;
+				ourLastPatientParam = thePatientParam;
+				ourLastPerformerParam = thePerformerParam;
+				ourLastCodeParam = theCodeParam;
+				return ourReturn;
+			}
+
+			@Create
+			public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.create";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Update
+			public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.update";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Delete
+			public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+				ourLastHitMethod = "Observation.delete";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+
+			@Patch
+			public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+				ourLastHitMethod = "Observation.patch";
+				ourLastConditionalUrl = theConditionalUrl;
+				return new MethodOutcome(new IdType("Observation/123"), true);
+			}
+		}
+	}
+	@SuppressWarnings("unused")
+	public static class DummyDeviceResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Device.class;
+		}
+
+
+		@Search()
+		public List<Resource> search(
+			 @OptionalParam(name = "_id") TokenAndListParam theIdParam,
+			 @OptionalParam(name = Device.SP_PATIENT) ReferenceAndListParam thePatientParam
+		) {
+			ourLastHitMethod = "Device.search";
+			ourLastIdParam = theIdParam;
+			ourLastPatientParam = thePatientParam;
+			return ourReturn;
+		}
+
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.create";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.update";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Device.delete";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
+
+		@Patch
+		public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+			ourLastHitMethod = "Device.patch";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Device/123"), true);
+		}
 	}
 
+
+	@SuppressWarnings("unused")
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
 		@Override
@@ -615,6 +1117,34 @@ public class SearchNarrowingInterceptorTest {
 			ourLastPerformerParam = thePerformerParam;
 			ourLastCodeParam = theCodeParam;
 			return ourReturn;
+		}
+
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Observation.create";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Observation/123"), true);
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Observation.update";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Observation/123"), true);
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl) {
+			ourLastHitMethod = "Observation.delete";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Observation/123"), true);
+		}
+
+		@Patch
+		public MethodOutcome patch(@IdParam IIdType theId, @ResourceParam IBaseResource theResource, @ConditionalUrlParam String theConditionalUrl, PatchTypeEnum thePatchType) {
+			ourLastHitMethod = "Observation.patch";
+			ourLastConditionalUrl = theConditionalUrl;
+			return new MethodOutcome(new IdType("Observation/123"), true);
 		}
 
 	}

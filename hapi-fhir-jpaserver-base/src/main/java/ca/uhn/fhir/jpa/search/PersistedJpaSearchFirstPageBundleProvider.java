@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -31,6 +30,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
@@ -52,16 +51,14 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	 */
 	@SuppressWarnings("rawtypes")
 	public PersistedJpaSearchFirstPageBundleProvider(
-			Search theSearch,
 			SearchTask theSearchTask,
 			ISearchBuilder theSearchBuilder,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
-		super(theRequest, theSearch.getUuid());
+		super(theRequest, theSearchTask.getSearch());
 
-		assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
+		assert getSearchEntity().getSearchType() != SearchTypeEnum.HISTORY;
 
-		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;
 		super.setRequestPartitionId(theRequestPartitionId);
@@ -76,16 +73,23 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 		mySearchTask.awaitInitialSync();
 
+		// request 1 more than we need to, in order to know if there are extra values
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex + 1);
 		ourLog.trace("Done fetching search resource PIDs");
+
+		int countOfPids = pids.size();
+
+		int maxSize = Math.min(theToIndex - theFromIndex, countOfPids);
+		thePageBuilder.setTotalRequestedResourcesFetched(countOfPids);
 
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 
+		List<JpaPid> firstBatch = pids.subList(0, maxSize);
 		List<IBaseResource> retVal = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> toResourceList(mySearchBuilder, pids, thePageBuilder));
+				.execute(() -> toResourceList(mySearchBuilder, firstBatch, thePageBuilder));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
@@ -106,12 +110,15 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
-				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, thePageBuilder);
+				ResponsePage.ResponsePageBuilder pageBuilder = new ResponsePage.ResponsePageBuilder();
+				pageBuilder.setBundleProvider(this);
+				List<IBaseResource> remaining = super.getResources((int) fromIndex, theToIndex, pageBuilder);
 				remaining.forEach(t -> {
 					if (!existingIds.contains(t.getIdElement().getValue())) {
 						retVal.add(t);
 					}
 				});
+				thePageBuilder.combineWith(pageBuilder);
 			}
 		}
 		ourLog.trace("Loaded resources to return");

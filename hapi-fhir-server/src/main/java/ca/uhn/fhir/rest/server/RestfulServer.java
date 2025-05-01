@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,13 @@ import ca.uhn.fhir.util.UrlPathTokenizer;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.UnavailableException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -97,13 +104,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.stream.Collectors.toList;
@@ -189,7 +189,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Constructor
 	 */
 	public RestfulServer(FhirContext theCtx) {
-		this(theCtx, new InterceptorService("RestfulServer"));
+		this(theCtx, new InterceptorService());
 	}
 
 	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService) {
@@ -367,6 +367,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				.forEach(t -> t.close());
 		myGlobalBinding.getMethodBindings().forEach(t -> t.close());
 		myServerBinding.getMethodBindings().forEach(t -> t.close());
+
+		myResourceNameToBinding.clear();
+		myGlobalBinding.getMethodBindings().clear();
+		myServerBinding.getMethodBindings().clear();
 	}
 
 	/**
@@ -965,6 +969,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
 		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
 
+		if (myServerConformanceProvider != null) {
+			unregisterProvider(myServerConformanceProvider);
+		}
+
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
 		// passing the server into the constructor. Having that sort
@@ -1030,6 +1038,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		theRequest.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, getServletContext());
 
+		// keep track of any unhandled exceptions in case the exception handler throws another exception
+		Throwable unhandledException = null;
+
 		try {
 
 			/* ***********************************
@@ -1039,7 +1050,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
-			String servletContextPath = IncomingRequestAddressStrategy.determineServletContextPath(theRequest, this);
+			String servletContextPath = myServerAddressStrategy.determineServletContextPath(theRequest, this);
 
 			/*
 			 * Just for debugging..
@@ -1197,6 +1208,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
+			unhandledException = e;
+
 			HookParams handleExceptionParams = new HookParams();
 			handleExceptionParams.add(RequestDetails.class, requestDetails);
 			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
@@ -1208,8 +1221,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			writeExceptionToResponse(theResponse, e);
+			unhandledException = null;
 
 		} catch (Throwable e) {
+
+			unhandledException = e;
 
 			/*
 			 * We have caught an exception during request processing. This might be because a handling method threw
@@ -1277,8 +1293,17 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
+			unhandledException = null;
 
 		} finally {
+
+			if (unhandledException != null) {
+				ourLog.error(
+						Msg.code(2544) + "Exception handling threw an exception.  Initial exception was: {}",
+						unhandledException.getMessage(),
+						unhandledException);
+				unhandledException = null;
+			}
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, requestDetails);
@@ -1317,7 +1342,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
-		theRequestDetails.getResponse().addHeader(Constants.HEADER_REQUEST_ID, theRequestId);
+		String caseSensitiveRequestIdKey = Constants.HEADER_REQUEST_ID;
+		for (String key : theRequestDetails.getHeaders().keySet()) {
+			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)) {
+				caseSensitiveRequestIdKey = key;
+				break;
+			}
+		}
+		theRequestDetails.getResponse().addHeader(caseSensitiveRequestIdKey, theRequestId);
 	}
 
 	/**
@@ -1598,9 +1630,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
+	private String resolveRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
+		if (myTenantIdentificationStrategy != null) {
+			theRequestPath = myTenantIdentificationStrategy.resolveRelativeUrl(theRequestPath, theRequestDetails);
+		}
+		return theRequestPath;
+	}
+
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
-		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);
-		String resourceName = null;
+		String resolvedRequestPath = resolveRequestPath(theRequestDetails, theRequestPath);
+		UrlPathTokenizer tok = new UrlPathTokenizer(resolvedRequestPath);
 
 		if (myTenantIdentificationStrategy != null) {
 			myTenantIdentificationStrategy.extractTenant(tok, theRequestDetails);
@@ -1609,6 +1648,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		IIdType id = null;
 		String operation = null;
 		String compartment = null;
+		String resourceName = null;
 		if (tok.hasMoreTokens()) {
 			resourceName = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(resourceName)) {
@@ -1635,7 +1675,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
 						throw new InvalidRequestException(
-								Msg.code(298) + "Don't know how to handle request path: " + theRequestPath);
+								Msg.code(298) + "Don't know how to handle request path: " + resolvedRequestPath);
 					}
 					id.setParts(null, resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 				} else {
@@ -1644,7 +1684,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			} else if (partIsOperation(nextString)) {
 				if (operation != null) {
 					throw new InvalidRequestException(
-							Msg.code(299) + "URL Path contains two operations: " + theRequestPath);
+							Msg.code(299) + "URL Path contains two operations: " + resolvedRequestPath);
 				}
 				operation = nextString;
 			} else {
@@ -1663,7 +1703,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				secondaryOperation = nextString;
 			} else {
 				throw new InvalidRequestException(Msg.code(300) + "URL path has unexpected token '" + nextString
-						+ "' at the end: " + theRequestPath);
+						+ "' at the end: " + resolvedRequestPath);
 			}
 		}
 
@@ -1967,7 +2007,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		/* perform a 'distinct' in case there are multiple concrete IResourceProviders declared for the same FHIR-Resource. (A concrete IResourceProvider for Patient@Read and a separate concrete for Patient@Search for example */
 		/* perform a 'sort' to provide an easier to read alphabetized list (vs how the different FHIR-resource IResourceProviders happened to be registered */
 		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
-				.map(t -> t.getResourceType().getSimpleName())
+				.map(t ->
+						myFhirContext.getResourceDefinition(t.getResourceType()).getName())
 				.distinct()
 				.sorted()
 				.collect(toList());

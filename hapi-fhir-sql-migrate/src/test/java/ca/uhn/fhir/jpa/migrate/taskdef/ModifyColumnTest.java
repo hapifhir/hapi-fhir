@@ -3,20 +3,26 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
+@SuppressWarnings("SqlDialectInspection")
 public class ModifyColumnTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -41,7 +47,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 250), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(1, task.getExecutedStatements().size());
+		assertThat(task.getExecutedStatements()).hasSize(1);
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -67,7 +73,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 300), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(1, task.getExecutedStatements().size());
+		assertThat(task.getExecutedStatements()).hasSize(1);
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -93,7 +99,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertEquals(0, task.getExecutedStatements().size());
+		assertThat(task.getExecutedStatements()).isEmpty();
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
@@ -232,14 +238,11 @@ public class ModifyColumnTest extends BaseTest {
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Nonnull
 	private JdbcUtils.ColumnType getLongColumnType(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		switch (theTestDatabaseDetails.get().getDriverType()) {
-			case H2_EMBEDDED:
-				return new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 64);
-			case DERBY_EMBEDDED:
-				return new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19);
-			default:
-				throw new UnsupportedOperationException();
-		}
+		return switch (theTestDatabaseDetails.get().getDriverType()) {
+			case H2_EMBEDDED -> new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 64);
+			case DERBY_EMBEDDED -> new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19);
+			default -> throw new UnsupportedOperationException();
+		};
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -258,7 +261,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID", "TEXTCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -270,16 +273,19 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("insert into SOMETABLE (TEXTCOL) values ('HELLO')");
 
 		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		task.addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(ColumnTypeEnum.LONG);
 		task.setNullable(true);
-		task.setFailureAllowed(true);
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
 		assertEquals(ColumnTypeEnum.STRING, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL").getColumnTypeEnum());
 
+		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
+		assertThat(entities).hasSize(1);
+		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_ALLOWED_FAILURE.name());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -343,13 +349,36 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertEquals(1, task.getExecutedStatements().size());
+		assertThat(task.getExecutedStatements()).hasSize(1);
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 10), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
 		getMigrator().migrate();
-
 	}
 
+	@Nested
+	public class SqlFeatures{
+
+		@Test
+		public void testIncreaseColumnSize_onOracleDb_willIncludeColumnSemantic() throws SQLException {
+			// given
+			ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
+			task.setTableName("SOMETABLE");
+			task.setColumnName("SOMECOLUMN");
+			task.setColumnType(ColumnTypeEnum.STRING);
+			task.setColumnLength(200);
+			task.setNullable(true);
+			task.setDriverType(DriverTypeEnum.ORACLE_12C);
+
+			// this is the definition of the column before the migration
+			JdbcUtils.ColumnType columnType = new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 100);
+
+			// when
+			List<String> sqlStringsToExecute = task.generateSql(columnType, true);
+
+			// then
+			assertThat(sqlStringsToExecute.get(0)).isEqualTo("alter table SOMETABLE modify ( SOMECOLUMN varchar2(200 char)  )");
+		}
+	}
 }

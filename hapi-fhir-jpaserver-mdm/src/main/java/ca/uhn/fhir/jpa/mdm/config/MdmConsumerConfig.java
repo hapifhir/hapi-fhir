@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,8 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
@@ -58,8 +57,8 @@ import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
@@ -72,7 +71,6 @@ import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.validation.IResourceLoader;
@@ -83,8 +81,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({MdmCommonConfig.class, MdmBatch2Config.class})
+@Import({MdmCommonConfig.class, MdmSurvivorshipConfig.class, MdmBatch2Config.class})
 public class MdmConsumerConfig {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Bean
@@ -93,12 +92,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IMdmSurvivorshipService mdmSurvivorshipService() {
-		return new MdmSurvivorshipSvcImpl();
-	}
-
-	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader(
+	public MdmQueueConsumerLoader mdmQueueConsumerLoader(
 			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
 	}
@@ -130,8 +124,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmResourceDaoSvc mdmResourceDaoSvc() {
-		return new MdmResourceDaoSvc();
+	IMdmResourceDaoSvc mdmResourceDaoSvc() {
+		return new MdmResourceDaoSvcImpl();
 	}
 
 	@Bean
@@ -140,17 +134,12 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	GoldenResourceHelper goldenResourceHelper(FhirContext theFhirContext) {
-		return new GoldenResourceHelper(theFhirContext);
-	}
-
-	@Bean
 	MessageHelper messageHelper(IMdmSettings theMdmSettings, FhirContext theFhirContext) {
 		return new MessageHelper(theMdmSettings, theFhirContext);
 	}
 
 	@Bean
-	MdmSubscriptionLoader mdmSubscriptionLoader() {
+	public MdmSubscriptionLoader mdmSubscriptionLoader() {
 		return new MdmSubscriptionLoader();
 	}
 

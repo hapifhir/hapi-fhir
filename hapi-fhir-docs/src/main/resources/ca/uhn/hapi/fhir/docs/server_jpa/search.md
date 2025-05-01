@@ -22,6 +22,12 @@ Searching on Location.Position using `near` currently uses a box search, not a r
 
 The special `_filter` is only partially implemented.
 
+### _pid
+
+The JPA server implements a non-standard special `_pid` which matches/sorts on the raw internal database id.
+This sort is useful for imposing tie-breaking sort order in an efficient way.
+
+Note that this is an internal feature that may change or be removed in the future. Use with caution.
 
 <a name="uplifted-refchains"/>
 
@@ -232,3 +238,7 @@ In order to improve sorting performance when chained sorts are needed, an [Uplif
 # _include and _revinclude order
 
 By default, all _revincludes will be performed first and then all _includes are performed afterwards.  However, if any _revinclude parameters are modified with :iterate (or :recurse for earlier versions of FHIR) then all _include parameters will be evaluated first.
+
+# Custom Search Parameters
+
+HAPI FHIR has the ability to index and use custom search parameters, including parameters which enforce uniqueness, parametrs which index combinations of parameters, and parameters which are indexed but not used for searches until they are ready. See [Custom Search Parameters](https://smilecdr.com/docs/fhir_standard/fhir_search_custom_search_parameters.html) for more information.

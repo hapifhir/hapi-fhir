@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -36,13 +36,13 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.2.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
@@ -60,7 +60,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->
 		<profile>
@@ -103,24 +102,19 @@
 			</build>
 		</profile>
 		<profile>
-			<id>CI</id>
+			<id>CHECKSTYLE</id>
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>${maven_checkstyle_version}</version>
 						<configuration>
 							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
-							<sourceDirectories>
-								<!--scan base project directory to include all modules-->
-								<!--suppress UnresolvedMavenProperty -->
-								<directory>${maven.multiModuleProjectDirectory}/</directory>
-							</sourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<!--suppress UnresolvedMavenProperty -->
-							<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
 							<!--suppress UnresolvedMavenProperty -->
-							<suppressionsLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
 							<inputEncoding>UTF-8</inputEncoding>
 							<consoleOutput>true</consoleOutput>
 						</configuration>

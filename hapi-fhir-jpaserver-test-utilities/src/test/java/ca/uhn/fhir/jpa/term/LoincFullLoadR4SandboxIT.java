@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -24,6 +23,9 @@ import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -33,7 +35,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.dialect.PostgreSQL10Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -52,9 +54,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,9 +79,9 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASK_AT_ORD
 import static ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler.ASSOCIATED_OBSERVATIONS_PROP_NAME;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -291,8 +290,8 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 	private String getRecordCode(Map<String, String> tcRecordMap) {
 		String recordCode = tcRecordMap.get("LOINC_NUM");
-		assertNotNull(recordCode, "Record without LOINC_NUM filed ???");
-		assertFalse(recordCode.isEmpty(), "Record with empty LOINC_NUM filed ???");
+		assertThat(recordCode).as("Record without LOINC_NUM filed ???").isNotNull();
+		assertThat(recordCode.isEmpty()).as("Record with empty LOINC_NUM filed ???").isFalse();
 		return recordCode;
 	}
 
@@ -367,7 +366,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 												  HashMap<String, Set<Pair<String, String>>> theTcConceptPropertyMap) {
 
 		// make sure we are good so far and both entries to compare are for same TermConcept code
-		assertEquals(theTermConcept.getCode(), theRecordPropsMap.get("LOINC_NUM"), "theTcCode and record key (LOINC_NUM) must match");
+		assertThat(theRecordPropsMap.get("LOINC_NUM")).as("theTcCode and record key (LOINC_NUM) must match").isEqualTo(theTermConcept.getCode());
 
 		for (Map.Entry<String, String> recordEntry : theRecordPropsMap.entrySet()) {
 
@@ -395,8 +394,8 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 				continue;
 			}
 
-			assertEquals(1, tcPropsValueDisplay.size(), "TermConcept with code: {} was expected to have 1 property " +
-				"with key: " + recordEntry.getKey() + " and value: " + recordEntry.getValue() + " but has: " + tcPropsValueDisplay.size() + " instead.");
+			assertThat(tcPropsValueDisplay.size()).as("TermConcept with code: {} was expected to have 1 property " +
+				"with key: " + recordEntry.getKey() + " and value: " + recordEntry.getValue() + " but has: " + tcPropsValueDisplay.size() + " instead.").isEqualTo(1);
 
 			String tcPropValue = tcPropsValueDisplay.iterator().next().getLeft();
 			if (!recordEntry.getValue().equals(tcPropValue)) {
@@ -513,9 +512,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 				continue;
 			}
 			String code = nextRecord.get(LoincMapToHandler.CONCEPT_CODE_PROP_NAME);
-			assertNotNull(code, "MapTo record with blank '" + LoincMapToHandler.CONCEPT_CODE_PROP_NAME + "' field: " + nextRecord);
+			assertThat(code).as("MapTo record with blank '" + LoincMapToHandler.CONCEPT_CODE_PROP_NAME + "' field: " + nextRecord).isNotNull();
 			String toValue = nextRecord.get(LoincMapToHandler.MAP_TO_PROP_NAME);
-			assertNotNull(code, "MapTo record with blank '" + LoincMapToHandler.MAP_TO_PROP_NAME + "' field: " + nextRecord);
+			assertThat(code).as("MapTo record with blank '" + LoincMapToHandler.MAP_TO_PROP_NAME + "' field: " + nextRecord).isNotNull();
 
 			records.put(code, Pair.of(toValue, nextRecord.get(LoincMapToHandler.DISPLAY_PROP_NAME)));
 			count++;
@@ -544,7 +543,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		try (ZipFile zipFile = new ZipFile(ResourceUtils.getFile(theFilePath))) {
 
 			ZipEntry zipEntry = zipFile.getEntry(theZipFileEntryPath);
-			assertNotNull(zipEntry, "Couldn't find file: " + theZipFileEntryPath + " inside zip file: " + theFilePath);
+			assertThat(zipEntry).as("Couldn't find file: " + theZipFileEntryPath + " inside zip file: " + theFilePath).isNotNull();
 			return IOUtils.toString(zipFile.getInputStream(zipEntry), StandardCharsets.UTF_8);
 
 		} catch (IOException e) {
@@ -599,20 +598,17 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	 */
 	private void queryForSpecificValueSet() {
 		runInTransaction(() -> {
-			Query q = myEntityManager.createQuery("from ForcedId where myForcedId like 'LG8749-6%'");
-			@SuppressWarnings("unchecked")
-			List<ForcedId> fIds = (List<ForcedId>) q.getResultList();
-			long res_id = fIds.stream().map(ForcedId::getId).sorted().findFirst().orElse(fail("ForcedId not found"));
-
-			Query q1 = myEntityManager.createQuery("from ResourceTable where id = " + res_id);
+			Query q1 = myEntityManager
+				.createQuery("from ResourceTable where myFhirId like :fhir_id")
+				.setParameter("fhir_id", "LG8749-6%");
 			@SuppressWarnings("unchecked")
 			List<ResourceTable> vsList = (List<ResourceTable>) q1.getResultList();
 			assertEquals(1, vsList.size());
-			long vsLongId = vsList.get(0).getId();
+			long vsLongId = vsList.get(0).getId().getId();
 			ValueSet vs = (ValueSet) myJpaStorageResourceParser.toResource(vsList.get(0), false);
 			assertNotNull(vs);
 
-			Query q2 = myEntityManager.createQuery("from TermValueSet where myResource = " + vsLongId);
+			Query q2 = myEntityManager.createQuery("from TermValueSet where myResourcePid = " + vsLongId);
 			@SuppressWarnings("unchecked")
 			List<TermValueSet> tvsList = (List<TermValueSet>) q2.getResultList();
 			assertEquals(1, tvsList.size());
@@ -710,7 +706,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		@Override
 		public String getHibernateDialect() {
 			if (USE_REAL_DB) {
-				return PostgreSQL10Dialect.class.getName();
+				return PostgreSQLDialect.class.getName();
 			}
 
 			return super.getHibernateDialect();

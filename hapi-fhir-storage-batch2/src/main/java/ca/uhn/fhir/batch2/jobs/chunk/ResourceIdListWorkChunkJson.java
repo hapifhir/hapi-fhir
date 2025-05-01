@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -62,7 +63,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		return myRequestPartitionId;
 	}
 
-	private List<TypedPidJson> getTypedPids() {
+	public List<TypedPidJson> getTypedPids() {
 		if (myTypedPids == null) {
 			myTypedPids = new ArrayList<>();
 		}
@@ -73,17 +74,20 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("ids", myTypedPids)
+				.append("requestPartitionId", myRequestPartitionId)
 				.toString();
 	}
 
-	public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
+	public <T extends IResourcePersistentId<?>> List<T> getResourcePersistentIds(
+			IIdHelperService<T> theIdHelperService) {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		return myTypedPids.stream()
 				.map(t -> {
-					T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
+					T retval = theIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), t.getResourceType());
 					return retval;
 				})
 				.collect(Collectors.toList());
@@ -93,8 +97,9 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		return getTypedPids().size();
 	}
 
-	public void addTypedPid(String theResourceType, Long thePid) {
-		getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
+	@VisibleForTesting
+	public void addTypedPidWithNullPartitionForUnitTest(String theResourceType, Long thePid) {
+		getTypedPids().add(new TypedPidJson(theResourceType, null, thePid.toString()));
 	}
 
 	public String getResourceType(int index) {

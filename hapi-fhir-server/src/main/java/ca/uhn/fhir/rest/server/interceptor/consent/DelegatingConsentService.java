@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,12 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
+	public boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return myTarget.shouldProcessCanSeeResource(theRequestDetails, theContextServices);
+	}
+
+	@Override
 	public ConsentOutcome canSeeResource(
 			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return myTarget.canSeeResource(theRequestDetails, theResource, theContextServices);
@@ -60,6 +66,10 @@ public class DelegatingConsentService implements IConsentService {
 			BaseServerResponseException theException,
 			IConsentContextServices theContextServices) {
 		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
+	}
+
+	public IConsentService getTarget() {
+		return myTarget;
 	}
 
 	public void setTarget(IConsentService theTarget) {

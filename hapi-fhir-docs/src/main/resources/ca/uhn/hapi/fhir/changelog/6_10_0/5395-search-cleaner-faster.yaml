@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 5395
+title: "The background activity that clears stale search results now has higher throughput.
+  Busy servers should no longer accumulate dead stale search results."

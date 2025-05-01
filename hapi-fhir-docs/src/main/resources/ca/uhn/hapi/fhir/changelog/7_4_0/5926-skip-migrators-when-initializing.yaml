@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5926
+title: "A regression in HAPI FHIR 6.4.0 meant that ther JPA server schema migrator ran all tasks
+   even when the database was initially empty and the schema was being initialized by script. 
+   This did not produce any incorrect results, but did impact the amount of time taken to initialize
+   an empty database. This has been corrected."

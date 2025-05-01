@@ -6,9 +6,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 
@@ -23,7 +21,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertThat(shouldBeProcessed, is(equalTo(false)));
+		assertEquals(false, shouldBeProcessed);
 	}
 
 	@Test
@@ -34,6 +32,6 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertThat(shouldBeProcessed, is(equalTo(true)));
+		assertEquals(true, shouldBeProcessed);
 	}
 }

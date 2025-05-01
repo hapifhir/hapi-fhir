@@ -6,12 +6,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.SearchParameter;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.*;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 

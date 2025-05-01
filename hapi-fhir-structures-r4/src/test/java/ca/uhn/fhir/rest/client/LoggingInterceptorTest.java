@@ -5,20 +5,19 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +39,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("checkstyle:NoPrintln")
 public class LoggingInterceptorTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static int ourPort;
-	private static Server ourServer;
 	private Logger myLoggerRoot;
 	private Appender<ILoggingEvent> myMockAppender;
+
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterEach
 	public void after() {
@@ -70,8 +78,7 @@ public class LoggingInterceptorTest {
 
 	@Test
 	public void testLoggerNonVerbose() {
-		System.out.println("Starting testLogger");
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl());
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(false);
@@ -87,7 +94,7 @@ public class LoggingInterceptorTest {
 				System.out.println("** Got Message: " + formattedMessage);
 				System.out.flush();
 				return
-					formattedMessage.contains("Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1") ||
+					formattedMessage.contains("Client request: GET " + ourServer.getBaseUrl() + "/Patient/1 HTTP/1.1") ||
 					formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1) in ");
 			}
 		}));
@@ -96,13 +103,13 @@ public class LoggingInterceptorTest {
 		@Test
 	public void testLoggerVerbose() {
 		System.out.println("Starting testLogger");
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl());
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -117,7 +124,7 @@ public class LoggingInterceptorTest {
 		client.unregisterInterceptor(interceptor);
 		
 		patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -132,7 +139,7 @@ public class LoggingInterceptorTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(IRestfulClientFactory.DEFAULT_SERVER_VALIDATION_MODE);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -146,20 +153,6 @@ public class LoggingInterceptorTest {
 		configurator.setContext(context);
 		context.reset();
 		configurator.doConfigure(conf);
-
-		ourServer = new Server(0);
-
-		DummyProvider patientProvider = new DummyProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}

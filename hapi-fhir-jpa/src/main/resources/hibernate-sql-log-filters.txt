@@ -1,0 +1,19 @@
+##############################################################################################
+# Filters suppress log statement according to prefix when:
+#   _ stack: there is an entry in stack trace which class name starts with filter string
+#   _ sw:    log statement starts with filter string
+#   _ frag:  log statement contains filter string
+#
+# To add a filter extend BaseSqlLoggerFilterImpl.
+#
+##############################################################################################
+# stack: ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl
+# stack: ca.uhn.fhir.jpa.subscription.ResourceModifiedMessagePersistenceSvcImpl
+# stack: ca.uhn.fhir.jpa.term.TermReindexingSvcImpl
+# stack: ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl
+# stack: ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl
+# stack: ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl
+# stack: ca.uhn.fhir.jpa.term.TermReadSvcImpl
+# stack: ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl
+# stack: ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl
+# stack: ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl

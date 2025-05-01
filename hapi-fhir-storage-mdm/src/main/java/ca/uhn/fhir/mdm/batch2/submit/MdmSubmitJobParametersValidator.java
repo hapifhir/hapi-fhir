@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class MdmSubmitJobParametersValidator implements IJobParametersValidator<MdmSubmitJobParameters> {
 
@@ -54,25 +54,25 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 			String resourceType = getResourceTypeFromUrl(url);
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resourceType);
 			validateTypeIsUsedByMdm(errorMsgs, resourceType);
-			validateAllSearchParametersApplyToResourceType(errorMsgs, partitionedUrl, resourceType, resourceDefinition);
+			validateAllSearchParametersApplyToResourceType(errorMsgs, url, resourceType, resourceDefinition);
 		}
 		return errorMsgs;
 	}
 
 	private void validateAllSearchParametersApplyToResourceType(
-			List<String> errorMsgs,
-			PartitionedUrl partitionedUrl,
-			String resourceType,
+			List<String> theErrorMessages,
+			String theUrl,
+			String theResourceType,
 			RuntimeResourceDefinition resourceDefinition) {
 		try {
-			myMatchUrlService.translateMatchUrl(partitionedUrl.getUrl(), resourceDefinition);
+			myMatchUrlService.translateMatchUrl(theUrl, resourceDefinition);
 		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
 			String errorMsg = String.format(
 					"Search parameter %s is not recognized for resource type %s. Source error is %s",
-					e.getParamName(), resourceType, e.getMessage());
-			errorMsgs.add(errorMsg);
+					e.getParamName(), theResourceType, e.getMessage());
+			theErrorMessages.add(errorMsg);
 		} catch (InvalidRequestException e) {
-			errorMsgs.add("Invalid request detected: " + e.getMessage());
+			theErrorMessages.add("Invalid request detected: " + e.getMessage());
 		}
 	}
 

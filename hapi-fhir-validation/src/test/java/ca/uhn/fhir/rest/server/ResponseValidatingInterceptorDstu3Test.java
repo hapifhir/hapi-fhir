@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -12,7 +13,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -22,45 +24,41 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-public class ResponseValidatingInterceptorDstu3Test {
+public class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlineMocks {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
 	public static IBaseResource myReturnResource;
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private ResponseValidatingInterceptor myInterceptor;
+
+	@RegisterExtension
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new PatientProvider())
+		.setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
 		myReturnResource = null;
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
+		ourServer.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new ResponseValidatingInterceptor();
 		// myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -68,7 +66,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		// myInterceptor.setResponseHeaderName("X-RESP");
 		// myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 
-		ourServlet.registerInterceptor(myInterceptor);
+		ourServer.registerInterceptor(myInterceptor);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,7 +86,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -98,7 +96,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,7 +116,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -128,7 +126,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -148,7 +146,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -158,7 +156,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"FOO\"/>"));
+		assertThat(responseContent).contains("<diagnostics value=\"FOO\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -178,7 +176,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -188,7 +186,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 
@@ -200,14 +198,14 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		HttpDelete httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/123");
+		HttpDelete httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/123");
 
 		CloseableHttpResponse status = ourClient.execute(httpDelete);
 		try {
 			ourLog.info("Response was:\n{}", status);
 
 			assertEquals(204, status.getStatusLine().getStatusCode());
-			assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+			assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -228,7 +226,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		{
 			HttpResponse status = ourClient.execute(httpPost);
@@ -240,8 +238,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 			ourLog.trace("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).endsWith("...");
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).startsWith("{\"resourceType\":\"OperationOutcome\"");
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
@@ -254,8 +252,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 			ourLog.trace("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
-			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).endsWith("...");
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue()).startsWith("{\"resourceType\":\"OperationOutcome\"");
 		}
 	}
 
@@ -267,7 +265,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -278,8 +276,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (Matchers.containsString(
-			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+		assertThat(status.toString().contains(
+			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}"));
 	}
 
 	/**
@@ -293,7 +291,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -304,7 +302,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
+		assertThat(responseContent).contains("<severity value=\"error\"/>");
 	}
 
 	@Test
@@ -314,7 +312,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -325,7 +323,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -338,7 +336,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -349,7 +347,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Response-Validation: NO ISSUES")));
+		assertThat(status.toString().contains("X-FHIR-Response-Validation: NO ISSUES"));
 	}
 
 	@Test
@@ -364,7 +362,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -375,7 +373,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
+		assertThat(status.toString()).contains("X-FHIR-Response-Validation");
 	}
 
 	/**
@@ -389,7 +387,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -400,7 +398,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
+		assertThat(responseContent).contains("<severity value=\"error\"/>");
 	}
 
 	@Test
@@ -410,7 +408,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient?foo=bar");
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -421,7 +419,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -431,7 +429,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addExcludeOperationType(RestOperationTypeEnum.METADATA);
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -441,7 +439,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
 	}
 
 	@Test
@@ -451,7 +449,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -461,8 +459,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", status);
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), (Matchers.containsString("X-FHIR-Response-Validation")));
+		assertThat(status.getStatusLine().getStatusCode()).as(responseContent).isEqualTo(200);
+		assertThat(status.toString().contains("X-FHIR-Response-Validation"));
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -489,32 +487,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 }

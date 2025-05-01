@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -54,10 +53,10 @@ import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
@@ -68,7 +67,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -96,7 +94,6 @@ public class SearchTask implements Callable<Void> {
 	protected final FhirContext myContext;
 	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final SearchParameterMap myParams;
-	private final IDao myCallingDao;
 	private final String myResourceType;
 	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
 	private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
@@ -114,6 +111,7 @@ public class SearchTask implements Callable<Void> {
 	private final JpaStorageSettings myStorageSettings;
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final IPagingProvider myPagingProvider;
+	private final IInterceptorBroadcaster myCompositeBroadcaster;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -121,6 +119,9 @@ public class SearchTask implements Callable<Void> {
 	private int myCountBlockedThisPass = 0;
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
+	// The max number of results that we request from the search
+	// Note that this is set using the configured pre-fetch thresholds, maximum page size, and/or the client provided
+	// _count parameter
 	private Integer myMaxResultsToFetch;
 
 	/**
@@ -150,7 +151,6 @@ public class SearchTask implements Callable<Void> {
 		// values
 		myOnRemove = theCreationParams.OnRemove;
 		mySearch = theCreationParams.Search;
-		myCallingDao = theCreationParams.CallingDao;
 		myParams = theCreationParams.Params;
 		myResourceType = theCreationParams.ResourceType;
 		myRequest = theCreationParams.Request;
@@ -159,9 +159,11 @@ public class SearchTask implements Callable<Void> {
 		myLoadingThrottleForUnitTests = theCreationParams.getLoadingThrottleForUnitTests();
 
 		mySearchRuntimeDetails = new SearchRuntimeDetails(myRequest, mySearch.getUuid());
-		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
+		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myContext));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+		myCompositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
 	}
 
 	protected RequestPartitionId getRequestPartitionId() {
@@ -204,7 +206,7 @@ public class SearchTask implements Callable<Void> {
 	private ISearchBuilder newSearchBuilder() {
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(myResourceType).getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(myCallingDao, myResourceType, resourceTypeClass);
+		return mySearchBuilderFactory.newSearchBuilder(myResourceType, resourceTypeClass);
 	}
 
 	@Nonnull
@@ -281,7 +283,7 @@ public class SearchTask implements Callable<Void> {
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
 				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> doSaveSearch());
+				.execute(this::doSaveSearch);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -302,14 +304,13 @@ public class SearchTask implements Callable<Void> {
 					// the user has a chance to know that they were in the results
 					if (mySearchRuntimeDetails.getRequestDetails() != null && !unsyncedPids.isEmpty()) {
 						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
+								new JpaPreResourceAccessDetails(unsyncedPids, this::newSearchBuilder);
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, mySearchRuntimeDetails.getRequestDetails())
 								.addIfMatchesType(
 										ServletRequestDetails.class, mySearchRuntimeDetails.getRequestDetails());
-						CompositeInterceptorBroadcaster.doCallHooks(
-								myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 						for (int i = unsyncedPids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -447,8 +448,7 @@ public class SearchTask implements Callable<Void> {
 			myTxService
 					.withRequest(myRequest)
 					.withRequestPartitionId(myRequestPartitionId)
-					.withIsolation(Isolation.READ_COMMITTED)
-					.execute(() -> doSearch());
+					.execute(this::doSearch);
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
@@ -456,15 +456,13 @@ public class SearchTask implements Callable<Void> {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 			} else {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 			}
 
 			ourLog.trace(
@@ -518,8 +516,7 @@ public class SearchTask implements Callable<Void> {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
+			myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 			saveSearch();
 			span.captureException(t);
@@ -599,12 +596,20 @@ public class SearchTask implements Callable<Void> {
 
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
+				/*
+				 * If we're past the last prefetch threshold then
+				 * we're potentially fetching unlimited amounts of data.
+				 * We'll move responsibility for deduplication to the database in this case
+				 * so that we don't run the risk of blowing out the memory
+				 * in the app server
+				 */
+				sb.setDeduplicateInDatabase(true);
 			} else {
 				// we want at least 1 more than our requested amount
 				// so we know that there are other results
 				// (in case we get the exact amount back)
-				myMaxResultsToFetch = Math.max(next, minWanted);
-				sb.setMaxResultsToFetch(myMaxResultsToFetch + 1);
+				myMaxResultsToFetch = Math.max(next, minWanted) + 1;
+				sb.setMaxResultsToFetch(myMaxResultsToFetch);
 			}
 
 			if (iter.hasNext()) {

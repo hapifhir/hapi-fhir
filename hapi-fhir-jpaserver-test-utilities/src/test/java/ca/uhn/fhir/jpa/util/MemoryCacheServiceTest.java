@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -24,10 +25,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -54,7 +54,7 @@ class MemoryCacheServiceTest {
 			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
-		assertThat(retVal, nullValue());
+		assertNull(retVal);
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
 		tagDef.setVersion(version);
@@ -62,7 +62,7 @@ class MemoryCacheServiceTest {
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
-		assertThat(retVal, equalTo(tagDef));
+		assertEquals(tagDef, retVal);
 	}
 
 	@Nested
@@ -233,9 +233,15 @@ class MemoryCacheServiceTest {
 			}
 
 			void assertNotDone() {
-				assertFalse(future.isDone(), "job " + myValue + " not done");
+				assertThat(future.isDone()).as("job " + myValue + " not done").isFalse();
 			}
 		}
+	}
+
+	@Test
+	public void testToString() {
+		String actual = new MemoryCacheService.ForcedIdCacheKey("Patient", "12", RequestPartitionId.forPartitionIdAndName(123, "Some partition", null)).toString();
+		assertEquals("MemoryCacheService.ForcedIdCacheKey[resType=Patient,resId=12,partId=[123]]", actual);
 	}
 
 

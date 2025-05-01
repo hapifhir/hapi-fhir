@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class MdmInflateAndSubmitResourcesStep
 		implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {

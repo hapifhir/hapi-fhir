@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -70,25 +68,25 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 			.count(10)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009");
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019");
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029");
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039");
 	}
 
 	@Test
@@ -118,9 +116,9 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 			.offset(0)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009");
 		assertThat(found.getLink().stream().filter(l -> l.getRelation().equals("next")).map(l -> l.getUrl()).findAny()
-			.orElseThrow(() -> new IllegalStateException("No next page link")).contains("_offset=10"), is(true));
+			.orElseThrow(() -> new IllegalStateException("No next page link")).contains("_offset=10")).isEqualTo(true);
 
 		myCaptureQueriesListener.clear();
 		found = myClient
@@ -128,19 +126,19 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 			.next(found)
 			.execute();
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019");
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A020", "Patient/A021", "Patient/A022", "Patient/A023", "Patient/A024", "Patient/A025", "Patient/A026", "Patient/A027", "Patient/A028", "Patient/A029");
 
 		found = myClient
 			.loadPage()
 			.next(found)
 			.execute();
-		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039"));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly("Patient/A030", "Patient/A031", "Patient/A032", "Patient/A033", "Patient/A034", "Patient/A035", "Patient/A036", "Patient/A037", "Patient/A038", "Patient/A039");
 	}
 
 

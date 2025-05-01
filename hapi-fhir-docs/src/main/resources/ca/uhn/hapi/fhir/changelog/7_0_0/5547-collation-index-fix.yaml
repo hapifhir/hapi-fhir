@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5547
+title: "The addition of the indexes `idx_sp_uri_hash_identity_pattern_ops` and `idx_sp_string_hash_nrm_pattern_ops` could occasionally timeout during migration in Postgresql on large databases, leaving the migration table in a failed state, and Smile CDR unable to boot. 
+Now existence of the index is checked before attempting to add it again."

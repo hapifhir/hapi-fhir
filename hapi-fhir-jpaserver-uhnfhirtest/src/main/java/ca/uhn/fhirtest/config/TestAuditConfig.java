@@ -6,12 +6,15 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManagerFactory;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
@@ -28,8 +31,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
@@ -69,6 +70,12 @@ public class TestAuditConfig {
 		return retVal;
 	}
 
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
+		return retVal;
+	}
+
 	@Bean(name = "myPersistenceDataSourceR4")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
@@ -102,9 +109,11 @@ public class TestAuditConfig {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
+			FhirContext theFhirContext,
+			JpaStorageSettings theStorageSettings) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+				theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaAudit");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -120,7 +129,7 @@ public class TestAuditConfig {
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
-		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		extraProperties.put("hibernate.hbm2ddl.auto", "none");
 		extraProperties.put("hibernate.jdbc.batch_size", "20");
 		extraProperties.put("hibernate.cache.use_query_cache", "false");
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");

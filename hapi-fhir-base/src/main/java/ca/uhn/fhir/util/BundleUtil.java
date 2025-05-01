@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -35,15 +37,20 @@ import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -54,6 +61,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
 
@@ -61,14 +70,24 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+
+	public static final String DIFFERENT_LINK_ERROR_MSG =
+			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
 	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
 
-	public static final String DIFFERENT_LINK_ERROR_MSG =
-			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	/**
+	 * Non instantiable
+	 */
+	private BundleUtil() {
+		// nothing
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -148,7 +167,42 @@ public class BundleUtil {
 		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, false);
 	}
 
+	/**
+	 * Returns a collection of Pairs, one for each entry in the bundle. Each pair will contain
+	 * the values of Bundle.entry.fullUrl, and Bundle.entry.resource respectively. Nulls
+	 * are possible in either or both values in the Pair.
+	 *
+	 * @since 7.0.0
+	 */
 	@SuppressWarnings("unchecked")
+	public static List<Pair<String, IBaseResource>> getBundleEntryFullUrlsAndResources(
+			FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
+
+		BaseRuntimeChildDefinition urlChild = entryChildElem.getChildByName("fullUrl");
+
+		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
+		for (IBase nextEntry : entries) {
+
+			String fullUrl = urlChild.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+					.orElse(null);
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
+
+			retVal.add(Pair.of(fullUrl, resource));
+		}
+
+		return retVal;
+	}
+
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
 			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -168,19 +222,15 @@ public class BundleUtil {
 		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
 		for (IBase nextEntry : entries) {
 
-			String url = null;
-			IBaseResource resource = null;
+			String url = requestChild
+					.getAccessor()
+					.getFirstValueOrNull(nextEntry)
+					.flatMap(e -> urlChild.getAccessor().getFirstValueOrNull(e))
+					.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+					.orElse(null);
 
-			for (IBase nextEntryValue : requestChild.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrlValue : urlChild.getAccessor().getValues(nextEntryValue)) {
-					url = ((IPrimitiveType<String>) nextUrlValue).getValue();
-				}
-			}
-
-			// Should return 0..1 only
-			for (IBase nextValue : resourceChild.getAccessor().getValues(nextEntry)) {
-				resource = (IBaseResource) nextValue;
-			}
+			IBaseResource resource = (IBaseResource)
+					resourceChild.getAccessor().getFirstValueOrNull(nextEntry).orElse(null);
 
 			retVal.add(Pair.of(url, resource));
 		}
@@ -197,6 +247,14 @@ public class BundleUtil {
 			return typeElement.getValueAsString();
 		}
 		return null;
+	}
+
+	public static BundleTypeEnum getBundleTypeEnum(FhirContext theContext, IBaseBundle theBundle) {
+		String bundleTypeCode = BundleUtil.getBundleType(theContext, theBundle);
+		if (isBlank(bundleTypeCode)) {
+			return null;
+		}
+		return BundleTypeEnum.forCode(bundleTypeCode);
 	}
 
 	public static void setBundleType(FhirContext theContext, IBaseBundle theBundle, String theType) {
@@ -243,10 +301,6 @@ public class BundleUtil {
 		return entryListAccumulator.getList();
 	}
 
-	static int WHITE = 1;
-	static int GRAY = 2;
-	static int BLACK = 3;
-
 	/**
 	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
 	 * 1. Deletes
@@ -261,7 +315,7 @@ public class BundleUtil {
 	 * this function will throw an IllegalStateException.
 	 *
 	 * @param theContext The FhirContext.
-	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
+	 * @param theBundle  The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle)
 			throws IllegalStateException {
@@ -292,6 +346,66 @@ public class BundleUtil {
 		// Blow away the entries and reset them in the right order.
 		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
+	}
+
+	/**
+	 * Converts a Bundle containing resources into a FHIR transaction which
+	 * creates/updates the resources. This method does not modify the original
+	 * bundle, but returns a new copy.
+	 * <p>
+	 * This method is mostly intended for test scenarios where you have a Bundle
+	 * containing search results or other sourced resources, and want to upload
+	 * these resources to a server using a single FHIR transaction.
+	 * </p>
+	 * <p>
+	 * The Bundle is converted using the following logic:
+	 * <ul>
+	 *     <li>Bundle.type is changed to <code>transaction</code></li>
+	 *     <li>Bundle.request.method is changed to <code>PUT</code></li>
+	 *     <li>Bundle.request.url is changed to <code>[resourceType]/[id]</code></li>
+	 *     <li>Bundle.fullUrl is changed to <code>[resourceType]/[id]</code></li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param theContext         The FhirContext to use with the bundle
+	 * @param theBundle          The Bundle to modify. All resources in the Bundle should have an ID.
+	 * @param thePrefixIdsOrNull If not <code>null</code>, all resource IDs and all references in the Bundle will be
+	 *                           modified to such that their IDs contain the given prefix. For example, for a value
+	 *                           of "A", the resource "Patient/123" will be changed to be "Patient/A123". If set to
+	 *                           <code>null</code>, resource IDs are unchanged.
+	 * @since 7.4.0
+	 */
+	public static <T extends IBaseBundle> T convertBundleIntoTransaction(
+			@Nonnull FhirContext theContext, @Nonnull T theBundle, @Nullable String thePrefixIdsOrNull) {
+		String prefix = defaultString(thePrefixIdsOrNull);
+
+		BundleBuilder bb = new BundleBuilder(theContext);
+
+		FhirTerser terser = theContext.newTerser();
+		List<IBase> entries = terser.getValues(theBundle, "Bundle.entry");
+		for (var entry : entries) {
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
+			if (resource != null) {
+				Validate.isTrue(resource.getIdElement().hasIdPart(), "Resource in bundle has no ID");
+				String newId = theContext.getResourceType(resource) + "/" + prefix
+						+ resource.getIdElement().getIdPart();
+
+				IBaseResource resourceClone = terser.clone(resource);
+				resourceClone.setId(newId);
+
+				if (isNotBlank(prefix)) {
+					for (var ref : terser.getAllResourceReferences(resourceClone)) {
+						var refElement = ref.getResourceReference().getReferenceElement();
+						ref.getResourceReference()
+								.setReference(refElement.getResourceType() + "/" + prefix + refElement.getIdPart());
+					}
+				}
+
+				bb.addTransactionUpdateEntry(resourceClone);
+			}
+		}
+
+		return bb.getBundleTyped();
 	}
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
@@ -465,48 +579,60 @@ public class BundleUtil {
 		BaseRuntimeElementCompositeDefinition<?> searchChildContentsDef =
 				(BaseRuntimeElementCompositeDefinition<?>) searchChildDef.getChildByName("search");
 		BaseRuntimeChildDefinition searchModeChildDef = searchChildContentsDef.getChildByName("mode");
+		BaseRuntimeChildDefinition searchScoreChildDef = searchChildContentsDef.getChildByName("score");
 
 		List<SearchBundleEntryParts> retVal = new ArrayList<>();
 		for (IBase nextEntry : entries) {
 			SearchBundleEntryParts parts = getSearchBundleEntryParts(
-					fullUrlChildDef, resourceChildDef, searchChildDef, searchModeChildDef, nextEntry);
+					fullUrlChildDef,
+					resourceChildDef,
+					searchChildDef,
+					searchModeChildDef,
+					searchScoreChildDef,
+					nextEntry);
 			retVal.add(parts);
 		}
 		return retVal;
 	}
 
 	private static SearchBundleEntryParts getSearchBundleEntryParts(
-			BaseRuntimeChildDefinition fullUrlChildDef,
-			BaseRuntimeChildDefinition resourceChildDef,
-			BaseRuntimeChildDefinition searchChildDef,
-			BaseRuntimeChildDefinition searchModeChildDef,
+			BaseRuntimeChildDefinition theFullUrlChildDef,
+			BaseRuntimeChildDefinition theResourceChildDef,
+			BaseRuntimeChildDefinition theSearchChildDef,
+			BaseRuntimeChildDefinition theSearchModeChildDef,
+			BaseRuntimeChildDefinition theSearchScoreChildDef,
 			IBase entry) {
 		IBaseResource resource = null;
 		String matchMode = null;
+		BigDecimal searchScore = null;
 
-		String fullUrl = fullUrlChildDef
+		String fullUrl = theFullUrlChildDef
 				.getAccessor()
 				.getFirstValueOrNull(entry)
 				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
 				.orElse(null);
 
-		for (IBase nextResource : resourceChildDef.getAccessor().getValues(entry)) {
+		for (IBase nextResource : theResourceChildDef.getAccessor().getValues(entry)) {
 			resource = (IBaseResource) nextResource;
 		}
 
-		for (IBase nextSearch : searchChildDef.getAccessor().getValues(entry)) {
-			for (IBase nextUrl : searchModeChildDef.getAccessor().getValues(nextSearch)) {
+		for (IBase nextSearch : theSearchChildDef.getAccessor().getValues(entry)) {
+			for (IBase nextUrl : theSearchModeChildDef.getAccessor().getValues(nextSearch)) {
 				matchMode = ((IPrimitiveType<?>) nextUrl).getValueAsString();
+			}
+			for (IBase nextUrl : theSearchScoreChildDef.getAccessor().getValues(nextSearch)) {
+				searchScore = (BigDecimal) ((IPrimitiveType<?>) nextUrl).getValue();
 			}
 		}
 
-		return new SearchBundleEntryParts(fullUrl, resource, matchMode);
+		return new SearchBundleEntryParts(fullUrl, resource, matchMode, searchScore);
 	}
 
 	/**
 	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
-	 * @param theContext The FHIR Context
-	 * @param theBundle The bundle to have its entries processed.
+	 *
+	 * @param theContext   The FHIR Context
+	 * @param theBundle    The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
 	 */
 	public static void processEntries(
@@ -582,6 +708,8 @@ public class BundleUtil {
 				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (requestType) {
 					case PUT:
+					case DELETE:
+					case PATCH:
 						conditionalUrl = url != null && url.contains("?") ? url : null;
 						break;
 					case POST:
@@ -640,6 +768,41 @@ public class BundleUtil {
 		return retVal;
 	}
 
+	public static IBase getReferenceInBundle(
+			@Nonnull FhirContext theFhirContext, @Nonnull String theUrl, @Nullable Object theAppContext) {
+		if (!(theAppContext instanceof IBaseBundle) || isBlank(theUrl) || theUrl.startsWith("#")) {
+			return null;
+		}
+
+		/*
+		 * If this is a reference that is a UUID, we must be looking for local references within a Bundle
+		 */
+		IBaseBundle bundle = (IBaseBundle) theAppContext;
+
+		final boolean isPlaceholderReference = theUrl.startsWith("urn:");
+		final String unqualifiedVersionlessReference =
+				new IdDt(theUrl).toUnqualifiedVersionless().getValue();
+
+		for (BundleEntryParts next : BundleUtil.toListOfEntries(theFhirContext, bundle)) {
+			IBaseResource nextResource = next.getResource();
+			if (nextResource == null) {
+				continue;
+			}
+			if (isPlaceholderReference) {
+				if (theUrl.equals(next.getFullUrl())
+						|| theUrl.equals(nextResource.getIdElement().getValue())) {
+					return nextResource;
+				}
+			} else {
+				if (unqualifiedVersionlessReference.equals(
+						nextResource.getIdElement().toUnqualifiedVersionless().getValue())) {
+					return nextResource;
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * DSTU3 did not allow the PATCH verb for transaction bundles- so instead we infer that a bundle
 	 * is a patch if the payload is a binary resource containing a patch. This method
@@ -663,9 +826,10 @@ public class BundleUtil {
 
 	/**
 	 * create a new bundle entry and set a value for a single field
-	 * @param theContext     Context holding resource definition
-	 * @param theFieldName   Child field name of the bundle entry to set
-	 * @param theValues      The values to set on the bundle entry child field name
+	 *
+	 * @param theContext   Context holding resource definition
+	 * @param theFieldName Child field name of the bundle entry to set
+	 * @param theValues    The values to set on the bundle entry child field name
 	 * @return the new bundle entry
 	 */
 	public static IBase createNewBundleEntryWithSingleField(
@@ -693,6 +857,26 @@ public class BundleUtil {
 		return bundleEntry;
 	}
 
+	/**
+	 * Get resource from bundle by resource type and reference
+	 *
+	 * @param theContext   FhirContext
+	 * @param theBundle    IBaseBundle
+	 * @param theReference IBaseReference
+	 * @return IBaseResource if found and null if not found.
+	 */
+	@Nonnull
+	public static IBaseResource getResourceByReferenceAndResourceType(
+			@Nonnull FhirContext theContext, @Nonnull IBaseBundle theBundle, @Nonnull IBaseReference theReference) {
+		return toListOfResources(theContext, theBundle).stream()
+				.filter(theResource -> theReference
+						.getReferenceElement()
+						.getIdPart()
+						.equals(theResource.getIdElement().getIdPart()))
+				.findFirst()
+				.orElse(null);
+	}
+
 	private static class SortLegality {
 		private boolean myIsLegal;
 
@@ -700,12 +884,12 @@ public class BundleUtil {
 			this.myIsLegal = true;
 		}
 
-		private void setLegal(boolean theLegal) {
-			myIsLegal = theLegal;
-		}
-
 		public boolean isLegal() {
 			return myIsLegal;
+		}
+
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
 		}
 	}
 }

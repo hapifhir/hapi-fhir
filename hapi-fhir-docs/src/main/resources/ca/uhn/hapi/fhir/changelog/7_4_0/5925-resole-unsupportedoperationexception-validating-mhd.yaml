@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5925
+title: "An UnsupportedOperationException occurred when validating R5 MHD bundles using
+  the HAPI FHIR validator. Thanks to Renaud Subiger for contributing a fix!"

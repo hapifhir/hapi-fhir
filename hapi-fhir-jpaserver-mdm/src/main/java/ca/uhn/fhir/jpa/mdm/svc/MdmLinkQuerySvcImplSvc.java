@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;

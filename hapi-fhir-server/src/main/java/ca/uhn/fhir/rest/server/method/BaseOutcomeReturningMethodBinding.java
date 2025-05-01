@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,21 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,10 +86,10 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	 */
 	protected abstract String getMatchingOperation();
 
-	private int getOperationStatus(MethodOutcome response) {
+	private int getOperationStatus(@Nullable MethodOutcome response) {
 
 		// if the response status code is set (i.e. from a custom Resource provider) it should be respected
-		if (response.isResponseStatusCodeSet()) {
+		if (response != null && response.isResponseStatusCodeSet()) {
 			return response.getResponseStatusCode();
 		}
 

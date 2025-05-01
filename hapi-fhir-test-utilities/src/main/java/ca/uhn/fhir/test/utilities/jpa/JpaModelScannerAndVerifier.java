@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,32 +29,35 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.ClassPath;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
@@ -72,7 +75,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class is only used at build-time. It scans the various Hibernate entity classes
@@ -187,7 +190,8 @@ public class JpaModelScannerAndVerifier {
 			scan(nextField, theNames, theIsSuperClass, isView);
 
 			Id id = nextField.getAnnotation(Id.class);
-			if (id != null) {
+			boolean isId = id != null;
+			if (isId) {
 				Validate.isTrue(!foundId, "Multiple fields annotated with @Id");
 				foundId = true;
 
@@ -197,19 +201,20 @@ public class JpaModelScannerAndVerifier {
 					if (generatedValue != null) {
 						Validate.notBlank(generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
 						assertNotADuplicateName(generatedValue.generator(), theNames);
-						assertEquals(generatedValue.strategy(), GenerationType.AUTO);
+						assertEqualsForIdGenerator(nextField, generatedValue.strategy(), GenerationType.AUTO);
 
 						GenericGenerator genericGenerator = nextField.getAnnotation(GenericGenerator.class);
 						SequenceGenerator sequenceGenerator = nextField.getAnnotation(SequenceGenerator.class);
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
-							assertEquals(generatedValue.generator(), genericGenerator.name());
+							assertEqualsForIdGenerator(nextField, "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
+							assertEqualsForIdGenerator(nextField, "native", genericGenerator.strategy());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
-							assertEquals(generatedValue.generator(), sequenceGenerator.name());
-							assertEquals(generatedValue.generator(), sequenceGenerator.sequenceName());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.name());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.sequenceName());
 						}
 					}
 				}
@@ -220,6 +225,7 @@ public class JpaModelScannerAndVerifier {
 			if (!isTransient) {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasJoinColumns = nextField.getAnnotation(JoinColumns.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
 				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
@@ -232,6 +238,7 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(
 					hasEmbedded ||
 						hasColumn ||
+						hasJoinColumns ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||
@@ -240,21 +247,36 @@ public class JpaModelScannerAndVerifier {
 
 				int columnLength = 16;
 				String columnName = null;
+				boolean nullable = false;
 				if (hasColumn) {
-					columnName = nextField.getAnnotation(Column.class).name();
-					columnLength = nextField.getAnnotation(Column.class).length();
+					Column column = nextField.getAnnotation(Column.class);
+					columnName = column.name();
+					columnLength = column.length();
+					nullable = column.nullable();
 				}
 				if (hasJoinColumn) {
-					columnName = nextField.getAnnotation(JoinColumn.class).name();
+					JoinColumn joinColumn = nextField.getAnnotation(JoinColumn.class);
+					columnName = joinColumn.name();
+					nullable = joinColumn.nullable();
+				}
+				if (isId) {
+					nullable = false;
+				}
+
+				if (nullable && !isView) {
+					Validate.isTrue(!nextField.getType().isPrimitive(), "Field [%s] has a nullable primitive type: %s", nextField.getName(), nextField.getType());
 				}
 
 				if (columnName != null) {
-					if (nextField.getType().isAssignableFrom(String.class)) {
-						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
-						columnLength = columnLength * 4;
-					}
+					addColumnName(columnNameToLength, nextField, columnLength, columnName);
+				}
 
-					columnNameToLength.put(columnName, columnLength);
+				if (hasJoinColumns) {
+					JoinColumns joinColumns = nextField.getAnnotation(JoinColumns.class);
+					for (JoinColumn joinColumn : joinColumns.value()) {
+						columnName = joinColumn.name();
+						addColumnName(columnNameToLength, nextField, columnLength, columnName);
+					}
 				}
 
 			}
@@ -275,6 +297,20 @@ public class JpaModelScannerAndVerifier {
 		}
 
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
+	}
+
+	private static void addColumnName(Map<String, Integer> columnNameToLength, Field nextField, int columnLength, String columnName) {
+		if (nextField.getType().equals(Integer.class) || nextField.getType().isPrimitive()) {
+			// This is pretty imprecise and probably an overestimation, but we use it
+			// only for calculating max column length so it's better to be over than
+			// under
+			columnLength = 16;
+		} else if (nextField.getType().isAssignableFrom(String.class)) {
+			// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
+			columnLength = columnLength * 4;
+		}
+
+		columnNameToLength.put(columnName, columnLength);
 	}
 
 	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
@@ -329,7 +365,7 @@ public class JpaModelScannerAndVerifier {
 					// this foreign key has the same name as an existing index
 					// let's make sure it's on the same column
 					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
-					assertTrue(columns.contains(columnName), String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName));
+					assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
 				} else {
 					// verify it's not a duplicate
 					assertNotADuplicateName(fk.name(), theNames);
@@ -360,9 +396,6 @@ public class JpaModelScannerAndVerifier {
 					if (!theIsView && column.length() == 255) {
 						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
 					}
-					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
-					}
 				}
 
 				Size size = theAnnotatedElement.getAnnotation(Size.class);
@@ -380,6 +413,14 @@ public class JpaModelScannerAndVerifier {
 				}
 			}
 
+		}
+
+		Enumerated enumerated = theAnnotatedElement.getAnnotation(Enumerated.class);
+		if (enumerated != null) {
+			JdbcTypeCode jdbcTypeCode = theAnnotatedElement.getAnnotation(JdbcTypeCode.class);
+			if (jdbcTypeCode == null) {
+				throw new IllegalStateException(Msg.code(2591) + "Field " + theAnnotatedElement + " has @Enumerated but not @JdbcTypeCode (must declare either VARCHAR or a numeric type to avoid the database using native enums)");
+			}
 		}
 
 	}
@@ -408,8 +449,8 @@ public class JpaModelScannerAndVerifier {
 		return retVal;
 	}
 
-	private static void assertEquals(Object theGenerator, Object theName) {
-		Validate.isTrue(theGenerator.equals(theName));
+	private static void assertEqualsForIdGenerator(Field theSource, Object theExpectedGenerator, Object theActualGenerator) {
+		Validate.isTrue(theExpectedGenerator.equals(theActualGenerator), "Value " + theActualGenerator + " doesn't match expected " + theExpectedGenerator + " for ID generator on " + theSource);
 	}
 
 	private static void assertNotADuplicateName(String theName, Set<String> theNames) {

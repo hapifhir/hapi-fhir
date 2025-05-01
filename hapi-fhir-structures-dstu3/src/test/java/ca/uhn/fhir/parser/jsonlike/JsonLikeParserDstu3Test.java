@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JsonLikeParserDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -68,23 +66,24 @@ public class JsonLikeParserDstu3Test {
 
 		jsonLikeParser.encodeResourceToJsonLikeWriter(fhirPat, jsonLikeWriter);
 		Map<String,Object> jsonLikeMap = jsonLikeWriter.getResultMap();
-		
-		System.out.println("encoded map: " + jsonLikeMap.toString());
 
-		assertNotNull(jsonLikeMap.get("resourceType"), "Encoded resource missing 'resourceType' element");
-		assertEquals(jsonLikeMap.get("resourceType"), "Patient", "Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'");
 
-		assertNotNull(jsonLikeMap.get("extension"), "Encoded resource missing 'extension' element");
-		assertTrue((jsonLikeMap.get("extension") instanceof List), "'extension' element is not a List");
+		ourLog.info("encoded map: " + jsonLikeMap.toString());
+
+		assertThat(jsonLikeMap.get("resourceType")).as("Encoded resource missing 'resourceType' element").isNotNull();
+		assertThat("Patient").as("Expecting 'resourceType'='Patient'; found '" + jsonLikeMap.get("resourceType") + "'").isEqualTo(jsonLikeMap.get("resourceType"));
+
+		assertThat(jsonLikeMap.get("extension")).as("Encoded resource missing 'extension' element").isNotNull();
+		assertThat((jsonLikeMap.get("extension") instanceof List)).as("'extension' element is not a List").isTrue();
 		
 		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
-		assertEquals(1, extensions.size(), "'extnesion' array has more than one entry");
-		assertTrue((extensions.get(0) instanceof Map), "'extension' array entry is not a Map");
+		assertThat(extensions.size()).as("'extnesion' array has more than one entry").isEqualTo(1);
+		assertThat((extensions.get(0) instanceof Map)).as("'extension' array entry is not a Map").isTrue();
 		
 		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
-		assertNotNull(extension.get("url"), "'extension' entry missing 'url' member");
-		assertTrue((extension.get("url") instanceof String), "'extension' entry 'url' member is not a String");
-		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
+		assertThat(extension.get("url")).as("'extension' entry missing 'url' member").isNotNull();
+		assertThat((extension.get("url") instanceof String)).as("'extension' entry 'url' member is not a String").isTrue();
+		assertThat(extension.get("url")).as("Expecting '/extension[]/url' = 'x1'; found '" + extension.get("url") + "'").isEqualTo("x1");
 	
 	}
 	

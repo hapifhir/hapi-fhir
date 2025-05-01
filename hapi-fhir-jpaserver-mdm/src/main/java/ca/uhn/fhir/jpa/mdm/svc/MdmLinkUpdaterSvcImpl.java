@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -72,7 +73,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmMatchLinkSvc myMdmMatchLinkSvc;
@@ -141,6 +142,67 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 
 		// Add partition for the mdm link if it doesn't exist
+		addPartitioninfoForLinkIfNecessary(goldenResource, mdmLink);
+		myMdmLinkDaoSvc.save(mdmLink);
+
+		if (matchResult == MdmMatchResultEnum.MATCH) {
+			// only apply survivorship rules in case of a match
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(sourceResource, goldenResource, mdmContext);
+		}
+
+		/**
+		 * We use the versionless id
+		 * because we call update on the goldenResource in 2 places:
+		 * here and below where we rebuild goldenresources if we have set
+		 * a link to NO_MATCH.
+		 *
+		 * This can be a problem when a source resource is deleted.
+		 * then {@link MdmStorageInterceptor} will update all links
+		 * connecting to any golden resource that was connected to the now deleted
+		 * source resource to NO_MATCH before deleting orphaned golden resources.
+		 */
+		goldenResource.setId(goldenResource.getIdElement().toVersionless());
+		myMdmResourceDaoSvc.upsertGoldenResource(goldenResource, mdmContext.getResourceType());
+		if (matchResult == MdmMatchResultEnum.NO_MATCH) {
+			/*
+			 * link is broken. We need to do 2 things:
+			 * * update links for the source resource (if no other golden resources exist, for instance)
+			 * * rebuild the golden resource from scratch, using current survivorship rules
+			 * 	and the current set of links
+			 */
+			List<?> links =
+					myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
+			if (links.isEmpty()) {
+				// No more links to source; Find a new Golden Resource to link this target to
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(sourceResource, mdmContext);
+			}
+
+			// with the link broken, the golden resource has delta info from a resource
+			// that is no longer matched to it; we need to remove this delta. But it's
+			// easier to just rebuild the resource from scratch using survivorship rules/current links
+			goldenResource = myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(
+					theParams.getRequestDetails(), goldenResource, mdmContext);
+		}
+
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {
+			// pointcut for MDM_POST_UPDATE_LINK
+			MdmLinkEvent event = new MdmLinkEvent();
+			event.addMdmLink(myModelConverter.toJson(mdmLink));
+
+			// add any link updates from side effects
+			mdmContext.getMdmLinks().stream().forEach(link -> {
+				event.addMdmLink(myModelConverter.toJson(link));
+			});
+
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_UPDATE_LINK, hookParams);
+		}
+
+		return goldenResource;
+	}
+
+	private static void addPartitioninfoForLinkIfNecessary(IAnyResource goldenResource, IMdmLink mdmLink) {
 		RequestPartitionId goldenResourcePartitionId =
 				(RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (goldenResourcePartitionId != null
@@ -151,34 +213,6 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 					goldenResourcePartitionId.getFirstPartitionIdOrNull(),
 					goldenResourcePartitionId.getPartitionDate()));
 		}
-		myMdmLinkDaoSvc.save(mdmLink);
-
-		if (matchResult == MdmMatchResultEnum.MATCH) {
-			// only apply survivorship rules in case of a match
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(sourceResource, goldenResource, mdmContext);
-		}
-
-		myMdmResourceDaoSvc.upsertGoldenResource(goldenResource, mdmContext.getResourceType());
-		if (matchResult == MdmMatchResultEnum.NO_MATCH) {
-			// We need to return no match for when a Golden Resource has already been found elsewhere
-			if (myMdmLinkDaoSvc
-					.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH)
-					.isEmpty()) {
-				// Need to find a new Golden Resource to link this target to
-				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(sourceResource, mdmContext);
-			}
-		}
-
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {
-			// pointcut for MDM_POST_UPDATE_LINK
-			MdmLinkEvent event = new MdmLinkEvent();
-			event.addMdmLink(myModelConverter.toJson(mdmLink));
-			HookParams hookParams = new HookParams();
-			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_UPDATE_LINK, hookParams);
-		}
-
-		return goldenResource;
 	}
 
 	/**

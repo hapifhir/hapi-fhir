@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5935
+title: "Remote Terminology Service can now return subproperty fields for a CodeSystem lookup operation. 
+This can be done in DSTU3 and R4. R5 is not yet implemented."

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,18 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
 @Entity
 @Table(
@@ -37,20 +44,24 @@ public class SearchResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Deprecated(since = "6.10", forRemoval = true) // migrating to composite PK on searchPid,Order
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_RES")
 	@SequenceGenerator(name = "SEQ_SEARCH_RES", sequenceName = "SEQ_SEARCH_RES")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "SEARCH_ORDER", nullable = false, insertable = true, updatable = false)
+	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
+	private Long mySearchPid;
+
+	@Column(name = "SEARCH_ORDER", insertable = true, updatable = false, nullable = false)
 	private int myOrder;
 
 	@Column(name = "RESOURCE_PID", insertable = true, updatable = false, nullable = false)
 	private Long myResourcePid;
 
-	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
-	private Long mySearchPid;
+	@Column(name = "RESOURCE_PARTITION_ID", insertable = true, updatable = false, nullable = true)
+	private Integer myResourcePartitionId;
 
 	/**
 	 * Constructor
@@ -73,6 +84,7 @@ public class SearchResult implements Serializable {
 				.append("search", mySearchPid)
 				.append("order", myOrder)
 				.append("resourcePid", myResourcePid)
+				.append("resourcePartitionId", myResourcePartitionId)
 				.toString();
 	}
 
@@ -99,6 +111,14 @@ public class SearchResult implements Serializable {
 	public SearchResult setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
 		return this;
+	}
+
+	public Integer getResourcePartitionId() {
+		return myResourcePartitionId;
+	}
+
+	public void setResourcePartitionId(Integer theResourcePartitionId) {
+		myResourcePartitionId = theResourcePartitionId;
 	}
 
 	@Override

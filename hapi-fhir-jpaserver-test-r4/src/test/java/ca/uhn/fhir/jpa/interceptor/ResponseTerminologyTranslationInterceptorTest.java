@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -12,7 +14,6 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,18 +24,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
 
@@ -72,10 +72,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
-			"[system=http://example.com/my_code_system, code=12345, display=null]",
-			"[system=http://example.com/my_code_system2, code=34567, display=Target Code 34567]"
-		));
+		assertThat(toCodeStrings(observation)).as(toCodeStrings(observation).toString()).containsExactly("[system=http://example.com/my_code_system, code=12345, display=null]", "[system=http://example.com/my_code_system2, code=34567, display=Target Code 34567]");
 	}
 
 	@Test
@@ -91,11 +88,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
-			"[system=http://example.com/my_code_system, code=12345, display=null]",
-			"[system=http://example.com/my_code_system3, code=56789, display=Target Code 56789]",
-			"[system=http://example.com/my_code_system3, code=67890, display=Target Code 67890]"
-		));
+		assertThat(toCodeStrings(observation)).as(toCodeStrings(observation).toString()).containsExactly("[system=http://example.com/my_code_system, code=12345, display=null]", "[system=http://example.com/my_code_system3, code=56789, display=Target Code 56789]", "[system=http://example.com/my_code_system3, code=67890, display=Target Code 67890]");
 	}
 
 	/**
@@ -115,10 +108,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
-			"[system=http://example.com/my_code_system, code=12345, display=null]",
-			"[system=http://example.com/my_code_system2, code=9999, display=Display 9999]"
-		));
+		assertThat(toCodeStrings(observation)).as(toCodeStrings(observation).toString()).containsExactly("[system=http://example.com/my_code_system, code=12345, display=null]", "[system=http://example.com/my_code_system2, code=9999, display=Display 9999]");
 	}
 
 	@Test
@@ -134,9 +124,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
-			"[system=http://example.com/my_code_system, code=FOO, display=null]"
-		));
+		assertThat(toCodeStrings(observation)).as(toCodeStrings(observation).toString()).containsExactly("[system=http://example.com/my_code_system, code=FOO, display=null]");
 	}
 
 	@Test
@@ -223,7 +211,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
 			List<String> binaryIds = file.getValue();
-			assertEquals(1, binaryIds.size());
+			assertThat(binaryIds).hasSize(1);
 			for (String binaryId : binaryIds) {
 				Binary binary = myBinaryDao.read(new IdType(binaryId));
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
@@ -231,7 +219,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				if ("Observation".equals(resourceTypeInFile)) {
 					for (String code : codingList) {
-						assertThat(contents, containsString(code));
+						assertThat(contents).contains(code);
 					}
 				} else {
 					fail(resourceTypeInFile);

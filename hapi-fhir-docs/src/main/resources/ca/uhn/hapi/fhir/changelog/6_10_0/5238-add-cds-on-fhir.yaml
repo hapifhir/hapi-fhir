@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5238
+title: "Added an implementation of Clinical Reasoning CDS on FHIR to the CDS Hooks module that allows PlanDefinition
+worfklows to be processed as CDS Services using the $apply operation.
+"

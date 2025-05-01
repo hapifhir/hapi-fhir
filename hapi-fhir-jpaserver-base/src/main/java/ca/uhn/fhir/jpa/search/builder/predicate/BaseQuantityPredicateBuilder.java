@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -33,10 +32,10 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import javax.persistence.criteria.CriteriaBuilder;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -86,9 +85,7 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
-			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
+			hashPredicate = createHashIdentityPredicate(theRequestPartitionId, theResourceName, theParamName);
 		}
 
 		SearchFilterParser.CompareOperation operation = theOperation;

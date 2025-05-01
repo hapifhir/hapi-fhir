@@ -130,14 +130,14 @@ Once enabled, HTTP Requests to the FHIR server must include the name of the part
 POST www.example.com/fhir/Patient
 ```
 
-With partitioning enabled, if we were to now create a patient in the `DEFAULT` paritition, the request would now look like this:
+With partitioning enabled, if we were to now create a patient in the `P1` partition, the request would now look like this:
 
 
 ```
-POST www.example.com/fhir/DEFAULT/Patient
+POST www.example.com/fhir/P1/Patient
 ```
 
-Failure to add a partition name to the request path will result in an error when multitenancy is enabled.
+If a tenant name is not provided in the request path, the request will default the tenant and use will use the 'DEFAULT' partition.
 
 # Limitations
 

@@ -40,6 +40,7 @@ import org.hl7.fhir.utilities.validation.ValidationOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,29 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext extends I18nBase implements IWorkerContext {
+	private static final List<String> PRIMITIVE_TYPES = Arrays.asList(
+			"boolean",
+			"integer",
+			"integer64",
+			"string",
+			"decimal",
+			"uri",
+			"base64Binary",
+			"instant",
+			"date",
+			"dateTime",
+			"time",
+			"code",
+			"oid",
+			"id",
+			"markdown",
+			"unsignedInt",
+			"positiveInt",
+			"uuid",
+			"xhtml",
+			"url",
+			"canonical");
+
 	private final FhirContext myCtx;
 	private final Cache<String, Resource> myFetchedResourceCache;
 	private IValidationSupport myValidationSupport;
@@ -60,7 +84,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
 
-		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
+		long timeoutMillis = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
 
 		myFetchedResourceCache = CacheFactory.build(timeoutMillis);
 
@@ -390,6 +414,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String input) {
+		List<StructureDefinition> types = new ArrayList<>();
+		for (StructureDefinition sd : allStructures()) {
+			if (input.equals(sd.getTypeTail())) {
+				types.add(sd);
+			}
+		}
+		return types;
+	}
+
+	@Override
 	public String getLinkForUrl(String corePath, String url) {
 		throw new UnsupportedOperationException(Msg.code(279));
 	}
@@ -411,6 +446,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends org.hl7.fhir.r4.model.Resource> T fetchResource(
+			Class<T> theClass, String theUri, String theVersion) {
+		return fetchResource(theClass, theUri + "|" + theVersion);
+	}
+
+	@Override
+	public <T extends Resource> T fetchResource(Class<T> theClass, String theUri, Resource resource) {
+		return fetchResource(theClass, theUri);
+	}
+
+	@Override
 	public <T extends org.hl7.fhir.r4.model.Resource> T fetchResourceWithException(Class<T> theClass, String theUri)
 			throws FHIRException {
 		T retVal = fetchResource(theClass, theUri);
@@ -418,6 +464,15 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			throw new FHIRException(Msg.code(281) + "Could not find resource: " + theUri);
 		}
 		return retVal;
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> aClass) {
+		List<T> res = new ArrayList<>();
+		if (aClass == StructureDefinition.class) {
+			res.addAll((Collection<? extends T>) getStructures());
+		}
+		return res;
 	}
 
 	@Override
@@ -453,5 +508,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			retVal = retVal.setInferSystem(true);
 		}
 		return retVal;
+	}
+
+	@Override
+	public boolean isPrimitiveType(String theType) {
+		return PRIMITIVE_TYPES.contains(theType);
 	}
 }

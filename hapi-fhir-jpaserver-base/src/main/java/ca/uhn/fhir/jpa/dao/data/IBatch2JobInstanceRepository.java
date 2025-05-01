@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import org.springframework.data.domain.Pageable;
@@ -55,14 +56,15 @@ public interface IBatch2JobInstanceRepository
 	int updateWorkChunksPurgedTrue(@Param("id") String theInstanceId);
 
 	@Query(
-			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND b.myParamsJson = :params AND b.myStatus IN( :stats )")
+			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params) AND b.myStatus IN( :stats )")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdParamsAndStatus(
 			@Param("defId") String theDefinitionId,
 			@Param("params") String theParams,
 			@Param("stats") Set<StatusEnum> theStatus,
 			Pageable thePageable);
 
-	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND b.myParamsJson = :params")
+	@Query(
+			"SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND (b.myParamsJson = :params OR b.myParamsJsonVc = :params)")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndParams(
 			@Param("defId") String theDefinitionId, @Param("params") String theParams, Pageable thePageable);
 
@@ -90,4 +92,8 @@ public interface IBatch2JobInstanceRepository
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(
 			@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
+
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO(e.myId, e.myStatus, e.myStartTime, e.myEndTime) FROM Batch2JobInstanceEntity e WHERE e.myId = :id")
+	BatchInstanceStatusDTO fetchBatchInstanceStatus(@Param("id") String theInstanceId);
 }

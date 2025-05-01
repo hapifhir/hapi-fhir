@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
 import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
@@ -29,4 +30,13 @@ import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 public interface IHSearchSortHelper {
 
 	SortFinalStep getSortClauses(SearchSortFactory theSortFactory, SortSpec theSort, String theResourceType);
+
+	/**
+	 * Given a resource type and a {@link SearchParameterMap}, return true only if all sort terms are supported.
+	 *
+	 * @param theResourceType The resource type for the query.
+	 * @param theParams The {@link SearchParameterMap} being searched with.
+	 * @return true if all sort terms are supported, false otherwise.
+	 */
+	boolean supportsAllSortTerms(String theResourceType, SearchParameterMap theParams);
 }

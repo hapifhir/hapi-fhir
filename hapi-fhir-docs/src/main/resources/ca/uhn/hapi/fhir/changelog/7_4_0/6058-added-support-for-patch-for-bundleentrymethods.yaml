@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6058
+title: "Added `PATCH` operation to `BundleEntryTransactionMethodEnumTest`
+        in order to fully support transaction bundle operations.
+"

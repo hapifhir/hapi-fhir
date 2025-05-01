@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.ParametersUtil;
-import joptsimple.internal.Strings;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 
@@ -111,7 +110,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	@Nonnull
 	private String getResponseMessage(IBaseParameters response) {
 		List<String> message = ParametersUtil.getNamedParameterValuesAsString(myFhirCtx, response, "message");
-		return Strings.join(message, NL);
+		return String.join(NL, message);
 	}
 
 	public static final String NL = System.getProperty("line.separator");

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -13,8 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

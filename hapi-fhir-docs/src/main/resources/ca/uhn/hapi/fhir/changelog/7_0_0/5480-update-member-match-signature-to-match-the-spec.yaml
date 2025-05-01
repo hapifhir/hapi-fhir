@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5480
+title: "Updated $member-match operation signature to match the latest specification."

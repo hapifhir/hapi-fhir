@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 
@@ -33,17 +32,21 @@ import java.util.Map;
 
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
-			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
+			ServletRequestDetails theRequestDetails,
+			String url,
+			String theVerb,
+			ArrayListMultimap<String, String> theParamValues) {
 		ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setRequestType(RequestTypeEnum.valueOf(theVerb));
 		requestDetails.setServer(theRequestDetails.getServer());
+		requestDetails.setRestOperationType(theRequestDetails.getRestOperationType());
 
 		int qIndex = url.indexOf('?');
 		requestDetails.setParameters(new HashMap<>());
 		if (qIndex != -1) {
 			String params = url.substring(qIndex);
-			List<NameValuePair> parameters = UrlUtil.translateMatchUrl(params);
+			List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(params);
 			for (NameValuePair next : parameters) {
 				theParamValues.put(next.getName(), next.getValue());
 			}
@@ -63,26 +66,9 @@ public class ServletRequestUtil {
 
 		requestDetails.setRequestPath(url);
 		requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+		requestDetails.setTenantId(theRequestDetails.getTenantId());
 
 		theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
 		return requestDetails;
-	}
-
-	public static String extractUrl(ServletRequestDetails theRequestDetails) {
-		StringBuilder b = new StringBuilder();
-		for (Map.Entry<String, String[]> next :
-				theRequestDetails.getParameters().entrySet()) {
-			for (String nextValue : next.getValue()) {
-				if (b.length() == 0) {
-					b.append('?');
-				} else {
-					b.append('&');
-				}
-				b.append(UrlUtil.escapeUrlParam(next.getKey()));
-				b.append('=');
-				b.append(UrlUtil.escapeUrlParam(nextValue));
-			}
-		}
-		return theRequestDetails.getRequestPath() + b.toString();
 	}
 }

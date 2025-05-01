@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -32,8 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static ca.uhn.fhir.rest.server.util.ISearchParamRegistry.isAllowedForContext;
 
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
@@ -54,20 +56,28 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-		return getActiveSearchParams(theResourceName).get(theParamName);
+	public RuntimeSearchParam getActiveSearchParam(
+			@Nonnull String theResourceName,
+			@Nonnull String theParamName,
+			@Nonnull SearchParamLookupContextEnum theContext) {
+		return getActiveSearchParams(theResourceName, theContext).get(theParamName);
 	}
 
 	@Override
-	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(
+			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
 		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-			retval.put(nextSp.getName(), nextSp);
+			if (isAllowedForContext(nextSp, theContext)) {
+				retval.put(nextSp.getName(), nextSp);
+			}
 		}
 
 		for (RuntimeSearchParam next : myExtraSearchParams) {
-			retval.put(next.getName(), next);
+			if (isAllowedForContext(next, theContext)) {
+				retval.put(next.getName(), next);
+			}
 		}
 
 		return retval;
@@ -78,40 +88,43 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			@Nonnull String theResourceName,
+			@Nonnull Set<String> theParamNames,
+			@Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2066));
 	}
 
 	@Nullable
 	@Override
-	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+	public RuntimeSearchParam getActiveSearchParamByUrl(
+			@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 		// simple implementation for test support
 		return myCtx.getResourceTypes().stream()
-				.flatMap(type -> getActiveSearchParams(type).values().stream())
+				.flatMap(type -> getActiveSearchParams(type, theContext).values().stream())
 				.filter(rsp -> theUrl.equals(rsp.getUri()))
 				.findFirst()
 				.orElse(null);
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2068));
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(
-			String theResourceName, ComboSearchParamType theParamType) {
+			@Nonnull String theResourceName,
+			@Nonnull ComboSearchParamType theParamType,
+			@Nonnull SearchParamLookupContextEnum theContext) {
 		throw new UnsupportedOperationException(Msg.code(2209));
 	}
 
 	@Override
-	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(
+			@Nonnull String theResourceName, @Nonnull IIdType theId) {
 		throw new UnsupportedOperationException(Msg.code(2211));
-	}
-
-	@Override
-	public void requestRefresh() {
-		// nothing
 	}
 
 	@Override

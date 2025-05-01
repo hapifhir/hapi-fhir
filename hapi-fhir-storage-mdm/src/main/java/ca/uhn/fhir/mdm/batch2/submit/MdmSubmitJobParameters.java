@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,6 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlJobParameters;
 
-public class MdmSubmitJobParameters extends PartitionedUrlListJobParameters {}
+public class MdmSubmitJobParameters extends PartitionedUrlJobParameters {}

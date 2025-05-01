@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -38,6 +40,9 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -153,6 +158,11 @@ public class ConsentInterceptor {
 		return this;
 	}
 
+	@VisibleForTesting
+	public List<IConsentService> getConsentServices() {
+		return Collections.unmodifiableList(myConsentService);
+	}
+
 	@Hook(value = Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void interceptPreHandled(RequestDetails theRequestDetails) {
 		if (isSkipServiceForRequest(theRequestDetails)) {
@@ -171,25 +181,40 @@ public class ConsentInterceptor {
 				case PROCEED:
 					continue;
 				case AUTHORIZED:
-					Map<Object, Object> userData = theRequestDetails.getUserData();
-					userData.put(myRequestAuthorizedKey, Boolean.TRUE);
+					authorizeRequest(theRequestDetails);
 					return;
 			}
 		}
 	}
 
-	@Hook(value = Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
-	public boolean interceptPreCheckForCachedSearch(RequestDetails theRequestDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return true;
-		}
-		return false;
+	protected void authorizeRequest(RequestDetails theRequestDetails) {
+		Map<Object, Object> userData = theRequestDetails.getUserData();
+		userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 	}
 
+	/**
+	 * Check if this request is eligible for cached search results.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * @return may the request be satisfied from cache.
+	 */
+	@Hook(value = Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)
+	public boolean interceptPreCheckForCachedSearch(@Nonnull RequestDetails theRequestDetails) {
+		return !isProcessCanSeeResource(theRequestDetails, null);
+	}
+
+	/**
+	 * Check if the search results from this request might be reused by later searches.
+	 * We can't use a cached result if consent may use canSeeResource.
+	 * This checks for AUTHORIZED requests, and the responses from shouldProcessCanSeeResource()
+	 * to see if this holds.
+	 * If not, marks the result as single-use.
+	 */
 	@Hook(value = Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void interceptPreSearchRegistered(
 			RequestDetails theRequestDetails, ICachedSearchDetails theCachedSearchDetails) {
-		if (!isRequestAuthorized(theRequestDetails)) {
+		if (isProcessCanSeeResource(theRequestDetails, null)) {
 			theCachedSearchDetails.setCannotBeReused();
 		}
 	}
@@ -197,34 +222,17 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
 	public void interceptPreAccess(
 			RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
-		if (isRequestAuthorized(theRequestDetails)) {
-			return;
-		}
-		if (isSkipServiceForRequest(theRequestDetails)) {
-			return;
-		}
-		if (myConsentService.isEmpty()) {
-			return;
-		}
 
-		// First check if we should be calling canSeeResource for the individual
-		// consent services
+		// Flags for each service
 		boolean[] processConsentSvcs = new boolean[myConsentService.size()];
-		boolean processAnyConsentSvcs = false;
-		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
-			IConsentService nextService = myConsentService.get(consentSvcIdx);
-
-			boolean shouldCallCanSeeResource =
-					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
-			processAnyConsentSvcs |= shouldCallCanSeeResource;
-			processConsentSvcs[consentSvcIdx] = shouldCallCanSeeResource;
-		}
+		boolean processAnyConsentSvcs = isProcessCanSeeResource(theRequestDetails, processConsentSvcs);
 
 		if (!processAnyConsentSvcs) {
 			return;
 		}
 
-		IdentityHashMap<IBaseResource, Boolean> authorizedResources = getAuthorizedResourcesMap(theRequestDetails);
+		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
+				getAlreadySeenResourcesMap(theRequestDetails);
 		for (int resourceIdx = 0; resourceIdx < thePreResourceAccessDetails.size(); resourceIdx++) {
 			IBaseResource nextResource = thePreResourceAccessDetails.getResource(resourceIdx);
 			for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
@@ -246,10 +254,11 @@ public class ConsentInterceptor {
 					case PROCEED:
 						break;
 					case AUTHORIZED:
-						authorizedResources.put(nextResource, Boolean.TRUE);
+						alreadySeenResources.put(nextResource, ConsentOperationStatusEnum.AUTHORIZED);
 						skipSubsequentServices = true;
 						break;
 					case REJECT:
+						alreadySeenResources.put(nextResource, ConsentOperationStatusEnum.REJECT);
 						thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 						skipSubsequentServices = true;
 						break;
@@ -260,6 +269,39 @@ public class ConsentInterceptor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Is canSeeResource() active in any services?
+	 * @param theProcessConsentSvcsFlags filled in with the responses from shouldProcessCanSeeResource each service
+	 * @return true of any service responded true to shouldProcessCanSeeResource()
+	 */
+	private boolean isProcessCanSeeResource(
+			@Nonnull RequestDetails theRequestDetails, @Nullable boolean[] theProcessConsentSvcsFlags) {
+		if (isRequestAuthorized(theRequestDetails)) {
+			return false;
+		}
+		if (isSkipServiceForRequest(theRequestDetails)) {
+			return false;
+		}
+		if (myConsentService.isEmpty()) {
+			return false;
+		}
+
+		if (theProcessConsentSvcsFlags == null) {
+			theProcessConsentSvcsFlags = new boolean[myConsentService.size()];
+		}
+		Validate.isTrue(theProcessConsentSvcsFlags.length == myConsentService.size());
+		boolean processAnyConsentSvcs = false;
+		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+			IConsentService nextService = myConsentService.get(consentSvcIdx);
+
+			boolean shouldCallCanSeeResource =
+					nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
+			processAnyConsentSvcs |= shouldCallCanSeeResource;
+			theProcessConsentSvcsFlags[consentSvcIdx] = shouldCallCanSeeResource;
+		}
+		return processAnyConsentSvcs;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -277,12 +319,14 @@ public class ConsentInterceptor {
 			return;
 		}
 
-		IdentityHashMap<IBaseResource, Boolean> authorizedResources = getAuthorizedResourcesMap(theRequestDetails);
+		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
+				getAlreadySeenResourcesMap(theRequestDetails);
 
 		for (int i = 0; i < thePreResourceShowDetails.size(); i++) {
 
 			IBaseResource resource = thePreResourceShowDetails.getResource(i);
-			if (resource == null || authorizedResources.putIfAbsent(resource, Boolean.TRUE) != null) {
+			if (resource == null
+					|| alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
 				continue;
 			}
 
@@ -299,15 +343,17 @@ public class ConsentInterceptor {
 						}
 						continue;
 					case AUTHORIZED:
+						alreadySeenResources.put(resource, ConsentOperationStatusEnum.AUTHORIZED);
 						if (newResource != null) {
 							thePreResourceShowDetails.setResource(i, newResource);
 						}
 						continue;
 					case REJECT:
+						alreadySeenResources.put(resource, ConsentOperationStatusEnum.REJECT);
 						if (nextOutcome.getOperationOutcome() != null) {
 							IBaseOperationOutcome newOperationOutcome = nextOutcome.getOperationOutcome();
 							thePreResourceShowDetails.setResource(i, newOperationOutcome);
-							authorizedResources.put(newOperationOutcome, true);
+							alreadySeenResources.put(newOperationOutcome, ConsentOperationStatusEnum.PROCEED);
 						} else {
 							resource = null;
 							thePreResourceShowDetails.setResource(i, null);
@@ -319,8 +365,8 @@ public class ConsentInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void interceptOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResource) {
-		if (theResource.getResponseResource() == null) {
+	public void interceptOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+		if (theResponseDetails.getResponseResource() == null) {
 			return;
 		}
 		if (isRequestAuthorized(theRequestDetails)) {
@@ -336,35 +382,56 @@ public class ConsentInterceptor {
 			return;
 		}
 
-		IdentityHashMap<IBaseResource, Boolean> authorizedResources = getAuthorizedResourcesMap(theRequestDetails);
+		// Take care of outer resource first
+		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
+				getAlreadySeenResourcesMap(theRequestDetails);
+		if (alreadySeenResources.containsKey(theResponseDetails.getResponseResource())) {
+			// we've already seen this resource before
+			ConsentOperationStatusEnum decisionOnResource =
+					alreadySeenResources.get(theResponseDetails.getResponseResource());
 
-		// See outer resource
-		if (authorizedResources.putIfAbsent(theResource.getResponseResource(), Boolean.TRUE) == null) {
+			if (ConsentOperationStatusEnum.AUTHORIZED.equals(decisionOnResource)
+					|| ConsentOperationStatusEnum.REJECT.equals(decisionOnResource)) {
+				// the consent service decision on the resource was AUTHORIZED or REJECT.
+				// In both cases, we can immediately return without checking children
+				return;
+			}
+		} else {
+			// we haven't seen this resource before
+			// mark it as seen now, set the initial consent decision value to PROCEED by default,
+			// we will update if it changes another value below
+			alreadySeenResources.put(theResponseDetails.getResponseResource(), ConsentOperationStatusEnum.PROCEED);
 
 			for (IConsentService next : myConsentService) {
 				final ConsentOutcome outcome = next.willSeeResource(
-						theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
+						theRequestDetails, theResponseDetails.getResponseResource(), myContextConsentServices);
 				if (outcome.getResource() != null) {
-					theResource.setResponseResource(outcome.getResource());
+					theResponseDetails.setResponseResource(outcome.getResource());
 				}
 
 				// Clear the total
-				if (theResource.getResponseResource() instanceof IBaseBundle) {
+				if (theResponseDetails.getResponseResource() instanceof IBaseBundle) {
 					BundleUtil.setTotal(
-							theRequestDetails.getFhirContext(), (IBaseBundle) theResource.getResponseResource(), null);
+							theRequestDetails.getFhirContext(),
+							(IBaseBundle) theResponseDetails.getResponseResource(),
+							null);
 				}
 
 				switch (outcome.getStatus()) {
 					case REJECT:
+						alreadySeenResources.put(
+								theResponseDetails.getResponseResource(), ConsentOperationStatusEnum.REJECT);
 						if (outcome.getOperationOutcome() != null) {
-							theResource.setResponseResource(outcome.getOperationOutcome());
+							theResponseDetails.setResponseResource(outcome.getOperationOutcome());
 						} else {
-							theResource.setResponseResource(null);
-							theResource.setResponseCode(Constants.STATUS_HTTP_204_NO_CONTENT);
+							theResponseDetails.setResponseResource(null);
+							theResponseDetails.setResponseCode(Constants.STATUS_HTTP_204_NO_CONTENT);
 						}
 						// Return immediately
 						return;
 					case AUTHORIZED:
+						alreadySeenResources.put(
+								theResponseDetails.getResponseResource(), ConsentOperationStatusEnum.AUTHORIZED);
 						// Don't check children, so return immediately
 						return;
 					case PROCEED:
@@ -375,7 +442,7 @@ public class ConsentInterceptor {
 		}
 
 		// See child resources
-		IBaseResource outerResource = theResource.getResponseResource();
+		IBaseResource outerResource = theResponseDetails.getResponseResource();
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		IModelVisitor2 visitor = new IModelVisitor2() {
 			@Override
@@ -395,7 +462,7 @@ public class ConsentInterceptor {
 				}
 				if (theElement instanceof IBaseResource) {
 					IBaseResource resource = (IBaseResource) theElement;
-					if (authorizedResources.putIfAbsent(resource, Boolean.TRUE) != null) {
+					if (alreadySeenResources.putIfAbsent(resource, ConsentOperationStatusEnum.PROCEED) != null) {
 						return true;
 					}
 
@@ -411,12 +478,17 @@ public class ConsentInterceptor {
 							case REJECT:
 								replacementResource = childOutcome.getOperationOutcome();
 								shouldReplaceResource = true;
+								alreadySeenResources.put(resource, ConsentOperationStatusEnum.REJECT);
 								break;
 							case PROCEED:
+								replacementResource = childOutcome.getResource();
+								shouldReplaceResource = replacementResource != null;
+								break;
 							case AUTHORIZED:
 								replacementResource = childOutcome.getResource();
 								shouldReplaceResource = replacementResource != null;
-								shouldCheckChildren &= childOutcome.getStatus() == ConsentOperationStatusEnum.PROCEED;
+								shouldCheckChildren = false;
+								alreadySeenResources.put(resource, ConsentOperationStatusEnum.AUTHORIZED);
 								break;
 						}
 
@@ -447,10 +519,6 @@ public class ConsentInterceptor {
 		ctx.newTerser().visit(outerResource, visitor);
 	}
 
-	private IdentityHashMap<IBaseResource, Boolean> getAuthorizedResourcesMap(RequestDetails theRequestDetails) {
-		return getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
-	}
-
 	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION)
 	public void requestFailed(RequestDetails theRequest, BaseServerResponseException theException) {
 		theRequest.getUserData().put(myRequestCompletedKey, Boolean.TRUE);
@@ -467,6 +535,37 @@ public class ConsentInterceptor {
 		for (IConsentService next : myConsentService) {
 			next.completeOperationSuccess(theRequest, myContextConsentServices);
 		}
+	}
+
+	protected RequestDetails getRequestDetailsForCurrentExportOperation(
+			BulkExportJobParameters theParameters, IBaseResource theBaseResource) {
+		// bulk exports are system operations
+		SystemRequestDetails details = new SystemRequestDetails();
+		return details;
+	}
+
+	@Hook(value = Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
+	public boolean shouldBulkExportIncludeResource(BulkExportJobParameters theParameters, IBaseResource theResource) {
+		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
+
+		for (IConsentService next : myConsentService) {
+			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
+			ConsentOperationStatusEnum status = nextOutcome.getStatus();
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
+			}
+
+			nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
+			status = nextOutcome.getStatus();
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
+			}
+		}
+
+		// default is to include the resource
+		return true;
 	}
 
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {
@@ -487,11 +586,11 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
-		return OPERATION_META.equals(theRequestDetails.getOperation());
+		return theRequestDetails != null && OPERATION_META.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
-		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+		return theRequestDetails != null && URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
@@ -509,14 +608,23 @@ public class ConsentInterceptor {
 		}
 	}
 
+	/**
+	 * The map returned by this method keeps track of the resources already processed by ConsentInterceptor in the
+	 * context of a request.
+	 * If the map contains a particular resource, it means that the resource has already been processed and the value
+	 * is the status returned by consent services for that resource.
+	 * @param theRequestDetails
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	public static IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(
-			RequestDetails theRequestDetails, String theKey) {
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>)
-				theRequestDetails.getUserData().get(theKey);
+	private IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> getAlreadySeenResourcesMap(
+			RequestDetails theRequestDetails) {
+		IdentityHashMap<IBaseResource, ConsentOperationStatusEnum> alreadySeenResources =
+				(IdentityHashMap<IBaseResource, ConsentOperationStatusEnum>)
+						theRequestDetails.getUserData().get(myRequestSeenResourcesKey);
 		if (alreadySeenResources == null) {
 			alreadySeenResources = new IdentityHashMap<>();
-			theRequestDetails.getUserData().put(theKey, alreadySeenResources);
+			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
 		}
 		return alreadySeenResources;
 	}

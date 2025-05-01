@@ -16,7 +16,7 @@
          <span class="fa fa-home topbarIcon"></span> Home
       </a>
 
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
          <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -25,9 +25,9 @@
          <!--
          Server selection dropdown
          -->
-         <ul class="navbar-nav ml-auto">
+         <ul class="navbar-nav ms-auto">
             <li class="nav-item dropdown">
-               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="fas fa-fire topbarIcon"></i>&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}"></span>&nbsp;<span class="caret" /></a>
                </a>
                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -47,7 +47,7 @@
          <th:block th:if="${apiKey != null}">
             <ul class="navbar-nav">
                <li class="nav-item dropdown">
-                  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><span class="fa fa-key topbarIcon"></span>&nbsp;API Key&nbsp;<span class="caret" /></a>
+                  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><span class="fa fa-key topbarIcon"></span>&nbsp;API Key&nbsp;<span class="caret" /></a>
                   <ul class="dropdown-menu" role="menu">
                      <div style="padding: 10px;">
                         <p>If your chosen server requires an API key / Bearer token, enter it here:</p>
@@ -69,7 +69,7 @@
          <!--
          SourceCode / About this Server
          -->
-         <th:block th:replace="tmpl-navbar-top-farright :: farright"/>
+         <th:block th:replace="~{tmpl-navbar-top-farright :: farright}"/>
 
       </div>
 

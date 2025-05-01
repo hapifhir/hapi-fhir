@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,7 +94,7 @@ public class JpaResourceDaoSearchParameterTest {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
+			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error @1, 1: Found [ expecting a token name", e.getMessage());
 		}
 	}
 

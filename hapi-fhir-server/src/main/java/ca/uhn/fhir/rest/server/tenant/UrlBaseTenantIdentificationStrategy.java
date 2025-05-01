@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 			tenantId = defaultIfBlank(theUrlPathTokenizer.peek(), null);
 
 			// If it's "metadata" or starts with "$", use DEFAULT partition and don't consume this token:
-			if (tenantId != null && (tenantId.equals("metadata") || tenantId.startsWith("$"))) {
+			if (tenantId != null && (tenantId.equals("metadata") || isOperation(tenantId))) {
 				tenantId = "DEFAULT";
 				theRequestDetails.setTenantId(tenantId);
 				ourLog.trace("No tenant ID found for metadata or system request; using DEFAULT.");
@@ -94,6 +94,10 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 		}
 	}
 
+	private boolean isOperation(String theToken) {
+		return theToken.startsWith("$");
+	}
+
 	@Override
 	public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
 		String result = theFhirServerBase;
@@ -101,5 +105,30 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 			result += "/" + theRequestDetails.getTenantId();
 		}
 		return result;
+	}
+
+	@Override
+	public String resolveRelativeUrl(String theRelativeUrl, RequestDetails theRequestDetails) {
+		UrlPathTokenizer tokenizer = new UrlPathTokenizer(theRelativeUrl);
+		// there is no more tokens in the URL - skip url resolution
+		if (!tokenizer.hasMoreTokens() || tokenizer.peek() == null) {
+			return theRelativeUrl;
+		}
+		String nextToken = tokenizer.peek();
+		// there is no tenant ID in parent request details or tenant ID is already present in URL - skip url resolution
+		if (theRequestDetails.getTenantId() == null || nextToken.equals(theRequestDetails.getTenantId())) {
+			return theRelativeUrl;
+		}
+
+		// token is Resource type or operation - adding tenant ID from parent request details
+		if (isResourceType(nextToken, theRequestDetails) || isOperation(nextToken)) {
+			return theRequestDetails.getTenantId() + "/" + theRelativeUrl;
+		} else {
+			return theRelativeUrl;
+		}
+	}
+
+	private boolean isResourceType(String token, RequestDetails theRequestDetails) {
+		return theRequestDetails.getFhirContext().getResourceTypes().stream().anyMatch(type -> type.equals(token));
 	}
 }

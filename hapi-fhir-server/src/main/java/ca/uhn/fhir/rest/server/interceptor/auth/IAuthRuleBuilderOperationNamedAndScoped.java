@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,12 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	 * Responses for this operation will not be checked
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses();
+
+	/**
+	 * @deprecated This is a synonym for {@link #andAllowAllResponses()}, use that method instead
+	 */
+	@Deprecated(since = "7.6.0")
+	IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponsesWithAllResourcesAccess();
 
 	/**
 	 * Responses for this operation must be authorized by other rules. For example, if this

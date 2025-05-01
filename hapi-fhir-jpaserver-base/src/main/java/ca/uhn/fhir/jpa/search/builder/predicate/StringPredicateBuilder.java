@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,8 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.Nonnull;
 
 public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
@@ -245,10 +244,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@Nonnull
 	public Condition createPredicateLikeExpressionOnly(
 			String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
-		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
-		BinaryCondition identityPredicate =
-				BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
+		Condition identityPredicate = createHashIdentityPredicate(theResourceType, theParamName);
 		BinaryCondition likePredicate;
 		if (theInverse) {
 			likePredicate = BinaryCondition.notLike(myColumnValueNormalized, generatePlaceholder(theLikeExpression));

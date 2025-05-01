@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 
@@ -90,7 +89,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), endsWith("This operation is only available for resources on the same partition."));
+			assertThat(e.getMessage()).endsWith("This operation is only available for resources on the same partition.");
 		}
 	}
 
@@ -131,7 +130,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(sourcePatientId2, patientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), endsWith("Use $mdm-query-links to see more details."));
+			assertThat(e.getMessage()).endsWith("Use $mdm-query-links to see more details.");
 		}
 	}
 
@@ -165,7 +164,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, MATCH_RESULT,myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(753) + "Link already exists"));
+			assertThat(e.getMessage()).startsWith(Msg.code(753) + "Link already exists");
 		}
 		assertLinkCount(1);
 	}
@@ -186,7 +185,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(new StringType(""), myPatientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), endsWith(" must have form <resourceType>/<id> where <id> is the id of the resource"));
+			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
 	}
 
@@ -196,7 +195,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(myVersionlessGodlenResourceId, new StringType(""), MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource"));
+			assertThat(e.getMessage()).endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
 	}
 

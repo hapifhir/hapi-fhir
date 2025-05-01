@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ package ca.uhn.fhir.jpa.fql.parser;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static java.lang.Character.isWhitespace;
 
@@ -137,6 +137,22 @@ class HfqlLexer {
 			case INITIAL: {
 				if (isWhitespace(theNextChar)) {
 					return;
+				}
+
+				for (String nextMultiCharToken : theOptions.getMultiCharTokens()) {
+					boolean haveStringStartingHere = true;
+					for (int i = 0; i < nextMultiCharToken.length(); i++) {
+						if (myInput.length <= myPosition + 1
+								|| nextMultiCharToken.charAt(i) != myInput[myPosition + i]) {
+							haveStringStartingHere = false;
+							break;
+						}
+					}
+					if (haveStringStartingHere) {
+						setNextToken(theOptions, nextMultiCharToken);
+						myPosition += nextMultiCharToken.length();
+						return;
+					}
 				}
 
 				if (theNextChar == '\'') {

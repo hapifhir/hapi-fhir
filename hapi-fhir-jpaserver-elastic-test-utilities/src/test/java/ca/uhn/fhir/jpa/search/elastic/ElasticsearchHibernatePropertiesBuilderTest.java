@@ -10,12 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Properties;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,9 +34,8 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 		try {
 			myPropertiesBuilder.setHosts(protocolHost)
 				.apply(new Properties());
-			fail();
-		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(2139) + failureMessage)));
+			fail("");		} catch (ConfigurationException e ) {
+			assertEquals(Msg.code(2139) + failureMessage, e.getMessage());
 		}
 
 		Properties properties = new Properties();
@@ -48,7 +43,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 			.setHosts(host)
 			.apply(properties);
 
-		assertThat(properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)), is(equalTo(host)));
+		assertEquals(host, properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)));
 
 	}
 }

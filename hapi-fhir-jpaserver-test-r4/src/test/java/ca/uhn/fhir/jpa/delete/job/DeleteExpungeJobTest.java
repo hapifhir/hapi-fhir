@@ -10,17 +10,18 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -29,6 +30,14 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+	}
 
 	@Test
 	public void testDeleteExpunge() {
@@ -63,14 +72,15 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
-		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
+		jobParameters.addUrl("Observation?subject.active=false");
+		jobParameters.addUrl("DiagnosticReport?subject.active=false");
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(jobParameters);
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
@@ -107,7 +117,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(failure.getErrorMessage(), containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
+		assertThat(failure.getErrorMessage()).contains("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it");
 	}
 
 	@Test
@@ -207,7 +217,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(outcome.getErrorMessage(), containsString("refers to it via the path"));
+		assertThat(outcome.getErrorMessage()).contains("refers to it via the path");
 		assertNotGone(p1);
 		assertNotGone(o1);
 		assertNotGone(o1b);
@@ -231,7 +241,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// validate
-			assertThat(e.getMessage(), containsString("Delete expunge URLs must be in the format"));
+			assertThat(e.getMessage()).contains("Delete expunge URLs must be in the format");
 		}
 
 	}

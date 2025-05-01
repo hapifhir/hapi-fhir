@@ -16,6 +16,7 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 public class InstantiationTest {
 
 	@SuppressWarnings("unchecked")

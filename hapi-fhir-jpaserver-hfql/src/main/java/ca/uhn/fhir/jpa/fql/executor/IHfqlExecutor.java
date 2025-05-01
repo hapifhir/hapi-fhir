@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public interface IHfqlExecutor {
 

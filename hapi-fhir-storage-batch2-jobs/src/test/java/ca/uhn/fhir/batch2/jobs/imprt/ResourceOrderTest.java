@@ -7,8 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ResourceOrderTest {
 
@@ -19,8 +18,8 @@ class ResourceOrderTest {
 		List<String> r4Order = ResourceOrderUtil.getResourceOrder(FhirContext.forR4Cached());
 		ourLog.info("R4 Order: {}", r4Order);
 
-		assertThat(r4Order.indexOf("Patient"), lessThan(r4Order.indexOf("Observation")));
-		assertThat(r4Order.indexOf("Practitioner"), lessThan(r4Order.indexOf("Patient")));
+		assertThat(r4Order.indexOf("Patient")).isLessThan(r4Order.indexOf("Observation"));
+		assertThat(r4Order.indexOf("Practitioner")).isLessThan(r4Order.indexOf("Patient"));
 	}
 
 }

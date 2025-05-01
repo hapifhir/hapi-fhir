@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.elementmodel;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -15,14 +16,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * Created by axemj on 14/07/2017.
  */
-public class PropertyDstu3Test {
+public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 
     private static final FhirContext ourCtx = FhirContext.forDstu3();
     private Property property;
@@ -42,9 +44,9 @@ public class PropertyDstu3Test {
         final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
         property = new Property(workerContext, ed, sd);
         final List<Property> result = property.getChildProperties("id", null);
-        assertFalse(result.isEmpty());
-        assertEquals(3, result.size());
-        assertEquals("id.id", result.get(0).getDefinition().getPath());
+			assertThat(result).isNotEmpty();
+			assertThat(result).hasSize(3);
+			assertEquals("id.id", result.get(0).getDefinition().getPath());
     }
 
     @Test
@@ -52,9 +54,9 @@ public class PropertyDstu3Test {
         final ElementDefinition ed = sd.getSnapshot().getElement().get(23);
         property = new Property(workerContext, ed, sd);
         final List<Property> result = property.getChildProperties("birthdate", null);
-        assertFalse(result.isEmpty());
-        assertEquals(3, result.size());
-        assertEquals("date.id", result.get(0).getDefinition().getPath());
+			assertThat(result).isNotEmpty();
+			assertThat(result).hasSize(3);
+			assertEquals("date.id", result.get(0).getDefinition().getPath());
     }
 
     @Test
@@ -63,9 +65,8 @@ public class PropertyDstu3Test {
 			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
-			fail();
-		} catch (Error e) {
-    		assertEquals("types == 0, and no children found", e.getMessage());
+			fail();		} catch (Error e) {
+				assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }
 }

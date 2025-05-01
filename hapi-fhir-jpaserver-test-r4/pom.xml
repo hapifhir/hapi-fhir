@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -35,17 +35,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.exparity</groupId>
-			<artifactId>hamcrest-date</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>*</artifactId>
-					<groupId>*</groupId>
-				</exclusion>
-			</exclusions>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
 			<scope>test</scope>
@@ -55,7 +44,12 @@
 			<artifactId>javax.json-api</artifactId>
 			<scope>test</scope>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -77,10 +71,6 @@
 						<version>${junit_version}</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

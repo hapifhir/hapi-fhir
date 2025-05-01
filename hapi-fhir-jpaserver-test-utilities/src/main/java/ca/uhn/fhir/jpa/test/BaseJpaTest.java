@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -35,52 +37,70 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -91,7 +111,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
-import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.test.utilities.server.SpringContextGrabbingTestExecutionListener;
 import ca.uhn.fhir.util.BundleUtil;
@@ -99,6 +118,9 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -118,8 +140,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
@@ -129,8 +155,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -139,6 +163,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -147,8 +172,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -164,6 +192,7 @@ import static org.mockito.Mockito.when;
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
+@Import(BaseJpaTest.TestSearchParamConfig.class)
 @TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
@@ -175,10 +204,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
+	protected static final long VALIDATION_CACHE_TIMEOUT_MILLIS = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
-		HapiSystemProperties.setTestValidationResourceCachesMs(1000);
+		HapiSystemProperties.setValidationResourceCacheTimeoutMillis(VALIDATION_CACHE_TIMEOUT_MILLIS);
 		HapiSystemProperties.enableTestMode();
 		HapiSystemProperties.enableUnitTestMode();
 		TestUtil.setShouldRandomizeTimezones(false);
@@ -190,17 +220,25 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
 	@Autowired
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
+	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 	@Autowired
+	protected SubscriptionSettings mySubscriptionSettings;
+	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 	@Autowired
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -229,12 +267,18 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired
+	protected IResourceIndexedComboStringUniqueDao myResourceIndexedComboStringUniqueDao;
+	@Autowired
+	protected IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
 	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
+	@Autowired
+	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
@@ -245,22 +289,61 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	protected ISchedulerService mySchedulerService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirInstanceValidator myFhirInstanceValidator;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
+	private IResourceSearchUrlDao myResourceSearchUrlDao;
+	@Autowired
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	private IForcedIdDao myForcedIdDao;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
+	@Autowired
+	protected IResourceSearchUrlDao mySearchUrlDao;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
+	@Autowired
+	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
+	@Autowired
+	protected ApplicationContext myApplicationContext;
+
+	@TestConfiguration
+	public static class TestSearchParamConfig {
+
+		@Autowired(required = false)
+		private SearchParamRegistryImpl mySearchParamRegistry;
+
+		@Autowired(required = false)
+		protected JpaStorageSettings myStorageSettings;
+
+		@PostConstruct
+		public void preConfigure() {
+			if (myStorageSettings != null) {
+				myStorageSettings.setWriteToSearchParamIdentityTable(false);
+			}
+
+			if (mySearchParamRegistry != null) {
+				mySearchParamRegistry.setPopulateSearchParamIdentities(false);
+			}
+		}
+	}
+
+	@BeforeEach
+	public void beforeInitSearchParams() {
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
+	}
 
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
@@ -295,7 +378,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	public static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
@@ -307,6 +390,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		for (int count = 0; ; count++) {
 			try {
+				ourLog.info("Calling Expunge count {}", count);
 				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
 				break;
 			} catch (Exception e) {
@@ -369,15 +453,21 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myMemoryCacheService != null) {
 			myMemoryCacheService.invalidateAllCaches();
 		}
-		if (myJpaPersistedValidationSupport != null) {
-			ProxyUtil.getSingletonTarget(myJpaPersistedValidationSupport, JpaPersistedResourceValidationSupport.class).clearCaches();
-		}
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
+		if (myValidationSupport != null) {
+			myValidationSupport.invalidateCaches();
+		}
+
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
-		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		BeanUtils.copyProperties(defaultConfig, myStorageSettings);
+
+		ParserOptions defaultParserOptions = new ParserOptions();
+		BeanUtils.copyProperties(defaultParserOptions, myFhirContext.getParserOptions());
+
+		PartitionSettings defaultPartConfig = new PartitionSettings();
+		BeanUtils.copyProperties(defaultPartConfig, myPartitionSettings);
 	}
 
 	@AfterEach
@@ -418,6 +508,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+		when(mySrd.getHeaders(eq(HEADER_CACHE_CONTROL))).thenReturn(new ArrayList<>());
 		// TODO enforce strict mocking everywhere
 		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
 		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
@@ -429,6 +520,11 @@ public abstract class BaseJpaTest extends BaseTest {
 		myRegisteredInterceptors.add(interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, interceptor);
 		return deliveryLatch;
+	}
+
+	protected void registerInterceptor(Object theInterceptor) {
+		myRegisteredInterceptors.add(theInterceptor);
+		myInterceptorRegistry.registerInterceptor(theInterceptor);
 	}
 
 	protected void purgeHibernateSearch(EntityManager theEntityManager) {
@@ -445,7 +541,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected abstract PlatformTransactionManager getTxManager();
 
-	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
+	public void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
 		runInTransaction(() -> {
 			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
 				.stream()
@@ -458,16 +554,46 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllResourceLinks() {
+	public void logAllPackageVersions() {
+		runInTransaction(() -> {
+			ourLog.info("Package Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected int countAllMdmLinks() {
+		return runInTransaction(()-> myMdmLinkDao.findAll().size());
+	}
+
+	protected int logAllMdmLinks() {
+		return runInTransaction(()->{
+			List<MdmLink> links = myMdmLinkDao.findAll();
+			if (links.isEmpty()) {
+				ourLog.info("MDM Links: NONE");
+			} else {
+				ourLog.info("MDM Links:\n * {}", links.stream().map(t -> t.toString()).collect(joining("\n * ")));
+			}
+			return links.size();
+		});
+	}
+
+	public void logAllResourceLinks() {
 		runInTransaction(() -> {
 			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(ResourceLink::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
-	protected int logAllResources() {
+	public int logAllResources() {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			ourLog.info("Resources:\n * {}", resources.stream().map(ResourceTable::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	public int logAllResourceSearchUrls() {
+		return runInTransaction(() -> {
+			List<ResourceSearchUrlEntity> resources = myResourceSearchUrlDao.findAll();
+			ourLog.info("Search URLs:\n * {}", resources.stream().map(ResourceSearchUrlEntity::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -483,12 +609,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected int logAllConceptProperties() {
 		return runInTransaction(() -> {
 			List<TermConceptProperty> resources = myTermConceptPropertyDao.findAll();
-			ourLog.info("Concept Designations:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concept Properties:\n * {}", resources.stream().map(TermConceptProperty::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
 
-	protected int logAllConcepts() {
+	public int logAllConcepts() {
 		return runInTransaction(() -> {
 			List<TermConcept> resources = myTermConceptDao.findAll();
 			ourLog.info("Concepts:\n * {}", resources.stream().map(TermConcept::toString).collect(Collectors.joining("\n * ")));
@@ -496,10 +622,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected int logAllValueSetConcepts() {
+	protected int logAllConceptParentChildLinks() {
+		return runInTransaction(() -> {
+			List<TermConceptParentChildLink> resources = myTermConceptParentChildLinkDao.findAll();
+			ourLog.info("Concept Parent/Child Links:\n * {}", resources.stream().map(TermConceptParentChildLink::toString).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	public int logAllValueSetConcepts() {
 		return runInTransaction(() -> {
 			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
-			ourLog.info("Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("ValueSet Concepts:\n * {}", resources.stream().map(TermValueSetConcept::toString).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
 	}
@@ -509,14 +643,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
 			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(TermValueSet::toString).collect(Collectors.joining("\n * ")));
 			return valueSets.size();
-		});
-	}
-
-	protected int logAllForcedIds() {
-		return runInTransaction(() -> {
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			ourLog.info("Resources:\n * {}", forcedIds.stream().map(ForcedId::toString).collect(Collectors.joining("\n * ")));
-			return forcedIds.size();
 		});
 	}
 
@@ -532,10 +658,37 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllTokenIndexes() {
+	protected void logAllUniqueIndexes() {
 		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+			ourLog.info("Unique indexes:\n * {}", myResourceIndexedComboStringUniqueDao.findAll().stream().map(ResourceIndexedComboStringUnique::toString).collect(Collectors.joining("\n * ")));
 		});
+	}
+
+    protected void logAllSearchUrls() {
+        runInTransaction(() -> {
+            ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+    
+	protected void logAllTokenIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
+		runInTransaction(() -> {
+			String message = getAllTokenIndexes(theParamNames)
+				.stream()
+				.map(ResourceIndexedSearchParamToken::toString)
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("Token indexes{}:\n * {}", messageSuffix, message);
+		});
+	}
+
+	@Nonnull
+	protected List<ResourceIndexedSearchParamToken> getAllTokenIndexes(String... theParamNames) {
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return runInTransaction(() -> myResourceIndexedSearchParamTokenDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
+			.toList());
 	}
 
 	protected void logAllCoordsIndexes() {
@@ -550,7 +703,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllUriIndexes() {
+	public void logAllUriIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(ResourceIndexedSearchParamUri::toString).collect(Collectors.joining("\n * ")));
 		});
@@ -559,25 +712,52 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllStringIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			String message = myResourceIndexedSearchParamStringDao
-				.findAll()
+			String message = getAllStringIndexes(theParamNames)
 				.stream()
-				.filter(t -> theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
-				.map(t -> t.toString())
+				.map(ResourceIndexedSearchParamString::toString)
 				.collect(Collectors.joining("\n * "));
 			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
 
+	@Nonnull
+	protected List<ResourceIndexedSearchParamString> getAllStringIndexes(String... theParamNames) {
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return myResourceIndexedSearchParamStringDao
+			.findAll()
+			.stream()
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
+			.toList();
+	}
+
+	protected List<Long> getSearchParamHashIdentities(String[] theParamNames) {
+		List<Long> searchParamHashIdentities = new ArrayList<>(theParamNames.length);
+		if (theParamNames.length != 0) {
+			searchParamHashIdentities.addAll(myResourceIndexedSearchParamIdentityDao
+				.findAll()
+				.stream()
+				.filter(t -> Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(IndexedSearchParamIdentity::getHashIdentity)
+				.toList());
+		}
+		return searchParamHashIdentities;
+	}
+
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {
-			ourLog.info("Token tags:\n * {}", myResourceTagDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Resource tags:\n * {}", myResourceTagDao.findAll().stream().map(ResourceTag::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllResourceHistoryTags() {
+		runInTransaction(() -> {
+			ourLog.info("Resource history tags:\n * {}", myResourceHistoryTagDao.findAll().stream().map(ResourceHistoryTag::toString).collect(Collectors.joining("\n * ")));
 		});
 	}
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		retVal.afterPropertiesSet();
 		return retVal;
 	}
@@ -602,9 +782,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	/**
-	 * Sleep until at least 1 ms has elapsed
+	 * Sleep until time change on the clocks
 	 */
-	public void sleepUntilTimeChanges() {
+	public void sleepUntilTimeChange() {
 		StopWatch sw = new StopWatch();
 		await().until(() -> sw.getMillis() > 0);
 	}
@@ -669,6 +849,19 @@ public abstract class BaseJpaTest extends BaseTest {
 		int fromIndex = 0;
 		Integer toIndex = theFound.size();
 		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+	}
+
+	/**
+	 * Keys will be unqualified versionless IDs (Patient/ABC) and values will be the resources
+	 * themselves.
+	 */
+	protected Map<String, IBaseResource> toResourceIdValueMap(IBundleProvider theFound) {
+		Map<String, IBaseResource> retVal = new HashMap<>();
+		List<IBaseResource> resources = theFound.getAllResources();
+		for (IBaseResource next : resources) {
+			retVal.put(next.getIdElement().toUnqualifiedVersionless().getValue(), next);
+		}
+		return retVal;
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
@@ -846,6 +1039,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void afterResetInterceptors() {
 		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
 		myRegisteredInterceptors.clear();
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 	}
 
 	/**
@@ -874,9 +1068,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		try {
 			dao.read(theId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			// good
+			assertThat(e.getMessage()).containsAnyOf(
+				Msg.code(1996) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known",
+				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
+			);
 		}
 	}
 }

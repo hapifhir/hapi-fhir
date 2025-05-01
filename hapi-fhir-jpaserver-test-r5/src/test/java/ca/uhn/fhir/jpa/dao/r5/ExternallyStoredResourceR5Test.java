@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -15,9 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +52,9 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 
 		// Verify
 		runInTransaction(()->{
-			ResourceTable resource = myResourceTableDao.getReferenceById(id.getIdPartAsLong());
+			ResourceTable resource = myResourceTableDao.getReferenceById(JpaPid.fromId(id.getIdPartAsLong()));
 			assertNotNull(resource);
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong()), 1L);
 			assertNotNull(history);
 			assertEquals(ResourceEncodingEnum.ESR, history.getEncoding());
 			assertEquals(MY_PROVIDER_ID + ":" + ADDRESS_123, history.getResourceTextVc());

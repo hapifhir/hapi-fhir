@@ -18,6 +18,7 @@ import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.google.common.collect.Lists;
+import jakarta.persistence.EntityManager;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -42,13 +43,12 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

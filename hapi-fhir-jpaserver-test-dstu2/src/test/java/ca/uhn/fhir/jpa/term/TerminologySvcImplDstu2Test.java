@@ -14,9 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
@@ -31,6 +30,8 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
 
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(null);
+
 		ValueSet upload = new ValueSet();
 		upload.setId(new IdDt("testVs"));
 		upload.setUrl("http://myVs");
@@ -41,27 +42,29 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
 		concepts = myTermReadSvc.findCodesBelow("http://myVs", "codeA");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("codeA", "codeAB"));
+		assertThat(codes).containsExactlyInAnyOrder("codeA", "codeAB");
 
 		concepts = myTermReadSvc.findCodesBelow("http://myVs", "codeAB");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("codeAB"));
+		assertThat(codes).containsExactlyInAnyOrder("codeAB");
 
 		// Unknown code
 		concepts = myTermReadSvc.findCodesBelow("http://myVs", "FOO");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Unknown system
 		concepts = myTermReadSvc.findCodesBelow("http://myVs2222", "codeA");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
 	public void testFindCodesAboveBuiltInCodeSystem() {
 		List<FhirVersionIndependentConcept> concepts;
 		Set<String> codes;
+
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(null);
 
 		ValueSet upload = new ValueSet();
 		upload.setId(new IdDt("testVs"));
@@ -73,21 +76,21 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
 		concepts = myTermReadSvc.findCodesAbove("http://myVs", "codeA");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("codeA"));
+		assertThat(codes).containsExactlyInAnyOrder("codeA");
 
 		concepts = myTermReadSvc.findCodesAbove("http://myVs", "codeAB");
 		codes = toCodes(concepts);
-		assertThat(codes, containsInAnyOrder("codeA", "codeAB"));
+		assertThat(codes).containsExactlyInAnyOrder("codeA", "codeAB");
 
 		// Unknown code
 		concepts = myTermReadSvc.findCodesAbove("http://myVs", "FOO");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 
 		// Unknown system
 		concepts = myTermReadSvc.findCodesBelow("http://myVs2222", "codeA");
 		codes = toCodes(concepts);
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 

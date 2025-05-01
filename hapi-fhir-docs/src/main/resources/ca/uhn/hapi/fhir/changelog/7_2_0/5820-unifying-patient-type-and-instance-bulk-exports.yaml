@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5820
+title: "Unifying the code paths for Patient type export and Patient instance export.
+        These paths should be the same, since type is defined by spec, but instance
+        is just 'syntactic sugar' on top of that spec (and so should be the same).
+"

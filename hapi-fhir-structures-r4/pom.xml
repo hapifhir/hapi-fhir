@@ -5,17 +5,13 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-r4</artifactId>
 	<packaging>bundle</packaging>
-
-	<properties>
-		<shexjava_version>1.3beta</shexjava_version>
-	</properties>
 
 	<name>HAPI FHIR Structures - FHIR R4</name>
 
@@ -25,7 +21,7 @@
 			<artifactId>okhttp</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -59,7 +55,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- 
+		<!--
 		Optional dependencies from RI codebase
 		-->
 		<dependency>
@@ -78,14 +74,14 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>xpp3</groupId>
+			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
 			<optional>true</optional>
 		</dependency>
 
 
 		<!--
-		Test dependencies on other optional parts of HAPI 
+		Test dependencies on other optional parts of HAPI
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -106,8 +102,8 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -124,21 +120,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>fr.inria.lille.shexjava</groupId>
-			<artifactId>shexjava-core</artifactId>
-			<version>${shexjava_version}</version>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-shex</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.helger.commons</groupId>
+			<artifactId>ph-collection</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<!-- If this is included it confused the RDFParser -->
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-rdf-jena</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!--
@@ -165,6 +153,12 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
+			<optional>true</optional>
+		</dependency>
 
 
 		<dependency>
@@ -174,8 +168,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<!-- Testing -->
@@ -189,36 +183,6 @@
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -243,34 +207,6 @@
 			<artifactId>awaitility</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- Dependencies for Schematron -->
-		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -354,13 +290,6 @@
 				<configuration>
 					<!-- Don't add UHN licenses to RI structures -->
 					<skipUpdateLicense>true</skipUpdateLicense>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
 				</configuration>
 			</plugin>
 			<plugin>

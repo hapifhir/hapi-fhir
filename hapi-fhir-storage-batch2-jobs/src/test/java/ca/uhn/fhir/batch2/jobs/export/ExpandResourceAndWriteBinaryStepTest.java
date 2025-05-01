@@ -1,17 +1,20 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -20,7 +23,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -35,7 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,9 +63,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -112,7 +115,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Spy
-	private StorageSettings myStorageSettings = new StorageSettings();
+	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	@Spy
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
@@ -123,6 +126,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@BeforeEach
 	public void init() {
 		ourLog.addAppender(myAppender);
+		myFinalStep.setIdHelperServiceForUnitTest(myIdHelperService);
 	}
 
 	@AfterEach
@@ -149,7 +153,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			theParameters,
 			theData,
 			theInstance,
-			"1"
+			new WorkChunk().setId("1")
 		);
 	}
 
@@ -194,7 +198,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -230,16 +234,16 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
-	@NotNull
+	@Nonnull
 	private static ArrayList<IBaseResource> createResourceList(ResourceIdList idList) {
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		ArrayList<BatchResourceId> batchResourceIds = new ArrayList<>();
+		ArrayList<TypedPidJson> batchResourceIds = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			String stringId = String.valueOf(i);
-			BatchResourceId batchResourceId = new BatchResourceId();
+			TypedPidJson batchResourceId = new TypedPidJson();
 			batchResourceId.setResourceType("Patient");
-			batchResourceId.setId(stringId);
+			batchResourceId.setPid(stringId);
 			batchResourceIds.add(batchResourceId);
 
 			Patient patient = new Patient();
@@ -271,7 +275,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -291,21 +295,18 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// test
 		try {
 			myFinalStep.run(input, sink);
-			fail();
+			fail("");
 		} catch (JobExecutionFailedException ex) {
-			assertTrue(ex.getMessage().contains("Failure to process resource of type"));
+			assertThat(ex.getMessage()).contains("Failure to process resource of type");
 		}
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertTrue(logCaptor.getValue().getFormattedMessage()
-			.contains(
-				"Failure to process resource of type "
-				+ idList.getResourceType()
-				+ " : "
-				+ testException
-			));
+		assertThat(logCaptor.getValue().getFormattedMessage()).contains("Failure to process resource of type "
+			+ idList.getResourceType()
+			+ " : "
+			+ testException);
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));

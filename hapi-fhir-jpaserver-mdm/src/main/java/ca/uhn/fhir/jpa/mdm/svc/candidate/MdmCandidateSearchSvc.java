@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,7 +77,16 @@ public class MdmCandidateSearchSvc {
 	@Transactional
 	public Collection<IAnyResource> findCandidates(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		Map<IResourcePersistentId, IAnyResource> matchedPidsToResources = new HashMap<>();
+
+		/*
+		 * This is a LinkedHashMap only because a number of Smile MDM unit tests depend on
+		 * the order of candidates being returned in an order consistent with the order they
+		 * were created. Before we added the partition ID to the hashCode() of JpaPid this
+		 * seemed to happen naturally by complete coincidence, but after that change it
+		 * stopped happening. So now a linked hashmap is used instead.
+		 */
+		Map<IResourcePersistentId, IAnyResource> matchedPidsToResources = new LinkedHashMap<>();
+
 		List<MdmFilterSearchParamJson> filterSearchParams =
 				myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
@@ -159,7 +168,8 @@ public class MdmCandidateSearchSvc {
 				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
 			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
+					+ "candidate search parameters is strongly recommended for better performance of MDM.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

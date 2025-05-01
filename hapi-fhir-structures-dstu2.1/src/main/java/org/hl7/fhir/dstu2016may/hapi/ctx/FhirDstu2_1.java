@@ -19,7 +19,10 @@
  */
 package org.hl7.fhir.dstu2016may.hapi.ctx;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;

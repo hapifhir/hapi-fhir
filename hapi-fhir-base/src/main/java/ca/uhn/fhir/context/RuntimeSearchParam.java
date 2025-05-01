@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -37,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -58,7 +58,9 @@ public class RuntimeSearchParam {
 	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
+	private final IIdType myIdUnqualifiedVersionless;
 	private IPhoneticEncoder myPhoneticEncoder;
+	private boolean myEnabledForSearching = true;
 
 	/**
 	 * Constructor
@@ -127,6 +129,7 @@ public class RuntimeSearchParam {
 		super();
 
 		myId = theId;
+		myIdUnqualifiedVersionless = theId != null ? theId.toUnqualifiedVersionless() : null;
 		myUri = theUri;
 		myName = theName;
 		myDescription = theDescription;
@@ -162,6 +165,24 @@ public class RuntimeSearchParam {
 		} else {
 			myComponents = Collections.emptyList();
 		}
+	}
+
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public boolean isEnabledForSearching() {
+		return myEnabledForSearching;
+	}
+
+	/**
+	 * Is this search parameter actually enabled for being used in searches (as opposed to only being used for
+	 * generating indexes, which might be desired while the search parameter is still being indexed). This
+	 * setting defaults to {@literal true} if it isn't set otherwise.
+	 */
+	public void setEnabledForSearching(boolean theEnabledForSearching) {
+		myEnabledForSearching = theEnabledForSearching;
 	}
 
 	public List<Component> getComponents() {
@@ -212,6 +233,10 @@ public class RuntimeSearchParam {
 
 	public IIdType getId() {
 		return myId;
+	}
+
+	public IIdType getIdUnqualifiedVersionless() {
+		return myIdUnqualifiedVersionless;
 	}
 
 	public String getUri() {
@@ -355,13 +380,6 @@ public class RuntimeSearchParam {
 		return !myUpliftRefchains.isEmpty();
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
-	}
-
 	/**
 	 * This method tests whether a given FHIRPath expression <i>could</i>
 	 * possibly apply to the given resource type.
@@ -405,6 +423,13 @@ public class RuntimeSearchParam {
 			}
 		}
 		return false;
+	}
+
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
 	}
 
 	public static class Component {

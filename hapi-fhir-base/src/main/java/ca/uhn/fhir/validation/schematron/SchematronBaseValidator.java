@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.commons.io.resource.IReadableResource;
 import com.helger.schematron.ISchematronResource;
 import com.helger.schematron.SchematronHelper;
+import com.helger.schematron.sch.SchematronResourceSCH;
 import com.helger.schematron.svrl.jaxb.SchematronOutputType;
-import com.helger.schematron.xslt.SchematronResourceSCH;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -90,7 +90,12 @@ public class SchematronBaseValidator implements IValidatorModule {
 		}
 		StreamSource source = new StreamSource(new StringReader(resourceAsString));
 
-		SchematronOutputType results = SchematronHelper.applySchematron(sch, source);
+		SchematronOutputType results;
+		try {
+			results = sch.applySchematronValidationToSVRL(source);
+		} catch (Exception e) {
+			throw new InternalErrorException(Msg.code(2433) + e.getMessage(), e);
+		}
 		if (results == null) {
 			return;
 		}

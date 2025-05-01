@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -38,11 +41,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -115,7 +117,8 @@ public interface IValidationSupport {
 			@Nonnull String theValueSetUrlToExpand)
 			throws ResourceNotFoundException {
 		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
-		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
+		IBaseResource valueSet =
+				theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrlToExpand);
 		if (valueSet == null) {
 			throw new ResourceNotFoundException(
 					Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
@@ -211,8 +214,8 @@ public interface IValidationSupport {
 				() -> fetchStructureDefinition(theUri), () -> fetchValueSet(theUri), () -> fetchCodeSystem(theUri)
 			};
 			return (T) Arrays.stream(sources)
-					.map(t -> t.get())
-					.filter(t -> t != null)
+					.map(Supplier::get)
+					.filter(Objects::nonNull)
 					.findFirst()
 					.orElse(null);
 		}
@@ -294,8 +297,8 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
 			String theCodeSystem,
 			String theCode,
 			String theDisplay,
@@ -328,14 +331,16 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Look up a code using the system and code value
+	 * Look up a code using the system and code value.
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param theDisplayLanguage          Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext,
@@ -347,12 +352,14 @@ public interface IValidationSupport {
 
 	/**
 	 * Look up a code using the system and code value
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Deprecated
 	@Nullable
 	default LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
@@ -360,7 +367,26 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
+	 * @since 7.0.0
+	 *
+	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 */
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		// TODO: can change to return null once the deprecated methods are removed
+		return lookupCode(
+				theValidationSupportContext,
+				theLookupCodeRequest.getSystem(),
+				theLookupCodeRequest.getCode(),
+				theLookupCodeRequest.getDisplayLanguage());
+	}
+
+	/**
+	 * Returns <code>true</code> if the given ValueSet can be validated by the given
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -409,23 +435,267 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * This field is used by the Terminology Troubleshooting Log to log which validation support module was used for the operation being logged.
+	 */
+	default String getName() {
+		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
+	}
+
+	/**
+	 * Defines codes in system <a href="http://hl7.org/fhir/issue-severity">http://hl7.org/fhir/issue-severity</a>.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
 	enum IssueSeverity {
 		/**
 		 * The issue caused the action to fail, and no further checking could be performed.
 		 */
-		FATAL,
+		FATAL("fatal"),
 		/**
 		 * The issue is sufficiently important to cause the action to fail.
 		 */
-		ERROR,
+		ERROR("error"),
 		/**
 		 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
 		 */
-		WARNING,
+		WARNING("warning"),
 		/**
 		 * The issue has no relation to the degree of success of the action.
 		 */
-		INFORMATION
+		INFORMATION("information"),
+		/**
+		 * The operation was successful.
+		 */
+		SUCCESS("success");
+		// the spec for OperationOutcome mentions that  a code from http://hl7.org/fhir/issue-severity is required
+
+		private final String myCode;
+
+		IssueSeverity(String theCode) {
+			myCode = theCode;
+		}
+		/**
+		 * Provide mapping to a code in system <a href="http://hl7.org/fhir/issue-severity">http://hl7.org/fhir/issue-severity</a>.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+		/**
+		 * Creates a {@link IssueSeverity} object from the given code.
+		 * @return the {@link IssueSeverity}
+		 */
+		public static IssueSeverity fromCode(String theCode) {
+			switch (theCode) {
+				case "fatal":
+					return FATAL;
+				case "error":
+					return ERROR;
+				case "warning":
+					return WARNING;
+				case "information":
+					return INFORMATION;
+				case "success":
+					return SUCCESS;
+				default:
+					return null;
+			}
+		}
+	}
+
+	/**
+	 * Defines codes in system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
+	 * The binding is enforced as a part of validation logic in the FHIR Core Validation library where an exception is thrown.
+	 * Only a sub-set of these codes are defined as constants because they relate to validation,
+	 * If there are additional ones that come up, for Remote Terminology they are currently supported via
+	 * {@link IValidationSupport.CodeValidationIssue#CodeValidationIssue(String, IssueSeverity, String)}
+	 * while for internal validators, more constants can be added to make things easier and consistent.
+	 * This maps to resource OperationOutcome.issue.code.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
+	class CodeValidationIssueCode {
+		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
+		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
+		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
+
+		private final String myCode;
+
+		// this is intentionally not exposed
+		CodeValidationIssueCode(String theCode) {
+			myCode = theCode;
+		}
+
+		/**
+		 * Retrieve the corresponding code from system <a href="http://hl7.org/fhir/issue-type">http://hl7.org/fhir/issue-type</a>.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+	}
+
+	/**
+	 * Holds information about the details of a {@link CodeValidationIssue}.
+	 * This maps to resource OperationOutcome.issue.details.
+	 */
+	/* this enum would not be needed if we design/refactor to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult */
+	class CodeValidationIssueDetails {
+		private final String myText;
+		private List<CodeValidationIssueCoding> myCodings;
+
+		public CodeValidationIssueDetails(String theText) {
+			myText = theText;
+		}
+
+		// intentionally not exposed
+		void addCoding(CodeValidationIssueCoding theCoding) {
+			getCodings().add(theCoding);
+		}
+
+		public CodeValidationIssueDetails addCoding(String theSystem, String theCode) {
+			if (myCodings == null) {
+				myCodings = new ArrayList<>();
+			}
+			myCodings.add(new CodeValidationIssueCoding(theSystem, theCode));
+			return this;
+		}
+
+		public String getText() {
+			return myText;
+		}
+
+		public List<CodeValidationIssueCoding> getCodings() {
+			if (myCodings == null) {
+				myCodings = new ArrayList<>();
+			}
+			return myCodings;
+		}
+	}
+
+	/**
+	 * Defines codes that can be part of the details of an issue.
+	 * There are some constants available (pre-defined) for codes for system <a href="http://hl7.org/fhir/tools/CodeSystem/tx-issue-type">http://hl7.org/fhir/tools/CodeSystem/tx-issue-type</a>.
+	 * This maps to resource OperationOutcome.issue.details.coding[0].code.
+	 */
+	class CodeValidationIssueCoding {
+		public static String TX_ISSUE_SYSTEM = "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type";
+		public static CodeValidationIssueCoding VS_INVALID =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "vs-invalid");
+		public static final CodeValidationIssueCoding NOT_FOUND =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "not-found");
+		public static final CodeValidationIssueCoding NOT_IN_VS =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "not-in-vs");
+		public static final CodeValidationIssueCoding INVALID_CODE =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "invalid-code");
+		public static final CodeValidationIssueCoding INVALID_DISPLAY =
+				new CodeValidationIssueCoding(TX_ISSUE_SYSTEM, "vs-display");
+		private final String mySystem, myCode;
+
+		// this is intentionally not exposed
+		CodeValidationIssueCoding(String theSystem, String theCode) {
+			mySystem = theSystem;
+			myCode = theCode;
+		}
+
+		/**
+		 * Retrieve the corresponding code for the details of a validation issue.
+		 * @return the code
+		 */
+		public String getCode() {
+			return myCode;
+		}
+
+		/**
+		 * Retrieve the system for the details of a validation issue.
+		 * @return the system
+		 */
+		public String getSystem() {
+			return mySystem;
+		}
+	}
+
+	/**
+	 * This is a hapi-fhir internal version agnostic object holding information about a validation issue.
+	 * An alternative (which requires significant refactoring) would be to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult instead.
+	 */
+	class CodeValidationIssue {
+		private final String myDiagnostics;
+		private final IssueSeverity mySeverity;
+		private final CodeValidationIssueCode myCode;
+		private CodeValidationIssueDetails myDetails;
+
+		public CodeValidationIssue(
+				String theDiagnostics, IssueSeverity theSeverity, CodeValidationIssueCode theTypeCode) {
+			this(theDiagnostics, theSeverity, theTypeCode, null);
+		}
+
+		public CodeValidationIssue(String theDiagnostics, IssueSeverity theSeverity, String theTypeCode) {
+			this(theDiagnostics, theSeverity, new CodeValidationIssueCode(theTypeCode), null);
+		}
+
+		public CodeValidationIssue(
+				String theDiagnostics,
+				IssueSeverity theSeverity,
+				CodeValidationIssueCode theType,
+				CodeValidationIssueCoding theDetailsCoding) {
+			myDiagnostics = theDiagnostics;
+			mySeverity = theSeverity;
+			myCode = theType;
+			// reuse the diagnostics message as a detail text message
+			myDetails = new CodeValidationIssueDetails(theDiagnostics);
+			myDetails.addCoding(theDetailsCoding);
+		}
+
+		/**
+		 * @deprecated Please use {@link #getDiagnostics()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public String getMessage() {
+			return getDiagnostics();
+		}
+
+		public String getDiagnostics() {
+			return myDiagnostics;
+		}
+
+		public IssueSeverity getSeverity() {
+			return mySeverity;
+		}
+
+		/**
+		 * @deprecated Please use {@link #getType()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationIssueCode getCode() {
+			return getType();
+		}
+
+		public CodeValidationIssueCode getType() {
+			return myCode;
+		}
+
+		/**
+		 * @deprecated Please use {@link #getDetails()} instead. That has support for multiple codings.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationIssueCoding getCoding() {
+			return myDetails != null
+					? myDetails.getCodings().stream().findFirst().orElse(null)
+					: null;
+		}
+
+		public void setDetails(CodeValidationIssueDetails theDetails) {
+			this.myDetails = theDetails;
+		}
+
+		public CodeValidationIssueDetails getDetails() {
+			return myDetails;
+		}
+
+		public boolean hasIssueDetailCode(@Nonnull String theCode) {
+			// this method is system agnostic at the moment but it can be restricted if needed
+			return myDetails.getCodings().stream().anyMatch(coding -> theCode.equals(coding.getCode()));
+		}
 	}
 
 	class ConceptDesignation {
@@ -495,7 +765,18 @@ public interface IValidationSupport {
 		public String getPropertyName() {
 			return myPropertyName;
 		}
+
+		public abstract String getType();
 	}
+
+	// The reason these cannot be declared within an enum is because a Remote Terminology Service
+	// can support arbitrary types. We do not restrict against the types in the spec.
+	// Some of the types in the spec are not yet implemented as well.
+	// @see https://github.com/hapifhir/hapi-fhir/issues/5700
+	String TYPE_STRING = "string";
+	String TYPE_BOOLEAN = "boolean";
+	String TYPE_CODING = "Coding";
+	String TYPE_GROUP = "group";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -512,6 +793,34 @@ public interface IValidationSupport {
 
 		public String getValue() {
 			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_STRING;
+		}
+	}
+
+	class BooleanConceptProperty extends BaseConceptProperty {
+		private final boolean myValue;
+
+		/**
+		 * Constructor
+		 *
+		 * @param theName The name
+		 */
+		public BooleanConceptProperty(String theName, boolean theValue) {
+			super(theName);
+			myValue = theValue;
+		}
+
+		public boolean getValue() {
+			return myValue;
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_BOOLEAN;
 		}
 	}
 
@@ -543,9 +852,48 @@ public interface IValidationSupport {
 		public String getDisplay() {
 			return myDisplay;
 		}
+
+		@Override
+		public String getType() {
+			return TYPE_CODING;
+		}
 	}
 
+	class GroupConceptProperty extends BaseConceptProperty {
+		public GroupConceptProperty(String thePropertyName) {
+			super(thePropertyName);
+		}
+
+		private List<BaseConceptProperty> subProperties;
+
+		public BaseConceptProperty addSubProperty(BaseConceptProperty theProperty) {
+			if (subProperties == null) {
+				subProperties = new ArrayList<>();
+			}
+			subProperties.add(theProperty);
+			return this;
+		}
+
+		public List<BaseConceptProperty> getSubProperties() {
+			return subProperties != null ? subProperties : Collections.emptyList();
+		}
+
+		@Override
+		public String getType() {
+			return TYPE_GROUP;
+		}
+	}
+
+	/**
+	 * This is a hapi-fhir internal version agnostic object holding information about the validation result.
+	 * An alternative (which requires significant refactoring) would be to use org.hl7.fhir.r5.terminologies.utilities.ValidationResult.
+	 */
 	class CodeValidationResult {
+		public static final String SOURCE_DETAILS = "sourceDetails";
+		public static final String RESULT = "result";
+		public static final String MESSAGE = "message";
+		public static final String DISPLAY = "display";
+
 		private String myCode;
 		private String myMessage;
 		private IssueSeverity mySeverity;
@@ -553,9 +901,29 @@ public interface IValidationSupport {
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
+		private String mySourceDetails;
+
+		private List<CodeValidationIssue> myIssues;
 
 		public CodeValidationResult() {
 			super();
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public String getSourceDetails() {
+			return mySourceDetails;
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public CodeValidationResult setSourceDetails(String theSourceDetails) {
+			mySourceDetails = theSourceDetails;
+			return this;
 		}
 
 		public String getDisplay() {
@@ -576,7 +944,7 @@ public interface IValidationSupport {
 			return this;
 		}
 
-		String getCodeSystemName() {
+		public String getCodeSystemName() {
 			return myCodeSystemName;
 		}
 
@@ -620,6 +988,48 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		/**
+		 * @deprecated Please use method {@link #getIssues()} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public List<CodeValidationIssue> getCodeValidationIssues() {
+			return getIssues();
+		}
+
+		/**
+		 * @deprecated Please use method {@link #setIssues(List)} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
+			return setIssues(theCodeValidationIssues);
+		}
+
+		/**
+		 * @deprecated Please use method {@link #addIssue(CodeValidationIssue)} instead.
+		 */
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
+			getCodeValidationIssues().add(theCodeValidationIssue);
+			return this;
+		}
+
+		public List<CodeValidationIssue> getIssues() {
+			if (myIssues == null) {
+				myIssues = new ArrayList<>();
+			}
+			return myIssues;
+		}
+
+		public CodeValidationResult setIssues(List<CodeValidationIssue> theIssues) {
+			myIssues = new ArrayList<>(theIssues);
+			return this;
+		}
+
+		public CodeValidationResult addIssue(CodeValidationIssue theCodeValidationIssue) {
+			getIssues().add(theCodeValidationIssue);
+			return this;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}
@@ -643,18 +1053,42 @@ public interface IValidationSupport {
 		public String getSeverityCode() {
 			String retVal = null;
 			if (getSeverity() != null) {
-				retVal = getSeverity().name().toLowerCase();
+				retVal = getSeverity().getCode();
 			}
 			return retVal;
 		}
 
 		/**
-		 * Sets an issue severity as a string code. Value must be the name of
-		 * one of the enum values in {@link IssueSeverity}. Value is case-insensitive.
+		 * Sets an issue severity using a severity code. Please use method {@link #setSeverity(IssueSeverity)} instead.
+		 * @param theSeverityCode the code
+		 * @return the current {@link CodeValidationResult} instance
 		 */
-		public CodeValidationResult setSeverityCode(@Nonnull String theIssueSeverity) {
-			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
+		@Deprecated(since = "7.4.6")
+		public CodeValidationResult setSeverityCode(@Nonnull String theSeverityCode) {
+			setSeverity(IssueSeverity.fromCode(theSeverityCode));
 			return this;
+		}
+
+		public IBaseParameters toParameters(FhirContext theContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, isOk());
+			if (isNotBlank(getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, getMessage());
+			}
+			if (isNotBlank(getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, getDisplay());
+			}
+			if (isNotBlank(getSourceDetails())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+			/*
+			should translate issues as well, except that is version specific code, so it requires more refactoring
+			or replace the current class with org.hl7.fhir.r5.terminologies.utilities.ValidationResult
+			@see VersionSpecificWorkerContextWrapper#getIssuesForCodeValidation
+			*/
+
+			return retVal;
 		}
 	}
 
@@ -663,14 +1097,18 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		public ValueSetExpansionOutcome(String theError) {
+		private final boolean myErrorIsFromServer;
+
+		public ValueSetExpansionOutcome(String theError, boolean theErrorIsFromServer) {
 			myValueSet = null;
 			myError = theError;
+			myErrorIsFromServer = theErrorIsFromServer;
 		}
 
 		public ValueSetExpansionOutcome(IBaseResource theValueSet) {
 			myValueSet = theValueSet;
 			myError = null;
+			myErrorIsFromServer = false;
 		}
 
 		public String getError() {
@@ -679,6 +1117,10 @@ public interface IValidationSupport {
 
 		public IBaseResource getValueSet() {
 			return myValueSet;
+		}
+
+		public boolean getErrorIsFromServer() {
+			return myErrorIsFromServer;
 		}
 	}
 
@@ -781,14 +1223,21 @@ public interface IValidationSupport {
 		}
 
 		public void throwNotFoundIfAppropriate() {
-			if (isFound() == false) {
+			if (!isFound()) {
 				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode()
 						+ "] in system[" + getSearchedForSystem() + "]");
 			}
 		}
 
+		/**
+		 * Converts the current LookupCodeResult instance into a IBaseParameters instance which is returned
+		 * to the client of the $lookup operation.
+		 * @param theContext the FHIR context used for running the operation
+		 * @param thePropertyNamesToFilter the properties which are passed as parameter to filter the result.
+		 * @return the output for the lookup operation.
+		 */
 		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNamesToFilter) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -802,40 +1251,29 @@ public interface IValidationSupport {
 
 			if (myProperties != null) {
 
-				Set<String> properties = Collections.emptySet();
-				if (theProperties != null) {
-					properties = theProperties.stream()
+				final List<BaseConceptProperty> propertiesToReturn;
+				if (thePropertyNamesToFilter != null && !thePropertyNamesToFilter.isEmpty()) {
+					// TODO MM: The logic to filter of properties could actually be moved to the lookupCode provider.
+					// That is where the rest of the lookupCode input parameter handling is done.
+					// This was left as is for now but can be done with next opportunity.
+					Set<String> propertyNameList = thePropertyNamesToFilter.stream()
 							.map(IPrimitiveType::getValueAsString)
 							.collect(Collectors.toSet());
+					propertiesToReturn = myProperties.stream()
+							.filter(p -> propertyNameList.contains(p.getPropertyName()))
+							.collect(Collectors.toList());
+				} else {
+					propertiesToReturn = myProperties;
 				}
 
-				for (BaseConceptProperty next : myProperties) {
-
-					if (!properties.isEmpty()) {
-						if (!properties.contains(next.getPropertyName())) {
-							continue;
-						}
-					}
-
+				for (BaseConceptProperty next : propertiesToReturn) {
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
-
-					if (next instanceof StringConceptProperty) {
-						StringConceptProperty prop = (StringConceptProperty) next;
-						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof CodingConceptProperty) {
-						CodingConceptProperty prop = (CodingConceptProperty) next;
-						ParametersUtil.addPartCoding(
-								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
-					} else {
-						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
-					}
+					populateProperty(theContext, property, next);
 				}
 			}
 
 			if (myDesignations != null) {
 				for (ConceptDesignation next : myDesignations) {
-
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
 					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
 					ParametersUtil.addPartCoding(
@@ -847,8 +1285,48 @@ public interface IValidationSupport {
 			return retVal;
 		}
 
-		public void setErrorMessage(String theErrorMessage) {
+		private void populateProperty(
+				FhirContext theContext, IBase theProperty, BaseConceptProperty theConceptProperty) {
+			ParametersUtil.addPartCode(theContext, theProperty, "code", theConceptProperty.getPropertyName());
+			String propertyType = theConceptProperty.getType();
+			switch (propertyType) {
+				case TYPE_STRING:
+					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
+					ParametersUtil.addPartString(theContext, theProperty, "value", stringConceptProperty.getValue());
+					break;
+				case TYPE_BOOLEAN:
+					BooleanConceptProperty booleanConceptProperty = (BooleanConceptProperty) theConceptProperty;
+					ParametersUtil.addPartBoolean(theContext, theProperty, "value", booleanConceptProperty.getValue());
+					break;
+				case TYPE_CODING:
+					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
+					ParametersUtil.addPartCoding(
+							theContext,
+							theProperty,
+							"value",
+							codingConceptProperty.getCodeSystem(),
+							codingConceptProperty.getCode(),
+							codingConceptProperty.getDisplay());
+					break;
+				case TYPE_GROUP:
+					GroupConceptProperty groupConceptProperty = (GroupConceptProperty) theConceptProperty;
+					if (groupConceptProperty.getSubProperties().isEmpty()) {
+						break;
+					}
+					groupConceptProperty.getSubProperties().forEach(p -> {
+						IBase subProperty = ParametersUtil.addPart(theContext, theProperty, "subproperty", null);
+						populateProperty(theContext, subProperty, p);
+					});
+					break;
+				default:
+					throw new IllegalStateException(
+							Msg.code(1739) + "Don't know how to handle " + theConceptProperty.getClass());
+			}
+		}
+
+		public LookupCodeResult setErrorMessage(String theErrorMessage) {
 			myErrorMessage = theErrorMessage;
+			return this;
 		}
 
 		public String getErrorMessage() {
@@ -871,7 +1349,7 @@ public interface IValidationSupport {
 		private final String myTargetValueSetUrl;
 		private final IIdType myResourceId;
 		private final boolean myReverse;
-		private List<IBaseCoding> myCodings;
+		private final List<IBaseCoding> myCodings;
 
 		public TranslateCodeRequest(List<IBaseCoding> theCodings, String theTargetSystemUrl) {
 			myCodings = theCodings;
@@ -972,17 +1450,37 @@ public interface IValidationSupport {
 		public boolean isReverse() {
 			return myReverse;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+					.append("sourceValueSetUrl", mySourceValueSetUrl)
+					.append("targetSystemUrl", myTargetSystemUrl)
+					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.append("reverse", myReverse)
+					.toString();
+		}
 	}
 
 	/**
-	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * When validating a CodeableConcept containing multiple codings, this method can be used to control whether
+	 * the validator requires all codings in the CodeableConcept to be valid in order to consider the
+	 * CodeableConcept valid.
 	 * <p>
-	 * If true, validation for codings will return a positive result if all codings are valid.
-	 * If false, validation for codings will return a positive result if there is any coding that is valid.
-	 *
-	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
+	 * for the behaviour associated with each value.
+	 * </p>
+	 * <p>
+	 *   <ul>
+	 *     <li>If <code>false</code> (default setting) the validation for codings will return a positive result only if
+	 *     ALL codings are valid.</li>
+	 * 	   <li>If <code>true</code> the validation for codings will return a positive result if ANY codings are valid.
+	 * 	   </li>
+	 * 	  </ul>
+	 * </p>
+	 * @return true or false depending on the desired coding validation behaviour.
 	 */
-	default boolean isEnabledValidationForCodingsLogicalAnd() {
+	default boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
 		return false;
 	}
 }

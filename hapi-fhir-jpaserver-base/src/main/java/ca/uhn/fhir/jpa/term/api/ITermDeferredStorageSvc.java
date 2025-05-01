@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ public interface ITermDeferredStorageSvc {
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();
+
+	boolean isJobsExecuting();
 
 	/**
 	 * Only to be used from tests - Disallow test timeouts on deferred tasks

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
@@ -50,7 +50,7 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 		Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
 
-		assertEquals(0, interceptedResource.getName().size());
+		assertThat(interceptedResource.getName()).isEmpty();
 
 	}
 

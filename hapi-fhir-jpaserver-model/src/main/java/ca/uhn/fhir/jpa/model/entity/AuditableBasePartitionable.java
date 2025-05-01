@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import java.io.Serializable;
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
 
 /**
  * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.

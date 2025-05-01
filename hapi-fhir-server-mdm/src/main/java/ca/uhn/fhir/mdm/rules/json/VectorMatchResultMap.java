@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ package ca.uhn.fhir.mdm.rules.json;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import java.util.stream.Collectors;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
@@ -64,6 +65,16 @@ public class VectorMatchResultMap {
 		return MdmMatchResultEnum.NO_MATCH;
 	}
 
+	public Set<String> getMatchedRules(Long theVector) {
+		if (theVector == null) {
+			return new HashSet<>();
+		}
+		return myVectorToFieldMatchNamesMap.entrySet().stream()
+				.filter(e -> ((e.getKey() & theVector) == e.getKey()))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toSet());
+	}
+
 	private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
 		long vector = getVector(theFieldMatchNames);
 		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
@@ -75,6 +86,17 @@ public class VectorMatchResultMap {
 		}
 	}
 
+	/**
+	 * Calculates the vector for the match rule.
+	 *
+	 * This calculation uses the index of the match field and the binary
+	 * shift operator (<<) to calculate the field.
+	 *
+	 * See {@link ca.uhn.fhir.mdm.rules.matcher.util.MatchRuleUtil#MAX_RULE_COUNT}
+	 *
+	 * @param theFieldMatchNames the match rule (eg, "match_field1,match_field2")
+	 * @return the vector expressed as a long
+	 */
 	public long getVector(String theFieldMatchNames) {
 		long retval = 0;
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
@@ -82,7 +104,7 @@ public class VectorMatchResultMap {
 			if (index == -1) {
 				throw new ConfigurationException(Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
 			}
-			retval |= (1 << index);
+			retval |= (1L << index);
 		}
 		return retval;
 	}
@@ -103,5 +125,11 @@ public class VectorMatchResultMap {
 
 	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
+	}
+
+	public Set<String> getAllFieldMatchNames() {
+		return myVectorToFieldMatchNamesMap.keySet().stream()
+				.map(key -> myVectorToFieldMatchNamesMap.get(key))
+				.collect(Collectors.toSet());
 	}
 }

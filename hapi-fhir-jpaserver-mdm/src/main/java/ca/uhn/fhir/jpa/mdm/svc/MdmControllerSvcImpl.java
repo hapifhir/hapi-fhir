@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,25 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.params.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
@@ -56,6 +57,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -67,8 +70,6 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -102,6 +103,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	public MdmControllerSvcImpl() {}
 
@@ -180,7 +184,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			MdmTransactionContext theMdmTransactionContext,
 			RequestDetails theRequestDetails) {
 		RequestPartitionId theReadPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.MDM_QUERY_LINKS);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
 			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
@@ -194,7 +199,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(
 			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
-		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
+		return myTxService
+				.withRequest(theRequestDetails)
+				.execute(() -> myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters));
 	}
 
 	@Override
@@ -236,7 +243,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
 		RequestPartitionId readPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES);
 
 		if (readPartitionId.isAllPartitions()) {
 			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(
@@ -312,10 +320,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_MDM_CLEAR);
 		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_MDM_CLEAR);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -354,9 +361,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
-		params.setRequestPartitionId(RequestPartitionId.allPartitions());
-
-		theUrls.forEach(params::addUrl);
+		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
+		theUrls.forEach(
+				url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(params);

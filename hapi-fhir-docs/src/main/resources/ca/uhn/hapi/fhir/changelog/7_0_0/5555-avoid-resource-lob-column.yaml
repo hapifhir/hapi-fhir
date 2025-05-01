@@ -1,0 +1,10 @@
+---
+type: perf
+issue: 5555
+title: "Previously, resource body content went into one of 2 columns on the HFJ_RES_VER table: 
+    RES_TEXT if the size was above a configurable threshold, or RES_TEXT_VC if it was below that 
+    threshold. Performance testing has shown that the latter is always faster, and that on 
+    Postgres the use of the latter is particularly problematic since it maps to the
+    largeobject table which isn't the recommended way of storing high frequency objects. 
+    The configurable threshold is now ignored, and the latter column is always used. Any legacy
+    data in the former column will still be read however."

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({"EnhancedSwitchMigration", "PatternVariableCanBeUsed"})
 public class SearchParamExtractorMegaTest {
@@ -207,7 +207,7 @@ public class SearchParamExtractorMegaTest {
 		{
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamDates(resource);
 			List<String> warnings = set.getWarnings();
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 		{
@@ -215,19 +215,19 @@ public class SearchParamExtractorMegaTest {
 			List<String> warnings = set.getWarnings();
 			// This is an R5 parameter that needs special handling
 			warnings.remove("Search param [Patient]#age is unable to index value of type date as a NUMBER at path: Patient.birthDate");
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 		{
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamStrings(resource);
 			List<String> warnings = set.getWarnings();
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 		{
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamQuantity(resource);
 			List<String> warnings = set.getWarnings();
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 		{
@@ -236,13 +236,13 @@ public class SearchParamExtractorMegaTest {
 			// Two invalid params in draft R5
 			warnings.remove("Search param [MedicationUsage]#adherence is unable to index value of type org.hl7.fhir.r5.model.MedicationUsage.MedicationUsageAdherenceComponent as a TOKEN at path: MedicationUsage.adherence");
 			warnings.remove("Search param [ResearchStudy]#focus is unable to index value of type org.hl7.fhir.r5.model.ResearchStudy.ResearchStudyFocusComponent as a TOKEN at path: ResearchStudy.focus");
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 		{
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamUri(resource);
 			List<String> warnings = set.getWarnings();
-			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			assertThat(warnings.size()).as(() -> String.join("\n", warnings)).isEqualTo(0);
 			theIndexesCounter.addAndGet(set.size());
 		}
 	}

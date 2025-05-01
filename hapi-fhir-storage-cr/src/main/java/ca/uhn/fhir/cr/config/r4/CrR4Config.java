@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,83 +21,145 @@ package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.config.BaseClinicalReasoningConfig;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.common.RepositoryFactoryForRepositoryInterface;
+import ca.uhn.fhir.cr.common.StringTimePeriodHandler;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
+import ca.uhn.fhir.cr.config.RepositoryConfig;
+import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
+import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
+import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
+import ca.uhn.fhir.cr.r4.IDataRequirementsServiceFactory;
+import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
+import ca.uhn.fhir.cr.r4.R4MeasureEvaluatorSingleFactory;
+import ca.uhn.fhir.cr.r4.R4MeasureServiceUtilsFactory;
+import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
-import ca.uhn.fhir.cr.r4.measure.CareGapsService;
-import ca.uhn.fhir.cr.r4.measure.ISubmitDataService;
+import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
-import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
-@Import(BaseClinicalReasoningConfig.class)
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
 
 	@Bean
-	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var ms = theApplicationContext.getBean(MeasureService.class);
-			ms.setRequestDetails(r);
-			return ms;
-		};
+	R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
+			RepositoryFactoryForRepositoryInterface theRepositoryFactory,
+			MeasureEvaluationOptions theEvaluationOptions,
+			MeasurePeriodValidator theMeasurePeriodValidator,
+			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
+		return rd -> new R4MeasureService(
+				theRepositoryFactory.create(rd),
+				theEvaluationOptions,
+				theMeasurePeriodValidator,
+				theR4MeasureServiceUtilsFactory.create(rd));
 	}
 
 	@Bean
-	@Scope("prototype")
-	public MeasureService r4measureService() {
-		return new MeasureService();
+	ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(IRepositoryFactory theRepositoryFactory) {
+		return rd -> new R4SubmitDataService(theRepositoryFactory.create(rd));
 	}
 
 	@Bean
-	public MeasureOperationsProvider r4measureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
+			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
+		return rd -> new R4CqlExecutionService(theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(
-			ApplicationContext theApplicationContext) {
-		return r -> {
-			var cs = theApplicationContext.getBean(CareGapsService.class);
-			cs.setRequestDetails(r);
-			return cs;
-		};
+	CqlExecutionOperationProvider r4CqlExecutionOperationProvider() {
+		return new CqlExecutionOperationProvider();
 	}
 
 	@Bean
-	@Scope("prototype")
-	public CareGapsService r4CareGapsService() {
-		return new CareGapsService();
+	CollectDataOperationProvider r4CollectDataOperationProvider(
+			ICollectDataServiceFactory theR4CollectDataServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CollectDataOperationProvider(theR4CollectDataServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
-	public CareGapsOperationProvider r4CareGapsProvider(
-			Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
-		return new CareGapsOperationProvider();
+	R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
+			RepositoryFactoryForRepositoryInterface theRepositoryFactory) {
+		return requestDetails -> new R4MeasureServiceUtils(theRepositoryFactory.create(requestDetails));
 	}
 
 	@Bean
-	public ISubmitDataService r4SubmitDataService(DaoRegistry theDaoRegistry) {
-		return requestDetails -> new SubmitDataService(theDaoRegistry, requestDetails);
+	ICollectDataServiceFactory collectDataServiceFactory(
+			IRepositoryFactory theRepositoryFactory,
+			MeasureEvaluationOptions theMeasureEvaluationOptions,
+			R4MeasureServiceUtilsFactory theR4MeasureServiceUtilsFactory) {
+		return rd -> new R4CollectDataService(
+				theRepositoryFactory.create(rd),
+				theMeasureEvaluationOptions,
+				theR4MeasureServiceUtilsFactory.create(rd));
 	}
 
 	@Bean
-	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService) {
-		return new SubmitDataProvider(theSubmitDataService);
+	DataRequirementsOperationProvider r4DataRequirementsOperationProvider() {
+		return new DataRequirementsOperationProvider();
+	}
+
+	@Bean
+	IDataRequirementsServiceFactory dataRequirementsServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		return rd -> new R4DataRequirementsService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions);
+	}
+
+	@Bean
+	ICareGapsServiceFactory careGapsServiceFactory(
+			IRepositoryFactory theRepositoryFactory,
+			CareGapsProperties theCareGapsProperties,
+			MeasureEvaluationOptions theMeasureEvaluationOptions,
+			MeasurePeriodValidator theMeasurePeriodValidator) {
+		return rd -> new R4CareGapsService(
+				theCareGapsProperties,
+				theRepositoryFactory.create(rd),
+				theMeasureEvaluationOptions,
+				rd.getFhirServerBase(),
+				theMeasurePeriodValidator);
+	}
+
+	@Bean
+	CareGapsOperationProvider r4CareGapsOperationProvider(
+			ICareGapsServiceFactory theR4CareGapsProcessorFactory, StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new CareGapsOperationProvider(theR4CareGapsProcessorFactory, theStringTimePeriodHandler);
+	}
+
+	@Bean
+	SubmitDataProvider r4SubmitDataProvider() {
+		return new SubmitDataProvider();
+	}
+
+	@Bean
+	MeasureOperationsProvider r4MeasureOperationsProvider(
+			R4MeasureEvaluatorSingleFactory theR4MeasureServiceFactory,
+			StringTimePeriodHandler theStringTimePeriodHandler) {
+		return new MeasureOperationsProvider(theR4MeasureServiceFactory, theStringTimePeriodHandler);
 	}
 
 	@Bean
@@ -111,7 +173,10 @@ public class CrR4Config {
 						Arrays.asList(
 								MeasureOperationsProvider.class,
 								SubmitDataProvider.class,
-								CareGapsOperationProvider.class)));
+								CareGapsOperationProvider.class,
+								CqlExecutionOperationProvider.class,
+								CollectDataOperationProvider.class,
+								DataRequirementsOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

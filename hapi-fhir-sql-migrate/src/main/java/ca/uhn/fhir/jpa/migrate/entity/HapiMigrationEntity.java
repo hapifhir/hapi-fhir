@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.util.VersionEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
 // so these annotations are for informational purposes only
@@ -41,6 +41,7 @@ public class HapiMigrationEntity {
 	public static final int TYPE_MAX_SIZE = 20;
 	public static final int SCRIPT_MAX_SIZE = 1000;
 	public static final int INSTALLED_BY_MAX_SIZE = 100;
+	public static final int RESULT_MAX_SIZE = 100;
 	public static final int CREATE_TABLE_PID = -1;
 	public static final String INITIAL_RECORD_DESCRIPTION = "<< HAPI FHIR Schema History table created >>";
 	public static final String INITIAL_RECORD_SCRIPT = "HAPI FHIR";
@@ -79,6 +80,9 @@ public class HapiMigrationEntity {
 
 	@Column(name = "SUCCESS")
 	private Boolean mySuccess;
+
+	@Column(name = "RESULT", length = RESULT_MAX_SIZE)
+	private String myResult;
 
 	public static HapiMigrationEntity tableCreatedRecord() {
 		HapiMigrationEntity retVal = new HapiMigrationEntity();
@@ -195,6 +199,7 @@ public class HapiMigrationEntity {
 			entity.setInstalledOn(rs.getDate(8));
 			entity.setExecutionTime(rs.getInt(9));
 			entity.setSuccess(rs.getBoolean(10));
+			entity.setResult(rs.getString(11));
 			return entity;
 		};
 	}
@@ -219,6 +224,15 @@ public class HapiMigrationEntity {
 							: null);
 			ps.setInt(9, getExecutionTime());
 			ps.setBoolean(10, getSuccess());
+			ps.setString(11, getResult());
 		};
+	}
+
+	public String getResult() {
+		return myResult;
+	}
+
+	public void setResult(String theResult) {
+		myResult = theResult;
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.rules.matcher.util.MatchRuleUtil;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -33,6 +34,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -110,6 +113,7 @@ public class MdmRulesJson implements IModelJson {
 	 * Must call initialize() before calling getMatchResult(Long)
 	 */
 	public void initialize() {
+		validate();
 		myVectorMatchResultMap = new VectorMatchResultMap(this);
 	}
 
@@ -194,6 +198,11 @@ public class MdmRulesJson implements IModelJson {
 		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
 			Validate.isTrue(enterpriseEIDSystems.size() == 1);
 		}
+
+		Validate.isTrue(
+				MatchRuleUtil.canHandleRuleCount(myMatchFieldJsonList),
+				String.format(
+						"MDM cannot guarantee accuracy with more than %d match fields.", MatchRuleUtil.MAX_RULE_COUNT));
 	}
 
 	public String getSummary() {
@@ -205,6 +214,13 @@ public class MdmRulesJson implements IModelJson {
 
 	public String getFieldMatchNamesForVector(long theVector) {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
+	}
+
+	public Set<Map.Entry<String, MdmMatchResultEnum>> getMatchedRulesFromVectorMap(Long theLong) {
+		Set<String> matchedRules = myVectorMatchResultMap.getMatchedRules(theLong);
+		return myMatchResultMap.entrySet().stream()
+				.filter(e -> matchedRules.contains(e.getKey()))
+				.collect(Collectors.toSet());
 	}
 
 	public String getDetailedFieldMatchResultWithSuccessInformation(long theVector) {
@@ -236,7 +252,6 @@ public class MdmRulesJson implements IModelJson {
 
 		@Override
 		public MdmRulesJson convert(MdmRulesJson theMdmRulesJson) {
-			theMdmRulesJson.validate();
 			theMdmRulesJson.initialize();
 			return theMdmRulesJson;
 		}

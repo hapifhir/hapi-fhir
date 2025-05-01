@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import jakarta.annotation.Nullable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
@@ -75,7 +76,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -668,7 +668,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
 		FhirVersionEnum versionEnum = parseFhirVersion(theCommandLine);
-		myFhirCtx = versionEnum.newContext();
+		myFhirCtx = FhirContext.forVersion(versionEnum);
 	}
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;

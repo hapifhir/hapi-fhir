@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.model.api.IModelJson;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
- * Reduction step worker.
+ * Reduction step worker. Once all chunks from the previous step have completed, consume() will first be called on
+ * all chunks, and then finally run() will be called on this step.
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
  * @param <OT> Output Job Report Type
  */
 public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 		extends IJobStepWorker<PT, IT, OT> {
+
+	// TODO KHS create an abstract superclass under this that enforces the one-at-a-time contract
+	// (this contract is currently baked into the implementations inconsistently)
 
 	/**
 	 *
@@ -41,4 +44,25 @@ public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJs
 	 */
 	@Nonnull
 	ChunkOutcome consume(ChunkExecutionDetails<PT, IT> theChunkDetails);
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws ReductionStepFailureException The reduction step may throw {@link ReductionStepFailureException} if it wishes to mark the job as {@link ca.uhn.fhir.batch2.model.StatusEnum#FAILED}
+	 *         but also attach a report to the failed job.
+	 */
+	@Nonnull
+	@Override
+	RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink)
+			throws JobExecutionFailedException, ReductionStepFailureException;
+
+	/**
+	 * This method is called to clone the current worker, so that a fresh clone
+	 * will be used for each reduction invocation. The clone should have any
+	 * dependencies set, but should not have any job state present.
+	 */
+	// TODO: drop the default method once every task has implemented this method
+	default IReductionStepWorker<PT, IT, OT> newInstance() {
+		return this;
+	}
 }

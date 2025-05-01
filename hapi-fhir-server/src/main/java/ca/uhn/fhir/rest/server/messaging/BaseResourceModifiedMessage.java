@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,20 +53,26 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@JsonProperty(value = "partitionId")
 	protected RequestPartitionId myPartitionId;
 
+	@JsonProperty(value = "payloadVersion")
+	protected String myPayloadVersion;
+
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
 	@JsonIgnore
 	protected transient String myPayloadType;
 
-	@JsonIgnore
-	protected String myPayloadVersion;
-
 	/**
 	 * Constructor
 	 */
 	public BaseResourceModifiedMessage() {
 		super();
+	}
+
+	public BaseResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+		this();
+		setOperationType(theOperationType);
+		setPayloadId(theIdType);
 	}
 
 	public BaseResourceModifiedMessage(
@@ -280,5 +287,19 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 			}
 		}
 		return retval;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		BaseResourceModifiedMessage that = (BaseResourceModifiedMessage) theO;
+		return Objects.equals(myPayload, that.myPayload) && Objects.equals(getPayloadId(), that.getPayloadId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), myPayload, getPayloadId());
 	}
 }

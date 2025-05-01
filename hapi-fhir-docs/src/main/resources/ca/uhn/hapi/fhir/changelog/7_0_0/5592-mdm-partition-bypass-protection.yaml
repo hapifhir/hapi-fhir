@@ -1,0 +1,7 @@
+---
+type: fix
+title: "$everything queries with MDM expansion were bypassing the partition boundary by return resources outside the partition.
+        Also, POST (as opposed to GET) $everything queries with MDM expansion.
+        The first issue was fixed by reversing the previous changes in [5493](https://github.com/hapifhir/hapi-fhir/issues/5493)
+        and by filtering source and golden resources by partition ID.
+        The second issue was fixed by correctly capturing the MDM expansion flag in POST $everything queries."

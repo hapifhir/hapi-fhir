@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,14 @@ public class LogbackLevelOverrideExtension implements AfterEachCallback {
 
 	public void setLogLevel(Class theClass, Level theLevel) {
 		String name = theClass.getName();
-		Logger logger = getClassicLogger(name);
-		if (!mySavedLevels.containsKey(name)) {
+		setLogLevel(name, theLevel);
+	}
+
+	public void setLogLevel(String theName, Level theLevel) {
+		Logger logger = getClassicLogger(theName);
+		if (!mySavedLevels.containsKey(theName)) {
 			// level can be null
-			mySavedLevels.put(name, logger.getLevel());
+			mySavedLevels.put(theName, logger.getLevel());
 		}
 		logger.setLevel(theLevel);
 	}

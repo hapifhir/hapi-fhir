@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.BeansException;
@@ -41,13 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
-	private FhirContext myContext;
+	private FhirContext myFhirContext;
 
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
@@ -65,7 +65,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	 */
 	public DaoRegistry(FhirContext theFhirContext) {
 		super();
-		myContext = theFhirContext;
+		myFhirContext = theFhirContext;
 	}
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {
@@ -128,7 +128,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Nullable
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
-		String resourceName = myContext.getResourceType(theResourceType);
+		String resourceName = myFhirContext.getResourceType(theResourceType);
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(resourceName);
 		} catch (InvalidRequestException e) {
@@ -175,7 +175,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
 			Class resourceType = nextResourceDao.getResourceType();
 			assert resourceType != null;
-			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(resourceType);
+			RuntimeResourceDefinition nextResourceDef = myFhirContext.getResourceDefinition(resourceType);
 			if (mySupportedResourceTypes == null || mySupportedResourceTypes.contains(nextResourceDef.getName())) {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}
@@ -183,7 +183,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	}
 
 	public void register(IFhirResourceDao theResourceDao) {
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceDao.getResourceType());
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceDao.getResourceType());
 		String resourceName = resourceDef.getName();
 		myResourceNameToResourceDao.put(resourceName, theResourceDao);
 	}
@@ -192,12 +192,12 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		IFhirResourceDao retVal = getResourceDao(theClass);
 		if (retVal == null) {
 			List<String> supportedResourceNames = myResourceNameToResourceDao.keySet().stream()
-					.map(t -> myContext.getResourceType(t))
+					.map(t -> myFhirContext.getResourceType(t))
 					.sorted()
 					.collect(Collectors.toList());
 			throw new InvalidRequestException(Msg.code(573)
 					+ "Unable to process request, this server does not know how to handle resources of type "
-					+ myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
+					+ myFhirContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}
@@ -224,5 +224,11 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	public Set<String> getRegisteredDaoTypes() {
 		return Collections.unmodifiableSet(myResourceNameToResourceDao.keySet());
+	}
+
+	// TODO KHS find all the places where FhirContext and DaoRegistry are both passed into constructors and
+	// remove the FhirContext parameter and pull it from the DaoRegistry parameter
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 }

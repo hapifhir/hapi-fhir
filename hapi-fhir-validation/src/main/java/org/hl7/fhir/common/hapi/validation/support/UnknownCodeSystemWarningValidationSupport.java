@@ -2,14 +2,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This validation support module may be placed at the end of a {@link ValidationSupportChain}
@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
  * in order to specify that unknown code systems should be allowed.
  */
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(UnknownCodeSystemWarningValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final IssueSeverity DEFAULT_SEVERITY = IssueSeverity.ERROR;
 
@@ -31,6 +31,11 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	 */
 	public UnknownCodeSystemWarningValidationSupport(FhirContext theFhirContext) {
 		super(theFhirContext);
+	}
+
+	@Override
+	public String getName() {
+		return getFhirContext().getVersion().getVersion() + " Unknown Code System Warning Validation Support";
 	}
 
 	@Override
@@ -46,12 +51,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Nullable
 	@Override
 	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		// filters out error/fatal
-		if (canValidateCodeSystem(theValidationSupportContext, theSystem)) {
+		if (canValidateCodeSystem(theValidationSupportContext, theLookupCodeRequest.getSystem())) {
 			return new LookupCodeResult().setFound(true);
 		}
 
@@ -74,13 +76,22 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		CodeValidationResult result = new CodeValidationResult();
 		// will be warning or info (error/fatal filtered out above)
 		result.setSeverity(myNonExistentCodeSystemSeverity);
-		result.setMessage("CodeSystem is unknown and can't be validated: " + theCodeSystem);
+		String theMessage = "CodeSystem is unknown and can't be validated: " + theCodeSystem + " for '" + theCodeSystem
+				+ "#" + theCode + "'";
+		result.setMessage(theMessage);
 
+		// For information level, we just strip out the severity+message entirely
+		// so that nothing appears in the validation result
 		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
-			// for warnings, we don't set the code
-			// cause if we do, the severity is stripped out
-			// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
 			result.setCode(theCode);
+			result.setSeverity(null);
+			result.setMessage(null);
+		} else {
+			result.addIssue(new CodeValidationIssue(
+					theMessage,
+					myNonExistentCodeSystemSeverity,
+					CodeValidationIssueCode.NOT_FOUND,
+					CodeValidationIssueCoding.NOT_FOUND));
 		}
 
 		return result;

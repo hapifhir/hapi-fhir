@@ -9,7 +9,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -17,6 +16,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
@@ -27,7 +27,8 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.hamcrest.Matchers;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Location;
@@ -38,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +47,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
@@ -67,7 +65,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
-		assertEquals(1, tokens.size());
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertEquals("category", token.getParamName());
 		assertEquals("SYSTEM", token.getSystem());
@@ -90,7 +88,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
-		assertEquals(1, params.size());
+		assertThat(params).hasSize(1);
 	}
 
 	@Test
@@ -108,7 +106,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertEquals(1, params.size());
+		assertThat(params).hasSize(1);
 		// Normalized to days
 		assertEquals("2", params.iterator().next().getValue().toPlainString());
 	}
@@ -120,15 +118,15 @@ public class SearchParamExtractorDstu3Test {
 		String threeSegmentPath = "Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')";
 
 		String[] expressions = extractor.split(threeSegmentPath);
-		assertThat(expressions.length, is(equalTo(3)));
-		assertThat(expressions[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
-		assertThat(expressions[1], containsString("Patient.telecom.where(system='email')"));
-		assertThat(expressions[2], containsString("Patient.telecom.where(system='mail' | system='phone')"));
+		assertEquals(3, expressions.length);
+		assertThat(expressions[0]).contains("Patient.telecom.where(system='phone' or system='email')");
+		assertThat(expressions[1]).contains("Patient.telecom.where(system='email')");
+		assertThat(expressions[2]).contains("Patient.telecom.where(system='mail' | system='phone')");
 
 		String zeroPathSplit = "Patient.telecom.where(system='phone' or system='email')";
 		String[] singularExpression = extractor.split(zeroPathSplit);
-		assertThat(singularExpression.length, is(equalTo(1)));
-		assertThat(singularExpression[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
+		assertEquals(1, singularExpression.length);
+		assertThat(singularExpression[0]).contains("Patient.telecom.where(system='phone' or system='email')");
 	}
 
 	@Test
@@ -144,7 +142,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertEquals(1, params.size());
+		assertThat(params).hasSize(1);
 		// Normalized to days
 		assertEquals("15", params.iterator().next().getValue().toPlainString());
 	}
@@ -176,7 +174,7 @@ public class SearchParamExtractorDstu3Test {
 		Patient resource = new Patient();
 		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
 		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
-		assertEquals(1, strings.size());
+		assertThat(strings).hasSize(1);
 		assertEquals("BLAH", strings.iterator().next().getValueNormalized());
 
 	}
@@ -194,37 +192,37 @@ public class SearchParamExtractorDstu3Test {
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> outcome = extractor.extractSearchParamStrings(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a STRING at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a STRING at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> outcome = extractor.extractSearchParamTokens(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a TOKEN at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a TOKEN at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> outcome = extractor.extractSearchParamQuantity(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a QUANTITY at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a QUANTITY at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> outcome = extractor.extractSearchParamDates(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a DATE at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a DATE at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> outcome = extractor.extractSearchParamNumber(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a NUMBER at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a NUMBER at path: Patient");
 		}
 		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient"));
+			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient");
 		}
 	}
 
@@ -241,10 +239,10 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
-		assertEquals(1, coords.size());
+		assertThat(coords).hasSize(1);
 		ResourceIndexedSearchParamCoords coord = (ResourceIndexedSearchParamCoords) coords.iterator().next();
-		assertEquals(latitude, coord.getLatitude(), 0.0);
-		assertEquals(longitude, coord.getLongitude(), 0.0);
+		assertThat(coord.getLatitude()).isCloseTo(latitude, within(0.0));
+		assertThat(coord.getLongitude()).isCloseTo(longitude, within(0.0));
 	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
@@ -266,7 +264,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		public RuntimeSearchParam getActiveSearchParam(@Nonnull String theResourceName, @Nonnull String theParamName, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -281,7 +279,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -294,34 +292,29 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull Set<String> theParamNames, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Nullable
 		@Override
-		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		public RuntimeSearchParam getActiveSearchParamByUrl(@Nonnull String theUrl, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		public List<RuntimeSearchParam> getActiveComboSearchParams(@Nonnull String theResourceName, @Nonnull ComboSearchParamType theParamType, @Nonnull SearchParamLookupContextEnum theContext) {
 			throw new UnsupportedOperationException(Msg.code(2210));
 		}
 
 		@Override
-		public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		public Optional<RuntimeSearchParam> getActiveComboSearchParamById(@Nonnull String theResourceName, @Nonnull IIdType theId) {
 			throw new UnsupportedOperationException(Msg.code(2212));
-		}
-
-		@Override
-		public void requestRefresh() {
-			// nothing
 		}
 
 		@Override

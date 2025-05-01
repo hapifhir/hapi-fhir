@@ -24,6 +24,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,7 +76,7 @@ public class BasicAuthInterceptorTest {
 		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
 		client.getPatientById(new IdType("111"));
 
-		assertEquals(1, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(1);
 		HttpUriRequest req = capt.getAllValues().get(0);
 		assertEquals(1, req.getHeaders("Authorization").length);
 		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
@@ -87,7 +88,7 @@ public class BasicAuthInterceptorTest {
 		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
 		client.getPatientById(new IdType("111"));
 
-		assertEquals(2, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(2);
 		req = capt.getAllValues().get(1);
 		assertEquals(1, req.getHeaders("Authorization").length);
 		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());

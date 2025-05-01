@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,21 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
-	/** @deprecated use BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE instead */
+	/** @deprecated use BulkDataExportUtil.UNSUPPORTED_BINARY_TYPE instead */
 	@Deprecated(since = "6.3.10")
-	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
+	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportUtil.UNSUPPORTED_BINARY_TYPE;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -62,7 +62,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		List<String> resourceTypes = theParameters.getResourceTypes();
 		if (resourceTypes != null && !resourceTypes.isEmpty()) {
 			for (String resourceType : theParameters.getResourceTypes()) {
-				if (resourceType.equalsIgnoreCase(UNSUPPORTED_BINARY_TYPE)) {
+				if (resourceType.equalsIgnoreCase(BulkDataExportUtil.UNSUPPORTED_BINARY_TYPE)) {
 					errorMsgs.add("Bulk export of Binary resources is forbidden");
 				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					errorMsgs.add("Resource type " + resourceType + " is not a supported resource type!");
@@ -77,7 +77,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
 
-			if (myBinaryStorageSvc != null && !myBinaryStorageSvc.isValidBlobId(theParameters.getExportIdentifier())) {
+			if (myBinaryStorageSvc != null
+					&& !myBinaryStorageSvc.isValidBinaryContentId(theParameters.getExportIdentifier())) {
 				errorMsgs.add("Export ID does not conform to the current blob storage implementation's limitations.");
 			}
 		}

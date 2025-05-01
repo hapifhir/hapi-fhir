@@ -4,7 +4,7 @@ package ca.uhn.fhir.sl.cache.caffeine;
  * #%L
  * HAPI FHIR - ServiceLoaders - Caching Caffeine
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,16 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 	public Cache<K, V> create(long timeoutMillis, long maximumSize) {
 		return new CacheDelegator<K, V>(Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				// Caffeine locks the whole array when growing the hash table.
+				// Set initial capacity to max to avoid this.  All our caches are <1M entries.
+				.initialCapacity((int) maximumSize)
+				.maximumSize(maximumSize)
+				.build());
+	}
+
+	public Cache<K, V> createEternal(int minimumSize, long maximumSize) {
+		return new CacheDelegator<>(Caffeine.newBuilder()
+				.initialCapacity(minimumSize)
 				.maximumSize(maximumSize)
 				.build());
 	}
@@ -51,6 +61,9 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 	public LoadingCache<K, V> create(long timeoutMillis, long maximumSize, CacheLoader<K, V> loading) {
 		return new LoadingCacheDelegator<K, V>(Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				// Caffeine locks the whole array when growing the hash table.
+				// Set initial capacity to max to avoid this.  All our caches are <1M entries.
+				.initialCapacity((int) maximumSize)
 				.maximumSize(maximumSize)
 				.build(loading::load));
 	}

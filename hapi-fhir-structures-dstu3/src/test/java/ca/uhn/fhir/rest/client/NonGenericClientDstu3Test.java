@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -42,7 +43,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -93,8 +94,8 @@ public class NonGenericClientDstu3Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		List<MyPatientWithExtensions> list = client.search();
-		
-		assertEquals(1, list.size());
+
+		assertThat(list).hasSize(1);
 		assertEquals(MyPatientWithExtensions.class, list.get(0).getClass());
 	}
 	

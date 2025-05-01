@@ -7,8 +7,8 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Base class for a bridge between the RI validation tools and HAPI
@@ -37,10 +37,18 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 						ResultSeverityEnum.fromCode(riMessage.getLevel().toCode()));
 			}
 			if (riMessage.getMessageId() != null) {
-				hapiMessage.setMessageId(riMessage.getMessageId());
+				// In BaseValidator, the messageId gets populated with the raw message because
+				// there is an assumption that it's a message key and not an actual message. But
+				// messsages coming from our internal terminology service don't work that
+				// way, so we strip them by checking if the ID is actually a sentence
+				if (!riMessage.getMessageId().contains(" ")) {
+					hapiMessage.setMessageId(riMessage.getMessageId());
+				}
 			}
-			if (riMessage.sliceText != null && riMessage.sliceText.length > 0) {
-				hapiMessage.setSliceMessages(Arrays.asList(riMessage.sliceText));
+			if (riMessage.hasSliceInfo()) {
+				hapiMessage.setSliceMessages(riMessage.getSliceInfo().stream()
+						.map(ValidationMessage::getMessage)
+						.collect(Collectors.toList()));
 			}
 			theCtx.addValidationMessage(hapiMessage);
 		}

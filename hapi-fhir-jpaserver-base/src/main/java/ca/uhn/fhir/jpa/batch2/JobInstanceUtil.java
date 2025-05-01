@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 class JobInstanceUtil {
 
@@ -61,6 +60,9 @@ class JobInstanceUtil {
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setWarningMessages(theEntity.getWarningMessages());
+		retVal.setTriggeringUsername(theEntity.getTriggeringUsername());
+		retVal.setTriggeringClientId(theEntity.getTriggeringClientId());
+		retVal.setUserDataAsString(theEntity.getUserDataJson());
 		return retVal;
 	}
 
@@ -95,6 +97,9 @@ class JobInstanceUtil {
 		theJobInstanceEntity.setReport(theJobInstance.getReport());
 		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
 		theJobInstanceEntity.setWarningMessages(theJobInstance.getWarningMessages());
+		theJobInstanceEntity.setTriggeringUsername(theJobInstance.getTriggeringUsername());
+		theJobInstanceEntity.setTriggeringClientId(theJobInstance.getTriggeringClientId());
+		theJobInstanceEntity.setUserDataJson(theJobInstance.getUserDataAsString());
 	}
 
 	/**
@@ -120,6 +125,8 @@ class JobInstanceUtil {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
+		retVal.setNextPollTime(theEntity.getNextPollTime());
+		retVal.setPollAttempts(theEntity.getPollAttempts());
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
 		retVal.setWarningMessage(theEntity.getWarningMessage());

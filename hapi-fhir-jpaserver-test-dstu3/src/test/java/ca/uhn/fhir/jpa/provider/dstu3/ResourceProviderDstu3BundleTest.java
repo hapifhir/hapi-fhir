@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -14,10 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Test {
@@ -36,9 +35,9 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			.setResource(bundle);
 		try {
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
-			fail();
+			fail("");
 		} catch (NotImplementedOperationException e) {
-			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
+			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
 	}
 

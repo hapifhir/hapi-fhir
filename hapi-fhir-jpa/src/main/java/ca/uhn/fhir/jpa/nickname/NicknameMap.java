@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.nickname;
 
+import jakarta.annotation.Nonnull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -27,7 +29,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();

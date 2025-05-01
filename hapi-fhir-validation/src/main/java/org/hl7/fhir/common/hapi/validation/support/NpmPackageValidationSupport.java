@@ -5,8 +5,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.ByteProvider;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.IOException;
@@ -14,11 +15,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.Nonnull;
 
 /**
  * This interceptor loads and parses FHIR NPM Conformance Packages, and makes the
- * artifacts foudn within them available to the FHIR validator.
+ * artifacts found within them available to the FHIR validator.
  *
  * @since 5.5.0
  */
@@ -64,7 +64,8 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 	private void loadBinariesFromPackage(NpmPackage thePackage) throws IOException {
 		List<String> binaries = thePackage.list("other");
 		for (String binaryName : binaries) {
-			addBinary(TextFile.streamToBytes(thePackage.load("other", binaryName)), binaryName);
+			addBinary(
+					ByteProvider.forStream(thePackage.load("other", binaryName)).getBytes(), binaryName);
 		}
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
@@ -35,9 +36,10 @@ import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
@@ -58,8 +60,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 
 @SuppressWarnings({"serial", "unused"})
 public class ValidatorExamples {
@@ -308,9 +308,7 @@ public class ValidatorExamples {
 			@Override
 			public LookupCodeResult lookupCode(
 					ValidationSupportContext theValidationSupportContext,
-					String theSystem,
-					String theCode,
-					String theDisplayLanguage) {
+					@Nonnull LookupCodeRequest validationSupportParameterObject) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
@@ -344,7 +342,8 @@ public class ValidatorExamples {
 		// START SNIPPET: validateSupplyProfiles
 		FhirContext ctx = FhirContext.forR4();
 
-		// Create a chain that will hold our modules
+		// Create a chain that will hold our modules and caches the
+		// values they supply
 		ValidationSupportChain supportChain = new ValidationSupportChain();
 
 		// DefaultProfileValidationSupport supplies base FHIR definitions. This is generally required
@@ -369,12 +368,9 @@ public class ValidatorExamples {
 		// Add the custom definitions to the chain
 		supportChain.addValidationSupport(prePopulatedSupport);
 
-		// Wrap the chain in a cache to improve performance
-		CachingValidationSupport cache = new CachingValidationSupport(supportChain);
-
 		// Create a validator using the FhirInstanceValidator module. We can use this
 		// validator to perform validation
-		FhirInstanceValidator validatorModule = new FhirInstanceValidator(cache);
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(supportChain);
 		FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
 		ValidationResult result = validator.validateWithResult(input);
 		// END SNIPPET: validateSupplyProfiles
@@ -404,12 +400,9 @@ public class ValidatorExamples {
 		remoteTermSvc.setBaseUrl("http://hapi.fhir.org/baseR4");
 		supportChain.addValidationSupport(remoteTermSvc);
 
-		// Wrap the chain in a cache to improve performance
-		CachingValidationSupport cache = new CachingValidationSupport(supportChain);
-
 		// Create a validator using the FhirInstanceValidator module. We can use this
 		// validator to perform validation
-		FhirInstanceValidator validatorModule = new FhirInstanceValidator(cache);
+		FhirInstanceValidator validatorModule = new FhirInstanceValidator(supportChain);
 		FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
 		ValidationResult result = validator.validateWithResult(input);
 		// END SNIPPET: validateUsingRemoteTermSvr
@@ -463,12 +456,11 @@ public class ValidatorExamples {
 				new CommonCodeSystemsTerminologyService(ctx),
 				new InMemoryTerminologyServerValidationSupport(ctx),
 				new SnapshotGeneratingValidationSupport(ctx));
-		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
 
 		// Create a validator. Note that for good performance you can create as many validator objects
 		// as you like, but you should reuse the same validation support object in all of the,.
 		FhirValidator validator = ctx.newValidator();
-		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupport);
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupportChain);
 		validator.registerValidatorModule(instanceValidator);
 
 		// Create a test patient to validate

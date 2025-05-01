@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -103,7 +104,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE;
@@ -158,6 +158,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
 public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
@@ -1026,7 +1027,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			valueSetId = LOINC_ALL_VALUESET_ID;
 		}
 		retVal.setId(valueSetId);
-		retVal.setUrl("http://loinc.org/vs");
+		retVal.setUrl(LOINC_GENERIC_VALUESET_URL);
 		retVal.setVersion(codeSystemVersionId);
 		retVal.setName("All LOINC codes");
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);

@@ -22,11 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -36,6 +35,17 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	private List<Integer> originalPreFetchThresholds;
 	@Autowired
 	private ISearchDao mySearchDao;
+
+	@BeforeEach
+	public void enableAdvancedHSearchIndexing() {
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+	}
+
+	@AfterEach
+	public void disableAdvancedHSearchIndex() {
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+	}
 
 	@Override
 	@BeforeEach
@@ -56,25 +66,23 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		mySmallerPreFetchThresholds.add(-1);
 		myStorageSettings.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
 
-		SearchBuilder.setMaxPageSize50ForTest(true);
+		SearchBuilder.setMaxPageSizeForTest(50);
 
 		myStorageSettings.setLastNEnabled(true);
-
 	}
 
 	@AfterEach
 	public void after() {
 		myStorageSettings.setSearchPreFetchThresholds(originalPreFetchThresholds);
-		SearchBuilder.setMaxPageSize50ForTest(false);
+		SearchBuilder.setMaxPageSizeForTest(null);
 	}
 
 	@Test
 	public void testLastNChunking() {
-
 		runInTransaction(() -> {
-			for (Search search : mySearchDao.findAll()) {
-				mySearchDao.updateDeleted(search.getId(), true);
-			}
+			Set<Long> all = mySearchDao.findAll().stream().map(Search::getId).collect(Collectors.toSet());
+
+			mySearchDao.updateDeleted(all, true);
 		});
 
 		// Set up search parameters that will return 75 Observations.
@@ -93,9 +101,6 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		Map<String, String[]> requestParameters = new HashMap<>();
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
-		// Set chunk size to 50
-		SearchBuilder.setMaxPageSize50ForTest(true);
-
 		// Expand default fetch sizes to ensure all observations are returned in first page:
 		List<Integer> myBiggerPreFetchThresholds = new ArrayList<>();
 		myBiggerPreFetchThresholds.add(100);
@@ -105,7 +110,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
-		assertEquals(75, results.size());
+		assertThat(results).hasSize(75);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = myCaptureQueriesListener
 			.getSelectQueriesForCurrentThread()
@@ -115,28 +120,29 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		ourLog.info("Queries:\n * " + String.join("\n * ", queries));
 
+		// 1 query to resolve the subject PIDs
 		// 3 queries to actually perform the search
 		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
-		assertEquals(6, queries.size());
+		assertThat(queries).hasSize(7);
 
 		// The first chunked query should have a full complement of PIDs
-		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
-			firstQueryPattern.append(" , '[0-9]+'");
+			firstQueryPattern.append(",'[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(4), matchesPattern(firstQueryPattern.toString()));
+		assertThat(queries.get(5)).matches(firstQueryPattern.toString());
 
 		// the second chunked query should be padded with "-1".
-		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
+		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(" , '[0-9]+'");
+			secondQueryPattern.append(",'[0-9]+'");
 		}
 		for (int pidIndex = 0; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(" , '-1'");
+			secondQueryPattern.append(",'-1'");
 		}
 		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(5), matchesPattern(secondQueryPattern.toString()));
+		assertThat(queries.get(6)).matches(secondQueryPattern.toString());
 
 	}
 

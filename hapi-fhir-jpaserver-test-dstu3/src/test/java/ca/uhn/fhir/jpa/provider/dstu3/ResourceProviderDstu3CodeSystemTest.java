@@ -29,10 +29,9 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
@@ -53,7 +52,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(this, myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
 
 		runInTransaction(() -> {
 			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
@@ -181,7 +180,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "code", new CodeType("ACSNAAAAAA"))
 				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -220,7 +219,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "code", new CodeType("8450-9AAAAA"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -259,7 +258,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.andParameter("code", new CodeType("8450-9"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
@@ -277,7 +276,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
@@ -294,7 +293,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.named("lookup")
 				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode(null))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
@@ -369,7 +368,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
+		assertThat(message).contains("Terminology service was unable to provide validation for https://url#1");
 	}
 
 }

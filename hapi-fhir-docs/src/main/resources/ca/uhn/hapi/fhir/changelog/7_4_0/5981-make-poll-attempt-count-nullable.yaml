@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5981
+title: "Batch2WorkChunkEntity poll_attempt count is a nullable field, but was incorrectly
+        declared as a primitive.
+        This has been fixed.
+"

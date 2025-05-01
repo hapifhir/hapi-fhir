@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
@@ -30,10 +34,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.sql.Clob;
 import java.sql.SQLException;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
 
 @Entity
 @Immutable
@@ -43,20 +43,21 @@ import javax.persistence.Lob;
 		 * because hibernate won't allow the view the function without it, but
 		 */
 		"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " + "       vsc.PID                         AS CONCEPT_PID, "
-				+ "       vsc.VALUESET_PID                AS CONCEPT_VALUESET_PID, "
-				+ "       vsc.VALUESET_ORDER              AS CONCEPT_VALUESET_ORDER, "
-				+ "       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, "
-				+ "       vsc.CODEVAL                     AS CONCEPT_CODEVAL, "
-				+ "       vsc.DISPLAY                     AS CONCEPT_DISPLAY, "
-				+ "       vsc.SYSTEM_VER                  AS SYSTEM_VER, "
-				+ "       vsc.SOURCE_PID                  AS SOURCE_PID, "
-				+ "       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, "
-				+ "       vscd.PID                        AS DESIGNATION_PID, "
-				+ "       vscd.LANG                       AS DESIGNATION_LANG, "
-				+ "       vscd.USE_SYSTEM                 AS DESIGNATION_USE_SYSTEM, "
-				+ "       vscd.USE_CODE                   AS DESIGNATION_USE_CODE, "
-				+ "       vscd.USE_DISPLAY                AS DESIGNATION_USE_DISPLAY, "
-				+ "       vscd.VAL                        AS DESIGNATION_VAL "
+				+ "       vsc.VALUESET_PID                   AS CONCEPT_VALUESET_PID, "
+				+ "       vsc.VALUESET_ORDER                 AS CONCEPT_VALUESET_ORDER, "
+				+ "       vsc.SYSTEM_URL                     AS CONCEPT_SYSTEM_URL, "
+				+ "       vsc.CODEVAL                        AS CONCEPT_CODEVAL, "
+				+ "       vsc.DISPLAY                        AS CONCEPT_DISPLAY, "
+				+ "       vsc.SYSTEM_VER                     AS SYSTEM_VER, "
+				+ "       vsc.SOURCE_PID                     AS SOURCE_PID, "
+				+ "       vsc.SOURCE_DIRECT_PARENT_PIDS      AS SOURCE_DIRECT_PARENT_PIDS, "
+				+ "       vsc.SOURCE_DIRECT_PARENT_PIDS_VC   AS SOURCE_DIRECT_PARENT_PIDS_VC, "
+				+ "       vscd.PID                           AS DESIGNATION_PID, "
+				+ "       vscd.LANG                          AS DESIGNATION_LANG, "
+				+ "       vscd.USE_SYSTEM                    AS DESIGNATION_USE_SYSTEM, "
+				+ "       vscd.USE_CODE                      AS DESIGNATION_USE_CODE, "
+				+ "       vscd.USE_DISPLAY                   AS DESIGNATION_USE_DISPLAY, "
+				+ "       vscd.VAL                           AS DESIGNATION_VAL "
 				+ "FROM TRM_VALUESET_CONCEPT vsc "
 				+ "LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID")
 public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
@@ -112,6 +113,9 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
 	private Clob mySourceConceptDirectParentPids;
 
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS_VC", nullable = true)
+	private String mySourceConceptDirectParentPidsVc;
+
 	@Override
 	public Long getSourceConceptPid() {
 		return mySourceConceptPid;
@@ -119,14 +123,19 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 
 	@Override
 	public String getSourceConceptDirectParentPids() {
+		String retVal = null;
+
 		if (mySourceConceptDirectParentPids != null) {
 			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
-				return IOUtils.toString(characterStream);
+				retVal = IOUtils.toString(characterStream);
 			} catch (IOException | SQLException e) {
 				throw new InternalErrorException(Msg.code(828) + e);
 			}
+		} else if (mySourceConceptDirectParentPidsVc != null) {
+			retVal = mySourceConceptDirectParentPidsVc;
 		}
-		return null;
+
+		return retVal;
 	}
 
 	@Override

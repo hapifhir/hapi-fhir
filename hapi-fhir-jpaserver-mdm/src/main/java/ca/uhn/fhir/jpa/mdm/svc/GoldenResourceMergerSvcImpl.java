@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,13 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -73,13 +76,16 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IIdHelperService myIdHelperService;
 
 	@Autowired
-	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	@Override
 	@Transactional
@@ -105,7 +111,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 					.getResource();
 		} else {
 			myGoldenResourceHelper.mergeIndentifierFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
-			myGoldenResourceHelper.mergeNonIdentiferFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+					fromGoldenResource, toGoldenResource, mdmTransactionContext);
 			// Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(toGoldenResource, resourceType);
 		}
@@ -160,6 +167,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			HookParams params = new HookParams();
 			params.add(MdmMergeEvent.class, event);
 			params.add(RequestDetails.class, theParams.getRequestDetails());
+			params.add(MdmTransactionContext.class, theParams.getMdmTransactionContext());
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES, params);
 		}
 	}
@@ -228,10 +236,11 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource);
 		List<IMdmLink> toDelete = new ArrayList<>();
 
-		IResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
+		IResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourceIdentityPid(
 				getPartitionIdForResource(theToResource),
 				theToResource.getIdElement().getResourceType(),
-				theToResource.getIdElement().getIdPart());
+				theToResource.getIdElement().getIdPart(),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 
 		// reassign links:
 		// to <- from

@@ -10,8 +10,8 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ContainedTest.class);
@@ -28,21 +28,20 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 		o1.setSubject(new Reference(p));
 		IIdType oid1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 
+		p = new Patient();
+		p.setId("#some_patient");
+		p.addName().setFamily("MYFAMILY").addGiven("MYGIVEN");
+
 		Observation o2 = new Observation();
 		o2.getCode().setText("Some Observation");
 		o2.setSubject(new Reference(p));
 		IIdType oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
-		Patient p2 = new Patient();
-		p2.addName().setFamily("MYFAMILY").addGiven("MYGIVEN");
-		IIdType pid2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
-
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));
-
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "some observation").setModifier(TokenParamModifier.TEXT));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(oid1, oid2)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).contains(toValues(oid1, oid2));
 	}
 
 

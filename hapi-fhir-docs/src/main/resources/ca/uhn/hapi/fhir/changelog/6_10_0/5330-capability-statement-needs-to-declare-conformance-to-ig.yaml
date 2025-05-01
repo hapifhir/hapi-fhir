@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5330
+jira: SMILE-7372
+title: "Previously, the capability statement returned by the server would not declare conformance to IG when a bulk data
+export provider is registered with the server.  This issue has been fixed."

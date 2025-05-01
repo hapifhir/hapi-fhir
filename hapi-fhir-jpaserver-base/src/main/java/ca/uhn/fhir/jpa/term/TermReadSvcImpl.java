@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
@@ -41,13 +43,12 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.ITermValueSetConceptView;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -60,8 +61,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -79,8 +80,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.sl.cache.Cache;
-import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -91,13 +90,20 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -109,7 +115,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -126,6 +131,8 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -148,7 +155,6 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.comparator.Comparators;
 
 import java.util.ArrayList;
@@ -168,14 +174,8 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -197,21 +197,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
 	// doesn't seem to be much gain by using more threads than this value
 	public static final int MAX_MASS_INDEXER_OBJECT_LOADING_THREADS = 6;
-	private static final int SINGLE_FETCH_SIZE = 1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	private static final TermCodeSystemVersionDetails NO_CURRENT_VERSION = new TermCodeSystemVersionDetails(-1L, null);
-	private static final String IDX_PROPERTIES = "myProperties";
-	private static final String IDX_PROP_KEY = IDX_PROPERTIES + ".myKey";
-	private static final String IDX_PROP_VALUE_STRING = IDX_PROPERTIES + ".myValueString";
-	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
+	private static final String CS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_CS_CURRENT_VERSION";
+	private static final String VS_USERDATA_CURRENT_VERSION = TermReadSvcImpl.class.getName() + "_VS_CURRENT_VERSION";
 	private static Runnable myInvokeOnNextCallForUnitTest;
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
-	private final Cache<String, TermCodeSystemVersionDetails> myCodeSystemCurrentVersionCache =
-			CacheFactory.build(TimeUnit.MINUTES.toMillis(1));
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
@@ -221,12 +216,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	protected ITermConceptDao myConceptDao;
-
-	@Autowired
-	protected ITermConceptPropertyDao myConceptPropertyDao;
-
-	@Autowired
-	protected ITermConceptDesignationDao myConceptDesignationDao;
 
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
@@ -287,17 +276,26 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 	@Autowired
-	private CachingValidationSupport myCachingValidationSupport;
-
-	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+
+	@Autowired
+	private ValueSetConceptAccumulatorFactory myValueSetConceptAccumulatorFactory;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
+		if (isBlank(theSystem)) {
+			return false;
+		}
+		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theValidationSupportContext, theSystem);
 		return cs != null;
 	}
 
@@ -311,12 +309,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			Set<String> theAddedCodes,
 			TermConcept theConcept,
+			String theConceptDisplayValue,
 			boolean theAdd,
 			String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
 		String codeSystemVersion = theConcept.getCodeSystemVersion().getCodeSystemVersionId();
 		String code = theConcept.getCode();
-		String display = theConcept.getDisplay();
 		Long sourceConceptPid = theConcept.getId();
 		String directParentPids = "";
 
@@ -327,31 +325,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
+
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
-		} else {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
+			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
 		}
+
+		return addCodeIfNotAlreadyAdded(
+				theValueSetCodeAccumulator,
+				theAddedCodes,
+				designations,
+				theAdd,
+				codeSystem,
+				code,
+				theConceptDisplayValue,
+				sourceConceptPid,
+				directParentPids,
+				codeSystemVersion);
 	}
 
 	private boolean addCodeIfNotAlreadyAdded(
@@ -456,15 +445,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public void clearCaches() {
-		myCodeSystemCurrentVersionCache.invalidateAll();
-	}
-
-	public void deleteValueSetForResource(ResourceTable theResourceTable) {
+	public Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermValueSet> optionalExistingTermValueSetById =
 				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
@@ -474,9 +455,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			deletePreCalculatedValueSetContents(existingTermValueSet);
-			myTermValueSetDao.deleteById(existingTermValueSet.getId());
+			myTermValueSetDao.deleteById(existingTermValueSet.getPartitionedId());
+
+			/*
+			 * If we're updating an existing ValueSet within a transaction, we need to make
+			 * sure to manually flush now since otherwise we'll try to create a new
+			 * TermValueSet entity and fail with a constraint error on the URL, since
+			 * this one won't be deleted yet
+			 */
+			myTermValueSetDao.flush();
+
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
+
+		return optionalExistingTermValueSetById;
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
@@ -538,6 +530,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			@Nullable ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			ExpansionFilter theFilter) {
+		Set<String> addedCodes = new HashSet<>();
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
@@ -558,9 +551,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
-		myTxTemplate.executeWithoutResult(tx -> {
-			expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true);
-		});
+		myTxTemplate.executeWithoutResult(tx -> expandValueSetIntoAccumulator(
+				theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true, addedCodes));
 
 		if (accumulator.getTotalConcepts() != null) {
 			accumulator.setTotal(accumulator.getTotalConcepts());
@@ -592,7 +584,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			IValueSetConceptAccumulator theAccumulator,
 			ExpansionFilter theFilter,
-			boolean theAdd) {
+			boolean theAdd,
+			Set<String> theAddedCodes) {
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
 			if (theValueSetToExpand.hasVersion()) {
@@ -619,7 +612,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							"valueSetExpandedUsingInMemoryExpansion",
 							getValueSetInfo(theValueSetToExpand));
 			theAccumulator.addMessage(msg);
-			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter, theAddedCodes);
 			return;
 		}
 
@@ -637,7 +630,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							termValueSet.getExpansionStatus().name(),
 							termValueSet.getExpansionStatus().getDescription());
 			theAccumulator.addMessage(msg);
-			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter, theAddedCodes);
 			return;
 		}
 
@@ -649,23 +642,26 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.getLocalizer()
 				.getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
-		expandConcepts(theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
+		expandConcepts(
+				theExpansionOptions,
+				theAccumulator,
+				termValueSet,
+				theFilter,
+				theAdd,
+				theAddedCodes,
+				myHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Nonnull
 	private String toHumanReadableExpansionTimestamp(TermValueSet termValueSet) {
 		String expansionTimestamp = "(unknown)";
 		if (termValueSet.getExpansionTimestamp() != null) {
-			String timeElapsed = StopWatch.formatMillis(System.currentTimeMillis()
-					- termValueSet.getExpansionTimestamp().getTime());
-			expansionTimestamp = new InstantType(termValueSet.getExpansionTimestamp()).getValueAsString() + " ("
-					+ timeElapsed + " ago)";
+			// Note: We used to append "123ms ago" to the timestamp, but we cache the
+			// results here, so it's just kind of weird to do that since the duration will
+			// be out of date when the entry comes back from cache
+			expansionTimestamp = new InstantType(termValueSet.getExpansionTimestamp()).getValueAsString();
 		}
 		return expansionTimestamp;
-	}
-
-	private boolean isOracleDialect() {
-		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
 	}
 
 	private void expandConcepts(
@@ -674,6 +670,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			TermValueSet theTermValueSet,
 			ExpansionFilter theFilter,
 			boolean theAdd,
+			Set<String> theAddedCodes,
 			boolean theOracle) {
 		// NOTE: if you modifiy the logic here, look to `expandConceptsOracle` and see if your new code applies to its
 		// copy pasted sibling
@@ -706,10 +703,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 			wasFilteredResult = true;
 		} else {
-			// TODO JA HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching
-			// index 3 -> 10 here, grabbing 7 concepts.
-			// Specifically this test
-			// testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange
 			if (theOracle) {
 				conceptViews = myTermValueSetConceptViewOracleDao.findByTermValueSetId(
 						offset, toIndex, theTermValueSet.getId());
@@ -800,24 +793,25 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 				Long sourceConceptPid = pidToSourcePid.get(nextPid);
 				String sourceConceptDirectParentPids = pidToSourceDirectParentPids.get(nextPid);
-				theAccumulator.includeConceptWithDesignations(
-						system,
-						code,
-						display,
-						designations,
-						sourceConceptPid,
-						sourceConceptDirectParentPids,
-						systemVersion);
+				if (theAddedCodes.add(system + OUR_PIPE_CHARACTER + code)) {
+					theAccumulator.includeConceptWithDesignations(
+							system,
+							code,
+							display,
+							designations,
+							sourceConceptPid,
+							sourceConceptDirectParentPids,
+							systemVersion);
+					if (wasFilteredResult) {
+						theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
+					}
+				}
 			} else {
-				boolean removed = theAccumulator.excludeConcept(system, code);
-				if (removed) {
+				if (theAddedCodes.remove(system + OUR_PIPE_CHARACTER + code)) {
+					theAccumulator.excludeConcept(system, code);
 					theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
 				}
 			}
-		}
-
-		if (wasFilteredResult && theAdd) {
-			theAccumulator.incrementOrDecrementTotalConcepts(true, pidToConcept.size());
 		}
 
 		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
@@ -884,8 +878,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		Set<String> addedCodes = new HashSet<>();
 		doExpandValueSet(
-				theExpansionOptions, theValueSetToExpand, theValueSetCodeAccumulator, ExpansionFilter.NO_FILTER);
+				theExpansionOptions,
+				theValueSetToExpand,
+				theValueSetCodeAccumulator,
+				ExpansionFilter.NO_FILTER,
+				addedCodes);
 	}
 
 	/**
@@ -896,8 +895,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			@Nonnull ExpansionFilter theExpansionFilter) {
-		Set<String> addedCodes = new HashSet<>();
+			@Nonnull ExpansionFilter theExpansionFilter,
+			Set<String> theAddedCodes) {
 
 		StopWatch sw = new StopWatch();
 		String valueSetInfo = getValueSetInfo(theValueSetToExpand);
@@ -906,7 +905,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// Offset can't be combined with excludes
 		Integer skipCountRemaining = theValueSetCodeAccumulator.getSkipCountRemaining();
 		if (skipCountRemaining != null && skipCountRemaining > 0) {
-			if (theValueSetToExpand.getCompose().getExclude().size() > 0) {
+			if (!theValueSetToExpand.getCompose().getExclude().isEmpty()) {
 				String msg = myContext
 						.getLocalizer()
 						.getMessage(TermReadSvcImpl.class, "valueSetNotYetExpanded_OffsetNotAllowed", valueSetInfo);
@@ -919,7 +918,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		for (ValueSet.ConceptSetComponent include :
 				theValueSetToExpand.getCompose().getInclude()) {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
-					theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, true, theExpansionFilter));
+					theExpansionOptions, theValueSetCodeAccumulator, theAddedCodes, include, true, theExpansionFilter));
 		}
 
 		// Handle excludes
@@ -929,7 +928,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
 					theExpansionOptions,
 					theValueSetCodeAccumulator,
-					addedCodes,
+					theAddedCodes,
 					exclude,
 					false,
 					ExpansionFilter.NO_FILTER));
@@ -974,7 +973,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
-		boolean hasValueSet = theIncludeOrExclude.getValueSet().size() > 0;
+		boolean hasValueSet = !theIncludeOrExclude.getValueSet().isEmpty();
 
 		if (hasSystem) {
 
@@ -1002,7 +1001,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			} else {
 
-				if (theIncludeOrExclude.getConcept().size() > 0 && theExpansionFilter.hasCode()) {
+				if (!theIncludeOrExclude.getConcept().isEmpty() && theExpansionFilter.hasCode()) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theExpansionFilter.getSystem())) {
 						if (theIncludeOrExclude.getConcept().stream()
 								.noneMatch(t -> t.getCode().equals(theExpansionFilter.getCode()))) {
@@ -1025,16 +1024,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							new VersionConvertor_40_50(new BaseAdvisor_40_50()), "ValueSet");
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
-					new InMemoryTerminologyServerValidationSupport(myContext)
-							.expandValueSetIncludeOrExclude(
-									new ValidationSupportContext(provideValidationSupport()),
-									consumer,
-									includeOrExclude);
+					myInMemoryTerminologyServerValidationSupport.expandValueSetIncludeOrExclude(
+							new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
-							&& e.getFailureType()
-									== InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
+							// Code system is unknown, therefore NOT_FOUND
+							&& e.getCodeValidationIssue()
+									.hasIssueDetailCode(CodeValidationIssueCoding.NOT_FOUND.getCode())) {
 						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
@@ -1066,7 +1063,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				}
 
 				expandValueSetIntoAccumulator(
-						valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, theAdd);
+						valueSet,
+						theExpansionOptions,
+						theValueSetCodeAccumulator,
+						subExpansionFilter,
+						theAdd,
+						theAddedCodes);
 			}
 
 		} else {
@@ -1130,77 +1132,105 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		int chunkSize = chunkSizeOpt.get();
 
-		SearchProperties searchProps = buildSearchScroll(
+		/*
+		 * Turn the filter into one or more Hibernate Search queries. Ideally we want it
+		 * to be handled by a single query, but Lucene/ES don't like it when we exceed
+		 * 1024 different terms in a single query. So if we have that many terms (which
+		 * can happen if a ValueSet has a lot of explicitly enumerated codes that it's
+		 * including) we split this into multiple searches. The method below builds these
+		 * searches lazily, returning a Supplier that creates and executes the search
+		 * when it's actually time to.
+		 */
+		SearchProperties searchProps = buildSearchScrolls(
 				theTermCodeSystemVersion,
 				theExpansionFilter,
 				theSystem,
 				theIncludeOrExclude,
 				chunkSize,
 				includeOrExcludeVersion);
-
 		int accumulatedBatchesSoFar = 0;
-		try (SearchScroll<EntityReference> scroll = searchProps.getSearchScroll()) {
+		for (var next : searchProps.getSearchScroll()) {
+			try (SearchScroll<EntityReference> scroll = next.get()) {
+				ourLog.debug(
+						"Beginning batch expansion for {} with max results per batch: {}",
+						(theAdd ? "inclusion" : "exclusion"),
+						chunkSize);
+				for (SearchScrollResult<EntityReference> chunk = scroll.next();
+						chunk.hasHits();
+						chunk = scroll.next()) {
+					int countForBatch = 0;
 
-			ourLog.debug(
-					"Beginning batch expansion for {} with max results per batch: {}",
-					(theAdd ? "inclusion" : "exclusion"),
-					chunkSize);
-			for (SearchScrollResult<EntityReference> chunk = scroll.next(); chunk.hasHits(); chunk = scroll.next()) {
-				int countForBatch = 0;
+					List<TermConcept.TermConceptPk> pids = chunk.hits().stream()
+							.map(t -> (TermConcept.TermConceptPk) t.id())
+							.collect(Collectors.toList());
 
-				List<Long> pids = chunk.hits().stream().map(t -> (Long) t.id()).collect(Collectors.toList());
-
-				List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
-
-				// If the include section had multiple codes, return the codes in the same order
-				termConcepts = sortTermConcepts(searchProps, termConcepts);
-
-				//	 int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the
-				// index of the first result, so just best-guessing it here.
-				Optional<PredicateFinalStep> expansionStepOpt = searchProps.getExpansionStepOpt();
-				int delta = 0;
-				for (TermConcept concept : termConcepts) {
-					count++;
-					countForBatch++;
-					if (theAdd && expansionStepOpt.isPresent()) {
-						ValueSet.ConceptReferenceComponent theIncludeConcept =
-								getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
-						if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
-							concept.setDisplay(theIncludeConcept.getDisplay());
+					/*
+					 * This is a (hopefully) temporary hack - we are pulling concepts
+					 * out of ElasticSearch here and ES concepts aren't yet partition
+					 * aware. So we'll assume that they meant the default partition. This
+					 * will always work for now since terminology stuff is non-partitionable
+					 * but that could change in the future.
+					 */
+					for (var pid : pids) {
+						if (pid.getPartitionIdValue() == null) {
+							pid.setPartitionIdValue(myPartitionSettings.getDefaultPartitionId());
 						}
 					}
-					boolean added = addCodeIfNotAlreadyAdded(
-							theExpansionOptions,
-							theValueSetCodeAccumulator,
-							theAddedCodes,
-							concept,
-							theAdd,
-							includeOrExcludeVersion);
-					if (added) {
-						delta++;
+
+					List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
+
+					// If the include section had multiple codes, return the codes in the same order
+					termConcepts = sortTermConcepts(searchProps, termConcepts);
+
+					//	 int firstResult = theQueryIndex * maxResultsPerBatch;
+					// TODO GGG HS we lose the ability to check the
+					// index of the first result, so just best-guessing it here.
+					int delta = 0;
+					for (TermConcept concept : termConcepts) {
+						count++;
+						countForBatch++;
+						String conceptDisplayValue = concept.getDisplay();
+						if (theAdd && searchProps.hasIncludeOrExcludeCodes()) {
+							ValueSet.ConceptReferenceComponent theIncludeConcept =
+									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+								conceptDisplayValue = theIncludeConcept.getDisplay();
+							}
+						}
+						boolean added = addCodeIfNotAlreadyAdded(
+								theExpansionOptions,
+								theValueSetCodeAccumulator,
+								theAddedCodes,
+								concept,
+								conceptDisplayValue,
+								theAdd,
+								includeOrExcludeVersion);
+						if (added) {
+							delta++;
+						}
 					}
+
+					ourLog.debug(
+							"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+							(theAdd ? "inclusion" : "exclusion"),
+							accumulatedBatchesSoFar,
+							chunk.hits().size(),
+							chunk.took().toMillis());
+
+					theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
+					accumulatedBatchesSoFar += countForBatch;
+
+					// keep session bounded
+					myEntityManager.flush();
+					myEntityManager.clear();
 				}
 
 				ourLog.debug(
-						"Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+						"Expansion for {} produced {} results in {}ms",
 						(theAdd ? "inclusion" : "exclusion"),
-						accumulatedBatchesSoFar,
-						chunk.hits().size(),
-						chunk.took().toMillis());
-
-				theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
-				accumulatedBatchesSoFar += countForBatch;
-
-				// keep session bounded
-				myEntityManager.flush();
-				myEntityManager.clear();
+						count,
+						fullOperationSw.getMillis());
 			}
-
-			ourLog.debug(
-					"Expansion for {} produced {} results in {}ms",
-					(theAdd ? "inclusion" : "exclusion"),
-					count,
-					fullOperationSw.getMillis());
 		}
 	}
 
@@ -1238,7 +1268,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return maxResultsPerBatch > 0 ? Optional.of(maxResultsPerBatch) : Optional.empty();
 	}
 
-	private SearchProperties buildSearchScroll(
+	private SearchProperties buildSearchScrolls(
 			TermCodeSystemVersion theTermCodeSystemVersion,
 			ExpansionFilter theExpansionFilter,
 			String theSystem,
@@ -1250,54 +1280,68 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		SearchPredicateFactory predicate =
 				searchSession.scope(TermConcept.class).predicate();
 
-		// Build the top-level expansion on filters.
-		PredicateFinalStep step = predicate.bool(b -> {
-			b.must(predicate.match().field("myCodeSystemVersionPid").matching(theTermCodeSystemVersion.getPid()));
-
-			if (theExpansionFilter.hasCode()) {
-				b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
-			}
-
-			String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-		});
-
-		SearchProperties returnProps = new SearchProperties();
-
-		List<String> codes = theIncludeOrExclude.getConcept().stream()
+		List<String> allCodes = theIncludeOrExclude.getConcept().stream()
 				.filter(Objects::nonNull)
 				.map(ValueSet.ConceptReferenceComponent::getCode)
 				.filter(StringUtils::isNotBlank)
 				.collect(Collectors.toList());
-		returnProps.setIncludeOrExcludeCodes(codes);
-
-		Optional<PredicateFinalStep> expansionStepOpt = buildExpansionPredicate(codes, predicate);
-		final PredicateFinalStep finishedQuery =
-				expansionStepOpt.isPresent() ? predicate.bool().must(step).must(expansionStepOpt.get()) : step;
-		returnProps.setExpansionStepOpt(expansionStepOpt);
+		SearchProperties returnProps = new SearchProperties();
+		returnProps.setIncludeOrExcludeCodes(allCodes);
 
 		/*
-		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
-		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
+		 * Lucene/ES can't typically handle more than 1024 clauses per search, so if
+		 * we have more than that number (e.g. because of a ValueSet that explicitly
+		 * includes thousands of codes), we break this up into multiple searches.
 		 */
+		List<List<String>> partitionedCodes = ListUtils.partition(allCodes, IndexSearcher.getMaxClauseCount() - 10);
+		if (partitionedCodes.isEmpty()) {
+			partitionedCodes = List.of(List.of());
+		}
 
-		// BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
-		// TODO GGG HS looks like we can't set max clause count, but it can be set server side.
-		// BooleanQuery.setMaxClauseCount(10000);
-		// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
+		for (List<String> nextCodePartition : partitionedCodes) {
+			Supplier<SearchScroll<EntityReference>> nextScroll = () -> {
+				// Build the top-level expansion on filters.
+				PredicateFinalStep step = predicate.bool(b -> {
+					b.must(predicate
+							.match()
+							.field("myCodeSystemVersionPid")
+							.matching(theTermCodeSystemVersion.getPid()));
 
-		SearchQuery<EntityReference> termConceptsQuery = searchSession
-				.search(TermConcept.class)
-				.selectEntityReference()
-				.where(f -> finishedQuery)
-				.toQuery();
+					if (theExpansionFilter.hasCode()) {
+						b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
+					}
 
-		returnProps.setSearchScroll(termConceptsQuery.scroll(theScrollChunkSize));
+					String codeSystemUrlAndVersion =
+							buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
+					for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
+						handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+					}
+					for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
+						handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+					}
+				});
+
+				// Add a selector on any explicitly enumerated codes in the VS component
+				final PredicateFinalStep finishedQuery;
+				if (nextCodePartition.isEmpty()) {
+					finishedQuery = step;
+				} else {
+					PredicateFinalStep expansionStep = buildExpansionPredicate(nextCodePartition, predicate);
+					finishedQuery = predicate.bool().must(step).must(expansionStep);
+				}
+
+				SearchQuery<EntityReference> termConceptsQuery = searchSession
+						.search(TermConcept.class)
+						.selectEntityReference()
+						.where(f -> finishedQuery)
+						.toQuery();
+
+				return termConceptsQuery.scroll(theScrollChunkSize);
+			};
+
+			returnProps.addSearchScroll(nextScroll);
+		}
+
 		return returnProps;
 	}
 
@@ -1312,29 +1356,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private Optional<PredicateFinalStep> buildExpansionPredicate(
-			List<String> theCodes, SearchPredicateFactory thePredicate) {
-		if (CollectionUtils.isEmpty(theCodes)) {
-			return Optional.empty();
-		}
-
-		if (theCodes.size() < BooleanQuery.getMaxClauseCount()) {
-			return Optional.of(thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes)));
-		}
-
-		// Number of codes is larger than maxClauseCount, so we split the query in several clauses
-
-		// partition codes in lists of BooleanQuery.getMaxClauseCount() size
-		List<List<String>> listOfLists = ListUtils.partition(theCodes, BooleanQuery.getMaxClauseCount());
-
-		PredicateFinalStep step = thePredicate.bool(b -> {
-			b.minimumShouldMatchNumber(1);
-			for (List<String> codeList : listOfLists) {
-				b.should(p -> p.simpleQueryString().field("myCode").matching(String.join(" | ", codeList)));
-			}
-		});
-
-		return Optional.of(step);
+	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
+		assert !theCodes.isEmpty();
+		return thePredicate.simpleQueryString().field("myCode").matching(String.join(" | ", theCodes));
 	}
 
 	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
@@ -1377,7 +1401,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return;
 		}
 
-		if (isBlank(theFilter.getValue()) || theFilter.getOp() == null || isBlank(theFilter.getProperty())) {
+		// if filter type is EXISTS, there's no reason to worry about the value (we won't set it anyways)
+		if ((isBlank(theFilter.getValue()) && theFilter.getOp() != ValueSet.FilterOperator.EXISTS)
+				|| theFilter.getOp() == null
+				|| isBlank(theFilter.getProperty())) {
 			throw new InvalidRequestException(
 					Msg.code(891) + "Invalid filter, must have fields populated: property op value");
 		}
@@ -1424,8 +1451,48 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String value = theFilter.getValue();
-		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
-		theB.must(theF.match().field(term.field()).matching(term.text()));
+		if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+			// EXISTS has no value and is thus handled differently
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
+			theB.must(theF.exists().field(term.field()));
+		} else {
+			Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), value);
+			switch (theFilter.getOp()) {
+				case EQUAL:
+					theB.must(theF.match().field(term.field()).matching(term.text()));
+					break;
+				case IN:
+				case NOTIN:
+					boolean isNotFilter = theFilter.getOp() == ValueSet.FilterOperator.NOTIN;
+					// IN and NOTIN expect comma separated lists
+					String[] values = term.text().split(",");
+					Set<String> valueSet = new HashSet<>(Arrays.asList(values));
+					if (isNotFilter) {
+						theB.filter(theF.not(theF.terms().field(term.field()).matchingAny(valueSet)));
+					} else {
+						theB.filter(theF.terms().field(term.field()).matchingAny(valueSet));
+					}
+					break;
+				case REGEX:
+				case EXISTS:
+				case NULL:
+				case ISA:
+				case ISNOTA:
+				case DESCENDENTOF:
+				case GENERALIZES:
+				default:
+					/*
+					 * We do not need to handle REGEX, because that's handled in parent
+					 * We also don't handle EXISTS because that's a separate area (with different term).
+					 * We add a match-none filter because otherwise it matches everything (not desired).
+					 */
+					ourLog.error(
+							"Unsupported property filter {}. This may affect expansion, but will not cause errors.",
+							theFilter.getOp().getDisplay());
+					theB.must(theF.matchNone());
+					break;
+			}
+		}
 	}
 
 	private void handleFilterRegex(
@@ -1581,9 +1648,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			SearchPredicateFactory f,
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCodeForFilterCriteria(theSystem, theFilter);
+		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
+			ourLog.debug(
+					" * Filtering on specific code and codes with a parent of {}/{}/{}",
+					code.getId(),
+					code.getCode(),
+					code.getDisplay());
+
+			b.must(f.bool()
+					.should(f.match().field("myParentPids").matching("" + code.getId()))
+					.should(f.match().field("myId").matching(code.getPid())));
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
 			ourLog.debug(
 					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
 
@@ -1594,7 +1671,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nonnull
-	private TermConcept findCodeForFilterCriteria(String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
+	private TermConcept findCodeForFilterCriteriaCodeOrConcept(
+			String theSystem, ValueSet.ConceptSetFilterComponent theFilter) {
 		return findCode(theSystem, theFilter.getValue())
 				.orElseThrow(() ->
 						new InvalidRequestException(Msg.code(2071) + "Invalid filter criteria - code does not exist: {"
@@ -1695,7 +1773,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
-		List<Long> parentPids = getCodeParentPids(theSystem, theFilter.getProperty(), theFilter.getValue());
+		List<TermConcept.TermConceptPk> parentPids =
+				getCodeParentPids(theSystem, theFilter.getProperty(), theFilter.getValue());
 		if (parentPids.isEmpty()) {
 			// Can't return empty must, because it wil match according to other predicates.
 			// Some day there will be a 'matchNone' predicate
@@ -1726,7 +1805,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			throw new InvalidRequestException(Msg.code(2062) + "Invalid filter criteria - no codes specified");
 		}
 
-		List<Long> descendantCodePidList = getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
+		List<TermConcept.TermConceptPk> descendantCodePidList =
+				getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
 
 		b.must(f.bool(innerB -> descendantCodePidList.forEach(
 				pId -> innerB.should(f.match().field("myId").matching(pId)))));
@@ -1735,15 +1815,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Returns the list of parentId(s) of the TermConcept representing theValue as a code
 	 */
-	private List<Long> getCodeParentPids(String theSystem, String theProperty, String theValue) {
+	private List<TermConcept.TermConceptPk> getCodeParentPids(String theSystem, String theProperty, String theValue) {
 		TermConcept code = findCode(theSystem, theValue)
 				.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {"
 						+ Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
 
 		String[] parentPids = code.getParentPidsAsString().split(" ");
-		List<Long> retVal = Arrays.stream(parentPids)
+		List<TermConcept.TermConceptPk> retVal = Arrays.stream(parentPids)
 				.filter(pid -> !StringUtils.equals(pid, "NONE"))
 				.map(Long::parseLong)
+				.map(t -> new TermConcept.TermConceptPk(t, myPartitionSettings.getDefaultPartitionId()))
 				.collect(Collectors.toList());
 		logFilteringValueOnProperty(theValue, theProperty);
 		return retVal;
@@ -1752,7 +1833,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Returns the list of parentId(s) of the TermConcept representing theValue as a code
 	 */
-	private List<Long> getMultipleCodeParentPids(String theSystem, String theProperty, String[] theValues) {
+	private List<TermConcept.TermConceptPk> getMultipleCodeParentPids(
+			String theSystem, String theProperty, String[] theValues) {
 		List<String> valuesList = Arrays.asList(theValues);
 		List<TermConcept> termConcepts = findCodes(theSystem, valuesList);
 		if (valuesList.size() != termConcepts.size()) {
@@ -1761,10 +1843,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					+ Constants.codeSystemWithDefaultDescription(theSystem) + "}: " + exMsg);
 		}
 
-		List<Long> retVal = termConcepts.stream()
+		List<TermConcept.TermConceptPk> retVal = termConcepts.stream()
 				.flatMap(tc -> Arrays.stream(tc.getParentPidsAsString().split(" ")))
 				.filter(pid -> !StringUtils.equals(pid, "NONE"))
 				.map(Long::parseLong)
+				.map(t -> new TermConcept.TermConceptPk(t, myPartitionSettings.getDefaultPartitionId()))
 				.collect(Collectors.toList());
 
 		logFilteringValueOnProperties(valuesList, theProperty);
@@ -1839,29 +1922,33 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
 			boolean handled = false;
-			switch (nextFilter.getProperty()) {
+			switch (nextFilter.getProperty().toLowerCase()) {
 				case "concept":
 				case "code":
 					if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
 						theValueSetCodeAccumulator.addMessage(
 								"Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
-						TermConcept code = findCodeForFilterCriteria(theSystem, nextFilter);
+						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
 						addConceptAndChildren(
 								theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
 						handled = true;
 					}
+					break;
+				default:
+					// TODO - we need to handle other properties (fields)
+					// and other operations (not just is-a)
+					// in some (preferably generic) way
 					break;
 			}
 
 			if (!handled) {
 				throwInvalidFilter(
 						nextFilter,
-						" - Note that Hibernate Search is disabled on this server so not all ValueSet expansion funtionality is available.");
+						" - Note that Hibernate Search is disabled on this server so not all ValueSet expansion functionality is available.");
 			}
 		}
 
-		if (theInclude.getConcept().isEmpty()) {
-
+		if (theInclude.getFilter().isEmpty() && theInclude.getConcept().isEmpty()) {
 			Collection<TermConcept> concepts =
 					myConceptDao.fetchConceptsAndDesignationsByVersionPid(theVersion.getPid());
 			for (TermConcept next : concepts) {
@@ -1963,7 +2050,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
-		myTermValueSetDao.save(termValueSet);
+
+		assert termValueSet.getId() != null;
+		myEntityManager.merge(termValueSet);
 
 		afterValueSetExpansionStatusChange();
 
@@ -1974,7 +2063,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(theValueSet);
 
@@ -1999,19 +2088,30 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return true;
 	}
 
+	@SuppressWarnings({"OptionalAssignedToNull", "unchecked"})
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
-		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
+		Optional<TermValueSet> retVal = (Optional<TermValueSet>) theValueSet.getUserData(VS_USERDATA_CURRENT_VERSION);
+		if (retVal == null) {
+			synchronized (theValueSet) {
+				JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+				retVal = myTermValueSetDao.findByResourcePid(valueSetResourcePid);
+				theValueSet.setUserData(VS_USERDATA_CURRENT_VERSION, retVal);
+			}
+		}
+
+		return retVal;
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
-		return myIdHelperService.resolveResourcePersistentIds(
+		return myIdHelperService.resolveResourceIdentityPid(
 				RequestPartitionId.allPartitions(),
 				theValueSet.getIdElement().getResourceType(),
-				theValueSet.getIdElement().getIdPart());
+				theValueSet.getIdElement().getIdPart(),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
+			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theValidationOptions,
 			ValueSet theValueSet,
 			String theSystem,
@@ -2051,11 +2151,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myTermValueSetDao
-				.findByResourcePid(valueSetResourcePid.getId())
-				.orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = fetchValueSetEntity(theValueSet).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
-		String msg = myContext
+		String preExpansionMessage = myContext
 				.getLocalizer()
 				.getMessage(TermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
@@ -2068,14 +2166,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							.setCode(concept.getCode())
 							.setDisplay(concept.getDisplay())
 							.setCodeSystemVersion(concept.getSystemVersion())
-							.setMessage(msg);
+							.setSourceDetails(preExpansionMessage);
 				}
 			}
 
 			String expectedDisplay = concepts.get(0).getDisplay();
-			String append = createMessageAppendForDisplayMismatch(theSystem, theDisplay, expectedDisplay) + " - " + msg;
-			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, append)
-					.setDisplay(expectedDisplay);
+			return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
+					myContext,
+					theCode,
+					theDisplay,
+					expectedDisplay,
+					theSystem,
+					systemVersion,
+					myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2083,7 +2186,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					.setCode(concepts.get(0).getCode())
 					.setDisplay(concepts.get(0).getDisplay())
 					.setCodeSystemVersion(concepts.get(0).getSystemVersion())
-					.setMessage(msg);
+					.setMessage(preExpansionMessage);
 		}
 
 		// Ok, we failed
@@ -2096,18 +2199,25 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			String unknownCodeMessage = myContext
 					.getLocalizer()
 					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode);
-			append = " - " + unknownCodeMessage + ". " + msg;
+			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, append);
+		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
 	}
 
-	private CodeValidationResult createFailureCodeValidationResult(
+	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
+		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
+		// The InstanceValidator (core) will change the severity based on the binding strength
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
+				.setMessage(theMessage)
+				.addIssue(new CodeValidationIssue(
+						theMessage,
+						IssueSeverity.ERROR,
+						CodeValidationIssueCode.NOT_FOUND,
+						CodeValidationIssueCoding.NOT_FOUND));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(
@@ -2158,26 +2268,24 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public Optional<TermConcept> findCode(String theCodeSystem, String theCode) {
 		/*
 		 * Loading concepts without a transaction causes issues later on some
-		 * platforms (e.g. PSQL) so this transactiontemplate is here to make
-		 * sure that we always call this with an open transaction
+		 * platforms (e.g. PSQL) so make sure that we always call this with an open transaction
 		 */
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
-		txTemplate.setReadOnly(true);
+		HapiTransactionService.requireTransaction();
 
-		return txTemplate.execute(t -> {
-			TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
-			if (csv == null) {
-				return Optional.empty();
-			}
-			return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
-		});
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
+		if (csv == null) {
+			return Optional.empty();
+		}
+		return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
-		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
+		HapiTransactionService.requireTransaction();
+
+		TermCodeSystemVersionDetails csv =
+				getCurrentCodeSystemVersion(new ValidationSupportContext(provideValidationSupport()), theCodeSystem);
 		if (csv == null) {
 			return Collections.emptyList();
 		}
@@ -2186,30 +2294,51 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(
+			ValidationSupportContext theValidationSupportContext, String theCodeSystemIdentifier) {
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
-		TermCodeSystemVersionDetails retVal = myCodeSystemCurrentVersionCache.get(
-				theCodeSystemIdentifier,
-				t -> myTxTemplate.execute(tx -> {
-					TermCodeSystemVersion csv = null;
-					TermCodeSystem cs =
-							myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
-					if (cs != null) {
-						if (version != null) {
-							csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
-						} else if (cs.getCurrentVersion() != null) {
-							csv = cs.getCurrentVersion();
-						}
-					}
-					if (csv != null) {
-						return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
-					} else {
-						return NO_CURRENT_VERSION;
-					}
-				}));
-		if (retVal == NO_CURRENT_VERSION) {
-			return null;
+
+		// Fetch the CodeSystem from ValidationSupport, which should return a cached copy. We
+		// keep a copy of the current version entity in userData in that cached copy
+		// to avoid repeated lookups
+		TermCodeSystemVersionDetails retVal;
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemIdentifier);
+		if (codeSystem != null) {
+
+			synchronized (codeSystem) {
+				retVal = (TermCodeSystemVersionDetails) codeSystem.getUserData(CS_USERDATA_CURRENT_VERSION);
+				if (retVal == null) {
+					retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
+					codeSystem.setUserData(CS_USERDATA_CURRENT_VERSION, retVal);
+				}
+			}
+		} else {
+			retVal = getCurrentCodeSystemVersion(theCodeSystemIdentifier, version);
 		}
+
+		return retVal;
+	}
+
+	@Nullable
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier, String version) {
+		TermCodeSystemVersionDetails retVal;
+		retVal = myTxTemplate.execute(tx -> {
+			TermCodeSystemVersion csv = null;
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
+			if (cs != null) {
+				if (version != null) {
+					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
+				} else if (cs.getCurrentVersion() != null) {
+					csv = cs.getCurrentVersion();
+				}
+			}
+			if (csv != null) {
+				return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
+			} else {
+				return null;
+			}
+		});
 		return retVal;
 	}
 
@@ -2235,7 +2364,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesAbove(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2255,7 +2384,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -2264,11 +2393,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
-		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId(), csv.getPid(), theCode);
+		Set<TermConcept> codes = findCodesAbove(cs.getResource().getId().getId(), csv.getPid(), theCode);
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Set<TermConcept> findCodesBelow(
 			Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
@@ -2292,7 +2421,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return retVal;
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelow(String theSystem, String theCode) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
@@ -2301,7 +2430,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
-		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId(), csv.getPid(), theCode);
+		Set<TermConcept> codes = findCodesBelow(cs.getResource().getId().getId(), csv.getPid(), theCode);
 		return toVersionIndependentConcepts(theSystem, codes);
 	}
 
@@ -2349,7 +2478,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				termValueSet.setTotalConcepts(0L);
 				termValueSet.setTotalConceptDesignations(0L);
 				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				return myTermValueSetDao.saveAndFlush(termValueSet);
+				TermValueSet retVal = myEntityManager.merge(termValueSet);
+				myEntityManager.flush();
+				return retVal;
 			});
 			if (valueSetToExpand == null) {
 				return;
@@ -2360,23 +2491,23 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
 					TermValueSet refreshedValueSetToExpand = myTermValueSetDao
-							.findById(valueSetToExpand.getId())
+							.findById(valueSetToExpand.getPartitionedId())
 							.orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
 				assert valueSet != null;
 
-				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(
-						valueSetToExpand, myTermValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+				ValueSetConceptAccumulator valueSetConceptAccumulator =
+						myValueSetConceptAccumulatorFactory.create(valueSetToExpand);
 				ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 				options.setIncludeHierarchy(true);
-				expandValueSet(options, valueSet, accumulator);
+				expandValueSet(options, valueSet, valueSetConceptAccumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 					valueSetToExpand.setExpansionTimestamp(new Date());
-					myTermValueSetDao.saveAndFlush(valueSetToExpand);
+					myEntityManager.merge(valueSetToExpand);
 				});
 
 				afterValueSetExpansionStatusChange();
@@ -2385,14 +2516,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						"Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}",
 						valueSet.getId(),
 						valueSet.getUrl(),
-						accumulator.getConceptsSaved(),
+						valueSetConceptAccumulator.getConceptsSaved(),
 						sw);
 
 			} catch (Exception e) {
-				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
+				ourLog.error(
+						"Failed to pre-expand ValueSet with URL[{}]: {}", valueSetToExpand.getUrl(), e.getMessage(), e);
 				txTemplate.executeWithoutResult(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myTermValueSetDao.saveAndFlush(valueSetToExpand);
+					myEntityManager.merge(valueSetToExpand);
 				});
 
 			} finally {
@@ -2407,9 +2539,30 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * results while they test changes, which is probably a worthwhile sacrifice
 	 */
 	private void afterValueSetExpansionStatusChange() {
-		// TODO: JA2 - Move this caching into the memorycacheservice, and only purge the
-		// relevant individual cache
-		myCachingValidationSupport.invalidateCaches();
+		provideValidationSupport().invalidateCaches();
+	}
+
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+	@Override
+	public void invalidateCaches() {
+		/*
+		 * Clear out anything left in the userdata caches. We do this mostly because it messes
+		 * up unit tests to have these things stick around between test runs, since many of
+		 * these resources come from DefaultProfileValidationSupport and therefore live beyond
+		 * any single test execution.
+		 */
+		for (IBaseResource next : provideValidationSupport().fetchAllConformanceResources()) {
+			if (next != null) {
+				synchronized (next) {
+					if (next.getUserData(CS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(CS_USERDATA_CURRENT_VERSION, null);
+					}
+					if (next.getUserData(VS_USERDATA_CURRENT_VERSION) != null) {
+						next.setUserData(VS_USERDATA_CURRENT_VERSION, null);
+					}
+				}
+			}
+		}
 	}
 
 	private synchronized boolean isPreExpandingValueSets() {
@@ -2439,6 +2592,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
+		// If we're in a transaction, we need to flush now so that we can correctly detect
+		// duplicates if there are multiple ValueSets in the same TX with the same URL
+		// (which is an error, but we need to catch it). It'd be better to catch this by
+		// inspecting the URLs in the bundle or something, since flushing hurts performance
+		// but it's not expected that loading valuesets is going to be a huge high frequency
+		// thing so it probably doesn't matter
+		myEntityManager.flush();
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theValueSet)) {
@@ -2464,7 +2624,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
 		// Delete version being replaced
-		deleteValueSetForResource(theResourceTable);
+		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
 
 		/*
 		 * Do the upload.
@@ -2472,14 +2632,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		String url = termValueSet.getUrl();
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
-		if (version != null) {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+
+		if (deletedTrmValueSet.isPresent()
+				&& Objects.equals(deletedTrmValueSet.get().getUrl(), url)
+				&& Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+			// If we just deleted the valueset marker, we don't need to check if it exists
+			// in the database
+			optionalExistingTermValueSetByUrl = Optional.empty();
 		} else {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+			optionalExistingTermValueSetByUrl = getTermValueSet(version, url);
 		}
+
 		if (optionalExistingTermValueSetByUrl.isEmpty()) {
 
-			myTermValueSetDao.save(termValueSet);
+			myEntityManager.persist(termValueSet);
 
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
@@ -2512,6 +2678,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 			throw new UnprocessableEntityException(Msg.code(902) + msg);
 		}
+	}
+
+	private Optional<TermValueSet> getTermValueSet(String version, String url) {
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
+		if (version != null) {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
+		} else {
+			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
+		}
+		return optionalExistingTermValueSetByUrl;
 	}
 
 	@Override
@@ -2567,10 +2743,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return new IFhirResourceDaoCodeSystem.SubsumesResult(subsumes);
 	}
 
-	protected IValidationSupport.LookupCodeResult lookupCode(
-			String theSystem, String theCode, String theDisplayLanguage) {
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
+			final String theSystem = theLookupCodeRequest.getSystem();
+			final String theCode = theLookupCodeRequest.getCode();
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
@@ -2585,7 +2764,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 				for (TermConceptDesignation next : code.getDesignations()) {
 					// filter out the designation based on displayLanguage if any
-					if (isDisplayLanguageMatch(theDisplayLanguage, next.getLanguage())) {
+					if (isDisplayLanguageMatch(theLookupCodeRequest.getDisplayLanguage(), next.getLanguage())) {
 						IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
 						designation.setLanguage(next.getLanguage());
 						designation.setUseSystem(next.getUseSystem());
@@ -2596,7 +2775,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					}
 				}
 
+				final Collection<String> propertyNames = theLookupCodeRequest.getPropertyNames();
 				for (TermConceptProperty next : code.getProperties()) {
+					if (ObjectUtils.isNotEmpty(propertyNames) && !propertyNames.contains(next.getKey())) {
+						continue;
+					}
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
 						IValidationSupport.CodingConceptProperty property =
 								new IValidationSupport.CodingConceptProperty(
@@ -2628,7 +2811,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		List<TermConcept> fetch = theSearchSession
 				.search(TermConcept.class)
 				.where(f -> f.bool()
-						.must(f.match().field("myId").matching(theRight.getId()))
+						.must(f.match().field("myId").matching(theRight.getPid()))
 						.must(f.match().field("myParentPids").matching(Long.toString(theLeft.getId()))))
 				.fetchHits(1);
 
@@ -2697,7 +2880,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		txTemplate.setReadOnly(true);
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					String codeSystemVersionId = getCurrentCodeSystemVersion(theCodeSystemUrl).myCodeSystemVersionId;
+					String codeSystemVersionId = getCurrentCodeSystemVersion(
+									theValidationSupportContext, theCodeSystemUrl)
+							.myCodeSystemVersionId;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
@@ -2710,15 +2895,18 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					|| code.getDisplay().equals(theDisplay)) {
 				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
 			} else {
-				String messageAppend =
-						createMessageAppendForDisplayMismatch(theCodeSystemUrl, theDisplay, code.getDisplay());
-				return createFailureCodeValidationResult(
-								theCodeSystemUrl, theCode, code.getSystemVersion(), messageAppend)
-						.setDisplay(code.getDisplay());
+				return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
+						myContext,
+						theCode,
+						theDisplay,
+						code.getDisplay(),
+						code.getSystem(),
+						code.getSystemVersion(),
+						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}
 		}
 
-		return createFailureCodeValidationResult(
+		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
@@ -2736,13 +2924,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
-			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
+			JpaPid pid = IDao.RESOURCE_PID.get(valueSet);
 			if (pid != null) {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {
 					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
 						return validateCodeIsInPreExpandedValueSet(
-								theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
+								theValidationSupportContext,
+								theValidationOptions,
+								valueSet,
+								theCodeSystem,
+								theCode,
+								theDisplay,
+								null,
+								null);
 					} else {
 						return null;
 					}
@@ -2752,17 +2947,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		if (retVal == null) {
 			if (valueSet != null) {
-				retVal = new InMemoryTerminologyServerValidationSupport(myContext)
-						.validateCodeInValueSet(
-								theValidationSupportContext,
-								theValidationOptions,
-								theCodeSystem,
-								theCode,
-								theDisplay,
-								valueSet);
+				retVal = myInMemoryTerminologyServerValidationSupport.validateCodeInValueSet(
+						theValidationSupportContext,
+						theValidationOptions,
+						theCodeSystem,
+						theCode,
+						theDisplay,
+						valueSet);
 			} else {
 				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+				retVal = createCodeNotFoundErrorForValidationResult(theCodeSystem, theCode, null, append);
 			}
 		}
 
@@ -2967,14 +3161,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId) {
 		@SuppressWarnings("unchecked")
 		List<ResourceTable> resultList = (List<ResourceTable>) myEntityManager
-				.createQuery("select f.myResource from ForcedId f "
-						+ "where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'")
+				.createQuery("select r from ResourceTable r "
+						+ "where r.myResourceType = 'CodeSystem' and r.myFhirId = :fhirId")
+				.setParameter("fhirId", theForcedId)
 				.getResultList();
 		if (resultList.isEmpty()) return Optional.empty();
 
 		if (resultList.size() > 1)
 			throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: "
-					+ theForcedId + ". Was constraint " + ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
+					+ theForcedId + ". Was constraint " + ResourceTable.IDX_RES_TYPE_FHIR_ID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
 		IBaseResource cs = myJpaStorageResourceParser.toResource(resultList.get(0), false);
@@ -3083,6 +3278,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(
+			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theOptions,
 			IBaseResource theValueSet,
 			String theSystem,
@@ -3097,7 +3293,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 
 		return validateCodeIsInPreExpandedValueSet(
-				theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConcept);
+				theValidationSupportContext,
+				theOptions,
+				valueSetR4,
+				theSystem,
+				theCode,
+				theDisplay,
+				codingR4,
+				codeableConcept);
 	}
 
 	@Override
@@ -3105,15 +3308,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
 		return isValueSetPreExpandedForCodeValidation(valueSetR4);
-	}
-
-	@Override
-	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
-		return lookupCode(theSystem, theCode, theDisplayLanguage);
 	}
 
 	private static class TermCodeSystemVersionDetails {
@@ -3141,24 +3335,15 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	 * Properties returned from method buildSearchScroll
 	 */
 	private static final class SearchProperties {
-		private SearchScroll<EntityReference> mySearchScroll;
-		private Optional<PredicateFinalStep> myExpansionStepOpt;
+		private final List<Supplier<SearchScroll<EntityReference>>> mySearchScroll = new ArrayList<>();
 		private List<String> myIncludeOrExcludeCodes;
 
-		public SearchScroll<EntityReference> getSearchScroll() {
+		public List<Supplier<SearchScroll<EntityReference>>> getSearchScroll() {
 			return mySearchScroll;
 		}
 
-		public void setSearchScroll(SearchScroll<EntityReference> theSearchScroll) {
-			mySearchScroll = theSearchScroll;
-		}
-
-		public Optional<PredicateFinalStep> getExpansionStepOpt() {
-			return myExpansionStepOpt;
-		}
-
-		public void setExpansionStepOpt(Optional<PredicateFinalStep> theExpansionStepOpt) {
-			myExpansionStepOpt = theExpansionStepOpt;
+		public void addSearchScroll(Supplier<SearchScroll<EntityReference>> theSearchScrollSupplier) {
+			mySearchScroll.add(theSearchScrollSupplier);
 		}
 
 		public List<String> getIncludeOrExcludeCodes() {
@@ -3167,6 +3352,10 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		public void setIncludeOrExcludeCodes(List<String> theIncludeOrExcludeCodes) {
 			myIncludeOrExcludeCodes = theIncludeOrExcludeCodes;
+		}
+
+		public boolean hasIncludeOrExcludeCodes() {
+			return !myIncludeOrExcludeCodes.isEmpty();
 		}
 	}
 
@@ -3180,13 +3369,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		return theExpansionOptions.getTheDisplayLanguage().equalsIgnoreCase(theStoredLang);
-	}
-
-	@Nonnull
-	private static String createMessageAppendForDisplayMismatch(
-			String theCodeSystemUrl, String theDisplay, String theExpectedDisplay) {
-		return " - Concept Display \"" + theDisplay + "\" does not match expected \"" + theExpectedDisplay
-				+ "\" for CodeSystem: " + theCodeSystemUrl;
 	}
 
 	@Nonnull
@@ -3245,6 +3427,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		termConcept.setCode(theConceptDefinition.getCode());
 		termConcept.setCodeSystemVersion(theCodeSystemVersion);
 		termConcept.setDisplay(theConceptDefinition.getDisplay());
+
 		termConcept.addChildren(
 				toPersistedConcepts(theConceptDefinition.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 
@@ -3281,6 +3464,20 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			if (next.getValue() instanceof StringType) {
 				property.setType(TermConceptPropertyTypeEnum.STRING);
 				property.setValue(next.getValueStringType().getValue());
+			} else if (next.getValue() instanceof BooleanType) {
+				property.setType(TermConceptPropertyTypeEnum.BOOLEAN);
+				property.setValue(((BooleanType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof IntegerType) {
+				property.setType(TermConceptPropertyTypeEnum.INTEGER);
+				property.setValue(((IntegerType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DecimalType) {
+				property.setType(TermConceptPropertyTypeEnum.DECIMAL);
+				property.setValue(((DecimalType) next.getValue()).getValueAsString());
+			} else if (next.getValue() instanceof DateTimeType) {
+				// DateType is not supported because it's not
+				// supported in CodeSystem.setValue
+				property.setType(TermConceptPropertyTypeEnum.DATETIME);
+				property.setValue(((DateTimeType) next.getValue()).getValueAsString());
 			} else if (next.getValue() instanceof Coding) {
 				Coding nextCoding = next.getValueCoding();
 				property.setType(TermConceptPropertyTypeEnum.CODING);
@@ -3288,7 +3485,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				property.setValue(nextCoding.getCode());
 				property.setDisplay(nextCoding.getDisplay());
 			} else if (next.getValue() != null) {
-				// TODO: LOINC has properties of type BOOLEAN that we should handle
 				ourLog.warn("Don't know how to handle properties of type: "
 						+ next.getValue().getClass());
 				continue;

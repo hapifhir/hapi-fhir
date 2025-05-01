@@ -1,20 +1,23 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class AddColumnTest extends BaseTest {
 
@@ -34,7 +37,7 @@ public class AddColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID", "TEXTCOL", "NEWCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -72,13 +75,13 @@ public class AddColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("PID", "TEXTCOL", "NEWCOL");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testAddColumnToNonExistantTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
+	public void testAddColumnToNonExistentTable_Failing(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		final DriverTypeEnum driverType = before(theTestDatabaseDetails);
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
 		tasks
@@ -93,7 +96,12 @@ public class AddColumnTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: "));
+			final String expectedError =
+				String.format("%sFailure executing task 'Add column FOO_COLUMN on table FOO_TABLE', for driver: %s, aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: %sFailed during task 4.0.0.2001.01: ",
+					Msg.code(47),
+					driverType.name(),
+					Msg.code(61));
+			assertThat(e.getMessage()).startsWith(expectedError);
 		}
 	}
 
@@ -117,4 +125,25 @@ public class AddColumnTest extends BaseTest {
 
 	}
 
+	@Nested
+	public class SqlFeatures{
+
+		@Test
+		public void testAddColumn_onOracleDb_willIncludeColumnSemantic() {
+			// given
+			AddColumnTask task = new AddColumnTask("1", "1");
+			task.setTableName("SOMETABLE");
+			task.setColumnName("newcol");
+			task.setColumnType(ColumnTypeEnum.STRING);
+			task.setColumnLength(200);
+			task.setNullable(true);
+			task.setDriverType(DriverTypeEnum.ORACLE_12C);
+
+			// when
+			String sqlStringToExecute = task.generateSql();
+
+			// then
+			assertThat(sqlStringToExecute).isEqualTo("alter table SOMETABLE add NEWCOL varchar2(200 char)");
+		}
+	}
 }

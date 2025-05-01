@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ package ca.uhn.fhir.jpa.topic.filter;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.util.Logs;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
 
 public final class SubscriptionTopicFilterUtil {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();

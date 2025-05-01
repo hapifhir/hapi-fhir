@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,16 @@ package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -37,15 +41,12 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is an experiment to see if we can make test data creation for storage unit tests a bit more readable.
@@ -78,6 +79,20 @@ public interface ITestDataBuilder {
 	 */
 	default ICreationArgument withActiveFalse() {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
+	}
+
+	/**
+	 * Set Resource.language
+	 */
+	default ICreationArgument withLanguage(String theLanguage) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "language", "string", theLanguage);
+	}
+
+	/**
+	 * List.entry.item
+	 */
+	default ICreationArgument withListItem(IIdType theReference) {
+		return withElementAt("entry", withReference("item", theReference));
 	}
 
 	/**
@@ -164,9 +179,15 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "name", "string", theStatus);
 	}
 
-	default ICreationArgument withId(String theId) {
+	default ICreationArgument withId(@Nonnull String theId) {
 		return t -> {
-			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
+			assertThat(theId).matches("[a-zA-Z0-9-]+");
+			((IBaseResource)t).setId(theId);
+		};
+	}
+
+	default ICreationArgument withIdOrNull(@Nullable String theId) {
+		return t -> {
 			((IBaseResource)t).setId(theId);
 		};
 	}
@@ -175,8 +196,11 @@ public interface ITestDataBuilder {
 		return t -> ((IBaseResource)t).setId(theId.toUnqualifiedVersionless());
 	}
 
-	default ICreationArgument withTag(String theSystem, String theCode) {
-		return t -> ((IBaseResource)t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+	default ICreationArgument withTag(String theSystem, String theCode, Consumer<IBaseCoding>... theModifiers) {
+		return t -> {
+			IBaseCoding coding = ((IBaseResource) t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+			applyElementModifiers(coding, theModifiers);
+		};
 	}
 
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
@@ -223,12 +247,20 @@ public interface ITestDataBuilder {
 		return buildResource("Patient", theModifiers);
 	}
 
+	default IIdType createList(ICreationArgument... theModifiers) {
+		return createResource("List", theModifiers);
+	}
+
 	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}
 
 	default IIdType createOrganization(ICreationArgument... theModifiers) {
 		return createResource("Organization", theModifiers);
+	}
+
+	default IIdType createPractitioner(ICreationArgument... theModifiers) {
+		return createResource("Practitioner", theModifiers);
 	}
 
 	default IIdType createResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -258,6 +290,10 @@ public interface ITestDataBuilder {
 		} else {
 			return doCreateResource(resource);
 		}
+	}
+
+	default <T extends IBaseResource> T buildResource(Class<T> theResourceType, ICreationArgument... theModifiers) {
+		return buildResource(getFhirContext().getResourceType(theResourceType), theModifiers);
 	}
 
 	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
@@ -291,7 +327,11 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withEncounter(@Nullable String theEncounter) {
-		return withReference("encounter", new IdType(theEncounter));
+		return withEncounter(new IdType(theEncounter));
+	}
+
+	default ICreationArgument withEncounter(@Nullable IIdType theEncounter) {
+		return withReference("encounter", theEncounter);
 	}
 
 	@Nonnull
@@ -301,7 +341,7 @@ public interface ITestDataBuilder {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((IBaseResource) t);
+				BaseRuntimeElementDefinition<?> resourceDef = getFhirContext().getElementDefinition(t.getClass());
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};

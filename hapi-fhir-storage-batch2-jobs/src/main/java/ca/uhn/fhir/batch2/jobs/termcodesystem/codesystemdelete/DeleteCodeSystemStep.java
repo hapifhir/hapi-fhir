@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class DeleteCodeSystemStep
 		implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
@@ -73,5 +72,11 @@ public class DeleteCodeSystemStep
 		 * Thus, we don't need to "consume" anything
 		 */
 		return ChunkOutcome.SUCCESS();
+	}
+
+	@Override
+	public IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel>
+			newInstance() {
+		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
 	}
 }

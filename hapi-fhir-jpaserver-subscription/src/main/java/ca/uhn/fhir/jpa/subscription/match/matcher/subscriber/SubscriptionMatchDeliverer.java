@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.channel.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -32,13 +33,12 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageChannel;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -156,8 +156,21 @@ public class SubscriptionMatchDeliverer {
 				ourLog.warn("Failed to send message to Delivery Channel.");
 			}
 		} catch (RuntimeException e) {
-			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
+			if (e.getCause() instanceof PayloadTooLargeException) {
+				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker "
+						+ "max message size. Retry is about to be performed without payload.");
+				ResourceDeliveryJsonMessage msgPayloadLess = nullOutPayload(theWrappedMsg);
+				trySendToDeliveryChannel(msgPayloadLess, theDeliveryChannel);
+			} else {
+				ourLog.error("Failed to send message to Delivery Channel", e);
+				throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
+			}
 		}
+	}
+
+	private ResourceDeliveryJsonMessage nullOutPayload(ResourceDeliveryJsonMessage theWrappedMsg) {
+		ResourceDeliveryMessage resourceDeliveryMessage = theWrappedMsg.getPayload();
+		resourceDeliveryMessage.setPayloadToNull();
+		return new ResourceDeliveryJsonMessage(resourceDeliveryMessage);
 	}
 }

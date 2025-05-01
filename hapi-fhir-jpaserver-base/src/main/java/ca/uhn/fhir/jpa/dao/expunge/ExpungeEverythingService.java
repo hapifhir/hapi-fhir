@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -48,7 +47,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
@@ -72,27 +71,36 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.util.comparator.Comparators;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 
 @Service
 public class ExpungeEverythingService implements IExpungeEverythingService {
@@ -121,20 +129,34 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		final AtomicInteger counter = new AtomicInteger();
 
 		// Notify Interceptors about pre-action call
-		HookParams hooks = new HookParams()
-				.add(AtomicInteger.class, counter)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)) {
+			HookParams hooks = new HookParams()
+					.add(AtomicInteger.class, counter)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+		}
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPUNGE);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequest, ProviderConstants.OPERATION_EXPUNGE);
 
+		deleteAll(theRequest, propagation, requestPartitionId, counter);
+
+		purgeAllCaches();
+
+		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
+	}
+
+	protected void deleteAll(
+			@Nullable RequestDetails theRequest,
+			Propagation propagation,
+			RequestPartitionId requestPartitionId,
+			AtomicInteger counter) {
 		myTxService
 				.withRequest(theRequest)
 				.withPropagation(propagation)
@@ -159,7 +181,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobFileEntity.class, requestPartitionId));
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobEntity.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ForcedId.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIndexedSearchParamDate.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
@@ -180,6 +201,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				theRequest, ResourceIndexedComboStringUnique.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
 				theRequest, ResourceIndexedComboTokenNonUnique.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
+				theRequest, IndexedSearchParamIdentity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceLink.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SearchResult.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SearchInclude.class, requestPartitionId));
@@ -229,6 +252,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTable.class, requestPartitionId));
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, ResourceSearchUrlEntity.class, requestPartitionId));
+
 		int counterBefore = counter.get();
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceTable.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, PartitionEntity.class, requestPartitionId));
@@ -242,10 +266,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				.execute(() -> {
 					counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 				});
-
-		purgeAllCaches();
-
-		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
 	@Override
@@ -257,8 +277,10 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		myMemoryCacheService.invalidateAllCaches();
 	}
 
-	private int expungeEverythingByTypeWithoutPurging(
-			RequestDetails theRequest, Class<?> theEntityType, RequestPartitionId theRequestPartitionId) {
+	protected <T> int expungeEverythingByTypeWithoutPurging(
+			RequestDetails theRequest, Class<T> theEntityType, RequestPartitionId theRequestPartitionId) {
+		HapiTransactionService.noTransactionAllowed();
+
 		int outcome = 0;
 		while (true) {
 			StopWatch sw = new StopWatch();
@@ -268,16 +290,85 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					.withPropagation(Propagation.REQUIRES_NEW)
 					.withRequestPartitionId(theRequestPartitionId)
 					.execute(() -> {
-						CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-						CriteriaQuery<?> cq = cb.createQuery(theEntityType);
-						cq.from(theEntityType);
-						TypedQuery<?> query = myEntityManager.createQuery(cq);
-						query.setMaxResults(1000);
-						List<?> results = query.getResultList();
-						for (Object result : results) {
-							myEntityManager.remove(result);
+
+						/*
+						 * This method uses a nice efficient mechanism where we figure out the PID datatype
+						 * and load only the PIDs and delete by PID for all resource types except ResourceTable.
+						 * We delete ResourceTable using the entitymanager so that Hibernate Search knows to
+						 * delete the corresponding records it manages in ElasticSearch. See
+						 * FhirResourceDaoR4SearchWithElasticSearchIT for a test that fails without the
+						 * block below.
+						 */
+						if (ResourceTable.class.equals(theEntityType)) {
+							CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+							CriteriaQuery<?> cq = cb.createQuery(theEntityType);
+							cq.from(theEntityType);
+							TypedQuery<?> query = myEntityManager.createQuery(cq);
+							query.setMaxResults(800);
+							List<?> results = query.getResultList();
+							for (Object result : results) {
+								myEntityManager.remove(result);
+							}
+							return results.size();
 						}
-						return results.size();
+
+						Metamodel metamodel = myEntityManager.getMetamodel();
+						EntityType<T> entity = metamodel.entity(theEntityType);
+						Set<SingularAttribute<? super T, ?>> singularAttributes = entity.getSingularAttributes();
+						List<String> idProperty = new ArrayList<>();
+						for (SingularAttribute<? super T, ?> singularAttribute : singularAttributes) {
+							if (singularAttribute.isId()) {
+								idProperty.add(singularAttribute.getName());
+							}
+						}
+						idProperty.sort(Comparators.comparable());
+						String idPropertyNames = String.join(",", idProperty);
+
+						Query nativeQuery = myEntityManager.createQuery(
+								"SELECT (" + idPropertyNames + ") FROM " + theEntityType.getSimpleName());
+
+						// Each ID is 2 parameters in DB partition mode, so this
+						// is the maximum we should allow
+						nativeQuery.setMaxResults(SearchBuilder.getMaximumPageSize() / 2);
+
+						List pids = nativeQuery.getResultList();
+						if (pids.isEmpty()) {
+							return 0;
+						}
+
+						StringBuilder deleteBuilder = new StringBuilder();
+						deleteBuilder.append("DELETE FROM ");
+						deleteBuilder.append(theEntityType.getSimpleName());
+						deleteBuilder.append(" WHERE (");
+						deleteBuilder.append(idPropertyNames);
+						deleteBuilder.append(") IN ");
+						if (idProperty.size() > 1) {
+							deleteBuilder.append('(');
+							for (Iterator<Object> iter = pids.iterator(); iter.hasNext(); ) {
+								Object[] pid = (Object[]) iter.next();
+								deleteBuilder.append('(');
+								for (int i = 0; i < pid.length; i++) {
+									if (i > 0) {
+										deleteBuilder.append(',');
+									}
+									deleteBuilder.append(pid[i]);
+								}
+								deleteBuilder.append(')');
+								if (iter.hasNext()) {
+									deleteBuilder.append(',');
+								}
+							}
+							deleteBuilder.append(')');
+						} else {
+							deleteBuilder.append("(:pids)");
+						}
+						String deleteSql = deleteBuilder.toString();
+						nativeQuery = myEntityManager.createQuery(deleteSql);
+						if (idProperty.size() == 1) {
+							nativeQuery.setParameter("pids", pids);
+						}
+						nativeQuery.executeUpdate();
+						return pids.size();
 					});
 
 			outcome += count;

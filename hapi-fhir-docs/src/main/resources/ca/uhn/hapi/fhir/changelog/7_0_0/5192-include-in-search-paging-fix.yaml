@@ -2,8 +2,6 @@
 type: fix
 issue: 5192
 title: "Fixed a bug where search Bundles with `include` entries from an _include query parameter might
-      trigger a 'next' link to blank pages.
-      Specifically, if _include'd resources + requested resources were greater than (or equal to)
-      requested page size, a 'next' link would be generated, even though no additional
-      resources are available.
+      trigger a 'next' link to blank pages when
+      no more results `match` results are available.
 "

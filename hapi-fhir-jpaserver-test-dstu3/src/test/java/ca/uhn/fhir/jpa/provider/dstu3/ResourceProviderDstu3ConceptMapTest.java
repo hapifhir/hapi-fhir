@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -20,10 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderDstu3ConceptMapTest.class);
@@ -98,7 +99,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -112,7 +113,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		part = getPartByName(param, "equivalence");
 		assertEquals("wider", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -159,7 +160,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -208,7 +209,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -258,7 +259,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -307,7 +308,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -355,7 +356,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -403,7 +404,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(3, param.getPart().size());
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertEquals("equal", ((CodeType) part.getValue()).getValueAsString());
 		part = getPartByName(param, "concept");
@@ -483,7 +484,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -492,7 +493,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -528,7 +529,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -537,7 +538,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -573,7 +574,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -582,7 +583,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	@Test
@@ -618,7 +619,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertThat(param.getPart()).hasSize(2);
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -627,7 +628,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(url, ((UriType) part.getValue()).getValueAsString());	
+		assertEquals(url, ((UriType) part.getValue()).getValueAsString());
 	}
 	
 	private void createConceptMap(String url, String version, String targetCode, String targetDisplay) {

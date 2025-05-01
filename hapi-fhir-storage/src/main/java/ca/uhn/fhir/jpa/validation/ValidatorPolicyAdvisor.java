@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,19 @@ import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.utils.validation.IMessagingServices;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
-import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
@@ -47,38 +50,105 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	private FhirContext myFhirContext;
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(
-			IResourceValidator validator, Object appContext, String path, String url) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
-		}
-
-		return ReferenceValidationPolicy.IGNORE;
+	public EnumSet<ResourceValidationAction> policyForResource(
+			IResourceValidator validator, Object appContext, StructureDefinition type, String path) {
+		return EnumSet.allOf(ResourceValidationAction.class);
 	}
 
 	@Override
-	public CodedContentValidationPolicy policyForCodedContent(
-			IResourceValidator iResourceValidator,
-			Object o,
-			String s,
-			ElementDefinition elementDefinition,
-			StructureDefinition structureDefinition,
-			BindingKind bindingKind,
+	public EnumSet<ElementValidationAction> policyForElement(
+			IResourceValidator validator,
+			Object appContext,
+			StructureDefinition structure,
+			ElementDefinition element,
+			String path) {
+		return EnumSet.allOf(ElementValidationAction.class);
+	}
+
+	@Override
+	public EnumSet<CodedContentValidationAction> policyForCodedContent(
+			IResourceValidator validator,
+			Object appContext,
+			String stackPath,
+			ElementDefinition definition,
+			StructureDefinition structure,
+			BindingKind kind,
+			AdditionalBindingPurpose purpose,
 			ValueSet valueSet,
-			List<String> list) {
-		return CodedContentValidationPolicy.CODE;
+			List<String> systems) {
+		return EnumSet.allOf(CodedContentValidationAction.class);
+	}
+
+	@Override
+	public SpecialValidationAction policyForSpecialValidation(
+			IResourceValidator validator,
+			Object appContext,
+			SpecialValidationRule rule,
+			String stackPath,
+			Element resource,
+			Element element) {
+		return null;
 	}
 
 	@Override
 	public ContainedReferenceValidationPolicy policyForContained(
 			IResourceValidator validator,
 			Object appContext,
+			StructureDefinition structure,
+			ElementDefinition element,
 			String containerType,
 			String containerId,
 			Element.SpecialElement containingResourceType,
 			String path,
 			String url) {
 		return ContainedReferenceValidationPolicy.CHECK_VALID;
+	}
+
+	@Override
+	public List<StructureDefinition> getImpliedProfilesForResource(
+			IResourceValidator validator,
+			Object appContext,
+			String stackPath,
+			ElementDefinition definition,
+			StructureDefinition structure,
+			Element resource,
+			boolean valid,
+			IMessagingServices msgServices,
+			List<ValidationMessage> messages) {
+		return Arrays.asList();
+	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId) {
+		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator validator,
+			Object appContext,
+			String path,
+			String url,
+			ReferenceDestinationType destinationType) {
+		int slashIdx = url.indexOf("/");
+		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
+			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+		}
+		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor getPolicyAdvisor() {
+		return this;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+		return this;
+	}
+
+	@Override
+	public ReferenceValidationPolicy getReferencePolicy() {
+		return ReferenceValidationPolicy.IGNORE;
 	}
 }

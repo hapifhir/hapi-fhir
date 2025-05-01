@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5371
+title: "Remote terminology operations that fetch ValueSets or CodeSystems now force _summary=false to allow local validation."

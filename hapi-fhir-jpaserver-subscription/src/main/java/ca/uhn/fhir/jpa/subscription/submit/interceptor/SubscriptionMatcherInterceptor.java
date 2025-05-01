@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
@@ -37,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageDeliveryException;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -57,13 +60,16 @@ public class SubscriptionMatcherInterceptor {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
+	@Autowired
+	private IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	/**
 	 * Constructor
@@ -87,7 +93,7 @@ public class SubscriptionMatcherInterceptor {
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
 		boolean dontTriggerSubscriptionWhenVersionsAreTheSame =
-				!myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
+				!mySubscriptionSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
 		if (dontTriggerSubscriptionWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
@@ -112,21 +118,43 @@ public class SubscriptionMatcherInterceptor {
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
-		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)) {
+			HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+			boolean outcome = compositeBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 
-		if (!outcome) {
-			return;
+			if (!outcome) {
+				return;
+			}
 		}
 
 		processResourceModifiedMessage(msg);
 	}
 
 	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage) {
-		//	persist the message for async submission to the processing pipeline. see {@link
-		// AsyncResourceModifiedProcessingSchedulerSvc}
-		myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
+		// Persist the message for async submission to the processing pipeline.
+		// see {@link AsyncResourceModifiedProcessingSchedulerSvc}
+		// If enabled in {@link JpaStorageSettings} the subscription will be handled immediately.
+
+		if (mySubscriptionSettings.isSubscriptionChangeQueuedImmediately()
+				&& theResourceModifiedMessage.hasPayloadType(myFhirContext, "Subscription")) {
+			try {
+				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+				return;
+			} catch (MessageDeliveryException exception) {
+				String payloadId = theResourceModifiedMessage.getPayloadId();
+				String subscriptionId = theResourceModifiedMessage.getSubscriptionId();
+				ourLog.error(
+						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
+						payloadId,
+						subscriptionId,
+						exception);
+			}
+		}
+
+		IPersistedResourceModifiedMessage persistedResourceModifiedMessage =
+				myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 	}
 
 	protected ResourceModifiedMessage createResourceModifiedMessage(
@@ -136,7 +164,7 @@ public class SubscriptionMatcherInterceptor {
 		// Even though the resource is being written, the subscription will be interacting with it by effectively
 		// "reading" it so we set the RequestPartitionId as a read request
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-				theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+				theRequest, theNewResource.getIdElement());
 		return new ResourceModifiedMessage(
 				myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 	}

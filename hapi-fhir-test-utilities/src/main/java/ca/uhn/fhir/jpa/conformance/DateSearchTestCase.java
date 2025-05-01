@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.jpa.conformance;
 
-import ca.uhn.fhir.util.CollectionUtil;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.IOException;
@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 /**
  * Collection of test cases for date type search.
@@ -127,7 +126,7 @@ public class DateSearchTestCase {
 	 */
 	@Nonnull
 	static List<DateSearchTestCase> expandPrefixCases(Reader theSource, String theFileName) {
-		Set<String> supportedPrefixes = CollectionUtil.newSet("eq", "ge", "gt", "le", "lt", "ne");
+		Set<String> supportedPrefixes = Set.of(new String[] {"eq", "ge", "gt", "le", "lt", "ne"});
 
 		// expand these into individual tests for each prefix.
 		LineNumberReader lineNumberReader = new LineNumberReader(theSource);

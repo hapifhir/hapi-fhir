@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -41,6 +43,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesToAnyInstance;
 	private boolean myAppliesAtAnyLevel;
 	private boolean myAllowAllResponses;
+	private boolean myAllowAllResourcesAccess;
 
 	OperationRule(String theRuleName) {
 		super(theRuleName);
@@ -52,6 +55,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	public void allowAllResponses() {
 		myAllowAllResponses = true;
+	}
+
+	public void allowAllResourcesAccess() {
+		myAllowAllResourcesAccess = true;
 	}
 
 	void appliesToAnyInstance() {
@@ -78,6 +85,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Override
 	public Verdict applyRule(
 			RestOperationTypeEnum theOperation,
@@ -90,23 +98,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 			Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		// Operation rules apply to the execution of the operation itself, not to side effects like
-		// loading resources (that will presumably be reflected in the response). Those loads need
-		// to be explicitly authorized
-		if (isResourceAccess(thePointcut)) {
-			return null;
-		}
-
 		boolean applies = false;
 		switch (theOperation) {
-			case ADD_TAGS:
-			case DELETE_TAGS:
-			case GET_TAGS:
-			case GET_PAGE:
-			case GRAPHQL_REQUEST:
-				// These things can't be tracked by the AuthorizationInterceptor
-				// at this time
-				return null;
 			case EXTENDED_OPERATION_SERVER:
 				if (myAppliesToServer || myAppliesAtAnyLevel) {
 					applies = true;
@@ -131,10 +124,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 					applies = true;
 				} else {
 					IIdType requestResourceId = null;
-					if (theInputResourceId != null) {
-						requestResourceId = theInputResourceId;
-					}
-					if (requestResourceId == null && myAllowAllResponses) {
+					if (theRequestDetails.getId() != null) {
 						requestResourceId = theRequestDetails.getId();
 					}
 					if (requestResourceId != null) {
@@ -161,40 +151,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 				}
 				break;
-			case CREATE:
-				break;
-			case DELETE:
-				break;
-			case HISTORY_INSTANCE:
-				break;
-			case HISTORY_SYSTEM:
-				break;
-			case HISTORY_TYPE:
-				break;
-			case READ:
-				break;
-			case SEARCH_SYSTEM:
-				break;
-			case SEARCH_TYPE:
-				break;
-			case TRANSACTION:
-				break;
-			case UPDATE:
-				break;
-			case VALIDATE:
-				break;
-			case VREAD:
-				break;
-			case METADATA:
-				break;
-			case META_ADD:
-				break;
-			case META:
-				break;
-			case META_DELETE:
-				break;
-			case PATCH:
-				break;
 			default:
 				return null;
 		}
@@ -207,13 +163,33 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		return newVerdict(
-				theOperation,
-				theRequestDetails,
-				theInputResource,
-				theInputResourceId,
-				theOutputResource,
-				theRuleApplier);
+		if (theOutputResource == null) {
+			// This is the request part
+			return newVerdict(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					theRuleApplier);
+		} else {
+			// This is the response part, so we might want to check all of the
+			// resources in the response
+			if (myAllowAllResponses) {
+				return newVerdict(
+						theOperation,
+						theRequestDetails,
+						theInputResource,
+						theInputResourceId,
+						theOutputResource,
+						theRuleApplier);
+			} else {
+				List<IBaseResource> outputResources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(
+						theOutputResource, theRequestDetails.getFhirContext());
+				return RuleImplOp.applyRulesToResponseResources(
+						theRequestDetails, theRuleApplier, thePointcut, outputResources);
+			}
+		}
 	}
 
 	/**
@@ -257,5 +233,26 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	boolean isAllowAllResponses() {
 		return myAllowAllResponses;
+	}
+
+	boolean isAllowAllResourcesAccess() {
+		return myAllowAllResourcesAccess;
+	}
+
+	@Override
+	@Nonnull
+	protected ToStringBuilder toStringBuilder() {
+		ToStringBuilder builder = super.toStringBuilder();
+		builder.append("op", myOperationName);
+		builder.append("appliesToServer", myAppliesToServer);
+		builder.append("appliesToTypes", myAppliesToTypes);
+		builder.append("appliesToIds", myAppliesToIds);
+		builder.append("appliesToInstancesOfType", myAppliesToInstancesOfType);
+		builder.append("appliesToAnyType", myAppliesToAnyType);
+		builder.append("appliesToAnyInstance", myAppliesToAnyInstance);
+		builder.append("appliesAtAnyLevel", myAppliesAtAnyLevel);
+		builder.append("allowAllResponses", myAllowAllResponses);
+		builder.append("allowAllResourcesAccess", myAllowAllResourcesAccess);
+		return builder;
 	}
 }

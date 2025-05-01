@@ -5,8 +5,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -32,6 +32,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcherR5Test.newRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +61,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@BeforeEach
 	public void before() {
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("code"), any())).thenReturn(codeSearchParam);
 
 		myObservation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -103,7 +105,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	}
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
-		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams retval = ResourceIndexedSearchParams.withSets();
 		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
 		return retval;
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
@@ -84,26 +84,26 @@ public enum DriverTypeEnum {
 		String retval;
 		switch (this) {
 			case H2_EMBEDDED:
-				retval = "hapifhirh2.sql";
+				retval = "h2.sql";
 				break;
 			case DERBY_EMBEDDED:
-				retval = "derbytenseven.sql";
+				retval = "derby.sql";
 				break;
 			case MYSQL_5_7:
 			case MARIADB_10_1:
-				retval = "mysql57.sql";
+				retval = "mysql.sql";
 				break;
 			case POSTGRES_9_4:
-				retval = "hapifhirpostgres94-complete.sql";
+				retval = "postgres.sql";
 				break;
 			case ORACLE_12C:
-				retval = "oracle12c.sql";
+				retval = "oracle.sql";
 				break;
 			case MSSQL_2012:
-				retval = "sqlserver2012.sql";
+				retval = "sqlserver.sql";
 				break;
 			case COCKROACHDB_21_1:
-				retval = "cockroachdb201.sql";
+				retval = "cockroachdb.sql";
 				break;
 			default:
 				throw new ConfigurationException(

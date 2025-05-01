@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ public class ResourceMetaParams {
 		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<>();
 		resourceMetaParams.put(IAnyResource.SP_RES_ID, StringParam.class);
 		resourceMetaAndParams.put(IAnyResource.SP_RES_ID, StringAndListParam.class);
+		resourceMetaParams.put(Constants.PARAM_PID, TokenParam.class);
+		resourceMetaAndParams.put(Constants.PARAM_PID, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
 		resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
 		resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);

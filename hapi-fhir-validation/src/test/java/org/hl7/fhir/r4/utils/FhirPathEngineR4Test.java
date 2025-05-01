@@ -1,11 +1,13 @@
 package org.hl7.fhir.r4.utils;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -22,15 +24,17 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirPathEngineR4Test {
+public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
@@ -46,21 +50,27 @@ public class FhirPathEngineR4Test {
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference(specimen));
 
-		IParser p = ourCtx.newJsonParser();
-		o = (Observation) p.parseResource(p.encodeResourceToString(o));
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
+		String encoded = p.encodeResourceToString(o);
+		ourLog.info(encoded);
+
+		o = (Observation) p.parseResource(encoded);
+		assertThat(o.getSpecimen().getReference()).isEqualTo("#" + o.getContained().get(0).getId());
 
 		List<Base> value;
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
-		assertEquals(1, value.size());
-
+		assertThat(value).hasSize(1);
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
+
+
+
 
 	@Test
 	public void testComponentCode() {
@@ -75,7 +85,7 @@ public class FhirPathEngineR4Test {
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
 		List<Base> outcome = ourCtx.newFhirPath().evaluate(o1, path, Base.class);
-		assertEquals(2, outcome.size());
+		assertThat(outcome).hasSize(2);
 
 	}
 
@@ -89,19 +99,19 @@ public class FhirPathEngineR4Test {
 		// even some 4.0.1 SPs use it
 
 		List<Base> value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(string)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.string)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(String)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.String)", Base.class);
-		assertEquals(1, value.size());
+		assertThat(value).hasSize(1);
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 	

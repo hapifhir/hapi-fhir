@@ -1,8 +1,9 @@
 package org.hl7.fhir.r4.model;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Test;
 
 public class MetadataResourceR4Test {
     /**
@@ -21,9 +22,9 @@ public class MetadataResourceR4Test {
         String copiedCodeSystemName = copiedCodeSystem.getName();
         Narrative.NarrativeStatus copiedCodeSystemTextStatus = copiedCodeSystem.getText().getStatus();
 
-        assertTrue(copiedCodeSystem instanceof MetadataResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-        assertEquals("1001", copiedCodeSystemID);
-        assertEquals("Name123", copiedCodeSystemName);
-        assertEquals(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus(), copiedCodeSystemTextStatus);
+			assertTrue(copiedCodeSystem instanceof MetadataResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
+			assertEquals("1001", copiedCodeSystemID);
+			assertEquals("Name123", copiedCodeSystemName);
+			assertEquals(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus(), copiedCodeSystemTextStatus);
     }
 }

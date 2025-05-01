@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ package ca.uhn.fhir.mdm.api.paging;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.PageRequest;
-
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;

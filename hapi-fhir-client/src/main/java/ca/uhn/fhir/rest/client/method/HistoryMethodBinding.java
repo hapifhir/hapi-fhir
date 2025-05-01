@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -98,7 +100,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 		String historyId = id != null ? id.getIdPart() : null;
 		HttpGetClientInvocation retVal =
-				createHistoryInvocation(getContext(), resourceName, historyId, null, null, null);
+				createHistoryInvocation(getContext(), resourceName, historyId, null, null, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -117,7 +119,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			String theId,
 			IPrimitiveType<Date> theSince,
 			Integer theLimit,
-			DateRangeParam theAt) {
+			DateRangeParam theAt,
+			Integer theOffset) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -149,6 +152,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				b.append("=");
 				b.append(next.getValueAsQueryToken(theContext));
 			}
+		}
+		if (theOffset != null) {
+			b.append(haveParam ? '&' : '?');
+			b.append(Constants.PARAM_OFFSET).append("=").append(theOffset);
+			haveParam = true;
 		}
 
 		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString());

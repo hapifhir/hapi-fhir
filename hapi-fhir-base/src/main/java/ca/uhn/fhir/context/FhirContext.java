@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
@@ -77,8 +79,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
@@ -137,6 +137,15 @@ public class FhirContext {
 	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
 	private IFhirValidatorFactory myFhirValidatorFactory = FhirValidator::new;
+	/**
+	 * If true, parsed resources will have the json string
+	 * used to create them stored
+	 * in the UserData.
+	 *
+	 * This is to help with validation, because the parser itself is far
+	 * more lenient than validation might be.
+	 */
+	private boolean myStoreResourceJsonFlag = false;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -713,6 +722,8 @@ public class FhirContext {
 					"org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport";
 			String commonCodeSystemsSupportType =
 					"org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService";
+			String snapshotGeneratingType =
+					"org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport";
 			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
 				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(
 						inMemoryTermSvcType,
@@ -724,11 +735,23 @@ public class FhirContext {
 						IValidationSupport.class,
 						new Class<?>[] {FhirContext.class},
 						new Object[] {this});
+				IValidationSupport snapshotGeneratingSupport = null;
+				if (getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+					snapshotGeneratingSupport = ReflectionUtil.newInstanceOrReturnNull(
+							snapshotGeneratingType,
+							IValidationSupport.class,
+							new Class<?>[] {FhirContext.class},
+							new Object[] {this});
+				}
 				retVal = ReflectionUtil.newInstanceOrReturnNull(
 						"org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain",
 						IValidationSupport.class,
 						new Class<?>[] {IValidationSupport[].class},
-						new Object[] {new IValidationSupport[] {retVal, inMemoryTermSvc, commonCodeSystemsSupport}});
+						new Object[] {
+							new IValidationSupport[] {
+								retVal, inMemoryTermSvc, commonCodeSystemsSupport, snapshotGeneratingSupport
+							}
+						});
 				assert retVal != null
 						: "Failed to instantiate "
 								+ "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
@@ -746,6 +769,14 @@ public class FhirContext {
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
+	}
+
+	public void setStoreRawJson(boolean theStoreResourceJsonFlag) {
+		myStoreResourceJsonFlag = theStoreResourceJsonFlag;
+	}
+
+	public boolean isStoreResourceJson() {
+		return myStoreResourceJsonFlag;
 	}
 
 	public IFhirVersion getVersion() {
@@ -1293,7 +1324,15 @@ public class FhirContext {
 	 * @since 5.1.0
 	 */
 	public static FhirContext forCached(FhirVersionEnum theFhirVersionEnum) {
-		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, v -> new FhirContext(v));
+		return ourStaticContexts.computeIfAbsent(theFhirVersionEnum, FhirContext::forVersion);
+	}
+
+	/**
+	 * An uncached version of forCached()
+	 * @return a new FhirContext for theFhirVersionEnum
+	 */
+	public static FhirContext forVersion(FhirVersionEnum theFhirVersionEnum) {
+		return new FhirContext(theFhirVersionEnum);
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(

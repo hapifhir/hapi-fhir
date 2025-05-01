@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 specification tests
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ package ca.uhn.hapi.fhir.batch2.test.support;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
-
-import javax.validation.constraints.NotBlank;
 
 public class TestJobParameters implements IModelJson {
 

@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-test-utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Run the tests defined in {@link DateSearchTestCase} in a DAO test as a @Nested suite.
@@ -120,7 +119,7 @@ public abstract class BaseDateSearchDaoTests {
 			"Expected " + theQuery + " to " +
 				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
 				" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
-		assertEquals(theExpectedMatch, matched, message);
+		assertThat(matched).as(message).isEqualTo(theExpectedMatch);
 	}
 
 

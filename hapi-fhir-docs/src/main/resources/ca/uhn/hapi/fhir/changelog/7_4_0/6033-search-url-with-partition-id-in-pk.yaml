@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6033
+jira:  SMILE-8429
+title: "Previously, attempting to store resources with common identifies but different partitions would.
+        This has been fixed by adding a new configuration key defaulting to false to allow storing resources with duplicate identifiers across partitions.
+        This new feature can be activated by calling PartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled()"

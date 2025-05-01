@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.cr.repo;
 
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -33,6 +35,7 @@ import java.util.Map;
  * RequestDetails object for reentrant calls. It retains header and tenancy information while
  * scrapping everything else.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 class RequestDetailsCloner {
 
 	static DetailsBuilder startWith(RequestDetails theDetails) {
@@ -43,6 +46,7 @@ class RequestDetailsCloner {
 		newDetails.setParameters(new HashMap<>());
 		newDetails.setResourceName(null);
 		newDetails.setCompartmentName(null);
+		newDetails.setResponse(theDetails.getResponse());
 
 		return new DetailsBuilder(newDetails);
 	}
@@ -52,6 +56,11 @@ class RequestDetailsCloner {
 
 		DetailsBuilder(SystemRequestDetails theDetails) {
 			myDetails = theDetails;
+		}
+
+		DetailsBuilder setAction(RestOperationTypeEnum theRestOperationType) {
+			myDetails.setRestOperationType(theRestOperationType);
+			return this;
 		}
 
 		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
@@ -65,7 +74,9 @@ class RequestDetailsCloner {
 		}
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
-			myDetails.setResource(theParameters);
+			IParser parser = myDetails.getServer().getFhirContext().newJsonParser();
+			myDetails.setRequestContents(
+					parser.encodeResourceToString(theParameters).getBytes());
 
 			return this;
 		}

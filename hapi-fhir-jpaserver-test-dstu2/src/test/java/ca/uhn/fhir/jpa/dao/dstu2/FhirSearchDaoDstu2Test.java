@@ -10,19 +10,26 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+	}
 
 	@Test
 	public void testContentSearch() {
@@ -61,7 +68,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1);
 		}
 		// OR
 		{
@@ -70,7 +77,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1, id2);
 		}
 		// AND
 		{
@@ -80,7 +87,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1);
 		}
 		// AND OR
 		{
@@ -90,7 +97,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1, id2);
 		}
 		// All Resource Types
 		{
@@ -99,7 +106,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(null, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2, id3));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1, id2, id3);
 		}
 
 	}
@@ -129,7 +136,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1);
 		}
 		// OR
 		{
@@ -138,7 +145,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1, id2);
 		}
 		// AND
 		{
@@ -148,7 +155,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1);
 		}
 		// AND OR
 		{
@@ -158,7 +165,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
+			assertThat(JpaPid.toLongList(found)).containsExactlyInAnyOrder(id1, id2);
 		}
 		// Tag Contents
 		{
@@ -167,7 +174,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map, SystemRequestDetails.newSystemRequestAllPartitions());
-			assertThat(JpaPid.toLongList(found), empty());
+			assertThat(JpaPid.toLongList(found)).isEmpty();
 		}
 	}
 

@@ -3,6 +3,7 @@ package ca.uhn.fhir.cli.client;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -15,9 +16,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest{
 
@@ -63,8 +65,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		try{
 			HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
 			unauthenticatedClient.execute(request);
-			fail();
-		}
+			fail();		}
 		catch(Exception e){
 			assertEquals(SSLHandshakeException.class, e.getClass());
 		}
@@ -101,9 +102,8 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		context.setRestfulClientFactory(new HapiFhirCliRestfulClientFactory(context));
 		try {
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-			fail();
-		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
+			fail();		} catch (Exception e) {
+			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
 	}
@@ -158,6 +158,17 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		} catch (UnsupportedOperationException e){
 			assertEquals(Msg.code(2120), e.getMessage());
 		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("baseParamsProvider")
+	public void testConnectionTimeToLive(FhirVersionEnum theFhirVersion) {
+		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
+		HapiFhirCliRestfulClientFactory clientFactory = new HapiFhirCliRestfulClientFactory(fhirVersionParams.getFhirContext());
+
+		assertEquals(IRestfulClientFactory.DEFAULT_CONNECTION_TTL, clientFactory.getConnectionTimeToLive());
+		clientFactory.setConnectionTimeToLive(25000);
+		assertEquals(25000, clientFactory.getConnectionTimeToLive());
 	}
 
 }

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 6040
+title: "The `meta.profile` element on resources was not being respected as
+        canonical (ie, allowing for a version to be appended, `http://example.com/StructureDefinition/abc|1.0.0`),
+        and was thus being ignored during validation.
+        This has been fixed.
+"

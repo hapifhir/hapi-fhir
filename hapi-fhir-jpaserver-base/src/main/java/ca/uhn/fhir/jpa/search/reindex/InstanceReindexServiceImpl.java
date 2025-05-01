@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.search.reindex;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -33,7 +32,20 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -46,6 +58,8 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -66,8 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer.subtract;
 import static java.util.Comparator.comparing;
@@ -146,7 +158,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return myVersionCanonicalizer.parametersFromCanonical(retValCanonical);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes"})
 	@Nonnull
 	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId) {
 		StopWatch sw = new StopWatch();
@@ -160,12 +172,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				myInterceptorService, theRequestDetails, theResourceId, resource);
 		BaseHapiFhirResourceDao.invokeStoragePreShowResources(myInterceptorService, theRequestDetails, resource);
 
-		ResourceIndexedSearchParams existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		List<String> messages = new ArrayList<>();
 
-		JpaPid pid = JpaPid.fromId(entity.getId());
+		JpaPid pid = entity.getId();
 		ReindexOutcome outcome = dao.reindex(pid, new ReindexParameters(), theRequestDetails, new TransactionDetails());
 		messages.add("Reindex completed in " + sw);
 
@@ -173,7 +185,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			messages.add("WARNING: " + next);
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams(entity);
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 		newParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 
 		return buildIndexResponse(existingParamsToPopulate, newParamsToPopulate, true, messages);
@@ -205,12 +217,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 					.collect(Collectors.toSet());
 		}
 
-		ResourceIndexedSearchParams newParamsToPopulate = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams newParamsToPopulate = ResourceIndexedSearchParams.withSets();
 		mySearchParamExtractorService.extractFromResource(
 				theRequestPartitionId,
 				theRequestDetails,
 				newParamsToPopulate,
-				new ResourceIndexedSearchParams(),
+				ResourceIndexedSearchParams.empty(),
 				entity,
 				resource,
 				theTransactionDetails,
@@ -220,13 +232,13 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		ResourceIndexedSearchParams existingParamsToPopulate;
 		boolean showAction;
 		if (theParameters == null) {
-			existingParamsToPopulate = new ResourceIndexedSearchParams(entity);
+			existingParamsToPopulate = ResourceIndexedSearchParams.withLists(entity);
 			existingParamsToPopulate.mySearchParamPresentEntities.addAll(entity.getSearchParamPresents());
 			fillInParamNames(
 					entity, existingParamsToPopulate.mySearchParamPresentEntities, theResourceId.getResourceType());
 			showAction = true;
 		} else {
-			existingParamsToPopulate = new ResourceIndexedSearchParams();
+			existingParamsToPopulate = ResourceIndexedSearchParams.withSets();
 			showAction = false;
 		}
 
@@ -236,8 +248,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 
 	@Nonnull
 	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IIdType theResourceId) {
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceId);
-		return myPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		return myPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, theResourceId);
 	}
 
 	@Nonnull
@@ -430,7 +441,8 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	private void fillInParamNames(
 			ResourceTable theEntity, Collection<SearchParamPresentEntity> theTarget, String theResourceName) {
 		Map<Long, String> hashes = new HashMap<>();
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName);
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				theResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		for (RuntimeSearchParam next : searchParams.values()) {
 			hashes.put(
 					SearchParamPresentEntity.calculateHashPresence(
@@ -513,8 +525,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 				String theParamTypeName) {
 			Parameters.ParametersParameterComponent retVal =
 					super.addIndexValue(theAction, theParent, theParam, theParamTypeName);
-			retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
-			retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			if (theParam.getLatitude() != null) {
+				retVal.addPart().setName("Latitude").setValue(new DecimalType(theParam.getLatitude()));
+			}
+			if (theParam.getLongitude() != null) {
+				retVal.addPart().setName("Longitude").setValue(new DecimalType(theParam.getLongitude()));
+			}
 			return retVal;
 		}
 	}

@@ -16,6 +16,8 @@ import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -297,7 +297,7 @@ public class BaseController {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		VersionCanonicalizer retVal = myCanonicalizers.get(version);
 		if (retVal == null) {
-			retVal = new VersionCanonicalizer(version.newContext());
+			retVal = new VersionCanonicalizer(FhirContext.forVersion(version));
 			myCanonicalizers.put(version, retVal);
 		}
 		return retVal;
@@ -583,7 +583,7 @@ public class BaseController {
 			theModelMap.put("resultBodyIsLong", resultBodyText.length() > 1000);
 			theModelMap.put("requestHeaders", requestHeaders);
 			theModelMap.put("responseHeaders", responseHeaders);
-			theModelMap.put("narrative", NarrativeUtil.sanitize(narrativeString));
+			theModelMap.put("narrative", NarrativeUtil.sanitizeHtmlFragment(narrativeString));
 			theModelMap.put("latencyMs", theLatency);
 
 			theModelMap.put("config", myConfig);

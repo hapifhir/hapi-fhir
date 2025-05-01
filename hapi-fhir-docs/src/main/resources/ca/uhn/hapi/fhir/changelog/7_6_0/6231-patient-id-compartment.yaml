@@ -1,0 +1,14 @@
+---
+type: fix
+issue: 6231
+title: "The PatientIdPartitionInterceptor could on rare occasion select the incorrect 
+partition for a resource. This has been corrected. In order for the wrong partition
+to be selected, the following three things need to be true:
+1) there are multiple values of a patient compartment for a resource (see https://hl7.org/fhir/R4/compartmentdefinition-patient.html)
+2) a patient compartment value is a non-Patient reference 
+3) the search parameter of the incorrect value needs to come alphabetically before the search parameter of the correct
+value.
+
+For example, if a QuestionnaireResponse has subject Patient/123 and author Organization/456,
+then since 'author' appears ahead of 'subject' alphabetically it would incorrectly determine the partition.
+The fix changed the partition selection so that it now only matches on Patient references."

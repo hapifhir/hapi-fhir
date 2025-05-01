@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@
  * #L%
  */
 package ca.uhn.fhir.jpa.cache;
+
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 /**
  * This is an internal service and is not intended to be used outside this package.  Implementers should only directly
@@ -40,4 +44,10 @@ public interface IResourceChangeListenerCacheRefresher {
 	 * @return the number of resources that have been created, updated and deleted since the last time the cache was refreshed
 	 */
 	ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theEntry);
+
+	@EventListener(ContextRefreshedEvent.class)
+	public void start();
+
+	@EventListener(ContextClosedEvent.class)
+	public void shutdown();
 }

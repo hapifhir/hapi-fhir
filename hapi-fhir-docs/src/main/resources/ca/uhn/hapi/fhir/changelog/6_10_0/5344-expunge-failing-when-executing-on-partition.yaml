@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5344
+jira: SMILE-7324
+title: "Previously, issuing an expunge operation for resources on a specific partition would fail.  This problem has been fixed."

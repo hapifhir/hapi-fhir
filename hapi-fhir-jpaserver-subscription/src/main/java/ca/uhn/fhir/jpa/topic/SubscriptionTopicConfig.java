@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,39 +22,84 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.subscription.config.SubscriptionConfig;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
+@Configuration
+@Import(SubscriptionConfig.class)
 public class SubscriptionTopicConfig {
 	@Bean
-	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
-		return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
+			FhirContext theFhirContext, MemoryCacheService memoryCacheService) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+			case R5:
+			case R4B:
+				return new SubscriptionTopicMatchingSubscriber(theFhirContext, memoryCacheService);
+			default:
+				return null;
+		}
 	}
 
 	@Bean
-	SubscriptionTopicRegistry subscriptionTopicRegistry() {
+	@Lazy
+	public SubscriptionTopicRegistry subscriptionTopicRegistry() {
 		return new SubscriptionTopicRegistry();
 	}
 
 	@Bean
-	SubscriptionTopicSupport subscriptionTopicSupport(
+	@Lazy
+	public SubscriptionTopicSupport subscriptionTopicSupport(
 			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
 	}
 
 	@Bean
-	SubscriptionTopicLoader subscriptionTopicLoader() {
-		return new SubscriptionTopicLoader();
+	public ISubscriptionTopicLoader subscriptionTopicLoader(
+			FhirContext theFhirContext,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			ISearchParamRegistry theSearchParamRegistry) {
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theFhirContext);
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				return new R4SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+			case R5:
+			case R4B:
+				return new SubscriptionTopicLoader(
+						versionCanonicalizer, theSubscriptionTopicRegistry, theSearchParamRegistry);
+			default:
+				return null;
+		}
 	}
 
 	@Bean
-	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
-		return new SubscriptionTopicRegisteringSubscriber();
+	public SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber(FhirContext theFhirContext) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicRegisteringSubscriber();
+			default:
+				return null;
+		}
 	}
 
 	@Bean
-	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
+	public SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
 			FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
-		return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R5:
+			case R4B:
+				return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
+			default:
+				return null;
+		}
 	}
 }

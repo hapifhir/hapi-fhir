@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nullable;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumEssenceService;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import javax.annotation.Nullable;
 
 /**
  * It's a wrapper of UcumEssenceService

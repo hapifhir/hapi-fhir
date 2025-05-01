@@ -1,0 +1,5 @@
+---
+type: remove
+issue: 6056
+title: "The Derby JARs have been removed from this release. The older versions have multiple high-severity vulnerabilities against them, and the newer versions force usage of Java 21, which HAPI-FHIR does not yet support.
+If you wish to continue to use derby, you will have to provide the `derby`, `derbyclient`,`derbynet`, `derbyshared`, and `derbytools` jars on your classpath."

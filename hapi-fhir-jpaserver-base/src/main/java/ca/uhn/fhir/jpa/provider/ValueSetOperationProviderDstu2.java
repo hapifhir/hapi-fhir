@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderCodeSystem.applyVersionToSystem;
 
@@ -127,7 +127,7 @@ public class ValueSetOperationProviderDstu2 extends ValueSetOperationProvider {
 			@OperationParam(name = "displayLanguage", min = 0, max = 1, typeName = "code")
 					IPrimitiveType<String> theDisplayLanguage,
 			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "code")
-					List<IPrimitiveType<String>> theProperties,
+					List<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails) {
 
 		startRequest(theServletRequest);
@@ -137,9 +137,16 @@ public class ValueSetOperationProviderDstu2 extends ValueSetOperationProvider {
 
 			FhirTerser terser = getContext().newTerser();
 			result = JpaResourceDaoCodeSystem.doLookupCode(
-					getContext(), terser, myValidationSupport, theCode, theSystem, theCoding, theDisplayLanguage);
+					getContext(),
+					terser,
+					myValidationSupport,
+					theCode,
+					theSystem,
+					theCoding,
+					theDisplayLanguage,
+					thePropertyNames);
 			result.throwNotFoundIfAppropriate();
-			return result.toParameters(theRequestDetails.getFhirContext(), theProperties);
+			return result.toParameters(theRequestDetails.getFhirContext(), thePropertyNames);
 		} finally {
 			endRequest(theServletRequest);
 		}

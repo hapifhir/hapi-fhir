@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import jakarta.persistence.EntityManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.persistence.EntityManager;
 
 public class SearchBuilderLoadIncludesParameters<T extends IResourcePersistentId> {
 

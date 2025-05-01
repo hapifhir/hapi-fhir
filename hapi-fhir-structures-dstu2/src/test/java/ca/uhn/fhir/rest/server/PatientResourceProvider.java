@@ -1,20 +1,25 @@
 
 package ca.uhn.fhir.rest.server;
 
-import java.util.Set;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
-//
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-// import ca.uhn.fhir.model.dstu.resource.Binary;
-// import ca.uhn.fhir.model.dstu2.resource.Bundle;
-// import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+
+import java.util.Set;
 
 public class PatientResourceProvider implements IResourceProvider
 	{
@@ -27,7 +32,7 @@ public class PatientResourceProvider implements IResourceProvider
 	//@formatter:off
 	@Search()
 	public IBundleProvider search(
-			javax.servlet.http.HttpServletRequest theServletRequest,
+			jakarta.servlet.http.HttpServletRequest theServletRequest,
 	
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")

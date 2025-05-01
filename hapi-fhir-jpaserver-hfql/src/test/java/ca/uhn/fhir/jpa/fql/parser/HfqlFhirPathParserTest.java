@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HfqlFhirPathParserTest {
 
@@ -49,7 +49,7 @@ public class HfqlFhirPathParserTest {
 		int foundCount = 0;
 		for (BaseRuntimeElementDefinition<?> next : ctx.getElementDefinitions()) {
 			if (next instanceof RuntimePrimitiveDatatypeDefinition) {
-				assertNotNull(HfqlFhirPathParser.getHfqlDataTypeForFhirType(next.getName()), () -> "No mapping for type: " + next.getName());
+				assertThat(HfqlFhirPathParser.getHfqlDataTypeForFhirType(next.getName())).as(() -> "No mapping for type: " + next.getName()).isNotNull();
 				foundCount++;
 			}
 		}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,25 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.tls.KeyStoreType;
+import jakarta.servlet.Servlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.Servlet;
 import java.security.KeyStore;
 import java.util.List;
 
 public abstract class BaseRestServerHelper {
+	private static int myFirstTargetPort = -1;
 
 	private final String SERVER_KEYSTORE_PATH = "/tls/server-keystore.p12";
 	private final String SERVER_TRUSTSTORE_PATH = "/tls/server-truststore.p12";
@@ -75,9 +76,11 @@ public abstract class BaseRestServerHelper {
 	}
 
 	protected void startServer(Servlet theServlet) throws Exception {
-		myListenerServer = new Server(0);
+
+		int port = myFirstTargetPort == -1 ? 0 : myFirstTargetPort++;
+		myListenerServer = new Server(port);
 		
-		myFhirContext.getRestfulClientFactory().setSocketTimeout(120000);
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(120_000);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -119,7 +122,7 @@ public abstract class BaseRestServerHelper {
 		myHttpsListenerPort = ((ServerConnector)myListenerServer.getConnectors()[1]).getLocalPort();
 	}
 
-	private SslContextFactory.Server getSslContextFactory() throws Exception{
+	private SslContextFactory.Server getSslContextFactory() {
 		try {
 			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
@@ -197,6 +200,10 @@ public abstract class BaseRestServerHelper {
 		String path = theUseHttps ? mySecureBase : myBase;
 		HardcodedServerAddressStrategy strategy = new HardcodedServerAddressStrategy(path);
 		setServerAddressStrategy(strategy);
+	}
+
+	public static void setMyFirstTargetPort(int theMyFirstTargetPort) {
+		myFirstTargetPort = theMyFirstTargetPort;
 	}
 
 	protected abstract void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy);

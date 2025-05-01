@@ -30,27 +30,59 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.Bindings;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IParameter;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
+import ca.uhn.fhir.rest.server.method.OperationParameter;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.method.*;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementKind;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.ResourceInteractionComponent;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.RestfulCapabilityMode;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.SystemRestfulInteraction;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.*;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -384,6 +416,8 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 			}
 		}
 
+		maybeAddBulkDataDeclarationToConformingToIg(retVal, serverConfiguration.getServerBindings());
+
 		return retVal;
 	}
 
@@ -681,5 +715,18 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 				return 1;
 			}
 		});
+	}
+
+	private void maybeAddBulkDataDeclarationToConformingToIg(
+			CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
+				.filter(OperationMethodBinding.class::isInstance)
+				.map(OperationMethodBinding.class::cast)
+				.map(OperationMethodBinding::getName)
+				.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+
+		if (bulkExportEnabled) {
+			theCapabilityStatement.addInstantiates(Constants.BULK_DATA_ACCESS_IG_URL);
+		}
 	}
 }

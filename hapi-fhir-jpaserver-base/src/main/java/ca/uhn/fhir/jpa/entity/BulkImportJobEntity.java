@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,24 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -64,6 +66,7 @@ public class BulkImportJobEntity implements Serializable {
 	private String myJobDescription;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private BulkImportJobStatusEnum myStatus;
 
@@ -82,6 +85,7 @@ public class BulkImportJobEntity implements Serializable {
 	private String myStatusMessage;
 
 	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Enumerated(EnumType.STRING)
 	private JobFileRowProcessingModeEnum myRowProcessingMode;
 

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -105,7 +105,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("draftOrders", builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR5());
-		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID +" a " + TEST_PATIENT_ID, result);
+		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
 	}
 
 	@Test

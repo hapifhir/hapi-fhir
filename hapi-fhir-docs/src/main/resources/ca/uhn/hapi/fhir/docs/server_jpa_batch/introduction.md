@@ -19,36 +19,58 @@ A HAPI-FHIR batch job definition consists of a job name, version, parameter json
 After a job has been defined, *instances* of that job can be submitted for batch processing by populating a `JobInstanceStartRequest` with the job name and job parameters json and then submitting that request to the Batch Job Coordinator.
 
 The Batch Job Coordinator will then store two records in the database:
-- Job Instance with status QUEUED: that is the parent record for all data concerning this job
-- Batch Work Chunk with status QUEUED: this describes the first "chunk" of work required for this job.  The first Batch Work Chunk contains no data.
+- Job Instance with status `QUEUED`: that is the parent record for all data concerning this job
+- Batch Work Chunk with status `READY`: this describes the first "chunk" of work required for this job. The first Batch Work Chunk contains no data.
 
-Lastly the Batch Job Coordinator publishes a message to the Batch Notification Message Channel (named `batch2-work-notification`) to inform worker threads that this first chunk of work is now ready for processing.
+### The Maintenance Job
 
-### Job Processing - First Step
+A Scheduled Job runs periodically (once a minute).  For each Job Instance in the database, it:
 
-HAPI-FHIR Batch Jobs run based on job notification messages.  The process is kicked off by the first chunk of work.  When this notification message arrives, the message handler makes a single call to the first step defined in the job definition, passing in the job parameters as input.
+1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
+1. Moves all `POLL_WAITING` work chunks to `READY` if their `nextPollTime` has expired.
+1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any leftover work chunks still in the database.
+1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
+1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`. If the the job is being moved to its final reduction step, chunks are moved from `GATE_WAITING` to `REDUCTION_READY`.
+1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered. All workchunks for the job in `REDUCTION_READY` will be consumed at this point.
+1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 
-The handler then does the following:
-1. Change the work chunk status from QUEUED to IN_PROGRESS
-2. Change the Job Instance status from QUEUED to IN_PROGRESS
-3. If the Job Instance is cancelled, change the status to COMPLETED and abort processing.
-4. The first step of the job definition is executed with the job parameters
-5. This step creates new work chunks.  For each work chunk it creates, it json serializes the work chunk data, stores it in the database, and publishes a new message to the Batch Notification Message Channel to notify worker threads that there are new work chunks waiting to be processed.
-6. If the step succeeded, the work chunk status is changed from IN_PROGRESS to COMPLETED, and the data it contained is deleted.
-7. If the step failed, the work chunk status is changed from IN_PROGRESS to either ERRORED or FAILED depending on the severity of the error.
+\* An exception is for the final reduction step, where work chunks are not published to the Batch Notification Message Channel,
+but instead processed inline.
 
-### Job Processing - Middle steps
+### Batch Notification Message Handler
 
-Middle Steps in the job definition are executed in the same way, except instead of only using the Job Parameters as input, they use both the Job Parameters and the Work Chunk data produced from the previous step.
+HAPI-FHIR Batch Jobs run based on job notification messages of the Batch Notification Message Channel (named `batch2-work-notification`).
 
-### Job Processing - Final Step
+When a notification message arrives, the handler does the following:
+
+1. Change the work chunk status from `QUEUED` to `IN_PROGRESS`
+1. Change the Job Instance status from `QUEUED` to `IN_PROGRESS`
+1. If the Job Instance is cancelled, change the status to `CANCELLED` and abort processing
+1. If the step creates new work chunks, each work chunk will be created in either the `GATE_WAITING` state (for gated jobs) or `READY` state (for non-gated jobs) and will be handled in the next maintenance job pass.
+1. If the step succeeds, the work chunk status is changed from `IN_PROGRESS` to `COMPLETED`, and the data it contained is deleted.
+1. If the step throws a `RetryChunkLaterException`, the work chunk status is changed from `IN_PROGRESS` to `POLL_WAITING`, and a `nextPollTime` value will be set.
+1. If the step fails, the work chunk status is changed from `IN_PROGRESS` to either `ERRORED` or `FAILED`, depending on the severity of the error.
+
+### First Step
+
+The first step in a job definition is executed with just the job parameters.
+
+### Middle steps
+
+Middle Steps in the job definition are executed using the initial Job Parameters and the Work Chunk data produced from the previous step.
+
+### Final Step
 
 The final step operates the same way as the middle steps, except it does not produce any new work chunks.
 
 ### Gated Execution
 
-If a Job Definition is set to having Gated Execution, then all work chunks for one step must be COMPLETED before any work chunks for the next step may begin.
+If a Job Definition is set to having Gated Execution, then all work chunks for a step must be `COMPLETED` before any work chunks for the next step may begin.
 
 ### Job Instance Completion
 
-A Batch Job Maintenance Service runs every minute to monitor the status of all Job Instances and the Job Instance is transitioned to either COMPLETED, ERRORED or FAILED according to the status of all outstanding work chunks for that job instance.  If the job instance is still IN_PROGRESS this maintenance service also estimates the time remaining to complete the job.
+A Batch Job Maintenance Service runs every minute to monitor the status of all Job Instances and the Job Instance is transitioned to either `COMPLETED`, `ERRORED` or `FAILED` according to the status of all outstanding work chunks for that job instance. If the job instance is still `IN_PROGRESS` this maintenance service also estimates the time remaining to complete the job.
+
+## Logging
+
+The job instance ID and work chunk ID are both available through the logback MDC and can be accessed using the `%X` specifier in a `logback.xml` file. See [Logging](/docs/appendix/logging.html#logging) for more details about logging in HAPI. 

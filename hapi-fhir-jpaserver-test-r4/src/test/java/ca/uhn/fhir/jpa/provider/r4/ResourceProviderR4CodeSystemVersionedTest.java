@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -28,15 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProviderR4Test {
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemVersionedTest.class);
-	private long parentChildCs1Id;
-	private long parentChildCs2Id;
+	private JpaPid parentChildCs1Id;
+	private JpaPid parentChildCs2Id;
 
 	@BeforeEach
 	@Transactional
@@ -394,7 +396,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -414,7 +416,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -434,7 +436,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
@@ -457,7 +459,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -475,7 +477,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -493,7 +495,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -514,7 +516,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -532,7 +534,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -550,7 +552,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
@@ -570,7 +572,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -588,7 +590,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -606,7 +608,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -643,7 +645,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -659,7 +661,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -675,7 +677,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -696,7 +698,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -712,7 +714,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		 resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -728,7 +730,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -748,7 +750,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -764,7 +766,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -780,7 +782,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 
@@ -789,7 +791,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 	@Test
 	public void testUpdateCodeSystemById() throws IOException {
 
-		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
@@ -804,10 +806,10 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			IOUtils.closeQuietly(resp);
 		}
 
-		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
 
-		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
@@ -820,7 +822,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			IOUtils.closeQuietly(resp);
 		}
 
-		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
+		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
 	}
 

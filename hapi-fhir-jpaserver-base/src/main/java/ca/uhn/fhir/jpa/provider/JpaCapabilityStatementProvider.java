@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -40,7 +41,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement.ResourceVersionPolicy;
 import org.hl7.fhir.r4.model.Meta;
 
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -89,24 +89,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
-	}
-
-	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
-
-		if (myStorageSettings
-				.getSupportedSubscriptionTypes()
-				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(
-						myContext,
-						theRest,
-						Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL,
-						"uri",
-						myStorageSettings.getWebsocketContextPath());
-			}
-		}
 	}
 
 	@Override

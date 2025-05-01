@@ -1,18 +1,16 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.SQLServer2012Dialect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
-import java.util.Locale;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -25,10 +23,17 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch next ? rows only"), sql);
+		sql = massageSql(sql);
+		assertThat(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
+	}
+
+	@Nonnull
+	private static String massageSql(String sql) {
+		sql = sql.replace("\n", " ").replaceAll(" +", " ");
+		return sql;
 	}
 
 	@Test
@@ -40,10 +45,11 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("select page0_ from query where __row__ >= ? and __row__ < ?"), sql);
+		sql = massageSql(sql);
+		assertThat(sql.endsWith("order by RES_ID offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
-		assertEquals(3, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
 	@Test
@@ -55,15 +61,16 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.toUpperCase(Locale.ROOT).contains("SELECT TOP(?) T0.RES_ID FROM"), sql);
+		sql = massageSql(sql);
+		assertThat(sql.endsWith("order by RES_ID offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertEquals(2, StringUtils.countMatches(sql, "?"));
-		assertEquals(2, generatedSql.getBindVariables().size());
+		assertThat(generatedSql.getBindVariables()).hasSize(2);
 	}
 
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new SQLServer2012Dialect();
+		return new HapiFhirSQLServerDialect();
 	}
 }

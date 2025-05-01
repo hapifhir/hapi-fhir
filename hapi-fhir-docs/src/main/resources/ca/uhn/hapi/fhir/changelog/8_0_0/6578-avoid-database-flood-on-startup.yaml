@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6578
+title: "When starting up the JPA server under heavy load, the validation support cache
+  could perform a large number of identical parallel queries. A synchronization guard
+  has been placed around the cache loader to avoid this."

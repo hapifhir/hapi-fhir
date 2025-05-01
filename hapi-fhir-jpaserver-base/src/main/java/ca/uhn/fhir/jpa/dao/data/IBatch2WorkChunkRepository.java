@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +50,8 @@ public interface IBatch2WorkChunkRepository
 	@Query("SELECT new Batch2WorkChunkEntity("
 			+ "e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus,"
 			+ "e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime,"
-			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage"
+			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage,"
+			+ "e.myNextPollTime, e.myPollAttempts"
 			+ ") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
@@ -65,7 +67,7 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
-			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, "
+			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, e.mySerializedDataVc = null, "
 			+ "e.myWarningMessage = :warningMessage WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(
 			@Param("id") String theChunkId,
@@ -77,7 +79,25 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = COALESCE(e.myPollAttempts, 0) + 1 WHERE e.myId = :id AND e.myStatus IN(:states)")
+	int updateWorkChunkNextPollTime(
+			@Param("id") String theChunkId,
+			@Param("status") WorkChunkStatusEnum theStatus,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
+			@Param("nextPollTime") Date theNextPollTime);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime <= :pollTime")
+	int updateWorkChunksForPollWaiting(
+			@Param("instanceId") String theInstanceId,
+			@Param("pollTime") Date theTime,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
+			@Param("status") WorkChunkStatusEnum theNewStatus);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.mySerializedDataVc = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
 	void updateAllChunksForInstanceStatusClearDataAndSetError(
 			@Param("ids") List<String> theChunkIds,
 			@Param("et") Date theEndTime,
@@ -93,6 +113,26 @@ public interface IBatch2WorkChunkRepository
 			@Param("em") String theErrorMessage,
 			@Param("status") WorkChunkStatusEnum theInProgress);
 
+	/**
+	 * Updates the workchunk error count and error message for WorkChunks that have failed after multiple retries.
+	 *
+	 * @param theStatus - the new status of the workchunk
+	 * @param theChunkId - the id of the workchunk to update
+	 * @param theMaxErrorCount - maximum error count (# of errors allowed for retry)
+	 * @param theMaxErrorSize - max error size (maximum number of characters)
+	 * @return - the number of updated chunks (should be 1)
+	 */
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e "
+			+ "SET e.myStatus = :failed, "
+			+ "e.myErrorMessage = LEFT(CONCAT('Too many errors: ', CAST(e.myErrorCount as string), '. Last err msg ', e.myErrorMessage), :maxErrorSize) "
+			+ "WHERE e.myId = :chunkId and e.myErrorCount > :maxCount")
+	int updateChunkForTooManyErrors(
+			@Param("failed") WorkChunkStatusEnum theStatus,
+			@Param("chunkId") String theChunkId,
+			@Param("maxCount") int theMaxErrorCount,
+			@Param("maxErrorSize") int theMaxErrorSize);
+
 	@Modifying
 	@Query(
 			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myStartTime = :st WHERE e.myId = :id AND e.myStatus IN :startStatuses")
@@ -101,6 +141,22 @@ public interface IBatch2WorkChunkRepository
 			@Param("st") Date theStartedTime,
 			@Param("status") WorkChunkStatusEnum theInProgress,
 			@Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
+
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus")
+	int updateChunkStatus(
+			@Param("id") String theChunkId,
+			@Param("oldStatus") WorkChunkStatusEnum theOldStatus,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus IN ( :oldStatuses )")
+	int updateAllChunksForStepWithStatus(
+			@Param("instanceId") String theInstanceId,
+			@Param("stepId") String theStepId,
+			@Param("oldStatuses") List<WorkChunkStatusEnum> theOldStatuses,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
@@ -112,4 +168,8 @@ public interface IBatch2WorkChunkRepository
 			@Param("instanceId") String theInstanceId,
 			@Param("stepId") String theStepId,
 			@Param("status") WorkChunkStatusEnum theStatus);
+
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO(e.myTargetStepId, e.myStatus, min(e.myStartTime), max(e.myEndTime), avg(cast((e.myEndTime - e.myStartTime) as long)), count(*)) FROM Batch2WorkChunkEntity e WHERE e.myInstanceId=:instanceId GROUP BY e.myTargetStepId, e.myStatus")
+	List<BatchWorkChunkStatusDTO> fetchWorkChunkStatusForInstance(@Param("instanceId") String theInstanceId);
 }

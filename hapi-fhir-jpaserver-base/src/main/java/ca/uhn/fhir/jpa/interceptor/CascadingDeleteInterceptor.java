@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,8 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -110,7 +110,6 @@ public class CascadingDeleteInterceptor {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
 		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
-
 			// Add a message to the response
 			String message = myFhirContext.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
 			ourLog.trace(message);
@@ -123,7 +122,6 @@ public class CascadingDeleteInterceptor {
 		}
 
 		myThreadSafeResourceDeleterSvc.delete(theRequest, theConflictList, theTransactionDetails);
-
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 

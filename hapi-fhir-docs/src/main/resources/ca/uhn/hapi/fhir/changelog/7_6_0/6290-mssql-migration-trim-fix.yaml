@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6290
+title: "Previously, a specific migration task was using the `TRIM()` function, which does not exist in MSSQL 2012. This was causing migrations targeting MSSQL 2012 to fail. 
+This has been corrected and replaced with usage of a combination of LTRIM() and RTRIM(). Thanks to Primož Delopst at Better for the contribution!"

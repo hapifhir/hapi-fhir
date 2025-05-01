@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -36,7 +36,7 @@ public class MdmGoldenResourceFindingSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
 	private FindCandidateByEidSvc myFindCandidateByEidSvc;

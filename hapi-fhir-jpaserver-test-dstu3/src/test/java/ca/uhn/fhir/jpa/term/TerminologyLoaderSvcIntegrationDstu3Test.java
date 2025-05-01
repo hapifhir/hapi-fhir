@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -27,14 +30,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
@@ -84,7 +81,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 
 		// Search by display name
 		input = new ValueSet();
@@ -99,7 +96,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 
 		// Search by something that doesn't match
 		input = new ValueSet();
@@ -114,7 +111,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(codes, empty());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test
@@ -125,7 +122,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		await().until(() -> runInTransaction(() -> myTermConceptMapDao.count()), greaterThan(0L));
+		await().untilAsserted(() -> runInTransaction(() -> assertThat(myTermConceptMapDao.count()).isGreaterThan(0L)));
 	}
 
 	@Test
@@ -147,7 +144,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
-		assertThat(codes, containsInAnyOrder("10013-1"));
+		assertThat(codes).containsExactlyInAnyOrder("10013-1");
 	}
 
 	@Test
@@ -160,22 +157,24 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+		logAllConcepts();
+		logAllConceptProperties();
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
-		assertTrue(propertyValue.isPresent());
+		assertThat(propertyValue).isPresent();
 		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP7753-9", propertyValue.get().getCode());
 		assertEquals("Qn", propertyValue.get().getDisplay());
 
 		propertyValue = findProperty(parameters, "COMPONENT");
-		assertTrue(propertyValue.isPresent());
+		assertThat(propertyValue).isPresent();
 
 		Optional<StringType> propertyValueString = findProperty(parameters, "ORDER_OBS");
-		assertTrue(propertyValueString.isPresent());
+		assertThat(propertyValueString).isPresent();
 		assertEquals("Observation", propertyValueString.get().getValue());
 
 		propertyValueString = findProperty(parameters, "CLASSTYPE");
-		assertTrue(propertyValueString.isPresent());
+		assertThat(propertyValueString).isPresent();
 		assertEquals("2", propertyValueString.get().getValue());
 
 	}
@@ -192,7 +191,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
-		assertTrue(propertyValue.isPresent());
+		assertThat(propertyValue).isPresent();
 		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP31101-6", propertyValue.get().getCode());
 		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
@@ -211,7 +210,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
-		assertTrue(propertyValueCoding.isPresent());
+		assertThat(propertyValueCoding).isPresent();
 		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
 		assertEquals("LP7753-9", propertyValueCoding.get().getCode());
 		assertEquals("Qn", propertyValueCoding.get().getDisplay());
@@ -245,7 +244,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
-		assertEquals("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'", result.getMessage());
+		assertThat(result.getMessage()).contains("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion");
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

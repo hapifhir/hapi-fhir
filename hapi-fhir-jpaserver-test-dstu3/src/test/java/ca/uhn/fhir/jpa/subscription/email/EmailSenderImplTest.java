@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
@@ -15,12 +17,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmailSenderImplTest {
 

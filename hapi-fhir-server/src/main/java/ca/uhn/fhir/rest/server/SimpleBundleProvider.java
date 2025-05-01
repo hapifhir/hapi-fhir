@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -30,7 +31,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
@@ -42,6 +42,15 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private Integer myCurrentPageOffset;
 	private Integer myCurrentPageSize;
 	private ResponsePage.ResponsePageBuilder myPageBuilder;
+
+	/**
+	 * The actual number of resources we have tried to fetch.
+	 * This value will only be populated if there is a
+	 * _count query parameter provided.
+	 * In which case, it will be the total number of resources
+	 * we tried to fetch (should be _count + 1 for accurate paging)
+	 */
+	private int myTotalResourcesRequestedReturned = -1;
 
 	/**
 	 * Constructor
@@ -144,6 +153,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Override
 	public List<IBaseResource> getResources(
 			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+		theResponsePageBuilder.setTotalRequestedResourcesFetched(myTotalResourcesRequestedReturned);
 		return (List<IBaseResource>)
 				myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
 	}
@@ -151,6 +161,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Override
 	public String getUuid() {
 		return myUuid;
+	}
+
+	public void setTotalResourcesRequestedReturned(int theAmount) {
+		myTotalResourcesRequestedReturned = theAmount;
 	}
 
 	/**

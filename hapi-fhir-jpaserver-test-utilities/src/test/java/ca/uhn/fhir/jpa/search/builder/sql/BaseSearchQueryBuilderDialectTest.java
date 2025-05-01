@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -10,14 +11,13 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
+import jakarta.annotation.Nonnull;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -30,6 +30,8 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	protected SqlObjectFactory mySqlObjectFactory;
 	@Mock
 	protected HibernatePropertiesProvider myHibernatePropertiesProvider;
+	@Mock
+	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@BeforeEach
 	public void beforeInitMocks() {
@@ -47,10 +49,12 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
-		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
+		DatePredicateBuilder datetimePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
+		datetimePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
+		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datetimePredicateBuilder);
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getJoinColumns());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("MolecularSequence", "variant-start");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);

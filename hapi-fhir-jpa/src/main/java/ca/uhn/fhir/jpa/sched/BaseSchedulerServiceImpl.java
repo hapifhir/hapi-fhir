@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -41,7 +42,6 @@ import org.springframework.core.env.Environment;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.
@@ -136,7 +136,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return retval;
 	}
 
-	private boolean isSchedulingDisabled() {
+	public boolean isSchedulingDisabled() {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 
@@ -177,7 +177,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		values.forEach(t -> t.scheduleJobs(this));
 	}
 
-	@EventListener(ContextClosedEvent.class)
+	@PreDestroy
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 
@@ -196,6 +196,18 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	public void logStatusForUnitTest() {
 		myLocalScheduler.logStatusForUnitTest();
 		myClusteredScheduler.logStatusForUnitTest();
+	}
+
+	@Override
+	public void pause() {
+		myLocalScheduler.pause();
+		myClusteredScheduler.pause();
+	}
+
+	@Override
+	public void unpause() {
+		myLocalScheduler.unpause();
+		myClusteredScheduler.unpause();
 	}
 
 	@Override

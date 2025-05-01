@@ -8,15 +8,16 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,8 +34,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -50,7 +51,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Spy
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext);
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings());
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -67,7 +68,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		mySubscription = buildSubscription();
 	}
 
-	@NotNull
+	@Nonnull
 	private static Subscription buildSubscription() {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/testrest");
@@ -80,7 +81,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
-		assertTrue(output.getOut().contains(expectedMessage));
+		assertThat(output.getOut()).contains(expectedMessage);
 	}
 
 	@Test

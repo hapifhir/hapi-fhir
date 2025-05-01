@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -41,15 +42,20 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionInterceptor;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -57,7 +63,9 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -76,6 +84,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
@@ -84,18 +93,25 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,14 +121,17 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -124,10 +143,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -138,7 +158,15 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
+
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	private static final String POST = "POST";
+	private static final String PUT = "PUT";
+	private static final String DELETE = "DELETE";
+	private static final String PATCH = "PATCH";
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -161,6 +189,9 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private StorageSettings myStorageSettings;
+
+	@Autowired
+	PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
@@ -261,19 +292,20 @@ public abstract class BaseTransactionProcessor {
 
 	@SuppressWarnings("unchecked")
 	private void handleTransactionCreateOrUpdateOutcome(
-			IdSubstitutionMap idSubstitutions,
-			Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
-			IIdType nextResourceId,
-			DaoMethodOutcome outcome,
-			IBase newEntry,
+			IdSubstitutionMap theIdSubstitutions,
+			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+			IIdType theNextResourceId,
+			DaoMethodOutcome theOutcome,
+			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
 			RequestDetails theRequestDetails) {
-		IIdType newId = outcome.getId().toUnqualified();
-		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
-		if (newId.equals(resourceId) == false) {
-			if (!nextResourceId.isEmpty()) {
-				idSubstitutions.put(resourceId, newId);
+		IIdType newId = theOutcome.getId().toUnqualified();
+		IIdType resourceId =
+				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
+		if (!newId.equals(resourceId)) {
+			if (!theNextResourceId.isEmpty()) {
+				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
 				/*
@@ -281,27 +313,27 @@ public abstract class BaseTransactionProcessor {
 				 */
 				IIdType id = myContext.getVersion().newIdType();
 				id.setValue(theResourceType + '/' + resourceId.getValue());
-				idSubstitutions.put(id, newId);
+				theIdSubstitutions.put(id, newId);
 			}
 		}
 
-		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
+		populateIdToPersistedOutcomeMap(theIdToPersistedOutcome, newId, theOutcome);
 
-		if (shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
-			theRes = idToPersistedOutcome.get(newId).getResource();
+		if (shouldSwapBinaryToActualResource(theRes, theResourceType, theNextResourceId)) {
+			theRes = theIdToPersistedOutcome.get(newId).getResource();
 		}
 
-		if (outcome.getCreated()) {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
+		if (theOutcome.getCreated()) {
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
-			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+			myVersionAdapter.setResponseStatus(theNewEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
 
 		Date lastModified = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
+		myVersionAdapter.setResponseLastModified(theNewEntry, lastModified);
 
-		if (outcome.getOperationOutcome() != null) {
-			myVersionAdapter.setResponseOutcome(newEntry, outcome.getOperationOutcome());
+		if (theOutcome.getOperationOutcome() != null) {
+			myVersionAdapter.setResponseOutcome(theNewEntry, theOutcome.getOperationOutcome());
 		}
 
 		if (theRequestDetails != null) {
@@ -310,9 +342,9 @@ public abstract class BaseTransactionProcessor {
 					RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 			if (preferReturn != null) {
 				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					if (outcome.getResource() != null) {
-						outcome.fireResourceViewCallbacks();
-						myVersionAdapter.setResource(newEntry, outcome.getResource());
+					if (theOutcome.getResource() != null) {
+						theOutcome.fireResourceViewCallbacks();
+						myVersionAdapter.setResource(theNewEntry, theOutcome.getResource());
 					}
 				}
 			}
@@ -346,14 +378,14 @@ public abstract class BaseTransactionProcessor {
 		try {
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
-			if (CompositeInterceptorBroadcaster.hasHooks(
-					Pointcut.STORAGE_TRANSACTION_PROCESSING, myInterceptorBroadcaster, theRequestDetails)) {
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					myInterceptorBroadcaster, theRequestDetails);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest)
 						.add(IBaseBundle.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 			}
 
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
@@ -368,14 +400,83 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IBaseBundle batch(final RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
+		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.DEFAULT;
+		if (theRequestDetails != null) {
+			String transactionSemanticsString = theRequestDetails.getHeader("X-Transaction-Semantics");
+			if (transactionSemanticsString != null) {
+				transactionSemantics = TransactionSemanticsHeader.parse(transactionSemanticsString);
+			}
+		}
+
+		int totalAttempts = defaultIfNull(transactionSemantics.getRetryCount(), 0) + 1;
+		boolean switchedToBatch = false;
+
+		int minRetryDelay = defaultIfNull(transactionSemantics.getMinRetryDelay(), 0);
+		int maxRetryDelay = defaultIfNull(transactionSemantics.getMaxRetryDelay(), 0);
+
+		// Don't let the user request a crazy delay, this could be used
+		// as a DOS attack
+		maxRetryDelay = Math.max(maxRetryDelay, minRetryDelay);
+		maxRetryDelay = Math.min(maxRetryDelay, 10000);
+		totalAttempts = Math.min(totalAttempts, 5);
+
+		IBaseBundle response;
+		for (int i = 1; ; i++) {
+			try {
+				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					BundleUtil.setBundleType(myContext, theRequest, "transaction");
+					response = processTransaction(theRequestDetails, theRequest, "Transaction", theNestedMode);
+				} else {
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+					response = processBatch(theRequestDetails, theRequest, theNestedMode);
+				}
+				break;
+			} catch (BaseServerResponseException e) {
+				if (i >= totalAttempts || theNestedMode) {
+					throw e;
+				}
+
+				long delay = RandomUtils.insecure().randomLong(minRetryDelay, maxRetryDelay);
+				String sleepMessage = "";
+				if (delay > 0) {
+					sleepMessage = "Sleeping for " + delay + " ms. ";
+				}
+
+				String switchedToBatchMessage = "";
+				if (switchedToBatch) {
+					switchedToBatchMessage = " (as batch)";
+				}
+
+				String switchingToBatchMessage = "";
+				if (i + 1 == totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
+					switchingToBatchMessage = "Performing final retry using batch semantics. ";
+					switchedToBatch = true;
+					BundleUtil.setBundleType(myContext, theRequest, "batch");
+				}
+
+				ourLog.warn(
+						"Transaction processing attempt{} {}/{} failed. {}{}",
+						switchedToBatchMessage,
+						i,
+						totalAttempts,
+						sleepMessage,
+						switchingToBatchMessage);
+
+				if (delay > 0) {
+					ThreadUtils.sleepQuietly(Duration.ofMillis(delay));
+				}
+			}
+		}
+
+		return response;
+	}
+
+	private IBaseBundle processBatch(RequestDetails theRequestDetails, IBaseBundle theRequest, boolean theNestedMode) {
 		ourLog.info(
 				"Beginning batch with {} resources",
 				myVersionAdapter.getEntries(theRequest).size());
 
 		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
@@ -551,8 +652,9 @@ public abstract class BaseTransactionProcessor {
 				theRequestDetails, response, getEntries, originalRequestOrder, transactionStopWatch, theNestedMode);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (CompositeInterceptorBroadcaster.hasHooks(
-				Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
 			String taskDurations = transactionStopWatch.formatTaskDurations();
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Transaction timing:\n" + taskDurations);
@@ -560,8 +662,7 @@ public abstract class BaseTransactionProcessor {
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, message);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 
 		return response;
@@ -598,41 +699,25 @@ public abstract class BaseTransactionProcessor {
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
 
 				ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+				ServletSubRequestDetails requestDetailsForEntry =
+						createRequestDetailsForReadEntry(srd, nextReqEntry, paramValues);
 
-				String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
+				String url = requestDetailsForEntry.getRequestPath();
 
-				ServletSubRequestDetails requestDetails =
-						ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
-
-				String url = requestDetails.getRequestPath();
-
-				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
+				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetailsForEntry, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
-				}
-
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
-				}
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry));
-				}
-				if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry))) {
-					requestDetails.addHeader(
-							Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(nextReqEntry));
 				}
 
 				Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
 				try {
 					BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
-					requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+					requestDetailsForEntry.setRestOperationType(methodBinding.getRestOperationType());
 
-					IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetails);
+					IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetailsForEntry);
 					if (paramValues.containsKey(Constants.PARAM_SUMMARY)
 							|| paramValues.containsKey(Constants.PARAM_CONTENT)) {
-						resource = filterNestedBundle(requestDetails, resource);
+						resource = filterNestedBundle(requestDetailsForEntry, resource);
 					}
 					myVersionAdapter.setResource(nextRespEntry, resource);
 					myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
@@ -647,6 +732,92 @@ public abstract class BaseTransactionProcessor {
 			}
 			theTransactionStopWatch.endCurrentTask();
 		}
+	}
+
+	/**
+	 * Checks if the given request entry has the extension specified to override the partition ids to use when processing that entry.
+	 * If the extension is present, this method will set the partition ids header in the given request details.
+	 */
+	private void setRequestPartitionHeaderIfEntryHasTheExtension(IBase theReqEntry, RequestDetails theRequestDetails) {
+		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
+				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
+		if (partitionIdsExtensionOptional.isPresent()
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
+			IPrimitiveType<?> valueAsPrimitiveType =
+					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
+			String value = valueAsPrimitiveType.getValueAsString();
+			theRequestDetails.setHeaders(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, List.of(value));
+		}
+	}
+
+	/**
+	 * Creates a new RequestDetails object based on the given RequestDetails. The new RequestDetails is to be used
+	 * when processing a write entry.
+	 * If the entry.request has the extension to override the partition ids, this method
+	 * sets the partition ids header in the newly created request details with the values from extension.
+	 * This allows using different partitions for different entries in the same transaction.
+	 *
+	 * @return the newly created request details
+	 */
+	private RequestDetails createRequestDetailsForWriteEntry(
+			RequestDetails theRequestDetails, IBase theEntry, String theUrl, String theVerb) {
+
+		if (theRequestDetails == null) {
+			ourLog.warn(
+					"The RequestDetails passed in to the transaction is null. Cannot create a new RequestDetails for transaction entry.");
+			return null;
+		}
+
+		RequestDetails newRequestDetails;
+		if (theRequestDetails instanceof ServletRequestDetails) {
+			newRequestDetails = ServletRequestUtil.getServletSubRequestDetails(
+					(ServletRequestDetails) theRequestDetails, theUrl, theVerb, ArrayListMultimap.create());
+		} else if (theRequestDetails instanceof SystemRequestDetails) {
+			newRequestDetails = new SystemRequestDetails((SystemRequestDetails) theRequestDetails);
+		} else {
+			// RequestDetails is not a ServletRequestDetails or SystemRequestDetails, and I don't know how to properly
+			// clone such a RequestDetails. Use the original RequestDetails without making any entry specific
+			// modifications
+			ourLog.warn(
+					"Cannot create a new RequestDetails for transaction entry out of the existing RequestDetails which is of type '{}'"
+							+ "Using the original RequestDetails for transaction entries without any entry specific modifications.",
+					theRequestDetails.getClass().getSimpleName());
+			return theRequestDetails;
+		}
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
+		return newRequestDetails;
+	}
+
+	/**
+	 * Creates a new RequestDetails based on the given one. The returned RequestDetails is to be used when processing
+	 * a GET entry of transaction.
+	 * It sets the headers in the newly request details according to the information from entry.request if needed.
+	 * Currently, GET entries only support ServletRequestDetails so it handles only that type.
+	 */
+	private ServletSubRequestDetails createRequestDetailsForReadEntry(
+			ServletRequestDetails theRequestDetails, IBase theEntry, ArrayListMultimap<String, String> theParamValues) {
+
+		final String verb = "GET";
+		String transactionUrl = extractTransactionUrlOrThrowException(theEntry, verb);
+
+		ServletSubRequestDetails subRequestDetails =
+				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
+
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(theEntry))) {
+			subRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
+		}
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(theEntry))) {
+			subRequestDetails.addHeader(
+					Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
+		}
+		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(theEntry))) {
+			subRequestDetails.addHeader(
+					Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
+		}
+
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);
+
+		return subRequestDetails;
 	}
 
 	/**
@@ -681,7 +852,7 @@ public abstract class BaseTransactionProcessor {
 		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
+			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new LinkedHashMap<>();
 
 			EntriesToProcessMap retVal = doTransactionWriteOperations(
 					theRequestDetails,
@@ -700,9 +871,13 @@ public abstract class BaseTransactionProcessor {
 		};
 		EntriesToProcessMap entriesToProcess;
 
+		RequestPartitionId requestPartitionId =
+				determineRequestPartitionIdForWriteEntries(theRequestDetails, theEntries);
+
 		try {
 			entriesToProcess = myHapiTransactionService
 					.withRequest(theRequestDetails)
+					.withRequestPartitionId(requestPartitionId)
 					.withTransactionDetails(theTransactionDetails)
 					.execute(txCallback);
 		} finally {
@@ -725,13 +900,104 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	/**
+	 * This method looks at the FHIR actions being performed in a List of bundle entries,
+	 * and determines the associated request partitions.
+	 */
+	@Nullable
+	protected RequestPartitionId determineRequestPartitionIdForWriteEntries(
+			RequestDetails theRequestDetails, List<IBase> theEntries) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return RequestPartitionId.allPartitions();
+		}
+
+		return theEntries.stream()
+				.map(e -> getEntryRequestPartitionId(theRequestDetails, e))
+				.reduce(null, (accumulator, nextPartition) -> {
+					if (accumulator == null) {
+						return nextPartition;
+					} else if (nextPartition == null) {
+						return accumulator;
+					} else if (myHapiTransactionService.isCompatiblePartition(accumulator, nextPartition)) {
+						return accumulator.mergeIds(nextPartition);
+					} else {
+						String msg = myContext
+								.getLocalizer()
+								.getMessage(
+										BaseTransactionProcessor.class, "multiplePartitionAccesses", theEntries.size());
+						throw new InvalidRequestException(Msg.code(2541) + msg);
+					}
+				});
+	}
+
+	@Nullable
+	private RequestPartitionId getEntryRequestPartitionId(RequestDetails theRequestDetails, IBase nextEntry) {
+
+		RequestPartitionId nextWriteEntryRequestPartitionId = null;
+		String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextEntry);
+		String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+		RequestDetails requestDetailsForEntry =
+				createRequestDetailsForWriteEntry(theRequestDetails, nextEntry, url, verb);
+		if (isNotBlank(verb)) {
+			BundleEntryTransactionMethodEnum verbEnum = BundleEntryTransactionMethodEnum.valueOf(verb);
+			switch (verbEnum) {
+				case GET:
+					nextWriteEntryRequestPartitionId = null;
+					break;
+				case DELETE: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forDelete(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										requestDetailsForEntry, details);
+					}
+					break;
+				}
+				case PATCH: {
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextEntry);
+					if (isNotBlank(requestUrl)) {
+						IdType id = new IdType(requestUrl);
+						String resourceType = id.getResourceType();
+						ReadPartitionIdRequestDetails details =
+								ReadPartitionIdRequestDetails.forPatch(resourceType, id);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineReadPartitionForRequest(
+										requestDetailsForEntry, details);
+					}
+					break;
+				}
+				case POST: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					String resourceType = myContext.getResourceType(resource);
+					nextWriteEntryRequestPartitionId =
+							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+									theRequestDetails, resourceType);
+					break;
+				}
+				case PUT: {
+					IBaseResource resource = myVersionAdapter.getResource(nextEntry);
+					if (resource != null) {
+						String resourceType = myContext.getResourceType(resource);
+						nextWriteEntryRequestPartitionId =
+								myRequestPartitionHelperService.determineCreatePartitionForRequest(
+										requestDetailsForEntry, resource, resourceType);
+					}
+					break;
+				}
+			}
+		}
+		return nextWriteEntryRequestPartitionId;
+	}
+
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
-		return CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, myInterceptorBroadcaster, theRequestDetails)
-				|| CompositeInterceptorBroadcaster.hasHooks(
-						Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST,
-						myInterceptorBroadcaster,
-						theRequestDetails);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		return compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE)
+				|| compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST);
 	}
 
 	private void callWriteOperationsHook(
@@ -739,10 +1005,14 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			TransactionWriteOperationsDetails theWriteOperationsDetails) {
-		HookParams params = new HookParams()
-				.add(TransactionDetails.class, theTransactionDetails)
-				.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, params);
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(thePointcut)) {
+			HookParams params = new HookParams()
+					.add(TransactionDetails.class, theTransactionDetails)
+					.add(TransactionWriteOperationsDetails.class, theWriteOperationsDetails);
+			compositeBroadcaster.callHooks(thePointcut, params);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -872,18 +1142,16 @@ public abstract class BaseTransactionProcessor {
 									+ " as it contained a duplicate conditional " + verb;
 							ourLog.info(msg);
 							// Interceptor broadcast: JPA_PERFTRACE_INFO
-							if (CompositeInterceptorBroadcaster.hasHooks(
-									Pointcut.JPA_PERFTRACE_WARNING, myInterceptorBroadcaster, theRequestDetails)) {
+							IInterceptorBroadcaster compositeBroadcaster =
+									CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+											myInterceptorBroadcaster, theRequestDetails);
+							if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING)) {
 								StorageProcessingMessage message = new StorageProcessingMessage().setMessage(msg);
 								HookParams params = new HookParams()
 										.add(RequestDetails.class, theRequestDetails)
 										.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 										.add(StorageProcessingMessage.class, message);
-								CompositeInterceptorBroadcaster.doCallHooks(
-										myInterceptorBroadcaster,
-										theRequestDetails,
-										Pointcut.JPA_PERFTRACE_INFO,
-										params);
+								compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
 							}
 
 							theEntries.remove(index);
@@ -931,10 +1199,11 @@ public abstract class BaseTransactionProcessor {
 	 * @param theBaseResource - base resource
 	 * @param theNextReqEntry - next request entry
 	 * @param theAllIds       - set of all IIdType values
+	 * @param theVerb
 	 * @return
 	 */
 	private IIdType getNextResourceIdFromBaseResource(
-			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds) {
+			IBaseResource theBaseResource, IBase theNextReqEntry, Set<IIdType> theAllIds, String theVerb) {
 		IIdType nextResourceId = null;
 		if (theBaseResource != null) {
 			nextResourceId = theBaseResource.getIdElement();
@@ -981,7 +1250,7 @@ public abstract class BaseTransactionProcessor {
 											"transactionContainsMultipleWithDuplicateId",
 											nextResourceId));
 				}
-			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+			} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart() && !"POST".equals(theVerb)) {
 				IIdType nextId = nextResourceId.toUnqualifiedVersionless();
 				if (!theAllIds.add(nextId)) {
 					throw new InvalidRequestException(Msg.code(535)
@@ -1038,17 +1307,31 @@ public abstract class BaseTransactionProcessor {
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
 			 */
+			String previousVerb = null;
 			for (int i = 0; i < theEntries.size(); i++) {
 				if (i % 250 == 0) {
 					ourLog.debug("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				IBase nextReqEntry = theEntries.get(i);
-				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
-
-				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
+
+				if (previousVerb != null && !previousVerb.equals(verb)) {
+					handleVerbChangeInTransactionWriteOperations();
+				}
+				previousVerb = verb;
+				if ("GET".equals(verb)) {
+					continue;
+				}
+
+				String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+				RequestDetails requestDetailsForEntry =
+						createRequestDetailsForWriteEntry(theRequest, nextReqEntry, url, verb);
+
+				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
+				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds, verb);
+
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
 				Integer order = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
@@ -1065,16 +1348,6 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
-						/*
-						 * To preserve existing functionality,
-						 * we will only verify that the request url is
-						 * valid if it's provided at all.
-						 * Otherwise, we'll ignore it
-						 */
-						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
-						if (isNotBlank(url)) {
-							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-						}
 						validateResourcePresent(res, order, verb);
 
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -1084,7 +1357,8 @@ public abstract class BaseTransactionProcessor {
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
-						outcome = resourceDao.create(res, matchUrl, false, theRequest, theTransactionDetails);
+						outcome =
+								resourceDao.create(res, matchUrl, false, requestDetailsForEntry, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						res.setId(outcome.getId());
 
@@ -1097,7 +1371,7 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									theRequest);
+									requestDetailsForEntry);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1113,15 +1387,14 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
 							if (!deletedResources.contains(deleteId.getValueAsString())) {
-								DaoMethodOutcome outcome =
-										dao.delete(deleteId, deleteConflicts, theRequest, theTransactionDetails);
+								DaoMethodOutcome outcome = dao.delete(
+										deleteId, deleteConflicts, requestDetailsForEntry, theTransactionDetails);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
 									entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
@@ -1131,8 +1404,8 @@ public abstract class BaseTransactionProcessor {
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							DeleteMethodOutcome deleteOutcome =
-									dao.deleteByUrl(matchUrl, deleteConflicts, theRequest, theTransactionDetails);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(
+									matchUrl, deleteConflicts, requestDetailsForEntry, theTransactionDetails);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
 							List<? extends IBasePersistedResource> allDeleted = deleteOutcome.getDeletedEntities();
 							for (IBasePersistedResource deleted : allDeleted) {
@@ -1157,8 +1430,6 @@ public abstract class BaseTransactionProcessor {
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
-
 						DaoMethodOutcome outcome;
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						if (isNotBlank(parts.getResourceId())) {
@@ -1168,7 +1439,8 @@ public abstract class BaseTransactionProcessor {
 										myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
+							outcome = resourceDao.update(
+									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 						} else {
 							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
 								res.setId((String) null);
@@ -1180,8 +1452,8 @@ public abstract class BaseTransactionProcessor {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome =
-									resourceDao.update(res, matchUrl, false, false, theRequest, theTransactionDetails);
+							outcome = resourceDao.update(
+									res, matchUrl, false, false, requestDetailsForEntry, theTransactionDetails);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
@@ -1206,7 +1478,7 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								theRequest);
+								requestDetailsForEntry);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1214,7 +1486,6 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
@@ -1255,7 +1526,8 @@ public abstract class BaseTransactionProcessor {
 						}
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						IIdType patchId =
+								myContext.getVersion().newIdType(parts.getResourceType(), parts.getResourceId());
 
 						String conditionalUrl;
 						if (isNull(patchId.getIdPart())) {
@@ -1275,7 +1547,7 @@ public abstract class BaseTransactionProcessor {
 								patchType,
 								patchBody,
 								patchBodyParameters,
-								theRequest,
+								requestDetailsForEntry,
 								theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
@@ -1291,7 +1563,7 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									theRequest);
+									requestDetailsForEntry);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
@@ -1306,6 +1578,8 @@ public abstract class BaseTransactionProcessor {
 
 				theTransactionStopWatch.endCurrentTask();
 			}
+
+			postTransactionProcess(theTransactionDetails);
 
 			/*
 			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
@@ -1352,7 +1626,11 @@ public abstract class BaseTransactionProcessor {
 			}
 			if (!myStorageSettings.isMassIngestionMode()) {
 				validateNoDuplicates(
-						theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
+						theRequest,
+						theTransactionDetails,
+						theActionName,
+						conditionalRequestUrls,
+						theIdToPersistedOutcome.values());
 			}
 
 			theTransactionStopWatch.endCurrentTask();
@@ -1374,13 +1652,14 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents =
 					theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
 				Pointcut nextPointcut = nextEntry.getKey();
 				HookParams nextParams = nextEntry.getValue();
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+				compositeBroadcaster.callHooks(nextPointcut, nextParams);
 			}
 
 			DeferredInterceptorBroadcasts deferredInterceptorBroadcasts =
@@ -1391,8 +1670,7 @@ public abstract class BaseTransactionProcessor {
 					.add(DeferredInterceptorBroadcasts.class, deferredInterceptorBroadcasts)
 					.add(TransactionDetails.class, theTransactionDetails)
 					.add(IBaseBundle.class, theResponse);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSED, params);
 
 			theTransactionDetails.deferredBroadcastProcessingFinished();
 
@@ -1405,6 +1683,22 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * Subclasses may override this in order to invoke specific operations when
+	 * we're finished handling all the write entries in the transaction bundle
+	 * with a given verb.
+	 */
+	protected void handleVerbChangeInTransactionWriteOperations() {
+		// nothing
+	}
+
+	/**
+	 * Implement to handle post transaction processing
+	 */
+	protected void postTransactionProcess(TransactionDetails theTransactionDetails) {
+		// nothing
 	}
 
 	/**
@@ -1440,7 +1734,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void setConditionalUrlToBeValidatedLater(
 			Map<String, IIdType> theConditionalUrlToIdMap, String theMatchUrl, IIdType theId) {
-		if (!StringUtils.isBlank(theMatchUrl)) {
+		if (!isBlank(theMatchUrl)) {
 			theConditionalUrlToIdMap.put(theMatchUrl, theId);
 		}
 	}
@@ -1565,9 +1859,9 @@ public abstract class BaseTransactionProcessor {
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 			StopWatch theTransactionStopWatch,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities) {
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
 		IdentityHashMap<DaoMethodOutcome, Set<IBaseReference>> deferredIndexesForAutoVersioning = null;
@@ -1592,6 +1886,9 @@ public abstract class BaseTransactionProcessor {
 
 			Set<IBaseReference> referencesToAutoVersion =
 					BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
+			Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+					BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
 				resolveReferencesThenSaveAndIndexResource(
@@ -1599,13 +1896,14 @@ public abstract class BaseTransactionProcessor {
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion); // this is empty
+						referencesToAutoVersion, // this is empty
+						referencesToKeepClientSuppliedVersion);
 			} else {
 				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
@@ -1622,19 +1920,22 @@ public abstract class BaseTransactionProcessor {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
 				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
 				IBaseResource nextResource = nextOutcome.getResource();
+				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
+						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
 
 				resolveReferencesThenSaveAndIndexResource(
 						theRequest,
 						theTransactionDetails,
 						theIdSubstitutions,
 						theIdToPersistedOutcome,
-						entriesToProcess,
-						nonUpdatedEntities,
-						updatedEntities,
+						theEntriesToProcess,
+						theNonUpdatedEntities,
+						theUpdatedEntities,
 						terser,
 						nextOutcome,
 						nextResource,
-						referencesToAutoVersion);
+						referencesToAutoVersion,
+						referencesToKeepClientSuppliedVersion);
 			}
 		}
 	}
@@ -1644,15 +1945,16 @@ public abstract class BaseTransactionProcessor {
 			TransactionDetails theTransactionDetails,
 			IdSubstitutionMap theIdSubstitutions,
 			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-			EntriesToProcessMap entriesToProcess,
-			Set<IIdType> nonUpdatedEntities,
-			Set<IBasePersistedResource> updatedEntities,
-			FhirTerser terser,
+			EntriesToProcessMap theEntriesToProcess,
+			Set<IIdType> theNonUpdatedEntities,
+			Set<IBasePersistedResource> theUpdatedEntities,
+			FhirTerser theTerser,
 			DaoMethodOutcome theDaoMethodOutcome,
 			IBaseResource theResource,
-			Set<IBaseReference> theReferencesToAutoVersion) {
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion) {
 		// References
-		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(theResource);
+		List<ResourceReferenceInfo> allRefs = theTerser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
 			IBaseReference resourceReference = nextRef.getResourceReference();
 			IIdType nextId = resourceReference.getReferenceElement();
@@ -1674,19 +1976,18 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
-				if (newId == null) {
-					newId = theIdSubstitutions.getForSource(nextId);
-				}
-				if (newId != null) {
-					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-
-					addRollbackReferenceRestore(theTransactionDetails, resourceReference);
-					if (theReferencesToAutoVersion.contains(resourceReference)) {
-						resourceReference.setReference(newId.getValue());
-						resourceReference.setResource(null);
-					} else {
-						resourceReference.setReference(newId.toVersionless().getValue());
-						resourceReference.setResource(null);
+				if (shouldReplaceResourceReference(
+						theReferencesToAutoVersion, theReferencesToKeepClientSuppliedVersion, resourceReference)) {
+					if (newId == null) {
+						newId = theIdSubstitutions.getForSource(nextId);
+					}
+					if (newId != null) {
+						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+						if (theReferencesToAutoVersion.contains(resourceReference)) {
+							replaceResourceReference(newId, resourceReference, theTransactionDetails);
+						} else {
+							replaceResourceReference(newId.toVersionless(), resourceReference, theTransactionDetails);
+						}
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
@@ -1716,7 +2017,10 @@ public abstract class BaseTransactionProcessor {
 					} else {
 						// we will add the looked up info to the transaction
 						// for later
-						theTransactionDetails.addResolvedResourceId(id, resourceVersionMap.getResourcePersistentId(id));
+						if (resourceVersionMap.containsKey(id)) {
+							theTransactionDetails.addResolvedResourceId(
+									id, resourceVersionMap.getResourcePersistentId(id));
+						}
 					}
 				}
 
@@ -1724,9 +2028,15 @@ public abstract class BaseTransactionProcessor {
 					DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 
 					if (outcome != null && !outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-						addRollbackReferenceRestore(theTransactionDetails, resourceReference);
-						resourceReference.setReference(nextId.getValue());
-						resourceReference.setResource(null);
+						replaceResourceReference(nextId, resourceReference, theTransactionDetails);
+					}
+
+					// if referenced resource is not in transaction but exists in the DB, resolving its version
+					IResourcePersistentId persistedReferenceId = resourceVersionMap.getResourcePersistentId(nextId);
+					if (outcome == null && persistedReferenceId != null && persistedReferenceId.getVersion() != null) {
+						IIdType newReferenceId = nextId.withVersion(
+								persistedReferenceId.getVersion().toString());
+						replaceResourceReference(newReferenceId, resourceReference, theTransactionDetails);
 					}
 				}
 			}
@@ -1735,22 +2045,24 @@ public abstract class BaseTransactionProcessor {
 		// URIs
 		Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>)
 				myContext.getElementDefinition("uri").getImplementingClass();
-		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(theResource, uriType);
+		List<? extends IPrimitiveType<?>> allUris = theTerser.getAllPopulatedChildElementsOfType(theResource, uriType);
 		for (IPrimitiveType<?> nextRef : allUris) {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
 			}
 			String nextUriString = nextRef.getValueAsString();
-			if (theIdSubstitutions.containsSource(nextUriString)) {
-				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
-				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+			if (isNotBlank(nextUriString)) {
+				if (theIdSubstitutions.containsSource(nextUriString)) {
+					IIdType newId = theIdSubstitutions.getForSource(nextUriString);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
-				String existingValue = nextRef.getValueAsString();
-				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+					String existingValue = nextRef.getValueAsString();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
 
-				nextRef.setValueAsString(newId.toVersionless().getValue());
-			} else {
-				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					nextRef.setValueAsString(newId.toVersionless().getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
 			}
 		}
 
@@ -1761,7 +2073,7 @@ public abstract class BaseTransactionProcessor {
 		IJpaDao jpaDao = (IJpaDao) dao;
 
 		IBasePersistedResource updateOutcome = null;
-		if (updatedEntities.contains(theDaoMethodOutcome.getEntity())) {
+		if (theUpdatedEntities.contains(theDaoMethodOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
@@ -1778,7 +2090,7 @@ public abstract class BaseTransactionProcessor {
 					theTransactionDetails);
 			updateOutcome = daoMethodOutcome.getEntity();
 			theDaoMethodOutcome = daoMethodOutcome;
-		} else if (!nonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
+		} else if (!theNonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
 			updateOutcome = jpaDao.updateEntity(
 					theRequest,
 					theResource,
@@ -1795,23 +2107,58 @@ public abstract class BaseTransactionProcessor {
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
 
-			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
+			IIdType entryId = theEntriesToProcess.getIdWithVersionlessComparison(newId);
 			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
 				entryId.setValue(newId.getValue());
 			}
 
 			theDaoMethodOutcome.setId(newId);
 
-			IIdType target = theIdSubstitutions.getForSource(newId);
-			if (target != null) {
-				target.setValue(newId.getValue());
-			}
+			theIdSubstitutions.updateTargets(newId);
 
-			if (theDaoMethodOutcome.getOperationOutcome() != null) {
-				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
-				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
+			// This will only be null if we're not intending to return an OO
+			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
+			if (operationOutcome != null) {
+
+				List<IIdType> autoCreatedPlaceholders =
+						theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+				for (IIdType autoCreatedPlaceholder : autoCreatedPlaceholders) {
+					BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+							myContext, autoCreatedPlaceholder, operationOutcome);
+				}
+
+				IBase responseEntry = theEntriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
+				myVersionAdapter.setResponseOutcome(responseEntry, operationOutcome);
 			}
 		}
+	}
+
+	/**
+	 * We should replace the references when
+	 * 1. It is not a reference we should keep the client-supplied version for as configured by `DontStripVersionsFromReferences` or
+	 * 2. It is a reference that has been identified for auto versioning or
+	 * 3. Is a placeholder reference
+	 *
+	 * @param theReferencesToAutoVersion               list of references identified for auto versioning
+	 * @param theReferencesToKeepClientSuppliedVersion list of references that we should not strip the version for
+	 * @param theResourceReference                     the resource reference
+	 * @return true if we should replace the resource reference, false if we should keep the client provided reference
+	 */
+	private boolean shouldReplaceResourceReference(
+			Set<IBaseReference> theReferencesToAutoVersion,
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			IBaseReference theResourceReference) {
+		return (!theReferencesToKeepClientSuppliedVersion.contains(theResourceReference)
+						&& myContext.getParserOptions().isStripVersionsFromReferences())
+				|| theReferencesToAutoVersion.contains(theResourceReference)
+				|| isPlaceholder(theResourceReference.getReferenceElement());
+	}
+
+	private void replaceResourceReference(
+			IIdType theReferenceId, IBaseReference theResourceReference, TransactionDetails theTransactionDetails) {
+		addRollbackReferenceRestore(theTransactionDetails, theResourceReference);
+		theResourceReference.setReference(theReferenceId.getValue());
+		theResourceReference.setResource(null);
 	}
 
 	private void addRollbackReferenceRestore(
@@ -1822,21 +2169,31 @@ public abstract class BaseTransactionProcessor {
 
 	private void validateNoDuplicates(
 			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
 			String theActionName,
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls,
 			Collection<DaoMethodOutcome> thePersistedOutcomes) {
+
+		Map<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
+				theTransactionDetails.getOrCreateUserData(
+						HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS, Collections::emptyMap);
 
 		IdentityHashMap<IBaseResource, ResourceIndexedSearchParams> resourceToIndexedParams =
 				new IdentityHashMap<>(thePersistedOutcomes.size());
 		thePersistedOutcomes.stream()
 				.filter(t -> !t.isNop())
-				.filter(t -> t.getEntity()
-						instanceof ResourceTable) // N.B. GGG: This validation never occurs for mongo, as nothing is a
-				// ResourceTable.
+				// N.B. GGG: This validation never occurs for mongo, as nothing is a ResourceTable.
+				.filter(t -> t.getEntity() instanceof ResourceTable)
 				.filter(t -> t.getEntity().getDeleted() == null)
 				.filter(t -> t.getResource() != null)
-				.forEach(t -> resourceToIndexedParams.put(
-						t.getResource(), new ResourceIndexedSearchParams((ResourceTable) t.getEntity())));
+				.forEach(t -> {
+					ResourceTable entity = (ResourceTable) t.getEntity();
+					ResourceIndexedSearchParams params = existingSearchParams.get(entity);
+					if (params == null) {
+						params = ResourceIndexedSearchParams.withLists(entity);
+					}
+					resourceToIndexedParams.put(t.getResource(), params);
+				});
 
 		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
 			String matchUrl = nextEntry.getKey();
@@ -1895,7 +2252,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
-		org.hl7.fhir.r4.model.IdType id = new org.hl7.fhir.r4.model.IdType(theResourceType, theResourceId, theVersion);
+		IdType id = new IdType(theResourceType, theResourceId, theVersion);
 		return myContext.getVersion().newIdType().setValue(id.getValue());
 	}
 
@@ -1931,21 +2288,25 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Extracts the transaction url from the entry and verifies it's:
-	 * * not null or blank
-	 * * is a relative url matching the resourceType it is about
+	 * <li>not null or blank (unless it is a POST), and</li>
+	 * <li>is a relative url matching the resourceType it is about</li>
 	 * <p>
-	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 * For POST requests, the url is allowed to be blank to preserve the existing behavior.
+	 * <p>
+	 * Returns the transaction url (or throws an InvalidRequestException if url is missing or not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
-
-		if (!isValidResourceTypeUrl(url)) {
-			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
-			String msg =
-					myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
-			throw new InvalidRequestException(Msg.code(2006) + msg);
+		if (url.isEmpty() || isValidResourceTypeUrl(url)) {
+			// for POST requests, the url is allowed to be blank, which is checked in
+			// extractTransactionUrlOrThrowException and an empty string is returned in that case.
+			// That is why empty url is allowed here.
+			return url;
 		}
-		return url;
+
+		ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
+		String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
+		throw new InvalidRequestException(Msg.code(2006) + msg);
 	}
 
 	/**
@@ -1979,11 +2340,18 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Extracts the transaction url from the entry and verifies that it is not null/blank
-	 * and returns it
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank, unless it is a POST,
+	 * and returns it. For POST requests allows null or blank values to keep the existing behaviour and returns
+	 * an empty string in that case.
 	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
+		if ("POST".equals(verb) && isBlank(url)) {
+			// allow blanks for POST to keep the existing behaviour
+			// returning empty string instead of null to not get NPE later
+			return "";
+		}
+
 		if (isBlank(url)) {
 			throw new InvalidRequestException(Msg.code(545)
 					+ myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionMissingUrl", verb));
@@ -2016,11 +2384,11 @@ public abstract class BaseTransactionProcessor {
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		switch (defaultString(verb)) {
-			case "POST":
+			case POST:
 				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			case "PUT":
-			case "DELETE":
-			case "PATCH":
+			case PUT:
+			case DELETE:
+			case PATCH:
 				String url = extractTransactionUrlOrThrowException(theEntry, verb);
 				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 				if (isBlank(parts.getResourceId())) {
@@ -2030,6 +2398,11 @@ public abstract class BaseTransactionProcessor {
 			default:
 				return null;
 		}
+	}
+
+	@VisibleForTesting
+	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -2245,8 +2618,7 @@ public abstract class BaseTransactionProcessor {
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
-
-			int startIdx = matchUrl.indexOf('?');
+			int startIdx = 0;
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);

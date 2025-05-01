@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,16 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -52,8 +55,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -80,6 +81,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
+	private static final Set<BundleTypeEnum> STANDALONE_BUNDLE_RESOURCE_TYPES =
+			Set.of(BundleTypeEnum.DOCUMENT, BundleTypeEnum.MESSAGE);
+
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
 	private final String myRequestSeenResourcesKey =
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
@@ -87,6 +91,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
+	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME = List.of(
+			RestOperationTypeEnum.SEARCH_TYPE, RestOperationTypeEnum.SEARCH_SYSTEM, RestOperationTypeEnum.GET_PAGE);
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
@@ -160,7 +166,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				rules.size(),
 				getPointcutNameOrEmpty(thePointcut),
 				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource));
+				getResourceTypeOrEmpty(theOutputResource),
+				thePointcut);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -503,12 +510,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		// Don't check the value twice
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap =
-				ConsentInterceptor.getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenMap = getAlreadySeenResourcesMap(theRequestDetails);
 		if (alreadySeenMap.putIfAbsent(theResponseObject, Boolean.TRUE) != null) {
 			return;
 		}
-
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
 		List<IBaseResource> resources = Collections.emptyList();
 
@@ -525,7 +530,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainerUnlessStandalone(
+							theResponseObject, fhirContext, theRequestDetails);
 				}
 				break;
 			}
@@ -572,29 +578,55 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+	protected static List<IBaseResource> toListOfResourcesAndExcludeContainerUnlessStandalone(
+			IBaseResource theResponseObject, FhirContext fhirContext, RequestDetails theRequestDetails) {
+
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
+		boolean shouldExamineChildResources = shouldExamineChildResources(theResponseObject, fhirContext);
+		if (!shouldExamineChildResources) {
+			return toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+					theResponseObject, theRequestDetails);
+		}
+
+		return toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+	}
+
+	/**
+	 *
+	 * @param theResponseObject The resource to convert to a list.
+	 * @param theRequestDetails The request details.
+	 * @return The response object (a resource) as a list. If the REST operation type in the request details is a
+	 * search, and the search is for resources that aren't the OperationOutcome, any OperationOutcome resource is removed from the list.
+	 * e.g. A GET [base]/Patient?parameter(s) search may return a bundle containing an OperationOutcome. The OperationOutcome will be removed from the
+	 * list to exclude from security.
+	 */
+	private static List<IBaseResource> toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+			IBaseResource theResponseObject, RequestDetails theRequestDetails) {
+		List<IBaseResource> resources = new ArrayList<>();
+		RestOperationTypeEnum restOperationType = theRequestDetails.getRestOperationType();
+		String resourceName = theRequestDetails.getResourceName();
+		resources.add(theResponseObject);
+
+		if (resourceName != null
+				&& !resourceName.equals("OperationOutcome")
+				&& REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME.contains(restOperationType)) {
+			resources.removeIf(t -> t instanceof IBaseOperationOutcome);
+		}
+
+		return resources;
+	}
+
+	@Nonnull
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			IBaseResource theResponseObject, FhirContext fhirContext) {
 		List<IBaseResource> retVal;
-
-		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
-		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
-		}
-
-		if (!isContainer) {
-			return Collections.singletonList(theResponseObject);
-		}
-
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
 		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+		if (!retVal.isEmpty() && retVal.get(0) == theResponseObject) {
 			retVal = retVal.subList(1, retVal.size());
 		}
 
@@ -602,6 +634,25 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		retVal.removeIf(t -> t instanceof IBaseOperationOutcome);
 
 		return retVal;
+	}
+
+	/**
+	 * This method determines if the given Resource should have permissions applied to the resources inside or
+	 * to the Resource itself.
+	 * For Parameters resources, we include child resources when checking the permissions.
+	 * For Bundle resources, we only look at resources inside if the Bundle is of type document, collection, or message.
+	 */
+	protected static boolean shouldExamineChildResources(IBaseResource theResource, FhirContext theFhirContext) {
+		if (theResource instanceof IBaseParameters) {
+			return true;
+		}
+		if (theResource instanceof IBaseBundle) {
+			BundleTypeEnum bundleType = BundleUtil.getBundleTypeEnum(theFhirContext, ((IBaseBundle) theResource));
+			boolean isStandaloneBundleResource =
+					bundleType != null && STANDALONE_BUNDLE_RESOURCE_TYPES.contains(bundleType);
+			return !isStandaloneBundleResource;
+		}
+		return false;
 	}
 
 	public static class Verdict {
@@ -659,5 +710,16 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		return theResource.getIdElement().getResourceType();
+	}
+
+	@SuppressWarnings("unchecked")
+	private IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(RequestDetails theRequestDetails) {
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>)
+				theRequestDetails.getUserData().get(myRequestSeenResourcesKey);
+		if (alreadySeenResources == null) {
+			alreadySeenResources = new IdentityHashMap<>();
+			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
+		}
+		return alreadySeenResources;
 	}
 }

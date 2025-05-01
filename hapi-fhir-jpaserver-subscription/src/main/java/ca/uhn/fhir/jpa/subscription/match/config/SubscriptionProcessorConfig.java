@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
@@ -44,6 +46,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -153,12 +156,17 @@ public class SubscriptionProcessorConfig {
 
 	@Lazy
 	@Bean
-	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
+	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			MatchUrlService theMatchUrlService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
 			case R4B:
 			case R5:
-				return new SubscriptionTopicPayloadBuilder(theFhirContext);
+				return new SubscriptionTopicPayloadBuilder(
+						theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
 			default:
 				return null;
 		}

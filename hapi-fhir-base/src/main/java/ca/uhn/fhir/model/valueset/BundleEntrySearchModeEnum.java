@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map;
 public enum BundleEntrySearchModeEnum {
 	MATCH("match", "http://hl7.org/fhir/search-entry-mode"),
 	INCLUDE("include", "http://hl7.org/fhir/search-entry-mode"),
+	OUTCOME("outcome", "http://hl7.org/fhir/search-entry-mode"),
 	;
 
 	/**
@@ -79,7 +80,7 @@ public enum BundleEntrySearchModeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public BundleEntrySearchModeEnum forCode(String theCode) {
+	public static BundleEntrySearchModeEnum forCode(String theCode) {
 		BundleEntrySearchModeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}

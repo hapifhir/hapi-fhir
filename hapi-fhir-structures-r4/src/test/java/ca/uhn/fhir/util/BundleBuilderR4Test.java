@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class BundleBuilderR4Test {
@@ -52,8 +54,8 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patch, bundle.getEntry().get(0).getResource());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
@@ -75,9 +77,9 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patch, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient?identifier=http://foo|123", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
 
@@ -96,10 +98,30 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+	}
+
+	@Test
+	public void testAddEntryUpdate_withCustomRequestUrl() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setId("http://foo/Patient/123");
+		patient.setActive(true);
+		builder.addTransactionUpdateEntry(patient, "Patient?identifier=test|123");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=test|123", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
 	}
 
@@ -143,8 +165,8 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
@@ -165,7 +187,7 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 		assertNotNull(bundle.getEntry().get(0).getSearch());
 		assertEquals(Bundle.SearchEntryMode.MATCH, bundle.getEntry().get(0).getSearch().getMode());
 		assertEquals(BigDecimal.ONE, bundle.getEntry().get(0).getSearch().getScore());
@@ -184,7 +206,7 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -199,9 +221,9 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
 	}
@@ -220,7 +242,7 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(2);
 
 		//Check the IBaseresource style entry
 		assertNull(bundle.getEntry().get(0).getResource());
@@ -248,9 +270,9 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
 		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.provider.ResourceProviderDstu2ValueSetTest;
@@ -18,12 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
@@ -103,9 +101,11 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertTrue(result.isOk());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7'");
+		assertThat(result.getMessage()).contains("for in-memory expansion");
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals(IValidationSupport.IssueSeverity.WARNING, result.getSeverity());
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk(), result.getMessage());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
@@ -158,8 +158,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		// @formatter:off
-		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+		assertThat(resp).
+			containsSubsequence("<ValueSet xmlns=\"http://hl7.org/fhir\">",
 				"<expansion>",
 				"<contains>",
 				"<system value=\"http://acme.org\"/>",
@@ -172,7 +172,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 				"<display value=\"Systolic blood pressure--expiration\"/>",
 				"</contains>",
 				"</expansion>"
-			));
+			);
 		//@formatter:on
 
 		/*
@@ -183,9 +183,9 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
 
 		/*
@@ -196,9 +196,9 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
 	}
 
@@ -209,7 +209,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 
 		List<String> codes = ResourceProviderDstu2ValueSetTest.toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 	}
 
 	@Test
@@ -220,7 +220,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(resp);
 
 		List<String> codes = ResourceProviderDstu2ValueSetTest.toCodes(expanded);
-		assertThat(codes, contains("11378-7", "8450-9"));
+		assertThat(codes).containsExactly("11378-7", "8450-9");
 	}
 
 }

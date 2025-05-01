@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,4 +45,9 @@ public @interface CdsServicePrefetch {
 	 * The strategy used for this query, defaults to the service-wide strategy
 	 */
 	CdsResolutionStrategyEnum source() default CdsResolutionStrategyEnum.NONE;
+
+	/**
+	 * How to handle prefetch failures, applies to both auto-prefetch failures or an OperationOutcome sent by the CDSClient as a prefetch resource.
+	 */
+	CdsPrefetchFailureMode failureMode() default CdsPrefetchFailureMode.FAIL;
 }

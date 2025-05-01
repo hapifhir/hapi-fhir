@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6502
+backport: 7.6.1
+title: "Support ReferenceParam in addition to UriParam for `_profile` in queries using the SearchParameterMap to match the change in the specification from DSTU3 to R4."

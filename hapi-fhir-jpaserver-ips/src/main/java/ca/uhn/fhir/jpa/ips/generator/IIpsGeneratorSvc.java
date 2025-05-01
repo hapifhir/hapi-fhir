@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - International Patient Summary (IPS)
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ public interface IIpsGeneratorSvc {
 	 * Generates an IPS document and returns the complete document bundle
 	 * for the given patient by ID
 	 */
-	IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId);
+	IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId, String theProfile);
 
 	/**
 	 * Generates an IPS document and returns the complete document bundle
 	 * for the given patient by identifier
 	 */
-	IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier);
+	IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier, String theProfile);
 }

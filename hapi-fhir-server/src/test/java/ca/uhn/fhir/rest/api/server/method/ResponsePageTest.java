@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -161,17 +160,24 @@ public class ResponsePageTest {
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"true,false,true",
-		"true,true,true",
-		"false,false,false",
-		"false,true,false",
-		"false,false,true",
-		"false,true,true"
+		"true,false,true,true",
+		"true,true,true,true",
+		"false,false,false,true",
+		"false,true,false,true",
+		"false,false,true,true",
+		"false,true,true,true",
+		"true,false,true,false",
+		"true,true,true,false",
+		"false,false,false,false",
+		"false,true,false,false",
+		"false,false,true,false",
+		"false,true,true,false"
 	})
 	public void nonCachedOffsetPaging_setsNextPreviousLinks_test(
 		boolean theNumTotalResultsIsNull,
 		boolean theHasPreviousBoolean,
-		boolean theHasNextBoolean
+		boolean theHasNextBoolean,
+		boolean theHasTotalRequestedCountBool
 	) {
 		// setup
 		myBundleBuilder
@@ -193,6 +199,11 @@ public class ResponsePageTest {
 		} else {
 			when(myBundleProvider.size())
 				.thenReturn(null);
+			if (theHasTotalRequestedCountBool) {
+				myBundleBuilder.setTotalRequestedResourcesFetched(11); // 1 more than pagesize
+			} else {
+				myBundleBuilder.setPageSize(10);
+			}
 		}
 
 		RequestedPage requestedPage = new RequestedPage(
@@ -215,19 +226,28 @@ public class ResponsePageTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"true,false,false",
-		"true,true,false",
-		"true,false,true",
-		"true,true,true",
-		"false,false,false",
-		"false,true,false",
-		"false,false,true",
-		"false,true,true"
+		"true,false,false,true",
+		"true,true,false,true",
+		"true,false,true,true",
+		"true,true,true,true",
+		"false,false,false,true",
+		"false,true,false,true",
+		"false,false,true,true",
+		"false,true,true,true",
+		"true,false,false,false",
+		"true,true,false,false",
+		"true,false,true,false",
+		"true,true,true,false",
+		"false,false,false,false",
+		"false,true,false,false",
+		"false,false,true,false",
+		"false,true,true,false"
 	})
 	public void savedSearch_setsNextPreviousLinks_test(
 		boolean theNumTotalResultsIsNull,
 		boolean theHasPreviousBoolean,
-		boolean theHasNextBoolean
+		boolean theHasNextBoolean,
+		boolean theHasTotalRequestedFetched
 	) {
 		// setup
 		int pageSize = myList.size();
@@ -254,6 +274,12 @@ public class ResponsePageTest {
 		if (!theNumTotalResultsIsNull) {
 			if (!theHasNextBoolean) {
 				myBundleBuilder.setNumToReturn(pageSize + offset + includeResourceCount);
+			}
+		} else if (theHasTotalRequestedFetched) {
+			if (theHasNextBoolean) {
+				myBundleBuilder.setTotalRequestedResourcesFetched(pageSize + 1); // 1 more than page size
+			} else {
+				myBundleBuilder.setTotalRequestedResourcesFetched(pageSize);
 			}
 		}
 
@@ -307,14 +333,14 @@ public class ResponsePageTest {
 		boolean theHasNextBoolean
 	) {
 		if (theHasNextBoolean) {
-			assertNotNull(myLinks.getNext(), "Next link expected but not found");
+			assertThat(myLinks.getNext()).as("Next link expected but not found").isNotNull();
 		} else {
-			assertNull(myLinks.getNext(), "Found unexpected next link");
+			assertThat(myLinks.getNext()).as("Found unexpected next link").isNull();
 		}
 		if (theHasPreviousBoolean) {
-			assertNotNull(myLinks.getPrev(), "Previous link expected but not found");
+			assertThat(myLinks.getPrev()).as("Previous link expected but not found").isNotNull();
 		} else {
-			assertNull(myLinks.getPrev(), "Found unexpected previous link");
+			assertThat(myLinks.getPrev()).as("Found unexpected previous link").isNull();
 		}
 	}
 }

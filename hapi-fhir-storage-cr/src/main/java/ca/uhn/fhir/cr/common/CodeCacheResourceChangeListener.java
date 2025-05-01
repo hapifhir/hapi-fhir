@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.evaluator.fhir.util.Reflections;
+import org.opencds.cqf.fhir.utility.Reflections;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,20 +38,20 @@ import java.util.function.Function;
 /**
  * This class listens for changes to ValueSet resources and invalidates the CodeCache. The CodeCache is used in CQL evaluation to speed up terminology operations. If ValueSet changes, it's possible that the constituent codes change and therefore the cache needs to be updated.
  **/
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CodeCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(CodeCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myValueSetDao;
-	private final Map<VersionedIdentifier, List<Code>> myGlobalCodeCache;
+	private final Map<String, List<Code>> myGlobalValueSetCache;
 	private final Function<IBaseResource, String> myUrlFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
-	public CodeCacheResourceChangeListener(
-			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, List<Code>> theGlobalCodeCache) {
+	public CodeCacheResourceChangeListener(DaoRegistry theDaoRegistry, Map<String, List<Code>> theGlobalValueSetCache) {
 		this.myValueSetDao = theDaoRegistry.getResourceDao("ValueSet");
-		this.myGlobalCodeCache = theGlobalCodeCache;
+		this.myGlobalValueSetCache = theGlobalValueSetCache;
 		this.myUrlFunction = Reflections.getUrlFunction(myValueSetDao.getResourceType());
 		this.myVersionFunction = Reflections.getVersionFunction(myValueSetDao.getResourceType());
 	}
@@ -89,7 +88,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 
 		IBaseResource valueSet;
 		try {
-			valueSet = this.myValueSetDao.read(theId);
+			valueSet = this.myValueSetDao.read(theId.toUnqualifiedVersionless());
 		}
 		// This happens when a Library is deleted entirely, so it's impossible to look up
 		// name and version.
@@ -97,13 +96,20 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 			ourLog.debug(
 					"Failed to locate resource {} to look up url and version. Clearing all codes from cache.",
 					theId.getValueAsString());
-			this.myGlobalCodeCache.clear();
+			myGlobalValueSetCache.clear();
 			return;
 		}
 
 		String url = this.myUrlFunction.apply(valueSet);
-		String version = this.myVersionFunction.apply(valueSet);
 
-		this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url).withVersion(version));
+		var valuesets = myGlobalValueSetCache.keySet();
+
+		for (String key : valuesets) {
+			var urlKey = key;
+			if (urlKey.contains(url)) {
+				myGlobalValueSetCache.remove(key);
+				ourLog.warn("Successfully removed valueSet from ValueSetCache: " + url + " due to updated resource");
+			}
+		}
 	}
 }

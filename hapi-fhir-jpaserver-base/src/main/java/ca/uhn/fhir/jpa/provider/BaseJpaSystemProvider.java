@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
 
 public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT>
 		implements IJpaSystemProvider {
@@ -69,12 +69,19 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+	@Autowired
+	private IReplaceReferencesSvc myReplaceReferencesSvc;
+
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
 
 	protected IResourceReindexingSvc getResourceReindexingSvc() {
 		return myResourceReindexingSvc;
+	}
+
+	public IReplaceReferencesSvc getReplaceReferencesSvc() {
+		return myReplaceReferencesSvc;
 	}
 
 	@History

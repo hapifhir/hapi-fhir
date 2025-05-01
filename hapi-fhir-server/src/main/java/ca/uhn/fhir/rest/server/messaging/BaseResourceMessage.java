@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,15 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -236,5 +237,22 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@VisibleForTesting
 	public Map<String, String> getAttributes() {
 		return ObjectUtils.defaultIfNull(myAttributes, Collections.emptyMap());
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		BaseResourceMessage that = (BaseResourceMessage) theO;
+		return getOperationType() == that.getOperationType()
+				&& Objects.equals(getAttributes(), that.getAttributes())
+				&& Objects.equals(getTransactionId(), that.getTransactionId())
+				&& Objects.equals(getMediaType(), that.getMediaType())
+				&& Objects.equals(getMessageKey(), that.getMessageKey());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getOperationType(), getAttributes(), getTransactionId(), getMediaType());
 	}
 }

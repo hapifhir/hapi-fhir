@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,40 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
@@ -57,13 +65,14 @@ import static org.apache.commons.lang3.StringUtils.length;
 		uniqueConstraints = {
 			@UniqueConstraint(
 					name = "IDX_VS_CONCEPT_CSCD",
-					columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+					columnNames = {"PARTITION_ID", "VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
 			@UniqueConstraint(
 					name = "IDX_VS_CONCEPT_ORDER",
-					columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
+					columnNames = {"PARTITION_ID", "VALUESET_PID", "VALUESET_ORDER"})
 		})
 @Entity()
-public class TermValueSetConcept implements Serializable {
+@IdClass(IdAndPartitionId.class)
+public class TermValueSetConcept extends BasePartitionable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
@@ -73,10 +82,21 @@ public class TermValueSetConcept implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_PID",
-			referencedColumnName = "PID",
-			nullable = false,
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "VALUESET_PID",
+						referencedColumnName = "PID",
+						insertable = true,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = true,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
@@ -98,9 +118,13 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "SOURCE_PID", nullable = true)
 	private Long mySourceConceptPid;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
 	private String mySourceConceptDirectParentPids;
+
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
+	private String mySourceConceptDirectParentPidsVc;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -131,12 +155,17 @@ public class TermValueSetConcept implements Serializable {
 		return myId;
 	}
 
+	public IdAndPartitionId getPartitionedId() {
+		return IdAndPartitionId.forId(myId, this);
+	}
+
 	public TermValueSet getValueSet() {
 		return myValueSet;
 	}
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		setPartitionId(theValueSet.getPartitionId());
 		return this;
 	}
 
@@ -264,7 +293,7 @@ public class TermValueSetConcept implements Serializable {
 				.append("valueSetName", this.getValueSetName())
 				.append("display", myDisplay)
 				.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
-				.append("parentPids", mySourceConceptDirectParentPids)
+				.append("parentPids", getSourceConceptDirectParentPids())
 				.toString();
 	}
 
@@ -282,5 +311,21 @@ public class TermValueSetConcept implements Serializable {
 
 	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
 		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
+		mySourceConceptDirectParentPidsVc = theSourceConceptDirectParentPids;
+	}
+
+	public String getSourceConceptDirectParentPids() {
+		return isNotEmpty(mySourceConceptDirectParentPidsVc)
+				? mySourceConceptDirectParentPidsVc
+				: mySourceConceptDirectParentPids;
+	}
+
+	public void clearSourceConceptDirectParentPidsLob() {
+		mySourceConceptDirectParentPids = null;
+	}
+
+	@VisibleForTesting
+	public boolean hasSourceConceptDirectParentPidsLob() {
+		return nonNull(mySourceConceptDirectParentPids);
 	}
 }

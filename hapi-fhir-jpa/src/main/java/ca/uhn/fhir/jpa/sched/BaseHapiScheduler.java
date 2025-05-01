@@ -1,8 +1,8 @@
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.ScheduleBuilder;
 import org.quartz.Scheduler;
@@ -43,16 +45,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
-
-	private static final AtomicInteger ourNextSchedulerId = new AtomicInteger();
 
 	private final String myThreadNamePrefix;
 	private final AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
@@ -71,18 +72,16 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		myInstanceName = theInstanceName;
 	}
 
-	int nextSchedulerId() {
-		return ourNextSchedulerId.getAndIncrement();
-	}
-
 	@Override
 	public void init() throws SchedulerException {
+
 		setProperties();
 		myFactory.setQuartzProperties(myProperties);
 		myFactory.setBeanName(myInstanceName);
 		myFactory.setSchedulerName(myThreadNamePrefix);
 		myFactory.setJobFactory(mySpringBeanJobFactory);
 		massageJobFactory(myFactory);
+
 		try {
 			Validate.notBlank(myInstanceName, "No instance name supplied");
 			myFactory.afterPropertiesSet();
@@ -100,8 +99,17 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(
-				StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		// Note that we use a common name, with no suffixed ID for the name, as per the quartz docs:
+		// https://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html
+		if (myInstanceName != null) {
+			myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName);
+		}
+
+		// By Default, the scheduler ID is not set, which will cause quartz to set it to the string NON_CLUSTERED. Here
+		// we are setting it explicitly as an indication to implementers that if they want a different ID, they should
+		// set it using this below property.
+		addProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, StdSchedulerFactory.DEFAULT_INSTANCE_ID);
+
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
@@ -151,6 +159,42 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
+	public void pause() {
+		int delay = 100;
+		String errorMsg = null;
+		Throwable ex = null;
+		try {
+			int count = 0;
+			myScheduler.standby();
+			while (count < 3) {
+				if (!hasRunningJobs()) {
+					break;
+				}
+				Thread.sleep(delay);
+				count++;
+			}
+			if (count >= 3) {
+				errorMsg = "Scheduler on standby. But after  " + (count + 1) * delay
+						+ " ms there are still jobs running. Execution will continue, but may cause bugs.";
+			}
+		} catch (Exception x) {
+			ex = x;
+			errorMsg = "Failed to set to standby. Execution will continue, but may cause bugs.";
+		}
+
+		if (isNotBlank(errorMsg)) {
+			if (ex != null) {
+				ourLog.warn(errorMsg, ex);
+			} else {
+				ourLog.warn(errorMsg);
+			}
+		}
+	}
+
+	public void unpause() {
+		start();
+	}
+
 	@Override
 	public void clear() throws SchedulerException {
 		myScheduler.clear();
@@ -165,6 +209,16 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to get log status for scheduler", e);
 			throw new InternalErrorException(Msg.code(1637) + "Failed to get log status for scheduler", e);
+		}
+	}
+
+	private boolean hasRunningJobs() {
+		try {
+			List<JobExecutionContext> currentlyExecutingJobs = myScheduler.getCurrentlyExecutingJobs();
+			ourLog.info("Checking for running jobs. Found {} running.", currentlyExecutingJobs);
+			return !currentlyExecutingJobs.isEmpty();
+		} catch (SchedulerException ex) {
+			throw new RuntimeException(Msg.code(2521) + " Failed during  check for scheduled jobs", ex);
 		}
 	}
 
@@ -233,5 +287,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		} catch (SchedulerException e) {
 			ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
 		}
+	}
+
+	/**
+	 * Retrieves a clone of the properties required for unit testing.
+	 *
+	 * @return The properties for unit testing.
+	 */
+	@VisibleForTesting
+	protected Properties getPropertiesForUnitTest() {
+		return myProperties;
 	}
 }

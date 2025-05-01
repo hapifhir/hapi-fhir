@@ -1,8 +1,8 @@
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,15 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.IndexedSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -46,14 +52,35 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.NUMBER;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.QUANTITY;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.SPECIAL;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
 
+	private static final List<RestSearchParameterTypeEnum> SUPPORTED_INDEXED_SEARCH_PARAMS =
+			List.of(SPECIAL, DATE, NUMBER, QUANTITY, STRING, TOKEN, URI, REFERENCE);
+
 	volatile Map<String, List<RuntimeSearchParam>> myActiveComboSearchParams = Collections.emptyMap();
 	volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams =
 			Collections.emptyMap();
+	volatile Map<Long, IndexedSearchParam> myHashIdentityToIndexedSearchParams = Collections.emptyMap();
+
+	private final PartitionSettings myPartitionSettings;
+
+	/**
+	 * Constructor
+	 */
+	public JpaSearchParamCache(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		List<RuntimeSearchParam> retval = myActiveComboSearchParams.get(theResourceName);
@@ -71,8 +98,9 @@ public class JpaSearchParamCache {
 	}
 
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		IIdType idToFind = theId.toUnqualifiedVersionless();
 		return getActiveComboSearchParams(theResourceName).stream()
-				.filter((param) -> Objects.equals(theId, param.getId()))
+				.filter((param) -> Objects.equals(idToFind, param.getIdUnqualifiedVersionless()))
 				.findFirst();
 	}
 
@@ -90,6 +118,10 @@ public class JpaSearchParamCache {
 		return Collections.unmodifiableList(retVal);
 	}
 
+	public Map<Long, IndexedSearchParam> getHashIdentityToIndexedSearchParamMap() {
+		return myHashIdentityToIndexedSearchParams;
+	}
+
 	void populateActiveSearchParams(
 			IInterceptorService theInterceptorBroadcaster,
 			IPhoneticEncoder theDefaultPhoneticEncoder,
@@ -99,6 +131,7 @@ public class JpaSearchParamCache {
 
 		Map<String, RuntimeSearchParam> idToRuntimeSearchParam = new HashMap<>();
 		List<RuntimeSearchParam> jpaSearchParams = new ArrayList<>();
+		Map<Long, IndexedSearchParam> hashIdentityToIndexedSearchParams = new HashMap<>();
 
 		/*
 		 * Loop through parameters and find JPA params
@@ -133,6 +166,7 @@ public class JpaSearchParamCache {
 				}
 
 				setPhoneticEncoder(theDefaultPhoneticEncoder, nextCandidate);
+				populateIndexedSearchParams(theResourceName, nextCandidate, hashIdentityToIndexedSearchParams);
 			}
 		}
 
@@ -183,6 +217,7 @@ public class JpaSearchParamCache {
 
 		myActiveComboSearchParams = resourceNameToComboSearchParams;
 		myActiveParamNamesToComboSearchParams = activeParamNamesToComboSearchParams;
+		myHashIdentityToIndexedSearchParams = hashIdentityToIndexedSearchParams;
 	}
 
 	void setPhoneticEncoder(IPhoneticEncoder theDefaultPhoneticEncoder, RuntimeSearchParam searchParam) {
@@ -194,5 +229,37 @@ public class JpaSearchParamCache {
 					theDefaultPhoneticEncoder == null ? "null" : theDefaultPhoneticEncoder.name());
 			searchParam.setPhoneticEncoder(theDefaultPhoneticEncoder);
 		}
+	}
+
+	private void populateIndexedSearchParams(
+			String theResourceName,
+			RuntimeSearchParam theRuntimeSearchParam,
+			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams) {
+
+		if (SUPPORTED_INDEXED_SEARCH_PARAMS.contains(theRuntimeSearchParam.getParamType())) {
+			addIndexedSearchParam(
+					theResourceName, theHashIdentityToIndexedSearchParams, theRuntimeSearchParam.getName());
+			// handle token search parameters with :of-type modifier
+			if (theRuntimeSearchParam.getParamType() == TOKEN) {
+				addIndexedSearchParam(
+						theResourceName,
+						theHashIdentityToIndexedSearchParams,
+						theRuntimeSearchParam.getName() + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+			}
+			// handle Uplifted Ref Chain Search Parameters
+			theRuntimeSearchParam.getUpliftRefchainCodes().stream()
+					.map(urCode -> String.format("%s.%s", theRuntimeSearchParam.getName(), urCode))
+					.forEach(urSpName ->
+							addIndexedSearchParam(theResourceName, theHashIdentityToIndexedSearchParams, urSpName));
+		}
+	}
+
+	private void addIndexedSearchParam(
+			String theResourceName,
+			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams,
+			String theSpName) {
+		Long hashIdentity = SearchParamHash.hashSearchParam(
+				myPartitionSettings, RequestPartitionId.defaultPartition(), theResourceName, theSpName);
+		theHashIdentityToIndexedSearchParams.put(hashIdentity, new IndexedSearchParam(theSpName, theResourceName));
 	}
 }

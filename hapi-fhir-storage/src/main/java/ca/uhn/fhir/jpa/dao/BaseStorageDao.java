@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,16 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -84,8 +88,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -100,6 +104,7 @@ public abstract class BaseStorageDao {
 
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";
 	protected static final String MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED = "deleteResourceAlreadyDeleted";
+	public static final String OO_ISSUE_CODE_INFORMATIONAL = "informational";
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
@@ -184,6 +189,19 @@ public abstract class BaseStorageDao {
 	 * Verify that the resource ID is actually valid according to FHIR's rules
 	 */
 	private void verifyResourceIdIsValid(IBaseResource theResource) {
+		if (theResource.getIdElement().hasResourceType()) {
+			String expectedType = getContext().getResourceType(theResource);
+			if (!expectedType.equals(theResource.getIdElement().getResourceType())) {
+				throw new InvalidRequestException(Msg.code(2616)
+						+ getContext()
+								.getLocalizer()
+								.getMessageSanitized(
+										BaseStorageDao.class,
+										"failedToCreateWithInvalidIdWrongResourceType",
+										theResource.getIdElement().toUnqualifiedVersionless()));
+			}
+		}
+
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(Msg.code(521)
@@ -331,14 +349,17 @@ public abstract class BaseStorageDao {
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 		if (outcome.getResource() != null) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
-			HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				outcome.setResource(null);
+			IInterceptorBroadcaster compositeBroadcaster =
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(getInterceptorBroadcaster(), theRequest);
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+				HookParams params = new HookParams()
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				if (accessDetails.isDontReturnResourceAtIndex(0)) {
+					outcome.setResource(null);
+				}
 			}
 		}
 
@@ -348,14 +369,17 @@ public abstract class BaseStorageDao {
 		// outcome.fireResourceViewCallback())
 		outcome.registerResourceViewCallback(() -> {
 			if (outcome.getResource() != null) {
-				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceShowDetails.class, showDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-				outcome.setResource(showDetails.getResource(0));
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceShowDetails.class, showDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					outcome.setResource(showDetails.getResource(0));
+				}
 			}
 		});
 
@@ -374,16 +398,19 @@ public abstract class BaseStorageDao {
 		outcome.setEntitySupplierUseCallback(() -> {
 			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 			if (outcome.getResource() != null) {
-				SimplePreResourceAccessDetails accessDetails =
-						new SimplePreResourceAccessDetails(outcome.getResource());
-				HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-				if (accessDetails.isDontReturnResourceAtIndex(0)) {
-					outcome.setResource(null);
+				IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+						getInterceptorBroadcaster(), theRequest);
+				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+					SimplePreResourceAccessDetails accessDetails =
+							new SimplePreResourceAccessDetails(outcome.getResource());
+					HookParams params = new HookParams()
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					if (accessDetails.isDontReturnResourceAtIndex(0)) {
+						outcome.setResource(null);
+					}
 				}
 			}
 
@@ -393,14 +420,19 @@ public abstract class BaseStorageDao {
 			// outcome.fireResourceViewCallback())
 			outcome.registerResourceViewCallback(() -> {
 				if (outcome.getResource() != null) {
-					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-					HookParams params = new HookParams()
-							.add(IPreResourceShowDetails.class, showDetails)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-					outcome.setResource(showDetails.getResource(0));
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									getInterceptorBroadcaster(), theRequest);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+						SimplePreResourceShowDetails showDetails =
+								new SimplePreResourceShowDetails(outcome.getResource());
+						HookParams params = new HookParams()
+								.add(IPreResourceShowDetails.class, showDetails)
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+						outcome.setResource(showDetails.getResource(0));
+					}
 				}
 			});
 		});
@@ -416,8 +448,9 @@ public abstract class BaseStorageDao {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			CompositeInterceptorBroadcaster.doCallHooks(
-					getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					getInterceptorBroadcaster(), theRequestDetails);
+			compositeBroadcaster.callHooks(thePointcut, theParams);
 		}
 	}
 
@@ -433,7 +466,8 @@ public abstract class BaseStorageDao {
 
 	public IBaseOperationOutcome createInfoOperationOutcome(
 			String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
-		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational", theStorageResponseCode);
+		return createOperationOutcome(
+				OO_SEVERITY_INFO, theMessage, OO_ISSUE_CODE_INFORMATIONAL, theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
@@ -515,29 +549,48 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(
+				getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
 			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				Collection<String> validNames =
-						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext()
-						.getLocalizer()
-						.getMessageSanitized(
-								BaseStorageDao.class,
-								"invalidSearchParameter",
-								qualifiedParamName.getParamName(),
-								getResourceName(),
-								validNames);
-				throw new InvalidRequestException(Msg.code(524) + msg);
+				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(
+						getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+				RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
+						getResourceName(),
+						qualifiedParamName.getParamName(),
+						ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (notEnabledForSearchParam != null) {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameterNotEnabledForSearch",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(2539) + msg);
+				} else {
+					String msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"invalidSearchParameter",
+									qualifiedParamName.getParamName(),
+									getResourceName(),
+									validNames);
+					throw new InvalidRequestException(Msg.code(524) + msg);
+				}
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeSearchParam paramDef =
-					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(
+					getResourceName(),
+					qualifiedParamName.getParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(
@@ -554,7 +607,8 @@ public abstract class BaseStorageDao {
 			@Nullable StopWatch theItemStopwatch,
 			DaoMethodOutcome theMethodOutcome,
 			String theMatchUrl,
-			RestOperationTypeEnum theOperationType) {
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails) {
 		String msg;
 		StorageResponseCodeEnum outcome;
 
@@ -685,34 +739,138 @@ public abstract class BaseStorageDao {
 			msg = msg + " " + msgSuffix;
 		}
 
-		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
+		IBaseOperationOutcome oo = createInfoOperationOutcome(msg, outcome);
+
+		if (theTransactionDetails != null) {
+			List<IIdType> autoCreatedPlaceholderResources =
+					theTransactionDetails.getAutoCreatedPlaceholderResourcesAndClear();
+			for (IIdType next : autoCreatedPlaceholderResources) {
+				msg = addIssueToOperationOutcomeForAutoCreatedPlaceholder(getContext(), next, oo);
+			}
+		}
+
+		theMethodOutcome.setOperationOutcome(oo);
 		ourLog.debug(msg);
 	}
 
+	public static String addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+			FhirContext theFhirContext, IIdType thePlaceholderId, IBaseOperationOutcome theOperationOutcomeToPopulate) {
+		String msg;
+		msg = theFhirContext
+				.getLocalizer()
+				.getMessageSanitized(BaseStorageDao.class, "successfulAutoCreatePlaceholder", thePlaceholderId);
+		String detailSystem = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getSystem();
+		String detailCode = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getCode();
+		String detailDescription = StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.getDisplay();
+		OperationOutcomeUtil.addIssue(
+				theFhirContext,
+				theOperationOutcomeToPopulate,
+				OO_SEVERITY_INFO,
+				msg,
+				null,
+				OO_ISSUE_CODE_INFORMATIONAL,
+				detailSystem,
+				detailCode,
+				detailDescription);
+		return msg;
+	}
+
 	/**
-	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 * Extracts a list of references that have versions in their ID whose versions should not be stripped
+	 *
+	 * @return A set of references that should not have their client-given versions stripped according to the
+	 * 		   versioned references settings.
+	 */
+	public static Set<IBaseReference> extractReferencesToAvoidReplacement(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		if (!theFhirContext
+				.getParserOptions()
+				.getDontStripVersionsFromReferencesAtPaths()
+				.isEmpty()) {
+			String theResourceType = theFhirContext.getResourceType(theResource);
+			Set<String> versionReferencesPaths = theFhirContext
+					.getParserOptions()
+					.getDontStripVersionsFromReferencesAtPathsByResourceType(theResourceType);
+			return getReferencesWithOrWithoutVersionId(versionReferencesPaths, theFhirContext, theResource, false);
+		}
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Extracts a list of references that should be auto-versioned.
+	 *
+	 * @return A set of references that should be versioned according to both storage settings
+	 * 		   and auto-version reference extensions, or it may also be empty.
 	 */
 	@Nonnull
 	public static Set<IBaseReference> extractReferencesToAutoVersion(
 			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
-		Map<IBaseReference, Object> references = Collections.emptyMap();
+		Set<IBaseReference> referencesToAutoVersionFromConfig =
+				getReferencesToAutoVersionFromConfig(theFhirContext, theStorageSettings, theResource);
+
+		Set<IBaseReference> referencesToAutoVersionFromExtensions =
+				getReferencesToAutoVersionFromExtension(theFhirContext, theResource);
+
+		return Stream.concat(referencesToAutoVersionFromConfig.stream(), referencesToAutoVersionFromExtensions.stream())
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
+	}
+
+	/**
+	 * Extracts a list of references that should be auto-versioned according to
+	 * <code>auto-version-references-at-path</code> extensions.
+	 * @see HapiExtensions#EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH
+	 */
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromExtension(
+			FhirContext theFhirContext, IBaseResource theResource) {
+		String resourceType = theFhirContext.getResourceType(theResource);
+		Set<String> autoVersionReferencesAtPaths =
+				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), resourceType);
+
+		if (!autoVersionReferencesAtPaths.isEmpty()) {
+			return getReferencesWithOrWithoutVersionId(autoVersionReferencesAtPaths, theFhirContext, theResource, true);
+		}
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Extracts a list of references that should be auto-versioned according to storage configuration.
+	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
+	 */
+	@Nonnull
+	private static Set<IBaseReference> getReferencesToAutoVersionFromConfig(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		if (!theStorageSettings.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
-			for (String nextPath : theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
-				List<IBaseReference> nextReferences =
-						theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-				for (IBaseReference next : nextReferences) {
-					if (next.getReferenceElement().hasVersionIdPart()) {
-						continue;
-					}
-					if (references.isEmpty()) {
-						references = new IdentityHashMap<>();
-					}
-					references.put(next, null);
-				}
-			}
+			Set<String> autoVersionReferencesPaths =
+					theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName);
+			return getReferencesWithOrWithoutVersionId(autoVersionReferencesPaths, theFhirContext, theResource, true);
 		}
-		return references.keySet();
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Extracts references from given resource and filters references by those with versions, or those without versions.
+	 *
+	 * @param theVersionReferencesPaths the paths from which to extract references from
+	 * @param theFhirContext the FHIR context
+	 * @param theResource the resource from which to extract references from
+	 * @param theShouldFilterByRefsWithoutVersionId If true, this method will return only references without a version. If false, this method will return only references with a version.
+	 * @return Set of references contained in the resource with or without versions
+	 */
+	private static Set<IBaseReference> getReferencesWithOrWithoutVersionId(
+			Set<String> theVersionReferencesPaths,
+			FhirContext theFhirContext,
+			IBaseResource theResource,
+			boolean theShouldFilterByRefsWithoutVersionId) {
+		return theVersionReferencesPaths.stream()
+				.map(fullPath -> theFhirContext.newTerser().getValues(theResource, fullPath, IBaseReference.class))
+				.flatMap(Collection::stream)
+				.filter(reference ->
+						reference.getReferenceElement().hasVersionIdPart() ^ theShouldFilterByRefsWithoutVersionId)
+				.collect(Collectors.toMap(ref -> ref, ref -> ref, (oldRef, newRef) -> oldRef, IdentityHashMap::new))
+				.keySet();
 	}
 
 	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {

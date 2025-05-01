@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -29,11 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 /**
  * Utility for modifying with extensions in a FHIR version-independent approach.
@@ -177,15 +178,18 @@ public class ExtensionUtil {
 	 * pulls out any extensions that have the given theExtensionUrl and a primitive value type,
 	 * and returns a list of the string version of the extension values.
 	 */
-	public static List<String> getExtensionPrimitiveValues(IBaseHasExtensions theBase, String theExtensionUrl) {
-		List<String> values = theBase.getExtension().stream()
-				.filter(t -> theExtensionUrl.equals(t.getUrl()))
-				.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
-				.map(t -> (IPrimitiveType<?>) t.getValue())
-				.map(IPrimitiveType::getValueAsString)
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
-		return values;
+	public static List<String> getExtensionPrimitiveValues(IBase theBase, String theExtensionUrl) {
+		if (theBase instanceof IBaseHasExtensions) {
+			return ((IBaseHasExtensions) theBase)
+					.getExtension().stream()
+							.filter(t -> theExtensionUrl.equals(t.getUrl()))
+							.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+							.map(t -> (IPrimitiveType<?>) t.getValue())
+							.map(IPrimitiveType::getValueAsString)
+							.filter(StringUtils::isNotBlank)
+							.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
 	}
 
 	/**

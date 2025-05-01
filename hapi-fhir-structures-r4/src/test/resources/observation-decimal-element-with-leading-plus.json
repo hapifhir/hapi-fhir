@@ -1,0 +1,64 @@
+{
+	"resourceType": "Observation",
+	"id": "1355",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2024-02-02T10:00:08.286-07:00",
+		"source": "#rxekXV5y3UZKAwxF"
+	},
+	"identifier": [
+		{
+			"system": "http://TEST.nl/fhir/NamingSystem/laboratory_observations",
+			"value": "H_2211280010-BEART"
+		}
+	],
+	"status": "preliminary",
+	"category": [
+		{
+			"coding": [
+				{
+					"system": "5-Step briefing | SNOMED International",
+					"code": "49581000146104",
+					"display": "Laboratory test finding (finding)"
+				}
+			]
+		}
+	],
+	"code": {
+		"coding": [
+			{
+				"system": "Home – LOINC",
+				"code": "8889-8",
+				"display": "Heart rate by Pulse oximeter"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/1354",
+		"display": "Jongetje. Jongensnaamnaam van"
+	},
+	"effectiveDateTime": "2022-11-28T16:09:00+01:00",
+	"performer": [
+		{
+			"reference": "Practitioner/P8",
+			"display": "TEST"
+		}
+	],
+	"referenceRange": [
+		{
+			"low": {
+				"value": -3.0,
+				"unit": "mmol/l",
+				"system": "Home",
+				"code": "mmol/l"
+			},
+			"high": {
+				"value": +3.0,
+				"unit": "mmol/l",
+				"system": "Home",
+				"code": "mmol/l"
+			},
+			"text": "-3.0 mmol/l - +3.0 mmol/l"
+		}
+	]
+}

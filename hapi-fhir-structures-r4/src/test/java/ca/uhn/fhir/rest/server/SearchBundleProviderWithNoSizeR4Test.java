@@ -2,37 +2,33 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -42,15 +38,20 @@ import static org.mockito.Mockito.when;
 
 public class SearchBundleProviderWithNoSizeR4Test {
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static TokenAndListParam ourIdentifiers;
 	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeR4Test.class);
-	private static int ourPort;
 
-	private static Server ourServer;
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -86,7 +87,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		BundleLinkComponent linkNext;
 
 		try {
-			httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
+			httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
@@ -94,7 +95,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(10, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(10);
 			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
@@ -115,7 +116,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(10, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(10);
 			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
@@ -133,7 +134,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry()).hasSize(5);
 			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNull(linkNext);
@@ -146,33 +147,9 @@ public class SearchBundleProviderWithNoSizeR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 

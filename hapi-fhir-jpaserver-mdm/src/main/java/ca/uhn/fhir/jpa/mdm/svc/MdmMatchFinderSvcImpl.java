@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 

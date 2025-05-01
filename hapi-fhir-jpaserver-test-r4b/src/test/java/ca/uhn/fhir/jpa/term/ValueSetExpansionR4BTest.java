@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.r4b.BaseJpaR4BTest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
@@ -42,8 +43,8 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
 		// check expansion size and include CodeSystem version
-		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
-		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(7);
+		assertThat(expandedValueSet.getCompose().getInclude()).hasSize(1);
 		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
 	}
 

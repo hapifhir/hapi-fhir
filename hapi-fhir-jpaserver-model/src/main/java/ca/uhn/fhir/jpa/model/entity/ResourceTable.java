@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,46 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPidIdentifierBridge;
+import ca.uhn.fhir.jpa.model.dao.JpaPidValueBridge;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GeneratorType;
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.IdentifierBridgeRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -47,54 +70,50 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hibernate.tuple.ValueGenerator;
+import org.hibernate.type.SqlTypes;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.IDX_RES_TYPE_FHIR_ID;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(
 		name = ResourceTable.HFJ_RESOURCE,
-		uniqueConstraints = {},
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = IDX_RES_TYPE_FHIR_ID,
+					columnNames = {"PARTITION_ID", "RES_TYPE", "FHIR_ID"})
+		},
 		indexes = {
 			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(name = "IDX_RES_FHIR_ID", columnList = "FHIR_ID"),
 			@Index(
 					name = "IDX_RES_TYPE_DEL_UPDATED",
 					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
+			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID, RES_UPDATED, PARTITION_ID")
 		})
 @NamedEntityGraph(name = "Resource.noJoins")
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
+public class ResourceTable extends BaseHasResource<JpaPid> implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
 	public static final String RES_TYPE = "RES_TYPE";
+	public static final String FHIR_ID = "FHIR_ID";
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
+	public static final int MAX_FORCED_ID_LENGTH = 100;
+	public static final String IDX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
+
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 * Note the extra config needed in HS6 for indexing transient props:
@@ -108,21 +127,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myContentTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myContentTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myContentTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
@@ -131,20 +135,29 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private String myHashSha256;
 
-	@Column(name = "SP_HAS_LINKS")
+	@Column(name = "SP_HAS_LINKS", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myHasLinks;
 
-	@Id
-	@GenericGenerator(name = "SEQ_RESOURCE_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
-	@Column(name = "RES_ID")
-	@GenericField(projectable = Projectable.YES)
-	private Long myId;
+	@EmbeddedId
+	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = JpaPidIdentifierBridge.class))
+	@GenericField(
+			name = "myId",
+			projectable = Projectable.YES,
+			valueBridge = @ValueBridgeRef(type = JpaPidValueBridge.class))
+	private JpaPid myPid;
+
+	@Column(name = PartitionablePartitionId.PARTITION_ID, nullable = true, insertable = false, updatable = false)
+	private Integer myPartitionIdValue;
+
+	@Column(name = PartitionablePartitionId.PARTITION_DATE, nullable = true)
+	private LocalDate myPartitionDateValue;
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
+	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.TINYINT)
 	@OptimisticLock(excluded = true)
-	private Long myIndexStatus;
+	private EntityIndexStatusEnum myIndexStatus;
 
 	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
@@ -160,21 +173,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "standardAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextEdgeNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextNGram",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(
-			name = "myNarrativeTextPhonetic",
-			searchable = Searchable.YES,
-			projectable = Projectable.NO,
-			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
@@ -192,7 +190,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
-	@Column(name = "SP_COORDS_PRESENT")
+	@Column(name = "SP_COORDS_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsCoordsPopulated;
 
@@ -204,7 +202,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
-	@Column(name = "SP_DATE_PRESENT")
+	@Column(name = "SP_DATE_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsDatePopulated;
 
@@ -216,7 +214,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
-	@Column(name = "SP_NUMBER_PRESENT")
+	@Column(name = "SP_NUMBER_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsNumberPopulated;
 
@@ -228,7 +226,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
-	@Column(name = "SP_QUANTITY_PRESENT")
+	@Column(name = "SP_QUANTITY_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
 
@@ -249,7 +247,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
 	 * since 5.3.0
 	 */
-	@Column(name = "SP_QUANTITY_NRML_PRESENT")
+	@Column(name = "SP_QUANTITY_NRML_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
@@ -261,7 +259,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
-	@Column(name = "SP_STRING_PRESENT")
+	@Column(name = "SP_STRING_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsStringPopulated;
 
@@ -273,7 +271,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
-	@Column(name = "SP_TOKEN_PRESENT")
+	@Column(name = "SP_TOKEN_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
@@ -285,7 +283,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
-	@Column(name = "SP_URI_PRESENT")
+	@Column(name = "SP_URI_PRESENT", nullable = false)
 	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
 
@@ -371,7 +369,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will be null during insert time until the first read.
 	 */
 	@Column(
-			name = "FHIR_ID",
+			name = FHIR_ID,
 			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
 			length = 64,
 			// we never update this after insert, and the Generator will otherwise "dirty" the object.
@@ -393,7 +391,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Boolean mySearchUrlPresent = false;
 
 	@Version
-	@Column(name = "RES_VER")
+	@Column(name = "RES_VER", nullable = false)
 	private long myVersion;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
@@ -403,22 +401,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@Transient
-	private transient ResourceHistoryTable myNewVersionEntity;
-
-	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
-
-	@OneToOne(
-			optional = true,
-			fetch = FetchType.EAGER,
-			cascade = {},
-			orphanRemoval = false,
-			mappedBy = "myResource")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
+
+	@Transient
+	private volatile String myUpdatedByMatchUrl;
 
 	/**
 	 * Constructor
@@ -480,20 +469,32 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHashSha256 = theHashSha256;
 	}
 
+	@Nonnull
 	@Override
-	public Long getId() {
-		return myId;
+	public JpaPid getId() {
+		if (myPid == null) {
+			myPid = new JpaPid();
+		}
+		myPid.setVersion(myVersion);
+		myPid.setPartitionIdIfNotAlreadySet(myPartitionIdValue);
+		myPid.setResourceType(myResourceType);
+		return myPid;
 	}
 
-	public void setId(Long theId) {
-		myId = theId;
+	public void setId(JpaPid thePid) {
+		myPid = thePid;
 	}
 
-	public Long getIndexStatus() {
+	@VisibleForTesting
+	public void setIdForUnitTest(Long theId) {
+		setId(JpaPid.fromId(theId));
+	}
+
+	public EntityIndexStatusEnum getIndexStatus() {
 		return myIndexStatus;
 	}
 
-	public void setIndexStatus(Long theIndexStatus) {
+	public void setIndexStatus(EntityIndexStatusEnum theIndexStatus) {
 		myIndexStatus = theIndexStatus;
 	}
 
@@ -633,7 +634,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public Long getResourceId() {
+	public JpaPid getResourceId() {
 		return getId();
 	}
 
@@ -675,13 +676,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
+	@Nonnull
+	@Override
+	public PartitionablePartitionId getPartitionId() {
+		PartitionablePartitionId retVal = getId().getPartitionablePartitionId();
+		if (myPartitionIdValue != null) {
+			retVal.setPartitionId(myPartitionIdValue);
+		}
+		if (myPartitionDateValue != null) {
+			retVal.setPartitionDate(myPartitionDateValue);
+		}
+		return retVal;
+	}
+
 	/**
 	 * Sets the version on this entity to {@literal 1}. This should only be called
 	 * on resources that are not yet persisted. After that time the version number
 	 * is managed by hibernate.
 	 */
 	public void initializeVersion() {
-		assert myId == null;
+		assert myPid == null || myPid.getId() == null;
 		myVersion = 1;
 	}
 
@@ -861,49 +875,56 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * multiple {@link ResourceHistoryTable} entities will result in a constraint error.
 	 */
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
-		boolean createVersionTags = theCreateVersionTags;
 
-		ResourceHistoryTable retVal = myNewVersionEntity;
-		if (retVal == null) {
-			retVal = new ResourceHistoryTable();
-			myNewVersionEntity = retVal;
-		} else {
-			// Tags should already be set
-			createVersionTags = false;
-		}
+		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
-		retVal.setResourceId(myId);
+		retVal.setResourceId(myPid.getId());
 		retVal.setResourceType(myResourceType);
-		retVal.setVersion(getVersion());
-		retVal.setTransientForcedId(getTransientForcedId());
-
-		retVal.setPublished(getPublishedDate());
-		retVal.setUpdated(getUpdatedDate());
+		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
-		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
-		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags() && createVersionTags) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
 		}
 
+		// If we've deleted and updated the same resource in the same transaction,
+		// we need to actually create 2 distinct versions
+		if (getCurrentVersionEntity() != null
+				&& getCurrentVersionEntity().getId() != null
+				&& getVersion() == getCurrentVersionEntity().getVersion()) {
+			myVersion++;
+		}
+
+		populateHistoryEntityVersionAndDates(retVal);
+
 		return retVal;
+	}
+
+	/**
+	 * Updates several temporal values in a {@link ResourceHistoryTable} entity which
+	 * are pulled from this entity, including the resource version, and the
+	 * creation, update, and deletion dates.
+	 */
+	public void populateHistoryEntityVersionAndDates(ResourceHistoryTable theResourceHistoryTable) {
+		theResourceHistoryTable.setVersion(getVersion());
+		theResourceHistoryTable.setPublished(getPublishedDate());
+		theResourceHistoryTable.setUpdated(getUpdatedDate());
+		theResourceHistoryTable.setDeleted(getDeleted());
 	}
 
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("pid", myId);
+		b.append("partition", getPartitionId().getPartitionId());
+		b.append("pid", getId().getId());
+		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
-		if (getPartitionId() != null) {
-			b.append("partitionId", getPartitionId().getPartitionId());
-		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
 			b.append("deleted", new InstantType(getDeleted()).getValueAsString());
@@ -943,17 +964,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public JpaPid getPersistentId() {
-		return JpaPid.fromId(getId());
-	}
-
-	@Override
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
+		return getId();
 	}
 
 	@Override
@@ -970,24 +981,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
+		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
-			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else if (getTransientForcedId() != null) {
-			// Avoid a join query if possible
-			retVal.setValue(getResourceType()
-					+ '/'
-					+ getTransientForcedId()
-					+ '/'
-					+ Constants.PARAM_HISTORY
-					+ '/'
-					+ getVersion());
-		} else if (getForcedId() == null) {
-			Long id = this.getResourceId();
-			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			resourceId = myFhirId;
 		} else {
-			String forcedId = getForcedId().getForcedId();
-			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			Long id = getResourceId().getId();
+			resourceId = Long.toString(id);
 		}
+		retVal.setValue(getResourceType() + '/' + resourceId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
 	public String getCreatedByMatchUrl() {
@@ -996,6 +997,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
 		myCreatedByMatchUrl = theCreatedByMatchUrl;
+	}
+
+	public String getUpdatedByMatchUrl() {
+		return myUpdatedByMatchUrl;
+	}
+
+	public void setUpdatedByMatchUrl(String theUpdatedByMatchUrl) {
+		myUpdatedByMatchUrl = theUpdatedByMatchUrl;
+	}
+
+	public boolean isVersionUpdatedInCurrentTransaction() {
+		return myVersionUpdatedInCurrentTransaction;
 	}
 
 	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
@@ -1015,12 +1028,34 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
 	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
+	@Override
 	public String getFhirId() {
 		return myFhirId;
 	}
 
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
+	}
+
+	public String asTypedFhirResourceId() {
+		return getResourceType() + "/" + getFhirId();
+	}
+
+	public void setPartitionId(PartitionablePartitionId theStoragePartition) {
+		if (myPid == null) {
+			myPid = new JpaPid();
+		}
+		myPid.setPartitionId(theStoragePartition.getPartitionId());
+		myPartitionIdValue = theStoragePartition.getPartitionId();
+		myPartitionDateValue = theStoragePartition.getPartitionDate();
+	}
+
+	public void setParamsComboStringUnique(Collection<ResourceIndexedComboStringUnique> theComboStringUniques) {
+		myParamsComboStringUnique = theComboStringUniques;
+	}
+
+	public void setParamsComboTokensNonUnique(Collection<ResourceIndexedComboTokenNonUnique> theComboTokensNonUnique) {
+		myParamsComboTokensNonUnique = theComboTokensNonUnique;
 	}
 
 	/**
@@ -1033,7 +1068,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		@Override
 		public String generateValue(Session session, Object owner) {
 			ResourceTable that = (ResourceTable) owner;
-			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
+			return that.myFhirId != null ? that.myFhirId : that.myPid.getId().toString();
 		}
 	}
 }

@@ -14,7 +14,6 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -22,14 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 
-import static org.hamcrest.Matchers.contains;
+import static org.assertj.core.api.Assertions.assertThat;
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Disabled
 public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaDstu2Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> mySubscriptionSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 
@@ -97,7 +96,7 @@ public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Tes
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		MatcherAssert.assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId, "ping " + mySubscriptionId);
 	}
 
 	@Test
@@ -121,6 +120,6 @@ public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Tes
 
 		waitForSize(2, myWebsocketClientExtension.getMessages());
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
-		MatcherAssert.assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId));
+		assertThat(myWebsocketClientExtension.getMessages()).containsExactly("bound " + mySubscriptionId);
 	}
 }

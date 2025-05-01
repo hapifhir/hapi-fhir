@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
 
 public class WriteBundleForImportStep
 		implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {

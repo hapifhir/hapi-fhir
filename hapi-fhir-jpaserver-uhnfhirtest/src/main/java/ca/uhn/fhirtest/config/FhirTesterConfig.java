@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
 import ca.uhn.fhirtest.mvc.SubscriptionPlaygroundController;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -116,7 +115,7 @@ public class FhirTesterConfig {
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public SubscriptionPlaygroundController subscriptionPlaygroundController() {
 		return new SubscriptionPlaygroundController();
 	}

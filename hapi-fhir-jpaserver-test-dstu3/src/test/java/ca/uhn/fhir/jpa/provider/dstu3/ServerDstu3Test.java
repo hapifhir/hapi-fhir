@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerDstu3Test extends BaseResourceProviderDstu3Test {

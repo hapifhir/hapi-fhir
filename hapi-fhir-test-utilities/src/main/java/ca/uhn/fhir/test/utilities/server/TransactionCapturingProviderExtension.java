@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class TransactionCapturingProviderExtension<T extends IBaseBundle> implements BeforeEachCallback, AfterEachCallback {
 
@@ -62,8 +60,8 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 	}
 
 	public void waitForTransactionCount(int theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(myProvider.size()));
-		await().until(()->myProvider.size(), equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(myProvider.size());
+		await().until(()->myProvider.size() == theCount);
 	}
 
 	public List<T> getTransactions() {

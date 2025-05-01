@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle, BUNDLEENTRY extends IBase> {
 
@@ -76,4 +78,6 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
+
+	Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(BUNDLEENTRY theEntry, String theUrl);
 }

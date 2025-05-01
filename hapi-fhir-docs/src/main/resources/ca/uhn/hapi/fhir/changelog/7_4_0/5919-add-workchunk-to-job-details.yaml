@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5919
+title: "Added the entire WorkChunk to the StepExecutionDetails of a Batch Job."

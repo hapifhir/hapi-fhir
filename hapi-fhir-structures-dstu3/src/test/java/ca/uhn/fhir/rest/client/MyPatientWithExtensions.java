@@ -3,11 +3,9 @@ package ca.uhn.fhir.rest.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 

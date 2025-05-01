@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,15 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -57,6 +62,28 @@ public interface IFhirVersion {
 	IBase newCodingDt();
 
 	IIdType newIdType();
+
+	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
+	 * @since 8.0.0
+	 */
+	default IIdType newIdType(String theValue) {
+		IIdType retVal = newIdType();
+		retVal.setValue(theValue);
+		return retVal;
+	}
+
+	/**
+	 * Creates a new {@link IIdType} instance for the given version with the given value
+	 *
+	 * @since 8.0.0
+	 */
+	default IIdType newIdType(String theResourceType, String theIdPart) {
+		IIdType retVal = newIdType();
+		retVal.setParts(null, theResourceType, theIdPart, null);
+		return retVal;
+	}
 
 	/**
 	 * Returns an instance of <code>IFhirVersionServer<code> for this version.

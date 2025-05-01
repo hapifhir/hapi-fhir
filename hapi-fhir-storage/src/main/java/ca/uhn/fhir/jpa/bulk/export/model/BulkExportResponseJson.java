@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,15 +54,16 @@ public class BulkExportResponseJson {
 	@JsonProperty("requiresAccessToken")
 	private Boolean myRequiresAccessToken;
 
+	@JsonInclude
 	@JsonProperty("output")
-	private List<Output> myOutput;
+	private final List<Output> myOutput = new ArrayList<>();
 
 	/*
 	 * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
 	 */
 	@JsonInclude
 	@JsonProperty("error")
-	private List<Output> myError = new ArrayList<>();
+	private final List<Output> myError = new ArrayList<>();
 
 	@JsonProperty("message")
 	private String myMsg;
@@ -93,16 +96,10 @@ public class BulkExportResponseJson {
 	}
 
 	public List<Output> getOutput() {
-		if (myOutput == null) {
-			myOutput = new ArrayList<>();
-		}
 		return myOutput;
 	}
 
 	public List<Output> getError() {
-		if (myError == null) {
-			myError = new ArrayList<>();
-		}
 		return myError;
 	}
 
@@ -144,6 +141,25 @@ public class BulkExportResponseJson {
 		public Output setUrl(String theUrl) {
 			myUrl = theUrl;
 			return this;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (!(theO instanceof Output)) return false;
+
+			Output output = (Output) theO;
+
+			return new EqualsBuilder()
+					.append(myType, output.myType)
+					.append(myUrl, output.myUrl)
+					.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37).append(myType).append(myUrl).toHashCode();
 		}
 	}
 }

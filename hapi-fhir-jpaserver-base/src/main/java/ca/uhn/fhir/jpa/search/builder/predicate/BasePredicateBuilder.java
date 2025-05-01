@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public abstract class BasePredicateBuilder {
 
@@ -39,6 +39,10 @@ public abstract class BasePredicateBuilder {
 
 	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
+	}
+
+	protected SearchQueryBuilder getSearchQueryBuilder() {
+		return mySearchSqlBuilder;
 	}
 
 	PartitionSettings getPartitionSettings() {
@@ -84,7 +88,7 @@ public abstract class BasePredicateBuilder {
 		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 	}
 
-	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
 		mySearchSqlBuilder.addJoin(theFromTable, theToTable, theFromColumn, theToColumn);
 	}
 }

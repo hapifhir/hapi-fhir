@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,23 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -64,29 +62,20 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	@Override
 	@Nonnull
-	@Transactional
 	public ResourceVersionMap getVersionMap(
 			RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
-
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug("About to retrieve version map for resource type: {}", theResourceName);
 		}
 
-		List<JpaPid> jpaPids = dao.searchForIds(
-				theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
-		List<Long> matchingIds = jpaPids.stream().map(JpaPid::getId).collect(Collectors.toList());
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
+		SystemRequestDetails request = new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId);
 
-		List<ResourceTable> allById = new ArrayList<>();
-		new QueryChunker<Long>().chunk(matchingIds, t -> {
-			List<ResourceTable> nextBatch = myResourceTableDao.findAllById(t);
-			allById.addAll(nextBatch);
-		});
+		List<IIdType> fhirIds = dao.searchForResourceIds(theSearchParamMap, request);
 
-		return ResourceVersionMap.fromResourceTableEntities(allById);
+		return ResourceVersionMap.fromIdsWithVersions(fhirIds);
 	}
 
-	@Override
 	/**
 	 * Retrieves the latest versions for any resourceid that are found.
 	 * If they are not found, they will not be contained in the returned map.
@@ -98,26 +87,14 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	 *
 	 * @param theRequestPartitionId - request partition id
 	 * @param theIds - list of IIdTypes for resources of interest.
-	 * @return
 	 */
+	@Override
 	public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(
 			RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
 		ResourcePersistentIdMap idToPID = new ResourcePersistentIdMap();
-		HashMap<String, List<IIdType>> resourceTypeToIds = new HashMap<>();
 
-		for (IIdType id : theIds) {
-			String resourceType = id.getResourceType();
-			if (!resourceTypeToIds.containsKey(resourceType)) {
-				resourceTypeToIds.put(resourceType, new ArrayList<>());
-			}
-			resourceTypeToIds.get(resourceType).add(id);
-		}
-
-		for (String resourceType : resourceTypeToIds.keySet()) {
-			ResourcePersistentIdMap idAndPID =
-					getIdsOfExistingResources(theRequestPartitionId, resourceTypeToIds.get(resourceType));
-			idToPID.putAll(idAndPID);
-		}
+		ResourcePersistentIdMap idAndPID = getIdsOfExistingResources(theRequestPartitionId, theIds);
+		idToPID.putAll(idAndPID);
 
 		return idToPID;
 	}
@@ -128,54 +105,51 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	 * If it's not found, it won't be included in the set.
 	 *
 	 * @param theIds - list of IIdType ids (for the same resource)
-	 * @return
 	 */
 	private ResourcePersistentIdMap getIdsOfExistingResources(
 			RequestPartitionId thePartitionId, Collection<IIdType> theIds) {
 		// these are the found Ids that were in the db
-		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
+		ResourcePersistentIdMap retVal = new ResourcePersistentIdMap();
 
 		if (theIds == null || theIds.isEmpty()) {
-			return retval;
+			return retVal;
 		}
 
-		List<JpaPid> jpaPids =
-				myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, new ArrayList<>(theIds));
+		Map<IIdType, IResourceLookup<JpaPid>> identities = myIdHelperService.resolveResourceIdentities(
+				thePartitionId,
+				new ArrayList<>(theIds),
+				ResolveIdentityMode.includeDeleted().cacheOk());
 
-		// we'll use this map to fetch pids that require versions
-		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();
+		Map<String, JpaPid> entriesWithoutVersion = new HashMap<>(identities.size());
 
-		// fill in our map
-		for (JpaPid pid : jpaPids) {
-			if (pid.getVersion() == null) {
-				pidsToVersionToResourcePid.put(pid.getId(), pid);
+		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : identities.entrySet()) {
+			IResourceLookup<JpaPid> lookup = entry.getValue();
+			JpaPid persistentId = lookup.getPersistentId();
+			retVal.put(entry.getKey(), persistentId);
+			if (persistentId.getVersion() == null) {
+				entriesWithoutVersion.put(
+						entry.getKey().toUnqualifiedVersionless().getValue(), persistentId);
 			}
-			Optional<IIdType> idOp = theIds.stream()
-					.filter(i ->
-							i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))
-					.findFirst();
-			// this should always be present
-			// since it was passed in.
-			// but land of optionals...
-			idOp.ifPresent(id -> {
-				retval.put(id, pid);
-			});
 		}
 
 		// set any versions we don't already have
-		if (!pidsToVersionToResourcePid.isEmpty()) {
+		if (!entriesWithoutVersion.isEmpty()) {
 			Collection<Object[]> resourceEntries =
-					myResourceTableDao.getResourceVersionsForPid(new ArrayList<>(pidsToVersionToResourcePid.keySet()));
+					myResourceTableDao.getResourceVersionsForPid(entriesWithoutVersion.values());
 
-			for (Object[] record : resourceEntries) {
+			for (Object[] nextRecord : resourceEntries) {
 				// order matters!
-				Long retPid = (Long) record[0];
-				String resType = (String) record[1];
-				Long version = (Long) record[2];
-				pidsToVersionToResourcePid.get(retPid).setVersion(version);
+				JpaPid retPid = (JpaPid) nextRecord[0];
+				String resType = (String) nextRecord[1];
+				String fhirId = (String) nextRecord[2];
+				Long version = (Long) nextRecord[3];
+				JpaPid jpaPid = entriesWithoutVersion.get(resType + "/" + fhirId);
+				if (jpaPid != null) {
+					jpaPid.setVersion(version);
+				}
 			}
 		}
 
-		return retval;
+		return retVal;
 	}
 }

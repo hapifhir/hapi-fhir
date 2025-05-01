@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -28,13 +30,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.text.IsEmptyString.emptyString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpdateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
@@ -74,7 +70,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 		ourLog.info("Response was:\n{}", status);
 
-		assertThat(responseContent, is(not(emptyString())));
+		assertThat(responseContent).isNotEmpty();
 
 		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
 		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
@@ -176,7 +172,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("Resource body ID of &quot;3&quot; does not match"));
+		assertThat(responseContent).contains("Resource body ID of &quot;3&quot; does not match");
 	}
 
 	public static class PatientProvider implements IResourceProvider {

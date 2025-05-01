@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,15 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import com.google.common.collect.Streams;
+import jakarta.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * This utility takes an input collection, breaks it up into chunks of a
@@ -35,18 +40,36 @@ import java.util.function.Consumer;
  */
 public class TaskChunker<T> {
 
-	public void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+	public static <T> void chunk(List<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+		if (theInput.size() <= theChunkSize) {
+			theBatchConsumer.accept(theInput);
+			return;
+		}
+		chunk((Collection<T>) theInput, theChunkSize, theBatchConsumer);
+	}
+
+	public static <T> void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
 		List<T> input;
 		if (theInput instanceof List) {
 			input = (List<T>) theInput;
 		} else {
 			input = new ArrayList<>(theInput);
 		}
+
 		for (int i = 0; i < input.size(); i += theChunkSize) {
 			int to = i + theChunkSize;
 			to = Math.min(to, input.size());
 			List<T> batch = input.subList(i, to);
 			theBatchConsumer.accept(batch);
 		}
+	}
+
+	@Nonnull
+	public static <T> Stream<List<T>> chunk(Stream<T> theStream, int theChunkSize) {
+		return StreamUtil.partition(theStream, theChunkSize);
+	}
+
+	public static <T> void chunk(Iterator<T> theIterator, int theChunkSize, Consumer<List<T>> theListConsumer) {
+		chunk(Streams.stream(theIterator), theChunkSize).forEach(theListConsumer);
 	}
 }

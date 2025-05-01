@@ -1,0 +1,8 @@
+---
+type: add
+issue: 5271
+title: "The error messages returned in an OperationOutcome when validating terminology codes
+  as a part of resource profile validation have been improved. Machine processable location
+  (line/col) information is now available through a pair of dedicated extensions, and
+  error messages such as UCUM parsing issues are now returned to the client (previously
+  they were swallowed and a generic error message was returned)."

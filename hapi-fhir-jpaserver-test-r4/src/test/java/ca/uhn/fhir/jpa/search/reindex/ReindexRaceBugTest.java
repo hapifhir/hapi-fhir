@@ -13,9 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
@@ -32,10 +30,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ContextConfiguration(classes = {
 	DaoTestDataBuilder.Config.class
@@ -65,13 +62,13 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		ourLog.info("An observation is created");
 
 		var observationCreateOutcome = callInFreshTx((tx, rd) -> {
-			Observation o = (Observation) buildResource("Observation", withEffectiveDate("2021-01-01T00:00:00"));
+			Observation o = buildResource("Observation", withEffectiveDate("2021-01-01T00:00:00"));
 			return myObservationDao.create(o, rd);
 		});
 		IIdType observationId = observationCreateOutcome.getId().toVersionless();
-		long observationPid = Long.parseLong(observationCreateOutcome.getId().getIdPart());
+		JpaPid observationPid = JpaPid.fromIdAndResourceType(observationCreateOutcome.getId().getIdPartAsLong(), "Observation");
 
-		assertEquals(1, getSPIDXDateCount(observationPid), "date index row for date");
+		assertThat(getSPIDXDateCount(observationPid)).as("date index row for date").isEqualTo(1);
 
 		ourLog.info("Then a SP is created after that matches data in the Observation");
 		SearchParameter sp = myFhirContext.newJsonParser().parseResource(SearchParameter.class, """
@@ -94,7 +91,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		});
 
 
-		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
+		assertThat(getSPIDXDateCount(observationPid)).as("still only one index row before reindex").isEqualTo(1);
 
 		ReindexParameters reindexParameters = new ReindexParameters();
 		reindexParameters.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL);
@@ -112,7 +109,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 						phaser.assertInPhase(Steps.RUN_REINDEX);
 						ourLog.info("Run $reindex");
-						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), reindexParameters, rd, new TransactionDetails());
+						myObservationDao.reindex(observationPid, reindexParameters, rd, new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
 						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
@@ -145,7 +142,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		phaser.assertInPhase(Steps.RUN_DELETE);
 		callInFreshTx((tx, rd) -> myObservationDao.delete(observationId, rd));
 		assertResourceDeleted(observationId);
-		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
+		assertThat(getSPIDXDateCount(observationPid)).as("A deleted resource should have 0 index rows").isEqualTo(0);
 
 		ourLog.info("Let $reindex commit");
 		phaser.arriveAndAwaitSharedEndOf(Steps.RUN_DELETE);
@@ -154,13 +151,13 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		ourLog.info("Await $reindex commit");
 		phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 
-		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should still have 0 index rows, after $reindex completes");
+		assertThat(getSPIDXDateCount(observationPid)).as("A deleted resource should still have 0 index rows, after $reindex completes").isEqualTo(0);
 
 		// Verify the exception from $reindex
 		// In a running server, we expect UserRequestRetryVersionConflictsInterceptor to cause a retry inside the ReindexStep
 		// But here in the test, we have not configured any retry logic.
 		ExecutionException e = assertThrows(ExecutionException.class, backgroundResult::get, "Optimistic locking detects the DELETE and rolls back");
-		assertThat("Hapi maps conflict exception type", e.getCause(), Matchers.instanceOf(ResourceVersionConflictException.class));
+		assertThat(e.getCause()).as("Hapi maps conflict exception type").isInstanceOf(ResourceVersionConflictException.class);
 	}
 
 	void assertResourceDeleted(IIdType observationId) {
@@ -183,7 +180,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	}
 
 
-	int getSPIDXDateCount(long observationPid) {
+	int getSPIDXDateCount(JpaPid observationPid) {
 		return callInFreshTx((rd, tx) ->
 			myResourceIndexedSearchParamDateDao.findAllForResourceId(observationPid).size());
 	}

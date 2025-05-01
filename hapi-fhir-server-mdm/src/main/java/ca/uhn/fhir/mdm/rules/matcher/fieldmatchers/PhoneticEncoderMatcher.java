@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,17 @@ public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
 
 	@Override
 	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-		String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
-		String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
+			String rightString =
+					StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
 
-		return matches(leftString, rightString);
+			return matches(leftString, rightString);
+		}
+		ourLog.warn(
+				"Unable to evaluate match between {} and {} because they are not an instance of PrimitiveType.",
+				theLeftBase.getClass().getSimpleName(),
+				theRightBase.getClass().getSimpleName());
+		return false;
 	}
 }

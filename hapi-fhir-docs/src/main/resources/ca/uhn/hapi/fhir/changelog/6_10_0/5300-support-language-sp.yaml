@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5300
+title: "A new configuration option has been added to `StorageSettings` which enables
+   support in the JPA server for the `_language` SearchParameter."

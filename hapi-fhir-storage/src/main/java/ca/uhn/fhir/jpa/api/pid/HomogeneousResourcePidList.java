@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Date;
-import javax.annotation.Nonnull;
 
 /**
  * A resource pid list where all pids have the same resource type
  */
-public class HomogeneousResourcePidList extends BaseResourcePidList {
+public class HomogeneousResourcePidList<T extends IResourcePersistentId<T>> extends BaseResourcePidList<T> {
 	@Nonnull
 	final String myResourceType;
 
 	public HomogeneousResourcePidList(
-			String theResourceType,
-			Collection<IResourcePersistentId> theIds,
+			@Nonnull String theResourceType,
+			Collection<T> theIds,
 			Date theLastDate,
 			RequestPartitionId theRequestPartitionId) {
 		super(theIds, theLastDate, theRequestPartitionId);
@@ -47,6 +47,7 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 		return getResourceType();
 	}
 
+	@Nonnull
 	public String getResourceType() {
 		return myResourceType;
 	}

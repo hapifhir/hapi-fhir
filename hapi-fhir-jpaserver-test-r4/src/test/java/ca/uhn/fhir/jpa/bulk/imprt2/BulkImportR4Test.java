@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -32,27 +34,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Test the standard bulk import job
+ */
 public class BulkImportR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportR4Test.class);
-	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
+	private static final String USERNAME = "username";
+	private static final String PASSWORD = "password";
+	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet(USERNAME, PASSWORD);
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
 		.withServlet(myBulkImportFileServlet);
@@ -76,6 +79,46 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().until(() -> channel.getQueueSizeForUnitTest() == 0);
 	}
 
+
+	@Test
+	public void testBulkImportFailsWith403OnBadCredentials() {
+
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		String url = myHttpServletExtension.getBaseUrl() + "/download?index=test"; // Name doesnt matter, its going to fail with 403 anyhow
+		parameters.addNdJsonUrl(url);
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
+
+		// Execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
+		String instanceId = startResponse.getInstanceId();
+		assertThat(instanceId).isNotBlank();
+		ourLog.info("Execution got ID: {}", instanceId);
+
+		// Verify
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
+			myJobCleanerService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			return instance.getStatus() == StatusEnum.FAILED;
+		});
+
+		//No resources stored
+		runInTransaction(() -> {
+			assertEquals(0, myResourceTableDao.count());
+		});
+
+
+		//Should have 403
+		runInTransaction(() -> {
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
+			assertEquals(1, instance.getErrorCount());
+			assertThat(instance.getErrorMessage()).contains("Received HTTP 403");
+		});
+
+	}
+
 	@Test
 	public void testRunBulkImport() {
 		// Setup
@@ -84,6 +127,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		List<String> indexes = addFiles(fileCount);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -95,9 +140,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
-		assertThat(instanceId, not(blankOrNullString()));
+		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
 
 		// Verify
@@ -105,8 +150,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+			return instance.getStatus() == StatusEnum.COMPLETED;
+		});
 
 		runInTransaction(() -> {
 			assertEquals(200, myResourceTableDao.count());
@@ -120,7 +165,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			assertNotNull(instance.getStartTime());
 			assertNotNull(instance.getEndTime());
 			assertEquals(200, instance.getCombinedRecordsProcessed());
-			assertThat(instance.getCombinedRecordsProcessedPerSecond(), greaterThan(5.0));
+			assertThat(instance.getCombinedRecordsProcessedPerSecond()).isGreaterThan(5.0);
+
+			String reportJson = instance.getReport();
+			BulkImportReportJson reportJsonParsed = JsonUtil.deserialize(reportJson, BulkImportReportJson.class);
+			String report = reportJsonParsed.getReportMsg();
+			ourLog.info("Final Report:\n{}", report);
+
+			assertEquals(100, StringUtils.countMatches(report, "Source: "));
+			assertThat(report).contains("* SUCCESSFUL_UPDATE_AS_CREATE: 2");
 		});
 	}
 
@@ -132,6 +185,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		List<String> indexes = addFiles(fileCount);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -149,9 +203,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Execute
 
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
-			assertThat(instanceId, not(blankOrNullString()));
+			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
 
 			// Verify
@@ -162,15 +216,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				StatusEnum status = instance.getStatus();
 				ourLog.info("Job status for instance[{}]: {}", instanceId, status);
 
-				runInTransaction(()->{
+				runInTransaction(() -> {
 					List<Batch2WorkChunkEntity> allChunks = myWorkChunkRepository.fetchChunks(Pageable.ofSize(1000), instanceId);
-					ourLog.info("Chunks:\n * " + allChunks.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+					ourLog.info("Chunks:\n * " + allChunks.stream().map(Batch2WorkChunkEntity::toString).collect(Collectors.joining("\n * ")));
 				});
 
 				return status;
-			}, equalTo(StatusEnum.ERRORED));
+			}, s -> s == StatusEnum.COMPLETED || s == StatusEnum.FAILED);
 
-			String storageDescription = runInTransaction(() -> {
+			runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
 				String storage = myJobInstanceRepository
 					.findAll()
@@ -186,20 +240,21 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return storage;
 			});
 
-			await().atMost(120, TimeUnit.SECONDS).until(() -> {
-				myJobCleanerService.runMaintenancePass();
-				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getErrorCount();
-			}, greaterThan(0)); // This should hit 3, but concurrency can lead it to only hitting 1-2
-
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-				assertThat(storageDescription, instance.getErrorCount(), greaterThan(0));
+
+				assertEquals(StatusEnum.FAILED, instance.getStatus());
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
-				assertNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage(), containsString("This is an exception"));
+				assertNotNull(instance.getEndTime());
+
+				String reportJson = instance.getReport();
+				BulkImportReportJson reportJsonParsed = JsonUtil.deserialize(reportJson, BulkImportReportJson.class);
+				String report = reportJsonParsed.getReportMsg();
+				ourLog.info("Final Report:\n{}", report);
+
+				assertThat(report).contains("* HAPI-2223: This is an exception");
 			});
 
 		} finally {
@@ -219,6 +274,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		indexes.add(myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Foo\"}"));
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -229,9 +285,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 		String instanceId = startResponse.getInstanceId();
-		assertThat(instanceId, not(blankOrNullString()));
+		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
 
 		// Verify
@@ -239,8 +295,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}, equalTo(StatusEnum.FAILED));
+			return instance.getStatus() == StatusEnum.FAILED;
+		});
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
@@ -249,7 +305,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		assertNotNull(instance.getCreateTime());
 		assertNotNull(instance.getStartTime());
 		assertNotNull(instance.getEndTime());
-		assertThat(instance.getErrorMessage(), containsString("Unknown resource name \"Foo\""));
+		assertThat(instance.getErrorMessage()).contains("Unknown resource name \"Foo\"");
 	}
 
 
@@ -260,6 +316,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		String url = myHttpServletExtension.getBaseUrl() + "/download?index=FOO";
 		parameters.addNdJsonUrl(url);
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
@@ -272,9 +329,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		try {
 
 			// Execute
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, request);
 			String instanceId = startResponse.getInstanceId();
-			assertThat(instanceId, not(blankOrNullString()));
+			assertThat(instanceId).isNotBlank();
 			ourLog.info("Execution got ID: {}", instanceId);
 
 			// Verify
@@ -282,8 +339,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			await().until(() -> {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getStatus();
-			}, equalTo(StatusEnum.FAILED));
+				return instance.getStatus() == StatusEnum.FAILED;
+			});
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
@@ -292,7 +349,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNotNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage(), containsString("Received HTTP 404 from URL: http://"));
+				assertThat(instance.getErrorMessage()).contains("Received HTTP 404 from URL: http://");
 			});
 
 		} finally {
@@ -312,7 +369,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -328,12 +385,14 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
-		request.setParameters(new BulkImportJobParameters());
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
+		request.setParameters(parameters);
 
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -360,7 +419,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Execute
 
 		try {
-			myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
 
@@ -391,7 +450,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			builder.append("\n");
 			builder.append("\n");
 
-			String index = myBulkImportFileServlet.registerFileByContents(builder.toString());
+			String index = myBulkImportFileServlet.registerFileByContents(builder.toString(), "FILE" + i);
 			retVal.add(index);
 		}
 		return retVal;

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -16,17 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,32 +36,36 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	@BeforeEach
 	public void before() {
 		mySynchronousSearchSvc.setContext(ourCtx);
+		mySynchronousSearchSvc.mySearchBuilderFactory = mySearchBuilderFactory;
 	}
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any()))
+			.thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), any(), nullable(RequestPartitionId.class)))
+			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+		doAnswer(loadPids()).when(mySearchBuilder)
+			.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertFalse(result.isEmpty());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(790, resources.size());
+		assertThat(resources).hasSize(790);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 	}
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setCount(10);
@@ -71,28 +73,29 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		List<JpaPid> pids = createPidSequence(30);
-		when(mySearchBuilder.createCountQuery(same(params), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
+		when(mySearchBuilder.createCountQuery(any(SearchParameterMap.class), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(10, resources.size());
+		assertThat(resources).hasSize(10);
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 	}
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 		when(myStorageSettings.getDefaultTotalMode()).thenReturn(null);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class)))
+			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
 		List<JpaPid> finalPids = pids;
@@ -101,7 +104,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(100, resources.size());
+		assertThat(resources).hasSize(100);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}

@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,34 +25,35 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.util.Batch2Constants;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
+import ca.uhn.fhir.batch2.util.Batch2Utils;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import javax.annotation.Nonnull;
 
-public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson> {
+public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJobParameters, ChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
 			@Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails,
-			@Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink)
+			@Nonnull IJobDataSink<ChunkRangeJson> theDataSink)
 			throws JobExecutionFailedException {
 		MdmClearJobParameters params = theStepExecutionDetails.getParameters();
 
-		Date start = Batch2Constants.BATCH_START_DATE;
+		Date start = Batch2Utils.BATCH_START_DATE;
 		Date end = new Date();
 
 		for (String nextResourceType : params.getResourceNames()) {
 			ourLog.info("Initiating mdm clear of [{}]] Golden Resources from {} to {}", nextResourceType, start, end);
-			MdmChunkRangeJson nextRange = new MdmChunkRangeJson();
-			nextRange.setResourceType(nextResourceType);
-			nextRange.setStart(start);
-			nextRange.setEnd(end);
+			assert nextResourceType != null;
+			ChunkRangeJson nextRange = new ChunkRangeJson(start, end)
+					.setResourceType(nextResourceType)
+					.setPartitionId(params.getRequestPartitionId());
 			theDataSink.accept(nextRange);
 		}
 

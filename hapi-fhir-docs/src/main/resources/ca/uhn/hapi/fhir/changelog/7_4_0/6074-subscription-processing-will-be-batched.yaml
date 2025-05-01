@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6074
+title: "Before being processed, subscriptions would be read out of the database all
+        at once. This lead to massive memory consumption if there were a lot of them.
+        This has now been changed to use batching as a means of mitigating this problem.
+"

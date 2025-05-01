@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -37,8 +42,8 @@ public class AttachmentUtil {
 		return getOrCreateChild(theContext, theAttachment, "data", "base64Binary");
 	}
 
-	public static IPrimitiveType<String> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
-		return getOrCreateChild(theContext, theAttachment, "contentType", "string");
+	public static IPrimitiveType<CodeDt> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
+		return getOrCreateChild(theContext, theAttachment, "contentType", "code");
 	}
 
 	public static IPrimitiveType<String> getOrCreateUrl(FhirContext theContext, ICompositeType theAttachment) {

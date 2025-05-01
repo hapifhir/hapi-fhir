@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashingInputStream;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
@@ -50,8 +52,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Date;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
@@ -81,13 +81,13 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	 * This implementation prevents: \ / | .
 	 */
 	@Override
-	public boolean isValidBlobId(String theNewBlobId) {
-		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
+	public boolean isValidBinaryContentId(String theNewBinaryContentId) {
+		return !StringUtils.containsAny(theNewBinaryContentId, '\\', '/', '|', '.');
 	}
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(
+	public StoredDetails storeBinaryContent(
 			IIdType theResourceId,
 			String theBlobIdOrNull,
 			String theContentType,
@@ -95,7 +95,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			RequestDetails theRequestDetails)
 			throws IOException {
 
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails, theContentType);
+		String id = super.provideIdForNewBinaryContent(theBlobIdOrNull, null, theRequestDetails, theContentType);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -126,7 +126,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) throws IOException {
 		StoredDetails retVal = null;
 
 		File storagePath = getStoragePath(theBlobId, false);
@@ -145,7 +145,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException {
 		InputStream inputStream = getInputStream(theResourceId, theBlobId);
 
 		if (inputStream != null) {
@@ -172,7 +173,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+	public void expungeBinaryContent(IIdType theResourceId, String theBlobId) {
 		File storagePath = getStoragePath(theBlobId, false);
 		if (storagePath != null) {
 			File storageFile = getStorageFilename(storagePath, theResourceId, theBlobId);
@@ -187,8 +188,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
-		StoredDetails details = fetchBlobDetails(theResourceId, theBlobId);
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) throws IOException {
+		StoredDetails details = fetchBinaryContentDetails(theResourceId, theBlobId);
 		try (InputStream inputStream = getInputStream(theResourceId, theBlobId)) {
 
 			if (inputStream != null) {

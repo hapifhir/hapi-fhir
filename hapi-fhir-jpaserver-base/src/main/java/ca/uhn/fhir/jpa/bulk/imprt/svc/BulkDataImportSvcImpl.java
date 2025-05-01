@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.apicatalog.jsonld.StringUtils;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -58,8 +60,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
@@ -217,6 +217,12 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		String biJobId = null;
 		try {
 			biJobId = processJob(bulkImportJobEntity);
+			// set job status to RUNNING so it would not be processed again
+			myTxTemplate.execute(t -> {
+				bulkImportJobEntity.setStatus(BulkImportJobStatusEnum.RUNNING);
+				myJobDao.save(bulkImportJobEntity);
+				return null;
+			});
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -256,6 +262,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	}
 
 	@Override
+	@Transactional
 	public JobInfo getJobStatus(String theBiJobId) {
 		BulkImportJobEntity theJob = findJobByBiJobId(theBiJobId);
 		return new JobInfo()

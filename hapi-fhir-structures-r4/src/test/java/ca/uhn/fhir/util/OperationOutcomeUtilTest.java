@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OperationOutcomeUtilTest {
@@ -41,7 +43,37 @@ public class OperationOutcomeUtilTest {
 	public void testAddIssueWithMessageId() {
 		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
 		OperationOutcomeUtil.addIssueWithMessageId(myCtx, oo, "error", "message", "messageID", "location", "processing");
-		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
+		assertThat(oo.getIssueFirstRep().getDetails()).as("OO.issue.details is empty").isNotNull();
+	}
+
+	@ParameterizedTest
+	@CsvSource(value = {
+		 "system, code, text",
+		 "system, code, null",
+		 "system, null, text",
+		 "null, code, text",
+		 "system, null, null",
+		 "null, code, null ",
+		 "null, null, text",
+		 "null, null, null ",
+	}, nullValues={"null"})
+	public void testAddDetailsToIssue(String theSystem, String theCode, String theText) {
+
+		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
+		OperationOutcomeUtil.addIssue(myCtx, oo, "error", "Help i'm a bug",null, null);
+
+		OperationOutcomeUtil.addDetailsToIssue(myCtx, oo.getIssueFirstRep(), theSystem, theCode, theText);
+
+		assertThat(oo.getIssueFirstRep().getDetails().getText()).isEqualTo(theText);
+		if (theCode != null || theSystem != null) {
+			assertThat(oo.getIssueFirstRep().getDetails().getCoding()).hasSize(1);
+			assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem()).isEqualTo(theSystem);
+			assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode()).isEqualTo(theCode);
+		}
+		else {
+			//both code and system are null, no coding should be present
+			assertThat(oo.getIssueFirstRep().getDetails().getCoding()).isEmpty();
+		}
 	}
 
 	@Test

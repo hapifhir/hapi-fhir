@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *
 	 * @deprecated As of HAPI 3.0.0 this method has been deprecated, as the operation is now called "capabilities". Use {@link #capabilities()} instead
 	 */
+	@Deprecated(since = "3.0.0", forRemoval = true)
 	IFetchConformanceUntyped fetchConformance();
 
 	/**

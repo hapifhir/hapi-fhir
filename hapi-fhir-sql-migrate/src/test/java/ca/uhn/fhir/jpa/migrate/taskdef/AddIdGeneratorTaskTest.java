@@ -10,9 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AddIdGeneratorTaskTest extends BaseTest {
 
@@ -22,20 +20,20 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 	public void testAddIdGenerator(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
-		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
+		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties())).isEmpty();
 
 		MyMigrationTasks migrationTasks = new MyMigrationTasks("123456.7");
 		getMigrator().addTasks(migrationTasks.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
+		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties())).containsExactlyInAnyOrder("SEQ_FOO");
 
 		// Second time, should produce no action
 		migrationTasks = new MyMigrationTasks("123456.8");
 		getMigrator().addTasks(migrationTasks.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
+		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties())).containsExactlyInAnyOrder("SEQ_FOO");
 
 	}
 

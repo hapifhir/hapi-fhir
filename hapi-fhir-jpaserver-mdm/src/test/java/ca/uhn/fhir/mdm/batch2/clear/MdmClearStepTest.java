@@ -3,6 +3,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -15,18 +16,20 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 class MdmClearStepTest extends BaseMdmR4Test {
 	private static final String GOLDEN_ID = "Patient/GOLDEN-ID";
@@ -42,8 +45,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	private String myGoldenId;
 	private String mySourceId;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		Patient sourcePatient = new Patient();
 		mySourceId = SOURCE_ID + "1";
 		sourcePatient.setId(mySourceId);
@@ -86,12 +91,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			mdmClearGoldenResource();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-				String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
-					myGoldenId,
-					husbandId
-				),
-				e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
+				myGoldenId,
+				husbandId
+			));
 		}
 	}
 
@@ -102,13 +105,13 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			assertPatientExists(myGoldenId);
 			fail("Resource cannot be found");
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
+			assertEquals("HAPI-1996: Resource " + myGoldenId + " is not known", e.getMessage());
 		}
 	}
 
 	private void mdmClearGoldenResource() {
 		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
-		chunk.addTypedPid("Patient", myGoldenPid);
+		chunk.addTypedPidWithNullPartitionForUnitTest("Patient", myGoldenPid);
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
@@ -118,13 +121,13 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	@Nonnull
-	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
+	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson theListWorkChunkJson) {
 		String instanceId = UUID.randomUUID().toString();
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkid = UUID.randomUUID().toString();
 		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, jobInstance, chunkid);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, theListWorkChunkJson, jobInstance, new WorkChunk().setId(chunkid));
 		return stepExecutionDetails;
 	}
 

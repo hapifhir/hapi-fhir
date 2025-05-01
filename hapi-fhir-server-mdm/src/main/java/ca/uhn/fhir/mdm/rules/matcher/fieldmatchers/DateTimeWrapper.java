@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ public class DateTimeWrapper {
 			org.hl7.fhir.r4.model.BaseDateTimeType r4Date = (org.hl7.fhir.r4.model.BaseDateTimeType) theDate;
 			myPrecision = r4Date.getPrecision();
 			myValueAsString = r4Date.getValueAsString();
+		} else if (theDate instanceof org.hl7.fhir.r5.model.BaseDateTimeType) {
+			org.hl7.fhir.r5.model.BaseDateTimeType r5Date = (org.hl7.fhir.r5.model.BaseDateTimeType) theDate;
+			myPrecision = r5Date.getPrecision();
+			myValueAsString = r5Date.getValueAsString();
 		} else {
 			// we should consider changing this error so we don't need the fhir context at all
 			throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: "

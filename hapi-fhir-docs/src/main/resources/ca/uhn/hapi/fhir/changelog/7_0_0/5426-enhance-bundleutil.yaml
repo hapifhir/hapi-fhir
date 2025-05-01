@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5426
+title: "Added a new method `getResourceByReferenceAndResourceType()` in `BundleUtil.java` to find a specific `Resource` from `Bundle` using `Reference`."

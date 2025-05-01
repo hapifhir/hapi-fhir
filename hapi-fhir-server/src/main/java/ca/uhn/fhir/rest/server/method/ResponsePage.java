@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,16 @@ public class ResponsePage {
 	 * even though it will change number of resources returned.
 	 */
 	private final int myOmittedResourceCount;
+	/**
+	 * This is the total count of requested resources
+	 * (ie, non-omitted, non-_include'd resource count).
+	 * We typically fetch (for offset queries) 1 more than
+	 * we need so we know if there is an additional page
+	 * to fetch.
+	 * But this is determined by the implementers of
+	 * IBundleProvider.
+	 */
+	private final int myTotalRequestedResourcesFetched;
 
 	/**
 	 * The bundle provider.
@@ -109,6 +119,7 @@ public class ResponsePage {
 			int theNumToReturn,
 			int theIncludedResourceCount,
 			int theOmittedResourceCount,
+			int theTotalRequestedResourcesFetched,
 			IBundleProvider theBundleProvider) {
 		mySearchId = theSearchId;
 		myResourceList = theResourceList;
@@ -116,6 +127,7 @@ public class ResponsePage {
 		myNumToReturn = theNumToReturn;
 		myIncludedResourceCount = theIncludedResourceCount;
 		myOmittedResourceCount = theOmittedResourceCount;
+		myTotalRequestedResourcesFetched = theTotalRequestedResourcesFetched;
 		myBundleProvider = theBundleProvider;
 
 		myNumTotalResults = myBundleProvider.size();
@@ -190,24 +202,16 @@ public class ResponsePage {
 				return StringUtils.isNotBlank(myBundleProvider.getNextPageId());
 			case NONCACHED_OFFSET:
 				if (myNumTotalResults == null) {
-					/*
-					 * Having a null total results is synonymous with
-					 * having a next link. Once our results are exhausted,
-					 * we will always have a myNumTotalResults value.
-					 *
-					 * Alternatively, if _total=accurate is provided,
-					 * we'll also have a myNumTotalResults value.
-					 */
-					return true;
+					if (hasNextPageWithoutKnowingTotal()) {
+						return true;
+					}
 				} else if (myNumTotalResults > myNumToReturn + ObjectUtils.defaultIfNull(myRequestedPage.offset, 0)) {
 					return true;
 				}
 				break;
 			case SAVED_SEARCH:
 				if (myNumTotalResults == null) {
-					if (myPageSize == myResourceList.size() + myOmittedResourceCount - myIncludedResourceCount) {
-						// if the size of the resource list - included resources + omitted resources == pagesize
-						// we have more pages
+					if (hasNextPageWithoutKnowingTotal()) {
 						return true;
 					}
 				} else if (myResponseBundleRequest.offset + myNumToReturn < myNumTotalResults) {
@@ -217,6 +221,53 @@ public class ResponsePage {
 		}
 
 		// fallthrough
+		return false;
+	}
+
+	/**
+	 * If myNumTotalResults is null, it typically means we don't
+	 * have an accurate total.
+	 *
+	 * Ie, we're in the middle of a set of pages (of non-named page results),
+	 * and _total=accurate was not passed.
+	 *
+	 * This typically always means that a
+	 * 'next' link definitely exists.
+	 *
+	 * But there are cases where this might not be true:
+	 * * the last page of a search that also has an _include
+	 * 	query parameter where the total of resources + _include'd
+	 * 	resources is > the page size expected to be returned.
+	 * * the last page of a search that returns the exact number
+	 * 	of resources requested
+	 *
+	 * In these case, we must check to see if the returned
+	 * number of *requested* resources.
+	 * If our bundleprovider has fetched > requested,
+	 * we'll know that there are more resources already.
+	 * But if it hasn't, we'll have to check pagesize compared to
+	 * _include'd count, omitted count, and resource count.
+	 */
+	private boolean hasNextPageWithoutKnowingTotal() {
+		// if we have totalRequestedResource count, and it's not equal to pagesize,
+		// then we can use this, alone, to determine if there are more pages
+		if (myTotalRequestedResourcesFetched >= 0) {
+			if (myPageSize < myTotalRequestedResourcesFetched) {
+				return true;
+			}
+		} else {
+			// otherwise we'll try and determine if there are next links based on the following
+			// calculation:
+			// resourceList.size - included resources + omitted resources == pagesize
+			// -> we (most likely) have more resources
+			if (myPageSize == myResourceList.size() - myIncludedResourceCount + myOmittedResourceCount) {
+				ourLog.warn(
+						"Returning a next page based on calculated resource count."
+								+ " This could be inaccurate if the exact number of resources were fetched is equal to the pagesize requested. "
+								+ " Consider setting ResponseBundleBuilder.setTotalResourcesFetchedRequest after fetching resources.");
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -356,9 +407,10 @@ public class ResponsePage {
 		private int myIncludedResourceCount;
 		private int myOmittedResourceCount;
 		private IBundleProvider myBundleProvider;
+		private int myTotalRequestedResourcesFetched = -1;
 
-		public ResponsePageBuilder setToOmittedResourceCount(int theOmittedResourcesCountToAdd) {
-			myOmittedResourceCount = theOmittedResourcesCountToAdd;
+		public ResponsePageBuilder setOmittedResourceCount(int theOmittedResourceCount) {
+			myOmittedResourceCount = theOmittedResourceCount;
 			return this;
 		}
 
@@ -392,6 +444,36 @@ public class ResponsePage {
 			return this;
 		}
 
+		public ResponsePageBuilder setTotalRequestedResourcesFetched(int theTotalRequestedResourcesFetched) {
+			myTotalRequestedResourcesFetched = theTotalRequestedResourcesFetched;
+			return this;
+		}
+
+		/**
+		 * Combine this builder with a second buider.
+		 * Useful if a second page is requested, but you do not wish to
+		 * overwrite the current values.
+		 *
+		 * Will not replace searchId, nor IBundleProvider (which should be
+		 * the exact same for any subsequent searches anyways).
+		 *
+		 * Will also not copy pageSize nor numToReturn, as these should be
+		 * the same for any single search result set.
+		 *
+		 * @param theSecondBuilder - a second builder (cannot be this one)
+		 */
+		public void combineWith(ResponsePageBuilder theSecondBuilder) {
+			assert theSecondBuilder != this; // don't want to combine with itself
+
+			if (myTotalRequestedResourcesFetched != -1 && theSecondBuilder.myTotalRequestedResourcesFetched != -1) {
+				myTotalRequestedResourcesFetched += theSecondBuilder.myTotalRequestedResourcesFetched;
+			}
+
+			// primitives can always be added
+			myIncludedResourceCount += theSecondBuilder.myIncludedResourceCount;
+			myOmittedResourceCount += theSecondBuilder.myOmittedResourceCount;
+		}
+
 		public ResponsePage build() {
 			return new ResponsePage(
 					mySearchId, // search id
@@ -400,6 +482,7 @@ public class ResponsePage {
 					myNumToReturn, // num to return
 					myIncludedResourceCount, // included count
 					myOmittedResourceCount, // omitted resources
+					myTotalRequestedResourcesFetched, // total count of requested resources
 					myBundleProvider // the bundle provider
 					);
 		}

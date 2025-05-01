@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title th:include="window-title :: resource" />
-		<th:block th:include="tmpl-head :: head" />
-		<script th:include="tmpl-buttonclick-handler :: handler" />
+		<th:block th:insert="~{window-title :: resource}" />
+		<th:block th:insert="~{tmpl-head :: head}" />
+		<th:block th:insert="~{tmpl-buttonclick-handler :: handler}" />
 	</head>
 
 	<body>
@@ -11,16 +11,16 @@
 		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/>
 		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
   
-		<div th:replace="tmpl-navbar-top :: top" ></div>
+		<div th:replace="~{tmpl-navbar-top :: top}" ></div>
 		
 		<div class="container-fluid">
 			<div class="row">
 
-				<div th:replace="tmpl-navbar-left :: left" ></div>
+				<div th:replace="~{tmpl-navbar-left :: left}" ></div>
 
 				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
 
-					<div th:replace="tmpl-banner :: banner"></div>
+					<div th:replace="~{tmpl-banner :: banner}"></div>
 
 					<!-- ********************************************************** -->
 					<!-- ** Default Home                                         ** -->
@@ -51,21 +51,21 @@
 						<ul class="nav nav-tabs" role="tablist" id="resource-nav-tabs" style="margin-top: 20px; padding-left: 5px;">
 							<!-- Search Tab -->
 							<li th:if="${haveSearchParams}" class="nav-item">
-								<a href="#tab-search" role="tab" data-toggle="tab" class="nav-link" id="search-tab">Search</a>
+								<a href="#tab-search" role="tab" data-bs-toggle="tab" class="nav-link" id="search-tab">Search</a>
 							</li>
 							<li th:if="${!haveSearchParams}" class="disabled nav-item">
 								<a href="#tab-search" role="tab" class="nav-link disabled">Search</a>
 							</li>
 							<!-- Queries Tab -->
 							<li th:if="${!queries.empty}" class="nav-item">
-								<a href="#tab-queries" role="tab" data-toggle="tab" class="nav-link" id="queries-tab">Queries</a>
+								<a href="#tab-queries" role="tab" data-bs-toggle="tab" class="nav-link" id="queries-tab">Queries</a>
 							</li>
 							<li th:if="${queries.empty}" class="disabled nav-item">
 								<a href="#tab-queries" role="tab" class="nav-link disabled">Queries</a>
 							</li>
 							<!-- CRUD Tab -->
 							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'" class="nav-item">
-								<a href="#tab-otheractions" role="tab" data-toggle="tab" name="tabCrudOperationsLink" class="nav-link" id="crud-tab">CRUD Operations</a>
+								<a href="#tab-otheractions" role="tab" data-bs-toggle="tab" name="tabCrudOperationsLink" class="nav-link" id="crud-tab">CRUD Operations</a>
 							</li>
 						</ul>
 						<script type="text/javascript">
@@ -74,7 +74,7 @@
 									if (!$('#resource-nav-tabs li:eq('+i+')').hasClass('disabled')) {
 										$('#resource-nav-tabs li:eq('+i+') a').tab('show');
 										break;
-									}									
+									}
 								}
 							});
 						</script>
@@ -85,7 +85,7 @@
 							<!-- *************************************************** -->
 							<!-- Search Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane active" id="tab-search" aria-labelledby="search-tab">
+							<div class="tab-pane" id="tab-search" aria-labelledby="search-tab">
 	
 								<!-- Search contents -->
 								<div class="container-fluid">
@@ -95,7 +95,7 @@
                                     <i class="fab fa-searchengin"></i>
 												Search
 											</button>
-										</div>												
+										</div>
 									</div>
 									<script type="text/javascript">
 										$('#search-btn').click(function() {
@@ -134,69 +134,72 @@
 										<h4>Includes <small>Also include resources which are referenced by the search results</small></h4>
 									</div>
                            <div class="row">
-										<span th:each="include : ${includes}" class="includeCheckContainer">
-											<span class="includeCheckCheck">
-												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
+										<div class="col">
+											<span th:each="include : ${includes}" class="includeCheckContainer">
+												<span class="includeCheckCheck">
+													<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
+												</span>
+												<span class="includeCheckName" th:text="${include}"/>
 											</span>
-											<span class="includeCheckName" th:text="${include}"/>
-										</span>
+										</div>
 									</div>
 
 									<!-- Results Sorting -->
-                           <br clear="all"/>
 									<div class="row">
 										<h4>Sort Results</h4>
 									</div>
 									<div class="row">
 										<!-- Sort By... -->
-										<div class='col-sm-6'>
-										<label>Sort By</label>
-										<div class="btn-group">
-											<input type="hidden" id="sort_by" />
-											<button type="button" class="btn btn-info" id="search_sort_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-												<span class="caret"></span>
-												<span class="sr-only">Default Sort</span>
-											</button>
-											<ul class="dropdown-menu" role="menu">
-												<li><a href="javascript:updateSort('');">Default Sort</a></li>
-												<li class="divider"></li>
-												<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}"></a></li>
-											</ul>
-										</div>
-										&nbsp;&nbsp;&nbsp;
-										<label>Direction</label>
-										<div class="btn-group">
-											<input type="hidden" id="sort_direction" />
-											<button type="button" class="btn btn-info" id="search_sort_direction_button">Default</button>
-											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-												<span class="caret"></span>
-												<span class="sr-only">Default Sort</span>
-											</button>
-											<ul class="dropdown-menu" role="menu">
-												<li><a href="javascript:updateSortDirection('');">Default</a></li>
-												<li class="divider"></li>
-												<li><a href="javascript:updateSortDirection('asc');">Ascending</a></li>
-												<li><a href="javascript:updateSortDirection('desc');">Descending</a></li>
-											</ul>
-										</div>
+										<div class='col'>
+											<div class="d-inline-block">
+												<div class="input-group">
+													<label class="input-group-text">Sort By</label>
+													<input type="hidden" id="sort_by" />
+													<label class="input-group-text border border-primary text-primary" id="search_sort_button">Default</label>
+													<button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+														<span class="caret"></span>
+														<span class="visually-hidden">Default Sort</span>
+													</button>
+													<ul class="dropdown-menu" role="menu">
+														<li><a href="javascript:updateSort('');" class="dropdown-item">Default Sort</a></li>
+														<li class="divider"></li>
+														<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}" class="dropdown-item"></a></li>
+													</ul>
+												</div>
+											</div>
+
+											<div class="d-inline-block ms-3">
+												<div class="input-group">
+													<label class="input-group-text">Direction</label>
+													<input type="hidden" id="sort_direction" />
+													<label class="input-group-text border border-primary text-primary" id="search_sort_direction_button">Default</label>
+													<button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+														<span class="caret"></span>
+														<span class="visually-hidden">Default Sort</span>
+													</button>
+													<ul class="dropdown-menu" role="menu">
+														<li><a href="javascript:updateSortDirection('');" class="dropdown-item">Default</a></li>
+														<li class="divider"></li>
+														<li><a href="javascript:updateSortDirection('asc');" class="dropdown-item">Ascending</a></li>
+														<li><a href="javascript:updateSortDirection('desc');" class="dropdown-item">Descending</a></li>
+													</ul>
+												</div>
+											</div>
 										</div>
 									</div>
-									<br clear="all"/>
 
                            <!-- Other Options -->
-                           <br clear="all"/>
 									<div class="row">
-										<h4>Other Options</h4>
+										<div class="col">
+											<h4>Other Options</h4>
+										</div>
 									</div>
 									
 									<div class="row">
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Limit
-								                    </div>
+								                    <label class="input-group-text">Limit</label>
 								                    <input type="text" class="form-control" id="resource-search-limit" placeholder="max # returned"/>
 								                </div>
 								            </div>
@@ -209,15 +212,17 @@
 										<h4>Reverse Includes <small>Also include resources which reference to the search results</small></h4>
 									</div>									
 									<div class="row">
-										<span class="includeCheckCheck">
-											<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
-										</span>
-										<span class="includeCheckName" th:text="'*'"/>
-										<span th:each="include : ${revincludes}" class="includeCheckContainer">
+										<span class="includeCheckContainer">
 											<span class="includeCheckCheck">
-												<input type="checkbox" th:value="${include}" th:id="'revinc_' + ${include}" />
+												<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
 											</span>
-											<span class="includeCheckName" th:text="${include}"/>
+											<span class="includeCheckName" th:text="'*'"/>
+											<span th:each="include : ${revincludes}" class="includeCheckContainer">
+												<span class="includeCheckCheck">
+													<input type="checkbox" th:value="${include}" th:id="'revinc_' + ${include}" />
+												</span>
+												<span class="includeCheckName" th:text="${include}"/>
+											</span>
 										</span>
 									</div>
 								</div>
@@ -229,7 +234,7 @@
 							<!-- Queries Tab -->
 							<!-- *************************************************** -->
 							<div class="tab-pane" id="tab-queries" aria-labelledby="queries-tab">
-								<div th:replace="tmpl-queries :: queries-list" ></div>
+								<div th:replace="~{tmpl-queries :: queries-list}" ></div>
 							</div>
 							<!-- End of queries tab -->
 							
@@ -327,7 +332,7 @@
 								        </div>											
 								        <div class='col-sm-5'>
 								            <div class="form-group">
-								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
+								                <div class='input-group date' id='resource-history-datetime' data-bs-toggledate-format="YYYY-MM-DDTHH:mm:ss">
                                            <div class="input-group-prepend">
                                                <span class="input-group-text">
       								                    Since
@@ -360,8 +365,7 @@
 								                	format: 'YYYY-MM-DDTHH:mm:ssZ'
 								                });
 								            });
-								            $('#resource-history-btn').click(
-												function() {
+								            $('#resource-history-btn').click(function() {
 													var btn = $(this);
 													handleActionButtonClick($(this));
 													var limit = $('#resource-history-limit').val();
@@ -371,7 +375,7 @@
 													var id = $('#resource-history-id').val();
 													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-history-id', value: id }));
 													$("#outerForm").attr("action", "history-type").submit();
-												});								            
+												});
 								        </script>								        
 								    </div>
 									<br clear="all"/>
@@ -399,7 +403,7 @@
                                                   <span class="loadingStar">*</span>
                                                </span>
 								                    </div>
-								                    <input type="text" class="form-control rounded-right" id="resource-delete-id"/>
+								                    <input type="text" class="form-control rounded-start" id="resource-delete-id"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -415,9 +419,9 @@
 								        </script>								        
 								    </div>
 									<br clear="all"/>
-																	
+
 								<!-- Create -->
-								
+
 									<div class="row">
                               <div class="col-12">
                                  <b>Create</b> an instance of the resource. Generally you do not need to specify an ID
@@ -612,11 +616,11 @@
 		</div>
 
 	</form>
-	<div th:replace="tmpl-footer :: footer" ></div>
+	<div th:replace="~{tmpl-footer :: footer}" ></div>
 
 	<!-- 
 	<script type="text/javascript">
-		$(function () { $("[data-toggle='tooltip']").tooltip(); });
+		$(function () { $("[data-bs-toggle='tooltip']").tooltip(); });
 	</script>
 	-->	
 </body>

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private boolean myClearBetweenTests = true;
+	private boolean myInitialized = false;
 	private final List<T> myUpdates = new ArrayList<>();
 
 	/**
@@ -57,7 +56,9 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		if (myClearBetweenTests) {
+			myRestfulServerExtension.getRestfulServer().unregisterProvider(HashMapResourceProviderExtension.this);
+		}
 	}
 
 	@Override
@@ -79,8 +80,11 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		if (myClearBetweenTests) {
 			clear();
 			clearCounts();
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
+		} else if (!myInitialized) {
+			myInitialized = true;
+			myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 		}
-		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
 	@Override
@@ -96,18 +100,18 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	public void waitForUpdateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
-		await().until(this::getCountUpdate, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountUpdate());
+		await().until(() -> this.getCountUpdate() == theCount);
 	}
 
 	public void waitForCreateCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
-		await().until(this::getCountCreate, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountCreate());
+		await().until(() -> this.getCountCreate() == theCount);
 	}
 
 	public void waitForDeleteCount(long theCount) {
-		assertThat(theCount, greaterThanOrEqualTo(getCountDelete()));
-		await().until(this::getCountDelete, equalTo(theCount));
+		assertThat(theCount).isGreaterThanOrEqualTo(getCountDelete());
+		await().until(() -> this.getCountDelete() == theCount);
 	}
 
 	public List<T> getResourceUpdates() {

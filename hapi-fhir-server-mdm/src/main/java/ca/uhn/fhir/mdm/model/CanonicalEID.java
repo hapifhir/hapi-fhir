@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,13 @@ public class CanonicalEID {
 	public org.hl7.fhir.dstu3.model.Identifier toDSTU3() {
 		return new org.hl7.fhir.dstu3.model.Identifier()
 				.setUse(org.hl7.fhir.dstu3.model.Identifier.IdentifierUse.fromCode(myUse))
+				.setSystem(mySystem)
+				.setValue(myValue);
+	}
+
+	public org.hl7.fhir.r5.model.Identifier toR5() {
+		return new org.hl7.fhir.r5.model.Identifier()
+				.setUse(org.hl7.fhir.r5.model.Identifier.IdentifierUse.fromCode(myUse))
 				.setSystem(mySystem)
 				.setValue(myValue);
 	}

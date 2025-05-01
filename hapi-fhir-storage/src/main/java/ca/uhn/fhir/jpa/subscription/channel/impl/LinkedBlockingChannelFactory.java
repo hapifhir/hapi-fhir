@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,24 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PreDestroy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.PreDestroy;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
-	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
+	private RetryPolicyProvider myRetryPolicyProvider;
+
+	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer, RetryPolicyProvider theRetryPolicyProvider) {
 		myChannelNamer = theChannelNamer;
+		myRetryPolicyProvider = theRetryPolicyProvider;
 	}
 
 	@Override
@@ -80,7 +83,8 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				threadNamePrefix,
 				SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
+		return new LinkedBlockingChannel(
+				theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize, myRetryPolicyProvider);
 	}
 
 	@PreDestroy

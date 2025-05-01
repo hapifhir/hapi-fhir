@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,9 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.TreeMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -74,9 +77,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -206,6 +206,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		terser.addElement(retVal, "id", UUID.randomUUID().toString());
 		terser.addElement(retVal, "name", "RestServer");
+		IBase text = terser.addElement(retVal, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(
+				text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + configuration.getServerName() + "</div>");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
 		terser.addElement(
@@ -314,6 +318,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							case UPDATE:
 								terser.setElement(resource, "conditionalUpdate", "true");
 								break;
+							case UPDATE_REWRITE_HISTORY:
 							case HISTORY_INSTANCE:
 							case HISTORY_SYSTEM:
 							case HISTORY_TYPE:
@@ -397,12 +402,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
-				ResourceSearchParams serverConfigurationActiveSearchParams =
-						serverConfiguration.getActiveSearchParams(resourceName);
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(
+						resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
 					searchParams = mySearchParamRegistry
-							.getActiveSearchParams(resourceName)
+							.getActiveSearchParams(
+									resourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 							.makeCopy();
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 						if (nextBuiltInSpName.startsWith("_")
@@ -461,7 +467,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							}
 
 							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName)
+									.getActiveSearchParams(
+											nextResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 									.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {
@@ -536,10 +543,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			}
 		}
 
+		maybeAddBulkDataDeclarationToConformingToIg(terser, retVal, configuration.getServerBindings());
+
 		postProcessRest(terser, rest);
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	private void maybeAddBulkDataDeclarationToConformingToIg(
+			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
+				.filter(OperationMethodBinding.class::isInstance)
+				.map(OperationMethodBinding.class::cast)
+				.map(OperationMethodBinding::getName)
+				.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+
+		if (bulkExportEnabled) {
+			theTerser.addElement(theBaseConformance, "instantiates", Constants.BULK_DATA_ACCESS_IG_URL);
+		}
 	}
 
 	/**
@@ -689,6 +711,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
 
+		IBase text = terser.addElement(op, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">Operation Named Search</div>");
+
 		terser.addElement(op, "status", "active");
 		terser.addElement(op, "kind", "query");
 		terser.addElement(op, "affectsState", "false");
@@ -749,6 +775,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		IBaseResource op =
 				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
+
+		IBase text = terser.addElement(op, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">Operation</div>");
 
 		terser.addElement(op, "status", "active");
 		terser.addElement(op, "kind", "operation");

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - HFQL Driver
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * This class represents a parsed HFQL expression tree. It is useful for
@@ -326,6 +328,15 @@ public class HfqlStatement implements IModelJson {
 				retVal.add(next);
 			}
 			return retVal;
+		}
+
+		/**
+		 * Returns a concatenation of the {@link #getLeft() left} and all of the {@link #getRight() right} expressions,
+		 * each joined by a single string. This is useful for obtaining expressions of
+		 * type {@link WhereClauseOperatorEnum#UNARY_BOOLEAN}.
+		 */
+		public String asUnaryExpression() {
+			return getLeft() + " " + join(getRight(), ' ');
 		}
 	}
 }

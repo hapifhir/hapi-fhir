@@ -11,15 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 class JobDefinitionRegistryTest {
-
 	private JobDefinitionRegistry mySvc;
 
 	@Mock
@@ -27,11 +26,12 @@ class JobDefinitionRegistryTest {
 	@Mock
 	private IJobStepWorker<TestJobParameters, TestJobStep2InputType, VoidModel> myLastStep;
 
+	private JobDefinition<TestJobParameters> myJobDefinition1;
+	private JobDefinition<TestJobParameters> myJobDefinition2;
+
 	@BeforeEach
 	void beforeEach() {
-		mySvc = new JobDefinitionRegistry();
-
-		mySvc.addJobDefinition(JobDefinition
+		myJobDefinition1 = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId("A")
 			.setJobDefinitionVersion(1)
@@ -39,9 +39,8 @@ class JobDefinitionRegistryTest {
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
 			.addLastStep("S2", "S2", myLastStep)
-			.build());
-
-		mySvc.addJobDefinition(JobDefinition
+			.build();
+		myJobDefinition2 = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId("A")
 			.setJobDefinitionVersion(2)
@@ -49,7 +48,12 @@ class JobDefinitionRegistryTest {
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
 			.addLastStep("S2", "S2", myLastStep)
-			.build());
+			.build();
+
+		mySvc = new JobDefinitionRegistry();
+
+		mySvc.addJobDefinition(myJobDefinition1);
+		mySvc.addJobDefinition(myJobDefinition2);
 	}
 
 	@Test
@@ -129,12 +133,44 @@ class JobDefinitionRegistryTest {
 	public void testRemoveJobDefinition() {
 		mySvc.removeJobDefinition("A", 1);
 
-		assertThat(mySvc.getJobDefinitionIds(), containsInAnyOrder("A"));
-		assertThat(mySvc.getJobDefinitionVersions("A"), containsInAnyOrder(2));
+		assertThat(mySvc.getJobDefinitionIds()).containsExactlyInAnyOrder("A");
+		assertThat(mySvc.getJobDefinitionVersions("A")).containsExactlyInAnyOrder(2);
 
 		mySvc.removeJobDefinition("A", 2);
-		assertThat(mySvc.getJobDefinitionIds(), empty());
+		assertThat(mySvc.getJobDefinitionIds()).isEmpty();
 	}
 
+	@Test
+	void getJobDefinitionShouldReturnJobDefinitionWhenItIsRegistered() {
+		// setup
+		final JobDefinitionRegistry fixture = new JobDefinitionRegistry();
+		fixture.addJobDefinition(myJobDefinition1);
+		fixture.addJobDefinition(myJobDefinition2);
+		// execute
+		final Optional<JobDefinition<?>> actual = fixture.getJobDefinition("A", 2);
+		// validate
+		assertThat(actual).isNotEmpty().contains(myJobDefinition2);
+	}
+
+	@Test
+	void getJobDefinitionShouldReturnEmptyOptionalWhenJobDefinitionsRegistered() {
+		// setup
+		final JobDefinitionRegistry fixture = new JobDefinitionRegistry();
+		// execute
+		final Optional<JobDefinition<?>> actual = fixture.getJobDefinition("A", 1);
+		// validate
+		assertThat(actual).isEmpty();
+	}
+
+	@Test
+	void getJobDefinitionShouldReturnJobDefinitionWhenJobDefinitionsRegisteredWithDifferentVersion() {
+		// setup
+		final JobDefinitionRegistry fixture = new JobDefinitionRegistry();
+		fixture.addJobDefinition(myJobDefinition1);
+		// execute
+		final Optional<JobDefinition<?>> actual = fixture.getJobDefinition("A", 2);
+		// validate
+		assertThat(actual).isEmpty();
+	}
 
 }

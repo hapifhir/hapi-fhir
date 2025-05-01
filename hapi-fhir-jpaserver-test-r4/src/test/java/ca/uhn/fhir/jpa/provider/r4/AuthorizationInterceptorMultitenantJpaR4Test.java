@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -12,7 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +22,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
 public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
@@ -131,8 +129,13 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 	public void testReadAcrossTenants_Allowed() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
-		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
+		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue()).toUnqualifiedVersionless();
+		IIdType id = createObservation(withTenant(TENANT_B)).toUnqualifiedVersionless();
+
+		Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+		obs.setSubject(new Reference(patientId));
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+		myClient.update().resource(obs).execute();
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A, TENANT_B)
@@ -146,15 +149,20 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.include(IBaseResource.INCLUDE_ALL)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(2, output.getEntry().size());
+		assertThat(output.getEntry()).hasSize(2);
 	}
 
 	@Test
 	public void testReadAcrossTenants_Blocked() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
-		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
-		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
+		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue()).toUnqualifiedVersionless();
+		IIdType id = createObservation(withTenant(TENANT_B)).toUnqualifiedVersionless();
+
+		Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+		obs.setSubject(new Reference(patientId));
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+		myClient.update().resource(obs).execute();
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
@@ -185,8 +193,13 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		List<IIdType> observationIds = Lists.newArrayList();
 		for (int i = 1; i <= 9; i++) {
 			IIdType subject = i == 9 ? patientIdB : patientIdA;
-			IIdType id = createObservation(withTenant(TENANT_A), withIdentifier("foo" + i, "val" + i), withStatus("final"), withSubject(subject)).toUnqualifiedVersionless();
+			IIdType id = createObservation(withTenant(TENANT_A), withIdentifier("foo" + i, "val" + i), withStatus("final")).toUnqualifiedVersionless();
 			observationIds.add(id);
+
+			Observation obs = myClient.read().resource(Observation.class).withId(id).execute();
+			obs.setSubject(new Reference(subject));
+			myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
+			myClient.update().resource(obs).execute();
 		}
 
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
@@ -205,7 +218,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.count(3)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
-		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA));
+		assertThat(toUnqualifiedVersionlessIds(bundle)).as(toUnqualifiedVersionlessIds(bundle).toString()).containsExactly(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA);
 
 		// Fetch the next 3
 		bundle = myClient
@@ -213,7 +226,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.next(bundle)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
-		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(3), observationIds.get(4), observationIds.get(5), patientIdA));
+		assertThat(toUnqualifiedVersionlessIds(bundle)).as(toUnqualifiedVersionlessIds(bundle).toString()).containsExactly(observationIds.get(3), observationIds.get(4), observationIds.get(5), patientIdA);
 
 		// Fetch the next 3 - This should fail as the last observation has a cross-partition reference
 		try {
@@ -250,10 +263,10 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assertions.assertTrue(patientBundle.hasLink());
-		Assertions.assertTrue(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next")));
+		assertTrue(patientBundle.hasLink());
+		assertTrue(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next")));
 		String nextLink = patientBundle.getLink().stream().filter(link -> link.hasRelation() && link.getRelation().equals("next")).findFirst().get().getUrl();
-		assertThat(nextLink, not(blankOrNullString()));
+		assertThat(nextLink).isNotBlank();
 
 		// Now come in as an imposter from a diff tenant with a stolen next link
 		// Request as a user with only access to TENANT_B
@@ -265,7 +278,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			Bundle resp2 = myClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			Assertions.assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 	}
 }

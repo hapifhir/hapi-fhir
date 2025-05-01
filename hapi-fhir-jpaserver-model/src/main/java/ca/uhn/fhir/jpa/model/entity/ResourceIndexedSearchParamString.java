@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,34 +22,38 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.StringUtil;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import static ca.uhn.fhir.jpa.model.util.SearchParamHash.hashSearchParam;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 // @formatter:off
-@Embeddable
+@EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
-		name = "HFJ_SPIDX_STRING",
+		name = ResourceIndexedSearchParamString.HFJ_SPIDX_STRING,
 		indexes = {
 			/*
 			 * Note: We previously had indexes with the following names,
@@ -65,28 +69,47 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 			@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_STRING_RESID_V2", columnList = "RES_ID,HASH_NORM_PREFIX,PARTITION_ID")
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
-	public static final int MAX_LENGTH = 200;
+	public static final int MAX_LENGTH = 768;
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_SPIDX_STRING = "HFJ_SPIDX_STRING";
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
+	@GenericGenerator(name = "SEQ_SPIDX_STRING", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	@ManyToOne(optional = false)
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	private String myValueExact;
@@ -98,11 +121,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
-	/**
-	 * @since 3.6.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -138,6 +156,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		myHashExact = source.myHashExact;
 		myHashIdentity = source.myHashIdentity;
 		myHashNormalizedPrefix = source.myHashNormalizedPrefix;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
@@ -181,22 +204,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamString obj = (ResourceIndexedSearchParamString) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
 		b.append(getValueExact(), obj.getValueExact());
 		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashExact(), obj.getHashExact());
 		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getValueNormalized(), obj.getValueNormalized());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashExact() {
@@ -252,13 +266,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
 		b.append(getValueExact());
 		b.append(getHashIdentity());
 		b.append(getHashExact());
 		b.append(getHashNormalizedPrefix());
 		b.append(getValueNormalized());
+		b.append(isMissing());
 		return b.toHashCode();
 	}
 
@@ -307,7 +320,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+		return hashSearchParam(
+				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
 	}
 
 	public static long calculateHashNormalized(
@@ -346,7 +360,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		}
 
 		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
+		return hashSearchParam(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override
@@ -356,7 +370,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

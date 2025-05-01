@@ -1,0 +1,13 @@
+---
+type: add
+issue: 5236
+title: "Previously, when updating an MDM link to NO_MATCH,
+      the golden resource involved would maintain its previous
+      values, as defined by survivorship service.
+      This would result in out-of-date golden resources with
+      data that might not be accurate anymore.
+      Now, when a link is changed to NO_MATCH, golden resources
+      will be rebuilt from the ground up using the MDM survivorship
+      service, and the set of links/source resources available at the
+      time of update.
+"

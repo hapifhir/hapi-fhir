@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,29 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Collection;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Table(
@@ -65,12 +67,14 @@ public class TagDefinition implements Serializable {
 	@Column(name = "TAG_ID")
 	private Long myId;
 
+	// one tag definition -> many resource tags
 	@OneToMany(
 			cascade = {},
 			fetch = FetchType.LAZY,
 			mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
 
+	// one tag definition -> many history
 	@OneToMany(
 			cascade = {},
 			fetch = FetchType.LAZY,
@@ -82,6 +86,7 @@ public class TagDefinition implements Serializable {
 
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
+	@JdbcTypeCode(SqlTypes.INTEGER)
 	private TagTypeEnum myTagType;
 
 	@Column(name = "TAG_VERSION", length = 30)

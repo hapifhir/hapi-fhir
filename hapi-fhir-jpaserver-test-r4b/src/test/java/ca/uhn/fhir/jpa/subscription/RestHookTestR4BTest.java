@@ -1,7 +1,13 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,7 +32,6 @@ import org.hl7.fhir.r4b.model.SearchParameter;
 import org.hl7.fhir.r4b.model.StringType;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,18 +44,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Test the rest-hook subscriptions
@@ -69,7 +66,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
 
@@ -86,7 +83,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(1);
 
 		Subscription subscription = mySubscriptionDao.read(id, mySrd);
-		assertEquals(1, subscription.getMeta().getTag().size());
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertEquals("DATABASE", subscription.getMeta().getTag().get(0).getCode());
 
 		mySubscriptionDao.delete(id, mySrd);
@@ -96,7 +93,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(1);
 
 		subscription = mySubscriptionDao.read(id, mySrd);
-		assertEquals(1, subscription.getMeta().getTag().size());
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertEquals("IN_MEMORY", subscription.getMeta().getTag().get(0).getCode());
 	}
 
@@ -199,7 +196,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 		ourObservationProvider.waitForUpdateCount(1);
 
-		assertThat(ourObservationProvider.getStoredResources().get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(ourObservationProvider.getStoredResources().get(0).getSubject().getReference()).matches("Patient/[0-9]+");
 	}
 
 	@Test
@@ -371,7 +368,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -493,7 +490,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
 		// Now VersionId is stripped
-		assertEquals(null, idElement.getVersionIdPart());
+		assertNull(idElement.getVersionIdPart());
 	}
 
 	@Test
@@ -683,14 +680,14 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
+		mySubscriptionSettings.setEnableInMemorySubscriptionMatching(false);
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
@@ -761,8 +758,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -833,8 +830,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -1032,8 +1029,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: FOO"));
-		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Bar: BAR"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: FOO");
+		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Bar: BAR");
 	}
 
 	@Test
@@ -1068,7 +1065,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testInvalidProvenanceParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
@@ -1077,7 +1074,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testInvalidProcedureRequestParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
 			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
@@ -1086,7 +1083,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testInvalidBodySiteParam() {
-		assertThrows(UnprocessableEntityException.class, () -> {
+		assertThatExceptionOfType(UnprocessableEntityException.class).isThrownBy(() -> {
 			String criteriabad = "BodySite?accessType=Catheter";
 			Subscription subscription = newSubscription(criteriabad, Constants.CT_FHIR_JSON_NEW);
 			myClient.create().resource(subscription).execute();
@@ -1107,8 +1104,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 	 */
 	@Test
 	public void testSubscriptionDoesntActivateIfRestHookIsNotEnabled() throws InterruptedException {
-		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = mySubscriptionSettings.getSupportedSubscriptionTypes();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		try {
 
 			Subscription subscription = newSubscriptionWithStatus("Observation?", "application/fhir+json", Enumerations.SubscriptionStatus.REQUESTED);
@@ -1119,7 +1116,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 			assertEquals(Enumerations.SubscriptionStatus.REQUESTED, subscription.getStatus());
 
 		} finally {
-			existingSupportedSubscriptionTypes.forEach(t -> myStorageSettings.addSupportedSubscriptionType(t));
+			existingSupportedSubscriptionTypes.forEach(t -> mySubscriptionSettings.addSupportedSubscriptionType(t));
 		}
 	}
 
@@ -1138,7 +1135,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 	}
 
@@ -1234,7 +1231,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 			ourTransactionProvider.waitForTransactionCount(1);
 
 			Bundle xact = ourTransactionProvider.getTransactions().get(0);
-			assertEquals(2, xact.getEntry().size());
+			assertThat(xact.getEntry()).hasSize(2);
 		}
 
 	}

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,4 +50,10 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
 	 */
 	IHistoryTyped<T> since(Date theCutoff);
+
+	/**
+	 * Requests that the server skips a number of resources and start at the specified element. Use
+	 * with {@link #count(Integer)}.
+	 */
+	IHistoryTyped<T> offset(Integer theOffset);
 }

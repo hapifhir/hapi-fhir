@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			@OperationParam(
 							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
 							min = 0,
@@ -57,11 +58,12 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theSearchUrls) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null);
+		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, null, theRequestDetails);
 	}
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
+			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 			@IdParam IIdType theSubscriptionId,
 			@OperationParam(
 							name = ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID,
@@ -75,7 +77,8 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 							max = OperationParam.MAX_UNLIMITED,
 							typeName = "string")
 					List<IPrimitiveType<String>> theSearchUrls) {
-		return mySubscriptionTriggeringSvc.triggerSubscription(theResourceIds, theSearchUrls, theSubscriptionId);
+		return mySubscriptionTriggeringSvc.triggerSubscription(
+				theResourceIds, theSearchUrls, theSubscriptionId, theRequestDetails);
 	}
 
 	@Override

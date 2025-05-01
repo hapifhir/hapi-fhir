@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -144,7 +143,7 @@ public class XmlParser extends BaseParser {
 
 	@Override
 	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext)
-			throws IOException, DataFormatException {
+			throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = createXmlWriter(theWriter);
@@ -163,6 +162,16 @@ public class XmlParser extends BaseParser {
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException(Msg.code(2365) + "Failed to initialize STaX event factory", e);
 		}
+	}
+
+	@Override
+	protected void doParseIntoComplexStructure(Reader theSource, IBase theTarget) {
+		XMLEventReader streamReader = createStreamReader(theSource);
+
+		ParserState<IBase> state = ParserState.getComplexObjectState(
+				this, getContext(), getContext(), false, theTarget, getErrorHandler());
+
+		doXmlLoop(streamReader, state);
 	}
 
 	@Override
@@ -187,7 +196,8 @@ public class XmlParser extends BaseParser {
 
 							String namespaceURI = elem.getName().getNamespaceURI();
 
-							if ("extension".equals(elem.getName().getLocalPart())) {
+							String localPart = elem.getName().getLocalPart();
+							if ("extension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -199,7 +209,7 @@ public class XmlParser extends BaseParser {
 									url = urlAttr.getValue();
 								}
 								parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
-							} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
+							} else if ("modifierExtension".equals(localPart)) {
 								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
 								String url;
 								if (urlAttr == null || isBlank(urlAttr.getValue())) {
@@ -213,8 +223,7 @@ public class XmlParser extends BaseParser {
 								}
 								parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
 							} else {
-								String elementName = elem.getName().getLocalPart();
-								parserState.enteringNewElement(namespaceURI, elementName);
+								parserState.enteringNewElement(namespaceURI, localPart);
 							}
 
 							if (!heldComments.isEmpty()) {
@@ -265,7 +274,7 @@ public class XmlParser extends BaseParser {
 			}
 			return parserState.getObject();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(Msg.code(1852) + e);
+			throw new DataFormatException(Msg.code(1852) + "Failed to parse XML content: " + e.getMessage());
 		}
 	}
 
@@ -295,7 +304,7 @@ public class XmlParser extends BaseParser {
 		try {
 
 			if (theElement == null || theElement.isEmpty()) {
-				if (isChildContained(childDef, theIncludedResource)) {
+				if (isChildContained(childDef, theIncludedResource, theEncodeContext)) {
 					// We still want to go in..
 				} else {
 					return;
@@ -359,8 +368,10 @@ public class XmlParser extends BaseParser {
 					 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
 					 * theEventWriter.writeEndElement(); }
 					 */
-					for (IBaseResource next : getContainedResources().getContainedResources()) {
-						IIdType resourceId = getContainedResources().getResourceId(next);
+					for (IBaseResource next :
+							theEncodeContext.getContainedResources().getContainedResources()) {
+						IIdType resourceId =
+								theEncodeContext.getContainedResources().getResourceId(next);
 						theEventWriter.writeStartElement("contained");
 						String value = resourceId.getValue();
 						encodeResourceToXmlStreamWriter(
@@ -372,7 +383,7 @@ public class XmlParser extends BaseParser {
 				case RESOURCE: {
 					IBaseResource resource = (IBaseResource) theElement;
 					String resourceName = getContext().getResourceType(resource);
-					if (!super.shouldEncodeResource(resourceName)) {
+					if (!super.shouldEncodeResource(resourceName, theEncodeContext)) {
 						break;
 					}
 					theEventWriter.writeStartElement(theChildName);
@@ -682,7 +693,7 @@ public class XmlParser extends BaseParser {
 		}
 
 		if (!theContainedResource) {
-			setContainedResources(getContext().newTerser().containResources(theResource));
+			containResourcesInReferences(theResource, theEncodeContext);
 		}
 
 		theEventWriter.writeStartElement(resDef.getName());
@@ -736,14 +747,14 @@ public class XmlParser extends BaseParser {
 
 			TagList tags = getMetaTagsForEncoding((resource), theEncodeContext);
 
-			if (super.shouldEncodeResourceMeta(resource)
+			if (super.shouldEncodeResourceMeta(resource, theEncodeContext)
 					&& ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartElement("meta");
-				if (shouldEncodePath(resource, "meta.versionId")) {
+				if (shouldEncodePath(resource, "meta.versionId", theEncodeContext)) {
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 				}
 				if (updated != null) {
-					if (shouldEncodePath(resource, "meta.lastUpdated")) {
+					if (shouldEncodePath(resource, "meta.lastUpdated", theEncodeContext)) {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 					}
 				}
@@ -768,6 +779,11 @@ public class XmlParser extends BaseParser {
 						writeOptionalTagWithValue(theEventWriter, "system", tag.getScheme());
 						writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());
 						writeOptionalTagWithValue(theEventWriter, "display", tag.getLabel());
+						writeOptionalTagWithValue(theEventWriter, "version", tag.getVersion());
+						Boolean userSelected = tag.getUserSelectedBoolean();
+						if (userSelected != null) {
+							writeOptionalTagWithValue(theEventWriter, "userSelected", userSelected.toString());
+						}
 						theEventWriter.writeEndElement();
 					}
 				}

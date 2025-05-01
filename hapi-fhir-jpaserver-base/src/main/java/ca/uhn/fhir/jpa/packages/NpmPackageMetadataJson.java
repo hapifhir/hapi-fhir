@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nonnull;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -115,6 +115,9 @@ public class NpmPackageMetadataJson {
 		@JsonProperty("version")
 		private String myVersion;
 
+		@JsonProperty("author")
+		private String myAuthor;
+
 		@JsonProperty("description")
 		private String myDescription;
 
@@ -124,6 +127,14 @@ public class NpmPackageMetadataJson {
 		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
+
+		public String getAuthor() {
+			return myAuthor;
+		}
+
+		public void setAuthor(String theAuthor) {
+			myAuthor = theAuthor;
+		}
 
 		public String getName() {
 			return myName;

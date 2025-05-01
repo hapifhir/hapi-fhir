@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,27 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
-import javax.persistence.EntityManager;
+import java.util.stream.Collectors;
 
 /**
- * This service ensures uniqueness of resources during create or create-on-update by storing the resource searchUrl.
+ * This service ensures uniqueness of resources during create or create-on-update
+ * by storing the resource searchUrl.
+ *
+ * @see SearchUrlJobMaintenanceSvcImpl which deletes stale entities
  */
 @Transactional
 @Service
@@ -48,16 +55,19 @@ public class ResourceSearchUrlSvc {
 	private final MatchUrlService myMatchUrlService;
 
 	private final FhirContext myFhirContext;
+	private final PartitionSettings myPartitionSettings;
 
 	public ResourceSearchUrlSvc(
 			EntityManager theEntityManager,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -73,19 +83,30 @@ public class ResourceSearchUrlSvc {
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
-	public void deleteByResId(long theResId) {
-		myResourceSearchUrlDao.deleteByResId(theResId);
+	public void deleteByResId(JpaPid theResId) {
+		myResourceSearchUrlDao.deleteByResId(theResId.getId());
+	}
+
+	/**
+	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
+	 * The use of the constraint table is done, and we can delete it to keep the table small.
+	 */
+	public void deleteByResIds(Collection<JpaPid> theResId) {
+		myResourceSearchUrlDao.deleteByResIds(
+				theResId.stream().map(JpaPid::getId).collect(Collectors.toList()));
 	}
 
 	/**
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
 	public void enforceMatchUrlResourceUniqueness(
-			String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
+			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
-		ResourceSearchUrlEntity searchUrlEntity =
-				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourcePersistentId.getId());
+		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(
+				canonicalizedUrlForStorage,
+				theResourceTable,
+				myPartitionSettings.isConditionalCreateDuplicateIdentifiersEnabled());
 		// calling dao.save performs a merge operation which implies a trip to
 		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
 		// em.persist.

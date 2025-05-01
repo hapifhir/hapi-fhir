@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -32,8 +33,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.method.SortParameter;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +44,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.not;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -79,6 +76,7 @@ public class TestDaoSearch {
 	final DaoRegistry myDaoRegistry;
 	final MatchUrlService myMatchUrlService;
 	final ISearchParamRegistry mySearchParamRegistry;
+	RequestPartitionId myRequestPartitionId;
 
 	public TestDaoSearch(
 			FhirContext theFhirCtx,
@@ -102,7 +100,11 @@ public class TestDaoSearch {
 	 * @param theIds the resource ids to expect.
 	 */
 	public void assertSearchFinds(String theReason, String theQueryUrl, String... theIds) {
-		assertSearchResultIds(theQueryUrl, theReason, hasItems(theIds));
+		assertSearchResultIds(theQueryUrl, theReason, theIds);
+	}
+
+	public void assertSearchFinds(String theReason, String theQueryUrl, List<String> theIds) {
+		assertSearchFinds(theReason, theQueryUrl, theIds.toArray(EMPTY_STRING_ARRAY));
 	}
 
 	/**
@@ -114,13 +116,31 @@ public class TestDaoSearch {
 	public void assertSearchFinds(String theReason, String theQueryUrl, IIdType... theIds) {
 		String[] bareIds = idTypeToIdParts(theIds);
 
-		assertSearchResultIds(theQueryUrl, theReason, hasItems(bareIds));
+		assertSearchResultIds(theQueryUrl, theReason, bareIds);
 	}
 
-	public void assertSearchResultIds(String theQueryUrl, String theReason, Matcher<Iterable<String>> matcher) {
+	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, String... theIds) {
 		List<String> ids = searchForIds(theQueryUrl);
 
-		MatcherAssert.assertThat(theReason, ids, matcher);
+		assertThat(ids).as(theReason).containsExactly(theIds);
+	}
+
+	public void assertSearchFindsInOrder(String theReason, String theQueryUrl, List<String> theIds) {
+		assertSearchFindsInOrder(theReason, theQueryUrl, theIds.toArray(EMPTY_STRING_ARRAY));
+	}
+
+	public void assertSearchFindsOnly(String theReason, String theQueryUrl, String... theIds) {
+		assertSearchIdsMatch(theReason, theQueryUrl, theIds);
+	}
+
+	public void assertSearchIdsMatch(String theReason, String theQueryUrl, String... theIds) {
+		List<String> ids = searchForIds(theQueryUrl);
+		assertThat(ids).as(theReason).containsExactlyInAnyOrder(theIds);
+	}
+
+	public void assertSearchResultIds(String theQueryUrl, String theReason, String... theExpectedIds) {
+		List<String> ids = searchForIds(theQueryUrl);
+		assertThat(ids).as(theReason).contains(theExpectedIds);
 	}
 
 	/**
@@ -131,8 +151,7 @@ public class TestDaoSearch {
 	 */
 	public void assertSearchNotFound(String theReason, String theQueryUrl, IIdType... theIds) {
 		List<String> ids = searchForIds(theQueryUrl);
-
-		MatcherAssert.assertThat(theReason, ids, everyItem(not(in(idTypeToIdParts(theIds)))));
+		assertThat(ids).as(theReason).doesNotContain(idTypeToIdParts(theIds));
 	}
 
 	@Nonnull
@@ -175,6 +194,9 @@ public class TestDaoSearch {
 		SystemRequestDetails reqDetails = theSynchronousMode
 				? fakeRequestDetailsFromUrl(theQueryUrl)
 				: fakePaginatedRequestDetailsFromUrl(theQueryUrl);
+		if (myRequestPartitionId != null) {
+			reqDetails.setRequestPartitionId(myRequestPartitionId);
+		}
 		return dao.search(map, reqDetails);
 	}
 
@@ -218,5 +240,13 @@ public class TestDaoSearch {
 		doReturn(mockServerDfts).when(spiedReqDetails).getServer();
 		doReturn(mockPagingProvider).when(mockServerDfts).getPagingProvider();
 		return spiedReqDetails;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,18 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.io.IOException;
 
 public class Parser {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws DataFormatException, IOException {
 
 		{
@@ -118,6 +121,36 @@ public class Parser {
 			// END SNIPPET: encodingConfig
 		}
 		{
+			// Create a FHIR context
+			FhirContext ctx = FhirContext.forR4();
+			Patient patient = new Patient();
+			patient.addName().setFamily("Simpson").addGiven("James");
+
+			// START SNIPPET: encodingSummary
+			// Create a parser
+			IParser parser = ctx.newJsonParser();
+
+			// Instruct the parser to only include summary elements
+			parser.setSummaryMode(true);
+
+			// If you need to, you can instruct the parser to override
+			// the default summary elements by adding and/or removing
+			// elements from the list of elements it will include. This
+			// is typically not needed, but it's shown here in case you
+			// need to do this:
+			// Include a non-summary element in the summary view.
+			parser.setEncodeElements("Patient.maritalStatus");
+			// Exclude a summary element even though it would normally
+			// be included.
+			parser.setDontEncodeElements("Patient.name");
+
+			// Serialize it
+			String serialized = parser.encodeResourceToString(patient);
+			System.out.println(serialized);
+			// END SNIPPET: encodingSummary
+		}
+
+		{
 			// START SNIPPET: disableStripVersions
 			FhirContext ctx = FhirContext.forR4();
 			IParser parser = ctx.newJsonParser();
@@ -146,6 +179,38 @@ public class Parser {
 					.setDontStripVersionsFromReferencesAtPaths(
 							"AuditEvent.entity.reference", "Patient.managingOrganization");
 			// END SNIPPET: disableStripVersionsField
+
+		}
+
+		{
+			IBaseResource patient = new Patient();
+
+			// START SNIPPET: globalParserConfig
+			FhirContext ctx = FhirContext.forR4();
+
+			// Request the ParserOptions, which store global config
+			// settings applied to all parsers coming from the given
+			// context.
+			ParserOptions parserOptions = ctx.getParserOptions();
+
+			// Never strip resource reference versions for the following
+			// paths
+			parserOptions.setDontStripVersionsFromReferencesAtPaths(
+					"AuditEvent.entity.reference", "Patient.managingOrganization");
+
+			// Never strip any resource reference versions (setting this
+			// to false would make the setting above redundant since this
+			// setting applies to all paths)
+			parserOptions.setStripVersionsFromReferences(false);
+
+			// Even in summary mode, always include extensions on the
+			// root of Patient resources.
+			parserOptions.setEncodeElementsForSummaryMode("Patient.extension");
+
+			// Create a parser and encode, with the global config applied.
+			IParser parser = ctx.newJsonParser();
+			String encoded = parser.encodeResourceToString(patient);
+			// END SNIPPET: globalParserConfig
 
 		}
 	}

@@ -1,50 +1,49 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FormatParameterDstu3Test {
 
 	private static final String VALUE_XML = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>";
 	private static final String VALUE_JSON = "{\"resourceType\":\"Patient\",\"id\":\"p1ReadId\",\"meta\":{\"profile\":[\"http://foo_profile\"]},\"identifier\":[{\"value\":\"p1ReadValue\"}]}";
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FormatParameterDstu3Test.class);
-	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
+
+	@RegisterExtension
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new DummyPatientResourceProvider())
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultPrettyPrint(false);
+
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	/**
 	 * See #346
 	 */
 	@Test
 	public void testFormatXml() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=xml");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -62,9 +61,9 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationXml() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/xml");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -82,9 +81,9 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationXmlFhir() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/xml%2Bfhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml%2Bfhir");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -102,10 +101,10 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationXmlFhirUnescaped() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/xml+fhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml+fhir");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -123,9 +122,9 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatJson() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=json");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -143,9 +142,9 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationJson() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/json");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -163,9 +162,9 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationJsonFhir() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/json%2Bfhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json%2Bfhir");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -183,10 +182,10 @@ public class FormatParameterDstu3Test {
 	 */
 	@Test
 	public void testFormatApplicationJsonFhirUnescaped() throws Exception {
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=application/json+fhir");
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json+fhir");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -201,34 +200,10 @@ public class FormatParameterDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+	private static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<Patient> getResourceType() {

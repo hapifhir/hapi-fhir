@@ -11,9 +11,10 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -40,13 +41,14 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 			assertTrue(table.isParamsUriPopulated());
 			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
 			uri.setResource(table);
+			uri.setResourceId(table.getId().getId());
 			uri.calculateHashes();
 			myResourceIndexedSearchParamUriDao.save(uri);
 		});
 
 		Parameters outcome = (Parameters) myInstanceReindexService.reindex(mySrd, id);
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue(), containsString("Reindex completed in"));
+		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue()).contains("Reindex completed in");
 		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
 
 		runInTransaction(() -> {

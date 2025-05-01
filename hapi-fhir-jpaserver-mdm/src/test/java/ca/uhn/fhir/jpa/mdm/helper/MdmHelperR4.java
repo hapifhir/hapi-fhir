@@ -6,14 +6,15 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
@@ -36,6 +37,18 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		return new OutcomeAndLogMessageWrapper(daoMethodOutcome, hookParams);
 	}
 
+	/**
+	 * Invokes {@link #createWithLatch(IBaseResource)} if the supplied resource has no ID set,
+	 * or {@link #updateWithLatch(IBaseResource)} if it does.
+	 */
+	public OutcomeAndLogMessageWrapper createOrUpdateWithLatch(IBaseResource theResource) throws InterruptedException {
+		if (theResource.getIdElement().hasIdPart()) {
+			return updateWithLatch(theResource);
+		} else {
+			return createWithLatch(theResource);
+		}
+	}
+
 	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource) throws InterruptedException {
 		return updateWithLatch(theIBaseResource, true);
 	}
@@ -51,7 +64,7 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		String resourceType = myFhirContext.getResourceType(theResource);
 
 		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource);
+		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource, new SystemRequestDetails());
 	}
 
 	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
@@ -67,6 +80,7 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		patient.getMeta().addTag(SYSTEM_GOLDEN_RECORD_STATUS, CODE_GOLDEN_RECORD, "Golden Record");
 		return patient;
 	}
+
 	/**
 	 * OutcomeAndLogMessageWrapper is a simple wrapper class which is _excellent_. It allows us to skip the fact that java doesn't allow
 	 * multiple returns, and wraps both the Method Outcome of the DAO, _and_ the TransactionLogMessages that were passed to the pointcut

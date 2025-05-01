@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
+import jakarta.servlet.ServletException;
+import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import javax.servlet.ServletException;
-import javax.ws.rs.core.Response;
 
 /**
  * An interceptor that catches the jax-rs exceptions

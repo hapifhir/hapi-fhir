@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -17,8 +19,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 	@Autowired
 	IIdHelperService<JpaPid> myIdHelperService;
@@ -94,9 +93,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		AtomicLong pid = new AtomicLong();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t) -> {
 			IAnyResource resource = (IAnyResource) t.get(IBaseResource.class, 0);
-			Long resourcePid = (Long) resource.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid resourcePid = (JpaPid) resource.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(resourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
-			pid.set(resourcePid);
+			pid.set(resourcePid.getId());
 		});
 		myClient.create().resource(new Patient()).execute();
 		assertTrue(pid.get() > 0);
@@ -108,15 +107,15 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		AtomicLong pid = new AtomicLong();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t) -> {
 			IAnyResource resource = (IAnyResource) t.get(IBaseResource.class, 0);
-			Long resourcePid = (Long) resource.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid resourcePid = (JpaPid) resource.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(resourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
-			pid.set(resourcePid);
+			pid.set(resourcePid.getId());
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
 
 		runInTransaction(() -> {
-			List<JpaPid> pids = myIdHelperService.resolveResourcePersistentIdsWithCache(null,
-				Collections.singletonList(savedPatientId));
+			List<JpaPid> pids = myIdHelperService.resolveResourcePids(RequestPartitionId.allPartitions(),
+				Collections.singletonList(savedPatientId), ResolveIdentityMode.includeDeleted().cacheOk());
 			Long savedPatientPid = pids.get(0).getId();
 			assertEquals(savedPatientPid.longValue(), pid.get());
 		});
@@ -127,12 +126,14 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		AtomicLong pid = new AtomicLong();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, (thePointcut, t) -> {
 			IAnyResource resource = (IAnyResource) t.get(IBaseResource.class, 0);
-			Long resourcePid = (Long) resource.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid resourcePid = (JpaPid) resource.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(resourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
-			pid.set(resourcePid);
+			pid.set(resourcePid.getId());
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
-		Long savedPatientPid = runInTransaction(() -> myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId());
+		Long savedPatientPid = runInTransaction(() ->
+			myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+		);
 
 		myClient.delete().resourceById(savedPatientId).execute();
 		Parameters parameters = new Parameters();
@@ -159,17 +160,19 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t) -> {
 			IAnyResource resourceOld = (IAnyResource) t.get(IBaseResource.class, 0);
 			IAnyResource resourceNew = (IAnyResource) t.get(IBaseResource.class, 1);
-			Long resourceOldPid = (Long) resourceOld.getUserData(IDao.RESOURCE_PID_KEY);
-			Long resourceNewPid = (Long) resourceNew.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid resourceOldPid = (JpaPid) resourceOld.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid resourceNewPid = (JpaPid) resourceNew.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(resourceOldPid, "Expecting RESOURCE_PID to be set on resource user data.");
 			assertNotNull(resourceNewPid, "Expecting RESOURCE_PID to be set on resource user data.");
-			pidOld.set(resourceOldPid);
-			pidNew.set(resourceNewPid);
+			pidOld.set(resourceOldPid.getId());
+			pidNew.set(resourceNewPid.getId());
 		});
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 		runInTransaction(() -> {
-			Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId();
+			Long savedPatientPid = runInTransaction(() ->
+				myIdHelperService.resolveResourceIdentityPid(RequestPartitionId.allPartitions(), savedPatientId.getResourceType(), savedPatientId.getIdPart(), ResolveIdentityMode.includeDeleted().cacheOk()).getId()
+			);
 			assertEquals(savedPatientPid.longValue(), pidOld.get());
 			assertEquals(savedPatientPid.longValue(), pidNew.get());
 		});
@@ -182,14 +185,14 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t) -> {
 
 			IAnyResource oldResource = (IAnyResource) t.get(IBaseResource.class, 0);
-			Long oldResourcePid = (Long) oldResource.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid oldResourcePid = (JpaPid) oldResource.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(oldResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
-			oldPid.set(oldResourcePid);
+			oldPid.set(oldResourcePid.getId());
 
 			IAnyResource newResource = (IAnyResource) t.get(IBaseResource.class, 1);
-			Long newResourcePid = (Long) newResource.getUserData(IDao.RESOURCE_PID_KEY);
+			JpaPid newResourcePid = (JpaPid) newResource.getUserData(IDao.RESOURCE_PID_KEY);
 			assertNotNull(newResourcePid, "Expecting RESOURCE_PID to be set on resource user data.");
-			newPid.set(newResourcePid);
+			newPid.set(newResourcePid.getId());
 		});
 		Patient patient = new Patient();
 		IIdType id = myClient.create().resource(patient).execute().getId();

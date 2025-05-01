@@ -1,8 +1,6 @@
 package org.hl7.fhir.dstu2.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -11,12 +9,13 @@ import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.MockValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu2.model.DateType;
@@ -26,31 +25,35 @@ import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FhirInstanceValidatorDstu2Test {
+@ExtendWith(MockitoExtension.class)
+public class FhirInstanceValidatorDstu2Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu2Test.class);
-	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2();
+	private static FhirContext ourCtxDstu2 = FhirContext.forDstu2Cached();
 	private static FhirInstanceValidator ourValidator;
-	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7Org();
+	private static FhirContext ourCtxHl7OrgDstu2 = FhirContext.forDstu2Hl7OrgCached();
+	private MockValidationSupport myMockSupport = new MockValidationSupport(FhirContext.forDstu2Cached());
 
-	@BeforeAll
-	public static void beforeClass() {
-		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(ourCtxDstu2);
-		IValidationSupport validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, new InMemoryTerminologyServerValidationSupport(ourCtxDstu2));
+	@BeforeEach
+	public void beforeEach() {
+
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+			myMockSupport,
+			ourCtxDstu2.getValidationSupport());
 		ourValidator = new FhirInstanceValidator(validationSupport);
+
 	}
 
 	/**
@@ -71,6 +74,8 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testObservation() {
+		myMockSupport.addValidConcept("http://loinc.org", "12345");
+
 		Observation o = new Observation();
 		o.addIdentifier().setSystem("http://acme.org").setValue("1234");
 		o.setStatus(ObservationStatus.FINAL);
@@ -102,7 +107,7 @@ public class FhirInstanceValidatorDstu2Test {
 		PeriodDt period = new PeriodDt();
 		period.setStart(new DateTimeDt("2000-01-01T00:00:01+05:00"));
 		period.setEnd(new DateTimeDt("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		assertThat(period.getStart().getTime()).isLessThan(period.getEnd().getTime());
 		procedure.setPerformed(period);
 
 		FhirValidator val = ourCtxDstu2.newValidator();
@@ -188,7 +193,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -211,7 +216,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertFalse(result.isSuccessful());
-		assertThat(encoded, containsString("A parameter must have a value or a resource, but not both"));
+		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -234,7 +239,7 @@ public class FhirInstanceValidatorDstu2Test {
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
-		assertThat(encoded, not(containsString("A parameter must have a value or a resource, but not both")));
+		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test
@@ -255,7 +260,6 @@ public class FhirInstanceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 	}
-	
 
 
 	@AfterAll

@@ -1,0 +1,17 @@
+{
+	"resourceType": "Condition",
+	"id": "SimpleCondition",
+	"code": {
+		"coding": [
+			{
+				"system": "http://snomed.info/sct",
+				"code": "195967001",
+				"display": "Asthma"
+			}
+		],
+		"text": "Asthma"
+	},
+	"subject": {
+		"reference": "Patient/SimplePatient"
+	}
+}

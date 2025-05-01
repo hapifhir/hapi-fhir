@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@ public class NdJsonFileJson implements IModelJson {
 	@JsonProperty("sourceName")
 	private String mySourceName;
 
+	@JsonProperty("batchLineCount")
+	private Integer myBatchLineCount;
+
+	@JsonProperty("batchLineCountTotal")
+	private Integer myBatchLineCountTotal;
+
 	public String getNdJsonText() {
 		return myNdJsonText;
 	}
@@ -45,5 +51,39 @@ public class NdJsonFileJson implements IModelJson {
 
 	public void setSourceName(String theSourceName) {
 		mySourceName = theSourceName;
+	}
+
+	/**
+	 * This is the approximate line number out of the total number of lines in the
+	 * entire batch load that corresponds to the source of this chunk.
+	 * @since 8.2.0
+	 */
+	public void setBatchLineCount(Integer theBatchLineCount) {
+		myBatchLineCount = theBatchLineCount;
+	}
+
+	/**
+	 * This is the approximate line number out of the total number of lines in the
+	 * entire batch load that corresponds to the source of this chunk.
+	 * @since 8.2.0
+	 */
+	public Integer getBatchLineCount() {
+		return myBatchLineCount;
+	}
+
+	/**
+	 * This is total number of lines in the entire batch.
+	 * @since 8.2.0
+	 */
+	public void setBatchLineCountTotal(Integer theBatchLineCountTotal) {
+		myBatchLineCountTotal = theBatchLineCountTotal;
+	}
+
+	/**
+	 * This is total number of lines in the entire batch.
+	 * @since 8.2.0
+	 */
+	public Integer getBatchLineCountTotal() {
+		return myBatchLineCountTotal;
 	}
 }

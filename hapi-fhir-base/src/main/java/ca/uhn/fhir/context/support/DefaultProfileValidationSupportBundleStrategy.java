@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -123,8 +123,10 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				break;
 			case R4B:
 				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/valuesets.xml");
-				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v2-tables.xml");
-				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v3-codesystems.xml");
+				// For R4B we can re-use the same v2 and v3 files as R4, as these will not be updated and it will reduce
+				// duplication.
+				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v2-tables.xml");
+				terminologyResources.add("/org/hl7/fhir/r4/model/valueset/v3-codesystems.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-resources.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-types.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-others.xml");
@@ -148,9 +150,15 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
-		retVal.addAll(myCodeSystems.values());
-		retVal.addAll(myStructureDefinitions.values());
-		retVal.addAll(myValueSets.values());
+		if (myCodeSystems != null) {
+			retVal.addAll(myCodeSystems.values());
+		}
+		if (myStructureDefinitions != null) {
+			retVal.addAll(myStructureDefinitions.values());
+		}
+		if (myValueSets != null) {
+			retVal.addAll(myValueSets.values());
+		}
 		return retVal;
 	}
 

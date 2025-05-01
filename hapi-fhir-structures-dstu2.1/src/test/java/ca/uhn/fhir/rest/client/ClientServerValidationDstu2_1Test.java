@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -29,12 +32,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -61,7 +61,7 @@ public class ClientServerValidationDstu2_1Test {
 	@Test
 	public void testServerReturnsAppropriateVersionDstu2_1() throws Exception {
 		String appropriateFhirVersion = "1.4.0";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2_1.getFhirVersionString()));
+		assertEquals(FhirVersionEnum.DSTU2_1.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -100,7 +100,7 @@ public class ClientServerValidationDstu2_1Test {
 	@Test
 	public void testServerReturnsWrongVersionDstu2_1() throws Exception {
 		String wrongFhirVersion = "1.0.2";
-		assertThat(wrongFhirVersion, is(FhirVersionEnum.DSTU2.getFhirVersionString()));
+		assertEquals(FhirVersionEnum.DSTU2.getFhirVersionString(), wrongFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -116,16 +116,15 @@ public class ClientServerValidationDstu2_1Test {
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
-			fail();
-		} catch (FhirClientInappropriateForServerException e) {
-			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"1.0.2\" which corresponds to DSTU2, but this client is configured to use DSTU2_1 (via the FhirContext)"));
+			fail();		} catch (FhirClientInappropriateForServerException e) {
+			assertThat(e.toString()).contains("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"1.0.2\" which corresponds to DSTU2, but this client is configured to use DSTU2_1 (via the FhirContext)");
 		}
 	}
 
 	@Test
 	public void testServerReturnsRightVersionDstu2_1() throws Exception {
 		String appropriateFhirVersion = "1.4.0";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2_1.getFhirVersionString()));
+		assertEquals(FhirVersionEnum.DSTU2_1.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);

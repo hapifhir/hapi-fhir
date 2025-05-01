@@ -11,7 +11,7 @@ ca.uhn.hapi Bundle
          <div class="panel-heading">
             <div class="panel-title">
                <th:block th:if="${#lists.isEmpty(bundle.entries)}">Bundle contains no entries</th:block>
-               <a th:unless="${#lists.isEmpty(bundle.entries)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+               <a th:unless="${#lists.isEmpty(bundle.entries)}" data-bs-toggle="collapse" data-parent="#accordion" href="#collapseOne">
                   <i id="collapseOneIcon" class="far fa-minus-square"></i>
                   <span th:if="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' entries'"/>
                   <span th:unless="${bundle.totalResults.empty}" th:text="'Bundle contains ' + ${#lists.size(bundle.entries)} + ' / ' + ${bundle.totalResults.value} + ' entries'"/>

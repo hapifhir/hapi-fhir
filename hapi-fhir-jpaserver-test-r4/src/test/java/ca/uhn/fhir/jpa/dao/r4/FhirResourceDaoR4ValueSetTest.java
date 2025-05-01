@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -31,15 +35,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
@@ -148,55 +146,55 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs#childX\""));
-		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs#childX\"");
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Precalculated - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs-np#codeX\""));
-		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs-np#codeX\"");
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 	}
 
@@ -251,55 +249,55 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// In memory - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getMessage());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		logAllValueSets();
-		myCachingValidationSupport.invalidateCaches();
+		myValidationSupport.invalidateCaches();
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs#childX\""));
-		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs#childX\"");
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Precalculated - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage(), containsString("Unknown code \"http://cs-np#codeX\""));
-		assertThat(outcome.getMessage(), containsString("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs-np#codeX\"");
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 	}
 
@@ -344,9 +342,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertFalse(result.isOk());
+		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
 	}
 
 	@Test
@@ -463,19 +461,19 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
+		assertThat(resp).contains("<expansion>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"8450-9\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("<contains>");
+		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
+		assertThat(resp).contains("<code value=\"11378-7\"/>");
+		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
+		assertThat(resp).contains("</contains>");
+		assertThat(resp).contains("</expansion>");
 
 		/*
 		 * Filter with display name
@@ -485,9 +483,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
 
 	}
@@ -511,8 +509,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
-			assertThat(e.getMessage(), containsString("Performing in-memory expansion"));
+			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
+			assertThat(e.getMessage()).contains("Performing in-memory expansion");
 		}
 	}
 
@@ -528,7 +526,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());
-		assertTrue(result.isOk(), result.getMessage());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
 		assertEquals("Male", result.getDisplay());
 	}
 
@@ -554,9 +552,16 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vsInclude.addConcept().setCode("28571000087109").setDisplay("MODERNA COVID-19 mRNA-1273");
 		myValueSetDao.update(vs);
 
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
+		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
+		assertTrue(outcome.isOk(), outcome.getMessage());
 		outcome = myTermSvc.validateCodeInValueSet(
 			new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions(),
@@ -566,10 +571,6 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			vs
 		);
 		assertTrue(outcome.isOk());
-
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-
 	}
 
 	/** See #4449 */
@@ -612,8 +613,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.expand(vs, options);
 
 		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
-		assertEquals(2, valueSet.getExpansion().getContains().get(0).getContains().size());
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
+		assertThat(valueSet.getExpansion().getContains().get(0).getContains()).hasSize(2);
 	}
 
 

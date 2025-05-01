@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-server-openapi
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.ImmutableList;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import io.swagger.v3.core.util.Yaml;
@@ -47,15 +48,23 @@ import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -64,10 +73,12 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationDefinition;
@@ -91,26 +102,26 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
+import org.thymeleaf.web.servlet.IServletWebExchange;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -336,7 +347,9 @@ public class OpenApiInterceptor {
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
 
-		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
+		JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
+		IServletWebExchange exchange = application.buildExchange(servletRequest, theResponse);
+		WebContext context = new WebContext(exchange);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
 		context.setVariable("SERVER_NAME", cs.getSoftware().getName());
@@ -353,7 +366,7 @@ public class OpenApiInterceptor {
 
 		String copyright = cs.getCopyright();
 		if (isNotBlank(copyright)) {
-			copyright = myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+			copyright = renderMarkdown(copyright);
 			context.setVariable("COPYRIGHT_HTML", copyright);
 		}
 
@@ -406,6 +419,11 @@ public class OpenApiInterceptor {
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	@Nonnull
+	private String renderMarkdown(String copyright) {
+		return myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
 	}
 
 	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
@@ -512,7 +530,7 @@ public class OpenApiInterceptor {
 
 			Tag resourceTag = new Tag();
 			resourceTag.setName(resourceType);
-			resourceTag.setDescription("The " + resourceType + " FHIR resource type");
+			resourceTag.setDescription(createResourceDescription(nextResource));
 			openApi.addTagsItem(resourceTag);
 
 			// Instance Read
@@ -621,6 +639,36 @@ public class OpenApiInterceptor {
 		return openApi;
 	}
 
+	@Nonnull
+	protected String createResourceDescription(
+			CapabilityStatement.CapabilityStatementRestResourceComponent theResource) {
+		StringBuilder b = new StringBuilder();
+		b.append("The ").append(theResource.getType()).append(" FHIR resource type");
+
+		String documentation = theResource.getDocumentation();
+		if (isNotBlank(documentation)) {
+			b.append("<br/>");
+			b.append(sanitizeHtmlFragment(renderMarkdown(documentation)));
+		}
+
+		if (isNotBlank(theResource.getProfile())) {
+			b.append("<br/>");
+			b.append("Base profile: ");
+			b.append(sanitizeHtmlFragment(theResource.getProfile()));
+		}
+
+		for (CanonicalType next : theResource.getSupportedProfile()) {
+			String nextSupportedProfile = next.getValueAsString();
+			if (isNotBlank(nextSupportedProfile)) {
+				b.append("<br/>");
+				b.append("Supported profile: ");
+				b.append(sanitizeHtmlFragment(nextSupportedProfile));
+			}
+		}
+
+		return b.toString();
+	}
+
 	protected void addSearchOperation(
 			final OpenAPI openApi,
 			final Operation operation,
@@ -638,9 +686,10 @@ public class OpenApiInterceptor {
 			operation.addParametersItem(parametersItem);
 
 			parametersItem.setName(nextSearchParam.getName());
+			parametersItem.setRequired(false);
 			parametersItem.setIn("query");
 			parametersItem.setDescription(nextSearchParam.getDocumentation());
-			parametersItem.setStyle(Parameter.StyleEnum.SIMPLE);
+			parametersItem.setSchema(toSchema(nextSearchParam.getType()));
 		}
 	}
 
@@ -724,7 +773,13 @@ public class OpenApiInterceptor {
 								"/" + theResourceType + "/$" + operationDefinition.getCode(),
 								PathItem.HttpMethod.GET);
 						populateOperation(
-								theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, true);
+								theFhirContext,
+								theOpenApi,
+								theResourceType,
+								operationDefinition,
+								operation,
+								"/" + theResourceType + "/$" + operationDefinition.getCode(),
+								PathItem.HttpMethod.GET);
 					}
 					if (operationDefinition.getInstance()) {
 						Operation operation = getPathItem(
@@ -733,13 +788,26 @@ public class OpenApiInterceptor {
 								PathItem.HttpMethod.GET);
 						addResourceIdParameter(operation);
 						populateOperation(
-								theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, true);
+								theFhirContext,
+								theOpenApi,
+								theResourceType,
+								operationDefinition,
+								operation,
+								"/" + theResourceType + "/{id}/$" + operationDefinition.getCode(),
+								PathItem.HttpMethod.GET);
 					}
 				} else {
 					if (operationDefinition.getSystem()) {
 						Operation operation =
 								getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.GET);
-						populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, true);
+						populateOperation(
+								theFhirContext,
+								theOpenApi,
+								null,
+								operationDefinition,
+								operation,
+								"/$" + operationDefinition.getCode(),
+								PathItem.HttpMethod.GET);
 					}
 				}
 			}
@@ -752,7 +820,13 @@ public class OpenApiInterceptor {
 							"/" + theResourceType + "/$" + operationDefinition.getCode(),
 							PathItem.HttpMethod.POST);
 					populateOperation(
-							theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
+							theFhirContext,
+							theOpenApi,
+							theResourceType,
+							operationDefinition,
+							operation,
+							"/" + theResourceType + "/$" + operationDefinition.getCode(),
+							PathItem.HttpMethod.POST);
 				}
 				if (operationDefinition.getInstance()) {
 					Operation operation = getPathItem(
@@ -761,19 +835,32 @@ public class OpenApiInterceptor {
 							PathItem.HttpMethod.POST);
 					addResourceIdParameter(operation);
 					populateOperation(
-							theFhirContext, theOpenApi, theResourceType, operationDefinition, operation, false);
+							theFhirContext,
+							theOpenApi,
+							theResourceType,
+							operationDefinition,
+							operation,
+							"/" + theResourceType + "/{id}/$" + operationDefinition.getCode(),
+							PathItem.HttpMethod.POST);
 				}
 			} else {
 				if (operationDefinition.getSystem()) {
 					Operation operation =
 							getPathItem(thePaths, "/$" + operationDefinition.getCode(), PathItem.HttpMethod.POST);
-					populateOperation(theFhirContext, theOpenApi, null, operationDefinition, operation, false);
+					populateOperation(
+							theFhirContext,
+							theOpenApi,
+							null,
+							operationDefinition,
+							operation,
+							"/$" + operationDefinition.getCode(),
+							PathItem.HttpMethod.POST);
 				}
 			}
 		}
 	}
 
-	private static List<String> primitiveTypes = Arrays.asList(
+	private static final List<String> primitiveTypes = List.of(
 			DataTypes.BOOLEAN.toCode(),
 			DataTypes.INTEGER.toCode(),
 			DataTypes.STRING.toCode(),
@@ -797,7 +884,7 @@ public class OpenApiInterceptor {
 			DataTypes.UUID.toCode());
 
 	private static boolean isPrimitive(OperationDefinitionParameterComponent parameter) {
-		return primitiveTypes.contains(parameter.getType());
+		return parameter.getType() != null && primitiveTypes.contains(parameter.getType());
 	}
 
 	private void populateOperation(
@@ -806,16 +893,18 @@ public class OpenApiInterceptor {
 			String theResourceType,
 			OperationDefinition theOperationDefinition,
 			Operation theOperation,
-			boolean theGet) {
+			String thePath,
+			PathItem.HttpMethod httpMethod) {
 		if (theResourceType == null) {
 			theOperation.addTagsItem(PAGE_SYSTEM);
 		} else {
 			theOperation.addTagsItem(theResourceType);
 		}
-		theOperation.setSummary(theOperationDefinition.getTitle());
+		theOperation.setSummary(Optional.ofNullable(theOperationDefinition.getTitle())
+				.orElse(String.format("%s: %s", httpMethod.name(), thePath)));
 		theOperation.setDescription(theOperationDefinition.getDescription());
 		addFhirResourceResponse(theFhirContext, theOpenApi, theOperation, null);
-		if (theGet) {
+		if (httpMethod == PathItem.HttpMethod.GET) {
 
 			for (OperationDefinition.OperationDefinitionParameterComponent nextParameter :
 					theOperationDefinition.getParameter()) {
@@ -832,8 +921,8 @@ public class OpenApiInterceptor {
 				parametersItem.setName(nextParameter.getName());
 				parametersItem.setIn("query");
 				parametersItem.setDescription(nextParameter.getDocumentation());
-				parametersItem.setStyle(Parameter.StyleEnum.SIMPLE);
 				parametersItem.setRequired(nextParameter.getMin() > 0);
+				parametersItem.setSchema(toSchema(nextParameter.getSearchType()));
 
 				List<Extension> exampleExtensions =
 						nextParameter.getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
@@ -983,6 +1072,7 @@ public class OpenApiInterceptor {
 		parameter.setIn("path");
 		parameter.setDescription("The resource version ID");
 		parameter.setExample("1");
+		parameter.setRequired(true);
 		parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
 		parameter.setStyle(Parameter.StyleEnum.SIMPLE);
 		theOperation.addParametersItem(parameter);
@@ -1044,6 +1134,7 @@ public class OpenApiInterceptor {
 		parameter.setIn("path");
 		parameter.setDescription("The resource ID");
 		parameter.setExample("123");
+		parameter.setRequired(true);
 		parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
 		parameter.setStyle(Parameter.StyleEnum.SIMPLE);
 		theOperation.addParametersItem(parameter);
@@ -1145,6 +1236,33 @@ public class OpenApiInterceptor {
 			}
 
 			return builder.toString();
+		}
+	}
+
+	private Schema<?> toSchema(Enumerations.SearchParamType type) {
+		if (type == null) {
+			return new StringSchema();
+		}
+		switch (type) {
+			case NUMBER:
+				return new NumberSchema();
+			case DATE:
+				Schema<?> dateSchema = new Schema<>();
+				dateSchema.anyOf(ImmutableList.of(new DateTimeSchema(), new DateSchema()));
+				return dateSchema;
+			case QUANTITY:
+				Schema<?> quantitySchema = new Schema<>();
+				quantitySchema.anyOf(ImmutableList.of(new StringSchema(), new NumberSchema()));
+				return quantitySchema;
+			case STRING:
+			case TOKEN:
+			case REFERENCE:
+			case COMPOSITE:
+			case URI:
+			case SPECIAL:
+			case NULL:
+			default:
+				return new StringSchema();
 		}
 	}
 }

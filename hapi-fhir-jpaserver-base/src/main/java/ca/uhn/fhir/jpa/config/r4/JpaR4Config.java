@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,26 @@
  */
 package ca.uhn.fhir.jpa.config.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.provider.r4.IMemberMatchConsentHook;
-import ca.uhn.fhir.jpa.provider.r4.MemberMatchR4ResourceProvider;
-import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
+import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
+import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -42,12 +47,8 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -106,19 +107,28 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(
-			@Autowired FhirContext theContext,
-			@Autowired IFhirResourceDao<Coverage> theCoverageDao,
-			@Autowired IFhirResourceDao<Patient> thePatientDao,
-			@Autowired IFhirResourceDao<Consent> theConsentDao,
-			@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider) {
-		return new MemberMatcherR4Helper(
-				theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider);
+	public ResourceMergeService resourceMergeService(
+			DaoRegistry theDaoRegistry,
+			IReplaceReferencesSvc theReplaceReferencesSvc,
+			HapiTransactionService theHapiTransactionService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IJobCoordinator theJobCoordinator,
+			Batch2TaskHelper theBatch2TaskHelper,
+			JpaStorageSettings theStorageSettings) {
+
+		return new ResourceMergeService(
+				theStorageSettings,
+				theDaoRegistry,
+				theReplaceReferencesSvc,
+				theHapiTransactionService,
+				theRequestPartitionHelperSvc,
+				theJobCoordinator,
+				theBatch2TaskHelper);
 	}
 
 	@Bean
-	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
-			FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
-		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
+	public PatientMergeProvider patientMergeProvider(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, ResourceMergeService theResourceMergeService) {
+		return new PatientMergeProvider(theFhirContext, theDaoRegistry, theResourceMergeService);
 	}
 }

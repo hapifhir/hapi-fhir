@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -42,8 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 
 /**
  * The JaxRsRequest is a jax-rs specific implementation of the RequestDetails.
@@ -115,6 +115,16 @@ public class JaxRsRequest extends RequestDetails {
 	public List<String> getHeaders(String name) {
 		List<String> requestHeader = myHeaders.getRequestHeader(name);
 		return requestHeader == null ? Collections.<String>emptyList() : requestHeader;
+	}
+
+	@Override
+	public void addHeader(String theName, String theValue) {
+		throw new UnsupportedOperationException(Msg.code(2499) + "Headers can not be modified in JAX-RS");
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValue) {
+		throw new UnsupportedOperationException(Msg.code(2500) + "Headers can not be modified in JAX-RS");
 	}
 
 	@Override

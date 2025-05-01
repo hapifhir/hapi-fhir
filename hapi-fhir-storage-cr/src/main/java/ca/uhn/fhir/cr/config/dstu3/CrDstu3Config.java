@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,45 +21,37 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.config.BaseClinicalReasoningConfig;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrBaseConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
+import ca.uhn.fhir.cr.config.RepositoryConfig;
+import ca.uhn.fhir.cr.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
-@Import(BaseClinicalReasoningConfig.class)
+@Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrDstu3Config {
 
 	@Bean
-	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(
-			ApplicationContext theApplicationContext) {
-		return r -> {
-			var ms = theApplicationContext.getBean(MeasureService.class);
-			ms.setRequestDetails(r);
-			return ms;
-		};
+	IMeasureServiceFactory dstu3MeasureServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theEvaluationOptions) {
+		return rd -> new Dstu3MeasureService(theRepositoryFactory.create(rd), theEvaluationOptions);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public MeasureService dstu3measureService() {
-		return new MeasureService();
-	}
-
-	@Bean
-	public MeasureOperationsProvider dstu3measureOperationsProvider() {
+	MeasureOperationsProvider dstu3MeasureOperationsProvider() {
 		return new MeasureOperationsProvider();
 	}
 

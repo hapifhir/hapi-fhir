@@ -1,0 +1,5 @@
+---
+type: fix
+title: "The hapi-fhir-validation module inadvertently included a mandatory dependency on the Caffeine 
+  caching library instead of leaving it to implementors to choose which module to pick. This has been
+  corrected."

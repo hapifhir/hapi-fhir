@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
@@ -31,13 +32,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -48,8 +49,11 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +65,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -83,7 +86,7 @@ public class ExpandResourcesStep
 	private ApplicationContext myApplicationContext;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private IIdHelperService myIdHelperService;
@@ -107,72 +110,99 @@ public class ExpandResourcesStep
 			throws JobExecutionFailedException {
 		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
 		String chunkId = theStepExecutionDetails.getChunkId();
-		ResourceIdList idList = theStepExecutionDetails.getData();
+		ResourceIdList data = theStepExecutionDetails.getData();
 		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
 		ourLog.info(
 				"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.",
 				instanceId,
 				chunkId,
-				idList.getIds().size());
+				data.getIds().size());
 
-		// search the resources
-		List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
+		// Partition the ID list in order to only fetch a reasonable number at a time
+		List<List<TypedPidJson>> idLists = ListUtils.partition(data.getIds(), 100);
 
-		// Apply post-fetch filtering
-		String resourceType = idList.getResourceType();
-		List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
-				.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
-				.collect(Collectors.toList());
+		for (List<TypedPidJson> idList : idLists) {
 
-		if (!postFetchFilterUrls.isEmpty()) {
-			applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
-		}
+			// search the resources
+			List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
 
-		// if necessary, expand resources
-		if (parameters.isExpandMdm()) {
-			myBulkExportProcessor.expandMdmResources(allResources);
-		}
+			// Apply post-fetch filtering
+			String resourceType = data.getResourceType();
+			List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
+					.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+					.collect(Collectors.toList());
 
-		// Normalize terminology
-		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
-			if (terminologyTranslationSvc == null) {
-				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
-				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+			if (!postFetchFilterUrls.isEmpty()) {
+				applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
 			}
-			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
-		}
 
-		// Interceptor call
-		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
-			for (Iterator<IBaseResource> iter = allResources.iterator(); iter.hasNext(); ) {
-				HookParams params = new HookParams()
-						.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
-						.add(IBaseResource.class, iter.next());
-				boolean outcome =
-						myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
-				if (!outcome) {
-					iter.remove();
+			// if necessary, expand resources
+			if (parameters.isExpandMdm()) {
+				myBulkExportProcessor.expandMdmResources(allResources);
+			}
+
+			// Normalize terminology
+			if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+				ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
+				if (terminologyTranslationSvc == null) {
+					terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+					myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+				}
+				terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+			}
+
+			// Interceptor call
+			if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
+				for (Iterator<IBaseResource> iter = allResources.iterator(); iter.hasNext(); ) {
+					HookParams params = new HookParams()
+							.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
+							.add(IBaseResource.class, iter.next());
+					boolean outcome =
+							myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
+					if (!outcome) {
+						iter.remove();
+					}
 				}
 			}
-		}
 
-		// encode them - Key is resource type, Value is a collection of serialized resources of that type
-		ListMultimap<String, String> resources = encodeToString(allResources, parameters);
+			// encode them - Key is resource type, Value is a collection of serialized resources of that type
+			ListMultimap<String, String> resources = encodeToString(allResources, parameters);
 
-		// set to datasink
-		for (String nextResourceType : resources.keySet()) {
+			// send to datasink
+			long maxFileSize = myStorageSettings.getBulkExportFileMaximumSize();
+			long currentFileSize = 0;
+			for (String nextResourceType : resources.keySet()) {
 
-			ExpandedResourcesList output = new ExpandedResourcesList();
-			output.setStringifiedResources(resources.get(nextResourceType));
-			output.setResourceType(nextResourceType);
-			theDataSink.accept(output);
+				List<String> stringifiedResources = resources.get(nextResourceType);
+				List<String> currentFileStringifiedResources = new ArrayList<>();
 
-			ourLog.info(
-					"Expanding of {} resources of type {} completed",
-					idList.getIds().size(),
-					idList.getResourceType());
+				for (String nextStringifiedResource : stringifiedResources) {
+
+					if (currentFileSize + nextStringifiedResource.length() > maxFileSize
+							&& !currentFileStringifiedResources.isEmpty()) {
+						ExpandedResourcesList output = new ExpandedResourcesList();
+						output.setStringifiedResources(currentFileStringifiedResources);
+						output.setResourceType(nextResourceType);
+						theDataSink.accept(output);
+
+						currentFileStringifiedResources = new ArrayList<>();
+						currentFileSize = 0;
+					}
+
+					currentFileStringifiedResources.add(nextStringifiedResource);
+					currentFileSize += nextStringifiedResource.length();
+				}
+
+				if (!currentFileStringifiedResources.isEmpty()) {
+					ExpandedResourcesList output = new ExpandedResourcesList();
+					output.setStringifiedResources(currentFileStringifiedResources);
+					output.setResourceType(nextResourceType);
+					theDataSink.accept(output);
+				}
+
+				ourLog.info("Expanding of {} resources of type {} completed", idList.size(), data.getResourceType());
+			}
 		}
 
 		// and return
@@ -223,42 +253,36 @@ public class ExpandResourcesStep
 		return false;
 	}
 
-	private List<IBaseResource> fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
-		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
-		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
+	private List<IBaseResource> fetchAllResources(List<TypedPidJson> theIds, RequestPartitionId theRequestPartitionId) {
+		ArrayListMultimap<String, TypedPidJson> typeToIds = ArrayListMultimap.create();
+		theIds.forEach(t -> typeToIds.put(t.getResourceType(), t));
 
-		List<IBaseResource> resources = new ArrayList<>(theIds.getIds().size());
+		List<IBaseResource> resources = new ArrayList<>(theIds.size());
 
 		for (String resourceType : typeToIds.keySet()) {
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-			List<String> allIds = typeToIds.get(resourceType);
-			while (!allIds.isEmpty()) {
+			List<TypedPidJson> allIds = typeToIds.get(resourceType);
 
-				// Load in batches in order to avoid having too many PIDs go into a
-				// single SQ statement at once
-				int batchSize = Math.min(500, allIds.size());
+			Set<IResourcePersistentId> nextBatchOfPids = allIds.stream()
+					.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(
+							t.getPartitionId(), t.getPid(), resourceType))
+					.collect(Collectors.toSet());
 
-				Set<IResourcePersistentId> nextBatchOfPids = allIds.subList(0, batchSize).stream()
-						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t, resourceType))
-						.collect(Collectors.toSet());
-				allIds = allIds.subList(batchSize, allIds.size());
+			PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
+					.withRequest(null)
+					.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
-				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
-						.withRequest(null)
-						.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
-
-				TokenOrListParam idListParam = new TokenOrListParam();
-				for (IResourcePersistentId nextPid : nextBatchOfPids) {
-					Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
-					idListParam.add(resourceId.orElse(nextPid.getId().toString()));
-				}
-
-				SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-				IBundleProvider outcome =
-						dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
-				resources.addAll(outcome.getAllResources());
+			TokenOrListParam idListParam = new TokenOrListParam();
+			for (IResourcePersistentId<?> nextPid : nextBatchOfPids) {
+				Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
+				idListParam.add(resourceId.orElse(nextPid.getId().toString()));
 			}
+
+			SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
+			IBundleProvider outcome =
+					dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+			resources.addAll(outcome.getAllResources());
 		}
 
 		return resources;
@@ -286,5 +310,10 @@ public class ExpandResourcesStep
 		// (but for now, only ndjson is supported
 		// see WriteBinaryStep as well
 		return myFhirContext.newJsonParser().setPrettyPrint(false);
+	}
+
+	@VisibleForTesting
+	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 }

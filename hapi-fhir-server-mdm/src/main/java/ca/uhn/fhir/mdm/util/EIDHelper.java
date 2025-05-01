@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public final class EIDHelper {
+public class EIDHelper {
 
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;

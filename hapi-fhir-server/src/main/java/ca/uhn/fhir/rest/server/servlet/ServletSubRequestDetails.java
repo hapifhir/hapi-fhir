@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,54 @@
  */
 package ca.uhn.fhir.rest.server.servlet;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+/**
+ * This class wraps a {@link ServletRequestDetails} object for
+ * processing sub-requests, such as processing individual
+ * entries in a transaction or batch bundle. An instance of this class is used for modifying some of the data
+ * in the request details, such as the request headers, for an individual entry,
+ * without affecting the original ServletRequestDetails.
+ */
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	private final ServletRequestDetails myWrap;
-	private Map<String, List<String>> myHeaders = new HashMap<>();
+
+	/**
+	 * Map with case-insensitive keys
+	 * This map contains only the headers modified by the user after this object is created.
+	 * If a header is not modified, the original value from the wrapped RequestDetails is returned by the
+	 * getters in this class.
+	 * <p>
+	 * The reason for implementing the map this way, which is just keeping track of the overrides, as opposed
+	 * to creating a copy of the header map of the wrapped RequestDetails at the time this object is created,
+	 * is that there some test code where the header values are stubbed for the wrapped details using Mockito
+	 * like `when(requestDetails.getHeader("headerName")).thenReturn("headerValue")`.
+	 * Creating a copy of the headers by iterating the map of the wrapped instance wouldn't satisfy such stubbing,
+	 * the stubbed values are not actually in the map.
+	 * For stubbing to work we have to make a call the getHeader method of the wrapped RequestDetails.
+	 * This is what the getters in this class do.
+	 */
+	private final ListMultimap<String, String> myHeaderOverrides = MultimapBuilder.treeKeys(
+					String.CASE_INSENSITIVE_ORDER)
+			.arrayListValues()
+			.build();
 
 	/**
 	 * Constructor
 	 *
 	 * @param theRequestDetails The parent request details
 	 */
-	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
+	public ServletSubRequestDetails(@Nonnull ServletRequestDetails theRequestDetails) {
 		super(theRequestDetails.getInterceptorBroadcaster());
-
 		myWrap = theRequestDetails;
-
-		if (theRequestDetails != null) {
-			Map<String, List<String>> headers = theRequestDetails.getHeaders();
-			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
-				myHeaders.put(next.getKey().toLowerCase(), next.getValue());
-			}
-		}
 	}
 
 	@Override
@@ -59,28 +79,33 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		return myWrap.getServletResponse();
 	}
 
+	@Override
 	public void addHeader(String theName, String theValue) {
-		String lowerCase = theName.toLowerCase();
-		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
-		list.add(theValue);
+		myHeaderOverrides.put(theName, theValue);
 	}
 
 	@Override
 	public String getHeader(String theName) {
-		List<String> list = myHeaders.get(theName.toLowerCase());
-		if (list == null || list.isEmpty()) {
-			return null;
+		List<String> list = myHeaderOverrides.get(theName);
+		if (list.isEmpty()) {
+			return myWrap.getHeader(theName);
 		}
 		return list.get(0);
 	}
 
 	@Override
 	public List<String> getHeaders(String theName) {
-		List<String> list = myHeaders.get(theName.toLowerCase());
-		if (list == null || list.isEmpty()) {
-			return null;
+		List<String> list = myHeaderOverrides.get(theName.toLowerCase());
+		if (list.isEmpty()) {
+			return myWrap.getHeaders(theName);
 		}
 		return list;
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValues) {
+		myHeaderOverrides.removeAll(theName);
+		myHeaderOverrides.putAll(theName, theValues);
 	}
 
 	@Override

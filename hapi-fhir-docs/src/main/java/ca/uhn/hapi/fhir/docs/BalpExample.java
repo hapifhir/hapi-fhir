@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalpSink;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletException;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 
 public class BalpExample {
 

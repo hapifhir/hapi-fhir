@@ -152,7 +152,7 @@ public class ResourceMinimizerMojo {
 
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
 		URL mainURL = ConfigurationWatchListUtil.getMainWatchURL(loggerContext);
-		System.out.println(mainURL);
+		ourLog.info(mainURL.toExternalForm());
 		// or even
 		ourLog.info("Logback used '{}' as the configuration file.", mainURL);
 

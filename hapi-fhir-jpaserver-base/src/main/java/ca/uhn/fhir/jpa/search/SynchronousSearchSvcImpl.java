@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -47,6 +46,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -71,7 +70,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	protected SearchBuilderFactory mySearchBuilderFactory;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -91,6 +90,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private int mySyncSize = 250;
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public IBundleProvider executeQuery(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -113,9 +113,8 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				.withRequestPartitionId(theRequestPartitionId)
 				.readOnly()
 				.execute(() -> {
-
 					// Load the results synchronously
-					final List<JpaPid> pids = new ArrayList<>();
+					List<JpaPid> pids = new ArrayList<>();
 
 					Long count = 0L;
 					if (wantCount) {
@@ -145,8 +144,17 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						return bundleProvider;
 					}
 
+					// if we have a count, we'll want to request
+					// additional resources
+					SearchParameterMap clonedParams = theParams.clone();
+					Integer requestedCount = clonedParams.getCount();
+					boolean hasACount = requestedCount != null;
+					if (hasACount) {
+						clonedParams.setCount(requestedCount.intValue() + 1);
+					}
+
 					try (IResultIterator<JpaPid> resultIter = theSb.createQuery(
-							theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+							clonedParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 						while (resultIter.hasNext()) {
 							pids.add(resultIter.next());
 							if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
@@ -162,13 +170,26 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						throw new InternalErrorException(Msg.code(1164) + e);
 					}
 
+					// truncate the list we retrieved - if needed
+					int receivedResourceCount = -1;
+					if (hasACount) {
+						// we want the accurate received resource count
+						receivedResourceCount = pids.size();
+						int resourcesToReturn = Math.min(theParams.getCount(), pids.size());
+						pids = pids.subList(0, resourcesToReturn);
+					}
+
 					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
-					HookParams params = new HookParams()
-							.add(IPreResourceAccessDetails.class, accessDetails)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					IInterceptorBroadcaster compositeBroadcaster =
+							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+									myInterceptorBroadcaster, theRequestDetails);
+					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+						HookParams params = new HookParams()
+								.add(IPreResourceAccessDetails.class, accessDetails)
+								.add(RequestDetails.class, theRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					}
 
 					for (int i = pids.size() - 1; i >= 0; i--) {
 						if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -228,6 +249,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+					if (hasACount && theSb.requiresTotal()) {
+						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
+					}
 					if (theParams.isOffsetQuery()) {
 						bundleProvider.setCurrentPageOffset(theParams.getOffset());
 						bundleProvider.setCurrentPageSize(theParams.getCount());
@@ -258,12 +282,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			RequestPartitionId theRequestPartitionId) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(theResourceType);
-
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb =
-				mySearchBuilderFactory.newSearchBuilder(callingDao, theResourceType, resourceTypeClass);
+		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return executeQuery(
 				theSearchParameterMap,

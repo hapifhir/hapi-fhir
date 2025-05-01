@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -80,6 +81,15 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 */
 	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE =
 			new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_MODE", BundleEntrySearchModeEnum.class) {};
+	/**
+	 * If present and populated with a decimal value, contains the "bundle entry search score", which is the value of the status field in the Bundle entry containing this resource.
+	 * The value for this key corresponds to field <code>Bundle.entry.search.score</code>. This value represents the search ranking score, where 1.0 is relevant and 0.0 is irrelevant.
+	 * <p>
+	 * Note that status is only used in FHIR DSTU2 and later.
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<BigDecimal> ENTRY_SEARCH_SCORE =
+			new ResourceMetadataKeyEnum<>("ENTRY_SEARCH_SCORE", BigDecimal.class) {};
 	/**
 	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation", which is the value of the status field in the Bundle entry
 	 * containing this resource. The value for this key corresponds to field <code>Bundle.entry.transaction.operation</code>. This value can be set in resources being transmitted to a server to

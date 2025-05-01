@@ -3,11 +3,11 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -27,12 +27,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class QuestionnaireValidatorR4Test {
+public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
@@ -77,8 +77,8 @@ public class QuestionnaireValidatorR4Test {
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertEquals(true, errors.isSuccessful());
+			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList())).isEmpty();
 		}
 	}
 
@@ -98,8 +98,8 @@ public class QuestionnaireValidatorR4Test {
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages(), Matchers.empty());
+			assertEquals(true, errors.isSuccessful());
+			assertThat(errors.getMessages()).isEmpty();
 		}
 	}
 
@@ -117,17 +117,17 @@ public class QuestionnaireValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.hasSize(1));
+		assertEquals(true, errors.isSuccessful());
+		assertThat(errors.getMessages()).hasSize(1);
 		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
-		assertThat(errors.getMessages().get(0).getMessage(), Matchers.startsWith("Unknown extension " + extensionUrl));
+		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(extensionUrl);
 		errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful(), Matchers.is(true));
-		assertThat(errors.getMessages(), Matchers.empty());
+		assertEquals(true, errors.isSuccessful());
+		assertThat(errors.getMessages()).isEmpty();
 	}
 
 	private Questionnaire minimalValidQuestionnaire() {

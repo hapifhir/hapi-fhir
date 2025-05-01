@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class SqlQuery {
+	private static final Logger ourLog = LoggerFactory.getLogger(SqlQuery.class);
 	private final String myThreadName = Thread.currentThread().getName();
 	private final String mySql;
 	private final List<String> myParams;
@@ -135,10 +138,15 @@ public class SqlQuery {
 					break;
 				}
 				String nextParamValue = nextParams.remove(0);
-				if (theSanitizeParams) {
-					nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+				String nextSubstitution;
+				if (nextParamValue != null) {
+					if (theSanitizeParams) {
+						nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+					}
+					nextSubstitution = "'" + nextParamValue + "'";
+				} else {
+					nextSubstitution = "NULL";
 				}
-				String nextSubstitution = "'" + nextParamValue + "'";
 				retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
 				idx += nextSubstitution.length();
 			}

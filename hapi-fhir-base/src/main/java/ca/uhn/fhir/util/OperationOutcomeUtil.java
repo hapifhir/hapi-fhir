@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -36,7 +37,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -99,15 +99,29 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
+	/**
+	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
+	 * method has always been misnamed for historical reasons.
+	 */
+	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
+		return getFirstIssueDiagnostics(theCtx, theOutcome);
+	}
+
+	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", 0);
+	}
+
+	public static String getIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome, int theIndex) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", theIndex);
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "location");
+		return getIssueStringPart(theCtx, theOutcome, "location", 0);
 	}
 
-	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
+	private static String getIssueStringPart(
+			FhirContext theCtx, IBaseOperationOutcome theOutcome, String theName, int theIndex) {
 		if (theOutcome == null) {
 			return null;
 		}
@@ -116,14 +130,14 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 
 		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
-		if (issues.isEmpty()) {
+		if (issues.size() <= theIndex) {
 			return null;
 		}
 
-		IBase issue = issues.get(0);
+		IBase issue = issues.get(theIndex);
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(theName);
 
 		List<IBase> details = detailsChild.getAccessor().getValues(issue);
 		if (details.isEmpty()) {
@@ -265,30 +279,48 @@ public class OperationOutcomeUtil {
 	}
 
 	public static void addDetailsToIssue(FhirContext theFhirContext, IBase theIssue, String theSystem, String theCode) {
+		addDetailsToIssue(theFhirContext, theIssue, theSystem, theCode, null);
+	}
+
+	public static void addDetailsToIssue(
+			FhirContext theFhirContext, IBase theIssue, String theSystem, String theCode, String theText) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
-
-		BaseRuntimeElementCompositeDefinition<?> codingDef =
-				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("Coding");
-		ICompositeType coding = (ICompositeType) codingDef.newInstance();
-
-		// System
-		IPrimitiveType<?> system =
-				(IPrimitiveType<?>) theFhirContext.getElementDefinition("uri").newInstance();
-		system.setValueAsString(theSystem);
-		codingDef.getChildByName("system").getMutator().addValue(coding, system);
-
-		// Code
-		IPrimitiveType<?> code =
-				(IPrimitiveType<?>) theFhirContext.getElementDefinition("code").newInstance();
-		code.setValueAsString(theCode);
-		codingDef.getChildByName("code").getMutator().addValue(coding, code);
 		BaseRuntimeElementCompositeDefinition<?> ccDef =
 				(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("CodeableConcept");
-
 		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
-		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+
+		if (isNotBlank(theSystem) || isNotBlank(theCode)) {
+			BaseRuntimeElementCompositeDefinition<?> codingDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition("Coding");
+			ICompositeType coding = (ICompositeType) codingDef.newInstance();
+
+			// System
+			if (isNotBlank(theSystem)) {
+				IPrimitiveType<?> system = (IPrimitiveType<?>)
+						theFhirContext.getElementDefinition("uri").newInstance();
+				system.setValueAsString(theSystem);
+				codingDef.getChildByName("system").getMutator().addValue(coding, system);
+			}
+
+			// Code
+			if (isNotBlank(theCode)) {
+				IPrimitiveType<?> code = (IPrimitiveType<?>)
+						theFhirContext.getElementDefinition("code").newInstance();
+				code.setValueAsString(theCode);
+				codingDef.getChildByName("code").getMutator().addValue(coding, code);
+			}
+
+			ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+		}
+
+		if (isNotBlank(theText)) {
+			IPrimitiveType<?> textElem = (IPrimitiveType<?>)
+					ccDef.getChildByName("text").getChildByName("text").newInstance(theText);
+			ccDef.getChildByName("text").getMutator().addValue(codeableConcept, textElem);
+		}
+
 		detailsChildDef.getMutator().addValue(theIssue, codeableConcept);
 	}
 

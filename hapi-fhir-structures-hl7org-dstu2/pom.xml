@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.9.4-SNAPSHOT</version>
+		<version>8.1.6-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -30,6 +30,13 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.dstu2</artifactId>
 			<version>${fhir_core_version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!--
@@ -59,19 +66,8 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- 
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>xpp3</groupId>
+			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
 			<optional>true</optional>
 		</dependency>
@@ -88,6 +84,16 @@
 		</dependency>
 
 		<!--
+		lombok is needed for some utility classes in org.hl7.fhir.dstu2
+		-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!--
 		Gson is needed for some utility classes in org.hl7.fhir.dstu2, so
 		this is necessary for the JavaDocs to build
 		-->
@@ -96,41 +102,17 @@
 			<artifactId>gson</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.32</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlets</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-util</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -153,23 +135,18 @@
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-schematron</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
+			<groupId>com.helger.schematron</groupId>
+			<artifactId>ph-schematron-xslt</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+			<groupId>jakarta.activation</groupId>
+			<artifactId>jakarta.activation-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -275,13 +252,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
@@ -295,7 +265,7 @@
 						</Fragment-Host>
 						-->
 						<Import-Package>
-							javax.servlet*;resolution:=optional,
+							jakarta.servlet*;resolution:=optional,
 							*
 						</Import-Package>
 					</instructions>

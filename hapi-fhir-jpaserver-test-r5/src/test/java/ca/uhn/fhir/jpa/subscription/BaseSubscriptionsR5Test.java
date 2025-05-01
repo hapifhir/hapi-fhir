@@ -24,11 +24,14 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -44,9 +47,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -56,20 +56,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Disabled("abstract")
 public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "http://example.com/topic/test";
-
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
+	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();
 	protected static int ourListenerPort;
+	protected static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
 	private static String ourListenerServerBase;
-	protected static RestfulServer ourListenerRestServer;
+	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
@@ -77,17 +79,14 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
-	private SingleQueryCountHolder myCountHolder;
-	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();
-	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
-	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
-	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@Override
 	@BeforeEach
@@ -264,16 +263,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return retval;
 	}
 
-	@AfterAll
-	public static void reportTotalSelects() {
-		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
-	}
-
-	private static QueryCount getQueryCount() {
-		return ourCountHolder.getQueryCountMap().get("");
-	}
-
-
 	protected void waitForRegisteredSubscriptionTopicCount(int theTarget) {
 		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
 	}
@@ -283,7 +272,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		if (size == theTarget) {
 			return true;
 		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		mySubscriptionTopicLoader.doSyncResourcesForUnitTest();
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
@@ -294,13 +283,22 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return retval;
 	}
 
+	@AfterAll
+	public static void reportTotalSelects() {
+		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
+	}
+
+	private static QueryCount getQueryCount() {
+		return ourCountHolder.getQueryCountMap().get("");
+	}
+
 	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
 		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
 		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertEquals(1, notificationEvents.size());
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
 		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
@@ -334,10 +332,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 
 	static class TestSystemProvider {
-		AtomicInteger count = new AtomicInteger(0);
 		final List<Bundle> receivedBundles = new ArrayList<>();
 		final List<String> receivedContentTypes = new ArrayList<>();
 		final List<String> myHeaders = new ArrayList<>();
+		AtomicInteger count = new AtomicInteger(0);
 
 		@Transaction
 		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {

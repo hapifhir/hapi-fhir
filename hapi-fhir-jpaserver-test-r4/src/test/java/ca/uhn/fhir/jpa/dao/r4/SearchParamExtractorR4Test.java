@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -50,16 +51,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SearchParamExtractorR4Test implements ITestDataBuilder {
@@ -77,7 +69,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
-		assertEquals(1, tokens.size());
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertEquals("category", token.getParamName());
 		assertEquals("SYSTEM", token.getSystem());
@@ -98,7 +90,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
 		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
-		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great"));
+		assertThat(nameValues).containsExactlyInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great");
 	}
 
 	@Test
@@ -108,7 +100,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
-		assertEquals(1, tokens.size());
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertEquals("context-type", token.getParamName());
 		assertEquals("http://system", token.getSystem());
@@ -127,7 +119,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertEquals(2, tokens.size());
+		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertEquals("code", token.getParamName());
@@ -141,7 +133,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	@Test
 	public void testTokenText_DisabledInSearchParam_Coding() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("code");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -156,7 +148,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertEquals(1, tokens.size());
+		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertEquals("code", token.getParamName());
@@ -180,7 +172,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertEquals(1, tokens.size());
+		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertEquals("code", token.getParamName());
@@ -194,7 +186,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("code");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(false)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -209,7 +201,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertEquals(2, tokens.size());
+		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertEquals("code", token.getParamName());
@@ -228,10 +220,10 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location", null);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
-		assertEquals(1, links.size());
+		assertThat(links).hasSize(1);
 		assertEquals("location", links.iterator().next().getSearchParamName());
 		assertEquals("Encounter.location.location", links.iterator().next().getPath());
 		assertEquals("Location/123", ((Reference) links.iterator().next().getRef()).getReference());
@@ -243,10 +235,10 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		consent.setSource(new Reference().setReference("Consent/999"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE, null);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
-		assertEquals(1, links.size());
+		assertThat(links).hasSize(1);
 		assertEquals("Consent.source", links.iterator().next().getPath());
 		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
 	}
@@ -258,10 +250,10 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		p.addIdentifier().setSystem("sys").setValue("val");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER, null);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
-		assertEquals(1, params.size());
+		assertThat(params).hasSize(1);
 		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
 		assertEquals("identifier", paramValue.getParamName());
 		assertEquals("sys", paramValue.getSystem());
@@ -281,7 +273,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient, false);
-		assertEquals(1, links.size());
+		assertThat(links).hasSize(1);
 
 	}
 
@@ -298,7 +290,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
-		assertEquals(4, links.size());
+		assertThat(links).hasSize(4);
 	}
 
 	@Test
@@ -316,7 +308,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
-		assertEquals(2, links.size());
+		assertThat(links).hasSize(2);
 
 	}
 
@@ -333,12 +325,12 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
 			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("component-value-quantity");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("component-value-quantity");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
 
-		assertEquals(2, list.size());
+		assertThat(list).hasSize(2);
 	}
 
 	@Test
@@ -371,16 +363,10 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.stream()
 			.map(t->(ResourceIndexedSearchParamToken)t)
 			.collect(Collectors.toList());
-		list.forEach(t->t.calculateHashes());
-		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		list.forEach(ResourceIndexedSearchParamToken::calculateHashes);
+		ourLog.info("Found tokens:\n * {}", list.stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
 
-		assertThat(list, containsInAnyOrder(
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
-		));
+		assertThat(list).containsExactlyInAnyOrder(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"), new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2"));
 
 	}
 
@@ -460,13 +446,15 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
 
-			assertThat(c, not(empty()));
-			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("searchParamName", equalTo("component-code-value-concept"))));
+			assertThat(c).isNotEmpty();
+			assertThat(c).as("Extracts standard R4 composite sp")
+				.extracting("searchParamName")
+				.contains("component-code-value-concept");
 
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.collect(Collectors.toList());
-			assertThat("one components per element", components, hasSize(3));
+			assertThat(components).as("one components per element").hasSize(3);
 
 		}
 
@@ -483,20 +471,20 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.toList();
-			assertThat(components, hasSize(1));
+			assertThat(components).hasSize(1);
 			ResourceIndexedSearchParamComposite componentCodeValueConcept = components.get(0);
 
 			// component-code-value-concept is two token params - component-code and component-value-concept
 			List<ResourceIndexedSearchParamComposite.Component> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
-			assertThat("component-code-value-concept has two sub-params", indexedComponentsOfElement, hasSize(2));
+			assertThat(indexedComponentsOfElement).as("component-code-value-concept has two sub-params").hasSize(2);
 
 			final ResourceIndexedSearchParamComposite.Component component0 = indexedComponentsOfElement.get(0);
-			assertThat(component0.getSearchParamName(), equalTo("component-code"));
-			assertThat(component0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+			assertEquals("component-code", component0.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, component0.getSearchParameterType());
 
 			final ResourceIndexedSearchParamComposite.Component component1 = indexedComponentsOfElement.get(1);
-			assertThat(component1.getSearchParamName(), equalTo("component-value-concept"));
-			assertThat(component1.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+			assertEquals("component-value-concept", component1.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, component1.getSearchParameterType());
 		}
 
 		@Test
@@ -512,31 +500,31 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
 				.toList();
-			assertThat(components, hasSize(1));
+			assertThat(components).hasSize(1);
 			ResourceIndexedSearchParamComposite spEntry = components.get(0);
 
 			// this SP has two sub-components
-			assertThat(spEntry.getComponents(), hasSize(2));
+			assertThat(spEntry.getComponents()).hasSize(2);
 
 			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);
-			assertThat(indexComponent0.getSearchParamName(), notNullValue());
-			assertThat(indexComponent0.getSearchParamName(), equalTo("component-code"));
-			assertThat(indexComponent0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
-			assertThat(indexComponent0.getParamIndexValues(), hasSize(2));
+			assertNotNull(indexComponent0.getSearchParamName());
+			assertEquals("component-code", indexComponent0.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, indexComponent0.getSearchParameterType());
+			assertThat(indexComponent0.getParamIndexValues()).hasSize(2);
 			// token indexes both the token, and the display text
 			ResourceIndexedSearchParamToken tokenIdx0 = (ResourceIndexedSearchParamToken) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamToken)
 				.findFirst().orElseThrow();
-			assertThat(tokenIdx0.getParamName(), equalTo("component-code"));
-			assertThat(tokenIdx0.getResourceType(), equalTo("Observation"));
-			assertThat(tokenIdx0.getValue(), equalTo("code_token"));
+			assertEquals("component-code", tokenIdx0.getParamName());
+			assertEquals("Observation", tokenIdx0.getResourceType());
+			assertEquals("code_token", tokenIdx0.getValue());
 
 			ResourceIndexedSearchParamString tokenDisplayIdx0 = (ResourceIndexedSearchParamString) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamString)
 				.findFirst().orElseThrow();
-			assertThat(tokenDisplayIdx0.getParamName(), equalTo("component-code"));
-			assertThat(tokenDisplayIdx0.getResourceType(), equalTo("Observation"));
-			assertThat(tokenDisplayIdx0.getValueExact(), equalTo("display value"));
+			assertEquals("component-code", tokenDisplayIdx0.getParamName());
+			assertEquals("Observation", tokenDisplayIdx0.getResourceType());
+			assertEquals("display value", tokenDisplayIdx0.getValueExact());
 		}
 	}
 

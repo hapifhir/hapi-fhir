@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
+import ca.uhn.fhir.jpa.subscription.channel.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -49,11 +51,33 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 
 				@Override
 				public void afterCommit() {
-					myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+					doSubmitResourceModified(theResourceModifiedMessage);
 				}
 			});
 		} else {
+			doSubmitResourceModified(theResourceModifiedMessage);
+		}
+	}
+
+	/**
+	 * Submit the message through the broker channel to the matcher.
+	 *
+	 * Note: most of our integrated tests for subscription assume we can successfully inflate the message and therefore
+	 * does not run with an actual database to persist the data. In these cases, submitting the complete message (i.e.
+	 * with payload) is OK. However, there are a few tests that do not assume it and do run with an actual DB. For them,
+	 * we should null out the payload body before submitting. This try-catch block only covers the case where the
+	 * payload is too large, which is enough for now. However, for better practice we might want to consider splitting
+	 * this interceptor into two, each for tests with/without DB connection.
+	 * @param theResourceModifiedMessage
+	 */
+	private void doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
+		try {
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+		} catch (MessageDeliveryException e) {
+			if (e.getCause() instanceof PayloadTooLargeException) {
+				theResourceModifiedMessage.setPayloadToNull();
+				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+			}
 		}
 	}
 }

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5834
+title: "Profiles of Device resources present in IGs would cause a failure during IG installation. This has now been fixed. Thanks to @jkiddo for the contribution!"

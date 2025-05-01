@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 6489
+title: "Change the migrator to avoid table locks when adding an index.  This allows systems to continue running during upgrade."

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -19,10 +21,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.function.Supplier;
 
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -78,6 +80,7 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 		//they are coming from an external HTTP Request.
 		MockitoAnnotations.initMocks(this);
 		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorBroadcaster);
+		when(myMockInterceptorBroadcaster.callHooks(any(Pointcut.class), any(HookParams.class))).thenReturn(true);
 		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
 		when(myMockSrd.getServer()).thenReturn(myMockRestfulServer);
 		when(myMockSrd.getRequestId()).thenReturn("MOCK_REQUEST");

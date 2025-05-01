@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
-import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -303,12 +303,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-			if (retVal.getDeleted() == null) {
-				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-				myTerminologySvc.storeTermValueSet(retVal, valueSet);
-			} else {
-				myTerminologySvc.deleteValueSetAndChildren(retVal);
+		if (thePerformIndexing) {
+			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+				if (retVal.getDeleted() == null) {
+					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+					myTerminologySvc.storeTermValueSet(retVal, valueSet);
+				} else {
+					myTerminologySvc.deleteValueSetAndChildren(retVal);
+				}
 			}
 		}
 

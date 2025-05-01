@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * The data required for the create transition.
@@ -37,6 +36,7 @@ public class WorkChunkCreateEvent {
 	public final String instanceId;
 	public final int sequence;
 	public final String serializedData;
+	public final boolean isGatedExecution;
 
 	/**
 	 * Constructor
@@ -53,20 +53,28 @@ public class WorkChunkCreateEvent {
 			@Nonnull String theTargetStepId,
 			@Nonnull String theInstanceId,
 			int theSequence,
-			@Nullable String theSerializedData) {
+			@Nullable String theSerializedData,
+			boolean theGatedExecution) {
 		jobDefinitionId = theJobDefinitionId;
 		jobDefinitionVersion = theJobDefinitionVersion;
 		targetStepId = theTargetStepId;
 		instanceId = theInstanceId;
 		sequence = theSequence;
 		serializedData = theSerializedData;
+		isGatedExecution = theGatedExecution;
 	}
 
+	/**
+	 * Creates the WorkChunkCreateEvent for the first chunk of a job.
+	 */
 	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null);
+		// the first chunk of a job is always READY, no matter whether the job is gated
+		boolean isGatedExecution = false;
+		return new WorkChunkCreateEvent(
+				jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null, isGatedExecution);
 	}
 
 	@Override
@@ -84,6 +92,7 @@ public class WorkChunkCreateEvent {
 				.append(instanceId, that.instanceId)
 				.append(sequence, that.sequence)
 				.append(serializedData, that.serializedData)
+				.append(isGatedExecution, that.isGatedExecution)
 				.isEquals();
 	}
 
@@ -96,6 +105,7 @@ public class WorkChunkCreateEvent {
 				.append(instanceId)
 				.append(sequence)
 				.append(serializedData)
+				.append(isGatedExecution)
 				.toHashCode();
 	}
 }

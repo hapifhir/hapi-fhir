@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5623
+backport: 6.10.5
+title: "Previously, searches that used more than one chained `Bundle` `SearchParameter` (i.e. `Composition`) were only 
+adding one condition to the underlying SQL query which resulted in incorrect search results. This has been fixed."

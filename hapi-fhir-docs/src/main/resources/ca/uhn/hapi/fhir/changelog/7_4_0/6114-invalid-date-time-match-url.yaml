@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6094
+jira: SMILE-8693
+title: "Searching or conditional creating/updating with a timestamp with an offset containing '+' fails with HAPI-1883.
+        For example: 'Observation?date=2024-07-08T20:47:12.123+03:30'
+        This has been fixed."

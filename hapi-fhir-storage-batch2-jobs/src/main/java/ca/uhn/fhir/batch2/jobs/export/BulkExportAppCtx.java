@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";
+	public static final String CREATE_REPORT_STEP = "create-report-step";
 
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
@@ -65,7 +65,7 @@ public class BulkExportAppCtx {
 						writeBinaryStep())
 				// finalize the job (set to complete)
 				.addFinalReducerStep(
-						"create-report-step",
+						CREATE_REPORT_STEP,
 						"Creates the output report from a bulk export job",
 						BulkExportJobResults.class,
 						createReportStep())
@@ -119,23 +119,31 @@ public class BulkExportAppCtx {
 		return new FetchResourceIdsStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public ExpandResourcesStep expandResourcesStep() {
 		return new ExpandResourcesStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public WriteBinaryStep writeBinaryStep() {
 		return new WriteBinaryStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 2 of the bulk export job definition
+	 */
 	@Bean
 	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
 		return new ExpandResourceAndWriteBinaryStep();
 	}
 
 	@Bean
-	@Scope("prototype")
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
 	}

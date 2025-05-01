@@ -22,10 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
@@ -147,9 +144,9 @@ public class SearchParameterCanonicalizerTest {
 		assertEquals("chef", output.getName());
 		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
-		assertThat(output.getPathsSplit(), containsInAnyOrder("Meal.chef", "Observation.subject"));
-		assertThat(output.getBase(), containsInAnyOrder("Meal", "Patient"));
-		assertThat(output.getTargets(), contains("Chef", "Observation"));
+		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
+		assertThat(output.getBase()).containsExactlyInAnyOrder("Meal", "Patient");
+		assertThat(output.getTargets()).containsExactly("Chef", "Observation");
 	}
 
 	@ParameterizedTest
@@ -185,16 +182,16 @@ public class SearchParameterCanonicalizerTest {
 		assertEquals("chef", output.getName());
 		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
-		assertThat(output.getPathsSplit(), containsInAnyOrder("Meal.chef", "Observation.subject"));
+		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
 		// DSTU2 Resources must only have 1 base
 		if ("Dstu2".equals(version)){
-			assertThat(output.getBase(), containsInAnyOrder("Meal"));
+			assertThat(output.getBase()).containsExactlyInAnyOrder("Meal");
 		} else {
-			assertThat(output.getBase(), containsInAnyOrder("Meal", "Patient"));
+			assertThat(output.getBase()).containsExactlyInAnyOrder("Meal", "Patient");
 		}
-		assertThat(output.getTargets(), containsInAnyOrder("Chef", "Observation"));
-		assertThat(output.getBase(), not(contains("Resource")));
-		assertThat(output.getTargets(), not(contains("Resource")));
+		assertThat(output.getTargets()).containsExactlyInAnyOrder("Chef", "Observation");
+		assertThat(output.getBase()).doesNotContain("Resource");
+		assertThat(output.getTargets()).doesNotContain("Resource");
 	}
 
 }

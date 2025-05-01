@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,21 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	IPartitionLookupSvc myPartitionConfigSvc;
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
+		List<Integer> partitionIds = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
 			PartitionEntity partition;
 			Integer id = theRequestPartitionId.getPartitionIds().get(i);
 			if (id == null) {
 				partition = null;
+				if (myPartitionSettings.getDefaultPartitionId() != null) {
+					if (partitionIds == null) {
+						partitionIds = new ArrayList<>(theRequestPartitionId.getPartitionIds());
+					}
+					partitionIds.set(i, myPartitionSettings.getDefaultPartitionId());
+				}
 			} else {
 				try {
 					partition = myPartitionConfigSvc.getPartitionById(id);
@@ -59,7 +66,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				}
 			}
 
-			if (theRequestPartitionId.getPartitionNames() != null) {
+			if (theRequestPartitionId.hasPartitionNames()) {
 				if (partition == null) {
 					Validate.isTrue(
 							theRequestPartitionId.getPartitionIds().get(i) == null,
@@ -68,8 +75,8 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				} else {
 					Validate.isTrue(
 							Objects.equals(
-									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition name %s does not match ID %n",
+									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
+							"Partition name %s does not match ID %s",
 							theRequestPartitionId.getPartitionNames().get(i),
 							theRequestPartitionId.getPartitionIds().get(i));
 				}
@@ -86,15 +93,19 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 		}
 
 		if (names != null) {
+			List<Integer> partitionIdsToUse = theRequestPartitionId.getPartitionIds();
+			if (partitionIds != null) {
+				partitionIdsToUse = partitionIds;
+			}
 			return RequestPartitionId.forPartitionIdsAndNames(
-					names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
+					names, partitionIdsToUse, theRequestPartitionId.getPartitionDate());
 		}
 
 		return theRequestPartitionId;
 	}
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
@@ -113,18 +124,18 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 			}
 
 			if (theRequestPartitionId.hasPartitionIds()) {
+				Integer partitionId = theRequestPartitionId.getPartitionIds().get(i);
 				if (partition == null) {
 					Validate.isTrue(
-							theRequestPartitionId.getPartitionIds().get(i) == null,
+							partitionId == null || partitionId.equals(myPartitionSettings.getDefaultPartitionId()),
 							"Partition %s must not have an ID",
 							JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
 					Validate.isTrue(
-							Objects.equals(
-									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition name %s does not match ID %n",
-							theRequestPartitionId.getPartitionNames().get(i),
-							theRequestPartitionId.getPartitionIds().get(i));
+							Objects.equals(partitionId, partition.getId()),
+							"Partition ID %s does not match name %s",
+							partitionId,
+							theRequestPartitionId.getPartitionNames().get(i));
 				}
 			} else {
 				if (ids == null) {
@@ -133,7 +144,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				if (partition != null) {
 					ids.add(partition.getId());
 				} else {
-					ids.add(null);
+					ids.add(myPartitionSettings.getDefaultPartitionId());
 				}
 			}
 		}

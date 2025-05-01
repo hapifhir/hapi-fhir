@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,5 +31,13 @@ public enum ColumnTypeEnum {
 	BLOB,
 	CLOB,
 	DOUBLE,
-	TEXT;
+
+	/**
+	 * Unlimited length text, with a column definition containing the annotation:
+	 * <code>@Column(length=Integer.MAX_VALUE)</code>
+	 */
+	TEXT,
+	/** Long inline binary */
+	BINARY,
+	BIG_DECIMAL;
 }
