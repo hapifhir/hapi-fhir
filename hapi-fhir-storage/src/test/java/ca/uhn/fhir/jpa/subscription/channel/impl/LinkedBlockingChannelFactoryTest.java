@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelProducer;
+import ca.uhn.fhir.broker.jms.ISpringMessagingChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ class LinkedBlockingChannelFactoryTest {
 
 	private static final String TEST_CHANNEL_NAME = "test-channel-name";
 	private static final String TEST_PAYLOAD = "payload";
-	LinkedBlockingChannelFactory myChannelFactory = new LinkedBlockingChannelFactory((name, settings) -> name);
+	LinkedBlockingChannelFactory myChannelFactory = new LinkedBlockingChannelFactory((name, settings) -> name, new RetryPolicyProvider());
 	private List<String> myReceivedPayloads;
 	private PointcutLatch[] myHandlerCanProceedLatch = {
 		new PointcutLatch("first delivery"),
@@ -136,11 +136,11 @@ class LinkedBlockingChannelFactoryTest {
 		myHandlerCanProceedLatch[theIndex].call("");
 	}
 
-	private IChannelProducer buildChannels(Runnable theCallback) {
+	private ISpringMessagingChannelProducer buildChannels(Runnable theCallback) {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setConcurrentConsumers(1);
-		IChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
-		IChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
+		ISpringMessagingChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, channelSettings);
+		ISpringMessagingChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, new ChannelConsumerSettings());
 		reciever.subscribe(msg -> {
 			theCallback.run();
 			myReceivedPayloads.add((String) msg.getPayload());

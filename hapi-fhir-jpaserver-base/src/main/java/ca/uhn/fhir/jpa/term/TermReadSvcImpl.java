@@ -309,12 +309,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			Set<String> theAddedCodes,
 			TermConcept theConcept,
+			String theConceptDisplayValue,
 			boolean theAdd,
 			String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
 		String codeSystemVersion = theConcept.getCodeSystemVersion().getCodeSystemVersionId();
 		String code = theConcept.getCode();
-		String display = theConcept.getDisplay();
 		Long sourceConceptPid = theConcept.getId();
 		String directParentPids = "";
 
@@ -325,31 +325,22 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
+
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
-		} else {
-			return addCodeIfNotAlreadyAdded(
-					theValueSetCodeAccumulator,
-					theAddedCodes,
-					designations,
-					theAdd,
-					codeSystem,
-					code,
-					display,
-					sourceConceptPid,
-					directParentPids,
-					codeSystemVersion);
+			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
 		}
+
+		return addCodeIfNotAlreadyAdded(
+				theValueSetCodeAccumulator,
+				theAddedCodes,
+				designations,
+				theAdd,
+				codeSystem,
+				code,
+				theConceptDisplayValue,
+				sourceConceptPid,
+				directParentPids,
+				codeSystemVersion);
 	}
 
 	private boolean addCodeIfNotAlreadyAdded(
@@ -1198,11 +1189,12 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					for (TermConcept concept : termConcepts) {
 						count++;
 						countForBatch++;
+						String conceptDisplayValue = concept.getDisplay();
 						if (theAdd && searchProps.hasIncludeOrExcludeCodes()) {
 							ValueSet.ConceptReferenceComponent theIncludeConcept =
 									getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
 							if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
-								concept.setDisplay(theIncludeConcept.getDisplay());
+								conceptDisplayValue = theIncludeConcept.getDisplay();
 							}
 						}
 						boolean added = addCodeIfNotAlreadyAdded(
@@ -1210,6 +1202,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 								theValueSetCodeAccumulator,
 								theAddedCodes,
 								concept,
+								conceptDisplayValue,
 								theAdd,
 								includeOrExcludeVersion);
 						if (added) {
@@ -2209,12 +2202,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, append);
+		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
 	}
 
-	private CodeValidationResult createFailureCodeValidationResult(
+	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
 			String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
 		String theMessage = "Unable to validate code " + theSystem + "#" + theCode + theAppend;
+		// The InstanceValidator (core) will change the severity based on the binding strength
 		return new CodeValidationResult()
 				.setSeverity(IssueSeverity.ERROR)
 				.setCodeSystemVersion(theCodeSystemVersion)
@@ -2222,8 +2216,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.addIssue(new CodeValidationIssue(
 						theMessage,
 						IssueSeverity.ERROR,
-						CodeValidationIssueCode.CODE_INVALID,
-						CodeValidationIssueCoding.INVALID_CODE));
+						CodeValidationIssueCode.NOT_FOUND,
+						CodeValidationIssueCoding.NOT_FOUND));
 	}
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(
@@ -2912,7 +2906,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			}
 		}
 
-		return createFailureCodeValidationResult(
+		return createCodeNotFoundErrorForValidationResult(
 				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
@@ -2962,7 +2956,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						valueSet);
 			} else {
 				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+				retVal = createCodeNotFoundErrorForValidationResult(theCodeSystem, theCode, null, append);
 			}
 		}
 

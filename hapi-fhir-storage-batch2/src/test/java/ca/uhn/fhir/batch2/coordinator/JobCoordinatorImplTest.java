@@ -20,11 +20,19 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.broker.SynchronousLinkedBlockingChannelFactory;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -64,8 +72,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JobCoordinatorImplTest extends BaseBatch2Test {
-	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
 	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
+	private final IInterceptorBroadcaster myInterceptorBroadcaster = new InterceptorService();
+
+
+	private static final String BATCH_CHANNEL_NAME = JobCoordinatorImplTest.class.getName()+"_BATCH_CHANNEL_NAME";
+
 	private JobCoordinatorImpl mySvc;
 	@Mock
 	private BatchJobSender myBatchJobSender;
@@ -90,14 +102,28 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<JobDefinition> myJobDefinitionCaptor;
 	@Captor
 	private ArgumentCaptor<String> myParametersJsonCaptor;
+	private IChannelProducer<JobWorkNotification> myJobProducer;
+	private IChannelConsumer<JobWorkNotification> myJobConsumer;
 
 
 	@BeforeEach
 	public void beforeEach() {
+		IChannelNamer channelNamer = (name, settings) -> name;
+		SynchronousLinkedBlockingChannelFactory myLinkedBlockingChannelFactory = new SynchronousLinkedBlockingChannelFactory(channelNamer, new RetryPolicyProvider());
+		LinkedBlockingBrokerClient myLinkedBlockingBrokerClient = new LinkedBlockingBrokerClient(channelNamer);
+		myLinkedBlockingBrokerClient.setLinkedBlockingChannelFactory(myLinkedBlockingChannelFactory);
+
+		myJobProducer = myLinkedBlockingBrokerClient.getOrCreateProducer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
+
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService());
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
+		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
+			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster);
+
+		myJobConsumer = myLinkedBlockingBrokerClient.getOrCreateConsumer(BATCH_CHANNEL_NAME, JobWorkNotificationJsonMessage.class, workChannelMessageListener, new ChannelConsumerSettings());
+
+		mySvc = new JobCoordinatorImpl(myJobInstancePersister, myJobDefinitionRegistry, myTransactionService);
 	}
 
 	@AfterEach
@@ -131,11 +157,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			sink.accept(new TestJobStep2InputType("data value 1b", "data value 2b"));
 			return new RunOutcome(50);
 		});
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Verify
 
@@ -195,7 +220,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
 		assertThat(req.getStatuses()).hasSize(2);
 		assertThat(req.getStatuses().contains(StatusEnum.IN_PROGRESS)
-				&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
+			&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
 	}
 
 	@Test
@@ -212,11 +237,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			return new RunOutcome(50);
 		};
 		when(myStep1Worker.run(any(), any())).thenAnswer(answer);
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Verify
 
@@ -239,11 +263,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenReturn(new RunOutcome(50));
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 
@@ -271,11 +294,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 				return RunOutcome.SUCCESS;
 			}
 		});
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 
@@ -309,11 +331,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			sink.recoveredError("Error message 2");
 			return new RunOutcome(50);
 		});
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 
@@ -335,11 +356,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenReturn(new RunOutcome(50));
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
 
@@ -364,10 +384,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			sink.accept(new VoidModel());
 			return new RunOutcome(50);
 		});
-		mySvc.start();
 
 		// Execute
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
 		verify(myStep3Worker, times(1)).run(myStep3ExecutionDetailsCaptor.capture(), any());
@@ -381,17 +400,16 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		String exceptionMessage = "badbadnotgood";
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenThrow(new JobExecutionFailedException(exceptionMessage));
-		mySvc.start();
 
 		// Execute
 
 		try {
-			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+			myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 			fail();
 		} catch (MessageDeliveryException e) {
 
 			// Verify
-			assertEquals(exceptionMessage, e.getMostSpecificCause().getMessage());
+			assertEquals(exceptionMessage, e.getCause().getMessage());
 		}
 
 	}
@@ -409,11 +427,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(JOB_DEFINITION_ID, 1)).thenReturn(jobDefinition);
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.empty());
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 		verifyNoMoreInteractions(myStep1Worker);
@@ -434,11 +451,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		WorkChunk chunk = createWorkChunkStep2();
 		chunk.setData((String) null);
 		setupMocks(createJobDefinition(), chunk);
-		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+		myJobProducer.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 		verifyNoMoreInteractions(myStep1Worker);

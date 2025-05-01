@@ -23,6 +23,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrServiceMethod extends BaseCdsCrMethod implements ICdsServiceMethod {
 	private final CdsServiceJson myCdsServiceJson;
 

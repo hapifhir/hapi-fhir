@@ -19,13 +19,15 @@
  */
 package ca.uhn.fhir.jpa.mdm.broker;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -35,17 +37,17 @@ import org.springframework.stereotype.Service;
 public class MdmQueueConsumerLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private final IChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
 	private final IMdmSettings myMdmSettings;
-	private final MdmMessageHandler myMdmMessageHandler;
+	private final MdmMessageListener myMdmMessageListener;
 
-	protected IChannelReceiver myMdmChannel;
+	protected IChannelConsumer<ResourceModifiedMessage> myMdmConsumer;
 
 	public MdmQueueConsumerLoader(
-			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
-		myChannelFactory = theChannelFactory;
+			IBrokerClient theBrokerClient, IMdmSettings theMdmSettings, MdmMessageListener theMdmMessageListener) {
+		myBrokerClient = theBrokerClient;
 		myMdmSettings = theMdmSettings;
-		myMdmMessageHandler = theMdmMessageHandler;
+		myMdmMessageListener = theMdmMessageListener;
 
 		if (myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY) {
 			ourLog.info("MDM running in {} mode. MDM channel consumer disabled.", myMdmSettings.getMode());
@@ -60,21 +62,20 @@ public class MdmQueueConsumerLoader {
 	}
 
 	private void startListeningToMdmChannel() {
-		if (myMdmChannel == null) {
+		if (myMdmConsumer == null) {
 			ChannelConsumerSettings config = getChannelConsumerSettings();
 
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 
-			myMdmChannel = myChannelFactory.getOrCreateReceiver(
-					IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
-			if (myMdmChannel == null) {
+			myMdmConsumer = myBrokerClient.getOrCreateConsumer(
+					IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, myMdmMessageListener, config);
+			if (myMdmConsumer == null) {
 				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
 			} else {
-				myMdmChannel.subscribe(myMdmMessageHandler);
 				ourLog.info(
 						"MDM Matching Consumer subscribed to Matching Channel {} with name {}",
-						myMdmChannel.getClass().getName(),
-						myMdmChannel.getName());
+						myMdmConsumer.getClass().getName(),
+						myMdmConsumer.getChannelName());
 			}
 		}
 	}
@@ -82,18 +83,12 @@ public class MdmQueueConsumerLoader {
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void stop() throws Exception {
-		if (myMdmChannel != null) {
-			// JMS channel needs to be destroyed to avoid dangling receivers
-			myMdmChannel.destroy();
-			ourLog.info(
-					"MDM Matching Consumer unsubscribed from Matching Channel {} with name {}",
-					myMdmChannel.getClass().getName(),
-					myMdmChannel.getName());
-		}
+		IoUtils.closeQuietly(myMdmConsumer, ourLog);
+		ourLog.info("MDM Matching Consumer closed");
 	}
 
 	@VisibleForTesting
-	public IChannelReceiver getMdmChannelForUnitTest() {
-		return myMdmChannel;
+	public IChannelConsumer<ResourceModifiedMessage> getMdmChannelConsumerForUnitTest() {
+		return myMdmConsumer;
 	}
 }

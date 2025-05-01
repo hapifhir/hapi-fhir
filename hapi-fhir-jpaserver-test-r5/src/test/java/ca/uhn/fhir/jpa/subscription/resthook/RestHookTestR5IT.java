@@ -1,18 +1,15 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,23 +25,25 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionStatus;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -56,13 +55,13 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	private static final String CUSTOM_URL = "http://custom.topic.url";
 
 	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 	}
 
 	@Test
@@ -363,9 +362,9 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		createTopicSubscription();
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", false);
@@ -382,7 +381,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionDeliveredLatch.awaitExpected();
 
 		awaitUntilReceivedTransactionCount(2);
@@ -412,9 +411,9 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		postSubscription(subscription);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", false);
@@ -430,7 +429,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionDeliveredLatch.awaitExpected();
 
 		assertTrue(getReceivedObservations().stream().allMatch(t -> "2".equals(t.getIdElement().getVersionIdPart())));

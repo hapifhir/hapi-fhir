@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6885
+title: "When querying for an NPM resource that is not found, the error is not clear.
+        This has been fixed with a proper HAPI error code and a clear message."

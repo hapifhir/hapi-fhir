@@ -86,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1022,9 +1023,12 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors).hasSize(1);
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found", errors.get(0).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertThat(errors).hasSize(2);
+		assertThat(errors.stream())
+			.anyMatch(r ->
+				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
+
 	}
 
 	@Test
@@ -1285,7 +1289,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 

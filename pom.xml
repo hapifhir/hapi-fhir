@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.3.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -126,7 +126,7 @@
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
 		<module>hapi-fhir-server-cds-hooks</module>
-        <module>hapi-fhir-jpa-hibernate-services</module>
+		<module>hapi-fhir-jpa-hibernate-services</module>
     </modules>
 
 	<dependencies>
@@ -969,6 +969,30 @@
 			<name>Mangala Ekanayake</name>
 			<organization>Cambio</organization>
 		</developer>
+		<developer>
+			<id>elavy-harris</id>
+			<name>Eliott Lavy</name>
+			<organization>Harris</organization>
+		</developer>
+		<developer>
+			<id>krauzer</id>
+			<name>Dylan Krause</name>
+			<organization>Corbalt</organization>
+		</developer>
+		<developer>
+			<id>xmhorsehead</id>
+			<name>Xun Ma</name>
+			<organization>CSIRO</organization>
+		</developer>
+		<developer>
+			<id>berkant-k</id>
+			<name>Berkant Karduman</name>
+			<organization>TigaHealth</organization>
+		</developer>
+		<developer>
+			<id>xytis</id>
+			<name>Vytis Valentinavičius</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -979,7 +1003,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.4.0</fhir_core_version>
+		<fhir_core_version>6.5.18</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
@@ -1016,7 +1040,7 @@
 		<commons_lang3_version>3.17.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<error_prone_core_version>2.36.0</error_prone_core_version>
-		<mockito_version>5.8.0</mockito_version>
+		<mockito_version>5.17.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>33.2.1-jre</guava_version>
 		<gson_version>2.8.9</gson_version>
@@ -1024,7 +1048,7 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
-		<jena_version>4.9.0</jena_version>
+		<jena_version>5.3.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>12.0.15</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
@@ -1032,7 +1056,7 @@
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.12</logback_version>
+		<logback_version>1.5.16</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1084,16 +1108,16 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.15.3</elasticsearch_version>
-		<ucum_version>1.0.8</ucum_version>
+		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
 		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
@@ -1662,6 +1686,11 @@
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
+				<version>${jena_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-shex</artifactId>
 				<version>${jena_version}</version>
 			</dependency>
 			<dependency>
@@ -2495,7 +2524,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.13.0</version>
+					<version>3.14.0</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
@@ -2661,14 +2690,14 @@
 					<version>1.24</version>
 					<configuration>
 						<signature>
-							<groupId>net.sf.androidscents.signature</groupId>
-							<artifactId>android-api-level-26</artifactId>
-							<version>8.0.0_r2</version>
+							<groupId>com.toasttab.android</groupId>
+							<artifactId>gummy-bears-api-34</artifactId>
+							<version>0.12.0</version>
 						</signature>
 					</configuration>
 					<executions>
 						<execution>
-							<id>check-android-26-compliance</id>
+							<id>check-android-34-compliance</id>
 							<phase>test</phase>
 							<goals>
 								<goal>check</goal>

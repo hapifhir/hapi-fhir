@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6599
+jira: SMILE-9237
+title: "Previously, attempting to restart the Storage module would result in a `NullPointerException` when partition 
+selection mode was set to `PATIENT_ID`, mass ingestion was enabled, and at least one Search Parameter was disabled. This 
+has now been fixed."

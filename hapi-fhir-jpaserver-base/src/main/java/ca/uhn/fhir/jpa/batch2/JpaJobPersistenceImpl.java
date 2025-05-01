@@ -56,7 +56,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -200,6 +199,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setReport(theInstance.getReport());
 		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
 		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
+		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -381,15 +381,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(
 					chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-			Validate.isTrue(changeCount > 0, "changed chunk matching %s", chunkId);
+			Validate.isTrue(changeCount > 0, "No changed chunk matching %s", chunkId);
 
-			Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity " + "set myStatus = :failed "
-					+ ",myErrorMessage = CONCAT('Too many errors: ', CAST(myErrorCount as string), '. Last error msg was ', myErrorMessage) "
-					+ "where myId = :chunkId and myErrorCount > :maxCount");
-			query.setParameter("chunkId", chunkId);
-			query.setParameter("failed", WorkChunkStatusEnum.FAILED);
-			query.setParameter("maxCount", MAX_CHUNK_ERROR_COUNT);
-			int failChangeCount = query.executeUpdate();
+			int failChangeCount = myWorkChunkRepository.updateChunkForTooManyErrors(
+					WorkChunkStatusEnum.FAILED, chunkId, MAX_CHUNK_ERROR_COUNT, ERROR_MSG_MAX_LENGTH);
 
 			if (failChangeCount > 0) {
 				return WorkChunkStatusEnum.FAILED;

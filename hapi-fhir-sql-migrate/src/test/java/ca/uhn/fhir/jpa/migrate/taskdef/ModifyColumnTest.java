@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -353,7 +355,30 @@ public class ModifyColumnTest extends BaseTest {
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
 		getMigrator().migrate();
-
 	}
 
+	@Nested
+	public class SqlFeatures{
+
+		@Test
+		public void testIncreaseColumnSize_onOracleDb_willIncludeColumnSemantic() throws SQLException {
+			// given
+			ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
+			task.setTableName("SOMETABLE");
+			task.setColumnName("SOMECOLUMN");
+			task.setColumnType(ColumnTypeEnum.STRING);
+			task.setColumnLength(200);
+			task.setNullable(true);
+			task.setDriverType(DriverTypeEnum.ORACLE_12C);
+
+			// this is the definition of the column before the migration
+			JdbcUtils.ColumnType columnType = new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 100);
+
+			// when
+			List<String> sqlStringsToExecute = task.generateSql(columnType, true);
+
+			// then
+			assertThat(sqlStringsToExecute.get(0)).isEqualTo("alter table SOMETABLE modify ( SOMECOLUMN varchar2(200 char)  )");
+		}
+	}
 }

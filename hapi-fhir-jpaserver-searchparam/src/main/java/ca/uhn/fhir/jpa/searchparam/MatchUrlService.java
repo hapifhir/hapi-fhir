@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -59,7 +60,7 @@ public class MatchUrlService {
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
-		List<NameValuePair> parameters = UrlUtil.translateMatchUrl(theMatchUrl);
+		List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(theMatchUrl);
 
 		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
 		for (NameValuePair next : parameters) {
@@ -223,15 +224,24 @@ public class MatchUrlService {
 		return ReflectionUtil.newInstance(clazz);
 	}
 
-	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId) {
+	public ResourceSearch getResourceSearch(String theUrl, RequestPartitionId theRequestPartitionId, Flag... theFlags) {
 		RuntimeResourceDefinition resourceDefinition;
 		resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theUrl);
-		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition);
+		SearchParameterMap searchParameterMap = translateMatchUrl(theUrl, resourceDefinition, theFlags);
 		return new ResourceSearch(resourceDefinition, searchParameterMap, theRequestPartitionId);
 	}
 
 	public ResourceSearch getResourceSearch(String theUrl) {
 		return getResourceSearch(theUrl, null);
+	}
+
+	/**
+	 * Parse a URL that contains _include or _revinclude parameters and return a {@link ResourceSearch} object
+	 * @param theUrl
+	 * @return the ResourceSearch object that can be used to create a SearchParameterMap
+	 */
+	public ResourceSearch getResourceSearchWithIncludesAndRevIncludes(String theUrl) {
+		return getResourceSearch(theUrl, null, MatchUrlService.processIncludes());
 	}
 
 	public interface Flag {

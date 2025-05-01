@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 
@@ -33,17 +32,21 @@ import java.util.Map;
 
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
-			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
+			ServletRequestDetails theRequestDetails,
+			String url,
+			String theVerb,
+			ArrayListMultimap<String, String> theParamValues) {
 		ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 		requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setRequestType(RequestTypeEnum.valueOf(theVerb));
 		requestDetails.setServer(theRequestDetails.getServer());
+		requestDetails.setRestOperationType(theRequestDetails.getRestOperationType());
 
 		int qIndex = url.indexOf('?');
 		requestDetails.setParameters(new HashMap<>());
 		if (qIndex != -1) {
 			String params = url.substring(qIndex);
-			List<NameValuePair> parameters = UrlUtil.translateMatchUrl(params);
+			List<NameValuePair> parameters = MatchUrlUtil.translateMatchUrl(params);
 			for (NameValuePair next : parameters) {
 				theParamValues.put(next.getName(), next.getValue());
 			}

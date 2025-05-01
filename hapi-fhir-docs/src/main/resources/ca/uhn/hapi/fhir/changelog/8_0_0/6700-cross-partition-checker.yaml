@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6700
+title: "Previously if a non-null default partition ID was selected when partitioning is enabled, the subscription matcher would fail to find cross-partition subscriptions, causing subscriptions to appear to not be working. This has been corrected."

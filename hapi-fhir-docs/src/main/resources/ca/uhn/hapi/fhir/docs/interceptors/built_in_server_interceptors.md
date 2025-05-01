@@ -225,6 +225,14 @@ When using Subscriptions, the debug log interceptor can be used to add a number 
 * [SubscriptionDebugLogInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionDebugLogInterceptor.java)
 
 
+# Subscription: Subscription Rules Interceptor
+
+This interceptor can be used to enforce rules on allowable subscriptions, such as mandatory criteria patteerns, or requiring a reachable target URL for REST HOOK subscriptions.
+
+* [SubscriptionRulesInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-subscription/ca/uhn/fhir/jpa/subscription/util/SubscriptionRulesInterceptor.html)
+* [SubscriptionRulesInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-subscription/src/main/java/ca/uhn/fhir/jpa/subscription/util/SubscriptionRulesInterceptor.java)
+
+
 # Request Pre-Processing: Override Meta.source
 
 If you wish to override the value of `Resource.meta.source` using the value	supplied in an HTTP header, you can use the CaptureResourceSourceFromHeaderInterceptor to accomplish this.

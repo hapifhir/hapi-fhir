@@ -91,6 +91,7 @@ public class CdsHooksContextBooter {
 				for (CdsServicePrefetch prefetch : annotation.prefetch()) {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
+					cdsServiceJson.addPrefetchFailureMode(prefetch.value(), prefetch.failureMode());
 				}
 				myCdsServiceCache.registerService(
 						cdsServiceJson.getId(),

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 6863
+title: "`returnForStringOutcome` operation was added to `GenericClient`."

@@ -29,6 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -68,10 +70,12 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -232,6 +236,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
+	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
+
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
@@ -297,6 +303,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	protected IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter() {
 		return myDeleteExpungeJobSubmitter;
+	}
+
+	@Override
+	protected IRequestPartitionHelperSvc getRequestPartitionHelperService() {
+		return myRequestPartitionHelperService;
 	}
 
 	/**
@@ -422,7 +433,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (isNotBlank(theMatchUrl) && theProcessMatchUrl) {
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
-					theMatchUrl, myResourceType, theTransactionDetails, theRequest);
+					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theRequestPartitionId);
 			ourLog.trace("Resolving match URL {} found: {}", theMatchUrl, match);
 			if (match.size() > 1) {
 				String msg = getContext()
@@ -483,14 +494,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Supplier<IIdType> idSupplier = () -> myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
-							Long version = myMemoryCacheService.getIfPresent(
-									MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
+							Long version = pid.getVersion();
+							if (version == null) {
+								version = myMemoryCacheService.getIfPresent(
+										MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid);
+							}
 							if (version == null) {
 								version = myResourceTableDao.findCurrentVersionByPid(pid);
 								if (version != null) {
 									myMemoryCacheService.putAfterCommit(
 											MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION,
-											pid.getId(),
+											pid,
 											version);
 								}
 							}
@@ -1504,6 +1518,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
+
+		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
+
 		super.start();
 	}
 
@@ -2110,6 +2127,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
 
+		myStorageInterceptorHooks.callStoragePresearchRegistered(
+				theRequest, theParams, new NonPersistedSearch(getResourceName()), requestPartitionId);
+
 		return myTransactionService
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
@@ -2215,7 +2235,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.flatMap(pidChunk -> searchBuilder.loadResourcesByPid(pidChunk, theRequest).stream());
 		// apply interceptors
 		return resourceStream
-				.flatMap(resource -> invokeStoragePreAccessResources(theRequest, resource).stream())
+				.flatMap(resource -> resource == null
+						? Stream.empty()
+						: invokeStoragePreAccessResources(theRequest, resource).stream())
 				.flatMap(resource -> Optional.ofNullable(invokeStoragePreShowResources(theRequest, resource)).stream());
 	}
 
@@ -2388,7 +2410,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theMatchUrl)) {
 			// Validate that the supplied resource matches the conditional.
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(
-					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
+					theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource, theRequestPartitionId);
 			if (match.size() > 1) {
 				String msg = getContext()
 						.getLocalizer()
@@ -2492,16 +2514,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Start
 		if (outcome == null) {
-			outcome = doUpdateForUpdateOrPatch(
-					theRequest,
-					resourceId,
-					theMatchUrl,
-					thePerformIndexing,
-					theForceUpdateVersion,
-					theResource,
-					entity,
-					update,
-					theTransactionDetails);
+			UpdateParameters updateParameters = new UpdateParameters<>()
+					.setRequestDetails(theRequest)
+					.setResourceIdToUpdate(resourceId)
+					.setMatchUrl(theMatchUrl)
+					.setShouldPerformIndexing(thePerformIndexing)
+					.setShouldForceUpdateVersion(theForceUpdateVersion)
+					.setResource(theResource)
+					.setEntity(entity)
+					.setOperationType(update)
+					.setTransactionDetails(theTransactionDetails)
+					.setShouldForcePopulateOldResourceForProcessing(false);
+
+			outcome = doUpdateForUpdateOrPatch(updateParameters);
 		}
 
 		postUpdateTransaction(theTransactionDetails);
@@ -2523,23 +2548,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	protected DaoMethodOutcome doUpdateForUpdateOrPatch(
-			RequestDetails theRequest,
-			IIdType theResourceId,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			T theResource,
-			IBasePersistedResource theEntity,
-			RestOperationTypeEnum theOperationType,
-			TransactionDetails theTransactionDetails) {
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(UpdateParameters<T> theUpdateParameters) {
 
 		/*
 		 * We stored a resource searchUrl at creation time to prevent resource duplication.
 		 * We'll clear any currently existing urls from the db, otherwise we could hit
 		 * duplicate index violations if we try to add another (after this create/update)
 		 */
-		ResourceTable entity = (ResourceTable) theEntity;
+		ResourceTable entity = (ResourceTable) theUpdateParameters.getEntity();
 
 		/*
 		 * If we read back the entity from hibernate, and it's already saying
@@ -2555,7 +2571,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (entity.isSearchUrlPresent()) {
 			JpaPid persistentId = entity.getResourceId();
-			theTransactionDetails.addUpdatedResourceId(persistentId);
+			theUpdateParameters.getTransactionDetails().addUpdatedResourceId(persistentId);
 
 			entity.setSearchUrlPresent(false); // it will be removed at the end
 		}
@@ -2572,16 +2588,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					null);
 		}
 
-		return super.doUpdateForUpdateOrPatch(
-				theRequest,
-				theResourceId,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theResource,
-				theEntity,
-				theOperationType,
-				theTransactionDetails);
+		boolean shouldForcePopulateOldResourceForProcessing = myInterceptorBroadcaster instanceof InterceptorService
+				&& ((InterceptorService) myInterceptorBroadcaster)
+						.hasRegisteredInterceptor(PatientCompartmentEnforcingInterceptor.class);
+		theUpdateParameters.setShouldForcePopulateOldResourceForProcessing(shouldForcePopulateOldResourceForProcessing);
+		return super.doUpdateForUpdateOrPatch(theUpdateParameters);
 	}
 
 	/**

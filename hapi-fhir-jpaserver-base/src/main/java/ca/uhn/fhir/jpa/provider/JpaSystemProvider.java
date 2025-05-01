@@ -182,7 +182,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		startRequest(theServletRequest);
 
 		try {
-			validateReplaceReferencesParams(theSourceId.getValue(), theTargetId.getValue());
+			validateReplaceReferencesParams(theSourceId, theTargetId);
 
 			int resourceLimit = MergeResourceHelper.setResourceLimitFromParameter(myStorageSettings, theResourceLimit);
 
@@ -205,13 +205,14 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		}
 	}
 
-	private static void validateReplaceReferencesParams(String theSourceId, String theTargetId) {
-		if (isBlank(theSourceId)) {
+	private static void validateReplaceReferencesParams(
+			IPrimitiveType<String> theSourceId, IPrimitiveType<String> theTargetId) {
+		if (theSourceId == null || isBlank(theSourceId.getValue())) {
 			throw new InvalidRequestException(Msg.code(2583) + "Parameter '"
 					+ OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID + "' is blank");
 		}
 
-		if (isBlank(theTargetId)) {
+		if (theTargetId == null || isBlank(theTargetId.getValue())) {
 			throw new InvalidRequestException(Msg.code(2584) + "Parameter '"
 					+ OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID + "' is blank");
 		}

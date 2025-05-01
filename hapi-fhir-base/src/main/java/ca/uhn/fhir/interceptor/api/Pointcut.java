@@ -36,6 +36,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
+
 /**
  * Value for {@link Hook#value()}
  * <p>
@@ -624,7 +626,7 @@ public enum Pointcut implements IPointcut {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
-	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP response to the client
 	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
 	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
 	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
@@ -1768,7 +1770,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle being processed</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1803,7 +1805,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle that wsa processed</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
+	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1817,9 +1822,6 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
-	 * </li>
-	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -2097,6 +2099,7 @@ public enum Pointcut implements IPointcut {
 	 * This hook is an alternative to {@link #STORAGE_PARTITION_IDENTIFY_READ} and {@link #STORAGE_PARTITION_IDENTIFY_CREATE}
 	 * and can be used in cases where a partition interceptor does not need knowledge of the specific resources being
 	 * accessed/read/written in order to determine the appropriate partition.
+	 * If registered, then neither STORAGE_PARTITION_IDENTIFY_READ, nor STORAGE_PARTITION_IDENTIFY_CREATE will be called.
 	 * </p>
 	 * <p>
 	 * This hook will only be called if
@@ -3146,6 +3149,26 @@ public enum Pointcut implements IPointcut {
 			"java.lang.Exception"),
 
 	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>This is a filter hook that can be used around workchunk processing.
+	 * It is expected that implementers return an <code>IInterceptorFilterHook</code> that invokes the supplier
+	 * and includes the logic that should be executed:</p>
+	 * <ol>
+	 *     <li>Before a workchunk has been processed</li>
+	 *     <li>If an error occurs during processing</li>
+	 *     <li>After the workchunk has been processed</li>
+	 * </ol>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
+	 *  </ul>
+	 * <p>Hooks should return an {@link ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook}</p>
+	 * <p>For more details see <a href="http://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html">Filter Hook Interceptors</a></p>
+	 */
+	BATCH2_CHUNK_PROCESS_FILTER(
+			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
@@ -3154,6 +3177,12 @@ public enum Pointcut implements IPointcut {
 			new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
 			String.class.getName(),
 			String.class.getName()),
+
+	/**
+	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
+	 * removed at any time.
+	 */
+	TEST_FILTER(IInterceptorFilterHook.class, String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

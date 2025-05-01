@@ -41,6 +41,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
+	private boolean myAllowExamples;
 
 	/**
 	 * Constructor
@@ -238,6 +239,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
 				.setValidatorResourceFetcher(getValidatorResourceFetcher())
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
+				.setAllowExamples(isAllowExamples())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -290,6 +292,20 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		if (myWrappedWorkerContext != null) {
 			myWrappedWorkerContext.invalidateCaches();
 		}
+	}
+
+	/**
+	 * Should the validator disallow URLs with common example names, such as {@literal http://acme.org}
+	 * and {@literal http://example.com}.
+	 *
+	 * @since 8.2.0
+	 */
+	public void setAllowExamples(boolean theAllowExamples) {
+		myAllowExamples = theAllowExamples;
+	}
+
+	public boolean isAllowExamples() {
+		return myAllowExamples;
 	}
 
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {

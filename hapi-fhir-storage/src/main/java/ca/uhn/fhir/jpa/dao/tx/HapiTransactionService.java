@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.SleepUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -147,7 +148,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			@Nonnull Runnable theCallback) {
 		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
 				theCallback.run();
 			}
 		};
@@ -322,7 +323,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 				// calling isThrowableOrItsSubclassPresent instead of isThrowablePresent for
 				// PessimisticLockingFailureException, because we want to retry on its subclasses as well,  especially
 				// CannotAcquireLockException, which is thrown in some deadlock situations which we want to retry
-				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class);
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class)
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockException.class);
 	}
 
 	@Nullable
@@ -430,7 +432,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	public void setTransactionPropagationWhenChangingPartitions(
 			Propagation theTransactionPropagationWhenChangingPartitions) {
-		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
+		Objects.requireNonNull(theTransactionPropagationWhenChangingPartitions);
 		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
 	}
 
@@ -464,7 +466,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	protected class ExecutionBuilder implements IExecutionBuilder, TransactionOperations, Cloneable {
-
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
 		private Propagation myPropagation;
@@ -535,8 +536,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public <T> T execute(@Nonnull TransactionCallback<T> callback) {
-			assert callback != null;
-
 			return doExecute(this, callback);
 		}
 
