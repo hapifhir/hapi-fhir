@@ -73,6 +73,8 @@ public class SubscriptionCanonicalizer {
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
 
+	private final PartitionSettings myPartitionSettings;
+
 	private IRequestPartitionHelperSvc myHelperSvc;
 
 	@Autowired
@@ -82,6 +84,7 @@ public class SubscriptionCanonicalizer {
 			PartitionSettings thePartitionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	// TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
@@ -90,17 +93,6 @@ public class SubscriptionCanonicalizer {
 	@Autowired
 	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
 		myHelperSvc = thePartitionHelperSvc;
-	}
-
-	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
-
-	/**
-	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
-	 */
-	@Deprecated
-	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -803,7 +795,7 @@ public class SubscriptionCanonicalizer {
 
 		if (nonNull(requestPartitionId)) {
 			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
-					? requestPartitionId.isDefaultPartition(myHelperSvc.getDefaultPartitionId())
+					? requestPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId())
 					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 

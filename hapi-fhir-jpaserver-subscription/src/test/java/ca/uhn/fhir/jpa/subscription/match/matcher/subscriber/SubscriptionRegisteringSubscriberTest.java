@@ -55,6 +55,8 @@ public class SubscriptionRegisteringSubscriberTest {
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings(), new PartitionSettings());
 	@Mock
 	private DaoRegistry myDaoRegistry;
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 	@Mock
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
 	@InjectMocks

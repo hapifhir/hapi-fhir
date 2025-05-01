@@ -434,9 +434,14 @@ public class SearchQueryBuilderTest {
 	public static class MyConfig {
 
 		@Bean
+		public PartitionSettings partitionSettings() {
+			return new PartitionSettings();
+		}
+
+		@Bean
 		@Scope("prototype")
-		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder, PartitionSettings thePartitionSettings) {
-			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, thePartitionSettings);
+		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
+			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, partitionSettings());
 		}
 
 		@Bean

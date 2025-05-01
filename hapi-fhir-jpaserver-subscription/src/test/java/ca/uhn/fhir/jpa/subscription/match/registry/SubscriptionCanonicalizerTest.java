@@ -509,12 +509,12 @@ class SubscriptionCanonicalizerTest {
 															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionFalse,
 															   RequestPartitionId theRequestPartitionId) {
 
-		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition(NON_NULL_DEFAULT_PARTITION_ID);
+		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition(null);
 
 		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
 		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
 
-		if(isDefaultPartition){
+		if (isDefaultPartition){
 			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
 		} else {
 			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
