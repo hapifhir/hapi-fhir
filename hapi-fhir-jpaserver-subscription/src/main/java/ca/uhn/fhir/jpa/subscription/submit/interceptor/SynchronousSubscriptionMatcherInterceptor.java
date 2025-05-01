@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -84,8 +83,9 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 			return retval;
 		} catch (Exception e) {
 			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
-				ourLog.warn("Failed to send message to Subscription Matching Channel because the payload size is larger than broker "
-					+ "max message size. Retry is about to be performed without payload.");
+				ourLog.warn(
+						"Failed to send message to Subscription Matching Channel because the payload size is larger than broker "
+								+ "max message size. Retry is about to be performed without payload.");
 				theResourceModifiedMessage.setPayloadToNull();
 				return myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 			} else {

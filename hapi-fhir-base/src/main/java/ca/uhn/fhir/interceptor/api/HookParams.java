@@ -24,7 +24,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;

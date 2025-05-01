@@ -133,7 +133,8 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		boolean anySubscriptionsMatchedResource = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-			anySubscriptionsMatchedResource |= processSubscription(theMsg, resourceId, nextActiveSubscription).isSuccessful();
+			anySubscriptionsMatchedResource |= processSubscription(theMsg, resourceId, nextActiveSubscription)
+					.isSuccessful();
 		}
 
 		if (!anySubscriptionsMatchedResource) {
