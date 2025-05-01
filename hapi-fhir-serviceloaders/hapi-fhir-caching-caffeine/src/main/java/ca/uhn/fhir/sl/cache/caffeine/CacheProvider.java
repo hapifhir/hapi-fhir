@@ -51,6 +51,13 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 				.build());
 	}
 
+	public Cache<K, V> createEternal(int minimumSize, long maximumSize) {
+		return new CacheDelegator<>(Caffeine.newBuilder()
+				.initialCapacity(minimumSize)
+				.maximumSize(maximumSize)
+				.build());
+	}
+
 	public LoadingCache<K, V> create(long timeoutMillis, long maximumSize, CacheLoader<K, V> loading) {
 		return new LoadingCacheDelegator<K, V>(Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)

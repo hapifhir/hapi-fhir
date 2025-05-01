@@ -72,6 +72,7 @@ public class BulkDataImportProvider {
 	public static final String PARAM_INPUT_URL = "url";
 	public static final String PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC = "credentialHttpBasic";
 	public static final String PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT = "maxBatchResourceCount";
+	public static final String PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME = "chunkByCompartmentName";
 
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
@@ -154,6 +155,12 @@ public class BulkDataImportProvider {
 			if (isNotBlank(maximumBatchResourceCount)) {
 				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
 			}
+
+			String groupByCompartmentName = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_CHUNK_BY_COMPARTMENT_NAME);
+			if (isNotBlank(groupByCompartmentName)) {
+				jobParameters.setChunkByCompartmentName(groupByCompartmentName);
+			}
 		}
 
 		RequestPartitionId partitionId =
@@ -177,7 +184,7 @@ public class BulkDataImportProvider {
 			Pair<String, String> typeAndUrl = Pair.of(type, url);
 			typeAndUrls.add(typeAndUrl);
 		}
-		ValidateUtil.isTrueOrThrowInvalidRequest(typeAndUrls.size() > 0, "No URLs specified");
+		ValidateUtil.isTrueOrThrowInvalidRequest(!typeAndUrls.isEmpty(), "No URLs specified");
 		List<String> resourceTypeOrder = getResourceTypeOrder();
 		typeAndUrls.sort(Comparator.comparing(t -> resourceTypeOrder.indexOf(t.getKey())));
 
@@ -241,7 +248,8 @@ public class BulkDataImportProvider {
 						Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
-		IBaseOperationOutcome oo;
+
+		ourLog.debug("Client is polling for $import status: {}", instance.getStatus());
 		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -249,9 +257,10 @@ public class BulkDataImportProvider {
 						+ instance.getStatus() + " state.";
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
+			case FINALIZE:
 			case ERRORED:
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
@@ -263,36 +272,42 @@ public class BulkDataImportProvider {
 						+ instance.getEstimatedTimeRemaining();
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			case COMPLETED: {
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
-				String msg = "Job is complete.";
-				streamOperationOutcomeResponse(response, msg, "information");
+				String msg = instance.getReport();
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
 			case FAILED: {
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 				String msg = "Job is in " + instance.getStatus() + " state with " + instance.getErrorCount()
 						+ " error count. Last error: " + instance.getErrorMessage();
-				streamOperationOutcomeResponse(response, msg, "error");
+				String report = instance.getReport();
+				streamOperationOutcomeResponse(response, "error", msg, report);
 				break;
 			}
 			case CANCELLED: {
 				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
 				String msg = "Job was cancelled.";
-				streamOperationOutcomeResponse(response, msg, "information");
+				streamOperationOutcomeResponse(response, "information", msg);
 				break;
+			}
+			default: {
+				ourLog.warn("Don't know how to handle status {}", instance.getStatus());
 			}
 		}
 	}
 
-	private void streamOperationOutcomeResponse(HttpServletResponse response, String theMessage, String theSeverity)
+	private void streamOperationOutcomeResponse(HttpServletResponse response, String theSeverity, String... theMessages)
 			throws IOException {
 		response.setContentType(Constants.CT_FHIR_JSON);
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirCtx);
-		OperationOutcomeUtil.addIssue(myFhirCtx, oo, theSeverity, theMessage, null, null);
+		for (String message : theMessages) {
+			OperationOutcomeUtil.addIssue(myFhirCtx, oo, theSeverity, message, null, null);
+		}
 		myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 		response.getWriter().close();
 	}

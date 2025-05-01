@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.1.3-SNAPSHOT</version>
+	<version>8.1.6-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -989,6 +989,10 @@
 			<name>Berkant Karduman</name>
 			<organization>TigaHealth</organization>
 		</developer>
+		<developer>
+			<id>xytis</id>
+			<name>Vytis Valentinavičius</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -999,7 +1003,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.5.18-tmp-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>6.5.18</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
@@ -1086,7 +1090,7 @@
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_version>2.2.25</swagger_version>
+		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
 		<spring_version>6.1.14</spring_version>
@@ -1107,13 +1111,13 @@
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
+		<clinical-reasoning.version>3.19.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.testSource>17</maven.compiler.testSource>
 		<maven.compiler.testTarget>17</maven.compiler.testTarget>
 		<maven.compiler.testRelease>17</maven.compiler.testRelease>
@@ -1541,17 +1545,17 @@
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-annotations-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-models-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-core-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.mysql</groupId>
@@ -2304,7 +2308,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>4.19.1</version>
+				<version>5.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
@@ -2686,14 +2690,14 @@
 					<version>1.24</version>
 					<configuration>
 						<signature>
-							<groupId>net.sf.androidscents.signature</groupId>
-							<artifactId>android-api-level-26</artifactId>
-							<version>8.0.0_r2</version>
+							<groupId>com.toasttab.android</groupId>
+							<artifactId>gummy-bears-api-34</artifactId>
+							<version>0.12.0</version>
 						</signature>
 					</configuration>
 					<executions>
 						<execution>
-							<id>check-android-26-compliance</id>
+							<id>check-android-34-compliance</id>
 							<phase>test</phase>
 							<goals>
 								<goal>check</goal>

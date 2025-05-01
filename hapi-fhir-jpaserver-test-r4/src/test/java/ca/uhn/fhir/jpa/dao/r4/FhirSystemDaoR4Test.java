@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.RequestGroup;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
@@ -76,6 +79,7 @@ import org.hl7.fhir.r4.model.EpisodeOfCare;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Meta;
@@ -121,6 +125,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -1585,65 +1590,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateInlineMatchUrlWithAuthorizationDeniedAndCacheEnabled() {
-		// setup
-		String patientId = UUID.randomUUID().toString();
-		Bundle request1 = new Bundle();
-		Bundle request2 = new Bundle();
-
-		myStorageSettings.setAllowInlineMatchUrlReferences(true);
-		myStorageSettings.setMatchUrlCacheEnabled(true);
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(patientId);
-		p.setId("Patient/" + patientId);
-		IIdType id = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		Observation o1 = new Observation();
-		o1.getCode().setText("Some Observation");
-		o1.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
-		request1.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST);
-
-		Observation o2 = new Observation();
-		o2.getCode().setText("Another Observation");
-		o2.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + patientId);
-		request2.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST);
-
-		// execute the first request before setting up the security rules, to populate the cache
-		mySystemDao.transaction(mySrd, request1);
-
-		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
-
-		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow("Rule 1").create().resourcesOfType(Observation.class).withAnyId().andThen()
-					.allow("Rule 2").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/this-is-not-the-id-you-are-looking-for")).andThen()
-					.denyAll()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(interceptor);
-
-		try {
-			// execute
-
-			// the second attempt to access the resource should fail even though the first one succeeded
-			mySystemDao.transaction(mySrd, request2);
-
-			// verify
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
-		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
-		}
-
-	}
-
-	@Test
 	public void testTransactionWithDuplicateConditionalCreates() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
@@ -2895,23 +2841,69 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	/**
+	 * We shouldn't care about duplicate IDs when we're doing a POST, since the ID is required to
+	 * be ignored anyhow.
+	 */
+	@Test
+	public void testTransactionSucceedsWithDuplicateIdsWhenUsingPost() {
+		Bundle request = new Bundle();
+
+		Patient patient1 = new Patient();
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		Patient patient2 = new Patient();
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		assertDoesNotThrow(() -> mySystemDao.transaction(mySrd, request));
+	}
+
 	@Test
 	public void testTransactionFailsWithDuplicateIds() {
 		Bundle request = new Bundle();
 
 		Patient patient1 = new Patient();
-		patient1.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
 		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
 
 		Patient patient2 = new Patient();
-		patient2.setId(new IdType("Patient/testTransactionFailsWithDusplicateIds"));
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
 		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
-		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
 
-		assertThatExceptionOfType(InvalidRequestException.class).isThrownBy(() -> {
-			mySystemDao.transaction(mySrd, request);
-		});
+		InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(mySrd, request));
+		assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDuplicateIds", e.getMessage());
+	}
+
+	@Test
+	public void testTransactionFailsWithDuplicateIds_AutoRetryEnabled() {
+		Bundle request = new Bundle();
+
+		Patient patient1 = new Patient();
+		patient1.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient1.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+		request.addEntry().setResource(patient1).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+		Patient patient2 = new Patient();
+		patient2.setId(new IdType("Patient/testTransactionFailsWithDuplicateIds"));
+		patient2.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP02");
+		request.addEntry().setResource(patient2).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/testTransactionFailsWithDuplicateIds");
+
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		String header = TransactionSemanticsHeader.newBuilder()
+			.withRetryCount(1)
+			.build()
+			.toHeaderValue();
+		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, header);
+
+		InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(requestDetails, request));
+		assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDuplicateIds", e.getMessage());
 	}
 
 	@Test
@@ -3248,7 +3240,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		patient = myPatientDao.read(new IdType(id));
 
 		assertThat(patient.getManagingOrganization().getReference()).containsPattern(HASH_UUID_PATTERN);
-		assertEquals(patient.getManagingOrganization().getReference(), patient.getContained().get(0).getId());
+		assertEquals(patient.getManagingOrganization().getReference(), "#" + patient.getContained().get(0).getId());
 	}
 
 	@Nonnull
@@ -5195,5 +5187,50 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.hasSize(2)
 			.allMatch(resourceLocation -> resourceLocation.contains("MessageHeader") || resourceLocation.contains("RequestGroup"));
 	}
+
+	/**
+	 * The transaction pre-fetch algorithms should work regardless of the
+	 * number and type of parameters in the conditional URL.
+	 */
+	@Test
+	public void testTransactionWithConditionalNonTokenUrls() {
+		Supplier<Bundle> input = ()->{
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Location location = new Location();
+			location.setName("LOCATION");
+			bb.addTransactionUpdateEntry(location).conditional("Location?name=LOCATION");
+
+			Encounter enc = new Encounter();
+			enc.addIdentifier().setValue("ENC");
+			enc.getPeriod().setStartElement(new DateTimeType("2021-01-01")).setEndElement(new DateTimeType("2021-01-02"));
+			bb.addTransactionUpdateEntry(enc).conditional("Encounter?identifier=ENC&date=lt2024");
+
+			CodeSystem cs = new CodeSystem();
+			cs.setUrl("http://foo");
+			bb.addTransactionUpdateEntry(cs).conditional("CodeSystem?url=http://foo");
+
+			return bb.getBundleTyped();
+		};
+
+
+		Bundle response = mySystemDao.transaction(mySrd, input.get());
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeToString(response));
+		String location0 = response.getEntry().get(0).getResponse().getLocation();
+		String location1 = response.getEntry().get(1).getResponse().getLocation();
+		String location2 = response.getEntry().get(2).getResponse().getLocation();
+
+		logAllSearchUrls();
+
+		// Test, run the same transaction a second time
+		response = mySystemDao.transaction(mySrd, input.get());
+
+		// Verify - No new resources should be created
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeToString(response));
+		assertEquals(location0, response.getEntry().get(0).getResponse().getLocation());
+		assertEquals(location1, response.getEntry().get(1).getResponse().getLocation());
+		assertEquals(location2, response.getEntry().get(2).getResponse().getLocation());
+	}
+
 
 }

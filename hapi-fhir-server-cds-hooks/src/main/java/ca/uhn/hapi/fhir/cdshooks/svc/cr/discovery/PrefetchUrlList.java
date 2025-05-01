@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class PrefetchUrlList extends CopyOnWriteArrayList<String> {
 
 	@Override

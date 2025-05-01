@@ -46,6 +46,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Component
 public class PlanDefinitionApplyProvider {
 	@Autowired
@@ -252,7 +253,7 @@ public class PlanDefinitionApplyProvider {
 				.create(theRequestDetails)
 				.applyR5(
 						Eithers.for3(canonicalType, theId, thePlanDefinition),
-						theSubject,
+						List.of(theSubject),
 						theEncounter,
 						thePractitioner,
 						theOrganization,
@@ -299,7 +300,7 @@ public class PlanDefinitionApplyProvider {
 				.create(theRequestDetails)
 				.applyR5(
 						Eithers.for3(canonicalType, null, thePlanDefinition),
-						theSubject,
+						List.of(theSubject),
 						theEncounter,
 						thePractitioner,
 						theOrganization,

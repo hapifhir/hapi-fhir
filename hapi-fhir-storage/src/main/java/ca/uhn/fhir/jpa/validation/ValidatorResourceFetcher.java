@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.utilities.CanonicalPair;
@@ -127,7 +128,13 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@Override
 	public boolean resolveURL(
-			IResourceValidator iResourceValidator, Object o, String s, String s1, String s2, boolean isCanonical) {
+			IResourceValidator iResourceValidator,
+			Object o,
+			String s,
+			String s1,
+			String s2,
+			boolean isCanonical,
+			List<CanonicalType> targets) {
 		return true;
 	}
 

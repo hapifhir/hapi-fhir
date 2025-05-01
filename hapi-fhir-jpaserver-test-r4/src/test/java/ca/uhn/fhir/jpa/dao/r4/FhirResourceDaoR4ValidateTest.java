@@ -32,10 +32,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.Level;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -90,7 +88,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -99,6 +99,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -720,6 +721,56 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsUnknownCodeSystemBindingStrengths")
+	void testValidateCode_unknownCodeSystem_returnsCorrectSeverityForDifferentBindingStrengths(Enumerations.BindingStrength theStructureDefinitionStrength, int theExpectedNumIssues, String theExpectedSeverity, String theExpectedDiagnosticsMessage) throws Exception {
+		// Given
+		myStorageSettings.setPreExpandValueSets(true);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setId("OrgContactSampleCs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setUrl("http://mytest/CodeSystem/OrgContactSampleCS");
+		cs.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("A").setDefinition("B"));
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("OrgContactSampleVS");
+		vs.setUrl("http://mytest/ValueSet/OrgContactSampleVS");
+		vs.getCompose().addInclude().setSystem("http://mytest/CodeSystem/OrgContactSampleCS");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myValueSetDao.update(vs, mySrd);
+
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
+
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/test-validation-unknown-codesystem-structure-def.json");
+		profile.getDifferential().getElement().get(1).getBinding().setStrength(theStructureDefinitionStrength);
+		myStructureDefinitionDao.update(profile, mySrd);
+
+		Organization org = loadResourceFromClasspath(Organization.class, "/r4/test-validation-unknown-codesystem-organization.json");
+		OperationOutcome oo;
+
+		// When
+		oo = validateAndReturnOutcome(org);
+
+		// Then
+		assertThat(oo.getIssue()).hasSize(theExpectedNumIssues);
+		assertThat(oo.getIssueFirstRep().getSeverity().getDisplay()).isEqualTo(theExpectedSeverity);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(theExpectedDiagnosticsMessage);
+	}
+
+	private static Stream<Arguments> paramsUnknownCodeSystemBindingStrengths() {
+		String expectedErrorMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String expectedSuccessMessage = "No issues detected during validation";
+		return Stream.of(
+			Arguments.of(Enumerations.BindingStrength.REQUIRED, 2, "Error", expectedErrorMessage),
+			Arguments.of(Enumerations.BindingStrength.EXTENSIBLE, 2, "Warning", expectedErrorMessage),
+			Arguments.of(Enumerations.BindingStrength.PREFERRED, 1, "Warning", expectedErrorMessage),
+			Arguments.of(Enumerations.BindingStrength.EXAMPLE, 1, "Information", expectedSuccessMessage)
+		);
 	}
 
 	@Test

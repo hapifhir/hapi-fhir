@@ -11,11 +11,13 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivat
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +33,11 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,7 +101,35 @@ public class SubscriptionLoaderTest {
 	}
 
 	@Test
-	public void syncSubscriptions_withInactiveSubscriptionFailing_Syncs() {
+	public void testUnfetchableResourceDoesntBlockLoading() {
+		// setup
+		Subscription subscription = new Subscription();
+		subscription.setId("Subscription/A");
+
+		// when
+		when(myDaoRegistry.getResourceDao("Subscription"))
+			.thenReturn(mySubscriptionDao);
+		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
+			.thenReturn(true);
+		when(mySubscriptionDao.read(eq(new IdType("Subscription/123")), any())).thenThrow(new ResourceGoneException(new IdType("Subscription/123")));
+		when(mySubscriptionDao.read(eq(new IdType("Subscription/A")), any())).thenReturn(subscription);
+
+		// test
+		mySubscriptionLoader.handleInit(List.of(new IdType("Subscription/123"), new IdType("Subscription/A")));
+
+		// verify
+		verify(mySubscriptionDao).read(eq(new IdType("Subscription/123")), any());
+		verify(mySubscriptionDao).read(eq(new IdType("Subscription/A")), any());
+		verifyNoMoreInteractions(mySubscriptionDao);
+		verify(mySubscriptionRegistry, times(1)).unregisterAllSubscriptionsNotInCollection(any());
+		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(subscription);
+		verifyNoMoreInteractions(mySubscriptionRegistry);
+	}
+
+
+
+	@Test
+	public void refreshCache_withInactiveSubscriptionFailing_Syncs() {
 		// setup
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
@@ -118,7 +152,7 @@ public class SubscriptionLoaderTest {
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 
 		// test
-		mySubscriptionLoader.syncDatabaseToCache();
+		mySubscriptionLoader.requestRefresh();
 
 		// verify
 		verify(mySubscriptionDao)
