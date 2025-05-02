@@ -16,9 +16,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-
-import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
-
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,23 +36,9 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -80,28 +63,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-
-import static org.mockito.ArgumentMatchers.eq;
-
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,13 +95,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
-public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
+public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
 	@Captor
 	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
 	@SpyBean
@@ -147,8 +135,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle execute = myClient.search().forResource("Patient").include(new Include("*")).revInclude(new Include("*")).count(theCount).returnBundle(Bundle.class).execute();
 
 
-		List<String> foundIds = new ArrayList<>();
-		foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		List<String> foundIds = new ArrayList<>(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
 		//Ensure no duplicates in first page
 		assertThat(foundIds).doesNotHaveDuplicates();
 
@@ -162,7 +149,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 	@ParameterizedTest
 	@ValueSource(ints = {1, 50})
-	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) throws IOException {
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) {
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
 		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
@@ -177,8 +164,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		Bundle everything = myClient.operation().onInstance(patient.toUnqualifiedVersionless().toString()).named("$everything").withParameters(parameters).returnResourceType(Bundle.class).execute();
 
-		List<String> foundIds = new ArrayList<>();
-		foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		List<String> foundIds = new ArrayList<>(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
 		//Ensure no duplicates in first page
 		assertThat(foundIds).doesNotHaveDuplicates();
 
@@ -894,6 +880,50 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		doUpdateResource(theCondition);
 	}
 
+	/**
+	 * Reproduced <a href="https://gitlab.com/simpatico.ai/cdr/-/issues/7241">this issue</a>
+	 */
+	@Test
+	public void testSourceSearchRetrievesResourcesFromOtherPartitions() {
+		createPatient(withTenant(TENANT_A), withActiveTrue(), withSource("in-tenant-A"), withGender("female"));
+
+		// setup works well for other parameter types i.e. 'gender'
+		{
+			// execute
+			Bundle result = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-B/Patient?gender=female").returnBundle(Bundle.class).execute();
+
+			// validate search didn't find resource created in different partition
+			assertThat(result.getEntry()).isEmpty();
+		}
+
+		// also works well when no parameters
+		{
+			// execute
+			Bundle result = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-B/Patient").returnBundle(Bundle.class).execute();
+
+			// validate search didn't find resource created in different partition
+			assertThat(result.getEntry()).isEmpty();
+		}
+
+		// also works well when any additional parameter, besides '_source'
+		{
+			// execute
+			Bundle result = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-B/Patient?_source=in-tenant-A&gender=female").returnBundle(Bundle.class).execute();
+
+			// validate search didn't find resource created in different partition
+			assertThat(result.getEntry()).isEmpty();
+		}
+
+		// but didn't work (before referenced issue fix) when only '_source' parameter
+		{
+			// execute
+			Bundle result = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-B/Patient?_source=in-tenant-A").returnBundle(Bundle.class).execute();
+
+			// validate search didn't find resource created in different partition
+			assertThat(result.getEntry()).isEmpty();
+		}
+	}
+
 	@Nested
 	public class PartitionTesting {
 
@@ -1081,7 +1111,6 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Map<String, Integer> counts = new TreeMap<>();
 			myResourceTableDao
 				.findAll()
-				.stream()
 				.forEach(t -> {
 					counts.putIfAbsent(t.getResourceType(), 0);
 					int value = counts.get(t.getResourceType());
