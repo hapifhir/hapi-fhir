@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
@@ -106,7 +107,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(
-			myMatchingChannelProducer,
+				myMatchingChannelProducer,
 				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		return myMatchingChannelProducer.send(new ResourceModifiedJsonMessage(theMsg));
 	}
@@ -219,7 +220,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	@PreDestroy
 	public void shutdown() throws Exception {
 		if (myMatchingChannelProducer instanceof AutoCloseable producer) {
-			producer.close();
+			IoUtils.closeQuietly(producer, ourLog);
 		}
 	}
 
