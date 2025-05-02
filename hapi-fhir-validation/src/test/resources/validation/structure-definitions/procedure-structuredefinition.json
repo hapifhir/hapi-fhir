@@ -21,7 +21,7 @@
 				"mustSupport": true,
 				"binding": {
 					"strength": "required",
-					"valueSet": "http://acme.org/ValueSet/valueset-1"
+					"valueSet": "http://acme.org/ValueSet/valueset-combined"
 				}
 			},
 			{
@@ -49,6 +49,18 @@
 					"strength": "required",
 					"description": "Value Set One Codes",
 					"valueSet": "http://acme.org/ValueSet/valueset-1"
+				}
+			},
+			{
+				"id": "Procedure.code.coding:slice2",
+				"path": "Procedure.code.coding",
+				"sliceName": "slice2",
+				"short": "Slice for Value Set Two codes",
+				"mustSupport": true,
+				"binding": {
+					"strength": "required",
+					"description": "Value Set Two Codes",
+					"valueSet": "http://acme.org/ValueSet/valueset-2"
 				}
 			}
 		]

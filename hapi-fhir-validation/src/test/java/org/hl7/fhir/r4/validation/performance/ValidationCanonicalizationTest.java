@@ -46,9 +46,12 @@ public class ValidationCanonicalizationTest {
 	private List<StructureDefinition> myAllStructureDefinitions;
 
 	private CodeSystem myCodeSystem1;
+	private CodeSystem myCodeSystem2;
 	private List<CodeSystem> myAllCodeSystems;
 
-	private ValueSet myValueSetFromLargeCodeSystem;
+	private ValueSet myValueSet1;
+	private ValueSet myValueSet2;
+	private ValueSet myValueSetCombined;
 	private List<ValueSet> myAllValueSets;
 
 	private FhirValidator myValidator;
@@ -59,11 +62,15 @@ public class ValidationCanonicalizationTest {
 		myStructureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, "/validation/structure-definitions/procedure-structuredefinition.json");
 		myAllStructureDefinitions = List.of(myStructureDefinition);
 
-		myCodeSystem1 = LargeTerminologyUtil.createCodeSystem("codesystem-1", "Code System One", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
-		myAllCodeSystems = List.of(myCodeSystem1);
+		myCodeSystem1 = CreateTerminologyTestUtil.createCodeSystem("codesystem-1", "Code System One", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
+		myCodeSystem2 = CreateTerminologyTestUtil.createCodeSystem("codesystem-2", "Code System Two", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
+		myAllCodeSystems = List.of(myCodeSystem1, myCodeSystem2);
 
-		myValueSetFromLargeCodeSystem = LargeTerminologyUtil.createValueSetFromCodeSystem("valueset-1", "Value Set One", myCodeSystem1);
-		myAllValueSets = List.of(myValueSetFromLargeCodeSystem);
+		myValueSet1 = CreateTerminologyTestUtil.createValueSetFromCodeSystemConcepts("valueset-1", "Value Set One", myCodeSystem1);
+		// ensures expansion functionality is tested
+		myValueSet2 = CreateTerminologyTestUtil.createValueSetFromCodeSystemUrl("valueset-2", "Value Set Two", myCodeSystem2.getUrl());
+		myValueSetCombined = CreateTerminologyTestUtil.createValueSetFromValueSets("valueset-combined", "Value Set Combined", myValueSet1, myValueSet2);
+		myAllValueSets = List.of(myValueSet1, myValueSet2, myValueSetCombined);
 
 		myValidator = configureValidator();
 	}
@@ -86,11 +93,25 @@ public class ValidationCanonicalizationTest {
 		procedure.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Empty</div>");
 		procedure.getMeta().addProfile(myStructureDefinition.getUrl());
 		procedure.setStatus(Procedure.ProcedureStatus.INPROGRESS);
-		int lastConcept = NUM_CONCEPTS - 1;
+
+		int lastConceptIndex = NUM_CONCEPTS - 1;
+
+		// add code from ValueSet 1 (has all concepts in include)
+		assertEquals(1, myValueSet1.getCompose().getInclude().size());
+		assertEquals(NUM_CONCEPTS, myValueSet1.getCompose().getInclude().get(0).getConcept().size());
+		ValueSet.ConceptReferenceComponent valueSet1LastConcept = myValueSet1.getCompose().getInclude().get(0).getConcept().get(lastConceptIndex);
 		procedure.getCode().addCoding()
 				.setSystem(myCodeSystem1.getUrl())
-				.setCode(myCodeSystem1.getConcept().get(lastConcept).getCode())
-				.setDisplay(myCodeSystem1.getConcept().get(lastConcept).getDisplay());
+				.setCode(valueSet1LastConcept.getCode())
+				.setDisplay(valueSet1LastConcept.getDisplay());
+
+		// add code from ValueSet 2 (has no concepts included and must be expanded)
+		assertEquals(1, myValueSet2.getCompose().getInclude().size());
+		assertTrue(myValueSet2.getCompose().getInclude().get(0).getConcept().isEmpty());
+		procedure.getCode().addCoding()
+				.setSystem(myCodeSystem2.getUrl())
+				.setCode("codesystem-2-concept-" + NUM_CONCEPTS)
+				.setDisplay("Code System Two Concept " + NUM_CONCEPTS);
 
 		// add invalid code to ensure validation is functioning properly
 		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
@@ -144,12 +165,12 @@ public class ValidationCanonicalizationTest {
 		SingleValidationMessage message1 = validationResult.getMessages().get(0);
 		assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
 		assertEquals("Procedure.code", message1.getLocationString());
-		String expectedMessage1 = "None of the codings provided are in the value set 'Value Set One' (http://acme.org/ValueSet/valueset-1|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-100000, http://acme.org/invalid#invalid)";
+		String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-100000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-100000, http://acme.org/invalid#invalid)";
 		assertEquals(expectedMessage1, message1.getMessage());
 
 		SingleValidationMessage message2 = validationResult.getMessages().get(1);
 		assertEquals(ResultSeverityEnum.INFORMATION, message2.getSeverity());
-		assertEquals("Procedure.code.coding[1]", message2.getLocationString());
+		assertEquals("Procedure.code.coding[2]", message2.getLocationString());
 		String expectedMessage2= "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
 		assertEquals(expectedMessage2, message2.getMessage());
 	}
