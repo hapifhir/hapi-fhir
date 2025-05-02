@@ -42,8 +42,8 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public CoordsPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_COORDS"), thePartitionSettings);
+	public CoordsPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_COORDS"));
 
 		myColumnLatitude = getTable().addColumn("SP_LATITUDE");
 		myColumnLongitude = getTable().addColumn("SP_LONGITUDE");

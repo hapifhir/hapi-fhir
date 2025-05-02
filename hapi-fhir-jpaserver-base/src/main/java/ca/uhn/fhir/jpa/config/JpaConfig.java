@@ -635,32 +635,32 @@ public class JpaConfig {
 	@Scope("prototype")
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
-		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder, myPartitionSettings);
+		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
-		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder, myPartitionSettings);
+		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public CoordsPredicateBuilder newCoordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new CoordsPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new CoordsPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public DatePredicateBuilder newDatePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new DatePredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new DatePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public NumberPredicateBuilder newNumberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new NumberPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new NumberPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -723,7 +723,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ResourceHistoryPredicateBuilder newResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceHistoryPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new ResourceHistoryPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -736,7 +736,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public UriPredicateBuilder newUriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new UriPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new UriPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

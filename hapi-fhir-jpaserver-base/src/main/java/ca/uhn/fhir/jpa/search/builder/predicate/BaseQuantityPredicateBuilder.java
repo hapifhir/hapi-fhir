@@ -54,8 +54,8 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 	 * Constructor
 	 */
 	public BaseQuantityPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theTable, thePartitionSettings);
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
+		super(theSearchSqlBuilder, theTable);
 	}
 
 	public Condition createPredicateQuantity(

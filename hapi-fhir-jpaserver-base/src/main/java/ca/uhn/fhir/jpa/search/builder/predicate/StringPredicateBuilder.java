@@ -56,8 +56,8 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public StringPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_STRING"), thePartitionSettings);
+	public StringPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_STRING"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnValueExact = getTable().addColumn("SP_VALUE_EXACT");
 		myColumnValueNormalized = getTable().addColumn("SP_VALUE_NORMALIZED");

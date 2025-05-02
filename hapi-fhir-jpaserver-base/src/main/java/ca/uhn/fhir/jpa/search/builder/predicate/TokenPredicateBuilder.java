@@ -96,8 +96,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public TokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_TOKEN"), thePartitionSettings);
+	public TokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_TOKEN"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnHashIdentity = getTable().addColumn("HASH_IDENTITY");
 		myColumnHashSystem = getTable().addColumn("HASH_SYS");

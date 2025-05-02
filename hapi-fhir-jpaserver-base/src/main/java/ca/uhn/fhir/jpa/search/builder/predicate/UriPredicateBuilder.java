@@ -68,8 +68,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public UriPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_URI"), thePartitionSettings);
+	public UriPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_URI"));
 
 		myColumnUri = getTable().addColumn("SP_URI");
 		myColumnHashUri = getTable().addColumn("HASH_URI");

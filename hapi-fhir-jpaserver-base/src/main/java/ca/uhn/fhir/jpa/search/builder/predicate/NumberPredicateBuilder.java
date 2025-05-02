@@ -53,8 +53,8 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public NumberPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_NUMBER"), thePartitionSettings);
+	public NumberPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_NUMBER"));
 
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}

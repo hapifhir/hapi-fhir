@@ -110,7 +110,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	private GeneratedSql buildSqlWithDateSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, myPartitionSettings));
-		DatePredicateBuilder datePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder, myPartitionSettings);
+		DatePredicateBuilder datePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
 		datePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datePredicateBuilder);
 

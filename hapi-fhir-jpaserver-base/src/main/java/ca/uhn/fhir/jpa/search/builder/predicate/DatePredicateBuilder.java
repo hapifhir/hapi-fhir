@@ -55,8 +55,8 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public DatePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_DATE"), thePartitionSettings);
+	public DatePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_DATE"));
 
 		myColumnValueLow = getTable().addColumn("SP_VALUE_LOW");
 		myColumnValueHigh = getTable().addColumn("SP_VALUE_HIGH");

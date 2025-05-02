@@ -32,7 +32,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		storageSettings.setUseOrdinalDatesForDayPrecisionSearches(true);
 
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder, new PartitionSettings()));
+		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
 
 		DatePredicateBuilder datePredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(null);
 		datePredicateBuilder.setStorageSettingsForUnitTest(storageSettings);
