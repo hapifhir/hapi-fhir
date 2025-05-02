@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6652
+title: "A failure in the migrator has been corrected when applying the SQL migrator's drop
+  primary key task on MSSQL. Thanks to Craig McClendon for the analysis and fix!"
