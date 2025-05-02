@@ -995,8 +995,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
 
-		VersionCanonicalizer versionCanonicalizer = theVersionCanonicalizer != null ? theVersionCanonicalizer :
-			new VersionCanonicalizer(theValidationSupport.getFhirContext());
+		VersionCanonicalizer versionCanonicalizer = theVersionCanonicalizer != null
+				? theVersionCanonicalizer
+				: new VersionCanonicalizer(theValidationSupport.getFhirContext());
 
 		return new VersionSpecificWorkerContextWrapper(
 				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);

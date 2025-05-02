@@ -358,18 +358,19 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			@Validate.Profile String theProfile,
 			RequestDetails theRequestDetails) {
 
-//		FIXME
-//		ConverterMetricUtil.setUseCache(true);
-//		ConverterMetricUtil.resetMetrics();
-//		ourLog.info("===Start Metrics===");
-//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
+		//		FIXME
+		//		ConverterMetricUtil.setUseCache(true);
+		//		ConverterMetricUtil.resetMetrics();
+		//		ourLog.info("===Start Metrics===");
+		//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
 
 		StopWatch sw = new StopWatch();
-		MethodOutcome outcome = validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
-//		ourLog.info("===Validated resource in {} ms===", sw.getMillis());
-//
-//		ourLog.info("===End Metrics===");
-//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
+		MethodOutcome outcome =
+				validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
+		//		ourLog.info("===Validated resource in {} ms===", sw.getMillis());
+		//
+		//		ourLog.info("===End Metrics===");
+		//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
 
 		return outcome;
 	}
