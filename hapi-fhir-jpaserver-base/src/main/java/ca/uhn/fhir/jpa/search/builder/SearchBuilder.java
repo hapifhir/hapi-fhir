@@ -156,7 +156,6 @@ import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.stripStart;
@@ -522,13 +521,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
-				new QueryChunker<JpaPid>()
-						.chunk(
-								fulltextExecutor,
-								SearchBuilder.getMaximumPageSize(),
-								// for each list of (SearchBuilder.getMaximumPageSize())
-								// we create a chunked query and add it to 'queries'
-								t -> doCreateChunkedQueries(theParams, t, theSearchProperties, theRequest, queries));
+				QueryChunker.chunk(
+						fulltextExecutor,
+						SearchBuilder.getMaximumPageSize(),
+						// for each list of (SearchBuilder.getMaximumPageSize())
+						// we create a chunked query and add it to 'queries'
+						t -> doCreateChunkedQueries(theParams, t, theSearchProperties, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
@@ -586,7 +584,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private List<JpaPid> executeLastNAgainstIndex(RequestDetails theRequestDetails, Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myStorageSettings.isAdvancedHSearchIndexing()) {
+		if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027)
 						+ "LastN operation is not enabled on this service, can not process this request");
@@ -606,8 +604,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String idParamValue;
 			IQueryParameterType idParam =
 					myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-			if (idParam instanceof TokenParam) {
-				TokenParam idParm = (TokenParam) idParam;
+			if (idParam instanceof TokenParam idParm) {
 				idParamValue = idParm.getValue();
 			} else {
 				StringParam idParm = (StringParam) idParam;
@@ -1268,7 +1265,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				resourceId.setVersion(version);
 			}
 
-			IBaseResource resource = null;
+			IBaseResource resource;
 			resource = myJpaStorageResourceParser.toResource(
 					resourceType, next, tagMap.get(next.getResourceId()), theForHistoryOperation);
 			if (resource == null) {
@@ -1301,15 +1298,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private Map<JpaPid, Collection<BaseTag>> getResourceTagMap(Collection<ResourceHistoryTable> theHistoryTables) {
-		switch (myStorageSettings.getTagStorageMode()) {
-			case VERSIONED:
-				return getPidToTagMapVersioned(theHistoryTables);
-			case NON_VERSIONED:
-				return getPidToTagMapUnversioned(theHistoryTables);
-			case INLINE:
-			default:
-				return Map.of();
-		}
+		return switch (myStorageSettings.getTagStorageMode()) {
+			case VERSIONED -> getPidToTagMapVersioned(theHistoryTables);
+			case NON_VERSIONED -> getPidToTagMapUnversioned(theHistoryTables);
+			default -> Map.of();
+		};
 	}
 
 	@Nonnull
@@ -1447,7 +1440,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean isLoadingFromElasticSearchSupported(Collection<JpaPid> thePids) {
 		// is storage enabled?
 		return myStorageSettings.isStoreResourceInHSearchIndex()
-				&& myStorageSettings.isAdvancedHSearchIndexing()
+				&& myStorageSettings.isHibernateSearchIndexSearchParams()
 				&&
 				// we don't support history
 				thePids.stream().noneMatch(p -> p.getVersion() != null)
@@ -1460,7 +1453,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES
 		// only impl
 		// to handle lastN?
-		if (myStorageSettings.isAdvancedHSearchIndexing() && myStorageSettings.isStoreResourceInHSearchIndex()) {
+		if (myStorageSettings.isHibernateSearchIndexSearchParams()
+				&& myStorageSettings.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
 
 			return myFulltextSearchSvc.getResources(pidList);
@@ -2034,7 +2028,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Nullable
 	private static Set<String> computeTargetResourceTypes(Include nextInclude, RuntimeSearchParam param) {
-		String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
+		String targetResourceType = nextInclude.getParamTargetType();
 		boolean haveTargetTypesDefinedByParam = param.hasTargets();
 		Set<String> targetResourceTypes;
 		if (targetResourceType != null) {
@@ -2448,8 +2442,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			paramOrValues.add(nextAndValue);
 
 			for (IQueryParameterType nextOrValue : nextAndValue) {
-				if (nextOrValue instanceof DateParam) {
-					DateParam dateParam = (DateParam) nextOrValue;
+				if (nextOrValue instanceof DateParam dateParam) {
 					if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
 						String message = "Search with params " + theComboParamNames
 								+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
@@ -2459,8 +2452,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						break;
 					}
 				}
-				if (nextOrValue instanceof BaseParamWithPrefix) {
-					BaseParamWithPrefix<?> paramWithPrefix = (BaseParamWithPrefix<?>) nextOrValue;
+				if (nextOrValue instanceof BaseParamWithPrefix<?> paramWithPrefix) {
 					ParamPrefixEnum prefix = paramWithPrefix.getPrefix();
 					// A parameter with the 'eq' prefix is the only accepted prefix when combo searching since
 					// birthdate=2025-01-01 and birthdate=eq2025-01-01 are equivalent searches.
