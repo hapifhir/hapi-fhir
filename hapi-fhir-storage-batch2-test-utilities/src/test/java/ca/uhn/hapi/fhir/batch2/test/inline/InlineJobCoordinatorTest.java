@@ -35,8 +35,9 @@ class InlineJobCoordinatorTest {
     private static final String STEP_1 = "create-subject-chunks";
     private static final String STEP_2 = "evaluate-subject-chunk";
     private static final String STEP_3 = "aggregate-subject-chunks";
+	private static final String JOB_INSTANCE_ID = "jobInstanceId";
 
-    @Test
+	@Test
     void testWithStubJobs() {
 		final List<MeasureReport> measureReportsPopulatedByBatch = new ArrayList<>();
 
@@ -128,7 +129,8 @@ class InlineJobCoordinatorTest {
                         new Step3Runner(measureReportsPopulatedByBatch))
                 .build();
 
-		final InlineJobCoordinator<InlineTestJobParams> testSubject = new InlineJobCoordinator<>(jobDefinition, InlineTestJobParams.class);
+		final InlineJobCoordinator<InlineTestJobParams> testSubject =
+			new InlineJobCoordinator<>(jobDefinition, JOB_INSTANCE_ID, InlineTestJobParams.class);
 
 		// Some sort of batch service would trigger this:
 		final InlineTestJobParams jobParams = new InlineTestJobParams(30);
@@ -242,7 +244,7 @@ class InlineJobCoordinatorTest {
 
 		}
 
-		private InlineTestJobParams(int baseNum) {
+		public InlineTestJobParams(int baseNum) {
 			this.baseNum = baseNum;
 		}
 

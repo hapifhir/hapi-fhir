@@ -36,11 +36,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 
 /**
  * {@link IJobCoordinator} used for testing that tiggers a batch job without the heavy infrastructure of the
@@ -49,14 +48,16 @@ import org.springframework.data.domain.Page;
  */
 public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinator {
 
-    private final InlineJobRunner<T> inlineJobRunner;
-    private final Class<T> clazz;
+    private final InlineJobRunner<T> myInlineJobRunner;
+	private final String myJobInstanceId;
+    private final Class<T> myClass;
 
-    private T parameters;
+    private T myParameters;
 
-    public InlineJobCoordinator(JobDefinition<T> jobDefinition, Class<T> clazz) {
-        this.clazz = clazz;
-        inlineJobRunner = new InlineJobRunner<>(jobDefinition);
+    public InlineJobCoordinator(JobDefinition<T> theJobDefinition, String theJobInstanceId, Class<T> theClass) {
+        myInlineJobRunner = new InlineJobRunner<>(theJobDefinition);
+		myJobInstanceId = theJobInstanceId;
+		myClass = theClass;
     }
 
     @Override
@@ -64,21 +65,24 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
             RequestDetails requestDetails, JobInstanceStartRequest jobInstanceStartRequest)
             throws InvalidRequestException {
 
-        parameters = jobInstanceStartRequest.getParameters(clazz);
+        myParameters = jobInstanceStartRequest.getParameters(myClass);
 
         final Batch2JobStartResponse batch2JobStartResponse = new Batch2JobStartResponse();
-        batch2JobStartResponse.setInstanceId("1234");
+        batch2JobStartResponse.setInstanceId(myJobInstanceId);
         return batch2JobStartResponse;
     }
 
     public ListMultimap<String, IModelJson> triggerJobRunner() {
-        return inlineJobRunner.run(parameters);
+        return myInlineJobRunner.run(myParameters);
     }
 
     @Nonnull
     @Override
     public JobInstance getInstance(String s) throws ResourceNotFoundException {
-        return null;
+		final JobInstance jobInstance = new JobInstance();
+		jobInstance.setJobDefinitionId(myJobInstanceId);
+
+		return jobInstance;
     }
 
     @Override
