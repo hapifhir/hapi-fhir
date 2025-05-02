@@ -7,8 +7,7 @@ import static ca.uhn.fhir.jpa.search.builder.predicate.ResourceHistoryProvenance
 public class ResourceHistoryPredicateBuilder extends BaseResourceHistoryPredicateBuilder
 		implements ISourcePredicateBuilder {
 
-	public ResourceHistoryPredicateBuilder(
-		SearchQueryBuilder theSearchSqlBuilder) {
+	public ResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"), "RES_ID");
 	}
 
