@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.messaging;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import jakarta.annotation.Nonnull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,6 +69,6 @@ public interface IMessage<T> {
 
 	default Map<String, String> getHeadersAsStrings() {
 		return getHeaders().entrySet().stream()
-			.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
 	}
 }
