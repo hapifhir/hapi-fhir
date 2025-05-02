@@ -1,4 +1,4 @@
-package ca.uhn.hapi.converters.test;
+package org.hl7.fhir.r4.validation.performance;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
