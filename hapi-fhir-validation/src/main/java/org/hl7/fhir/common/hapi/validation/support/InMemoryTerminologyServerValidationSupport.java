@@ -8,20 +8,11 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -140,40 +131,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			return null;
 		}
 
-		IBaseResource expansion;
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2: {
-				org.hl7.fhir.r4.model.ValueSet expansionR4 = (org.hl7.fhir.r4.model.ValueSet)
-						VersionConvertorFactory_40_50.convertResource(expansionR5, new BaseAdvisor_40_50(false));
-				expansion = myVersionCanonicalizer.valueSetFromCanonical(expansionR4);
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				expansion = VersionConvertorFactory_10_50.convertResource(expansionR5, new BaseAdvisor_10_50(false));
-				break;
-			}
-			case DSTU3: {
-				expansion = VersionConvertorFactory_30_50.convertResource(expansionR5, new BaseAdvisor_30_50(false));
-				break;
-			}
-			case R4: {
-				expansion = VersionConvertorFactory_40_50.convertResource(expansionR5, new BaseAdvisor_40_50(false));
-				break;
-			}
-			case R4B: {
-				expansion = VersionConvertorFactory_43_50.convertResource(expansionR5, new BaseAdvisor_43_50(false));
-				break;
-			}
-			case R5: {
-				expansion = expansionR5;
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(Msg.code(697) + "Can not handle version: "
-						+ myCtx.getVersion().getVersion());
-		}
-
+		IBaseResource expansion = myVersionCanonicalizer.valueSetFromValidatorCanonical(expansionR5);
 		return new ValueSetExpansionOutcome(expansion);
 	}
 
@@ -183,64 +141,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode)
 			throws ExpansionCouldNotBeCompletedInternallyException {
-		ValueSetAndMessages expansion;
-		switch (getFhirVersionEnum(
-				theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand)) {
-			case DSTU2: {
-				expansion = expandValueSetDstu2(
-						theValidationSupportContext,
-						(ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				expansion = expandValueSetDstu2Hl7Org(
-						theValidationSupportContext,
-						(ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU3: {
-				expansion = expandValueSetDstu3(
-						theValidationSupportContext,
-						(org.hl7.fhir.dstu3.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R4: {
-				expansion = expandValueSetR4(
-						theValidationSupportContext,
-						(org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R4B: {
-				expansion = expandValueSetR4B(
-						theValidationSupportContext,
-						(org.hl7.fhir.r4b.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case R5: {
-				expansion = expandValueSetR5(
-						theValidationSupportContext,
-						(org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand,
-						theWantSystemUrlAndVersion,
-						theWantCode);
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(Msg.code(698) + "Can not handle version: "
-						+ myCtx.getVersion().getVersion());
-		}
-
-		return expansion;
+		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theValueSetToExpand);
+		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 	}
 
 	@Override
@@ -703,35 +605,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return codeValidationResult.asLookupCodeResult(system, code);
 	}
 
-	@Nullable
-	private ValueSetAndMessages expandValueSetDstu2Hl7Org(
-			ValidationSupportContext theValidationSupportContext,
-			ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet)
-				VersionConvertorFactory_10_50.convertResource(theInput, new BaseAdvisor_10_50(false));
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetDstu2(
-			ValidationSupportContext theValidationSupportContext,
-			ca.uhn.fhir.model.dstu2.resource.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG).newJsonParser();
-		IParser parserHapi = FhirContext.forDstu2Cached().newJsonParser();
-
-		org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(
-				org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(theInput));
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet)
-				VersionConvertorFactory_10_50.convertResource(valueSetRi, new BaseAdvisor_10_50(false));
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		if (isBlank(theSystem)) {
@@ -782,42 +655,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			theTargetList.add(targetConcept);
 			addCodesDstu2(nextSource.getConcept(), targetConcept.getConcept());
 		}
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetDstu3(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.dstu3.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet)
-				VersionConvertorFactory_30_50.convertResource(theInput, new BaseAdvisor_30_50(false));
-		return (expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode));
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetR4(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.r4.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet)
-				VersionConvertorFactory_40_50.convertResource(theInput, new BaseAdvisor_40_50(false));
-		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
-	}
-
-	@Nullable
-	private ValueSetAndMessages expandValueSetR4B(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.r4b.model.ValueSet theInput,
-			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
-			throws ExpansionCouldNotBeCompletedInternallyException {
-		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet)
-				VersionConvertorFactory_43_50.convertResource(theInput, new BaseAdvisor_43_50(false));
-		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 	}
 
 	@Nullable
@@ -1203,124 +1040,40 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private Function<String, org.hl7.fhir.r5.model.ValueSet> newValueSetLoader(
 			ValidationSupportContext theValidationSupportContext) {
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-				return t -> {
-					IBaseResource vs = theValidationSupportContext
-							.getRootValidationSupport()
-							.fetchValueSet(t);
-					if (vs instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet) {
-						IParser parserRi = FhirContext.forCached(FhirVersionEnum.DSTU2_HL7ORG)
-								.newJsonParser();
-						IParser parserHapi = FhirContext.forDstu2Cached().newJsonParser();
-						ca.uhn.fhir.model.dstu2.resource.ValueSet valueSet =
-								(ca.uhn.fhir.model.dstu2.resource.ValueSet) vs;
-						org.hl7.fhir.dstu2.model.ValueSet valueSetRi = parserRi.parseResource(
-								org.hl7.fhir.dstu2.model.ValueSet.class, parserHapi.encodeResourceToString(valueSet));
-						return (org.hl7.fhir.r5.model.ValueSet)
-								VersionConvertorFactory_10_50.convertResource(valueSetRi, new BaseAdvisor_10_50(false));
-					} else {
-						org.hl7.fhir.dstu2.model.ValueSet valueSet =
-								(org.hl7.fhir.dstu2.model.ValueSet) theValidationSupportContext
-										.getRootValidationSupport()
-										.fetchValueSet(t);
-						return (org.hl7.fhir.r5.model.ValueSet)
-								VersionConvertorFactory_10_50.convertResource(valueSet, new BaseAdvisor_10_50(false));
-					}
-				};
-			case DSTU3:
-				return t -> {
-					org.hl7.fhir.dstu3.model.ValueSet valueSet =
-							(org.hl7.fhir.dstu3.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return (org.hl7.fhir.r5.model.ValueSet)
-							VersionConvertorFactory_30_50.convertResource(valueSet, new BaseAdvisor_30_50(false));
-				};
-			case R4:
-				return t -> {
-					org.hl7.fhir.r4.model.ValueSet valueSet =
-							(org.hl7.fhir.r4.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return (org.hl7.fhir.r5.model.ValueSet)
-							VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false));
-				};
-			case R4B:
-				return t -> {
-					org.hl7.fhir.r4b.model.ValueSet valueSet =
-							(org.hl7.fhir.r4b.model.ValueSet) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchValueSet(t);
-					return (org.hl7.fhir.r5.model.ValueSet)
-							VersionConvertorFactory_43_50.convertResource(valueSet, new BaseAdvisor_43_50(false));
-				};
-			default:
-			case DSTU2_1:
-			case R5:
-				return t -> (org.hl7.fhir.r5.model.ValueSet)
-						theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
-		}
+		return t -> {
+			IBaseResource valueSet =
+					theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+			return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
+		};
 	}
 
 	private Function<String, CodeSystem> newCodeSystemLoader(ValidationSupportContext theValidationSupportContext) {
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-				return t -> {
-					IBaseResource codeSystem = theValidationSupportContext
-							.getRootValidationSupport()
-							.fetchCodeSystem(t);
-					CodeSystem retVal = null;
-					if (codeSystem != null) {
-						retVal = new CodeSystem();
-						if (codeSystem instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet) {
-							ca.uhn.fhir.model.dstu2.resource.ValueSet codeSystemCasted =
-									(ca.uhn.fhir.model.dstu2.resource.ValueSet) codeSystem;
-							retVal.setUrl(codeSystemCasted.getUrl());
-							addCodesDstu2(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
-						} else {
-							org.hl7.fhir.dstu2.model.ValueSet codeSystemCasted =
-									(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
-							retVal.setUrl(codeSystemCasted.getUrl());
-							addCodesDstu2Hl7Org(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
-						}
-					}
-					return retVal;
-				};
-			case DSTU3:
-				return t -> {
-					org.hl7.fhir.dstu3.model.CodeSystem codeSystem =
-							(org.hl7.fhir.dstu3.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return (CodeSystem)
-							VersionConvertorFactory_30_50.convertResource(codeSystem, new BaseAdvisor_30_50(false));
-				};
-			case R4:
-				return t -> {
-					org.hl7.fhir.r4.model.CodeSystem codeSystem =
-							(org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return (CodeSystem)
-							VersionConvertorFactory_40_50.convertResource(codeSystem, new BaseAdvisor_40_50(false));
-				};
-			case R4B:
-				return t -> {
-					org.hl7.fhir.r4b.model.CodeSystem codeSystem =
-							(org.hl7.fhir.r4b.model.CodeSystem) theValidationSupportContext
-									.getRootValidationSupport()
-									.fetchCodeSystem(t);
-					return (CodeSystem)
-							VersionConvertorFactory_43_50.convertResource(codeSystem, new BaseAdvisor_43_50(false));
-				};
-			case DSTU2_1:
-			case R5:
-			default:
-				return t -> (org.hl7.fhir.r5.model.CodeSystem)
+		FhirVersionEnum version = myCtx.getVersion().getVersion();
+		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)) {
+			return t -> {
+				IBaseResource codeSystem =
 						theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+				CodeSystem retVal = null;
+				if (codeSystem != null) {
+					retVal = new CodeSystem();
+					if (codeSystem instanceof ca.uhn.fhir.model.dstu2.resource.ValueSet codeSystemCasted) {
+						retVal.setUrl(codeSystemCasted.getUrl());
+						addCodesDstu2(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
+					} else {
+						org.hl7.fhir.dstu2.model.ValueSet codeSystemCasted =
+								(org.hl7.fhir.dstu2.model.ValueSet) codeSystem;
+						retVal.setUrl(codeSystemCasted.getUrl());
+						addCodesDstu2Hl7Org(codeSystemCasted.getCodeSystem().getConcept(), retVal.getConcept());
+					}
+				}
+				return retVal;
+			};
+		} else {
+			return t -> {
+				IBaseResource codeSystem =
+						theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+				return myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
+			};
 		}
 	}
 
