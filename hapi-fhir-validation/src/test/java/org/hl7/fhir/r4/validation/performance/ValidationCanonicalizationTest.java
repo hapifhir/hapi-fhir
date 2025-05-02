@@ -34,7 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidationCanonicalizationTest {
 
-	public static final int NUM_RUNS = 10;
+	private static final int NUM_RUNS = 10;
+	private static final int NUM_CONCEPTS = 100_000;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationCanonicalizationTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -149,8 +150,8 @@ public class ValidationCanonicalizationTest {
 		supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(ourFhirContext, ourVersionCanonicalizer));
 
 		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
-		addCodeSystems(prePopulatedSupport);
-		addValueSets(prePopulatedSupport);
+		CodeSystem loadedCodeSystem = addCodeSystems(prePopulatedSupport);
+		addValueSets(prePopulatedSupport, loadedCodeSystem);
 		addStructureDefinitions(prePopulatedSupport);
 
 		supportChain.addValidationSupport(prePopulatedSupport);
@@ -161,18 +162,17 @@ public class ValidationCanonicalizationTest {
 		return validator;
 	}
 
-	private static void addCodeSystems(PrePopulatedValidationSupport prePopulatedSupport) {
-		String path = "/validation/code-systems/large-codesystem.json";
-		CodeSystem codeSystem = ClasspathUtil.loadResource(ourFhirContext, CodeSystem.class, path);
+	private static CodeSystem addCodeSystems(PrePopulatedValidationSupport prePopulatedSupport) {
+		CodeSystem codeSystem = LargeTerminologyUtil.createLargeCodeSystem(NUM_CONCEPTS);
 		prePopulatedSupport.addCodeSystem(codeSystem);
-		ourLog.info("Loaded CodeSystem: {}", path);
+		ourLog.info("Loaded CodeSystem with {} concepts", NUM_CONCEPTS);
+		return codeSystem;
 	}
 
-	private static void addValueSets(PrePopulatedValidationSupport prePopulatedSupport) {
-		String path = "/validation/value-sets/large-valueset.json";
-		ValueSet valueSet = ClasspathUtil.loadResource(ourFhirContext, ValueSet.class, path);
+	private static void addValueSets(PrePopulatedValidationSupport prePopulatedSupport, CodeSystem theLoadedCodeSystem) {
+		ValueSet valueSet = LargeTerminologyUtil.createLargeValueSet(theLoadedCodeSystem);
 		prePopulatedSupport.addValueSet(valueSet);
-		ourLog.info("Loaded ValueSet: {}", path);
+		ourLog.info("Loaded ValueSet with {} concepts", theLoadedCodeSystem.getConcept().size());
 	}
 
 	private static void addStructureDefinitions(PrePopulatedValidationSupport prePopulatedSupport) {
