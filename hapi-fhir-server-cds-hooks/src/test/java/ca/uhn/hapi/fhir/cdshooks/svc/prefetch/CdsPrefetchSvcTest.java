@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,8 +58,14 @@ class CdsPrefetchSvcTest {
 	private ICdsServiceMethod myServiceMethodMock;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcasterMock;
-	@InjectMocks
+
 	private CdsPrefetchSvc myCdsPrefetchSvc;
+
+	@BeforeEach
+	void setUp() {
+		when(myCdsPrefetchDaoSvc.getFhirContext()).thenReturn(myFhirContext);
+		myCdsPrefetchSvc = new CdsPrefetchSvc(myCdsResolutionStrategySvc, myCdsPrefetchDaoSvc, myCdsPrefetchFhirClientSvc, myCdsHooksDaoAuthorizationSvc, myInterceptorBroadcasterMock);
+	}
 
 	@Test
 	void testFindMissingPrefetch() {
@@ -162,7 +169,7 @@ class CdsPrefetchSvcTest {
 			assertThat(request.getPrefetchKeys()).doesNotContain("patient");
 		}
 
-		verifyNoInteractions(myCdsPrefetchFhirClientSvc, myCdsPrefetchDaoSvc);
+		verifyNoMoreInteractions(myCdsPrefetchFhirClientSvc, myCdsPrefetchDaoSvc);
 	}
 
 	@ParameterizedTest
