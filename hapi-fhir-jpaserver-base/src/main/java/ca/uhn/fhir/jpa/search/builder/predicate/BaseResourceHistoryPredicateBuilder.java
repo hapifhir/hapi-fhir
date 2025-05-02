@@ -14,6 +14,7 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
 import java.util.List;
 
@@ -26,12 +27,12 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	protected DbColumn myColumnRequestId;
 	protected DbColumn myResourceIdColumn;
 
-	public BaseResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
-
-		myResourceIdColumn = getTable().addColumn("RES_ID");
+	public BaseResourceHistoryPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, String theResourceIdColumn) {
+		super(theSearchSqlBuilder, theTable);
 		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
+		myResourceIdColumn = getTable().addColumn(theResourceIdColumn);
 	}
 
 	@Override
