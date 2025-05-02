@@ -64,8 +64,8 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 	@Override
 	public void validate() {
 		super.validate();
-		Validate.notNull(myColumnType);
-		Validate.notNull(myNullable);
+		Validate.notNull(myColumnType, "myColumnType must not be null");
+		Validate.notNull(myNullable, "myNullable must not be null");
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
 			Validate.notNull(
