@@ -91,7 +91,7 @@ public class ValidationCanonicalizationTest {
 			ourLog.info("=== Run #{} - Validated resource in: {}ms ===", run, millis);
 
 			totalTime += millis;
-			ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getTime()));
+			ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
 			if (millis > max){
 				max = millis;
@@ -135,7 +135,10 @@ public class ValidationCanonicalizationTest {
 	}
 
 	private void logMetrics(){
-		ourVersionCanonicalizer.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(10_000)));
+		ourVersionCanonicalizer.getMetrics().forEach(metric -> {
+			String metrics = metric.writeMetrics(10_000, new ConverterInvocation.ElapsedTimeComparator());
+			ourLog.info("{}", metrics);
+		});
 	}
 
 	private FhirValidator configureValidator(){

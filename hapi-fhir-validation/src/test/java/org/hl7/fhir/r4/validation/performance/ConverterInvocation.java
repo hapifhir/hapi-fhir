@@ -2,56 +2,75 @@ package org.hl7.fhir.r4.validation.performance;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class ConverterInvocation {
-	private final String resource;
-	private final long time;
-  	private final List<String> stacktrace;
-	  private final int myThreadOffset;
 
-	public ConverterInvocation(String theResource, long theTime, List<String> theStacktrace, int theThreadOffSet) {
-		resource = theResource;
-		time = theTime;
-    stacktrace = theStacktrace;
-	myThreadOffset = theThreadOffSet;
+	private static final DateTimeFormatter OUR_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+
+	private final ConverterMetric myMetric;
+	private final String myResourceId;
+	private final long myElapsedTime;
+	private final List<String> myStacktrace;
+	private final int myThreadOffset;
+	private final Instant myInvocatedAt;
+
+	public ConverterInvocation(ConverterMetric theMetric, String theResource, long theTime, List<String> theStacktrace, int theThreadOffSet) {
+		myMetric = theMetric;
+		myResourceId = theResource;
+		myElapsedTime = theTime;
+		myStacktrace = theStacktrace;
+		myThreadOffset = theThreadOffSet;
+		myInvocatedAt = new Date().toInstant();
 	}
 
-  public long getTime() {
-    return time;
-  }
-
-  public String getResource() {
-    return resource;
-  }
+	public long getElapsedTime() {
+		return myElapsedTime;
+  	}
 
   @Override
 	public String toString() {
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("[").append("resource=").append(resource).append(", time=").append(time).append("ms]\n");
+    StringBuilder sb = new StringBuilder()
+    	.append("[")
+		.append("method=").append(myMetric.getMethod())
+		.append(", timestamp=").append(OUR_FORMATTER.format(myInvocatedAt))
+		.append(", resource=").append(myResourceId)
+		.append(", time=").append(myElapsedTime).append("ms")
+		.append("]\n");
 
     int maxElements = 10;
 
     for (int i = 0; i < maxElements; i++){
-      if (i != 0){
-        sb.append("\n");
-      }
-      int index = i + myThreadOffset;
-      String element = stacktrace.get(index);
-      sb.append("\t").append(element);
+		if (i != 0){
+			sb.append("\n");
+		}
+		int index = i + myThreadOffset;
+		String element = myStacktrace.get(index);
+		sb.append("\t").append(element);
     }
-
-		return sb.toString();
+	return sb.toString();
 	}
 
-	public static class TimeComparator implements Comparator<ConverterInvocation> {
-
+	public static class ElapsedTimeComparator implements Comparator<ConverterInvocation> {
 		@Override
 		public int compare(ConverterInvocation theO1, ConverterInvocation theO2) {
 			return new CompareToBuilder()
-				.append(theO1.time, theO2.time)
+				.append(theO1.myElapsedTime, theO2.myElapsedTime)
+				.toComparison();
+		}
+	}
+
+	public static class InvocatedAtComparator implements Comparator<ConverterInvocation> {
+		@Override
+		public int compare(ConverterInvocation theO1, ConverterInvocation theO2) {
+			return new CompareToBuilder()
+				.append(theO1.myInvocatedAt, theO2.myInvocatedAt)
 				.toComparison();
 		}
 	}
