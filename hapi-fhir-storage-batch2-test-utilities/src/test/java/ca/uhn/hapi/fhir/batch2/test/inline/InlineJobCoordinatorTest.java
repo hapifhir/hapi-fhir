@@ -153,22 +153,22 @@ class InlineJobCoordinatorTest {
     }
 
     static class Step1TestOutput implements IModelJson {
-        private final int num;
+        private final int myNum;
         // random instant to test step data transformation
         @Nullable
-        private final Instant instant;
+        private final Instant myInstant;
 
-        public Step1TestOutput(int num) {
-            this(num, Instant.now());
+        public Step1TestOutput(int theNum) {
+            this(theNum, Instant.now());
         }
 
-        public Step1TestOutput(int num, @Nullable Instant instant) {
-            this.num = num;
-            this.instant = instant;
+        public Step1TestOutput(int theNum, @Nullable Instant theInstant) {
+            myNum = theNum;
+            myInstant = theInstant;
         }
 
         public int getNum() {
-            return num;
+            return myNum;
         }
 
         @Override
@@ -177,40 +177,40 @@ class InlineJobCoordinatorTest {
                 return false;
             }
             Step1TestOutput that = (Step1TestOutput) o;
-            return num == that.num && Objects.equals(instant, that.instant);
+            return myNum == that.myNum && Objects.equals(myInstant, that.myInstant);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(num, instant);
+            return Objects.hash(myNum, myInstant);
         }
 
         @Override
         public String toString() {
             return new StringJoiner(", ", Step1TestOutput.class.getSimpleName() + "[", "]")
-                    .add("num=" + num)
-                    .add("instant=" + instant)
+                    .add("num=" + myNum)
+                    .add("instant=" + myInstant)
                     .toString();
         }
     }
 
     static class Step2TestOutput implements IModelJson {
-        private final String text;
+        private final String myText;
         // random instant to test step data transformation
         @Nullable
-        private final Instant instant;
+        private final Instant myInstant;
 
-        public Step2TestOutput(String text) {
-            this(text, Instant.now());
+        public Step2TestOutput(String theText) {
+            this(theText, Instant.now());
         }
 
-        public Step2TestOutput(String text, @Nullable Instant instant) {
-            this.text = text;
-            this.instant = instant;
+        public Step2TestOutput(String theText, @Nullable Instant theInstant) {
+            myText = theText;
+            myInstant = theInstant;
         }
 
         public String getText() {
-            return text;
+            return myText;
         }
 
         @Override
@@ -219,41 +219,41 @@ class InlineJobCoordinatorTest {
                 return false;
             }
             Step2TestOutput that = (Step2TestOutput) o;
-            return Objects.equals(text, that.text) && Objects.equals(instant, that.instant);
+            return Objects.equals(myText, that.myText) && Objects.equals(myInstant, that.myInstant);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(text, instant);
+            return Objects.hash(myText, myInstant);
         }
 
         @Override
         public String toString() {
             return new StringJoiner(", ", Step2TestOutput.class.getSimpleName() + "[", "]")
-                    .add("text='" + text + "'")
-                    .add("instant=" + instant)
+                    .add("text='" + myText + "'")
+                    .add("instant=" + myInstant)
                     .toString();
         }
     }
 
 	private static class InlineTestJobParams implements IModelJson {
 		@JsonProperty(value = "baseNum", required = true)
-		private int baseNum;
+		private int myBaseNum;
 
 		private InlineTestJobParams() {
 
 		}
 
-		public InlineTestJobParams(int baseNum) {
-			this.baseNum = baseNum;
+		public InlineTestJobParams(int theBaseNum) {
+			this.myBaseNum = theBaseNum;
 		}
 
 		public int getBaseNum() {
-			return baseNum;
+			return myBaseNum;
 		}
 
 		public void setBaseNum(int baseNum) {
-			this.baseNum = baseNum;
+			this.myBaseNum = baseNum;
 		}
 	}
 
@@ -279,24 +279,24 @@ class InlineJobCoordinatorTest {
                 @Nonnull StepExecutionDetails<InlineTestJobParams, Step1TestOutput> theStepExecutionDetails,
                 @Nonnull IJobDataSink<Step2TestOutput> theDataSink) {
 
-            theDataSink.accept(new Step2TestOutput("hello" + theStepExecutionDetails.getData().num));
+            theDataSink.accept(new Step2TestOutput("hello" + theStepExecutionDetails.getData().myNum));
 
             return new RunOutcome(5);
         }
     }
 
 	private static class Step3Runner implements IReductionStepWorker<InlineTestJobParams, Step2TestOutput, VoidModel> {
-		private final List<MeasureReport> measureReports;
-        private final List<String> texts = new ArrayList<>();
+		private final List<MeasureReport> myMeasureReports;
+        private final List<String> myTexts = new ArrayList<>();
 
-        public Step3Runner(List<MeasureReport> measureReports) {
-			this.measureReports = measureReports;
+        public Step3Runner(List<MeasureReport> theMeasureReports) {
+			myMeasureReports = theMeasureReports;
         }
 
 		@Nonnull
         @Override
         public ChunkOutcome consume(ChunkExecutionDetails<InlineTestJobParams, Step2TestOutput> chunkExecutionDetails) {
-            texts.add(chunkExecutionDetails.getData().getText());
+            myTexts.add(chunkExecutionDetails.getData().getText());
 
             return ChunkOutcome.SUCCESS();
         }
@@ -308,8 +308,8 @@ class InlineJobCoordinatorTest {
                 @Nonnull IJobDataSink<VoidModel> dataSink)
                 throws JobExecutionFailedException {
 
-			String unifiedString = String.join(",", texts);
-			measureReports.add(new MeasureReport().setMeasure(unifiedString));
+			String unifiedString = String.join(",", myTexts);
+			myMeasureReports.add(new MeasureReport().setMeasure(unifiedString));
 
             dataSink.accept(new VoidModel());
 
