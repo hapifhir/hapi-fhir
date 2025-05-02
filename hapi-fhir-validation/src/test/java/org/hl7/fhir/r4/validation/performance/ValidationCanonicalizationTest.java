@@ -45,7 +45,7 @@ public class ValidationCanonicalizationTest {
 	private StructureDefinition myStructureDefinition;
 	private List<StructureDefinition> myAllStructureDefinitions;
 
-	private CodeSystem myLargeCodeSystem;
+	private CodeSystem myCodeSystem1;
 	private List<CodeSystem> myAllCodeSystems;
 
 	private ValueSet myValueSetFromLargeCodeSystem;
@@ -59,10 +59,10 @@ public class ValidationCanonicalizationTest {
 		myStructureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, "/validation/structure-definitions/procedure-structuredefinition.json");
 		myAllStructureDefinitions = List.of(myStructureDefinition);
 
-		myLargeCodeSystem = LargeTerminologyUtil.createCodeSystem("large-codesystem", "Large CodeSystem", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
-		myAllCodeSystems = List.of(myLargeCodeSystem);
+		myCodeSystem1 = LargeTerminologyUtil.createCodeSystem("codesystem-1", "Code System One", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
+		myAllCodeSystems = List.of(myCodeSystem1);
 
-		myValueSetFromLargeCodeSystem = LargeTerminologyUtil.createValueSetFromCodeSystem("large-valueset", "Large ValueSet", myLargeCodeSystem);
+		myValueSetFromLargeCodeSystem = LargeTerminologyUtil.createValueSetFromCodeSystem("valueset-1", "Value Set One", myCodeSystem1);
 		myAllValueSets = List.of(myValueSetFromLargeCodeSystem);
 
 		myValidator = configureValidator();
@@ -88,9 +88,9 @@ public class ValidationCanonicalizationTest {
 		procedure.setStatus(Procedure.ProcedureStatus.INPROGRESS);
 		int lastConcept = NUM_CONCEPTS - 1;
 		procedure.getCode().addCoding()
-				.setSystem(myLargeCodeSystem.getUrl())
-				.setCode(myLargeCodeSystem.getConcept().get(lastConcept).getCode())
-				.setDisplay(myLargeCodeSystem.getConcept().get(lastConcept).getDisplay());
+				.setSystem(myCodeSystem1.getUrl())
+				.setCode(myCodeSystem1.getConcept().get(lastConcept).getCode())
+				.setDisplay(myCodeSystem1.getConcept().get(lastConcept).getDisplay());
 
 		// add invalid code to ensure validation is functioning properly
 		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
@@ -144,7 +144,7 @@ public class ValidationCanonicalizationTest {
 		SingleValidationMessage message1 = validationResult.getMessages().get(0);
 		assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
 		assertEquals("Procedure.code", message1.getLocationString());
-		String expectedMessage1 = "None of the codings provided are in the value set 'Large ValueSet' (http://acme.org/ValueSet/large-valueset|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/large-codesystem#large-codesystem-concept-100000, http://acme.org/invalid#invalid)";
+		String expectedMessage1 = "None of the codings provided are in the value set 'Value Set One' (http://acme.org/ValueSet/valueset-1|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-100000, http://acme.org/invalid#invalid)";
 		assertEquals(expectedMessage1, message1.getMessage());
 
 		SingleValidationMessage message2 = validationResult.getMessages().get(1);
