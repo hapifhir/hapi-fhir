@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -51,9 +52,11 @@ public class SubscriptionRegisteringSubscriberTest {
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Spy
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings());
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings(), new PartitionSettings());
 	@Mock
 	private DaoRegistry myDaoRegistry;
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 	@Mock
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
 	@InjectMocks

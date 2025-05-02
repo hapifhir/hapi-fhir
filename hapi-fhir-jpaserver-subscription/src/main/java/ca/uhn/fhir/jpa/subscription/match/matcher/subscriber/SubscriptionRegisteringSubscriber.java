@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -59,6 +60,9 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -123,8 +127,9 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition(defaultPartitionId)) {
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.

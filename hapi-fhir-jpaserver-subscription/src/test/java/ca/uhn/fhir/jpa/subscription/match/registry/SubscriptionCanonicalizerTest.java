@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -47,9 +48,9 @@ class SubscriptionCanonicalizerTest {
 
 	private static final Integer NON_NULL_DEFAULT_PARTITION_ID = 666;
 
-	FhirContext r4Context = FhirContext.forR4();
+	private final FhirContext r4Context = FhirContext.forR4();
 
-	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context, new SubscriptionSettings());
+	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context, new SubscriptionSettings(), new PartitionSettings());
 
 	@Test
 	void testCanonicalizeR4SendDeleteMessagesSetsExtensionValueNotPresent() {
@@ -90,7 +91,7 @@ class SubscriptionCanonicalizerTest {
 	@Test
 	public void testCanonicalizeDstu2SendDeleteMessages() {
 		//setup
-		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2Cached(), new SubscriptionSettings());
+		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2Cached(), new SubscriptionSettings(), new PartitionSettings());
 		ca.uhn.fhir.model.dstu2.resource.Subscription dstu2Sub = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		ExtensionDt extensionDt = new ExtensionDt();
 		extensionDt.setUrl(EX_SEND_DELETE_MESSAGES);
@@ -126,7 +127,7 @@ class SubscriptionCanonicalizerTest {
 	@ValueSource(strings = {"full-resource", "id-only", "empty"})
 	public void testR5Canonicalize_returnsCorrectCanonicalSubscription(String thePayloadContent) {
 		// setup
-		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), new SubscriptionSettings());
+		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), new SubscriptionSettings(), new PartitionSettings());
 		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
 				org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent);
 		org.hl7.fhir.r5.model.Subscription subscription = buildR5Subscription(payloadContent);
@@ -166,7 +167,7 @@ class SubscriptionCanonicalizerTest {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
-		SubscriptionCanonicalizer r4bCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), new SubscriptionSettings());
+		SubscriptionCanonicalizer r4bCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), new SubscriptionSettings(), new PartitionSettings());
 		org.hl7.fhir.r4b.model.Subscription subscription = buildR4BSubscription(thePayloadContent);
 
 		// execute
@@ -240,7 +241,7 @@ class SubscriptionCanonicalizerTest {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), subscriptionSettings, new PartitionSettings());
 		subscriptionCanonicalizer.setPartitionHelperSvc(myHelperSvc);
 		Subscription subscription = buildMdmSubscriptionR4("test-subscription", "Patient?");
 		CanonicalSubscription canonicalize = subscriptionCanonicalizer.canonicalize(subscription);
@@ -271,7 +272,7 @@ class SubscriptionCanonicalizerTest {
 	void testSubscriptionCrossPartitionEnableProperty_forDstu2WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2(), subscriptionSettings, new PartitionSettings());
 
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscriptionWithoutExtension = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
@@ -286,7 +287,7 @@ class SubscriptionCanonicalizerTest {
 	void testSubscriptionCrossPartitionEnableProperty_forDstu3WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu3(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu3(), subscriptionSettings, new PartitionSettings());
 
 		org.hl7.fhir.dstu3.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.dstu3.model.Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
@@ -317,7 +318,7 @@ class SubscriptionCanonicalizerTest {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
 
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), subscriptionSettings, new PartitionSettings());
 
 		Subscription subscriptionWithoutExtension = new Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
@@ -348,7 +349,7 @@ class SubscriptionCanonicalizerTest {
 	void testSubscriptionCrossPartitionEnableProperty_forR4BWithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), subscriptionSettings, new PartitionSettings());
 
 		org.hl7.fhir.r4b.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.r4b.model.Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
@@ -378,7 +379,7 @@ class SubscriptionCanonicalizerTest {
 	void testSubscriptionCrossPartitionEnableProperty_forR5WithExtensionAndPartitions(RequestPartitionId theRequestPartitionId) {
 		final SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 		subscriptionSettings.setCrossPartitionSubscriptionEnabled(true);
-		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), subscriptionSettings);
+		final SubscriptionCanonicalizer subscriptionCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), subscriptionSettings, new PartitionSettings());
 
 		org.hl7.fhir.r5.model.Subscription subscriptionWithoutExtension = new org.hl7.fhir.r5.model.Subscription();
 		subscriptionWithoutExtension.setUserData(RESOURCE_PARTITION_ID, theRequestPartitionId);
@@ -438,7 +439,7 @@ class SubscriptionCanonicalizerTest {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
-		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), new SubscriptionSettings());
+		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), new SubscriptionSettings(), new PartitionSettings());
 
 		// execute
 		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);
@@ -508,12 +509,12 @@ class SubscriptionCanonicalizerTest {
 															   CanonicalSubscription theCanonicalSubscriptionWithExtensionCrossPartitionFalse,
 															   RequestPartitionId theRequestPartitionId) {
 
-		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition();
+		boolean isDefaultPartition = isNull(theRequestPartitionId) ? false : theRequestPartitionId.isDefaultPartition(null);
 
 		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithoutExtension.isCrossPartitionEnabled()).isFalse();
 		AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionFalse.isCrossPartitionEnabled()).isFalse();
 
-		if(isDefaultPartition){
+		if (isDefaultPartition){
 			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isTrue();
 		} else {
 			AssertionsForClassTypes.assertThat(theCanonicalSubscriptionWithExtensionCrossPartitionTrue.isCrossPartitionEnabled()).isFalse();
