@@ -10,25 +10,25 @@ public class LargeTerminologyUtil {
 		// utility class
 	}
 
-	public static CodeSystem createLargeCodeSystem(int theNumConcepts) {
+	public static CodeSystem createCodeSystem(String theId, String theTitle, CodeSystem.CodeSystemContentMode theContentMode, int theNumConcepts) {
 		CodeSystem largeCodeSystem = new CodeSystem();
-		largeCodeSystem.setId("large-codesystem");
-		largeCodeSystem.setUrl("http://acme.org/CodeSystem/large-codesystem");
+		largeCodeSystem.setId(theId);
+		largeCodeSystem.setUrl("http://acme.org/CodeSystem/" + theId);
 		largeCodeSystem.setVersion("1");
-		largeCodeSystem.setName("Large CodeSystem");
-		largeCodeSystem.setTitle("Large CodeSystem");
+		largeCodeSystem.setTitle(theTitle);
+		largeCodeSystem.setName(theTitle);
 		largeCodeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		largeCodeSystem.setDescription("Some Large CodeSystem");
-		largeCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		largeCodeSystem.setDescription(theTitle + " - Description");
+		largeCodeSystem.setContent(theContentMode);
 
 		for (int i = 1; i <= theNumConcepts; i++){
 			CodeSystem.ConceptDefinitionComponent concept = largeCodeSystem.addConcept();
 			concept
-				.setCode("concept-" + i)
-				.setDisplay("Concept " + i)
+				.setCode(theId + "-concept-" + i)
+				.setDisplay(theTitle + " Concept " + i)
 				.addDesignation()
 				.setLanguage("fr")
-				.setValue("Le Concept " + i)
+				.setValue("Le " + theTitle + " Concept " + i)
 				.getUse()
 				.setSystem("http://terminology.hl7.org/CodeSystem/hl7TermMaintInfra")
 				.setCode("preferredForLanguage")
@@ -38,15 +38,15 @@ public class LargeTerminologyUtil {
 		return largeCodeSystem;
 	}
 
-	public static ValueSet createLargeValueSet(CodeSystem theCodeSystem) {
+	public static ValueSet createValueSetFromCodeSystem(String theId, String theTitle, CodeSystem theCodeSystem) {
 		ValueSet largeValueSet = new ValueSet();
-		largeValueSet.setId("large-valueset");
-		largeValueSet.setUrl("http://acme.org/ValueSet/large-valueset");
+		largeValueSet.setId(theId);
+		largeValueSet.setUrl("http://acme.org/ValueSet/" + theId);
 		largeValueSet.setVersion("1");
-		largeValueSet.setName("Large ValueSet");
-		largeValueSet.setTitle("Large ValueSet");
+		largeValueSet.setName(theTitle);
+		largeValueSet.setTitle(theTitle);
 		largeValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		largeValueSet.setDescription("Some Large ValueSet");
+		largeValueSet.setDescription(theTitle + " - Description");
 		ValueSet.ConceptSetComponent include = largeValueSet.getCompose().addInclude();
 		include.setSystem(theCodeSystem.getUrl());
 

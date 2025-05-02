@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,10 +42,29 @@ public class ValidationCanonicalizationTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static final MetricCapturingVersionCanonicalizer ourVersionCanonicalizer = new MetricCapturingVersionCanonicalizer(ourFhirContext);
 
+	private StructureDefinition myStructureDefinition;
+	private List<StructureDefinition> myAllStructureDefinitions;
+
+	private CodeSystem myLargeCodeSystem;
+	private List<CodeSystem> myAllCodeSystems;
+
+	private ValueSet myValueSetFromLargeCodeSystem;
+	private List<ValueSet> myAllValueSets;
+
 	private FhirValidator myValidator;
+
 
 	@BeforeEach
 	public void beforeEach(){
+		myStructureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, "/validation/structure-definitions/procedure-structuredefinition.json");
+		myAllStructureDefinitions = List.of(myStructureDefinition);
+
+		myLargeCodeSystem = LargeTerminologyUtil.createCodeSystem("large-codesystem", "Large CodeSystem", CodeSystem.CodeSystemContentMode.COMPLETE, NUM_CONCEPTS);
+		myAllCodeSystems = List.of(myLargeCodeSystem);
+
+		myValueSetFromLargeCodeSystem = LargeTerminologyUtil.createValueSetFromCodeSystem("large-valueset", "Large ValueSet", myLargeCodeSystem);
+		myAllValueSets = List.of(myValueSetFromLargeCodeSystem);
+
 		myValidator = configureValidator();
 	}
 
@@ -64,9 +84,13 @@ public class ValidationCanonicalizationTest {
 
 		Procedure procedure = new Procedure();
 		procedure.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Empty</div>");
-		procedure.getMeta().addProfile("http://example.org/fhir/StructureDefinition/TestProcedure");
+		procedure.getMeta().addProfile(myStructureDefinition.getUrl());
 		procedure.setStatus(Procedure.ProcedureStatus.INPROGRESS);
-		procedure.getCode().addCoding().setSystem("http://acme.org/CodeSystem/large-codesystem").setCode("concept-100000").setDisplay("Le Concept 100000");
+		int lastConcept = NUM_CONCEPTS - 1;
+		procedure.getCode().addCoding()
+				.setSystem(myLargeCodeSystem.getUrl())
+				.setCode(myLargeCodeSystem.getConcept().get(lastConcept).getCode())
+				.setDisplay(myLargeCodeSystem.getConcept().get(lastConcept).getDisplay());
 
 		// add invalid code to ensure validation is functioning properly
 		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
@@ -106,11 +130,11 @@ public class ValidationCanonicalizationTest {
 	}
 
 
-	private static void logSummary(long totalTime, long max, long totalConversionTime) {
+	private void logSummary(long totalTime, long max, long totalConversionTime) {
 		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | AVERAGE TIME: {}ms | CONVERSION TIME: {}ms =====", NUM_RUNS, totalTime, max, totalTime / NUM_RUNS, totalConversionTime);
 	}
 
-	private static void assertHasInvalidCodeError(ValidationResult validationResult) {
+	private void assertHasInvalidCodeError(ValidationResult validationResult) {
 //		ourLog.info("===Validation Messages ({})===", validationResult.getMessages().size());
 //		validationResult.getMessages().forEach(message -> ourLog.info("[{}:{} at {}]", message.getSeverity(), message.getMessage(), message.getLocationString()));
 
@@ -120,7 +144,7 @@ public class ValidationCanonicalizationTest {
 		SingleValidationMessage message1 = validationResult.getMessages().get(0);
 		assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
 		assertEquals("Procedure.code", message1.getLocationString());
-		String expectedMessage1 = "None of the codings provided are in the value set 'Large ValueSet' (http://acme.org/ValueSet/large-valueset|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/large-codesystem#concept-100000, http://acme.org/invalid#invalid)";
+		String expectedMessage1 = "None of the codings provided are in the value set 'Large ValueSet' (http://acme.org/ValueSet/large-valueset|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/large-codesystem#large-codesystem-concept-100000, http://acme.org/invalid#invalid)";
 		assertEquals(expectedMessage1, message1.getMessage());
 
 		SingleValidationMessage message2 = validationResult.getMessages().get(1);
@@ -150,8 +174,8 @@ public class ValidationCanonicalizationTest {
 		supportChain.addValidationSupport(new CommonCodeSystemsTerminologyService(ourFhirContext, ourVersionCanonicalizer));
 
 		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
-		CodeSystem loadedCodeSystem = addCodeSystems(prePopulatedSupport);
-		addValueSets(prePopulatedSupport, loadedCodeSystem);
+		addCodeSystems(prePopulatedSupport);
+		addValueSets(prePopulatedSupport);
 		addStructureDefinitions(prePopulatedSupport);
 
 		supportChain.addValidationSupport(prePopulatedSupport);
@@ -162,23 +186,24 @@ public class ValidationCanonicalizationTest {
 		return validator;
 	}
 
-	private static CodeSystem addCodeSystems(PrePopulatedValidationSupport prePopulatedSupport) {
-		CodeSystem codeSystem = LargeTerminologyUtil.createLargeCodeSystem(NUM_CONCEPTS);
-		prePopulatedSupport.addCodeSystem(codeSystem);
-		ourLog.info("Loaded CodeSystem with {} concepts", NUM_CONCEPTS);
-		return codeSystem;
+	private void addCodeSystems(PrePopulatedValidationSupport prePopulatedSupport) {
+		for (CodeSystem codeSystem : myAllCodeSystems){
+			prePopulatedSupport.addCodeSystem(codeSystem);
+			ourLog.info("Loaded CodeSystem {}", codeSystem.getId());
+		}
 	}
 
-	private static void addValueSets(PrePopulatedValidationSupport prePopulatedSupport, CodeSystem theLoadedCodeSystem) {
-		ValueSet valueSet = LargeTerminologyUtil.createLargeValueSet(theLoadedCodeSystem);
-		prePopulatedSupport.addValueSet(valueSet);
-		ourLog.info("Loaded ValueSet with {} concepts", theLoadedCodeSystem.getConcept().size());
+	private void addValueSets(PrePopulatedValidationSupport prePopulatedSupport) {
+		for (ValueSet valueSet : myAllValueSets) {
+			prePopulatedSupport.addValueSet(valueSet);
+			ourLog.info("Loaded ValueSet {}", valueSet.getId());
+		}
 	}
 
-	private static void addStructureDefinitions(PrePopulatedValidationSupport prePopulatedSupport) {
-		String path = "/validation/structure-definitions/procedure-structuredefinition.json";
-		StructureDefinition structureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, path);
-		prePopulatedSupport.addStructureDefinition(structureDefinition);
-		ourLog.info("Loaded StructureDefinition: {}", path);
+	private void addStructureDefinitions(PrePopulatedValidationSupport prePopulatedSupport) {
+		for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
+			prePopulatedSupport.addStructureDefinition(structureDefinition);
+			ourLog.info("Loaded StructureDefinition: {}", structureDefinition.getId());
+		}
 	}
 }
