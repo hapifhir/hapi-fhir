@@ -33,15 +33,12 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 	private final DbColumn myColumnResourceId;
 	private final DbColumn myColumnHashPresence;
 
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-
 	/**
 	 * Constructor
 	 */
 	public SearchParamPresentPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"), thePartitionSettings);
+			SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"));
 		myColumnResourceId = getTable().addColumn("RES_ID");
 		myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");
 	}

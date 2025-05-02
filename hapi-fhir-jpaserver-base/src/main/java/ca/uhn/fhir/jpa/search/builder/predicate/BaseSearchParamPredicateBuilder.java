@@ -59,8 +59,8 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	}
 
 	public BaseSearchParamPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theTable, thePartitionSettings);
+			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
+		super(theSearchSqlBuilder, theTable);
 
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnMissing = theTable.addColumn("SP_MISSING");

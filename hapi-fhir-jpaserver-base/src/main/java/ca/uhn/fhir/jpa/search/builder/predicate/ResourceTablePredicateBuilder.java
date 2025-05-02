@@ -44,7 +44,7 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	 */
 	public ResourceTablePredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RESOURCE"), thePartitionSettings);
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RESOURCE"));
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnResType = getTable().addColumn(ResourceTable.RES_TYPE);
 		myColumnResDeletedAt = getTable().addColumn("RES_DELETED_AT");

@@ -680,7 +680,7 @@ public class JpaConfig {
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
 			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, myPartitionSettings, theReversed);
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
 	}
 
 	@Bean
@@ -692,20 +692,20 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TagPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new TagPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceIdPredicateBuilder newResourceIdPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceIdPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new ResourceIdPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new SearchParamPresentPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -730,7 +730,7 @@ public class JpaConfig {
 	@Scope("prototype")
 	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

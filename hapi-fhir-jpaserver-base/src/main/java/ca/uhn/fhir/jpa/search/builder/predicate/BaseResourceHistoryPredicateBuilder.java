@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -28,11 +29,12 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	protected DbColumn myResourceIdColumn;
 
 	public BaseResourceHistoryPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable, String theResourceIdColumn) {
-		super(theSearchSqlBuilder, theTable);
+		SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
+
+		myResourceIdColumn = getTable().addColumn("RES_ID");
 		myColumnSourceUri = getTable().addColumn("SOURCE_URI");
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
-		myResourceIdColumn = getTable().addColumn(theResourceIdColumn);
 	}
 
 	@Override

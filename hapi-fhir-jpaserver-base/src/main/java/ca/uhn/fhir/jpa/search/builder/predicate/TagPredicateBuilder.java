@@ -49,8 +49,8 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnTagId;
 	private final DbColumn myTagDefinitionColumnTagType;
 
-	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"), thePartitionSettings);
+	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"));
 
 		myColumnResId = getTable().addColumn("RES_ID");
 		myColumnTagId = getTable().addColumn("TAG_ID");

@@ -39,17 +39,17 @@ public abstract class BasePredicateBuilder {
 
 	protected final PartitionSettings myPartitionSettings;
 
-	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
+	public BasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		mySearchSqlBuilder = theSearchSqlBuilder;
-		myPartitionSettings = thePartitionSettings;
+		myPartitionSettings = mySearchSqlBuilder.getPartitionSettings();
 	}
 
 	protected SearchQueryBuilder getSearchQueryBuilder() {
 		return mySearchSqlBuilder;
 	}
 
-	PartitionSettings getPartitionSettings() {
-		return mySearchSqlBuilder.getPartitionSettings();
+	protected PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
 	}
 
 	RequestPartitionId getRequestPartitionId() {

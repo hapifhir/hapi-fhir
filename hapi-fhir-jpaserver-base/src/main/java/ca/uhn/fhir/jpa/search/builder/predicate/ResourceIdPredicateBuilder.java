@@ -56,8 +56,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	/**
 	 * Constructor
 	 */
-	public ResourceIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, PartitionSettings thePartitionSettings) {
-		super(theSearchSqlBuilder, thePartitionSettings);
+	public ResourceIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder);
 	}
 
 	@Nullable
