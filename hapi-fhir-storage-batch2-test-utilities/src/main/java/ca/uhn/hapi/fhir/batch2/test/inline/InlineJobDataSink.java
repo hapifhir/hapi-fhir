@@ -28,23 +28,27 @@ import java.util.List;
 /**
  * {@link IJobDataSink} implementation that collects the output of a batch job step into a list in a lightweight way.
  *
- * @param <OutputType> the type of the job step output
+ * @param <OT> the type of the job step output
  */
-class InlineJobDataSink<OutputType extends IModelJson> implements IJobDataSink<OutputType> {
-    private final List<WorkChunkData<OutputType>> myCurrentOutput;
+class InlineJobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
+    private final List<WorkChunkData<OT>> myCurrentOutput;
 
-    InlineJobDataSink(List<WorkChunkData<OutputType>> theCurrentOutput) {
+    InlineJobDataSink(List<WorkChunkData<OT>> theCurrentOutput) {
         myCurrentOutput = theCurrentOutput;
     }
 
 	@Override
-    public void accept(WorkChunkData<OutputType> theData) {
+    public void accept(WorkChunkData<OT> theData) {
         myCurrentOutput.add(theData);
     }
 
     @Override
-    public void recoveredError(String theMessage) {}
+    public void recoveredError(String theMessage) {
+		// not implemented
+	}
 
     @Override
-    public void setWarningProcessor(IWarningProcessor theWarningProcessor) {}
+    public void setWarningProcessor(IWarningProcessor theWarningProcessor) {
+		// not implemented
+	}
 }

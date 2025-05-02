@@ -34,32 +34,32 @@ import java.util.List;
 /**
  * Run all steps for a given batch job definition and collect the output for each step.
  *
- * @param <ParameterType> the type of the job parameters
- * @param <InputType> the input type of the job step
- * @param <OutputType> the output type of the job step
+ * @param <PT> the type of the job parameters
+ * @param <IT> the input type of the job step
+ * @param <OT> the output type of the job step
  */
-class InlineStepRunner<ParameterType extends IModelJson, InputType extends IModelJson, OutputType extends IModelJson> {
+class InlineStepRunner<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 
     private final JobInstance myInstance;
-    private final JobDefinitionStep<ParameterType, InputType, OutputType> myStep;
-    private final ParameterType myParameter;
-    private final List<WorkChunkData<OutputType>> myCurrentOutput = new ArrayList<>();
+    private final JobDefinitionStep<PT, IT, OT> myStep;
+    private final PT myParameter;
+    private final List<WorkChunkData<OT>> myCurrentOutput = new ArrayList<>();
 
     InlineStepRunner(
-            JobDefinitionStep<ParameterType, InputType, OutputType> theStep,
-            ParameterType theParameter,
+            JobDefinitionStep<PT, IT, OT> theStep,
+            PT theParameter,
             JobInstance theInstance) {
         myStep = theStep;
         myParameter = theParameter;
         myInstance = theInstance;
     }
 
-    List<WorkChunkData<OutputType>> getCurrentOutput() {
+    List<WorkChunkData<OT>> getCurrentOutput() {
         return myCurrentOutput;
     }
 
-    void run(List<WorkChunkData<InputType>> theCurrentInput) {
-        InlineJobDataSink<OutputType> sink = new InlineJobDataSink<>(myCurrentOutput);
+    void run(List<WorkChunkData<IT>> theCurrentInput) {
+        InlineJobDataSink<OT> sink = new InlineJobDataSink<>(myCurrentOutput);
 
         final WorkChunk workChunk = new WorkChunk();
 
@@ -71,13 +71,13 @@ class InlineStepRunner<ParameterType extends IModelJson, InputType extends IMode
     }
 
     private void runReduce(
-            List<WorkChunkData<InputType>> theCurrentInput, WorkChunk workChunk, InlineJobDataSink<OutputType> sink) {
-        for (WorkChunkData<InputType> nextChunk : theCurrentInput) {
-            final IJobStepWorker<ParameterType, InputType, OutputType> jobStepWorker = myStep.getJobStepWorker();
+		List<WorkChunkData<IT>> theCurrentInput, WorkChunk workChunk, InlineJobDataSink<OT> sink) {
+        for (WorkChunkData<IT> nextChunk : theCurrentInput) {
+            final IJobStepWorker<PT, IT, OT> jobStepWorker = myStep.getJobStepWorker();
 
             if (jobStepWorker
-                    instanceof IReductionStepWorker<ParameterType, InputType, OutputType> reductionStepWorker) {
-                final ChunkExecutionDetails<ParameterType, InputType> chunkExecutionDetails =
+                    instanceof IReductionStepWorker<PT, IT, OT> reductionStepWorker) {
+                final ChunkExecutionDetails<PT, IT> chunkExecutionDetails =
                         new ChunkExecutionDetails<>(
                                 nextChunk.getData(),
                                 myParameter,
@@ -86,16 +86,16 @@ class InlineStepRunner<ParameterType extends IModelJson, InputType extends IMode
                 reductionStepWorker.consume(chunkExecutionDetails);
             }
         }
-        final StepExecutionDetails<ParameterType, InputType> stepExecutionDetails =
+        final StepExecutionDetails<PT, IT> stepExecutionDetails =
                 new StepExecutionDetails<>(myParameter, null, myInstance, workChunk);
         myStep.getJobStepWorker().run(stepExecutionDetails, sink);
     }
 
     private void runNonReduce(
-            List<WorkChunkData<InputType>> theCurrentInput, WorkChunk workChunk, InlineJobDataSink<OutputType> sink) {
-        for (WorkChunkData<InputType> nextChunk : theCurrentInput) {
-            final InputType data = nextChunk.getData();
-            final StepExecutionDetails<ParameterType, InputType> stepExecutionDetails =
+		List<WorkChunkData<IT>> theCurrentInput, WorkChunk workChunk, InlineJobDataSink<OT> sink) {
+        for (WorkChunkData<IT> nextChunk : theCurrentInput) {
+            final IT data = nextChunk.getData();
+            final StepExecutionDetails<PT, IT> stepExecutionDetails =
                     new StepExecutionDetails<>(myParameter, data, myInstance, workChunk);
             myStep.getJobStepWorker().run(stepExecutionDetails, sink);
         }
