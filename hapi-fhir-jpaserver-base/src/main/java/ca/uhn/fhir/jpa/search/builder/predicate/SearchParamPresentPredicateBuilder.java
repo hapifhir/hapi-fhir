@@ -20,13 +20,11 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuilder {
 
@@ -36,8 +34,7 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 	/**
 	 * Constructor
 	 */
-	public SearchParamPresentPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+	public SearchParamPresentPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_PARAM_PRESENT"));
 		myColumnResourceId = getTable().addColumn("RES_ID");
 		myColumnHashPresence = getTable().addColumn("HASH_PRESENCE");

@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -137,9 +136,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	 * Constructor
 	 */
 	public ResourceLinkPredicateBuilder(
-			QueryStack theQueryStack,
-			SearchQueryBuilder theSearchSqlBuilder,
-			boolean theReversed) {
+			QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_LINK"));
 		myColumnSrcResourceId = getTable().addColumn("SRC_RESOURCE_ID");
 		myColumnSrcPartitionId = getTable().addColumn("PARTITION_ID");

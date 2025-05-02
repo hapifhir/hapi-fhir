@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -38,8 +37,7 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 	/**
 	 * Constructor
 	 */
-	public ComboNonUniqueSearchParameterPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
 		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");

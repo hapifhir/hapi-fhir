@@ -41,7 +41,7 @@ import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.cr
 import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 
 public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredicateBuilder
-	implements ISourcePredicateBuilder {
+		implements ISourcePredicateBuilder {
 
 	private final DbColumn myColumnSourceUri;
 	private final DbColumn myColumnRequestId;
@@ -75,7 +75,7 @@ public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredic
 
 	@Override
 	public Condition createPredicateSourceUriWithModifiers(
-		IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
+			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
 		if (theQueryParameter.getMissing() != null && !theQueryParameter.getMissing()) {
 			return UnaryCondition.isNotNull(myColumnSourceUri);
 		} else if (theQueryParameter instanceof UriParam && theQueryParameter.getQueryParameterQualifier() != null) {
@@ -89,9 +89,9 @@ public class ResourceHistoryProvenancePredicateBuilder extends BaseJoiningPredic
 					return createPredicateSourceContains(theStorageSetting, theSourceUri);
 				default:
 					throw new InvalidRequestException(Msg.code(2569)
-						+ String.format(
-						"Unsupported qualifier specified, qualifier=%s",
-						theQueryParameter.getQueryParameterQualifier()));
+							+ String.format(
+									"Unsupported qualifier specified, qualifier=%s",
+									theQueryParameter.getQueryParameterQualifier()));
 			}
 		} else {
 			return createPredicateSourceUri(theSourceUri);

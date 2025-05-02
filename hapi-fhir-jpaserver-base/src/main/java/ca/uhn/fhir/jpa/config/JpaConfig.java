@@ -666,14 +666,14 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public QuantityPredicateBuilder newQuantityPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new QuantityPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new QuantityPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
 			SearchQueryBuilder theSearchBuilder) {
-		return new QuantityNormalizedPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
@@ -711,13 +711,13 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public StringPredicateBuilder newStringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new StringPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new StringPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new TokenPredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new TokenPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

@@ -1,4 +1,3 @@
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -75,7 +74,7 @@ public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder
 
 	@Override
 	public Condition createPredicateSourceUriWithModifiers(
-		IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
+			IQueryParameterType theQueryParameter, JpaStorageSettings theStorageSetting, String theSourceUri) {
 		if (theQueryParameter.getMissing() != null && !theQueryParameter.getMissing()) {
 			return UnaryCondition.isNotNull(myColumnSourceUri);
 		} else if (theQueryParameter instanceof UriParam && theQueryParameter.getQueryParameterQualifier() != null) {
@@ -89,9 +88,9 @@ public class ResourceHistoryPredicateBuilder extends BaseJoiningPredicateBuilder
 					return createPredicateSourceContains(theStorageSetting, theSourceUri);
 				default:
 					throw new InvalidRequestException(Msg.code(2418)
-						+ String.format(
-						"Unsupported qualifier specified, qualifier=%s",
-						theQueryParameter.getQueryParameterQualifier()));
+							+ String.format(
+									"Unsupported qualifier specified, qualifier=%s",
+									theQueryParameter.getQueryParameterQualifier()));
 			}
 		} else {
 			return createPredicateSourceUri(theSourceUri);

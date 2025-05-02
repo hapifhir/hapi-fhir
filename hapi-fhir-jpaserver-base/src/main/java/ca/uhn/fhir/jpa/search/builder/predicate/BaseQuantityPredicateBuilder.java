@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -53,8 +52,7 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 	/**
 	 * Constructor
 	 */
-	public BaseQuantityPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
+	public BaseQuantityPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);
 	}
 

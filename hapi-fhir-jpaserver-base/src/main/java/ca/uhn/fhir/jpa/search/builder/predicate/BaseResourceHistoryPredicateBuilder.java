@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -15,7 +14,6 @@ import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
 import java.util.List;
 
@@ -28,8 +26,7 @@ public abstract class BaseResourceHistoryPredicateBuilder extends BaseJoiningPre
 	protected DbColumn myColumnRequestId;
 	protected DbColumn myResourceIdColumn;
 
-	public BaseResourceHistoryPredicateBuilder(
-		SearchQueryBuilder theSearchSqlBuilder) {
+	public BaseResourceHistoryPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_VER"));
 
 		myResourceIdColumn = getTable().addColumn("RES_ID");
