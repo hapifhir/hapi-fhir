@@ -25,6 +25,8 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
@@ -45,6 +47,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -220,7 +223,7 @@ public class IpsGeneratorSvcImplTest {
 		HtmlTable table = (HtmlTable) tables.get(0);
 		int onsetIndex = 6;
 		assertEquals("Onset", table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText());
-		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValueAsString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
 		assertEquals("Some Onset", table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText());
 		assertEquals("", table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText());
 	}
@@ -614,6 +617,46 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals(1, illnessHistorySection.getEntry().size());
 	}
 
+	/**
+	 * While resources not in the Bundle have their references removed, contained resources should retain their references. They are still included information despite not technically being in the Bundle.
+	 */
+	@Test
+	public void testContainedResourceReferenceNotRemoved() {
+		// Setup Patient
+		initializeGenerationStrategy(
+			List.of(t->Section.newBuilder(t).withNoInfoGenerator(null).build())
+		);
+		registerPatientDaoWithRead();
+
+		// Setup MedicationStatement with contained Medication
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
+		medicationStatement.addContained(medication);
+		medicationStatement.getMedicationReference().setReference("#" + MEDICATION_ID);
+		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
+		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement)));
+
+		Patient patient = new Patient();
+		patient.setId(PATIENT_ID);
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
+
+		MedicationStatement result = (MedicationStatement) outcome
+			.getEntry()
+			.stream()
+			.filter(t -> medicationStatement.fhirType().equals(t.getResource().getResourceType().name()))
+			.map(Bundle.BundleEntryComponent::getResource)
+			.findFirst().orElseThrow();
+		
+		assert(result.hasMedicationReference());
+		assert(result.getMedicationReference().hasReference());
+		assertEquals(result.getMedicationReference().getReference(), "#" + MEDICATION_ID);
+	}
+
 	@Test
 	public void testPatientIsReturnedAsAnIncludeResource() {
 		// Setup Patient
@@ -665,6 +708,59 @@ public class IpsGeneratorSvcImplTest {
 		assertSame(strategy1, svc.selectGenerationStrategy(null));
 		assertSame(strategy1, svc.selectGenerationStrategy("http://foo"));
 		assertSame(strategy2, svc.selectGenerationStrategy("http://2"));
+	}
+
+	@Test
+	public void testVitalSigns_withComponents() throws IOException {
+		// Setup Patient
+		initializeGenerationStrategy();
+		registerPatientDaoWithRead();
+
+		Observation observation1 = new Observation();
+		observation1.setId("Observation/1");
+		observation1.setStatus(Observation.ObservationStatus.FINAL);
+		observation1.setCode(
+			new CodeableConcept().addCoding(
+				new Coding("http://loinc.org", "85354-9", "Blood pressure panel with all children optional")
+			)
+		);
+		observation1.addComponent(
+			new Observation.ObservationComponentComponent(
+				new CodeableConcept(
+					new Coding("http://loinc.org", "8480-6", "Systolic blood pressure")
+				)
+			).setValue(new Quantity().setValue(125).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]"))
+		);
+		observation1.addComponent(
+			new Observation.ObservationComponentComponent(
+				new CodeableConcept(
+					new Coding("http://loinc.org", "8462-4", "Diastolic blood pressure")
+				)
+			).setValue(new Quantity().setValue(75).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]"))
+		);
+
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(observation1, BundleEntrySearchModeEnum.MATCH);
+		IFhirResourceDao<Observation> observationDao = registerResourceDaoWithNoData(Observation.class);
+		when(observationDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(observation1)));
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType(PATIENT_ID), null);
+
+		// Verify
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = findSection(compositions, DefaultJpaIpsGenerationStrategy.SECTION_CODE_VITAL_SIGNS);
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertThat(tables).hasSize(1);
+		HtmlTable table = (HtmlTable) tables.get(0);
+		assertEquals("Code", table.getHeader().getRows().get(0).getCell(0).asNormalizedText());
+		assertEquals("Blood pressure panel with all children optional", table.getBodies().get(0).getRows().get(0).getCell(0).asNormalizedText());
+		assertEquals("Component(s)", table.getHeader().getRows().get(0).getCell(4).asNormalizedText());
+		assertEquals("Systolic blood pressure 125 , Diastolic blood pressure 75", table.getBodies().get(0).getRows().get(0).getCell(4).asNormalizedText());
 	}
 
 	@Nonnull

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrationTaskExecutionResultEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -25,6 +26,8 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -164,6 +167,14 @@ public class SchemaMigratorTest extends BaseTest {
 		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
 		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
 		assertThat(tableNames).containsExactlyInAnyOrder("SOMETABLE_A", "SOMETABLE_C");
+
+		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
+
+		assertThat(entities).hasSize(4);
+		assertThat(entities.get(0).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.APPLIED.name());
+		assertThat(entities.get(1).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_SKIPPED.name());
+		assertThat(entities.get(2).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.APPLIED.name());
+		assertThat(entities.get(3).getResult()).isEqualTo(MigrationTaskExecutionResultEnum.NOT_APPLIED_SKIPPED.name());
 	}
 
 	@Nonnull

@@ -92,7 +92,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -101,6 +103,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -415,23 +418,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
-
 	}
 
 	@Test
-	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
+	public void testDeviceIsNativelyInPatientCompartmentForAuthorizationPurposes() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Device:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
-				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartment("Patient", relatedIds)
 					.andThen().denyAll()
 					.build();
 			}
@@ -459,19 +458,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
+
 	@Test
-	public void testCustomSearchParamsDontOverPermit() throws Exception {
+	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				AdditionalCompartmentSearchParameters additionalCompartmentSearchParameters = new AdditionalCompartmentSearchParameters();
-				additionalCompartmentSearchParameters.addSearchParameters("Encounter:patient");
 				List<IdType> relatedIds = new ArrayList<>();
 				relatedIds.add(new IdType("Patient/123"));
+				relatedIds.add(new IdType("Patient/456"));
 				return new RuleBuilder()
 					.allow().read().allResources()
-					.inCompartmentWithAdditionalSearchParams("Patient", relatedIds, additionalCompartmentSearchParameters)
+					.inCompartment("Patient", relatedIds)
 					.andThen().denyAll()
 					.build();
 			}
@@ -494,11 +493,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 
-		//then
-		assertFalse(ourHitMethod);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		//Then
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
-
 
 	@Test
 	public void testNonsenseParametersThrowAtRuntime() throws Exception {
@@ -531,7 +529,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourReturn = Collections.singletonList(d);
 
 		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 
@@ -4230,7 +4228,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Bundle");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx, requestDetails);
 		assertEquals(1, resources.size());
 		assertTrue(resources.contains(bundle));
 	}
@@ -4247,10 +4245,44 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setResourceName("Patient");
 
-		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainer(searchSet, ourCtx);
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(searchSet, ourCtx, requestDetails);
 		assertEquals(2, resources.size());
 		assertTrue(resources.contains(patient1));
 		assertTrue(resources.contains(patient2));
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideArgumentsForToListOfResourcesAndExcludeContainerUnlessStandalone")
+	public void givenAsearchRequestWithOperationOutcomeIntheResponse_whenToListOfResourcesAndExcludeContainerUnlessStandalone_thenReturnNoOperationOutcome(
+		IBaseResource theResource, RequestDetails theRequestDetails, int theExpectedListSize
+	) {
+		List<IBaseResource> resources = AuthorizationInterceptor.toListOfResourcesAndExcludeContainerUnlessStandalone(theResource, ourCtx, theRequestDetails);
+		assertEquals(theExpectedListSize, resources.size());
+	}
+
+	private static Stream<Arguments> provideArgumentsForToListOfResourcesAndExcludeContainerUnlessStandalone() {
+		Stream.Builder<Arguments> retVal = Stream.builder();
+	AuthorizationInterceptor.REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME.forEach((restOperationType)->{
+		RequestDetails firstRequestDetails = new SystemRequestDetails();
+		RequestDetails secondRequestDetails = new SystemRequestDetails();
+		firstRequestDetails.setResourceName("Patient");
+		firstRequestDetails.setRestOperationType(restOperationType);
+		secondRequestDetails.setResourceName("OperationOutcome");
+		secondRequestDetails.setRestOperationType(restOperationType);
+
+		OperationOutcome firstResponse = new OperationOutcome();
+		OperationOutcome secondResponse = new OperationOutcome();
+		firstResponse.addIssue().
+			setSeverity(OperationOutcome.IssueSeverity.INFORMATION).
+			setCode(OperationOutcome.IssueType.INFORMATIONAL);
+		secondResponse.addIssue().
+			setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setCode(OperationOutcome.IssueType.CODEINVALID);
+
+		retVal.add(Arguments.of(firstResponse, firstRequestDetails, 0));
+		retVal.add(Arguments.of(secondResponse, secondRequestDetails, 1));
+	});
+		return retVal.build();
 	}
 
 	@ParameterizedTest

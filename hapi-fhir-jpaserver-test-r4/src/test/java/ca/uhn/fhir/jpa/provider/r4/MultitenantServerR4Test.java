@@ -1,25 +1,32 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ConcurrentWriteTest;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+
+import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
+
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -27,29 +34,64 @@ import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+
+import static org.mockito.ArgumentMatchers.eq;
+
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
@@ -61,11 +103,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -75,13 +118,76 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
+	@Captor
+	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
+	@SpyBean
+	private MemoryCacheService myMemoryCacheService;
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		myStorageSettings.setMatchUrlCacheEnabled(defaultStorageSettings.isMatchUrlCacheEnabled());
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnDoubleInclude(int theCount) {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+		Bundle execute = myClient.search().forResource("Patient").include(new Include("*")).revInclude(new Include("*")).count(theCount).returnBundle(Bundle.class).execute();
+
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (execute.getLink("next") != null) {
+			execute = myClient.loadPage().next(execute).execute();
+			foundIds.addAll(execute.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 50})
+	public void testPartitioningDoesNotReturnDuplicatesOnPatientEverything(int theCount) throws IOException {
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		IIdType patient = createPatient(withTenant(TENANT_A), withActiveTrue());
+		IIdType encounter = createEncounter(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("enc-"),  withIdentifier("http://example.com/", "code"));
+		createObservation(withTenant(TENANT_A), withSubject(patient.toUnqualifiedVersionless().toString()), withId("obs-"), withObservationCode("http://example.com/", "code"), withEncounter(encounter.toUnqualifiedVersionless().toString()));
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId(TENANT_A);
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("_count").setValue(new IntegerType(theCount));
+		parameters.addParameter().setName("_format").setValue(new StringType("json"));
+
+		Bundle everything = myClient.operation().onInstance(patient.toUnqualifiedVersionless().toString()).named("$everything").withParameters(parameters).returnResourceType(Bundle.class).execute();
+
+		List<String> foundIds = new ArrayList<>();
+		foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		//Ensure no duplicates in first page
+		assertThat(foundIds).doesNotHaveDuplicates();
+
+		while (everything.getLink("next") != null) {
+			everything = myClient.loadPage().next(everything).execute();
+			foundIds.addAll(everything.getEntry().stream().map(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().toString()).toList());
+		}
+		assertThat(foundIds).doesNotHaveDuplicates();
+		assertThat(foundIds).hasSize(3);
 	}
 
 	@Test
@@ -104,7 +210,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		runInTransaction(() -> {
 			PartitionEntity partition = myPartitionDao.findForName(TENANT_A).orElseThrow(IllegalStateException::new);
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(partition.getId(), resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -142,7 +248,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 
@@ -362,7 +468,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -416,10 +522,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -448,6 +554,120 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		requestDetails.setTenantId(TENANT_B);
 		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
 		assertEquals("Family", patient1.getName().get(0).getFamily());
+	}
+
+	@Test
+	public void testTransactionPatch_withConditionalAndMatchUrlCache_sameMatchUrlInDifferentPartitionShouldNotBeFound() {
+		// Given
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+
+		IBaseResource patientToCreate = buildPatient(withTenant(TENANT_A), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"), withBirthdate("1970-01-01"));
+		myClient.update().resource(patientToCreate).execute();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		JpaPid patientPid = (JpaPid) myPatientDao.readEntity(new IdType("1234a"), requestDetails).getPersistentId();
+
+		String thePatientMatchUrl = "Patient?_id=1234a";
+		Bundle patchBundle1 = createPatchBundleReplaceBirthDateOnPatient("2000-01-01", thePatientMatchUrl);
+
+		// When
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		myClient.transaction().withBundle(patchBundle1).execute();
+		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+
+		// Then: the Patch is successful and the match url is cached
+		assertEquals("Family", patient1.getName().get(0).getFamily());
+		assertThat(patient1.getBirthDateElement().getValueAsString()).isEqualTo("2000-01-01");
+
+		// Verify that the entry is put into cache
+		verify(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), myMatchUrlCacheValueCaptor.capture());
+		JpaPid actualCachedPid = myMatchUrlCacheValueCaptor.getValue();
+		assertThat(actualCachedPid.getId()).isEqualTo(patientPid.getId());
+		assertThat(actualCachedPid.getPartitionId()).isEqualTo(TENANT_A_ID);
+
+		reset(myMemoryCacheService);
+		Bundle patchBundle2 = createPatchBundleReplaceBirthDateOnPatient("2025-01-01", thePatientMatchUrl);
+
+		try {
+			// When: Perform Patch with the same match url, but in another partition
+			myTenantClientInterceptor.setTenantId(TENANT_B);
+			myClient.transaction().withBundle(patchBundle2).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// Then: the match URl cache should not be resolved
+			assertThat(e.getMessage()).contains("Invalid match URL \"" + thePatientMatchUrl + "\" - No resources match this search");
+			Patient patientInDb = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
+			assertEquals("Family", patientInDb.getName().get(0).getFamily());
+			assertThat(patientInDb.getBirthDateElement().getValueAsString()).isEqualTo("2000-01-01");
+			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
+		}
+	}
+
+	private static Bundle createPatchBundleReplaceBirthDateOnPatient(String theDate, String thePatientUrl) {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation.addPart().setName("type").setValue(new CodeType("replace"));
+		operation.addPart().setName("path").setValue(new CodeType("Patient.birthDate"));
+		operation.addPart().setName("value").setValue(new DateType(theDate));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(thePatientUrl)
+			.setResource(patch)
+			.getRequest().setUrl(thePatientUrl)
+			.setMethod(Bundle.HTTPVerb.PATCH);
+		return input;
+	}
+
+	@Test
+	public void testUpdate_withConditionalReferenceAndMatchUrlCache_sameMatchUrlInDifferentPartitionShouldNotBeFound() {
+		// Given
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+
+		IBaseResource patientA = buildPatient(withTenant(TENANT_A), withActiveTrue(), withId("1234a"),
+			withFamily("Family"), withGiven("Given"));
+		myClient.update().resource(patientA).execute();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		JpaPid patientPid = (JpaPid) myPatientDao.readEntity(new IdType("1234a"), requestDetails).getPersistentId();
+
+		Encounter encounter = new Encounter();
+		encounter.setId("1234b");
+		String thePatientMatchUrl = "Patient?_id=1234a";
+		encounter.setSubject(new Reference(thePatientMatchUrl));
+
+		// When
+		myTenantClientInterceptor.setTenantId(TENANT_A);
+		myClient.update().resource(encounter).execute();
+
+		// Then: ensure the Encounter is updated
+		Encounter encounter1 = myEncounterDao.read(new IdType("Encounter/1234b"), requestDetails);
+		assertEquals("Patient/1234a", encounter1.getSubject().getReference());
+
+		// Also ensure that the match URL cache is populated after resolving
+		verify(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), myMatchUrlCacheValueCaptor.capture());
+		JpaPid actualCachedPid = myMatchUrlCacheValueCaptor.getValue();
+		assertThat(actualCachedPid.getId()).isEqualTo(patientPid.getId());
+		assertThat(actualCachedPid.getPartitionId()).isEqualTo(TENANT_A_ID);
+
+		reset(myMemoryCacheService);
+		encounter.setId("1234c");
+
+		try {
+			// When: try to update the Encounter again with the same Patient match url, but on Partition B
+			myTenantClientInterceptor.setTenantId(TENANT_B);
+			myClient.update().resource(encounter).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// Then: the match URL should fail to resolve
+			assertThat(e.getMessage()).contains("Invalid match URL \"" + thePatientMatchUrl + "\" - No resources match this search");
+			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
+		}
 	}
 
 	@ParameterizedTest
@@ -490,9 +710,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -522,6 +742,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
+	@Disabled("This test relied on a tenantId mismatch with the partition ID of the resource - This " +
+		"doesn't really make sense since tenant ID != partition ID")
 	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
 		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
@@ -531,7 +753,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			String idPart = ((Patient) patientA).getIdElement().getIdPart();
+			assertThat(e.getMessage()).contains("HAPI-0960: Can not create resource with ID[" + idPart + "]");
 		}
 	}
 
@@ -554,9 +777,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-			assertNull(resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -618,10 +841,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-            assert resourceTable.getPartitionId() != null;
+            assert resourceTable.getPartitionId().getPartitionId() != null;
             assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -666,6 +889,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IIdType idB = createResource("Condition", withTenant(TENANT_A), withObservationCode("http://cs", "A"));
 		Condition theCondition = myClient.read().resource(Condition.class).withId(idB).execute();
 		theCondition.getSubject().setReference("Patient/" + idA.getIdPart());
+		logAllResources();
+		myTenantClientInterceptor.setTenantId(ProviderConstants.ALL_PARTITIONS_TENANT_NAME);
 		doUpdateResource(theCondition);
 	}
 
@@ -746,6 +971,125 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		private String buildExportUrl(String createInPartition, String jobId) {
 			return myClient.getServerBase() + "/" + createInPartition + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
+		}
+	}
+
+	/**
+	 * This is a partitioned version of the same test in
+	 * {@link FhirResourceDaoR4ConcurrentWriteTest#testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate()}
+	 */
+	@Nested
+	class TestConcurrencyInterceptorInPartitioningMode {
+		private static final int THREAD_COUNT = 10;
+
+		private ExecutorService myExecutor;
+		CompletionService<Boolean> myCompletionService;
+		private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
+
+		@BeforeEach
+		public void before() {
+			myExecutor = Executors.newFixedThreadPool(THREAD_COUNT);
+			myCompletionService = new ExecutorCompletionService<>(myExecutor);
+			myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
+
+			RestfulServer server = new RestfulServer(myFhirContext);
+			when(mySrd.getServer()).thenReturn(server);
+		}
+
+		@AfterEach
+		public void after() {
+			myExecutor.shutdown();
+			myInterceptorRegistry.unregisterInterceptor(myConcurrencySemaphoreInterceptor);
+		}
+
+		@Test
+		public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() {
+			myStorageSettings.setMatchUrlCacheEnabled(true);
+			myPartitionSettings.setConditionalCreateDuplicateIdentifiersEnabled(true);
+			myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
+			myConcurrencySemaphoreInterceptor.setLogWaits(true);
+
+			Callable<Boolean> creatorForPartitionA = () -> {
+				Bundle input = createBundleForRunnableTransaction();
+				SystemRequestDetails requestDetails = new SystemRequestDetails();
+				requestDetails.setTenantId(TENANT_A);
+				return executeTransactionOrThrow(requestDetails, input);
+			};
+
+			Callable<Boolean> creatorForPartitionB = () -> {
+				Bundle input = createBundleForRunnableTransaction();
+				SystemRequestDetails requestDetails = new SystemRequestDetails();
+				requestDetails.setTenantId(TENANT_B);
+				return executeTransactionOrThrow(requestDetails, input);
+			};
+
+			for (int set = 0; set < 3; set++) {
+				myConcurrencySemaphoreInterceptor.clearSemaphores();
+
+				for (int j = 0; j < 10; j++) {
+					if (j % 2 == 0) {
+						myCompletionService.submit(creatorForPartitionA);
+					} else {
+						myCompletionService.submit(creatorForPartitionB);
+					}
+				}
+
+				executeFutures(myCompletionService, 10);
+
+				// Only a thread from the first iteration (set) will acquire the semaphores for the match urls
+				// Since the match URLs will still be present in the Match URL cache for the remaining of the test
+				if (set == 0) {
+					assertEquals(2, myConcurrencySemaphoreInterceptor.countSemaphores());
+				} else {
+					assertEquals(0, myConcurrencySemaphoreInterceptor.countSemaphores());
+				}
+			}
+
+			runInTransaction(() -> {
+				Map<String, Integer> counts = getResourceCountMap();
+				assertEquals(4, counts.get("Patient"), counts.toString());
+			});
+		}
+
+		private boolean executeTransactionOrThrow(SystemRequestDetails requestDetails, Bundle input) {
+			try {
+				mySystemDao.transaction(requestDetails, input);
+				return true;
+			} catch (Throwable theError) {
+				String bundleAsString = myFhirContext.newJsonParser().encodeResourceToString(input);
+				ourLog.error("Caught an error during processing instance {}", bundleAsString, theError);
+				throw new InternalErrorException("Caught an error during processing instance " + bundleAsString, theError);
+			}
+		}
+
+		private Bundle createBundleForRunnableTransaction() {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Patient patient1 = new Patient();
+			patient1.addIdentifier().setSystem("http://foo").setValue("1");
+			bb.addTransactionCreateEntry(patient1).conditional("Patient?identifier=http://foo|1");
+
+			Patient patient2 = new Patient();
+			patient2.addIdentifier().setSystem("http://foo").setValue("2");
+			bb.addTransactionCreateEntry(patient2).conditional("Patient?identifier=http://foo|2");
+
+			return (Bundle) bb.getBundle();
+		}
+
+		@Nonnull
+		private Map<String, Integer> getResourceCountMap() {
+			Map<String, Integer> counts = new TreeMap<>();
+			myResourceTableDao
+				.findAll()
+				.stream()
+				.forEach(t -> {
+					counts.putIfAbsent(t.getResourceType(), 0);
+					int value = counts.get(t.getResourceType());
+					value++;
+					counts.put(t.getResourceType(), value);
+				});
+			ourLog.info("Counts: {}", counts);
+			return counts;
 		}
 	}
 }

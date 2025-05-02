@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,6 @@ public final class SctHandlerRelationship implements IZipContentsHandlerCsv {
 						}
 					}
 				}
-			} else if (ignoredTypes.contains(typeConcept.getDisplay())) {
-				// ignore
-			} else {
-				// ourLog.warn("Unknown relationship type: {}/{}", typeId, typeConcept.getDisplay());
 			}
 		}
 	}

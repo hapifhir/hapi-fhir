@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -30,10 +31,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Currently only DB->FHIR is enabled through this interface but the aim
  * eventually is to handle both directions
  */
-public interface IStorageResourceParser {
+public interface IStorageResourceParser<T extends IResourcePersistentId<?>> {
 
 	// TODO: JA2 - Remove theForHistoryOperation flag - It toggles adding a bit of extra
 	// metadata but there's no reason to not always just add that, and this would
 	// simplify this interface
-	IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
+	IBaseResource toResource(IBasePersistedResource<T> theEntity, boolean theForHistoryOperation);
 }

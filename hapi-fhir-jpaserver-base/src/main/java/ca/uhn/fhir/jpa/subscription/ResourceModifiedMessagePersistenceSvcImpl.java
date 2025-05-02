@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			inflatedResourceModifiedMessage = inflatePersistedResourceModifiedMessage(theResourceModifiedMessage);
 		} catch (ResourceNotFoundException e) {
 			IdDt idDt = new IdDt(
-					theResourceModifiedMessage.getPayloadType(myFhirContext),
+					theResourceModifiedMessage.getResourceType(myFhirContext),
 					theResourceModifiedMessage.getPayloadId(),
 					theResourceModifiedMessage.getPayloadVersion());
 
@@ -219,7 +219,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			setOperationType(theMsg.getOperationType());
 			setPartitionId(theMsg.getPartitionId());
 			setTransactionId(theMsg.getTransactionId());
-			setMessageKey(theMsg.getMessageKeyOrNull());
+			setPayloadMessageKey(theMsg.getPayloadMessageKey());
 			copyAdditionalPropertiesFrom(theMsg);
 		}
 	}

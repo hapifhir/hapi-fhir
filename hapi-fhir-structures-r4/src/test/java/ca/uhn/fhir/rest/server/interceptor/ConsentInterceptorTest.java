@@ -2,12 +2,16 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -15,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -61,6 +66,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -388,7 +394,6 @@ public class ConsentInterceptorTest {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
-		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
@@ -622,45 +627,48 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource instanceof Patient) {
+				Patient replacement = new Patient();
+				String idPart = resource.getIdElement().getIdPart();
+				replacement.setId(idPart);
+				replacement.addIdentifier().setSystem("REPLACEMENT-" + idPart);
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+			}
+			return ConsentOutcome.PROCEED;
+		});
 
+		// Perform initial page search
 		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			nextPageLink = bundle.getLink(Constants.LINK_NEXT).getUrl();
+			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT-PTA", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			nextPageLink = response.getLink(Constants.LINK_NEXT).getUrl();
 		}
 
 		// Now perform a page request
-		reset(myConsentSvc);
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
-			if (resource.getIdElement().getIdPart().equals("PTB")) {
-				Patient replacement = new Patient();
-				replacement.setId("PTB");
-				replacement.addIdentifier().setSystem("REPLACEMENT");
-				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
-			}
-			return ConsentOutcome.PROCEED;
-		});
-
 		httpGet = new HttpGet(nextPageLink);
+		String responseContent;
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
-			assertEquals("REPLACEMENT", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
 		}
 
-		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(2)).startOperation(any(), any());
+		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
+
+		Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+		assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals("REPLACEMENT-PTB", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
 	}
 
 
@@ -998,6 +1006,34 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(2, response.getTotal());
+	}
+
+	@Nested
+	class BulkExport {
+
+		class CanSeeResourceRejectingConsentService implements IConsentService {
+			@Override
+			public ConsentOutcome canSeeResource(
+				 RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+				return ConsentOutcome.REJECT;
+			}
+		}
+
+		@Test
+		void testBulkExportPointcut(){
+			ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+			consentInterceptor.registerConsentService(new CanSeeResourceRejectingConsentService());
+
+			InterceptorService interceptorService = new InterceptorService();
+			interceptorService.registerInterceptor(consentInterceptor);
+
+			HookParams hookParams = new HookParams()
+				 .add(BulkExportJobParameters.class, new BulkExportJobParameters())
+				  .add(IBaseResource.class, new Patient());
+
+			boolean isResourceIncluded = interceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, hookParams);
+			assertFalse(isResourceIncluded);
+		}
 	}
 
 	@Nested

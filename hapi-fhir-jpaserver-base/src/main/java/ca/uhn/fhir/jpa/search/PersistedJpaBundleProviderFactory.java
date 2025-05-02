@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -56,7 +58,7 @@ public class PersistedJpaBundleProviderFactory {
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(
 			RequestDetails theRequestDetails,
 			SearchTask theTask,
-			ISearchBuilder theSearchBuilder,
+			ISearchBuilder<JpaPid> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(
 				JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER,
@@ -69,7 +71,7 @@ public class PersistedJpaBundleProviderFactory {
 	public IBundleProvider history(
 			RequestDetails theRequest,
 			String theResourceType,
-			Long theResourcePid,
+			@Nullable JpaPid theResourcePid,
 			Date theRangeStartInclusive,
 			Date theRangeEndInclusive,
 			Integer theOffset,
@@ -88,7 +90,7 @@ public class PersistedJpaBundleProviderFactory {
 	public IBundleProvider history(
 			RequestDetails theRequest,
 			String theResourceType,
-			Long theResourcePid,
+			@Nullable JpaPid theResourcePid,
 			Date theRangeStartInclusive,
 			Date theRangeEndInclusive,
 			Integer theOffset,

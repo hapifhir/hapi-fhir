@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,7 +30,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long>, IHapiFhirJpaRepository {
+public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, IdAndPartitionId>, IHapiFhirJpaRepository {
 	@Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
 	@Modifying
 	void deleteTermConceptMapById(@Param("pid") Long theId);
@@ -48,7 +49,7 @@ public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long>,
 	// Note that last updated version is considered current version.
 	@Query(
 			value =
-					"SELECT cm FROM TermConceptMap cm INNER JOIN ResourceTable r ON r.myId = cm.myResourcePid WHERE cm.myUrl = :url ORDER BY r.myUpdated DESC")
+					"SELECT cm FROM TermConceptMap cm INNER JOIN ResourceTable r ON r = cm.myResource WHERE cm.myUrl = :url ORDER BY r.myUpdated DESC")
 	List<TermConceptMap> getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(
 			Pageable thePage, @Param("url") String theUrl);
 

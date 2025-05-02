@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -41,6 +43,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
@@ -56,6 +60,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,6 +90,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private Timer myHeartbeatTimer;
 
 	/**
@@ -97,6 +103,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 	}
@@ -105,8 +112,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	public void start() {
 		if (myHeartbeatTimer == null) {
 			myHeartbeatTimer = new Timer("batch2-reducer-heartbeat");
-			myHeartbeatTimer.schedule(
-					new HeartbeatTimerTask(), DateUtils.MILLIS_PER_MINUTE, DateUtils.MILLIS_PER_MINUTE);
+			long delay = DateUtils.MILLIS_PER_MINUTE;
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
+				delay = DateUtils.MILLIS_PER_SECOND;
+			}
+			myHeartbeatTimer.schedule(new HeartbeatTimerTask(), delay, delay);
 		}
 	}
 
@@ -217,8 +227,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		PT parameters =
 				instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
+
+		// Clone the worker so that we start with no built-up state
+		reductionStepWorker = reductionStepWorker.newInstance();
 
 		instance.setStatus(FINALIZE);
 
@@ -232,7 +246,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
-					theInstance.setStatus(StatusEnum.FAILED);
+					theInstance.setEndTime(new Date());
+					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.FAILED);
 					return true;
 				});
 				return null;
@@ -278,11 +293,26 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						StepExecutionDetails.createReductionStepDetails(parameters, null, instance);
 
 				if (response.isSuccessful()) {
-					reductionStepWorker.run(chunkDetails, dataSink);
+					try {
+						reductionStepWorker.run(chunkDetails, dataSink);
 
-					// the ReductionStepDataSink will update the job status to COMPLETED
-					// we should update instance here to keep it consistent with the newest version in persistence
-					instance.setStatus(COMPLETED);
+						// the ReductionStepDataSink will update the job status to COMPLETED
+						// we should update instance here to keep it consistent with the newest version in persistence
+						instance.setStatus(COMPLETED);
+					} catch (ReductionStepFailureException e) {
+
+						myJobPersistence.updateInstance(instance.getInstanceId(), i -> {
+							i.setErrorMessage(e.getMessage());
+							i.setEndTime(new Date());
+							i.setStatus(StatusEnum.FAILED);
+
+							if (e.getReportMsg() != null) {
+								i.setReport(JsonUtil.serialize(e.getReportMsg()));
+							}
+
+							return true;
+						});
+					}
 				}
 
 				if (response.hasSuccessfulChunksIds()) {

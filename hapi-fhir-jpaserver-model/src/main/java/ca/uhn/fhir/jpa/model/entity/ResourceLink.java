@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,20 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import jakarta.persistence.AttributeOverride;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -42,6 +44,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -58,10 +61,14 @@ import java.util.Date;
 					name = "IDX_RL_TGT_v2",
 					columnList = "TARGET_RESOURCE_ID, SRC_PATH, SRC_RESOURCE_ID, TARGET_RESOURCE_TYPE,PARTITION_ID")
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
+	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
+	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
 
 	@GenericGenerator(name = "SEQ_RESLINK_ID", type = ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator.class)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -72,32 +79,64 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SRC_PATH", length = SRC_PATH_LENGTH, nullable = false)
 	private String mySourcePath;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "SRC_RESOURCE_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
+	@ManyToOne(
+			optional = false,
+			fetch = FetchType.LAZY,
+			cascade = {})
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "SRC_RESOURCE_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
 			foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
 
-	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
+	@Column(name = "SRC_RESOURCE_ID", nullable = false)
 	private Long mySourceResourcePid;
 
 	@Column(name = "SOURCE_RESOURCE_TYPE", updatable = false, nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@FullTextField
 	private String mySourceResourceType;
 
-	@ManyToOne(optional = true, fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "TARGET_RESOURCE_ID",
-			referencedColumnName = "RES_ID",
-			nullable = true,
-			insertable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
+	@ManyToOne(optional = true, fetch = FetchType.EAGER)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = TARGET_RESOURCE_ID,
+						referencedColumnName = "RES_ID",
+						nullable = true,
+						insertable = false,
+						updatable = false),
+				@JoinColumn(
+						name = TARGET_RES_PARTITION_ID,
+						referencedColumnName = "PARTITION_ID",
+						nullable = true,
+						insertable = false,
+						updatable = false),
+			},
+			/*
+			 * TODO: We need to drop this constraint because it affects performance in pretty
+			 *  terrible ways on a lot of platforms. But a Hibernate bug present in Hibernate 6.6.4
+			 *  makes it impossible.
+			 *  See: https://hibernate.atlassian.net/browse/HHH-19046
+			 */
+			foreignKey = @ForeignKey(name = FK_RESLINK_TARGET))
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
+	@Transient
+	private ResourceTable myTransientTargetResource;
+
+	@Column(name = TARGET_RESOURCE_ID, insertable = true, updatable = true, nullable = true)
 	@FullTextField
 	private Long myTargetResourcePid;
 
@@ -120,10 +159,11 @@ public class ResourceLink extends BaseResourceIndex {
 	@Transient
 	private transient String myTargetResourceId;
 
-	@Embedded
-	@AttributeOverride(name = "myPartitionId", column = @Column(name = "TARGET_RES_PARTITION_ID"))
-	@AttributeOverride(name = "myPartitionDate", column = @Column(name = "TARGET_RES_PARTITION_DATE"))
-	private PartitionablePartitionId myTargetResourcePartitionId;
+	@Column(name = TARGET_RES_PARTITION_ID, nullable = true)
+	private Integer myTargetResourcePartitionId;
+
+	@Column(name = "TARGET_RES_PARTITION_DATE", nullable = true)
+	private LocalDate myTargetResourcePartitionDate;
 
 	/**
 	 * Constructor
@@ -141,7 +181,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	public String getTargetResourceId() {
-		if (myTargetResourceId == null && myTargetResource != null) {
+		if (myTargetResourceId == null && getTargetResource() != null) {
 			myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		return myTargetResourceId;
@@ -184,17 +224,33 @@ public class ResourceLink extends BaseResourceIndex {
 		return b.isEquals();
 	}
 
+	/**
+	 * ResourceLink.myTargetResource field is immutable.Transient ResourceLink.myTransientTargetResource property
+	 * is used instead, allowing it to be updated via the ResourceLink#copyMutableValuesFrom method
+	 * when ResourceLink table row is reused.
+	 */
+	@PostLoad
+	public void postLoad() {
+		myTransientTargetResource = myTargetResource;
+	}
+
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		ResourceLink source = (ResourceLink) theSource;
 		mySourcePath = source.getSourcePath();
-		myTargetResource = source.getTargetResource();
+		myTransientTargetResource = source.getTargetResource();
 		myTargetResourceId = source.getTargetResourceId();
 		myTargetResourcePid = source.getTargetResourcePid();
 		myTargetResourceType = source.getTargetResourceType();
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
 		myTargetResourcePartitionId = source.getTargetResourcePartitionId();
+		myTargetResourcePartitionDate = source.getTargetResourcePartitionDate();
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		mySourceResourcePid = theResourceId;
 	}
 
 	public String getSourcePath() {
@@ -205,8 +261,8 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourcePath = theSourcePath;
 	}
 
-	public Long getSourceResourcePid() {
-		return mySourceResourcePid;
+	public JpaPid getSourceResourcePk() {
+		return JpaPid.fromId(mySourceResourcePid, myPartitionIdValue);
 	}
 
 	public ResourceTable getSourceResource() {
@@ -215,8 +271,9 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public void setSourceResource(ResourceTable theSourceResource) {
 		mySourceResource = theSourceResource;
-		mySourceResourcePid = theSourceResource.getId();
+		mySourceResourcePid = theSourceResource.getId().getId();
 		mySourceResourceType = theSourceResource.getResourceType();
+		setPartitionId(theSourceResource.getPartitionId());
 	}
 
 	public void setTargetResource(String theResourceType, Long theResourcePid, String theTargetResourceId) {
@@ -277,12 +334,21 @@ public class ResourceLink extends BaseResourceIndex {
 		myId = theId;
 	}
 
-	public PartitionablePartitionId getTargetResourcePartitionId() {
+	public LocalDate getTargetResourcePartitionDate() {
+		return myTargetResourcePartitionDate;
+	}
+
+	public Integer getTargetResourcePartitionId() {
 		return myTargetResourcePartitionId;
 	}
 
 	public ResourceLink setTargetResourcePartitionId(PartitionablePartitionId theTargetResourcePartitionId) {
-		myTargetResourcePartitionId = theTargetResourcePartitionId;
+		myTargetResourcePartitionId = null;
+		myTargetResourcePartitionDate = null;
+		if (theTargetResourcePartitionId != null) {
+			myTargetResourcePartitionId = theTargetResourcePartitionId.getPartitionId();
+			myTargetResourcePartitionDate = theTargetResourcePartitionId.getPartitionDate();
+		}
 		return this;
 	}
 
@@ -321,7 +387,9 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append("ResourceLink[");
 		b.append("path=").append(mySourcePath);
 		b.append(", srcResId=").append(mySourceResourcePid);
+		b.append(", srcPartition=").append(myPartitionIdValue);
 		b.append(", targetResId=").append(myTargetResourcePid);
+		b.append(", targetPartition=").append(myTargetResourcePartitionId);
 		b.append(", targetResType=").append(myTargetResourceType);
 		b.append(", targetResVersion=").append(myTargetResourceVersion);
 		b.append(", targetResUrl=").append(myTargetResourceUrl);
@@ -331,7 +399,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	public ResourceTable getTargetResource() {
-		return myTargetResource;
+		return myTransientTargetResource;
 	}
 
 	/**
@@ -341,15 +409,16 @@ public class ResourceLink extends BaseResourceIndex {
 	public ResourceLink cloneWithoutTargetPid() {
 		ResourceLink retVal = new ResourceLink();
 		retVal.mySourceResource = mySourceResource;
-		retVal.mySourceResourcePid = mySourceResource.getId();
+		retVal.mySourceResourcePid = mySourceResource.getId().getId();
 		retVal.mySourceResourceType = mySourceResource.getResourceType();
+		retVal.myPartitionIdValue = mySourceResource.getPartitionId().getPartitionId();
 		retVal.mySourcePath = mySourcePath;
 		retVal.myUpdated = myUpdated;
 		retVal.myTargetResourceType = myTargetResourceType;
 		if (myTargetResourceId != null) {
 			retVal.myTargetResourceId = myTargetResourceId;
-		} else if (myTargetResource != null) {
-			retVal.myTargetResourceId = myTargetResource.getIdDt().getIdPart();
+		} else if (getTargetResource() != null) {
+			retVal.myTargetResourceId = getTargetResource().getIdDt().getIdPart();
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;

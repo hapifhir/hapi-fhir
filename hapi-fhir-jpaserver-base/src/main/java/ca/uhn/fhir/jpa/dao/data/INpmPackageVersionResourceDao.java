@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,4 +51,40 @@ public interface INpmPackageVersionResourceDao
 			@Param("fhirVersion") FhirVersionEnum theFhirVersion,
 			@Param("url") String theCanonicalUrl,
 			@Param("version") String theCanonicalVersion);
+
+	@Query(
+			"SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true AND e.myPackageVersion.myPackageId = :packageId")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndPackageId(
+			Pageable theOf,
+			@Param("fhirVersion") FhirVersionEnum theFhirVersion,
+			@Param("url") String theCanonicalUrl,
+			@Param("packageId") String thePackageId);
+
+	@Query(
+			"SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true AND e.myPackageVersion.myPackageId = :packageId AND e.myPackageVersion.myVersionId = :versionId")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndPackageIdAndVersion(
+			Pageable theOf,
+			@Param("fhirVersion") FhirVersionEnum theFhirVersion,
+			@Param("url") String theCanonicalUrl,
+			@Param("packageId") String thePackageId,
+			@Param("versionId") String theVersionId);
+
+	@Query(
+			"SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myCanonicalVersion = :version AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true AND e.myPackageVersion.myPackageId = :packageId")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndVersionAndPackageId(
+			Pageable theOf,
+			@Param("fhirVersion") FhirVersionEnum theFhirVersion,
+			@Param("url") String theCanonicalUrl,
+			@Param("version") String theCanonicalVersion,
+			@Param("packageId") String thePackageId);
+
+	@Query(
+			"SELECT e FROM NpmPackageVersionResourceEntity e WHERE e.myCanonicalUrl = :url AND e.myCanonicalVersion = :version AND e.myFhirVersion = :fhirVersion AND e.myPackageVersion.myCurrentVersion = true AND e.myPackageVersion.myPackageId = :packageId AND e.myPackageVersion.myVersionId = :versionId")
+	Slice<NpmPackageVersionResourceEntity> findCurrentVersionByCanonicalUrlAndVersionAndPackageIdAndVersion(
+			Pageable theOf,
+			@Param("fhirVersion") FhirVersionEnum theFhirVersion,
+			@Param("url") String theCanonicalUrl,
+			@Param("version") String theCanonicalVersion,
+			@Param("packageId") String thePackageId,
+			@Param("versionId") String theVersionId);
 }

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import java.io.Writer;
@@ -34,6 +35,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
 
 /**
  * Value for {@link Hook#value()}
@@ -623,7 +626,7 @@ public enum Pointcut implements IPointcut {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
-	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP response to the client
 	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
 	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
 	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
@@ -1767,7 +1770,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle being processed</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1802,7 +1805,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The Bundle that wsa processed</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
+	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1816,9 +1822,6 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
-	 * </li>
-	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -2096,6 +2099,7 @@ public enum Pointcut implements IPointcut {
 	 * This hook is an alternative to {@link #STORAGE_PARTITION_IDENTIFY_READ} and {@link #STORAGE_PARTITION_IDENTIFY_CREATE}
 	 * and can be used in cases where a partition interceptor does not need knowledge of the specific resources being
 	 * accessed/read/written in order to determine the appropriate partition.
+	 * If registered, then neither STORAGE_PARTITION_IDENTIFY_READ, nor STORAGE_PARTITION_IDENTIFY_CREATE will be called.
 	 * </p>
 	 * <p>
 	 * This hook will only be called if
@@ -3080,6 +3084,91 @@ public enum Pointcut implements IPointcut {
 			void.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked before a CDS Hooks prefetch request is made.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson" - The prefetch query, template and resolution strategy used for the request.
+	 *     		This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 *     		invocations of a prefetch request/response.</li>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_REQUEST(
+			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson",
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson"),
+
+	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked after CDS Hooks prefetch request is completed successfully.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson" - The prefetch query and template and resolution strategy used for the request.
+	 * 	 	This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 * 	 	invocations of a prefetch request/response.</li>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *     <li> "org.hl7.fhir.instance.model.api.IBaseResource" - The resource that is returned by the prefetch
+	 *     request</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_RESPONSE(
+			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson",
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
+			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>CDS Hooks Prefetch Hook:</b>
+	 * Invoked after a failed CDS Hooks prefetch request.
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 *     <li> "ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson" - The prefetch query and template and resolution strategy used for the request.
+	 * 	 		This parameter also contains a user data map <code>(String, Object)</code>, that allows data to be store between pointcut
+	 * 	 		invocations of a prefetch request/response.</li>
+	 *     <li> "ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson" - The CDS Hooks request that the prefetch is being made for</li>
+	 *     <li> "java.lang.Exception" - The exception that caused the failure of the prefetch request</li>
+	 *  </ul>
+	 *
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	CDS_HOOK_PREFETCH_FAILED(
+			void.class,
+			"ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson",
+			"ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson",
+			"java.lang.Exception"),
+
+	/**
+	 * <b>Batch2 Hook:</b>
+	 * <p>This is a filter hook that can be used around workchunk processing.
+	 * It is expected that implementers return an <code>IInterceptorFilterHook</code> that invokes the supplier
+	 * and includes the logic that should be executed:</p>
+	 * <ol>
+	 *     <li>Before a workchunk has been processed</li>
+	 *     <li>If an error occurs during processing</li>
+	 *     <li>After the workchunk has been processed</li>
+	 * </ol>
+	 * <p>Parameters:</p>
+	 * <ul>
+	 *     <li>ca.uhn.fhir.batch2.model.JobInstance - The job instance</li>
+	 *     <li>ca.uhn.fhir.batch2.model.WorkChunk - The work chunk</li>
+	 *  </ul>
+	 * <p>Hooks should return an {@link ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook}</p>
+	 * <p>For more details see <a href="http://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html">Filter Hook Interceptors</a></p>
+	 */
+	BATCH2_CHUNK_PROCESS_FILTER(
+			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
+	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
@@ -3088,6 +3177,12 @@ public enum Pointcut implements IPointcut {
 			new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
 			String.class.getName(),
 			String.class.getName()),
+
+	/**
+	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
+	 * removed at any time.
+	 */
+	TEST_FILTER(IInterceptorFilterHook.class, String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
@@ -3107,6 +3202,10 @@ public enum Pointcut implements IPointcut {
 			@Nonnull Class<?> theReturnType,
 			@Nonnull ExceptionHandlingSpec theExceptionHandlingSpec,
 			String... theParameterTypes) {
+
+		// This enum uses the lowercase-b boolean type to indicate boolean return pointcuts
+		Validate.isTrue(!theReturnType.equals(Boolean.class), "Return type Boolean not allowed here, must be boolean");
+
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
@@ -3130,6 +3229,11 @@ public enum Pointcut implements IPointcut {
 	@Nonnull
 	public Class<?> getReturnType() {
 		return myReturnType;
+	}
+
+	@Override
+	public Class<?> getBooleanReturnTypeForEnum() {
+		return boolean.class;
 	}
 
 	@Override

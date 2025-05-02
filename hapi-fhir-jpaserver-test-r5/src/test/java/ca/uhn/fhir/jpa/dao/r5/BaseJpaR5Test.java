@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -56,9 +57,7 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -94,6 +93,7 @@ import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Group;
+import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
 import org.hl7.fhir.r5.model.Location;
@@ -118,6 +118,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.ServiceRequest;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.hl7.fhir.r5.model.Substance;
 import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -127,6 +128,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -142,7 +144,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR5Config.class})
+@ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
@@ -292,6 +294,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myPatientDaoR5")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
+	protected IFhirResourceDao<HealthcareService> myHealthcareServiceDao;
+	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
@@ -346,6 +350,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("mySubscriptionDaoR5")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+	@Autowired
+	@Qualifier("mySubscriptionTopicDaoR5")
+	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	@Autowired
 	@Qualifier("mySubstanceDaoR5")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
@@ -421,12 +428,16 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
-		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setAccessMetaSourceInformationFromProvenanceTable(defaults.isAccessMetaSourceInformationFromProvenanceTable());
+		myStorageSettings.setAllowContainsSearches(defaults.isAllowContainsSearches());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(defaults.isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setExpireSearchResults(defaults.isExpireSearchResults());
+		myStorageSettings.setExpireSearchResultsAfterMillis(defaults.getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(defaults.getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setSuppressUpdatesWithNoChange(defaults.isSuppressUpdatesWithNoChange());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -434,10 +445,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
-		baseHapiTerminologySvc.clearCaches();
-		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
-		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);
 		deferredStorageSvc.clearDeferred();
 	}
@@ -446,7 +453,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected void afterResetInterceptors() {
 		super.afterResetInterceptors();
-//		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach

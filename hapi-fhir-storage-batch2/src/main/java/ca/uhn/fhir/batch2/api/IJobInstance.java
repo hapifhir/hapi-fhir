@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
 import java.util.Date;
+import java.util.Map;
 
 public interface IJobInstance {
 	String getCurrentGatedStepId();
@@ -66,4 +67,8 @@ public interface IJobInstance {
 	boolean isFastTracking();
 
 	void setFastTracking(boolean theFastTracking);
+
+	Map<String, Object> getUserData();
+
+	void setUserData(Map<String, Object> theUserData);
 }

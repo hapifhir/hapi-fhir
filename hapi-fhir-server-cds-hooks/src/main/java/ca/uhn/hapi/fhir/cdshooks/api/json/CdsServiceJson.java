@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
-import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.BaseCdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.CdsPrefetchFailureMode;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -32,7 +33,7 @@ import java.util.Map;
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */
-public class CdsServiceJson extends BaseCdsServiceJson implements IModelJson {
+public class CdsServiceJson extends BaseCdsServiceJson {
 	public static final String HOOK = "hook";
 	public static final String TITLE = "title";
 	public static final String DESCRIPTION = "description";
@@ -55,6 +56,8 @@ public class CdsServiceJson extends BaseCdsServiceJson implements IModelJson {
 	private Map<String, String> myPrefetch;
 
 	private Map<String, CdsResolutionStrategyEnum> mySource;
+
+	private Map<String, CdsPrefetchFailureMode> myPrefetchFailureModes;
 
 	public String getHook() {
 		return myHook;
@@ -118,5 +121,19 @@ public class CdsServiceJson extends BaseCdsServiceJson implements IModelJson {
 			mySource = new LinkedHashMap<>();
 		}
 		return Collections.unmodifiableMap(mySource);
+	}
+
+	public void addPrefetchFailureMode(String theKey, CdsPrefetchFailureMode theFailureMode) {
+		if (myPrefetchFailureModes == null) {
+			myPrefetchFailureModes = new LinkedHashMap<>();
+		}
+		myPrefetchFailureModes.put(theKey, theFailureMode);
+	}
+
+	public CdsPrefetchFailureMode getPrefetchFailureMode(String theKey) {
+		if (myPrefetchFailureModes == null) {
+			myPrefetchFailureModes = new LinkedHashMap<>();
+		}
+		return myPrefetchFailureModes.getOrDefault(theKey, CdsPrefetchFailureMode.FAIL);
 	}
 }

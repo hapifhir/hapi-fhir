@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -469,9 +469,19 @@ public class SearchParameterCanonicalizer {
 						setEncoder(theRuntimeSearchParam, next.getValue());
 					} else if (HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN.equals(nextUrl)) {
 						addUpliftRefchain(theRuntimeSearchParam, next);
+					} else if (HapiExtensions.EXT_SEARCHPARAM_ENABLED_FOR_SEARCHING.equals(nextUrl)) {
+						addEnabledForSearching(theRuntimeSearchParam, next.getValue());
 					}
 				}
 			}
+		}
+	}
+
+	private void addEnabledForSearching(RuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
+		if (theValue instanceof IPrimitiveType) {
+			String stringValue = ((IPrimitiveType<?>) theValue).getValueAsString();
+			boolean enabledForSearching = Boolean.parseBoolean(stringValue);
+			theRuntimeSearchParam.setEnabledForSearching(enabledForSearching);
 		}
 	}
 

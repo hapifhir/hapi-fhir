@@ -1,16 +1,27 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ValidationSupportUtils {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportUtils.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	private ValidationSupportUtils() {}
 
+	/**
+	 * This method extracts a code system that can be (potentially) associated with a code when
+	 * performing validation against a ValueSet. This method was created for internal purposes.
+	 * Please use this method with care because it will only cover some
+	 * use-cases (e.g. standard bindings) while for others it may not return correct results or return null.
+	 * An incorrect result could be considered if the resource declares a code with a system, and you're calling
+	 * this method to check a binding against a ValueSet that has nothing to do with that system.
+	 * @param theValueSet the valueSet
+	 * @param theCode the code
+	 * @return the system which can be associated with the code
+	 */
 	public static String extractCodeSystemForCode(IBaseResource theValueSet, String theCode) {
 		if (theValueSet instanceof org.hl7.fhir.dstu3.model.ValueSet) {
 			return extractCodeSystemForCodeDSTU3((org.hl7.fhir.dstu3.model.ValueSet) theValueSet, theCode);
@@ -128,6 +139,6 @@ public final class ValidationSupportUtils {
 	}
 
 	private static void logCodeAndValueSet(String theCode, String theValueSet) {
-		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet);
+		ourLog.debug("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet);
 	}
 }

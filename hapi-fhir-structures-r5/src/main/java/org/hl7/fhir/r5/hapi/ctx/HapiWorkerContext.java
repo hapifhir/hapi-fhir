@@ -67,7 +67,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		myCtx = theCtx;
 		myValidationSupport = theValidationSupport;
 
-		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
+		long timeoutMillis = HapiSystemProperties.getValidationResourceCacheTimeoutMillis();
 
 		myFetchedResourceCache = CacheFactory.build(timeoutMillis);
 
@@ -211,6 +211,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(String s, boolean b, boolean b1, int i) {
+		return null;
+	}
+
+	@Override
 	public ValidationResult validateCode(
 			ValidationOptions theOptions, String theSystem, String theVersion, String theCode, String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
@@ -297,6 +302,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical, int i) {
+		throw new UnsupportedOperationException(Msg.code(2128));
+	}
+
+	/*1@Override
 	public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical, boolean theNoInactive)
 			throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
@@ -306,7 +316,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 				myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
 		return new ValueSetExpansionOutcome(
 				(ValueSet) output.getValueSet(), output.getError(), null, output.getErrorIsFromServer());
-	}
+	}*/
 
 	@Override
 	public Locale getLocale() {
@@ -493,6 +503,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			Resource src, ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical)
 			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(230));
+	}
+
+	@Override
+	public ValueSetExpansionOutcome expandVS(
+			ITerminologyOperationDetails iTerminologyOperationDetails,
+			ConceptSetComponent conceptSetComponent,
+			boolean b,
+			boolean b1)
+			throws TerminologyServiceException {
+		return null;
 	}
 
 	@Override

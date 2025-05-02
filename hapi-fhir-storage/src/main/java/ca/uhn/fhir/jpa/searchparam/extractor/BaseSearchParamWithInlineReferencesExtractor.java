@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -48,7 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId>
+public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId<?>>
 		implements ISearchParamWithInlineReferencesExtractor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamWithInlineReferencesExtractor.class);
 
@@ -66,6 +68,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 
 	@Autowired
 	private IIdHelperService<T> myIdHelperService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@Override
 	public void extractInlineReferences(
@@ -116,8 +121,15 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				if (resolvedMatch != null && !IResourcePersistentId.NOT_FOUND.equals(resolvedMatch)) {
 					matches = Set.of(resolvedMatch);
 				} else {
+					RequestPartitionId theRequestPartitionId =
+							myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+									theRequestDetails, resourceTypeString);
 					matches = myMatchResourceUrlService.processMatchUrl(
-							nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
+							nextIdText,
+							matchResourceType,
+							theTransactionDetails,
+							theRequestDetails,
+							theRequestPartitionId);
 				}
 
 				T match;

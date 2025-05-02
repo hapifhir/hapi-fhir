@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ public class BulkImportAppCtx {
 	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
 	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
 
+	/**
+	 * Pre-HAPI FHIR 8.2.0 definition
+	 */
 	@Bean
 	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinition() {
 		return JobDefinition.newBuilder()
@@ -39,8 +42,35 @@ public class BulkImportAppCtx {
 				.setJobDefinitionVersion(1)
 				.setParametersType(BulkImportJobParameters.class)
 				.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
-				.addLastStep("process-files", "Process files", bulkImport2ConsumeFiles())
+				.addLastStep("process-files", "Process files", bulkImport2ConsumeFilesV1())
 				.build();
+	}
+
+	/**
+	 * @since 8.2.0
+	 */
+	@Bean
+	public JobDefinition<BulkImportJobParameters> bulkImport2JobDefinitionV2() {
+		return JobDefinition.newBuilder()
+				.gatedExecution()
+				.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
+				.setJobDescription("FHIR Bulk Import using pull-based data source")
+				.setJobDefinitionVersion(2)
+				.setParametersType(BulkImportJobParameters.class)
+				.addFirstStep("fetch-files", "Fetch files for import", NdJsonFileJson.class, bulkImport2FetchFiles())
+				.addIntermediateStep(
+						"process-files", "Process files", ConsumeFilesOutcomeJson.class, bulkImport2ConsumeFilesV2())
+				.addFinalReducerStep(
+						"generate-report",
+						"Generate outcome report",
+						BulkImportReportJson.class,
+						generateOutcomeReportReducerStep())
+				.build();
+	}
+
+	@Bean
+	public GenerateReportReductionStep generateOutcomeReportReducerStep() {
+		return new GenerateReportReductionStep();
 	}
 
 	@Bean
@@ -49,8 +79,13 @@ public class BulkImportAppCtx {
 	}
 
 	@Bean
-	public IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, VoidModel> bulkImport2ConsumeFiles() {
-		return new ConsumeFilesStep();
+	public ConsumeFilesStepV1 bulkImport2ConsumeFilesV1() {
+		return new ConsumeFilesStepV1();
+	}
+
+	@Bean
+	public ConsumeFilesStepV2 bulkImport2ConsumeFilesV2() {
+		return new ConsumeFilesStepV2();
 	}
 
 	@Bean

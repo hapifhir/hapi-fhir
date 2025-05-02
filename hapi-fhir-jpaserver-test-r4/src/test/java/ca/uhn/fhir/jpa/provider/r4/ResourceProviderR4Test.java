@@ -7,8 +7,10 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -17,7 +19,9 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -49,6 +53,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -61,6 +66,9 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.test.util.LogbackTestExtension;
+import ca.uhn.test.util.LogbackTestExtensionAssert;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -169,16 +177,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import ch. qos. logback. classic.Level;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -195,6 +208,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -220,6 +234,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@Autowired
 	private ISearchDao mySearchEntityDao;
+
+	@RegisterExtension
+	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(SearchParamValidatingInterceptor.class, Level.WARN);
 
 	@Override
 	@AfterEach
@@ -261,6 +278,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+	}
+
+	@Test
+	public void testSearchParameterValidation() {
+		// setup
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.getUserData().put(SearchParamValidatingInterceptor.SKIP_VALIDATION, true);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setUrl("http://example.com/name");
+		sp.setId("name");
+		sp.setCode("name");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.addBase("Patient");
+		sp.setExpression("Patient.name");
+
+		// test
+		DaoMethodOutcome outcome = mySearchParameterDao.update(sp, requestDetails);
+
+		myCaptureQueriesListener.clear();
+		sp.setId(outcome.getId());
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(sp, requestDetails);
+
+		LogbackTestExtensionAssert.assertThat(myLogbackTestExtension).hasWarnMessage("Skipping validation of submitted SearchParameter because " + SearchParamValidatingInterceptor.SKIP_VALIDATION + " flag is true");
 	}
 
 	@Test
@@ -353,7 +396,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IFhirResourceDao<SearchParameter> searchParameterDao = myDaoRegistry.getResourceDao(SearchParameter.class);
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile", null);
 		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
@@ -624,7 +667,127 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Ids: {}", ids);
 		assertThat(output.getEntry()).hasSize(4);
 		assertNull(output.getLink("next"));
+	}
 
+	/**
+	 * Test for <a href = https://github.com/hapifhir/hapi-fhir/issues/6849>#6849</a>
+	 *
+	 * This is an edge case for chained searches with the _count parameter may not terminate when the search returns
+	 * resources with multiple references.
+	 */
+	@ParameterizedTest
+	@MethodSource("createFhirSearchWithChainingAndCountParams")
+	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
+		// Given
+		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);
+		if (theMaxPageSize != null) {
+			myPagingProvider.setMaximumPageSize(theMaxPageSize);
+		}
+		if (thePrefetchThresholds != null) {
+			myStorageSettings.setSearchPreFetchThresholds(thePrefetchThresholds);
+		}
+
+		// Create some organizations to reference
+		int maxNumberOfRefs = theRefCountToResourceCount.keySet().stream().mapToInt(num -> num).max().orElseThrow();
+		List<IIdType> organizations = new ArrayList<>();
+
+		for (int i = 0; i < maxNumberOfRefs; i++) {
+			Organization o = new Organization();
+			o.setId("O" + i);
+			o.setName("O" + i);
+			o.setActive(true);
+			organizations.add(myClient.update().resource(o).execute().getId().toUnqualifiedVersionless());
+		}
+
+		int totalNumberOfPatientsCreated = createPatientsWithReferences(theRefCountToResourceCount, organizations);
+
+		int numberOfSingleRefResources = theRefCountToResourceCount.getOrDefault(1, 0);
+		int count = totalNumberOfPatientsCreated - numberOfSingleRefResources;
+
+		Bundle output = myClient
+			.search()
+			.byUrl("Patient?general-practitioner.active=true")
+			.count(count)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		ourLog.info("Loaded page 1 with ids: {}", ids);
+		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
+
+		// When: loading the next page
+		for (int pageNum = 2; output.getLink("next") != null; pageNum++) {
+			output = myClient
+				.loadPage()
+				.next(output)
+				.execute();
+
+			ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+			ourLog.info("Loaded page {} with ids: {}", pageNum, ids);
+
+			// Then: search properly resolves, and has the correct count
+			if (output.getLink("next") != null) {
+				assertThat(output.getEntry()).hasSize(count);
+			} else {
+				int numLeft = totalNumberOfPatientsCreated % count;
+				numLeft = numLeft == 0 ? count : numLeft;
+				assertThat(output.getEntry()).hasSize(numLeft);
+			}
+		}
+	}
+
+	/**
+	 * @param theRefCountToResourceCount map where the key is the number of references (general-practitioner) the Patient should have, and the value is the number of such Patients to create
+	 * @param theOrganizationRefs the Organizations to use as references
+	 * @return total number of patients created
+	 */
+	private int createPatientsWithReferences(Map<Integer, Integer> theRefCountToResourceCount, List<IIdType> theOrganizationRefs) {
+		int totalNumberOfPatientsCreated = 0;
+
+		for (Integer refCount : theRefCountToResourceCount.keySet()) {
+			// Create a new patient with refCount references
+			Patient p = new Patient();
+			p.setActive(true);
+			for (int j = 0; j < refCount; j++) {
+				p.addGeneralPractitioner(new Reference(theOrganizationRefs.get(j).getValue()));
+			}
+
+			for (int i = 0; i < theRefCountToResourceCount.get(refCount); i++) {
+				p.setId("P" + totalNumberOfPatientsCreated);
+				myPatientDao.update(p, mySrd);
+
+				totalNumberOfPatientsCreated++;
+			}
+		}
+		return totalNumberOfPatientsCreated;
+	}
+
+	public static Stream<Arguments> createFhirSearchWithChainingAndCountParams() {
+		// 5 resources with 2 refs; 3 resources with 1 ref
+		Map<Integer, Integer> m1 = Map.of(2, 5, 1, 3);
+		// 10 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m2 = Map.of(2, 10, 1, 2);
+		// 251 resources with 2 refs; 2 resources with 1 ref
+		Map<Integer, Integer> m3 = Map.of(2, 251, 1, 2);
+		// 4 resources with 3 refs; 1 resources with 1 ref
+		Map<Integer, Integer> m4 = Map.of(3, 4, 1, 1);
+		// 2 resources with 3 refs; 2 resources with 2 refs, 3 resources with 1 ref
+		Map<Integer, Integer> m5 = Map.of(3, 2, 2, 2,1, 3);
+		Map<Integer, Integer> m6 = Map.of(3, 3, 1,4);
+		Map<Integer, Integer> m7 = Map.of(2, 1, 1,11);
+
+
+		return Stream.of(
+			// Map of ref count to resource count; the max page size; the pre-fetch thresholds to use
+			Arguments.of(m1, null, null),
+			Arguments.of(m2, null, null),
+			Arguments.of(m3, 500, null),
+			Arguments.of(m4, null, null),
+			Arguments.of(m5, null, null),
+			Arguments.of(m1, null, List.of(9, 13, 503, -1)),
+			Arguments.of(m6, null, null),
+			Arguments.of(m7, null, null)
+		);
 	}
 
 	@Test
@@ -2043,6 +2206,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEmptySearch() {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Bundle responseBundle;
 
 		responseBundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
@@ -2145,6 +2310,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFullTextSearch() throws Exception {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		IParser parser = myFhirContext.newJsonParser();
 
 		Observation obs1 = new Observation();
@@ -2178,6 +2345,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+
 		Patient p = new Patient();
 		p.setId("FOO");
 		p.addName().setFamily("FAMILY");
@@ -2200,6 +2369,43 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(myServerBase + "/Patient?_id=FOO&_content=HELLO");
 		assertThat(ids).isEmpty();
 	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/Patient?_text=HELLO",
+		"/Patient?_content=HELLO",
+		"/Patient?_content=HELLO&_text=HELLO",
+		"/Patient?_id=FOO&_content=HELLO",
+		"/Patient/A/$everything?_content=HELLO"
+	})
+	public void testFullTextIndexingDisabled(String theUri) throws IOException {
+		// Setup
+		myStorageSettings.setHibernateSearchIndexFullText(false);
+		createPatient(withId("A"), withActiveTrue());
+
+		// Test
+		HttpGet get = new HttpGet(myServerBase + theUri);
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+
+			// Verify
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(400, response.getStatusLine().getStatusCode(), resp);
+			String expectedParams = null;
+			if (theUri.contains("_content")) {
+				expectedParams = "_content";
+			}
+			if (theUri.contains("_text")) {
+				if (expectedParams != null) {
+					expectedParams += ", _text";
+				} else {
+					expectedParams = "_text";
+				}
+			}
+			assertThat(resp).contains("Fulltext searching is not enabled on this server, can not support the parameter(s): " + expectedParams);
+		}
+
+	}
+
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
@@ -2364,18 +2570,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = idCreated.toUnqualifiedVersionless();
 
 		for (int i = 0; i < 10; i++) {
-			sleepOneClick();
+			sleepAtLeast(100);
 			preDates.add(new Date());
-			sleepOneClick();
+			sleepAtLeast(100);
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
-			sleepOneClick();
 		}
 
 		List<String> idValues;
 
+		myCaptureQueriesListener.clear();
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(idValues).as(idValues.toString()).containsExactly(ids.get(3), ids.get(2), ids.get(1), ids.get(0));
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
@@ -2393,8 +2600,71 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=ge" + InstantDt.withCurrentTime().getYear());
 		assertThat(idValues).as(idValues.toString()).hasSize(10);
 
-		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + InstantDt.withCurrentTime().getYear());
+		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + (InstantDt.withCurrentTime().getYear() + 1));
 		assertThat(idValues).isEmpty();
+	}
+
+	@Test
+	public void testPaginatingHistoryWithGenericClientLoadPageMethod() throws Exception {
+		//Given: A patient with 100 versions.
+		Patient p = new Patient().setActive(true);
+		p.setId("a123");
+		myPatientDao.update(p);
+
+		for (int i=0; i < 99; i++) {
+			p.addName().setFamily("John" + i);
+			myPatientDao.update(p, mySrd);
+		}
+
+		Bundle response = myClient
+			.history()
+			.onInstance(new IdType("Patient", "a123"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		//When: Paginating using GenericClient's "loadPage()" method
+		while (response.getLink("next") != null) {
+			response = myClient.loadPage().next(response).execute();
+		}
+		//Verify: We paginate to the last page.
+		assertNotNull(response.getLink("self"));
+		assertNotNull(response.getLink("previous"));
+		assertNull(response.getLink("next"));
+	}
+
+	@Test
+	public void testPaginatingHistoryWithOffsetAndCountQueryParam() throws Exception {
+		//Given: A patient with 100 versions.
+		Patient p = new Patient().setActive(true);
+		p.setId("a123");
+		myPatientDao.update(p);
+
+		for (int i=0; i < 99; i++) {
+			p.addName().setFamily("John" + i);
+			myPatientDao.update(p, mySrd);
+		}
+
+		int offset = 0;
+		Bundle response;
+		boolean nextLinkExists = true;
+		//When: Paginating using _offset and _count query parameters
+		while (nextLinkExists) {
+			response = myClient
+				.history()
+				.onInstance(new IdType("Patient", "a123"))
+				.returnBundle(Bundle.class)
+				.offset(offset)
+				.count(10)
+				.execute();
+			offset += 10;
+			nextLinkExists = response.getLink("next") != null;
+			//Verify: We get to the last page.
+			if (!nextLinkExists){
+				assertNotNull(response.getLink("self"));
+				assertNotNull(response.getLink("previous"));
+				assertNull(response.getLink("next"));
+			}
+		}
 	}
 
 
@@ -2720,8 +2990,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See issue #52
-	 */
+     * See issue #52
+     */
 	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = myClient;
@@ -2951,8 +3221,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	/**
-	 * See #793
-	 */
+     * See #793
+     */
 	@Test
 	public void testIncludeCountDoesntIncludeIncludes() {
 		Organization org = new Organization();
@@ -3367,7 +3637,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -3392,7 +3662,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -4254,6 +4524,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchReturnsSearchDate() throws Exception {
 		Date before = new Date();
+		sleepAtLeast(10);
 
 		//@formatter:off
 		Bundle found = myClient
@@ -4264,6 +4535,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
+		sleepAtLeast(10);
 		Date after = new Date();
 
 		InstantType updated = found.getMeta().getLastUpdatedElement();
@@ -5807,14 +6079,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			myClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
 		try {
 			myClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (InvalidRequestException e) {
 			// good
 		}
 
@@ -6804,6 +7076,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		TestUtil.sleepAtLeast(delayInMs + 100);
 		patient.getNameFirstRep().addGiven("Bob");
 		myClient.update().resource(patient).execute();
+		TestUtil.sleepAtLeast(100);
 
 		Patient unrelatedPatient = (Patient) myClient.create().resource(new Patient()).execute().getResource();
 		assertThat(patientId).isNotEqualTo(unrelatedPatient.getIdElement().getIdPartAsLong());
@@ -6829,7 +7102,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Issue 3138 test case, verify behavior of _at
 		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.clear();
 		verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		myCaptureQueriesListener.logSelectQueries();
 		// verify behavior of _since
 		verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
 		verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
@@ -6851,8 +7126,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.after(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(1);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
@@ -6860,8 +7137,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(2);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
@@ -6870,9 +7149,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
-		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
-		assertThat(resultIds).hasSize(1);
+		String url = myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates);
+		myCaptureQueriesListener.clear();
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(url);
+		assertThat(resultIds).as(()->describeVersionsAndUrl(url)).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
+	}
+
+	private String describeVersionsAndUrl(String theUrl) {
+		return runInTransaction(()->{
+			return "URL: " + theUrl + "\n\nHistory Entries:\n * " +
+				myResourceHistoryTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")) +
+				"\n\nSQL Queries:\n * " +
+				myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * "));
+		});
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -7185,6 +7475,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		@AfterEach
 		public void cleanUp() {
+			myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+			myStorageSettings.setSearchPreFetchThresholds(JpaStorageSettings.DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS);
 			myStorageSettings.setIndexStorageOptimized(false);
 		}
 	}

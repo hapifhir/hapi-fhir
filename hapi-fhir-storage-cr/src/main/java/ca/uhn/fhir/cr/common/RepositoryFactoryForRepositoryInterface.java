@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.api.Repository;
 /**
  * Factory interface to return a {@link Repository} from a {@link RequestDetails}
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @FunctionalInterface
 public interface RepositoryFactoryForRepositoryInterface {
 	Repository create(RequestDetails theRequestDetails);

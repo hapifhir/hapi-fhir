@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,6 +289,7 @@ public class Constants {
 
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 	public static final String HEADER_X_PROGRESS = "X-Progress";
+	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	public static final String HEADER_RETRY_AFTER = "Retry-After";
 	/**
 	 * Operation name for the $lastn operation
@@ -341,6 +342,8 @@ public class Constants {
 	 * Application configuration key used to enable or disable Hibernate Envers.
 	 */
 	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
+
+	public static final String OPENTELEMETRY_BASE_NAME = "io.hapifhir";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

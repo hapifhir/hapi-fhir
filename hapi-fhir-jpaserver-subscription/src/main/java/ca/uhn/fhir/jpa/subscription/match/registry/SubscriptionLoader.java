@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -46,7 +46,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	@Autowired
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
+	private SubscriptionActivatingListener mySubscriptionActivatingInterceptor;
 
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
@@ -71,7 +71,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	protected SearchParameterMap getSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 
-		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
+		if (mySearchParamRegistry.getActiveSearchParam(
+						"Subscription", "status", ISearchParamRegistry.SearchParamLookupContextEnum.ALL)
+				!= null) {
 			map.add(
 					Subscription.SP_STATUS,
 					new TokenOrListParam()
@@ -168,9 +170,5 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 						+ "This will not prevent startup, but it could lead to undesirable outcomes! {}",
 				theSubscription.getIdElement().getIdPart(),
 				(StringUtils.isBlank(error) ? "" : "Error: " + error));
-	}
-
-	public void syncSubscriptions() {
-		super.syncDatabaseToCache();
 	}
 }

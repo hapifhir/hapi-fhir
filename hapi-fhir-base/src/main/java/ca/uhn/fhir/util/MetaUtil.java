@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,13 @@ public class MetaUtil {
 	public static String cleanProvenanceSourceUriOrEmpty(String theProvenanceSourceUri) {
 		String sanitizedProvenance = defaultString(theProvenanceSourceUri);
 		return StringUtils.substringBefore(sanitizedProvenance, "#");
+	}
+
+	/**
+	 * @since 8.2.0
+	 */
+	public static String getSource(FhirContext theContext, IBaseResource theResource) {
+		return getSource(theContext, theResource.getMeta());
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {

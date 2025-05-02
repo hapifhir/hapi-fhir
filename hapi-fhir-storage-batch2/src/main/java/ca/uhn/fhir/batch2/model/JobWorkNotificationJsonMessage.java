@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,18 @@ public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotif
 	 */
 	public JobWorkNotificationJsonMessage() {
 		super();
+	}
+
+	@Override
+	@Nonnull
+	public String getMessageKey() {
+		// We assume that preserving chunk order does not matter, so we want to spread work as much across the cluster
+		// as possible even if it means chunks are processed out of order. If we wanted to preserve order, we would
+		// use instanceId instead. This may need to change by job type in the future...
+		if (myPayload.getChunkId() != null) {
+			return myPayload.getChunkId();
+		}
+		return super.getMessageKey();
 	}
 
 	/**

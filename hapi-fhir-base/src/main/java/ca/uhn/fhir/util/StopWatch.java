@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,10 +282,34 @@ public class StopWatch {
 	}
 
 	/**
-	 * Format a throughput number (output does not include units)
+	 * Format a throughput number (output does not include units) into
+	 * a number suitable for logging.
+	 * <p>
+	 * This method tries to use a suitable amount of precision for logging.
+	 * For numbers above 1000 it includes no decimal.
+	 * For numbers between 100 and 1000 it includes one decimal.
+	 * For numbers below 100 it includes two decimals.
+	 * </p>
 	 */
 	public static String formatThroughput(double throughput) {
-		return new DecimalFormat("0.0").format(throughput);
+		return formatDouble(throughput);
+	}
+
+	/**
+	 * This method tries to use a suitable amount of precision for logging.
+	 * For numbers above 1000 it includes no decimal.
+	 * For numbers between 100 and 1000 it includes one decimal.
+	 * For numbers below 100 it includes two decimals.
+	 */
+	static String formatDouble(double theDouble) {
+		double abs = Math.abs(theDouble);
+		if (abs > 1000) {
+			return Long.toString(Math.round(theDouble));
+		}
+		if (abs > 100) {
+			return Double.toString(Math.round(theDouble * 10.0) / 10.0);
+		}
+		return Double.toString(Math.round(theDouble * 100.0) / 100.0);
 	}
 
 	/**

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
@@ -59,6 +57,7 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.TaskChunker;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
@@ -214,19 +213,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	private static void filterBySpecificPatient(
+	private void filterBySpecificPatient(
 			ExportPIDIteratorParameters theParams,
 			String resourceType,
 			String patientSearchParam,
 			SearchParameterMap map) {
 		if (resourceType.equalsIgnoreCase("Patient")) {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(PARAM_ID, referenceOrListParam);
 			}
 		} else {
 			if (theParams.getPatientIds() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				ReferenceOrListParam referenceOrListParam = makeReferenceOrListParam(theParams.getPatientIds());
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
@@ -235,11 +234,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	@Nonnull
-	private static ReferenceOrListParam getReferenceOrListParam(ExportPIDIteratorParameters theParams) {
-		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-		for (String patientId : theParams.getPatientIds()) {
-			referenceOrListParam.addOr(new ReferenceParam(patientId));
-		}
+	private ReferenceOrListParam makeReferenceOrListParam(@Nonnull List<String> thePatientIds) {
+		final ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		thePatientIds.forEach(patientId -> referenceOrListParam.addOr(new ReferenceParam(patientId)));
 		return referenceOrListParam;
 	}
 
@@ -315,8 +312,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// for each patient pid ->
 			//	search for the target resources, with their correct patient references, chunked.
 			// The results will be jammed into myReadPids
-			QueryChunker<JpaPid> queryChunker = new QueryChunker<>();
-			queryChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
+			TaskChunker.chunk(expandedMemberResourceIds, QUERY_CHUNK_SIZE, (idChunk) -> {
 				try {
 					queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
 				} catch (IOException ex) {
@@ -350,10 +346,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * Get a ISearchBuilder for the given resource type.
 	 */
 	protected ISearchBuilder<JpaPid> getSearchBuilderForResourceType(String theResourceType) {
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
 		Class<? extends IBaseResource> typeClass = def.getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(dao, theResourceType, typeClass);
+		return mySearchBuilderFactory.newSearchBuilder(theResourceType, typeClass);
 	}
 
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType(String theResourceType) {
@@ -445,15 +440,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<JpaPid> getMembersFromGroupWithFilter(
-			ExportPIDIteratorParameters theParameters, boolean theConsiderSince) throws IOException {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
-		List<JpaPid> resPids = new ArrayList<>();
-
-		List<SearchParameterMap> maps =
-				myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters, theConsiderSince);
-
-		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
-
+			ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) throws IOException {
+		final List<SearchParameterMap> maps = makeSearchParameterMaps(theParameters, theConsiderDateRange);
+		final List<JpaPid> resPids = new ArrayList<>();
 		for (SearchParameterMap map : maps) {
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType("Patient");
 			ourLog.debug(
@@ -475,17 +464,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return resPids;
 	}
 
-	/**
-	 * This method takes an {@link SearchParameterMap} and adds a clause to it that will filter the search results to only
-	 * return members of the defined group.
-	 *
-	 * @param theMap     the map to add the clause to.
-	 * @param theGroupId the group ID to filter by.
-	 */
-	private void addMembershipToGroupClause(SearchParameterMap theMap, String theGroupId) {
-		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theGroupId));
-		theMap.add(PARAM_HAS, hasOrListParam);
+	@Nonnull
+	private List<SearchParameterMap> makeSearchParameterMaps(
+			@Nonnull ExportPIDIteratorParameters theParameters, boolean theConsiderDateRange) {
+		final RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
+		final List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(
+				def, theParameters, theConsiderDateRange);
+		maps.forEach(map -> {
+			map.add(PARAM_HAS, makeGroupMemberHasOrListParam(theParameters.getGroupId()));
+			final List<String> patientIds = theParameters.getPatientIds();
+			if (patientIds != null && !patientIds.isEmpty()) {
+				map.add(PARAM_ID, makeReferenceOrListParam(patientIds));
+			}
+		});
+		return maps;
+	}
+
+	@Nonnull
+	private HasOrListParam makeGroupMemberHasOrListParam(@Nonnull String theGroupId) {
+		final HasParam hasParam = new HasParam("Group", "member", "_id", theGroupId);
+		return new HasOrListParam().addOr(hasParam);
 	}
 
 	/**
@@ -625,7 +623,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			resourceToCheck = "Patient";
 			activeSearchParamName = "organization";
 		}
-		return mySearchParamRegistry.getActiveSearchParam(resourceToCheck, activeSearchParamName);
+		return mySearchParamRegistry.getActiveSearchParam(
+				resourceToCheck, activeSearchParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 	}
 
 	/**

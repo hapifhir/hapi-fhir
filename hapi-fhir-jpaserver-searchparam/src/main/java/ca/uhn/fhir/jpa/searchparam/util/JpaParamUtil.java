@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,8 @@ public enum JpaParamUtil {
 		List<RuntimeSearchParam.Component> components = theParamDef.getComponents();
 		for (RuntimeSearchParam.Component next : components) {
 			String url = next.getReference();
-			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(url);
+			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(
+					url, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}

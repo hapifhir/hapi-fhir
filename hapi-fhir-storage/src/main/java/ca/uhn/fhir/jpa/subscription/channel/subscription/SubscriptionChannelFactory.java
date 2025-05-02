@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,54 +19,59 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import org.apache.commons.lang3.Validate;
 
 public class SubscriptionChannelFactory {
-	private final IChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionChannelFactory(IChannelFactory theChannelFactory) {
-		Validate.notNull(theChannelFactory);
-		myChannelFactory = theChannelFactory;
+	public SubscriptionChannelFactory(IBrokerClient theBrokerClient) {
+		Validate.notNull(theBrokerClient);
+		myBrokerClient = theBrokerClient;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(
+	public IChannelProducer<ResourceDeliveryMessage> newDeliveryProducer(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelConsumer<ResourceDeliveryMessage> newDeliveryConsumer(
+			String theChannelName,
+			IMessageListener<ResourceDeliveryMessage> theListener,
+			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		IChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
+		return myBrokerClient.getOrCreateConsumer(
+				theChannelName, ResourceDeliveryJsonMessage.class, theListener, config);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(
+	public IChannelProducer<ResourceModifiedMessage> newMatchingProducer(
 			String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
-		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
+		return myBrokerClient.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelConsumer<ResourceModifiedMessage> newMatchingConsumer(
+			String theChannelName,
+			IMessageListener<ResourceModifiedMessage> theListener,
+			ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		IChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
-		return new BroadcastingSubscribableChannelWrapper(channel);
+		return myBrokerClient.getOrCreateConsumer(
+				theChannelName, ResourceModifiedJsonMessage.class, theListener, config);
 	}
 
 	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
@@ -113,7 +118,7 @@ public class SubscriptionChannelFactory {
 		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 
-	public IChannelFactory getChannelFactory() {
-		return myChannelFactory;
+	public IBrokerClient getBrokerClient() {
+		return myBrokerClient;
 	}
 }

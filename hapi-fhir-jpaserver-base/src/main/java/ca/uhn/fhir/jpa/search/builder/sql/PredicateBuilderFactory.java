@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
@@ -30,13 +31,12 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 
 public class PredicateBuilderFactory {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderFactory.class);
-
+	@Nonnull
 	public static ICanMakeMissingParamPredicate createPredicateBuilderForParamType(
 			RestSearchParameterTypeEnum theParamType, SearchQueryBuilder theBuilder, QueryStack theQueryStack) {
 		switch (theParamType) {
@@ -59,51 +59,40 @@ public class PredicateBuilderFactory {
 				return createCoordsPredicateBuilder(theBuilder);
 			case COMPOSITE:
 			default:
-				// we don't expect to see this
-				ourLog.error("Invalid param type " + theParamType.name());
-				return null;
+				throw new InternalErrorException(Msg.code(2593) + "Invalid param type " + theParamType.name());
 		}
 	}
 
 	private static StringPredicateBuilder createStringPredicateBuilder(SearchQueryBuilder theBuilder) {
-		StringPredicateBuilder sp = theBuilder.getSqlBuilderFactory().stringIndexTable(theBuilder);
-		return sp;
+		return theBuilder.getSqlBuilderFactory().stringIndexTable(theBuilder);
 	}
 
 	private static NumberPredicateBuilder createNumberPredicateBuilder(SearchQueryBuilder theBuilder) {
-		NumberPredicateBuilder np = theBuilder.getSqlBuilderFactory().numberIndexTable(theBuilder);
-		return np;
+		return theBuilder.getSqlBuilderFactory().numberIndexTable(theBuilder);
 	}
 
 	private static QuantityPredicateBuilder createQuantityPredicateBuilder(SearchQueryBuilder theBuilder) {
-		QuantityPredicateBuilder qp = theBuilder.getSqlBuilderFactory().quantityIndexTable(theBuilder);
-		return qp;
+		return theBuilder.getSqlBuilderFactory().quantityIndexTable(theBuilder);
 	}
 
 	private static CoordsPredicateBuilder createCoordsPredicateBuilder(SearchQueryBuilder theBuilder) {
-		CoordsPredicateBuilder cp = theBuilder.getSqlBuilderFactory().coordsPredicateBuilder(theBuilder);
-		return cp;
+		return theBuilder.getSqlBuilderFactory().coordsPredicateBuilder(theBuilder);
 	}
 
 	private static TokenPredicateBuilder createTokenPredicateBuilder(SearchQueryBuilder theBuilder) {
-		TokenPredicateBuilder tp = theBuilder.getSqlBuilderFactory().tokenIndexTable(theBuilder);
-		return tp;
+		return theBuilder.getSqlBuilderFactory().tokenIndexTable(theBuilder);
 	}
 
 	private static DatePredicateBuilder createDatePredicateBuilder(SearchQueryBuilder theBuilder) {
-		DatePredicateBuilder dp = theBuilder.getSqlBuilderFactory().dateIndexTable(theBuilder);
-		return dp;
+		return theBuilder.getSqlBuilderFactory().dateIndexTable(theBuilder);
 	}
 
 	private static UriPredicateBuilder createUriPredicateBuilder(SearchQueryBuilder theBuilder) {
-		UriPredicateBuilder up = theBuilder.getSqlBuilderFactory().uriIndexTable(theBuilder);
-		return up;
+		return theBuilder.getSqlBuilderFactory().uriIndexTable(theBuilder);
 	}
 
 	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(
 			QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
-		ResourceLinkPredicateBuilder retVal =
-				theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
-		return retVal;
+		return theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
 	}
 }

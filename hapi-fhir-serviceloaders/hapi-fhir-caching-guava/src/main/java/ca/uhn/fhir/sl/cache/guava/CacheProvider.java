@@ -4,7 +4,7 @@ package ca.uhn.fhir.sl.cache.guava;
  * #%L
  * HAPI FHIR - ServiceLoaders - Caching Guava
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,14 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 	public Cache<K, V> create(long timeoutMillis, long maximumSize) {
 		return new CacheDelegator<K, V>(CacheBuilder.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				.maximumSize(maximumSize)
+				.build());
+	}
+
+	@Override
+	public Cache<K, V> createEternal(int minimumSize, long maximumSize) {
+		return new CacheDelegator<>(CacheBuilder.newBuilder()
+				.initialCapacity(minimumSize)
 				.maximumSize(maximumSize)
 				.build());
 	}

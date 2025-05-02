@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,20 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	private final IRepositoryFactory myRepositoryFactory;
 	private final RestfulServer myRestfulServer;
 
+	public CdsConfigServiceImpl(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull ObjectMapper theObjectMapper,
+			@Nullable DaoRegistry theDaoRegistry,
+			@Nullable RestfulServer theRestfulServer) {
+		myFhirContext = theFhirContext;
+		myObjectMapper = theObjectMapper;
+		myDaoRegistry = theDaoRegistry;
+		myRestfulServer = theRestfulServer;
+		myCdsCrSettings = new CdsCrSettings();
+		myRepositoryFactory = null;
+	}
+
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	public CdsConfigServiceImpl(
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ObjectMapper theObjectMapper,

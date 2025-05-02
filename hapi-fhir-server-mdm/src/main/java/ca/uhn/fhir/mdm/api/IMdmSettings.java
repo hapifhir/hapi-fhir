@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,5 +71,10 @@ public interface IMdmSettings {
 	// TODO: on next bump, make this method non-default
 	default void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
 		throw new UnsupportedOperationException(Msg.code(2427));
+	}
+
+	// In MATCH_ONLY mode, the Patient/$match operation is available, but no mdm processing takes place.
+	default MdmModeEnum getMode() {
+		return MdmModeEnum.MATCH_AND_LINK;
 	}
 }

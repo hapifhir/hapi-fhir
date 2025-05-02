@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ package ca.uhn.fhir.batch2.channel;
 
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BatchJobSender {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobSender.class);
-	private final IChannelProducer myWorkChannelProducer;
+	private final IChannelProducer<JobWorkNotification> myWorkChannelProducer;
 
-	public BatchJobSender(@Nonnull IChannelProducer theWorkChannelProducer) {
+	public BatchJobSender(@Nonnull IChannelProducer<JobWorkNotification> theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
 	}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.Nonnull;
+import org.thymeleaf.util.Validate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +84,7 @@ public class JsonUtil {
 	 * Parse JSON
 	 */
 	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
+		Validate.notEmpty(theInput, "theInput must not be blank or null");
 		try {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 		} catch (IOException e) {
@@ -160,8 +162,25 @@ public class JsonUtil {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+			throw newInvalidRequestException(theJson, e);
 		}
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject) {
+		return serializeOrInvalidRequest(theObject, true);
+	}
+
+	public static String serializeOrInvalidRequest(Object theObject, boolean thePrettyPrint) {
+		try {
+			return serialize(theObject, thePrettyPrint);
+		} catch (InternalErrorException e) {
+			throw newInvalidRequestException(theObject, e);
+		}
+	}
+
+	private static InvalidRequestException newInvalidRequestException(Object theObject, Exception theCause)
+			throws InvalidRequestException {
+		return new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theObject.getClass(), theCause);
 	}
 
 	private static class SensitiveDataFilter extends SimpleBeanPropertyFilter {

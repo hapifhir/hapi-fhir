@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,12 @@ public class DeleteConflictFinderService {
 	protected EntityManager myEntityManager;
 
 	List<ResourceLink> findConflicts(ResourceTable theEntity, int maxResults) {
-		TypedQuery<ResourceLink> query = myEntityManager.createQuery(
-				"SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
+		String queryStr =
+				"SELECT l FROM ResourceLink l WHERE l.myTargetResource.myPid = :target_pid AND (l.myTargetResourceVersion IS NULL)";
+		TypedQuery<ResourceLink> query = myEntityManager.createQuery(queryStr, ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(maxResults);
+
 		return query.getResultList();
 	}
 }

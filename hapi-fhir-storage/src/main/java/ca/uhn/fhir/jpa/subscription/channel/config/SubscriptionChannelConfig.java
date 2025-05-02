@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.config;
 
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelNamer;
+import ca.uhn.fhir.broker.impl.LinkedBlockingBrokerClient;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,16 +33,33 @@ import org.springframework.context.annotation.Configuration;
 public class SubscriptionChannelConfig {
 
 	/**
+	 * We are autowiring this because we need to override retry policy
+	 * in some tests
+	 */
+	@Autowired
+	private RetryPolicyProvider myRetryPolicyProvider;
+
+	/**
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
-		return new LinkedBlockingChannelFactory(theChannelNamer);
+	public LinkedBlockingChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
+		return new LinkedBlockingChannelFactory(theChannelNamer, myRetryPolicyProvider);
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelFactory theQueueChannelFactory) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory);
+	public IBrokerClient brokerClient(IChannelNamer theChannelNamer) {
+		return new LinkedBlockingBrokerClient(theChannelNamer);
+	}
+
+	@Bean
+	public RetryPolicyProvider retryPolicyProvider() {
+		return new RetryPolicyProvider();
+	}
+
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory(IBrokerClient theBrokerClient) {
+		return new SubscriptionChannelFactory(theBrokerClient);
 	}
 
 	/**

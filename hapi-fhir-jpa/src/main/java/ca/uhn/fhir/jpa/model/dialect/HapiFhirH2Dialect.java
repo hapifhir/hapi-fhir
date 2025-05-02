@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -26,7 +27,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
  * Dialect for H2 database.
  * Minimum version: 2.2.220
  */
-public class HapiFhirH2Dialect extends H2Dialect {
+public class HapiFhirH2Dialect extends H2Dialect implements IHapiFhirDialect {
 
 	public HapiFhirH2Dialect() {
 		super();
@@ -57,9 +58,36 @@ public class HapiFhirH2Dialect extends H2Dialect {
 	 *  RES_VERSION varchar(7),
 	 * </pre>
 	 * </p>
+	 * <p>
+	 * Also note, as of Hibernate 6.6, Enum types are also used on some database platforms,
+	 * creating a definition like:
+	 * <code>STAT enum ('CANCELLED','COMPLETED','ERRORED','FAILED','FINALIZE','IN_PROGRESS','QUEUED') not null</code>.
+	 * We also disable these by overriding <code>getEnumTypeDeclaration</code>.
+	 * </p>
 	 */
 	@Override
 	public boolean supportsColumnCheck() {
 		return false;
+	}
+
+	@Override
+	public DriverTypeEnum getDriverType() {
+		return DriverTypeEnum.H2_EMBEDDED;
+	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public String getEnumTypeDeclaration(Class<? extends Enum<?>> enumType) {
+		return null;
+	}
+
+	/**
+	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
+	 */
+	@Override
+	public String getEnumTypeDeclaration(String name, String[] values) {
+		return null;
 	}
 }

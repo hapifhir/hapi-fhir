@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -123,4 +125,25 @@ public class AddColumnTest extends BaseTest {
 
 	}
 
+	@Nested
+	public class SqlFeatures{
+
+		@Test
+		public void testAddColumn_onOracleDb_willIncludeColumnSemantic() {
+			// given
+			AddColumnTask task = new AddColumnTask("1", "1");
+			task.setTableName("SOMETABLE");
+			task.setColumnName("newcol");
+			task.setColumnType(ColumnTypeEnum.STRING);
+			task.setColumnLength(200);
+			task.setNullable(true);
+			task.setDriverType(DriverTypeEnum.ORACLE_12C);
+
+			// when
+			String sqlStringToExecute = task.generateSql();
+
+			// then
+			assertThat(sqlStringToExecute).isEqualTo("alter table SOMETABLE add NEWCOL varchar2(200 char)");
+		}
+	}
 }

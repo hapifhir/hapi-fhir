@@ -1,13 +1,10 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -17,11 +14,11 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
+import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -29,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +44,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,11 +53,17 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+/**
+ * Tests the legacy bulk import job, which may well no longer be needed
+ */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuilder {
 
@@ -76,7 +79,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	@Autowired
-	private IChannelFactory myChannelFactory;
+	private LinkedBlockingChannelFactory myChannelFactory;
 
 	private LinkedBlockingChannel myWorkChannel;
 
@@ -84,7 +87,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, new ChannelConsumerSettings());
 	}
 
 	@AfterEach
@@ -166,6 +169,8 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome.isActivated);
+		// validate that job changed status from READY to RUNNING
+		assertEquals(BulkImportJobStatusEnum.RUNNING, mySvc.getJobStatus(jobId).getStatus());
 
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId, 60);
 		assertNotNull(instance);
@@ -196,6 +201,8 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 			assertTrue(activateJobOutcome.isActivated);
+			// validate that job changed status from READY to RUNNING
+			assertEquals(BulkImportJobStatusEnum.RUNNING, mySvc.getJobStatus(jobId).getStatus());
 
 			JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
 			assertNotNull(instance);

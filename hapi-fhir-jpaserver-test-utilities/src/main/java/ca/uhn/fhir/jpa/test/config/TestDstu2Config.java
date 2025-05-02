@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,19 +69,10 @@ public class TestDstu2Config {
 	private static int ourMaxThreads;
 
 	static {
-		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation
-		 *
-		 * A minimum of 2 is required for most transactions.
-		 */
-		ourMaxThreads = (int) (Math.random() * 6.0) + 2;
-
+		ourMaxThreads = 6;
 		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 			ourMaxThreads = 1;
 		}
-
 	}
 
 	@Autowired

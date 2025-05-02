@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.mdm.svc;
 
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
@@ -35,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageChannel;
 
 import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 
@@ -45,11 +45,11 @@ import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private MessageChannel myMdmChannelProducer;
+	private IChannelProducer<ResourceModifiedMessage> myMdmChannelProducer;
 
 	private final FhirContext myFhirContext;
 
-	private final IChannelFactory myChannelFactory;
+	private final IBrokerClient myBrokerClient;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -70,25 +70,30 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 					new HookParams().add(ResourceModifiedJsonMessage.class, resourceModifiedJsonMessage);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT_PRE_MESSAGE_DELIVERY, params);
 		}
-		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
+		boolean success =
+				getMdmChannelProducer().send(resourceModifiedJsonMessage).isSuccessful();
 		if (!success) {
 			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
 		}
 	}
 
 	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
+	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IBrokerClient theBrokerClient) {
 		myFhirContext = theFhirContext;
-		myChannelFactory = theIChannelFactory;
+		myBrokerClient = theBrokerClient;
+	}
+
+	protected ChannelProducerSettings getChannelProducerSettings() {
+		return new ChannelProducerSettings();
 	}
 
 	private void init() {
-		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(
+		ChannelProducerSettings channelSettings = getChannelProducerSettings();
+		myMdmChannelProducer = myBrokerClient.getOrCreateProducer(
 				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
-	private MessageChannel getMdmChannelProducer() {
+	private IChannelProducer<ResourceModifiedMessage> getMdmChannelProducer() {
 		if (myMdmChannelProducer == null) {
 			init();
 		}

@@ -18,6 +18,7 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -159,7 +160,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 		logAllTokenIndexes();
 
 
@@ -196,7 +197,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 		logAllTokenIndexes();
 
 		runInTransaction(() -> {
@@ -224,7 +225,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
 
 		reindexTestHelper.createAlleleSearchParameter();
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation", null).getSearchParamNames());
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);

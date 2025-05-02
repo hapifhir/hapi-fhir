@@ -2,7 +2,7 @@
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,27 @@ public class BulkExportCreateReportStep
 
 	@Nonnull
 	@Override
+	public ChunkOutcome consume(
+			ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
+		BulkExportBinaryFileId fileId = theChunkDetails.getData();
+		if (myResourceToBinaryIds == null) {
+			myResourceToBinaryIds = new HashMap<>();
+		}
+
+		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
+
+		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
+
+		return ChunkOutcome.SUCCESS();
+	}
+
+	@Override
+	public IReductionStepWorker<BulkExportJobParameters, BulkExportBinaryFileId, BulkExportJobResults> newInstance() {
+		return new BulkExportCreateReportStep();
+	}
+
+	@Nonnull
+	@Override
 	public RunOutcome run(
 			@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
 			@Nonnull IJobDataSink<BulkExportJobResults> theDataSink)
@@ -64,8 +85,6 @@ public class BulkExportCreateReportStep
 					theStepExecutionDetails.getInstance().getInstanceId());
 
 			results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
-
-			myResourceToBinaryIds = null;
 		} else {
 			String msg = "Export complete, but no data to generate report for job instance: "
 					+ theStepExecutionDetails.getInstance().getInstanceId();
@@ -77,22 +96,6 @@ public class BulkExportCreateReportStep
 		// accept saves the report
 		theDataSink.accept(results);
 		return RunOutcome.SUCCESS;
-	}
-
-	@Nonnull
-	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theChunkDetails) {
-		BulkExportBinaryFileId fileId = theChunkDetails.getData();
-		if (myResourceToBinaryIds == null) {
-			myResourceToBinaryIds = new HashMap<>();
-		}
-
-		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
-
-		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
-
-		return ChunkOutcome.SUCCESS();
 	}
 
 	private static String getOriginatingRequestUrl(

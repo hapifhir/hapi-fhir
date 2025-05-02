@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -35,76 +33,57 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.sl.cache.Cache;
-import ca.uhn.fhir.sl.cache.CacheFactory;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
+import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 
 /**
  * This class is a {@link IValidationSupport Validation support} module that loads
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
  */
-@Transactional(propagation = Propagation.REQUIRED)
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
-	private final IBaseResource myNoMatch;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private ITermReadSvc myTermReadSvc;
-
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
 	private Class<? extends IBaseResource> myValueSetType;
-
-	// TODO: JA2 We shouldn't need to cache here, but we probably still should since the
-	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
-	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
-	// at which point we could do away with this cache
-	// TODO:  LD: This cache seems to supersede the cache in CachingValidationSupport, as that cache is set to
-	// 10 minutes, but this 1 minute cache now determines the expiry.
-	// This new behaviour was introduced between the 7.0.0 release and the current master (7.2.0)
-	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
 
 	/**
 	 * Constructor
 	 */
 	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext) {
 		super();
-		Validate.notNull(theFhirContext);
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		myFhirContext = theFhirContext;
-
-		myNoMatch = myFhirContext.getResourceDefinition("Basic").newInstance();
 	}
 
 	@Override
@@ -115,55 +94,49 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
-			Optional<IBaseResource> currentCSOpt = getCodeSystemCurrentVersion(new UriType(theSystem));
-			if (!currentCSOpt.isPresent()) {
-				ourLog.info("Couldn't find current version of CodeSystem: " + theSystem);
-			}
-			return currentCSOpt.orElse(null);
+			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
+			return findResourceByIdWithNoException(id, myCodeSystemType);
 		}
 
 		return fetchResource(myCodeSystemType, theSystem);
 	}
 
-	/**
-	 * Obtains the current version of a CodeSystem using the fact that the current
-	 * version is always pointed by the ForcedId for the no-versioned CS
-	 */
-	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
-		if (!theUrl.getValueAsString().contains(LOINC_LOW)) {
-			return Optional.empty();
-		}
-
-		return myTermReadSvc.readCodeSystemByForcedId(LOINC_LOW);
-	}
-
 	@Override
 	public IBaseResource fetchValueSet(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
-			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
-			return currentVSOpt.orElse(null);
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theSystem);
+			if (vsIdOpt.isEmpty()) {
+				return null;
+			}
+			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
+			return findResourceByIdWithNoException(id, myValueSetType);
 		}
 
 		return fetchResource(myValueSetType, theSystem);
 	}
 
 	/**
-	 * Obtains the current version of a ValueSet using the fact that the current
-	 * version is always pointed by the ForcedId for the no-versioned VS
+	 * Performs a lookup by ID, with no exception thrown (since that can mark the active
+	 * transaction as rollback).
 	 */
-	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
-		Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl.getValueAsString());
-		if (!vsIdOpt.isPresent()) {
-			return Optional.empty();
+	@Nullable
+	private IBaseResource findResourceByIdWithNoException(IIdType id, Class<? extends IBaseResource> type) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.setLoadSynchronousUpTo(1)
+				.add(IAnyResource.SP_RES_ID, new TokenParam(id.getValue()));
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(type);
+		IBundleProvider outcome = dao.search(map, new SystemRequestDetails());
+		List<IBaseResource> resources = outcome.getResources(0, 1);
+		if (resources.isEmpty()) {
+			return null;
+		} else {
+			return resources.get(0);
 		}
-
-		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
-		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", vsIdOpt.get()));
-		return Optional.ofNullable(valueSet);
 	}
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
+		assert myStructureDefinitionType != null;
 		return fetchResource(myStructureDefinitionType, theUrl);
 	}
 
@@ -187,17 +160,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			return null;
 		}
 
-		String key = theClass + " " + theUri;
-		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
-
-		if (fetched == myNoMatch) {
-			ourLog.debug(
-					"Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
-			myLoadCache.invalidate(key);
-			return null;
-		}
-
-		return (T) fetched;
+		return (T) doFetchResource(theClass, theUri);
 	}
 
 	private <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
@@ -208,17 +171,14 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				() -> doFetchResource(StructureDefinition.class, theUri)
 			};
 			return Arrays.stream(fetchers)
-					.map(t -> t.get())
-					.filter(t -> t != myNoMatch)
+					.map(Supplier::get)
+					.filter(Objects::nonNull)
 					.findFirst()
-					.orElse(myNoMatch);
+					.orElse(null);
 		}
 
 		IdType id = new IdType(theUri);
-		boolean localReference = false;
-		if (id.hasBaseUrl() == false && id.hasIdPart() == true) {
-			localReference = true;
-		}
+		boolean localReference = id.hasBaseUrl() == false && id.hasIdPart() == true;
 
 		String resourceName = myFhirContext.getResourceType(theClass);
 		IBundleProvider search;
@@ -229,7 +189,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.setLoadSynchronousUpTo(1);
 					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
 					search = myDaoRegistry.getResourceDao(resourceName).search(params);
-					if (search.size() == 0) {
+					if (search.isEmpty()) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
@@ -245,7 +205,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					} else {
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
 					}
-					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 					search = myDaoRegistry.getResourceDao(resourceName).search(params);
 
 					if (search.isEmpty()
@@ -254,11 +214,13 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						params.setLoadSynchronousUpTo(1);
 						if (versionSeparator != -1) {
 							params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-							params.add("system", new UriParam(theUri.substring(0, versionSeparator)));
+							params.add(
+									ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM,
+									new UriParam(theUri.substring(0, versionSeparator)));
 						} else {
-							params.add("system", new UriParam(theUri));
+							params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(theUri));
 						}
-						params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+						params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 						search = myDaoRegistry.getResourceDao(resourceName).search(params);
 					}
 				}
@@ -268,12 +230,18 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
 					if (myFhirContext.getElementDefinition(typeName) != null) {
-						return myNoMatch;
+						return null;
 					}
 				}
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
-				params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+				int versionSeparator = theUri.lastIndexOf('|');
+				if (versionSeparator != -1) {
+					params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+					params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+				} else {
+					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+				}
 				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
 				break;
 			}
@@ -298,7 +266,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				} else {
 					params.add(CodeSystem.SP_URL, new UriParam(theUri));
 				}
-				params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
+				params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}
@@ -321,7 +289,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 		Integer size = search.size();
 		if (size == null || size == 0) {
-			return myNoMatch;
+			return null;
 		}
 
 		if (size > 1) {
@@ -347,9 +315,5 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		} else {
 			myCodeSystemType = myFhirContext.getResourceDefinition("ValueSet").getImplementingClass();
 		}
-	}
-
-	public void clearCaches() {
-		myLoadCache.invalidateAll();
 	}
 }

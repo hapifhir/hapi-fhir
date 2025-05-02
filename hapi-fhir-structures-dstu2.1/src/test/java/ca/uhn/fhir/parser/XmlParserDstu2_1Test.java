@@ -13,6 +13,7 @@ import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComp
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -361,75 +362,6 @@ public class XmlParserDstu2_1Test {
 	}
 
 	@Test
-	public void testEncodeAndParseContained() {
-		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
-
-		// Create an organization, note that the organization does not have an ID
-		Organization org = new Organization();
-		org.getNameElement().setValue("Contained Test Organization");
-
-		// Create a patient
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-
-		// Put the organization as a reference in the patient resource
-		patient.getManagingOrganization().setResource(org);
-
-		String encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).contains("<contained>");
-		assertThat(encoded).contains("<reference value=\"#1\"/>");
-
-		// Create a bundle with just the patient resource
-		Bundle b = new Bundle();
-		b.addEntry().setResource(patient);
-
-		// Encode the bundle
-		encoded = xmlParser.encodeResourceToString(b);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
-		assertThat(encoded).contains("<reference value=\"#1\"/>");
-		assertThat(encoded).containsSubsequence(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<entry>.*</entry>.*<entry>");
-
-		// Re-parse the bundle
-		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference());
-
-		assertNotNull(patient.getManagingOrganization().getResource());
-		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getIdElement().getValue());
-		assertEquals("Contained Test Organization", org.getName());
-
-		// And re-encode a second time
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-		assertThat(encoded).contains("<reference value=\"#1\"/>");
-
-		// And re-encode once more, with the references cleared
-		patient.getContained().clear();
-		patient.getManagingOrganization().setReference(null);
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-		assertThat(encoded).contains("<reference value=\"#1\"/>");
-
-		// And re-encode once more, with the references cleared and a manually set local ID
-		patient.getContained().clear();
-		patient.getManagingOrganization().setReference(null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
-		encoded = xmlParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded).doesNotContainPattern("(?s)<contained>.*<Org.*<contained>");
-
-	}
-
-	@Test
 	public void testEncodeAndParseContainedCustomTypes() {
 		ourCtx = FhirContext.forDstu2_1();
 		ourCtx.setDefaultTypeForProfile(CustomObservation.PROFILE, CustomObservation.class);
@@ -447,6 +379,8 @@ public class XmlParserDstu2_1Test {
 
 		String output = parser.encodeResourceToString(dr);
 		ourLog.info(output);
+		String observationUuid = UuidUtils.findFirstUUID(output);
+		assertNotNull(observationUuid);
 
 		//@formatter:off
 		assertThat(output).containsSubsequence(
@@ -456,7 +390,7 @@ public class XmlParserDstu2_1Test {
 				"</meta>",
 				"<contained>",
 					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
+						"<id value=\"" + observationUuid + "\"/>",
 						"<meta>",
 							"<profile value=\"http://custom_Observation\"/>",
 						"</meta>",
@@ -465,7 +399,7 @@ public class XmlParserDstu2_1Test {
 				"</contained>",
 				"<status value=\"final\"/>",
 				"<result>",
-					"<reference value=\"#1\"/>",
+					"<reference value=\"#" + observationUuid + "\"/>",
 				"</result>",
 			"</DiagnosticReport>");
 		//@formatter:on
@@ -477,7 +411,7 @@ public class XmlParserDstu2_1Test {
 		dr = (CustomDiagnosticReport) parser.parseResource(output);
 		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
 
-		assertEquals("#1", dr.getResult().get(0).getReference());
+		assertEquals("#" + observationUuid, dr.getResult().get(0).getReference());
 		obs = (CustomObservation) dr.getResult().get(0).getResource();
 		assertEquals(ObservationStatus.FINAL, obs.getStatus());
 
@@ -500,19 +434,21 @@ public class XmlParserDstu2_1Test {
 
 		String output = parser.encodeResourceToString(dr);
 		ourLog.info(output);
+		String observationUuid = UuidUtils.findFirstUUID(output);
+		assertNotNull(observationUuid);
 
 		//@formatter:off
 		assertThat(output).containsSubsequence(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 				"<contained>",
 					"<Observation xmlns=\"http://hl7.org/fhir\">",
-						"<id value=\"1\"/>",
+						"<id value=\"" + observationUuid + "\"/>",
 						"<status value=\"final\"/>",
 					"</Observation>",
 				"</contained>",
 				"<status value=\"final\"/>",
 				"<result>",
-					"<reference value=\"#1\"/>",
+					"<reference value=\"#" + observationUuid + "\"/>",
 				"</result>",
 			"</DiagnosticReport>");
 		//@formatter:on
@@ -524,7 +460,7 @@ public class XmlParserDstu2_1Test {
 		dr = (DiagnosticReport) parser.parseResource(output);
 		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
 
-		assertEquals("#1", dr.getResult().get(0).getReference());
+		assertEquals("#" + observationUuid, dr.getResult().get(0).getReference());
 		obs = (Observation) dr.getResult().get(0).getResource();
 		assertEquals(ObservationStatus.FINAL, obs.getStatus());
 
@@ -832,18 +768,20 @@ public class XmlParserDstu2_1Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">", 
 				"<contained>", 
 					"<Condition xmlns=\"http://hl7.org/fhir\">", 
-					"<id value=\"1\"/>",
+					"<id value=\"" + conditionUuid + "\"/>",
 					"</Condition>",
 				"</contained>",
 				"<extension url=\"test\">",
 					"<valueReference>",
-					"<reference value=\"#1\"/>", 
+					"<reference value=\"#" + conditionUuid + "\"/>",
 					"</valueReference>",
 				"</extension>",
 				"<birthDate value=\"2016-04-05\"/>", 
@@ -911,10 +849,12 @@ public class XmlParserDstu2_1Test {
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
+		String medicationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(medicationUuid);
 		
 		//@formatter:on
-		assertThat(encoded).containsSubsequence("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
-						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
+		assertThat(encoded).containsSubsequence("<MedicationOrder xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"" + medicationUuid + "\"/>", "<code>", "<coding>",
+						"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#" + medicationUuid + "\"/>",
 						"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationOrder>");
 		//@formatter:off
 	}
@@ -1185,13 +1125,15 @@ public class XmlParserDstu2_1Test {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
+		String conditionUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(conditionUuid);
 
 		//@formatter:off
 		assertThat(encoded).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">", 
 				"<contained>", 
 					"<Condition xmlns=\"http://hl7.org/fhir\">", 
-						"<id value=\"1\"/>", 
+						"<id value=\"" + conditionUuid + "\"/>",
 						"<bodySite>", 
 							"<text value=\"BODY SITE\"/>", 
 						"</bodySite>", 
@@ -1199,7 +1141,7 @@ public class XmlParserDstu2_1Test {
 				"</contained>", 
 				"<extension url=\"testCondition\">",
 					"<valueReference>", 
-						"<reference value=\"#1\"/>", 
+						"<reference value=\"#" + conditionUuid + "\"/>",
 					"</valueReference>", 
 				"</extension>", 
 				"<birthDate value=\"2016-04-14\"/>", 

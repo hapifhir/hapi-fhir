@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - International Patient Summary (IPS)
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,7 +234,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 						.getResourceReference()
 						.getReferenceElement()
 						.getValue();
-				if (isNotBlank(existingReference)) {
+				if (isNotBlank(existingReference) && !existingReference.startsWith("#")) {
 					existingReference = new IdType(existingReference)
 							.toUnqualifiedVersionless()
 							.getValue();
@@ -480,7 +480,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 		compositionBuilder.setStatus(Composition.CompositionStatus.FINAL.toCode());
 		compositionBuilder.setSubject(thePatient.getIdElement().toUnqualifiedVersionless());
-		compositionBuilder.addTypeCoding("http://loinc.org", "60591-5", "Patient Summary Document");
+		compositionBuilder.addTypeCoding("http://loinc.org", "60591-5", "Patient summary Document");
 		compositionBuilder.setDate(InstantType.now());
 		compositionBuilder.setTitle(theStrategy.createTitle(context));
 		compositionBuilder.setConfidentiality(theStrategy.createConfidentiality(context));

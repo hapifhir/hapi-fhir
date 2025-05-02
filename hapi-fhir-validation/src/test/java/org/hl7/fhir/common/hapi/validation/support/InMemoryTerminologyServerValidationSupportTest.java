@@ -16,10 +16,15 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -190,7 +195,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, theCodeSystem, codeToValidate, null, vs.getUrl());
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'");
 	}
 
 	@Test
@@ -240,7 +245,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -506,6 +511,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		code = "123";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("for in-memory expansion of ValueSet");
+		assertThat(outcome.getSourceDetails()).contains("In-memory expansion containing 0 codes");
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
 		assertNull(expansion.getError());
@@ -570,42 +577,42 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
-    @ParameterizedTest
-	 @ValueSource(strings = {"http://terminology.hl7.org/CodeSystem/v2-0360|2.7","http://terminology.hl7.org/CodeSystem/v2-0360"})
-    void testValidateCodeInValueSet_VsExpandedWithIncludes(String theCodeSystemUri) {
-		 ConceptValidationOptions options = new ConceptValidationOptions();
-		 ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-		 String codeMD = "MD";
+	@ParameterizedTest
+	@ValueSource(strings = {"http://terminology.hl7.org/CodeSystem/v2-0360|2.7", "http://terminology.hl7.org/CodeSystem/v2-0360"})
+	void testValidateCodeInValueSet_VsExpandedWithIncludes(String theCodeSystemUri) {
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		String codeMD = "MD";
 
-		 CodeSystem cs = new CodeSystem();
-		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		 cs.setUrl(theCodeSystemUri);
-		 cs.addConcept()
-			 .setCode(codeMD)
-			 .setDisplay("Doctor of Medicine");
-		 myPrePopulated.addCodeSystem(cs);
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl(theCodeSystemUri);
+		cs.addConcept()
+			.setCode(codeMD)
+			.setDisplay("Doctor of Medicine");
+		myPrePopulated.addCodeSystem(cs);
 
-		 ValueSet theValueSet = new ValueSet();
-		 theValueSet.setUrl("http://someValueSetURL");
-		 theValueSet.setVersion("0360");
-		 theValueSet.getCompose().addInclude().setSystem(theCodeSystemUri);
+		ValueSet theValueSet = new ValueSet();
+		theValueSet.setUrl("http://someValueSetURL");
+		theValueSet.setVersion("0360");
+		theValueSet.getCompose().addInclude().setSystem(theCodeSystemUri);
 
-		 String theCodeToValidateCodeSystemUrl = theCodeSystemUri;
-		 String theCodeToValidate = codeMD;
+		String theCodeToValidateCodeSystemUrl = theCodeSystemUri;
+		String theCodeToValidate = codeMD;
 
-		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(
-			 valCtx,
-			 options,
-			 theCodeToValidateCodeSystemUrl,
-			 theCodeToValidate,
-			 null,
-			 theValueSet);
+		IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(
+			valCtx,
+			options,
+			theCodeToValidateCodeSystemUrl,
+			theCodeToValidate,
+			null,
+			theValueSet);
 
-			assertTrue(codeValidationResult.isOk());
-	 }
+		assertTrue(codeValidationResult.isOk());
+	}
 
-    private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
+	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
 		private final Map<String, IBaseResource> myDstu2ValueSets;
 
 		PrePopulatedValidationSupportDstu2(FhirContext theFhirContext) {
@@ -627,7 +634,85 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		public IBaseResource fetchCodeSystem(String theSystem) {
 			return myDstu2ValueSets.get(theSystem);
 		}
-
 	}
 
+	/**
+	 * Parameterized scenarios: operator, filterValue, expected codes in any order.
+	 */
+	static Stream<Arguments> filterScenarios() {
+		String url = "http://example.org/CS/descendant-filter-test";
+
+		// The code system under test is built once below,
+		// but we pass only the operator & filterValue + expected output here:
+		return Stream.of(
+			// descendentOf: only children/grandchildren of PARENT1
+			org.junit.jupiter.params.provider.Arguments.of(
+				ValueSet.FilterOperator.DESCENDENTOF, "PARENT1",
+				List.of("CHILD1","CHILD2","CHILD3")
+			),
+
+			// is-a: include parent AND descendants
+			org.junit.jupiter.params.provider.Arguments.of(
+				ValueSet.FilterOperator.ISA, "PARENT1",
+				List.of("PARENT1","CHILD1","CHILD2","CHILD3")
+			),
+
+			// is-not-a: exclude parent+descendants, include the other branch
+			org.junit.jupiter.params.provider.Arguments.of(
+				ValueSet.FilterOperator.ISNOTA, "PARENT1",
+				List.of("PARENT2","CHILD4","CHILD5")
+			),
+
+			// generalizes: pick a leaf and include its ancestor chain
+			org.junit.jupiter.params.provider.Arguments.of(
+				ValueSet.FilterOperator.GENERALIZES, "CHILD3",
+				List.of("PARENT1","CHILD2","CHILD3")
+			)
+		);
+	}
+
+	@ParameterizedTest(name = "[{0}] filterValue={1} ⇒ codes={2}")
+	@MethodSource("filterScenarios")
+	public void testExpandValueSet_allStructuralFilters(
+		ValueSet.FilterOperator op,
+		String filterValue,
+		List<String> expectedCodes
+	) {
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		String codeSystemUrl = "http://example.org/CS/structural-filter-test";
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(codeSystemUrl);
+		CodeSystem.ConceptDefinitionComponent parent1 = cs.addConcept().setCode("PARENT1");
+		parent1.addConcept().setCode("CHILD1");
+		CodeSystem.ConceptDefinitionComponent child2 = parent1.addConcept().setCode("CHILD2");
+		child2.addConcept().setCode("CHILD3");
+
+		CodeSystem.ConceptDefinitionComponent parent2 = cs.addConcept().setCode("PARENT2");
+		parent2.addConcept().setCode("CHILD4");
+		parent2.addConcept().setCode("CHILD5");
+
+		myPrePopulated.addCodeSystem(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(cs.getUrl())
+			.addFilter()
+			.setProperty("concept")
+			.setOp(op)
+			.setValue(filterValue);
+
+		IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+		ValueSet expanded = (ValueSet) outcome.getValueSet();
+		List<String> actualCodes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toList());
+
+		// 4) Assert exactly the expected set, order independent
+		assertThat(actualCodes)
+			.as("%s on '%s' should yield %s", op, filterValue, expectedCodes)
+			.containsExactlyInAnyOrderElementsOf(expectedCodes);
+	}
 }

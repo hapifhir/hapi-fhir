@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import java.util.Objects;
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
  * that doesn't require knowledge of subscriptions.
  */
+// TODO KHS rename classes like this to ResourceModifiedPayload so they're not confused with the actual message wrapper
+// class
 public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	/**

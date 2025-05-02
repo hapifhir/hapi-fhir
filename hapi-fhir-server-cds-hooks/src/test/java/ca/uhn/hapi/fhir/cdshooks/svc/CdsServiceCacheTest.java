@@ -2,7 +2,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -16,17 +16,20 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class CdsServiceCacheTest {
-	private static final String TEST_KEY = "testKey";
-	private static final String MODULE_ID = "moduleId";
+	private static final String SERVICE_ID1 = "service id 1";
+	private static final String SERVICE_ID2 = "service id 2";
+	private static final String SERVICE_ID3 = "service id 3";
+	private static final String HOOK_SERVICE_ID1 = "hook service id 1";
+	private static final String HOOK_SERVICE_ID2 = "hook service id 2";
+	private static final String HOOK_SERVICE_ID3 = "hook service id 3";
+	private static final String SERVICE_GROUP_ID = "service group id";
 	@RegisterExtension
 	final LogbackTestExtension myLogCapture = new LogbackTestExtension((Logger) CdsServiceCache.ourLog, Level.ERROR);
 	@InjectMocks
@@ -36,78 +39,122 @@ class CdsServiceCacheTest {
 	void registerDynamicServiceShouldRegisterServiceWhenServiceNotRegistered() {
 		// setup
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = withFunction();
-		final CdsServiceJson cdsServiceJson = withCdsServiceJson();
+		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
 		// execute
-		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
 		// validate
-		assertThat(myFixture.myServiceMap).hasSize(1);
-		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
-		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
+		assertThat(myFixture.myServiceMap).hasSize(1).containsKey(SERVICE_ID1);
+		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(SERVICE_ID1);
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1).contains(cdsServiceJson);
+		assertThat(myFixture.myGroups).hasSize(1).containsKey(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).hasSize(1).contains(SERVICE_ID1);
 	}
 
 	@Test
 	void registerDynamicServiceShouldNotRegisterServiceWhenServiceAlreadyRegistered() {
 		// setup
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = withFunction();
-		final CdsServiceJson cdsServiceJson = withCdsServiceJson();
+		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction2 = withFunction();
-		final CdsServiceJson cdsServiceJson2 = withCdsServiceJson();
-		final String expectedLogMessage = "CDS service with serviceId: testKey for moduleId: moduleId, already exists. It will not be overwritten!";
+		final CdsServiceJson cdsServiceJson2 = withCdsServiceJson(HOOK_SERVICE_ID2);
+		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 +" for serviceGroupId: " + SERVICE_GROUP_ID + ", already exists. It will not be overwritten!";
 		// execute
-		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
-		myFixture.registerDynamicService(TEST_KEY, serviceFunction2, cdsServiceJson2, false, MODULE_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction2, cdsServiceJson2, false, SERVICE_GROUP_ID);
 		// validate
-		assertThat(myFixture.myServiceMap).hasSize(1);
-		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
-		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
-		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
+		assertThat(myFixture.myServiceMap).hasSize(1).containsKey(SERVICE_ID1);
+		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(SERVICE_ID1);
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1).contains(cdsServiceJson);
+		assertThat(myFixture.myGroups).hasSize(1).containsKey(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).hasSize(1).contains(SERVICE_ID1);
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
-
 	}
 
 	@Test
 	void unregisterServiceMethodShouldReturnsServiceWhenServiceRegistered() {
 		// setup
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = withFunction();
-		final CdsServiceJson cdsServiceJson = withCdsServiceJson();
-		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
+		final CdsServiceJson cdsServiceJson = withCdsServiceJson(HOOK_SERVICE_ID1);
+		myFixture.registerDynamicService(SERVICE_ID1, serviceFunction, cdsServiceJson, true, SERVICE_GROUP_ID);
 		// execute
-		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
+		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(SERVICE_ID1, SERVICE_GROUP_ID);
 		// validate
-		assertTrue(myFixture.myServiceMap.isEmpty());
-		assertEquals(serviceFunction, cdsMethod.getFunction());
-		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
-		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
+		assertThat(myFixture.myServiceMap).isEmpty();
+		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
+		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
 		assertThat(myFixture.myCdsServiceJson.getServices()).isEmpty();
 	}
 
 	@Test
 	void unregisterServiceMethodShouldReturnNullWhenServiceNotRegistered() {
 		// setup
-		final String expectedLogMessage = "CDS service with serviceId: testKey for moduleId: moduleId, is not registered. Nothing to remove!";
+		final String expectedLogMessage = "CDS service with serviceId: " + SERVICE_ID1 + " for serviceGroupId: " + SERVICE_GROUP_ID + ", is not registered. Nothing to remove!";
 		// execute
-		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
+		final ICdsMethod actual = myFixture.unregisterServiceMethod(SERVICE_ID1, SERVICE_GROUP_ID);
 		// validate
-		assertNull(actual);
+		assertThat(actual).isNull();
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasErrorMessage(expectedLogMessage);
 	}
 
+	@Test
+	void unregisterServices() {
+		// setup
+		final List<Function<CdsServiceRequestJson, CdsServiceResponseJson>> serviceFunctions = withFunctions();
+		final List<CdsServiceJson> cdsServiceJsons = withCdsServiceJsons();
+		final List<String> keys = List.of(SERVICE_ID1, SERVICE_ID2, SERVICE_ID3);
+		for (int i = 0; i < keys.size() ; i++) {
+			myFixture.registerDynamicService(keys.get(i), serviceFunctions.get(i), cdsServiceJsons.get(i), true, SERVICE_GROUP_ID);
+		}
+		assertThat(myFixture.myGroups.keySet()).hasSize(1).containsExactly(SERVICE_GROUP_ID);
+		assertThat(myFixture.myGroups.get(SERVICE_GROUP_ID)).containsExactlyInAnyOrderElementsOf(keys);
+		// execute
+		myFixture.unregisterServices(SERVICE_GROUP_ID);
+		// validate
+		assertThat(myFixture.myServiceMap).isEmpty();
+		assertThat(myFixture.myGroups).isEmpty();
+	}
+
+	@Test
+	void unregisterServicesWithInvalidServiceGroupID() {
+		// execute
+		myFixture.unregisterServices(SERVICE_GROUP_ID);
+		// validate
+		LogbackTestExtensionAssert.assertThat(myLogCapture)
+			.hasErrorMessage("CDS services for serviceGroupId: " + SERVICE_GROUP_ID + ", are not registered. Nothing to remove!");
+	}
+
 	@Nonnull
-	private static CdsServiceJson withCdsServiceJson() {
+	private List<Function<CdsServiceRequestJson, CdsServiceResponseJson>> withFunctions() {
+		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction1 = withFunction();
+		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction2 = withFunction();
+		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction3 = withFunction();
+		return List.of(serviceFunction1, serviceFunction2, serviceFunction3);
+	}
+
+	@Nonnull
+	private List<CdsServiceJson> withCdsServiceJsons() {
+		final CdsServiceJson cdsServiceJson1 = withCdsServiceJson(HOOK_SERVICE_ID1);
+		final CdsServiceJson cdsServiceJson2 = withCdsServiceJson(HOOK_SERVICE_ID2);
+		final CdsServiceJson cdsServiceJson3 = withCdsServiceJson(HOOK_SERVICE_ID3);
+		return List.of(cdsServiceJson1, cdsServiceJson2, cdsServiceJson3);
+	}
+
+	@Nonnull
+	private CdsServiceJson withCdsServiceJson(@Nonnull String theHookServiceId) {
 		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
-		cdsServiceJson.setId(TEST_KEY);
+		cdsServiceJson.setId(theHookServiceId);
 		return cdsServiceJson;
 	}
 
 	@Nonnull
-	private static Function<CdsServiceRequestJson, CdsServiceResponseJson> withFunction() {
+	private Function<CdsServiceRequestJson, CdsServiceResponseJson> withFunction() {
 		return (CdsServiceRequestJson theCdsServiceRequestJson) -> {
 			final CdsServiceResponseJson cdsServiceResponseJson = new CdsServiceResponseJson();
 			final CdsServiceResponseCardJson card = new CdsServiceResponseCardJson();

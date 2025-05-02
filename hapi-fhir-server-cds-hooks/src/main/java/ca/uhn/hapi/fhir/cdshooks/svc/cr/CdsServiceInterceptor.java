@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.List;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.CDS_CR_MODULE_ID;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsServiceInterceptor implements IResourceChangeListener {
 	static final Logger ourLog = LoggerFactory.getLogger(CdsServiceInterceptor.class);
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -392,7 +392,7 @@ public class ExtendedHSearchClauseBuilder {
 
 	/**
 	 * Create date clause from date params. The date lower and upper bounds are taken
-	 * into considertion when generating date query ranges
+	 * into consideration when generating date query ranges
 	 *
 	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=eq2020</code>
 	 * would generate the following search clause

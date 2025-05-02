@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.Date;
 import java.util.List;
@@ -98,7 +99,7 @@ public class VersionCanonicalizer {
 	private final FhirContext myContext;
 
 	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
-		this(theTargetVersion.newContextCached());
+		this(FhirContext.forCached(theTargetVersion));
 	}
 
 	public VersionCanonicalizer(FhirContext theTargetContext) {
@@ -301,6 +302,10 @@ public class VersionCanonicalizer {
 			baseList.clear();
 		}
 		return baseExtensionValues;
+	}
+
+	public SubscriptionTopic subscriptionTopicToCanonical(IBaseResource theResource) {
+		return SubscriptionTopicCanonicalizer.canonicalizeTopic(myContext, theResource);
 	}
 
 	private interface IStrategy {

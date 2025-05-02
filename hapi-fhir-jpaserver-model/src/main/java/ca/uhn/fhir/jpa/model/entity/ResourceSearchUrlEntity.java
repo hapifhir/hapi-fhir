@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -43,6 +42,13 @@ import java.util.Optional;
  * in this table. The URL is the PK of the table, so the database
  * ensures that two concurrent threads don't accidentally create two
  * resources with the same conditional URL.
+ * <p>
+ * Note that this entity is partitioned, but does not always respect the
+ * partition ID of the parent resource entity (it may just use a
+ * hardcoded partition ID of -1 depending on configuration). As a result
+ * we don't have a FK relationship. This table only contains short-lived
+ * rows that get cleaned up and purged periodically, so it should never
+ * grow terribly large anyhow.
  */
 @Entity
 @Table(
@@ -56,21 +62,25 @@ public class ResourceSearchUrlEntity {
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
 	public static final String PARTITION_ID = "PARTITION_ID";
 
-	public static final int RES_SEARCH_URL_LENGTH = 768;
-
 	@EmbeddedId
 	private ResourceSearchUrlEntityPK myPk;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_ID",
-			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_RES_SEARCH_URL_RESOURCE"))
-	private ResourceTable myResourceTable;
+	/*
+	 * Note: We previously had a foreign key here, but it's just not possible for this to still
+	 * work with partition IDs in the PKs since non-partitioned mode currently depends on the
+	 * partition ID being a part of the PK and it necessarily has to be stripped out if we're
+	 * stripping out others. So we'll leave this without a FK relationship, which does increase
+	 * the possibility of dangling records in this table but that's probably an ok compromise.
+	 *
+	 * Ultimately records in this table get cleaned up based on their CREATED_TIME anyhow, so
+	 * it's really not a big deal to not have a FK relationship here.
+	 */
 
-	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = false)
+	@Column(name = "RES_ID", updatable = false, nullable = false, insertable = true)
 	private Long myResourcePid;
+
+	@Column(name = "PARTITION_ID", updatable = false, nullable = false, insertable = false)
+	private Integer myPartitionIdValue;
 
 	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
 	private LocalDate myPartitionDate;
@@ -101,11 +111,8 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	public Long getResourcePid() {
-		if (myResourcePid != null) {
-			return myResourcePid;
-		}
-		return myResourceTable.getResourceId();
+	public JpaPid getResourcePid() {
+		return JpaPid.fromId(myResourcePid, myPartitionIdValue);
 	}
 
 	public ResourceSearchUrlEntity setResourcePid(Long theResourcePid) {
@@ -113,12 +120,9 @@ public class ResourceSearchUrlEntity {
 		return this;
 	}
 
-	public ResourceTable getResourceTable() {
-		return myResourceTable;
-	}
-
-	public ResourceSearchUrlEntity setResourceTable(ResourceTable myResourceTable) {
-		this.myResourceTable = myResourceTable;
+	public ResourceSearchUrlEntity setResourceTable(ResourceTable theResourceTable) {
+		this.myResourcePid = theResourceTable.getId().getId();
+		this.myPartitionIdValue = theResourceTable.getPartitionId().getPartitionId();
 		return this;
 	}
 
@@ -146,5 +150,14 @@ public class ResourceSearchUrlEntity {
 	public ResourceSearchUrlEntity setPartitionDate(LocalDate thePartitionDate) {
 		myPartitionDate = thePartitionDate;
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("searchUrl", getPk().getSearchUrl())
+				.append("partitionId", myPartitionIdValue)
+				.append("resourcePid", myResourcePid)
+				.toString();
 	}
 }

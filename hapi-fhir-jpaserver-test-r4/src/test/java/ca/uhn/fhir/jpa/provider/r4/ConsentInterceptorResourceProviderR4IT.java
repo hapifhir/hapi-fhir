@@ -137,6 +137,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
+
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
 		create50Observations();
@@ -939,8 +940,6 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
 	private static class ReadingBackResourcesConsentSvc implements  IConsentService {
@@ -960,7 +959,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String fhirType = theResource.fhirType();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
 			String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
-			dao.read(theResource.getIdElement());
+			try {
+				dao.read(theResource.getIdElement());
+			} catch (ResourceNotFoundException e) {
+				// this is expected, the resource isn't saved in the DB yet. But it shouldn't
+				// be an NPE, only a ResourceNotFoundException
+			}
 			return ConsentOutcome.PROCEED;
 		}
 

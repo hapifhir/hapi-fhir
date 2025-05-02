@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -356,7 +355,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
 
-				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
+				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(
+						componentSpRef, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 				Validate.notNull(
 						componentSp,
 						"Misconfigured SP %s - failed to load component %s",
@@ -426,7 +426,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		private boolean isNotExtractableCompositeComponent(RuntimeSearchParam.Component c) {
-			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(c.getReference());
+			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(
+					c.getReference(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 			return // Does the sub-param link work?
 			componentSearchParam == null
 					||
@@ -450,8 +451,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
 			String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
-		List<RuntimeSearchParam> runtimeComboUniqueParams =
-				mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.UNIQUE);
+		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
+				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
 			Set<ResourceIndexedComboStringUnique> comboUniqueParams =
@@ -485,8 +486,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
 			String theResourceType, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
-		List<RuntimeSearchParam> runtimeComboNonUniqueParams =
-				mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.NON_UNIQUE);
+		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
+				theResourceType,
+				ComboSearchParamType.NON_UNIQUE,
+				ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
 			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams =
@@ -576,7 +579,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
 
-					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(
+							theResourceType, key, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE
 							&& param != null
 							&& param.getParamType() == RestSearchParameterTypeEnum.STRING) {
@@ -990,8 +994,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@VisibleForTesting
 	Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		Collection<RuntimeSearchParam> retVal =
-				mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
+		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry
+				.getActiveSearchParams(def.getName(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX)
+				.values();
 		List<RuntimeSearchParam> defaultList = Collections.emptyList();
 		retVal = ObjectUtils.defaultIfNull(retVal, defaultList);
 		return retVal;
@@ -1618,8 +1623,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		Collection<RuntimeSearchParam> filteredSearchParams = theSearchParamFilter.filterSearchParams(searchParams);
 		assert filteredSearchParams.size() == preFilterSize || searchParams != filteredSearchParams;
 
-		cleanUpContainedResourceReferences(theResource, theSearchParamType, filteredSearchParams);
-
 		for (RuntimeSearchParam nextSpDef : filteredSearchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
@@ -1645,34 +1648,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				.map(RuntimeSearchParam::getPath)
 				.filter(Objects::nonNull)
 				.anyMatch(path -> path.contains("resolve"));
-	}
-
-	/**
-	 * HAPI FHIR Reference objects (e.g. {@link org.hl7.fhir.r4.model.Reference}) can hold references either by text
-	 * (e.g. "#3") or by resource (e.g. "new Reference(patientInstance)"). The FHIRPath evaluator only understands the
-	 * first way, so if there is any chance of the FHIRPath evaluator needing to descend across references, we
-	 * have to assign values to those references before indexing.
-	 * <p>
-	 * Doing this cleanup isn't hugely expensive, but it's not completely free either so we only do it
-	 * if we think there's actually a chance
-	 */
-	private void cleanUpContainedResourceReferences(
-			IBaseResource theResource,
-			RestSearchParameterTypeEnum theSearchParamType,
-			Collection<RuntimeSearchParam> searchParams) {
-		boolean havePathWithResolveExpression = myStorageSettings.isIndexOnContainedResources()
-				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
-
-		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
-			// TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt
-			// to contain it internally. Wild
-			myContext
-					.newTerser()
-					.containResources(
-							theResource,
-							FhirTerser.OptionsEnum.MODIFY_RESOURCE,
-							FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
-		}
 	}
 
 	/**

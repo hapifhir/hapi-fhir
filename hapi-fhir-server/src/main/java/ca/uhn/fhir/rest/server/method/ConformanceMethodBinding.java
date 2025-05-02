@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,11 +220,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if ("metadata".equals(theRequest.getOperation())) {
-			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+			if (theRequest.getRequestType() == RequestTypeEnum.GET
+					|| theRequest.getRequestType() == RequestTypeEnum.HEAD) {
 				return MethodMatchEnum.EXACT;
 			}
-			throw new MethodNotAllowedException(
-					Msg.code(388) + "/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			throw new MethodNotAllowedException(Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD");
 		}
 
 		return MethodMatchEnum.NONE;

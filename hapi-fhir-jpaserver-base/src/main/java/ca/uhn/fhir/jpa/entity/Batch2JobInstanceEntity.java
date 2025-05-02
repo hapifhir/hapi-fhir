@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -88,6 +90,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private StatusEnum myStatus;
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
@@ -142,6 +145,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "CLIENT_ID", length = INITIATING_CLIENT_ID_MAX_LENGTH, nullable = true)
 	private String myTriggeringClientId;
+
+	@Column(name = "USER_DATA_JSON", length = Length.LONG32, nullable = true)
+	private String myUserDataJson;
 
 	/**
 	 * Any output from the job can be held in this column
@@ -389,5 +395,13 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setFastTracking(boolean theFastTracking) {
 		myFastTracking = theFastTracking;
+	}
+
+	public String getUserDataJson() {
+		return myUserDataJson;
+	}
+
+	public void setUserDataJson(String theUserDataJson) {
+		myUserDataJson = theUserDataJson;
 	}
 }

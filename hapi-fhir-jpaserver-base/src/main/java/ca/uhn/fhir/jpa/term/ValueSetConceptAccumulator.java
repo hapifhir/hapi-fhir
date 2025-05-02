@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,8 +40,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
-	private TermValueSet myTermValueSet;
-	private final ITermValueSetDao myValueSetDao;
+	private final TermValueSet myTermValueSet;
+	private final EntityManager myEntityManager;
 	private final ITermValueSetConceptDao myValueSetConceptDao;
 	private final ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	private int myConceptsSaved;
@@ -52,11 +52,11 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 
 	public ValueSetConceptAccumulator(
 			@Nonnull TermValueSet theTermValueSet,
-			@Nonnull ITermValueSetDao theValueSetDao,
+			@Nonnull EntityManager theEntityManager,
 			@Nonnull ITermValueSetConceptDao theValueSetConceptDao,
 			@Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;
-		myValueSetDao = theValueSetDao;
+		myEntityManager = theEntityManager;
 		myValueSetConceptDao = theValueSetConceptDao;
 		myValueSetConceptDesignationDao = theValueSetConceptDesignationDao;
 		myConceptsSaved = 0;
@@ -138,12 +138,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 					concept.getCode(),
 					myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
-				myValueSetConceptDesignationDao.deleteById(designation.getId());
+				myValueSetConceptDesignationDao.deleteById(designation.getPartitionedId());
 				myTermValueSet.decrementTotalConceptDesignations();
 			}
-			myValueSetConceptDao.deleteById(concept.getId());
+			myValueSetConceptDao.deleteById(concept.getPartitionedId());
 			myTermValueSet.decrementTotalConcepts();
-			myValueSetDao.save(myTermValueSet);
+			myEntityManager.merge(myTermValueSet);
 			ourLog.debug(
 					"Done excluding [{}|{}] from ValueSet[{}]",
 					concept.getSystem(),
@@ -190,8 +190,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			concept.clearSourceConceptDirectParentPidsLob();
 		}
 
-		myValueSetConceptDao.save(concept);
-		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
+		myEntityManager.persist(concept);
+		myEntityManager.merge(myTermValueSet.incrementTotalConcepts());
 
 		if (++myConceptsSaved % 250 == 0) {
 			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
@@ -217,8 +217,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			}
 		}
 		designation.setValue(theDesignation.getValue());
-		myValueSetConceptDesignationDao.save(designation);
-		myValueSetDao.save(myTermValueSet.incrementTotalConceptDesignations());
+		myEntityManager.persist(designation);
+		myEntityManager.merge(myTermValueSet.incrementTotalConceptDesignations());
 
 		if (++myDesignationsSaved % 250 == 0) {
 			ourLog.debug(

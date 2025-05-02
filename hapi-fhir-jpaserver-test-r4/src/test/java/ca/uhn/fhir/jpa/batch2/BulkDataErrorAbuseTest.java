@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static ca.uhn.fhir.jpa.util.ConcurrencyTestUtil.executeFutures;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -77,7 +78,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGroupBulkExportNotInGroup_DoesNotShowUp() throws InterruptedException, ExecutionException {
+	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
 		duAbuseTest(100);
 	}
 
@@ -92,7 +93,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	@Disabled("for manual debugging")
-	public void testNonStopAbuseBatch2BulkExportStressTest() throws InterruptedException, ExecutionException {
+	public void testNonStopAbuseBatch2BulkExportStressTest() {
 		duAbuseTest(Integer.MAX_VALUE);
 	}
 
@@ -188,34 +189,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		ourLog.info("Finished task execution");
 	}
-
-	private void executeFutures(CompletionService<Boolean> theCompletionService, int theTotal) {
-		List<String> errors = new ArrayList<>();
-		int count = 0;
-
-		while (count + errors.size() < theTotal) {
-			try {
-				Future<Boolean> future = theCompletionService.take();
-				boolean r = future.get();
-				assertTrue(r);
-				count++;
-			} catch (Exception ex) {
-				// we will run all the threads to completion, even if we have errors;
-				// this is so we don't have background threads kicking around with
-				// partial changes.
-				// we either do this, or shutdown the completion service in an
-				// "inelegant" manner, dropping all threads (which we aren't doing)
-				ourLog.error("Failed after checking " + count + " futures");
-				errors.add(ex.getMessage());
-			}
-		}
-
-		if (!errors.isEmpty()) {
-			fail(String.format("Failed to execute futures. Found %d errors :\n", errors.size())
-				+ String.join(", ", errors));
-		}
-	}
-
 
 	private void verifyBulkExportResults(String theInstanceId, List<String> theContainedList, List<String> theExcludedList) {
 		// Iterate over the files

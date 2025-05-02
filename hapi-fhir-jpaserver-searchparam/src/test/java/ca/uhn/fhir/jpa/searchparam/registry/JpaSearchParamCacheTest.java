@@ -22,6 +22,7 @@ import java.util.Optional;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,12 +34,12 @@ public class JpaSearchParamCacheTest {
 
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 		myJpaSearchParamCache = new TestableJpaSearchParamCache();
 	}
 
 	@Test
-	public void testGetAllActiveComboParams(){
+	public void testGetAllActiveComboParams() {
 		RuntimeSearchParam unique1 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam unique2 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam nonUnique1 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
@@ -51,7 +52,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetUniqueActiveComboParams(){
+	public void testGetUniqueActiveComboParams() {
 		RuntimeSearchParam unique1 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam unique2 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam nonUnique = createSearchParam(ComboSearchParamType.NON_UNIQUE);
@@ -63,7 +64,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetNonUniqueActiveComboParams(){
+	public void testGetNonUniqueActiveComboParams() {
 		RuntimeSearchParam nonUnique1 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
 		RuntimeSearchParam nonUnique2 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
 		RuntimeSearchParam unique = createSearchParam(ComboSearchParamType.UNIQUE);
@@ -75,7 +76,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetActiveComboParamByIdPresent(){
+	public void testGetActiveComboParamByIdPresent() {
 		IIdType id1 = new IdType("SearchParameter/1");
 		RuntimeSearchParam sp1 = createSearchParam(id1, ComboSearchParamType.NON_UNIQUE);
 
@@ -90,7 +91,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetActiveComboParamByIdAbsent(){
+	public void testGetActiveComboParamByIdAbsent() {
 		IIdType id1 = new IdType(1);
 		RuntimeSearchParam sp1 = createSearchParam(id1, ComboSearchParamType.NON_UNIQUE);
 
@@ -100,6 +101,17 @@ public class JpaSearchParamCacheTest {
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id2);
 		assertTrue(found.isEmpty());
+	}
+
+	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType) {
+		return createSearchParam(null, theType);
+	}
+
+	private RuntimeSearchParam createSearchParam(IIdType theId, ComboSearchParamType theType) {
+		RuntimeSearchParam sp = mock(RuntimeSearchParam.class);
+		when(sp.getIdUnqualifiedVersionless()).thenReturn(theId);
+		when(sp.getComboSearchParamType()).thenReturn(theType);
+		return sp;
 	}
 
 	@ParameterizedTest
@@ -115,10 +127,10 @@ public class JpaSearchParamCacheTest {
 		"ValueSet,       url,                  url,                  type = uri",
 		"Encounter,      subject,              subject.name,         type = reference with refChain"
 	})
-	public void getIndexedSearchParamByHashIdentity_returnsCorrectIndexedSearchParam(String theResourceType,
-																					 String theSpName,
-																					 String theExpectedSpName,
-																					 String theSpType) {
+	public void getHashIdentityToIndexedSearchParamMap_returnsCorrectIndexedSearchParamMap(String theResourceType,
+																						   String theSpName,
+																						   String theExpectedSpName,
+																						   String theSpType) {
 		// setup
 		RuntimeSearchParamCache runtimeCache = new RuntimeSearchParamCache();
 		RuntimeResourceDefinition resourceDefinition = ourFhirContext.getResourceDefinition(theResourceType);
@@ -129,23 +141,13 @@ public class JpaSearchParamCacheTest {
 
 		// execute
 		myJpaSearchParamCache.populateActiveSearchParams(null, null, runtimeCache);
-		Optional<IndexedSearchParam> indexedSearchParam = myJpaSearchParamCache.getIndexedSearchParamByHashIdentity(hashIdentity);
+		Map<Long, IndexedSearchParam> indexedSearchParamMap = myJpaSearchParamCache.getHashIdentityToIndexedSearchParamMap();
+		IndexedSearchParam indexedSearchParam = indexedSearchParamMap.get(hashIdentity);
 
 		// validate
-		assertTrue(indexedSearchParam.isPresent(), "No IndexedSearchParam found for search param with " + theSpType);
-		assertEquals(theResourceType, indexedSearchParam.get().getResourceType());
-		assertEquals(theExpectedSpName, indexedSearchParam.get().getParameterName());
-	}
-
-	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType){
-		return createSearchParam(null, theType);
-	}
-
-	private RuntimeSearchParam createSearchParam(IIdType theId, ComboSearchParamType theType){
-		RuntimeSearchParam sp = mock(RuntimeSearchParam.class);
-		when(sp.getIdUnqualifiedVersionless()).thenReturn(theId);
-		when(sp.getComboSearchParamType()).thenReturn(theType);
-		return sp;
+		assertNotNull(indexedSearchParam);
+		assertEquals(theResourceType, indexedSearchParam.getResourceType());
+		assertEquals(theExpectedSpName, indexedSearchParam.getParameterName());
 	}
 
 	private void setActiveComboSearchParams(String theResourceType, List<RuntimeSearchParam> theRuntimeSearchParams) {
@@ -155,7 +157,15 @@ public class JpaSearchParamCacheTest {
 	}
 
 	private static class TestableJpaSearchParamCache extends JpaSearchParamCache {
-		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams){
+
+		/**
+		 * Constructor
+		 */
+		public TestableJpaSearchParamCache() {
+			super(new PartitionSettings());
+		}
+
+		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams) {
 			myActiveComboSearchParams = theActiveComboSearchParams;
 		}
 	}

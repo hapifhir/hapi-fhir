@@ -10,12 +10,14 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,6 +30,14 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		myStorageSettings.setHibernateSearchIndexFullText(true);
+	}
 
 	@Test
 	public void testDeleteExpunge() {
@@ -70,7 +80,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 			}
 		}
 
+		String sql = generateSql();
+		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		executeSql(getTableName(), sql);
+	}
+
+	String generateSql() {
 		String typeStatement = getTypeStatement();
 
 		String sql;
@@ -94,8 +100,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 				throw new IllegalStateException(Msg.code(60));
 		}
 
-		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
-		executeSql(getTableName(), sql);
+		return sql;
 	}
 
 	@Nonnull

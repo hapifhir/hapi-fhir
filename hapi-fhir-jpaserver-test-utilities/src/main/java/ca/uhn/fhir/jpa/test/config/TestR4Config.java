@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -55,6 +56,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -72,6 +74,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 	PackageLoaderConfig.class,
 	TestHapiJpaConfig.class,
 	TestJPAConfig.class,
+	SubscriptionTopicConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
@@ -88,12 +91,11 @@ public class TestR4Config {
 
 	static {
 		/*
-		 * We use a randomized number of maximum threads in order to try
-		 * and catch any potential deadlocks caused by database connection
-		 * starvation
+		 * Set a reasonable number of maximum connections so that anything that
+		 * runs away demanding large numbers of connections causes a failure.
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 4;
+			ourMaxThreads = 8;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
@@ -110,8 +112,6 @@ public class TestR4Config {
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -189,7 +189,9 @@ public class TestR4Config {
 		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
-		DataSource dataSource = ProxyDataSourceBuilder
+		//			.logQueryBySlf4j(level)
+
+		return ProxyDataSourceBuilder
 			.create(retVal)
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
@@ -200,15 +202,13 @@ public class TestR4Config {
 			.countQuery(singleQueryCountHolder())
 			.afterMethod(captureQueriesListener())
 			.build();
-
-		return dataSource;
 	}
 
 
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
 		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
-		theDataSource.setMaxWaitMillis(30000);
+		theDataSource.setMaxWait(Duration.ofSeconds(30));
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");
 		theDataSource.setMaxTotal(ourMaxThreads);

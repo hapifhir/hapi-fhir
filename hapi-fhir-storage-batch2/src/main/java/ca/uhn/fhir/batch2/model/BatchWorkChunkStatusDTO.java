@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public class BatchWorkChunkStatusDTO {
 	public final WorkChunkStatusEnum status;
 	public final Date start;
 	public final Date stop;
+
 	public final Double avg;
 	public final Long totalChunks;
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,19 +71,23 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  */
 public class BundleUtil {
 
-	/** Non instantiable */
-	private BundleUtil() {
-		// nothing
-	}
-
+	public static final String DIFFERENT_LINK_ERROR_MSG =
+			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
 	private static final String PREVIOUS = LINK_PREV;
 	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
+	static int WHITE = 1;
+	static int GRAY = 2;
+	static int BLACK = 3;
 
-	public static final String DIFFERENT_LINK_ERROR_MSG =
-			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	/**
+	 * Non instantiable
+	 */
+	private BundleUtil() {
+		// nothing
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -297,10 +301,6 @@ public class BundleUtil {
 		return entryListAccumulator.getList();
 	}
 
-	static int WHITE = 1;
-	static int GRAY = 2;
-	static int BLACK = 3;
-
 	/**
 	 * Function which will do an in-place sort of a bundles' entries, to the correct processing order, which is:
 	 * 1. Deletes
@@ -315,7 +315,7 @@ public class BundleUtil {
 	 * this function will throw an IllegalStateException.
 	 *
 	 * @param theContext The FhirContext.
-	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
+	 * @param theBundle  The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle)
 			throws IllegalStateException {
@@ -367,8 +367,8 @@ public class BundleUtil {
 	 * </ul>
 	 * </p>
 	 *
-	 * @param theContext The FhirContext to use with the bundle
-	 * @param theBundle The Bundle to modify. All resources in the Bundle should have an ID.
+	 * @param theContext         The FhirContext to use with the bundle
+	 * @param theBundle          The Bundle to modify. All resources in the Bundle should have an ID.
 	 * @param thePrefixIdsOrNull If not <code>null</code>, all resource IDs and all references in the Bundle will be
 	 *                           modified to such that their IDs contain the given prefix. For example, for a value
 	 *                           of "A", the resource "Patient/123" will be changed to be "Patient/A123". If set to
@@ -630,8 +630,9 @@ public class BundleUtil {
 
 	/**
 	 * Given a bundle, and a consumer, apply the consumer to each entry in the bundle.
-	 * @param theContext The FHIR Context
-	 * @param theBundle The bundle to have its entries processed.
+	 *
+	 * @param theContext   The FHIR Context
+	 * @param theBundle    The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
 	 */
 	public static void processEntries(
@@ -825,9 +826,10 @@ public class BundleUtil {
 
 	/**
 	 * create a new bundle entry and set a value for a single field
-	 * @param theContext     Context holding resource definition
-	 * @param theFieldName   Child field name of the bundle entry to set
-	 * @param theValues      The values to set on the bundle entry child field name
+	 *
+	 * @param theContext   Context holding resource definition
+	 * @param theFieldName Child field name of the bundle entry to set
+	 * @param theValues    The values to set on the bundle entry child field name
 	 * @return the new bundle entry
 	 */
 	public static IBase createNewBundleEntryWithSingleField(
@@ -857,6 +859,7 @@ public class BundleUtil {
 
 	/**
 	 * Get resource from bundle by resource type and reference
+	 *
 	 * @param theContext   FhirContext
 	 * @param theBundle    IBaseBundle
 	 * @param theReference IBaseReference
@@ -881,12 +884,12 @@ public class BundleUtil {
 			this.myIsLegal = true;
 		}
 
-		private void setLegal(boolean theLegal) {
-			myIsLegal = theLegal;
-		}
-
 		public boolean isLegal() {
 			return myIsLegal;
+		}
+
+		private void setLegal(boolean theLegal) {
+			myIsLegal = theLegal;
 		}
 	}
 }

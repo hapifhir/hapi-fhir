@@ -1,18 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
-import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -49,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -57,9 +51,15 @@ import java.util.concurrent.TimeUnit;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -70,27 +70,16 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	public static final String PATIENT_REFERENCE = "Patient/" + TEST_PATIENT_ID;
 
 	@Autowired
-	ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
-
-	@Autowired
-	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
-	@Autowired(required = false)
-	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+    StoppableSubscriptionDeliveringRestHookListener myStoppableSubscriptionDeliveringRestHookListener;
 	@Autowired
 	SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
 
 	@AfterEach
-	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+	public void cleanupStoppableSubscriptionDeliveringRestHookListener() {
 		ourLog.info("@AfterEach");
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
-	}
-
-	@Test
-	public void testSubscriptionTopicRegistryBean() {
-		// This bean should not exist in R4
-		assertNull(mySubscriptionTopicRegistry);
 	}
 
 	/**
@@ -98,7 +87,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 * that changes the database mode we don't store both versioning modes
 	 */
 	@Test
-	public void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
+	void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		String payload = "application/fhir+json";
@@ -122,7 +111,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
+	void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -144,7 +133,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testUpdatesHaveCorrectMetadata() throws Exception {
+	void testUpdatesHaveCorrectMetadata() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -158,7 +147,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		 */
 
 		Observation obs = sendObservation(code, "SNOMED-CT", "http://source-system.com", null);
-		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
+		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -178,8 +167,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		obs.getIdentifierFirstRep().setSystem("foo").setValue("2");
 		obs.getMeta().setSource("http://other-source");
-		myObservationDao.update(obs);
-		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
+		myObservationDao.update(obs, mySrd);
+		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -195,7 +184,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
+	void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
 
 		String payload = "application/fhir+json";
 		String code = "1000000050";
@@ -228,7 +217,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
+	void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -250,7 +239,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
 		Bundle responseBundle = mySystemDao.transaction(null, bundle);
 
-		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()));
+		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()), mySrd);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -275,7 +264,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
 		mySystemDao.transaction(null, bundle);
-		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
+		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless(), mySrd);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -289,7 +278,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRepeatedDeliveries() throws Exception {
+	void testRepeatedDeliveries() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -303,7 +292,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			observation.getIdentifierFirstRep().setSystem("foo").setValue("ID" + i);
 			observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
 			observation.setStatus(Observation.ObservationStatus.FINAL);
-			myObservationDao.create(observation);
+			myObservationDao.create(observation, mySrd);
 		}
 
 		ourObservationProvider.waitForUpdateCount(100);
@@ -311,7 +300,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 
 	@Test
-	public void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
+	void testSubscriptionRegistryLoadsSubscriptionsFromDatabase() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -332,13 +321,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("ID");
 		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
 		observation.setStatus(Observation.ObservationStatus.FINAL);
-		myObservationDao.create(observation);
+		myObservationDao.create(observation, mySrd);
 
 		ourObservationProvider.waitForUpdateCount(1);
 	}
 
 	@Test
-	public void testActiveSubscriptionShouldntReActivate() throws Exception {
+	void testActiveSubscriptionShouldntReActivate() throws Exception {
 		String criteria = "Observation?code=111111111&_format=xml";
 		String payload = "application/fhir+json";
 		createSubscription(criteria, payload);
@@ -351,7 +340,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
+	void testRestHookSubscriptionMetaAddDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -376,12 +365,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
 		myClient.meta().add().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
 
-		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
+		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toVersionless()).execute();
 		Coding tag = obs.getMeta().getTag("http://blah", "blah");
 		assertNotNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -395,7 +383,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -403,7 +390,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
+	void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
 		String payload = "application/fhir+json";
@@ -433,7 +420,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNotNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(3);
@@ -447,7 +433,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertNull(tag);
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(5);
@@ -455,7 +440,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
+	void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -479,7 +464,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myClient.update().resource(obs).execute();
 
 		// Should be no further deliveries
-		Thread.sleep(1000);
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(1);
@@ -488,7 +472,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
+	void testRestHookSubscriptionApplicationJsonDisableVersionIdInDelivery() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -536,7 +520,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
+	void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -546,9 +530,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -563,14 +547,14 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
 
-		Observation observation1 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(()->new IllegalArgumentException());
-		Observation observation2 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		Observation observation1 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(IllegalArgumentException::new);
+		Observation observation2 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(IllegalArgumentException::new);
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());
@@ -581,7 +565,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
-	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
+	void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
 		String payload = "application/json";
 
 		Extension sendDeleteMessagesExtension = new Extension()
@@ -598,13 +582,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(1);
 
 		ourLog.info("** About to delete observation");
-		myObservationDao.delete(IdDt.of(observation).toUnqualifiedVersionless());
+		myObservationDao.delete(Objects.requireNonNull(IdDt.of(observation)).toUnqualifiedVersionless(), mySrd);
 		ourObservationProvider.waitForDeleteCount(1);
 	}
 
 
 	@Test
-	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
+	void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -620,9 +604,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		myStoppableSubscriptionDeliveringRestHookListener.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(countDownLatch);
 
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
@@ -637,7 +621,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		myStoppableSubscriptionDeliveringRestHookListener.resume();
 
 
 		assertEquals(0, ourObservationProvider.getCountCreate());
@@ -653,7 +637,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionApplicationJson() throws Exception {
+	void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -674,7 +658,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
-		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
@@ -698,7 +682,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
@@ -711,21 +695,21 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toUnqualifiedVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertNotEquals(subscription1.getId(), subscription2.getId());
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -754,7 +738,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
-		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
@@ -778,7 +762,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
@@ -791,21 +775,21 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertNotEquals(subscription1.getId(), subscription2.getId());
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -830,7 +814,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(1);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -852,7 +836,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
@@ -865,21 +849,21 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(4);
 
-		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read().resource(Observation.class).withId(observationTemp3.getId()).execute();
 
 		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement().toVersionless()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertNotEquals(subscription1.getId(), subscription2.getId());
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -1002,7 +986,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		ourLog.info("** About to send observation that wont match");
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		sendObservation(code, "SNOMED-CT");
 
 		// Criteria didn't match, shouldn't see any updates
 		waitForQueueToDrain();
@@ -1018,7 +1002,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		ourLog.info("** About to send Observation 2");
-		Observation observation2 = sendObservation(code, "SNOMED-CT");
+		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
 		// Should see a subscription notification this time
@@ -1027,7 +1011,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
-		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+		sendObservation(code, "SNOMED-CT");
 
 		// No more matches
 		Thread.sleep(1000);
@@ -1042,11 +1026,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload);
-		Subscription subscription2 = createSubscription(criteria2, payload);
+		createSubscription(criteria1, payload);
+		createSubscription(criteria2, payload);
 		waitForActivatedSubscriptionCount(2);
 
-		Observation observation1 = sendObservation(code, "SNOMED-CT");
+		sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -1056,7 +1040,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
+	public void testRestHookSubscriptionInvalidCriteria() {
 		String payload = "application/xml";
 
 		String criteria1 = "Observation?codeeeee=SNOMED-CT";
@@ -1235,7 +1219,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		sp.setExpression("Observation.extension('Observation#accessType')");
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(sp);
+		mySearchParameterDao.create(sp,mySrd);
 		mySearchParamRegistry.forceRefresh();
 		createSubscription(criteria, "application/json");
 		waitForActivatedSubscriptionCount(1);

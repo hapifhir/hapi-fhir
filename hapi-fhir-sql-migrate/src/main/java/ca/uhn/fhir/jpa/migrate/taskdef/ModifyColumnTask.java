@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +51,6 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-
 		JdbcUtils.ColumnType existingType;
 		boolean nullable;
 
@@ -70,32 +71,40 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 			throw new InternalErrorException(Msg.code(66) + e);
 		}
 
+		List<String> sqlStringToExecute = generateSql(existingType, nullable);
+
+		sqlStringToExecute.forEach(s -> executeSql(getTableName(), s));
+	}
+
+	List<String> generateSql(JdbcUtils.ColumnType theColumnType, boolean theIsNullable) {
+		List<String> reVal = new ArrayList<>();
+
 		Long taskColumnLength = getColumnLength();
 		boolean isShrinkOnly = false;
 		if (taskColumnLength != null) {
-			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
+			long existingLength = theColumnType.getLength() != null ? theColumnType.getLength() : 0;
 			if (existingLength > taskColumnLength) {
 				if (isNoColumnShrink()) {
 					taskColumnLength = existingLength;
 				} else {
-					if (existingType.getColumnTypeEnum() == getColumnType()) {
+					if (theColumnType.getColumnTypeEnum() == getColumnType()) {
 						isShrinkOnly = true;
 					}
 				}
 			}
 		}
 
-		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), taskColumnLength);
-		boolean alreadyCorrectNullable = isNullable() == nullable;
+		boolean alreadyOfCorrectType = theColumnType.equals(getColumnType(), taskColumnLength);
+		boolean alreadyCorrectNullable = isNullable() == theIsNullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
 			logInfo(
 					ourLog,
 					"Column {} on table {} is already of type {} and has nullable {} - No action performed",
 					getColumnName(),
 					getTableName(),
-					existingType,
-					nullable);
-			return;
+					theColumnType,
+					theIsNullable);
+			return Collections.emptyList();
 		}
 
 		String type = getSqlType(taskColumnLength);
@@ -164,15 +173,17 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 			addFlag(TaskFlagEnum.FAILURE_ALLOWED);
 		}
 
-		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
-			executeSql(getTableName(), sql);
+			logInfo(ourLog, "Will Update column {} on table {} to type {}", getColumnName(), getTableName(), type);
+			reVal.add(sql);
 		}
 
 		if (sqlNotNull != null) {
-			logInfo(ourLog, "Updating column {} on table {} to not null", getColumnName(), getTableName());
-			executeSql(getTableName(), sqlNotNull);
+			logInfo(ourLog, "Update column {} on table {} to not null", getColumnName(), getTableName());
+			reVal.add(sqlNotNull);
 		}
+
+		return reVal;
 	}
 
 	private boolean isColumnNullable(String tableName, String columnName) throws SQLException {

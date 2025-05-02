@@ -1,21 +1,26 @@
 package ca.uhn.fhir.tinder.ddl;
 
+import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.util.IoUtil;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.JdbcSettings;
+import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -32,6 +37,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -44,8 +50,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -55,9 +63,11 @@ public class DdlGeneratorHibernate61 {
 	private final List<GenerateDdlMojo.Dialect> myDialects = new ArrayList<>();
 	private File myOutputDirectory;
 	private MavenProject myProject;
+	private final HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService =
+			new HapiHibernateDialectSettingsService();
 
 	public void addPackage(String thePackage) {
-		Validate.notNull(thePackage);
+		Validate.notNull(thePackage, "thePackage must not be null");
 		myPackages.add(thePackage);
 	}
 
@@ -67,8 +77,12 @@ public class DdlGeneratorHibernate61 {
 		myDialects.add(theDialect);
 	}
 
+	public HapiHibernateDialectSettingsService getHapiHibernateDialectSettingsService() {
+		return myHapiHibernateDialectSettingsService;
+	}
+
 	public void setOutputDirectory(File theOutputDirectory) {
-		Validate.notNull(theOutputDirectory);
+		Validate.notNull(theOutputDirectory, "theOutputDirectory must not be null");
 		myOutputDirectory = theOutputDirectory;
 	}
 
@@ -88,11 +102,13 @@ public class DdlGeneratorHibernate61 {
 
 			StandardServiceRegistryBuilder registryBuilder =
 					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
-			registryBuilder.applySetting(AvailableSettings.HBM2DDL_AUTO, "create");
-			registryBuilder.applySetting(AvailableSettings.DIALECT, dialectClassName);
+			registryBuilder.applySetting(SchemaToolingSettings.HBM2DDL_AUTO, "create");
+			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
 			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
+			registryBuilder.addService(
+					HapiHibernateDialectSettingsService.class, myHapiHibernateDialectSettingsService);
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
 			MetadataSources metadataSources = new MetadataSources(standardRegistry);
 
@@ -101,6 +117,14 @@ public class DdlGeneratorHibernate61 {
 			}
 
 			Metadata metadata = metadataSources.buildMetadata();
+
+			/*
+			 * This is not actually necessary for schema exporting, but we validate
+			 * in order to ensure that various tests fail if the
+			 * ConditionalIdMappingContributor leaves the model in an
+			 * inconsistent state.
+			 */
+			((MetadataImpl) metadata).validate();
 
 			EnumSet<TargetType> targetTypes = EnumSet.of(TargetType.SCRIPT);
 			SchemaExport.Action action = SchemaExport.Action.CREATE;
@@ -126,6 +150,44 @@ public class DdlGeneratorHibernate61 {
 			schemaExport.execute(targetTypes, action, metadata, standardRegistry);
 
 			writeContentsToFile(nextDialect.getAppendFile(), classLoader, outputFile);
+
+			if (nextDialect.getDropStatementsContainingRegex() != null
+					&& !nextDialect.getDropStatementsContainingRegex().isEmpty()) {
+				ourLog.info(
+						"Dropping statements containing regex(s): {}", nextDialect.getDropStatementsContainingRegex());
+				try {
+					String fullFile;
+					try (FileReader fr = new FileReader(outputFileName, StandardCharsets.UTF_8)) {
+						fullFile = IOUtils.toString(fr);
+					}
+
+					int count = 0;
+					List<String> statements = SqlUtil.splitSqlFileIntoStatements(fullFile);
+					for (Iterator<String> statementIter = statements.iterator(); statementIter.hasNext(); ) {
+						String statement = statementIter.next();
+						if (nextDialect.getDropStatementsContainingRegex().stream()
+								.anyMatch(regex -> Pattern.compile(regex)
+										.matcher(statement)
+										.find())) {
+							statementIter.remove();
+							count++;
+						}
+					}
+
+					ourLog.info(
+							"Filtered {} statement(s) from file for dialect: {}", count, nextDialect.getClassName());
+
+					try (FileWriter fw = new FileWriter(outputFileName, StandardCharsets.UTF_8)) {
+						for (String statement : statements) {
+							fw.append(statement);
+							fw.append(";\n\n");
+						}
+					}
+
+				} catch (IOException theE) {
+					throw new RuntimeException(theE);
+				}
+			}
 		}
 
 		IoUtil.closeQuietly(connectionProvider);
@@ -189,6 +251,19 @@ public class DdlGeneratorHibernate61 {
 		return entityClassNames;
 	}
 
+	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
+			throws MojoFailureException {
+		if (isNotBlank(prependFile)) {
+			ResourceLoader loader = new DefaultResourceLoader(classLoader);
+			Resource resource = loader.getResource(prependFile);
+			try (Writer w = new FileWriter(outputFile, true)) {
+				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
+			}
+		}
+	}
+
 	/**
 	 * The hibernate bootstrap process insists on having a DB connection even
 	 * if it will never be used. So we just create a placeholder H2 connection
@@ -239,19 +314,6 @@ public class DdlGeneratorHibernate61 {
 				connection.close();
 			} catch (SQLException e) {
 				throw new IOException(e);
-			}
-		}
-	}
-
-	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
-			throws MojoFailureException {
-		if (isNotBlank(prependFile)) {
-			ResourceLoader loader = new DefaultResourceLoader(classLoader);
-			Resource resource = loader.getResource(prependFile);
-			try (Writer w = new FileWriter(outputFile, true)) {
-				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
-			} catch (IOException e) {
-				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
 			}
 		}
 	}

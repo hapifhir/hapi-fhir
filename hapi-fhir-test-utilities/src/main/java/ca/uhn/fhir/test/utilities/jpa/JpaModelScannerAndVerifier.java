@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.ClassPath;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -52,6 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
@@ -222,6 +226,7 @@ public class JpaModelScannerAndVerifier {
 			if (!isTransient) {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasJoinColumns = nextField.getAnnotation(JoinColumns.class) != null;
 				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
 				boolean hasEmbedded = nextField.getAnnotation(Embedded.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
@@ -234,6 +239,7 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(
 					hasEmbedded ||
 						hasColumn ||
+						hasJoinColumns ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
 						isOtherSideOfOneToOneMapping ||
@@ -263,12 +269,15 @@ public class JpaModelScannerAndVerifier {
 				}
 
 				if (columnName != null) {
-					if (nextField.getType().isAssignableFrom(String.class)) {
-						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
-						columnLength = columnLength * 4;
-					}
+					addColumnName(columnNameToLength, nextField, columnLength, columnName);
+				}
 
-					columnNameToLength.put(columnName, columnLength);
+				if (hasJoinColumns) {
+					JoinColumns joinColumns = nextField.getAnnotation(JoinColumns.class);
+					for (JoinColumn joinColumn : joinColumns.value()) {
+						columnName = joinColumn.name();
+						addColumnName(columnNameToLength, nextField, columnLength, columnName);
+					}
 				}
 
 			}
@@ -289,6 +298,20 @@ public class JpaModelScannerAndVerifier {
 		}
 
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
+	}
+
+	private static void addColumnName(Map<String, Integer> columnNameToLength, Field nextField, int columnLength, String columnName) {
+		if (nextField.getType().equals(Integer.class) || nextField.getType().isPrimitive()) {
+			// This is pretty imprecise and probably an overestimation, but we use it
+			// only for calculating max column length so it's better to be over than
+			// under
+			columnLength = 16;
+		} else if (nextField.getType().isAssignableFrom(String.class)) {
+			// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
+			columnLength = columnLength * 4;
+		}
+
+		columnNameToLength.put(columnName, columnLength);
 	}
 
 	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
@@ -330,23 +353,26 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
-				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
-
-				// Validate FK naming.
-				// temporarily allow two hibernate legacy sp fk names until we fix them
-				List<String> legacySPHibernateFKNames = Arrays.asList(
-					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
-				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
-					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
-
-				if (ourIndexNameToColumn.containsKey(fk.name())) {
-					// this foreign key has the same name as an existing index
-					// let's make sure it's on the same column
-					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
-					assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
+				if (fk.value() == ConstraintMode.NO_CONSTRAINT) {
+					Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " is NO_CONSTRAINT so it should have no name()");
 				} else {
-					// verify it's not a duplicate
-					assertNotADuplicateName(fk.name(), theNames);
+					Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
+					// Validate FK naming.
+					// temporarily allow two hibernate legacy sp fk names until we fix them
+					List<String> legacySPHibernateFKNames = Arrays.asList(
+						"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+					Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
+						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
+
+					if (ourIndexNameToColumn.containsKey(fk.name())) {
+						// this foreign key has the same name as an existing index
+						// let's make sure it's on the same column
+						Collection<String> columns = ourIndexNameToColumn.get(fk.name());
+						assertThat(columns.contains(columnName)).as(String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName)).isTrue();
+					} else {
+						// verify it's not a duplicate
+						assertNotADuplicateName(fk.name(), theNames);
+					}
 				}
 			}
 		}
@@ -391,6 +417,14 @@ public class JpaModelScannerAndVerifier {
 				}
 			}
 
+		}
+
+		Enumerated enumerated = theAnnotatedElement.getAnnotation(Enumerated.class);
+		if (enumerated != null) {
+			JdbcTypeCode jdbcTypeCode = theAnnotatedElement.getAnnotation(JdbcTypeCode.class);
+			if (jdbcTypeCode == null) {
+				throw new IllegalStateException(Msg.code(2591) + "Field " + theAnnotatedElement + " has @Enumerated but not @JdbcTypeCode (must declare either VARCHAR or a numeric type to avoid the database using native enums)");
+			}
 		}
 
 	}

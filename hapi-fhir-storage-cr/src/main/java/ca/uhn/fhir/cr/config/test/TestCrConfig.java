@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Common hapi-fhir clinical reasoning config shared with downstream modules.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
@@ -104,13 +105,16 @@ public class TestCrConfig {
 
 	@Bean
 	public JpaStorageSettings storageSettings() {
-		JpaStorageSettings storageSettings = new JpaStorageSettings();
-		storageSettings.setAllowExternalReferences(true);
-		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
-		storageSettings.setEnforceReferenceTargetTypes(false);
-		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		return storageSettings;
+		// Storage Settings for CR unit tests are set up in TestCrStorageSettingsConfigurer
+		// so that they can be reset for each test invocation
+		return new JpaStorageSettings();
 	}
+
+	@Bean
+	public TestCrStorageSettingsConfigurer storageSettingsConfigurer(JpaStorageSettings theStorageSettings) {
+		return new TestCrStorageSettingsConfigurer(theStorageSettings);
+	}
+
 	@Bean
 	public ModelManager modelManager(Map<ModelIdentifier, Model> theGlobalModelCache) {
 		return new ModelManager(theGlobalModelCache);

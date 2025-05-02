@@ -79,7 +79,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
-	private Long myExtensionalVsIdOnResourceTable;
+	private JpaPid myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
 	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
@@ -142,7 +142,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable = JpaPid.fromId((Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId());
 	}
 
 	private CodeSystem createExternalCs() {
@@ -1069,9 +1069,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.withParameter(Parameters.class, "url", new UrlType(URL_MY_VALUE_SET))
 			.returnResourceType(ValueSet.class)
 			.execute();
+		myCaptureQueriesListener.logSelectQueries();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).as(() -> myCaptureQueriesListener.logSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * "))).isEqualTo(14);
+		assertThat(myCaptureQueriesListener.getSelectQueries().size()).as(() -> myCaptureQueriesListener.logSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n * "))).isEqualTo(16);
 		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 
 		// Hierarchical
@@ -1088,7 +1089,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(15);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(13);
 
 	}
 
@@ -1128,7 +1129,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(13);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(11);
 
 	}
 
@@ -1573,7 +1574,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 

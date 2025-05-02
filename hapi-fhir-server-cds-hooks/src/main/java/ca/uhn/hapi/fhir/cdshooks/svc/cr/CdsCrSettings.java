@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CdsCrSettings {
 	private final String DEFAULT_CLIENT_ID_HEADER_NAME = "client_id";
 	private String myClientIdHeaderName;

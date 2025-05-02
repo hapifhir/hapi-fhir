@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
+	public static final List<RestOperationTypeEnum> REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME = List.of(
+			RestOperationTypeEnum.SEARCH_TYPE, RestOperationTypeEnum.SEARCH_SYSTEM, RestOperationTypeEnum.GET_PAGE);
 	private IValidationSupport myValidationSupport;
 
 	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
@@ -164,7 +166,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				rules.size(),
 				getPointcutNameOrEmpty(thePointcut),
 				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource));
+				getResourceTypeOrEmpty(theOutputResource),
+				thePointcut);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -511,7 +514,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (alreadySeenMap.putIfAbsent(theResponseObject, Boolean.TRUE) != null) {
 			return;
 		}
-
 		FhirContext fhirContext = theRequestDetails.getServer().getFhirContext();
 		List<IBaseResource> resources = Collections.emptyList();
 
@@ -528,7 +530,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case EXTENDED_OPERATION_TYPE:
 			case EXTENDED_OPERATION_INSTANCE: {
 				if (theResponseObject != null) {
-					resources = toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+					resources = toListOfResourcesAndExcludeContainerUnlessStandalone(
+							theResponseObject, fhirContext, theRequestDetails);
 				}
 				break;
 			}
@@ -575,19 +578,51 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
-	protected static List<IBaseResource> toListOfResourcesAndExcludeContainer(
-			IBaseResource theResponseObject, FhirContext fhirContext) {
+	protected static List<IBaseResource> toListOfResourcesAndExcludeContainerUnlessStandalone(
+			IBaseResource theResponseObject, FhirContext fhirContext, RequestDetails theRequestDetails) {
+
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
 
-		List<IBaseResource> retVal;
-
 		boolean shouldExamineChildResources = shouldExamineChildResources(theResponseObject, fhirContext);
 		if (!shouldExamineChildResources) {
-			return Collections.singletonList(theResponseObject);
+			return toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+					theResponseObject, theRequestDetails);
 		}
 
+		return toListOfResourcesAndExcludeContainer(theResponseObject, fhirContext);
+	}
+
+	/**
+	 *
+	 * @param theResponseObject The resource to convert to a list.
+	 * @param theRequestDetails The request details.
+	 * @return The response object (a resource) as a list. If the REST operation type in the request details is a
+	 * search, and the search is for resources that aren't the OperationOutcome, any OperationOutcome resource is removed from the list.
+	 * e.g. A GET [base]/Patient?parameter(s) search may return a bundle containing an OperationOutcome. The OperationOutcome will be removed from the
+	 * list to exclude from security.
+	 */
+	private static List<IBaseResource> toListOfResourcesAndExcludeOperationOutcomeBasedOnRestOperationType(
+			IBaseResource theResponseObject, RequestDetails theRequestDetails) {
+		List<IBaseResource> resources = new ArrayList<>();
+		RestOperationTypeEnum restOperationType = theRequestDetails.getRestOperationType();
+		String resourceName = theRequestDetails.getResourceName();
+		resources.add(theResponseObject);
+
+		if (resourceName != null
+				&& !resourceName.equals("OperationOutcome")
+				&& REST_OPERATIONS_TO_EXCLUDE_SECURITY_FOR_OPERATION_OUTCOME.contains(restOperationType)) {
+			resources.removeIf(t -> t instanceof IBaseOperationOutcome);
+		}
+
+		return resources;
+	}
+
+	@Nonnull
+	public static List<IBaseResource> toListOfResourcesAndExcludeContainer(
+			IBaseResource theResponseObject, FhirContext fhirContext) {
+		List<IBaseResource> retVal;
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
 		// Exclude the container

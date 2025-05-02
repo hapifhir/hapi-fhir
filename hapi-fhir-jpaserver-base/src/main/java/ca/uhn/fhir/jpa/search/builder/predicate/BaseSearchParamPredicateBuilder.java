@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -33,6 +35,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +48,14 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	private final DbColumn myColumnParamName;
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnHashIdentity;
+
+	@Autowired
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
+
+	@VisibleForTesting
+	public void setSearchParamIdentityCacheSvcForUnitTest(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {
+		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
+	}
 
 	public BaseSearchParamPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);
@@ -90,10 +101,15 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 	@Nonnull
 	public Condition createHashIdentityPredicate(String theResourceType, String theParamName) {
+		return createHashIdentityPredicate(getRequestPartitionId(), theResourceType, theParamName);
+	}
+
+	public Condition createHashIdentityPredicate(
+			RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
-		String hashIdentityVal = generatePlaceholder(hashIdentity);
-		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
+				getPartitionSettings(), theRequestPartitionId, theResourceType, theParamName);
+		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, theResourceType, theParamName);
+		return BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 	}
 
 	public Condition createPredicateParamMissingForNonReference(
@@ -101,9 +117,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 		List<Condition> conditions = new ArrayList<>();
 		if (getStorageSettings().isIndexStorageOptimized()) {
-			Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), getRequestPartitionId(), theResourceName, theParamName);
-			conditions.add(BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity)));
+			conditions.add(createHashIdentityPredicate(theResourceName, theParamName));
 		} else {
 			conditions.add(BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)));
 			conditions.add(BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)));
@@ -120,8 +134,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(getTable());
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(),
+		Condition hashIdentityPredicate = createHashIdentityPredicate(
 				theParams.getRequestPartitionId(),
 				theParams.getResourceTablePredicateBuilder().getResourceType(),
 				theParams.getParamName());
@@ -130,7 +143,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 				BinaryCondition.equalTo(
 						getResourceIdColumn(),
 						theParams.getResourceTablePredicateBuilder().getResourceIdColumn()),
-				BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity)));
+				hashIdentityPredicate);
 
 		subquery.addCondition(subQueryCondition);
 

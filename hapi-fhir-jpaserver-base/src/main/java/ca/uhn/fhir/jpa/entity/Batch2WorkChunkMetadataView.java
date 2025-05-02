@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Subselect;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 
@@ -58,6 +60,7 @@ public class Batch2WorkChunkMetadataView implements Serializable {
 
 	@Column(name = "STATE", length = ID_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private WorkChunkStatusEnum myStatus;
 
 	@Column(name = "INSTANCE_ID", length = ID_MAX_LENGTH, nullable = false)

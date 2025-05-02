@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,28 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public static final String DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "10000";
+
+	public static final int DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE =
+			Integer.parseInt(DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public static final String DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING = "1024";
+
+	public static final int DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE =
+			Integer.parseInt(DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE_STRING);
+
+	public static final List<Integer> DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS = Arrays.asList(13, 503, 2003, 1000003, -1);
+
+	/**
 	 * Do not change default of {@code 0}!
 	 *
 	 * @since 4.1.0
@@ -188,8 +210,9 @@ public class JpaStorageSettings extends StorageSettings {
 
 	// start with a tiny number so our first page always loads quickly.
 	// If they fetch the second page, fetch more.
-	// Use prime sizes to avoid empty next links.
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
+	// we'll only fetch (by default) up to 1 million records, because after that, deduplication in local memory is
+	// prohibitive
+	private List<Integer> mySearchPreFetchThresholds = DEFAULT_SEARCH_PRE_FETCH_THRESHOLDS;
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
@@ -272,7 +295,15 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 5.6.0
 	 */
-	private boolean myAdvancedHSearchIndexing = false;
+	private boolean myHibernateSearchIndexSearchParams = false;
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	private boolean myHibernateSearchIndexFullText = false;
 
 	/**
 	 * @since 5.7.0
@@ -368,6 +399,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 7.2.0
 	 */
 	private boolean myWriteToLegacyLobColumns = false;
+	/**
+	 * @since 8.0.0
+	 */
+	private boolean myAccessMetaSourceInformationFromProvenanceTable = false;
 
 	/**
 	 * If this is enabled (default is {@literal false}), searches on token indexes will
@@ -378,6 +413,30 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Beta
 	private boolean myIncludeHashIdentityForTokenSearches = false;
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	private int myMaxTransactionEntriesForWrite = DEFAULT_MAX_TRANSACTION_ENTRIES_FOR_WRITE;
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	private int myDefaultTransactionEntriesForWrite = DEFAULT_TRANSACTION_ENTRIES_FOR_WRITE;
+
+	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	private boolean myWriteToSearchParamIdentityTable = true;
 
 	/**
 	 * Constructor
@@ -1765,6 +1824,37 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isAccessMetaSourceInformationFromProvenanceTable() {
+		return myAccessMetaSourceInformationFromProvenanceTable;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the system will read
+	 * <code>Resource.meta.source</code> values from the <code>HFJ_RES_VER_PROV</code>
+	 * table. This table was replaced by dedicated columns in the <code>HFJ_RES_VER</code>
+	 * table as of HAPI FHIR 6.8.0 (Smile CDR 2023.08.R01) and as of that version
+	 * there is no need to read from the dedicated table. However, if old data still
+	 * remains and has not been migrated (using a $reindex operation) then you can
+	 * enable this setting in order to read from the old table.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setAccessMetaSourceInformationFromProvenanceTable(
+			boolean theAccessMetaSourceInformationFromProvenanceTable) {
+		myAccessMetaSourceInformationFromProvenanceTable = theAccessMetaSourceInformationFromProvenanceTable;
+	}
+
+	/**
 	 * <p>
 	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
 	 * optimization of the $expand operation on large ValueSets.
@@ -1886,6 +1976,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */
@@ -1899,6 +1993,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * deletion can be skipped, which improves performance. This is particularly helpful when large
 	 * amounts of data containing client-assigned IDs are being loaded, but it can also improve
 	 * search performance.
+	 * <p>
+	 * If deletes are disabled, it is also not possible to un-delete a previously deleted
+	 * resource.
+	 * </p>
 	 *
 	 * @since 5.0.0
 	 */
@@ -2148,12 +2246,35 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * Is HSearch indexing enabled beyond _contains or _text?
+	 * @deprecated Use {@link #isHibernateSearchIndexSearchParams()} instead
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	public boolean isAdvancedHSearchIndexing() {
+		return isHibernateSearchIndexSearchParams();
+	}
+
+	/**
+	 * @deprecated Use {@link #setHibernateSearchIndexSearchParams(boolean)} instead
+	 */
+	@Deprecated(since = "8.0.0", forRemoval = true)
+	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
+		setHibernateSearchIndexSearchParams(theAdvancedHSearchIndexing);
+	}
+
+	/**
+	 * Is HSearch indexing enabled beyond {@literal _content} or {@literal _text}?
+	 * If this setting is enabled, other search parameters will also be indexed using
+	 * Hibernate Search, allowing more kinds of searches to be performed using the
+	 * fulltext engine.
+	 *
+	 * <p>
+	 * Note that this property was called "setAdvancedHSearchIndexing" prior to HAPI FHIR 8.0.0
+	 * </p>
 	 *
 	 * @since 5.6.0
 	 */
-	public boolean isAdvancedHSearchIndexing() {
-		return myAdvancedHSearchIndexing;
+	public boolean isHibernateSearchIndexSearchParams() {
+		return myHibernateSearchIndexSearchParams;
 	}
 
 	/**
@@ -2162,11 +2283,36 @@ public class JpaStorageSettings extends StorageSettings {
 	 * String, token, and reference parameters can be indexed in HSearch.
 	 * This extends token search to support :text searches, as well as supporting
 	 * :contains and :text on string parameters.
+	 * </p>
+	 * <p>
+	 * Note that this property was called "setAdvancedHSearchIndexing" prior to HAPI FHIR 8.0.0
+	 * </p>
 	 *
 	 * @since 5.6.0
 	 */
-	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
-		this.myAdvancedHSearchIndexing = theAdvancedHSearchIndexing;
+	public void setHibernateSearchIndexSearchParams(boolean theAdvancedHSearchIndexing) {
+		this.myHibernateSearchIndexSearchParams = theAdvancedHSearchIndexing;
+	}
+
+	/**
+	 * Is hibernate search indexing of fulltext data from resources enabled?
+	 * This setting activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public boolean isHibernateSearchIndexFullText() {
+		return myHibernateSearchIndexFullText;
+	}
+
+	/**
+	 * Activates hibernate search indexing of fulltext data from resources, which
+	 * is used to support the {@literal _text} and {@literal _content} Search Parameters.
+	 *
+	 * @since 8.0.0
+	 */
+	public void setHibernateSearchIndexFullText(boolean theHibernateSearchIndexFullText) {
+		myHibernateSearchIndexFullText = theHibernateSearchIndexFullText;
 	}
 
 	/**
@@ -2548,6 +2694,66 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
 		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public int getMaxTransactionEntriesForWrite() {
+		return myMaxTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the maximum number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public void setMaxTransactionEntriesForWrite(int theMaxTransactionEntriesForWrite) {
+		myMaxTransactionEntriesForWrite = theMaxTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public int getDefaultTransactionEntriesForWrite() {
+		return myDefaultTransactionEntriesForWrite;
+	}
+
+	/**
+	 * If we are batching write operations in transactions, what should the default number of write operations per
+	 * transaction be?
+	 * @since 8.0.0
+	 */
+	public void setDefaultTransactionEntriesForWrite(int theDefaultTransactionEntriesForWrite) {
+		myDefaultTransactionEntriesForWrite = theDefaultTransactionEntriesForWrite;
+	}
+
+	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	public boolean isWriteToSearchParamIdentityTable() {
+		return myWriteToSearchParamIdentityTable;
+	}
+
+	/**
+	 * Controls whether the server writes data to the <code>HFJ_SPIDX_IDENTITY</code> table.
+	 * <p>
+	 * Defaults to {@code true}. If set to {@code false}, the server will skip writing to the table.
+	 * This should normally remain {@code true}, but is configurable for use in unit tests.
+	 *
+	 * @since 8.2.0
+	 */
+	public void setWriteToSearchParamIdentityTable(boolean theWriteToSearchParamIdentityTable) {
+		myWriteToSearchParamIdentityTable = theWriteToSearchParamIdentityTable;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

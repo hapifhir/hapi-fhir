@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,4 +182,37 @@ public interface IRequestPartitionHelperSvc {
 	 * @return - A {@link RequestPartitionId} with a normalized list of partition ids and partition names.
 	 */
 	RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
+
+	/**
+	 * This method returns the default partition ID. Implementers of this interface should overwrite this method to provide
+	 * a default partition ID that is different than the default value of null.
+	 *
+	 * @return the default partition ID
+	 */
+	@Nullable
+	default Integer getDefaultPartitionId() {
+		return null;
+	}
+
+	/**
+	 * Test whether <code>theRequestPartitionId</code> is only targeting the default partition where the ID of the default
+	 * partition is provided by {@link #getDefaultPartitionId()}.
+	 *
+	 * @param theRequestPartitionId to perform the evaluation upon.
+	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
+	 */
+	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId.isDefaultPartition(getDefaultPartitionId());
+	}
+
+	/**
+	 * Test whether <code>theRequestPartitionId</code> has one of its targeted partitions matching the default partition
+	 * where the ID of the default partition is provided by {@link #getDefaultPartitionId()}.
+	 *
+	 * @param theRequestPartitionId to perform the evaluation upon.
+	 * @return true if the <code>theRequestPartitionId</code> is targeting the default partition.
+	 */
+	default boolean hasDefaultPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId.hasDefaultPartitionId(getDefaultPartitionId());
+	}
 }

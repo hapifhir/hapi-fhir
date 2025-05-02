@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,10 +244,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@Nonnull
 	public Condition createPredicateLikeExpressionOnly(
 			String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
-		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
-		BinaryCondition identityPredicate =
-				BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
+		Condition identityPredicate = createHashIdentityPredicate(theResourceType, theParamName);
 		BinaryCondition likePredicate;
 		if (theInverse) {
 			likePredicate = BinaryCondition.notLike(myColumnValueNormalized, generatePlaceholder(theLikeExpression));

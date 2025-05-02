@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 import java.util.Arrays;
 import java.util.Map;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import(CrProcessorConfig.class)
 public class PackageOperationConfig {

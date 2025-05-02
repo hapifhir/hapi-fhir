@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ package ca.uhn.hapi.fhir.cdshooks.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -50,6 +52,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
@@ -100,7 +103,8 @@ public class CdsHooksConfig {
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper,
 			ICdsCrServiceFactory theCdsCrServiceFactory,
 			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			FhirContext theFhirContext) {
+			FhirContext theFhirContext,
+			@Nullable CDSHooksVersion theCDSHooksVersion) {
 		final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
 				new CdsServiceRequestJsonDeserializer(theFhirContext, theObjectMapper);
 		return new CdsServiceRegistryImpl(
@@ -109,14 +113,17 @@ public class CdsHooksConfig {
 				theObjectMapper,
 				theCdsCrServiceFactory,
 				theCrDiscoveryServiceFactory,
-				cdsServiceRequestJsonDeserializer);
+				cdsServiceRequestJsonDeserializer,
+				CDSHooksVersion.getOrDefault(theCDSHooksVersion));
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceRegistry cdsCrServiceRegistry() {
 		return new CdsCrServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrServiceFactory cdsCrServiceFactory(
 			FhirContext theFhirContext,
@@ -148,11 +155,13 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICdsCrDiscoveryServiceRegistry cdsCrDiscoveryServiceRegistry() {
 		return new CdsCrDiscoveryServiceRegistry();
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public ICrDiscoveryServiceFactory crDiscoveryServiceFactory(
 			FhirContext theFhirContext,
@@ -184,6 +193,7 @@ public class CdsHooksConfig {
 		};
 	}
 
+	@Deprecated(since = "8.1.4", forRemoval = true)
 	@Bean
 	public CdsServiceInterceptor cdsServiceInterceptor() {
 		if (myResourceChangeListenerRegistry == null) {
@@ -209,12 +219,16 @@ public class CdsHooksConfig {
 			CdsResolutionStrategySvc theCdsResolutionStrategySvc,
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
-			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
+			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
+			FhirContext theFhirContext,
+			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CdsPrefetchSvc(
 				theCdsResolutionStrategySvc,
 				theResourcePrefetchDao,
 				theResourcePrefetchFhirClient,
-				theCdsHooksDaoAuthorizationSvc);
+				theCdsHooksDaoAuthorizationSvc,
+				theFhirContext,
+				theInterceptorBroadcaster);
 	}
 
 	@Bean

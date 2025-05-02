@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import java.util.concurrent.Executors;
 /**
  * Common hapi-fhir clinical reasoning config specifically for R4 shared with downstream modules.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 @Configuration
 @Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {

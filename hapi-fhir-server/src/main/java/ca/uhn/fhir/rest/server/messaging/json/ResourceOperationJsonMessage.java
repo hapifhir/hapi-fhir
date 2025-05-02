@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
@@ -62,17 +61,5 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
-	}
-
-	@Nullable
-	@Override
-	public String getMessageKey() {
-		return myPayload.getMessageKey();
-	}
-
-	@Nullable
-	@Override
-	public String getMessageKeyOrDefault() {
-		return myPayload.getMessageKeyOrDefault();
 	}
 }

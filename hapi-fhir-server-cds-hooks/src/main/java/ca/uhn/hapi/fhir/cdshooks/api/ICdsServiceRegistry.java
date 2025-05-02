@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.api;
 
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 
@@ -63,14 +63,14 @@ public interface ICdsServiceRegistry {
 	 * @param theServiceFunction             the function that will be called to invoke the service
 	 * @param theCdsServiceJson              the service descriptor
 	 * @param theAllowAutoFhirClientPrefetch Whether to allow the server to automatically prefetch resources
-	 * @param theModuleId                    the moduleId where the service is registered
+	 * @param theServiceGroupId              the serviceGroupId where the service is registered
 	 */
 	void registerService(
 			String theServiceId,
 			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
 			CdsServiceJson theCdsServiceJson,
 			boolean theAllowAutoFhirClientPrefetch,
-			String theModuleId);
+			String theServiceGroupId);
 
 	/**
 	 * Register a new Clinical Reasoning CDS Service with the endpoint.
@@ -84,8 +84,16 @@ public interface ICdsServiceRegistry {
 	 * Remove registered CDS service with the service ID, only removes dynamically registered service
 	 *
 	 * @param theServiceId the id of the service to be removed
+	 * @param theServiceGroupId the id of the group where the service is registered
 	 */
-	void unregisterService(String theServiceId, String theModuleId);
+	void unregisterService(String theServiceId, String theServiceGroupId);
+
+	/**
+	 * Remove registered CDS services with the Group ID, only removes dynamically registered services
+	 *
+	 * @param theServiceGroupId the id of the group where the services are registered
+	 */
+	void unregisterServices(String theServiceGroupId);
 
 	/**
 	 * Get registered CDS service with service ID

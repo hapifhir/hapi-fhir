@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ public class MethodUtil {
 		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
-			retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			retVal.addHeader(Constants.HEADER_IF_MATCH, "W/\"" + theId.getVersionIdPart() + '"');
 		}
 
 		return retVal;

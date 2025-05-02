@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.svc.MdmChannelSubmitterSvcImpl;
@@ -48,8 +48,8 @@ public class MdmSubmitterConfig {
 
 	@Bean
 	@Lazy
-	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IChannelFactory theChannelFactory) {
-		return new MdmChannelSubmitterSvcImpl(theFhirContext, theChannelFactory);
+	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IBrokerClient theBrokerClient) {
+		return new MdmChannelSubmitterSvcImpl(theFhirContext, theBrokerClient);
 	}
 
 	@Bean

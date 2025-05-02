@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,17 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.annotations.VisibleForTesting;
@@ -59,6 +62,9 @@ public class DaoSearchParamSynchronizer {
 
 	@Autowired
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
+	@Autowired
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -103,6 +109,11 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	@VisibleForTesting
+	public void setSearchParamIdentityCacheSvc(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {
+		mySearchParamIdentityCacheSvc = theSearchParamIdentityCacheSvc;
+	}
+
+	@VisibleForTesting
 	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
 	}
@@ -115,6 +126,7 @@ public class DaoSearchParamSynchronizer {
 			@Nullable IPreSaveHook<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
+			next.setResourceId(theEntity.getId().getId());
 			next.setPartitionId(theEntity.getPartitionId());
 			next.calculateHashes();
 		}
@@ -169,12 +181,43 @@ public class DaoSearchParamSynchronizer {
 		}
 
 		for (T next : paramsToAdd) {
-			myEntityManager.merge(next);
+			findOrCreateSearchParamIdentity(next);
+			if (next.getId() == null) {
+				myEntityManager.persist(next);
+			} else {
+				myEntityManager.merge(next);
+			}
 		}
 
 		// TODO:  are there any unintended consequences to fixing this bug?
 		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
+
+		// Replace the existing "new set" with the set of params we should be adding.
+		// We're going to add them back into the entity just in case it gets updated
+		// a second time within the same transaction
+		theNewParams.clear();
+		theNewParams.addAll(theExistingParams);
+		theNewParams.addAll(paramsToAdd);
+		theNewParams.removeAll(paramsToRemove);
+	}
+
+	/**
+	 * Checks whether the Indexed Search Parameter hash identity exists in the cache.
+	 * If the identity is missing, a new {@link IndexedSearchParamIdentity} will be
+	 * created asynchronously in a separate thread.
+	 *
+	 * <p>For details, see:
+	 * {@link SearchParamIdentityCacheSvcImpl#findOrCreateSearchParamIdentity(Long, String, String)}</p>
+	 */
+	private <T extends BaseResourceIndex> void findOrCreateSearchParamIdentity(T theNewParam) {
+		if (theNewParam instanceof BaseResourceIndexedSearchParam) {
+			BaseResourceIndexedSearchParam indexedSearchParam = ((BaseResourceIndexedSearchParam) theNewParam);
+			mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(
+					indexedSearchParam.getHashIdentity(),
+					indexedSearchParam.getResourceType(),
+					indexedSearchParam.getParamName());
+		}
 	}
 
 	/**

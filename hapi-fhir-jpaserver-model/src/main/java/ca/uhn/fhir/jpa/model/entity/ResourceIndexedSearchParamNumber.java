@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.model.listener.IndexStorageOptimizationListener;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -32,8 +31,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -48,7 +49,6 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Embeddable
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
@@ -58,6 +58,7 @@ import java.util.Objects;
 			@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 		})
+@IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -77,12 +78,26 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 			optional = false,
 			fetch = FetchType.LAZY,
 			cascade = {})
-	@JoinColumn(
-			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false)
+	@JoinColumns(
+			value = {
+				@JoinColumn(
+						name = "RES_ID",
+						referencedColumnName = "RES_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false),
+				@JoinColumn(
+						name = "PARTITION_ID",
+						referencedColumnName = "PARTITION_ID",
+						insertable = false,
+						updatable = false,
+						nullable = false)
+			},
+			foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"))
 	private ResourceTable myResource;
+
+	@Column(name = "RES_ID", nullable = false)
+	private Long myResourceId;
 
 	public ResourceIndexedSearchParamNumber() {}
 
@@ -101,6 +116,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		ResourceIndexedSearchParamNumber source = (ResourceIndexedSearchParamNumber) theSource;
 		myValue = source.myValue;
 		myHashIdentity = source.myHashIdentity;
+	}
+
+	@Override
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override

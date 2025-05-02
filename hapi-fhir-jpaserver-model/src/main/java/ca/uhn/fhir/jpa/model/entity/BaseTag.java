@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,15 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.io.Serializable;
 
@@ -31,9 +36,15 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 
 	private static final long serialVersionUID = 1L;
 
-	// many baseTags -> one tag definition
+	/**
+	 * Every tag has a reference to the tag definition. Note that this field
+	 * must not have a FK constraint! In this case, Postgres (and maybe others)
+	 * are horribly slow writing to the table if there's an FK constraint.
+	 * See https://pganalyze.com/blog/5mins-postgres-multiXact-ids-foreign-keys-performance
+	 */
 	@ManyToOne(cascade = {})
-	@JoinColumn(name = "TAG_ID", nullable = false)
+	@JoinColumn(name = "TAG_ID", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@NotFound(action = NotFoundAction.IGNORE)
 	private TagDefinition myTag;
 
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
@@ -43,6 +54,12 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 		return myTagId;
 	}
 
+	/**
+	 * This can be null if the tag definition has been deleted. This
+	 * should never happen unless someone has manually messed with
+	 * the database, but it could happen.
+	 */
+	@Nullable
 	public TagDefinition getTag() {
 		return myTag;
 	}

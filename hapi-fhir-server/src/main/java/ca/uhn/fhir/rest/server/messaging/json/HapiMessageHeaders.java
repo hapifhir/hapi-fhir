@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,15 @@ public class HapiMessageHeaders implements IModelJson {
 
 	public MessageHeaders toMessageHeaders() {
 		Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
-		returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
-		returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
-		returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+		if (myRetryCount != null) {
+			returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
+		}
+		if (myFirstFailureTimestamp != null) {
+			returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
+		}
+		if (myLastFailureTimestamp != null) {
+			returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+		}
 		return new MessageHeaders(returnedHeaders);
 	}
 }

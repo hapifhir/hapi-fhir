@@ -450,6 +450,18 @@
 			"lat": 40.43486,
 			"lon": -3.63220,
 			"added": "2022-07-19"
+		},
+			{
+			"title": "Healthsoft",
+			"description": "Innovative software solutions for future-proof healthcare.",
+			"company": "Healthsoft B.V.",
+			"contactName": "Bart Embregts",
+			"contactEmail": "b.embregts@healthsoft.nl",
+			"link": "https://healthsoft.nl/",
+			"city": "Rotterdam",
+			"lat": 51.908779,
+			"lon": 4.477520,
+			"added": "2024-11-14"
 		}
 	]
 }

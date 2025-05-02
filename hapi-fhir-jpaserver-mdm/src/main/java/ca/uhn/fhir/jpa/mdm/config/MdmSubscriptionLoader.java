@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.broker.api.ChannelProducerSettings;
+import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.ISubscriptionTopicLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -73,10 +73,9 @@ public class MdmSubscriptionLoader {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired(required = false)
-	private SubscriptionTopicLoader mySubscriptionTopicLoader;
+	private ISubscriptionTopicLoader mySubscriptionTopicLoader;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
-	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
 	public synchronized void daoUpdateMdmSubscriptions() {
 		List<IBaseResource> subscriptions;
@@ -98,7 +97,7 @@ public class MdmSubscriptionLoader {
 				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
 				updateSubscriptionTopic(subscriptionTopic);
 				// After loading subscriptionTopic, sync subscriptionTopic to the registry.
-				mySubscriptionTopicLoader.syncDatabaseToCache();
+				mySubscriptionTopicLoader.requestRefresh();
 
 				subscriptions = buildMdmSubscriptionR5(subscriptionTopic);
 				break;
@@ -112,8 +111,8 @@ public class MdmSubscriptionLoader {
 			updateIfNotPresent(subscription);
 		}
 		// After loading all the subscriptions, sync the subscriptions to the registry.
-		if (subscriptions != null && subscriptions.size() > 0) {
-			mySubscriptionLoader.syncDatabaseToCache();
+		if (!subscriptions.isEmpty()) {
+			mySubscriptionLoader.requestRefresh();
 		}
 	}
 
@@ -121,14 +120,18 @@ public class MdmSubscriptionLoader {
 		try {
 			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
-			ourLog.info("Creating subscription " + theSubscription.getIdElement());
+			ourLog.info("Creating subscription {}", theSubscription.getIdElement());
 			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
 		}
 	}
 
 	synchronized void updateSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) {
-		mySubscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		mySubscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
+		IFhirResourceDao<SubscriptionTopic> subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		subscriptionTopicDao.update(theSubscriptionTopic, SystemRequestDetails.forAllPartitions());
+	}
+
+	protected ChannelProducerSettings getChannelProducerSettings() {
+		return new ChannelProducerSettings();
 	}
 
 	private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(String theId, String theCriteria) {
@@ -147,7 +150,7 @@ public class MdmSubscriptionLoader {
 		org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
@@ -168,7 +171,7 @@ public class MdmSubscriptionLoader {
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		channel.setPayload(Constants.CT_JSON);
 		return retval;
 	}
@@ -216,7 +219,7 @@ public class MdmSubscriptionLoader {
 				.setSystem(CanonicalSubscriptionChannelType.MESSAGE.getSystem()));
 
 		subscription.setEndpoint("channel:"
-				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+				+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, getChannelProducerSettings()));
 		subscription.setContentType(Constants.CT_JSON);
 
 		return Collections.singletonList(subscription);

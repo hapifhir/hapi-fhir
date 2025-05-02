@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -75,6 +76,30 @@ public class SystemRequestDetails extends RequestDetails {
 			myServer = theDetails.getServer();
 			myFhirContext = theDetails.getFhirContext();
 		}
+	}
+
+	/**
+	 * Copy constructor
+	 * @param theOther The request details to copy from
+	 */
+	public SystemRequestDetails(SystemRequestDetails theOther) {
+		super(theOther);
+		if (nonNull(theOther.getServer())) {
+			myServer = theOther.getServer();
+			myFhirContext = theOther.getFhirContext();
+		}
+		if (nonNull(theOther.myHeaders)) {
+			initHeaderMap();
+			myHeaders.putAll(theOther.myHeaders);
+		}
+		myRequestPartitionId = theOther.myRequestPartitionId;
+	}
+
+	// TODO KHS use this everywhere we create a srd with only one partition
+	public static SystemRequestDetails forRequestPartitionId(RequestPartitionId thePartitionId) {
+		SystemRequestDetails retVal = new SystemRequestDetails();
+		retVal.setRequestPartitionId(thePartitionId);
+		return retVal;
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
@@ -240,6 +265,11 @@ public class SystemRequestDetails extends RequestDetails {
 		@Override
 		public boolean hasHooks(Pointcut thePointcut) {
 			return false;
+		}
+
+		@Override
+		public List<IInvoker> getInvokersForPointcut(Pointcut thePointcut) {
+			return Collections.emptyList();
 		}
 	}
 

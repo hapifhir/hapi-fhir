@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.HapiFhirEnversRevision;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -69,6 +70,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -147,6 +149,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.expandPidsByGoldenResourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
 				.stream()
 				.map(this::daoTupleToMdmTuple)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<MdmPidTuple<JpaPid>> resolveGoldenResources(List<JpaPid> theSourcePids) {
+		return myMdmLinkDao
+				.expandPidsByGoldenResourcePidsOrSourcePidsAndMatchResult(
+						JpaPid.toLongList(theSourcePids), MdmMatchResultEnum.MATCH)
+				.stream()
+				.map(this::daoTupleToMdmTuple)
+				.distinct()
 				.collect(Collectors.toList());
 	}
 
@@ -443,9 +456,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Nonnull
 	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
 		return myIdHelperService
-				.getPidsOrThrowException(RequestPartitionId.allPartitions(), theMdmHistorySearchParameters)
+				.resolveResourceIdentities(
+						RequestPartitionId.allPartitions(),
+						theMdmHistorySearchParameters,
+						ResolveIdentityMode.includeDeleted().cacheOk())
+				.values()
 				.stream()
-				.map(JpaPid::getId)
+				.map(t -> t.getPersistentId().getId())
 				.collect(Collectors.toUnmodifiableList());
 	}
 

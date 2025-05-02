@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 /**
  * The purpose of this Condition is to verify that the CR dependent beans RestfulServer and EvaluationSettings exist.
  */
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CrConfigCondition implements Condition {
 	private static final Logger ourLog = LoggerFactory.getLogger(CrConfigCondition.class);
 

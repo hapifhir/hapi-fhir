@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -21,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,10 +32,10 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters;
@@ -49,7 +49,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -59,10 +58,11 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
@@ -71,7 +71,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
-	private Long myExtensionalVsIdOnResourceTable;
+	private JpaPid myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
 	private void loadAndPersistCodeSystemAndValueSet(HTTPVerb theVerb) throws IOException {
@@ -148,7 +148,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable = (JpaPid) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -1253,7 +1253,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(false, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 			assertEquals("message", respParam.getParameter().get(1).getName());
-			assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+			String message = ((StringType) respParam.getParameter().get(1).getValue()).getValue();
+			assertThat(message).contains("Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'", message);
 		}
 	}
 
@@ -1448,7 +1449,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1471,7 +1472,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 

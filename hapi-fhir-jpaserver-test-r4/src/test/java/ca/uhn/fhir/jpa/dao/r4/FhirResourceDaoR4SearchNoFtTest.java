@@ -6,11 +6,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -28,7 +30,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -1729,65 +1730,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.add(PARAM_ID, new TokenParam(id1));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params))).containsExactly(id1);
 
-	}
-
-	@Test
-	public void testSearchByIdParam_QueryIsMinimal() {
-		// With only an _id parameter
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-			myCaptureQueriesListener.clear();
-			myDiagnosticReportDao.search(params).size();
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(1);
-
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-			assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
-		}
-		// With an _id parameter and a standard search param
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLoadSynchronous(true);
-			params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-			params.add("code", new TokenParam("foo", "bar"));
-			myCaptureQueriesListener.clear();
-			myDiagnosticReportDao.search(params).size();
-			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-			assertThat(selectQueries).hasSize(1);
-
-			String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-			ourLog.info("SQL Query:\n{}", sqlQuery);
-			assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "hash_sys_and_value")).as(sqlQuery).isEqualTo(1);
-			assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport")).as(sqlQuery).isEqualTo(0); // could be 0
-			assertThat(countMatches(sqlQuery, "res_deleted_at")).as(sqlQuery).isEqualTo(0); // could be 0
-		}
-	}
-
-	@Test
-	public void testSearchByIdParamAndOtherSearchParam_QueryIsMinimal() {
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-		params.add(PARAM_ID, new StringParam("DiagnosticReport/123"));
-		myCaptureQueriesListener.clear();
-		myDiagnosticReportDao.search(params).size();
-		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(selectQueries).hasSize(1);
-
-		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
-		ourLog.info("SQL Query:\n{}", sqlQuery);
-		assertThat(countMatches(sqlQuery, "res_id = '123'")).as(sqlQuery).isEqualTo(1);
-		assertThat(countMatches(sqlQuery, "join")).as(sqlQuery).isEqualTo(0);
-		assertThat(countMatches(sqlQuery, "res_type = 'diagnosticreport'")).as(sqlQuery).isEqualTo(1);
-		assertThat(countMatches(sqlQuery, "res_deleted_at is null")).as(sqlQuery).isEqualTo(1);
 	}
 
 	@Test
@@ -4049,9 +3991,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
-		runInTransaction(() -> {
-			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t -> t.getParamName().equals("identifier")).map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		long patientIdentifierHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
+			RequestPartitionId.defaultPartition(), "Patient", "identifier");
+		runInTransaction(() -> ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream()
+			.filter(t -> t.getHashIdentity().equals(patientIdentifierHashIdentity))
+			.map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * "))));
 
 		{
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
@@ -5318,12 +5262,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setCode("MR");
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
+		long patientIdentifierOfTypeHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+			new PartitionSettings(), RequestPartitionId.defaultPartition(), "Patient", "identifier:of-type");
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
-				.filter(t -> t.getParamName().equals("identifier:of-type"))
-				.collect(Collectors.toList());
+				.filter(t -> t.getHashIdentity().equals(patientIdentifierOfTypeHashIdentity))
+				.toList();
 			assertEquals(1, params.size());
 			assertNotNull(params.get(0).getHashSystemAndValue());
 			assertNull(params.get(0).getHashSystem());

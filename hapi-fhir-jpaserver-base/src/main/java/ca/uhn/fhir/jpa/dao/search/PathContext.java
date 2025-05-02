@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import jakarta.annotation.Nonnull;
+import org.hibernate.search.engine.search.common.NamedValues;
 import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.ExistsPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.KnnPredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.MatchAllPredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.MatchIdPredicateMatchingStep;
 import org.hibernate.search.engine.search.predicate.dsl.MatchNonePredicateFinalStep;
@@ -34,6 +36,8 @@ import org.hibernate.search.engine.search.predicate.dsl.NestedPredicateOptionsSt
 import org.hibernate.search.engine.search.predicate.dsl.NotPredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.PhrasePredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.PrefixPredicateFieldStep;
+import org.hibernate.search.engine.search.predicate.dsl.QueryStringPredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.RangePredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.RegexpPredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -222,6 +226,11 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
+	public PrefixPredicateFieldStep<?> prefix() {
+		return myPredicateFactory.prefix();
+	}
+
+	@Override
 	public RegexpPredicateFieldStep<?> regexp() {
 		return myPredicateFactory.regexp();
 	}
@@ -247,6 +256,11 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
+	public QueryStringPredicateFieldStep<?> queryString() {
+		return myPredicateFactory.queryString();
+	}
+
+	@Override
 	public ExistsPredicateFieldStep<?> exists() {
 		return myPredicateFactory.exists();
 	}
@@ -260,6 +274,16 @@ class PathContext implements SearchPredicateFactory {
 	@Incubating
 	public NamedPredicateOptionsStep named(String path) {
 		return myPredicateFactory.named(path);
+	}
+
+	@Override
+	public KnnPredicateFieldStep knn(int i) {
+		return myPredicateFactory.knn(i);
+	}
+
+	@Override
+	public PredicateFinalStep withParameters(Function<? super NamedValues, ? extends PredicateFinalStep> function) {
+		return myPredicateFactory.withParameters(function);
 	}
 
 	@Override

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,6 +209,7 @@ public class HapiMigrator {
 			theTask.execute();
 			recordTaskAsCompletedIfNotDryRun(theTask, sw.getMillis(), true);
 			theMigrationResult.changes += theTask.getChangesCount();
+			theMigrationResult.executionResult = theTask.getExecutionResult();
 			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
 			theMigrationResult.succeededTasks.add(theTask);
 		} catch (SQLException | HapiMigrationException e) {
@@ -247,7 +248,16 @@ public class HapiMigrator {
 		}
 	}
 
+	/**
+	 * Unlike {@link #addTasks(Iterable)}, this method always adds all tasks
+	 */
+	public void addAllTasksForUnitTest(Iterable<BaseTask> theMigrationTasks) {
+		myTaskList.append(theMigrationTasks);
+	}
+
 	public void addTask(BaseTask theTask) {
+		// Don't add a check for unit test mode here - We call this from
+		// tests which expect tasks to always be added
 		myTaskList.add(theTask);
 	}
 

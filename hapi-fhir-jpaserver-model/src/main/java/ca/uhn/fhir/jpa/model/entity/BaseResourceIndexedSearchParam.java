@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
@@ -49,6 +51,13 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@FullTextField
 	@Column(name = "SP_NAME", length = MAX_SP_NAME)
 	private String myParamName;
+
+	/**
+	 * This is just a place to stash the {@link #myParamName} value if
+	 * {@link #optimizeIndexStorage()} is called.
+	 */
+	@Transient
+	private transient String myParamNameCached;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
@@ -80,6 +89,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	public abstract Long getId();
 
 	public String getParamName() {
+		if (myParamNameCached != null) {
+			return myParamNameCached;
+		}
 		return myParamName;
 	}
 
@@ -100,16 +112,18 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	/**
-	 * Set SP_NAME, RES_TYPE, SP_UPDATED to null without clearing hashes
+	 * Set SP_NAME, RES_TYPE to null without clearing hashes
 	 */
 	public void optimizeIndexStorage() {
-		myParamName = null;
+		if (isNotBlank(myParamName)) {
+			myParamNameCached = myParamName;
+			myParamName = null;
+		}
 		myResourceType = null;
-		myUpdated = null;
 	}
 
 	public boolean isIndexStorageOptimized() {
-		return myParamName == null || myResourceType == null || myUpdated == null;
+		return myParamName == null || myResourceType == null;
 	}
 
 	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation

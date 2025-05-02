@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
+import ca.uhn.fhir.rest.server.messaging.ICanNullPayload;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
+public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> implements ICanNullPayload {
 
 	@JsonProperty("payload")
 	private ResourceModifiedMessage myPayload;
@@ -53,25 +53,14 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 	}
 
 	@Override
-	@Nullable
-	public String getMessageKey() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKey();
-	}
-
-	@Override
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKeyOrDefault();
-	}
-
-	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
+	}
+
+	@Override
+	public void setPayloadToNull() {
+		if (myPayload != null) {
+			myPayload.setPayloadToNull();
+		}
 	}
 }

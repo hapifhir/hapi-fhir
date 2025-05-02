@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,17 +50,6 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	private FhirContext myFhirContext;
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(
-			IResourceValidator validator, Object appContext, String path, String url) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
-		}
-
-		return ReferenceValidationPolicy.IGNORE;
-	}
-
-	@Override
 	public EnumSet<ResourceValidationAction> policyForResource(
 			IResourceValidator validator, Object appContext, StructureDefinition type, String path) {
 		return EnumSet.allOf(ResourceValidationAction.class);
@@ -91,6 +80,17 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
+	public SpecialValidationAction policyForSpecialValidation(
+			IResourceValidator validator,
+			Object appContext,
+			SpecialValidationRule rule,
+			String stackPath,
+			Element resource,
+			Element element) {
+		return null;
+	}
+
+	@Override
 	public ContainedReferenceValidationPolicy policyForContained(
 			IResourceValidator validator,
 			Object appContext,
@@ -116,5 +116,39 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 			IMessagingServices msgServices,
 			List<ValidationMessage> messages) {
 		return Arrays.asList();
+	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId) {
+		return false;
+	}
+
+	@Override
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator validator,
+			Object appContext,
+			String path,
+			String url,
+			ReferenceDestinationType destinationType) {
+		int slashIdx = url.indexOf("/");
+		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
+			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
+		}
+		return ReferenceValidationPolicy.IGNORE;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor getPolicyAdvisor() {
+		return this;
+	}
+
+	@Override
+	public IValidationPolicyAdvisor setPolicyAdvisor(IValidationPolicyAdvisor policyAdvisor) {
+		return this;
+	}
+
+	@Override
+	public ReferenceValidationPolicy getReferencePolicy() {
+		return ReferenceValidationPolicy.IGNORE;
 	}
 }

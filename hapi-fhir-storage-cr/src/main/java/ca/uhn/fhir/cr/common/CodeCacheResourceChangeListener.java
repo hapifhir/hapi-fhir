@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import java.util.function.Function;
 /**
  * This class listens for changes to ValueSet resources and invalidates the CodeCache. The CodeCache is used in CQL evaluation to speed up terminology operations. If ValueSet changes, it's possible that the constituent codes change and therefore the cache needs to be updated.
  **/
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CodeCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog =

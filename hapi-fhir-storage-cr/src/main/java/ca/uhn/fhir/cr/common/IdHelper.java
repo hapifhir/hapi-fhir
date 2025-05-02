@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Clinical Reasoning
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class IdHelper {
 	public static IIdType getIdType(FhirVersionEnum fhirVersion, String resourceType, String theId) {
 		if (StringUtils.isBlank(theId)) {

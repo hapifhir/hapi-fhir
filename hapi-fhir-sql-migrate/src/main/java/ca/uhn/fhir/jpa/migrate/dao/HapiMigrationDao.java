@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,11 @@ public class HapiMigrationDao {
 
 	public boolean createMigrationTableIfRequired() {
 		if (migrationTableExists()) {
+			if (!columnExists("result")) {
+				String addResultColumnStatement = myMigrationQueryBuilder.addResultColumnStatement();
+				ourLog.info(addResultColumnStatement);
+				myJdbcTemplate.execute(addResultColumnStatement);
+			}
 			return false;
 		}
 		ourLog.info("Creating table {}", myMigrationTablename);
@@ -141,6 +146,29 @@ public class HapiMigrationDao {
 			}
 		} catch (SQLException e) {
 			throw new InternalErrorException(Msg.code(2141) + e);
+		}
+	}
+
+	private boolean columnExists(String theColumnName) {
+		try (Connection connection = myDataSource.getConnection()) {
+			ResultSet columnsUpper = connection
+					.getMetaData()
+					.getColumns(
+							connection.getCatalog(),
+							connection.getSchema(),
+							myMigrationTablename,
+							theColumnName.toUpperCase());
+			ResultSet columnsLower = connection
+					.getMetaData()
+					.getColumns(
+							connection.getCatalog(),
+							connection.getSchema(),
+							myMigrationTablename,
+							theColumnName.toLowerCase());
+
+			return columnsUpper.next() || columnsLower.next(); // If there's a row, the column exists
+		} catch (SQLException e) {
+			throw new InternalErrorException(Msg.code(2615) + "Error checking column existence: " + e.getMessage(), e);
 		}
 	}
 

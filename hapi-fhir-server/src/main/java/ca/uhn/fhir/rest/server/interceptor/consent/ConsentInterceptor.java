@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -157,6 +158,11 @@ public class ConsentInterceptor {
 		return this;
 	}
 
+	@VisibleForTesting
+	public List<IConsentService> getConsentServices() {
+		return Collections.unmodifiableList(myConsentService);
+	}
+
 	@Hook(value = Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void interceptPreHandled(RequestDetails theRequestDetails) {
 		if (isSkipServiceForRequest(theRequestDetails)) {
@@ -175,11 +181,15 @@ public class ConsentInterceptor {
 				case PROCEED:
 					continue;
 				case AUTHORIZED:
-					Map<Object, Object> userData = theRequestDetails.getUserData();
-					userData.put(myRequestAuthorizedKey, Boolean.TRUE);
+					authorizeRequest(theRequestDetails);
 					return;
 			}
 		}
+	}
+
+	protected void authorizeRequest(RequestDetails theRequestDetails) {
+		Map<Object, Object> userData = theRequestDetails.getUserData();
+		userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 	}
 
 	/**
@@ -539,18 +549,18 @@ public class ConsentInterceptor {
 		RequestDetails requestDetails = getRequestDetailsForCurrentExportOperation(theParameters, theResource);
 
 		for (IConsentService next : myConsentService) {
-			ConsentOutcome nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
-
+			ConsentOutcome nextOutcome = next.canSeeResource(requestDetails, theResource, myContextConsentServices);
 			ConsentOperationStatusEnum status = nextOutcome.getStatus();
-			switch (status) {
-				case AUTHORIZED:
-				case PROCEED:
-					// go to the next
-					break;
-				case REJECT:
-					// if any consent service rejects,
-					// reject the resource
-					return false;
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
+			}
+
+			nextOutcome = next.willSeeResource(requestDetails, theResource, myContextConsentServices);
+			status = nextOutcome.getStatus();
+			if (ConsentOperationStatusEnum.REJECT.equals(status)) {
+				// if any consent service rejects, reject the resource
+				return false;
 			}
 		}
 

@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - CDS Hooks
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.TriggerDefinition;
 
 import java.util.stream.Collectors;
 
+@Deprecated(since = "8.1.4", forRemoval = true)
 public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
 	protected PlanDefinition myPlanDefinition;
 	protected PrefetchUrlList myPrefetchUrlList;

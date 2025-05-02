@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,22 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class AddIdGeneratorTask extends BaseTask {
 
+	private static final Integer DEFAULT_INCREMENT = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIdGeneratorTask.class);
 	private final String myGeneratorName;
+	private final Integer myIncrement;
 
 	public AddIdGeneratorTask(String theProductVersion, String theSchemaVersion, String theGeneratorName) {
 		super(theProductVersion, theSchemaVersion);
 		myGeneratorName = theGeneratorName;
+		myIncrement = DEFAULT_INCREMENT;
+	}
+
+	public AddIdGeneratorTask(
+			String theProductVersion, String theSchemaVersion, String theGeneratorName, Integer theIncrement) {
+		super(theProductVersion, theSchemaVersion);
+		myGeneratorName = theGeneratorName;
+		myIncrement = theIncrement;
 	}
 
 	@Override
@@ -58,6 +68,7 @@ public class AddIdGeneratorTask extends BaseTask {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
 				// These require a separate table
+				// Increment value is controlled globally using the auto_increment_increment variable
 				if (!tableNames.contains(myGeneratorName)) {
 
 					String creationSql = "create table " + myGeneratorName + " ( next_val bigint ) engine=InnoDB";
@@ -69,17 +80,13 @@ public class AddIdGeneratorTask extends BaseTask {
 				break;
 			case DERBY_EMBEDDED:
 			case H2_EMBEDDED:
-				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
+			case ORACLE_12C:
+			case MSSQL_2012:
+				sql = "create sequence " + myGeneratorName + " start with 1 increment by " + myIncrement;
 				break;
 			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
-				sql = "create sequence " + myGeneratorName + " start 1 increment 50";
-				break;
-			case ORACLE_12C:
-				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
-				break;
-			case MSSQL_2012:
-				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
+				sql = "create sequence " + myGeneratorName + " start 1 increment " + myIncrement;
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(63));

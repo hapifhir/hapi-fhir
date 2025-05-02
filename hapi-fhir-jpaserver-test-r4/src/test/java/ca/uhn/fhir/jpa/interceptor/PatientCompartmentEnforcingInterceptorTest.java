@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -11,10 +15,10 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
@@ -43,20 +47,28 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
 	}
 
+	@Override
 	@AfterEach
-	public void after() {
+	public void after() throws Exception {
+		super.after();
 		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(false);
-		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
+		PartitionSettings defaultPartitionSettings = new PartitionSettings();
+		myPartitionSettings.setUnnamedPartitionMode(defaultPartitionSettings.isUnnamedPartitionMode());
+		myPartitionSettings.setDefaultPartitionId(defaultPartitionSettings.getDefaultPartitionId());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
+
+		myStorageSettings.setMassIngestionMode(false);
 	}
 
-
-	@Test
-	public void testUpdateResource_whenCrossingPatientCompartment_throws() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testUpdateResource_whenCrossingPatientCompartment_throws(boolean theMassIngestionEnabled) {
+		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		createPatientA();
 		createPatientB();
 
@@ -71,8 +83,10 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		assertEquals("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?", thrown.getMessage());
 	}
 
-	@Test
-	public void testUpdateResource_whenNotCrossingPatientCompartment_allows() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testUpdateResource_whenNotCrossingPatientCompartment_allows(boolean theMassIngestionEnabled) {
+		myStorageSettings.setMassIngestionMode(theMassIngestionEnabled);
 		createPatientA();
 
 		Observation obs = new Observation();
@@ -82,7 +96,8 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		obs.getNote().add(new Annotation().setText("some text"));
 		obs.setStatus(Observation.ObservationStatus.CORRECTED);
 
-		myObservationDao.update(obs, new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.update(obs, new SystemRequestDetails());
+		assertEquals("Patient/A", ((Observation) outcome.getResource()).getSubject().getReference());
 	}
 
 	private void createPatientA() {

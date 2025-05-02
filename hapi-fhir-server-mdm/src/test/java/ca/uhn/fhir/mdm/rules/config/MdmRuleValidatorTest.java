@@ -16,19 +16,23 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MdmRuleValidatorTest extends BaseR4Test {
 
+	@Override
 	@BeforeEach
 	public void before() {
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
-		when(mySearchParamRetriever.getActiveSearchParam("Organization", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Organization", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		super.before();
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Patient"), eq("identifier"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Practitioner"), eq("identifier"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Medication"), eq("identifier"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("AllergyIntolerance"), eq("identifier"), any())).thenReturn(null);
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Organization"), eq("identifier"), any())).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam(eq("Organization"), eq("active"), any())).thenReturn(mock(RuntimeSearchParam.class));
 	}
 
    @Test
@@ -72,7 +76,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		try {
 			setMdmRuleJson("bad-rules-bad-fhirpath.json");
 			fail();		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error in ?? at 1, 1: The name blurst is not a valid function name");
+			assertThat(e.getMessage()).startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error @1, 1: The name blurst is not a valid function name");
 		}
 	}
 

@@ -11,10 +11,12 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -26,8 +28,10 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
@@ -36,7 +40,6 @@ import org.hl7.fhir.r4.model.Property;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +60,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * operation in order to validate codes.
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
-	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
@@ -65,18 +68,40 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
 
+	@Nullable
+	private final IRestfulClientFactory myRestfulClientFactory;
+
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext The FhirContext object to use
+	 * @param theFhirContext The FhirContext. Will be used to create a FHIR client for remote terminology requests.
 	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext) {
-		super(theFhirContext);
+		this(theFhirContext, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theFhirContext The FhirContext. Will be used to create a FHIR client for remote terminology requests.
+	 * @param theBaseUrl The url used for the remote terminology FHIR client.
+	 */
 	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
+		this(theFhirContext, theBaseUrl, null);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theFhirContext The FhirContext.
+	 * @param theBaseUrl The url used for the remote terminology FHIR client.
+	 * @param theRestfulClientFactory Used to create the remote terminology FHIR client. If this is not supplied, a client will be created from the FhirContext
+	 */
+	public RemoteTerminologyServiceValidationSupport(
+			FhirContext theFhirContext, String theBaseUrl, @Nullable IRestfulClientFactory theRestfulClientFactory) {
 		super(theFhirContext);
 		myBaseUrl = theBaseUrl;
+		myRestfulClientFactory = theRestfulClientFactory;
 	}
 
 	@Override
@@ -456,6 +481,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				StringType stringType = (StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
 				break;
+			case IValidationSupport.TYPE_BOOLEAN:
+				BooleanType booleanType = (BooleanType) theValue;
+				conceptProperty = new BooleanConceptProperty(theName, booleanType.getValue());
+				break;
 			case IValidationSupport.TYPE_CODING:
 				Coding coding = (Coding) theValue;
 				conceptProperty =
@@ -566,7 +595,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private IGenericClient provideClient() {
-		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		IGenericClient retVal;
+		if (myRestfulClientFactory != null) {
+			retVal = myRestfulClientFactory.newGenericClient(myBaseUrl);
+		} else {
+			retVal = myCtx.newRestfulGenericClient(myBaseUrl);
+		}
 		for (Object next : myClientInterceptors) {
 			retVal.registerInterceptor(next);
 		}
@@ -631,7 +665,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return new CodeValidationResult()
 				.setSeverity(severity)
 				.setMessage(theMessage)
-				.addCodeValidationIssue(new CodeValidationIssue(
+				.addIssue(new CodeValidationIssue(
 						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
 	}
 
@@ -680,13 +714,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			createCodeValidationIssues(
 							(IBaseOperationOutcome) issuesValue.get(),
 							fhirContext.getVersion().getVersion())
-					.ifPresent(i -> i.forEach(result::addCodeValidationIssue));
+					.ifPresent(i -> i.forEach(result::addIssue));
 		} else {
 			// create a validation issue out of the message
 			// this is a workaround to overcome an issue in the FHIR Validator library
 			// where ValueSet bindings are only reading issues but not messages
 			// @see https://github.com/hapifhir/org.hl7.fhir.core/issues/1766
-			result.addCodeValidationIssue(createCodeValidationIssue(result.getMessage()));
+			result.addIssue(createCodeValidationIssue(result.getMessage()));
 		}
 		return result;
 	}
@@ -717,23 +751,42 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent ->
-						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.map(issueComponent -> {
+					String diagnostics = issueComponent.getDiagnostics();
+					IssueSeverity issueSeverity =
+							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
+					String issueTypeCode = issueComponent.getCode().toCode();
+					CodeableConcept details = issueComponent.getDetails();
+					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
+					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
+					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
+					issue.setDetails(issueDetails);
+					return issue;
+				})
 				.collect(Collectors.toList());
 	}
 
 	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
 			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
 		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent ->
-						createCodeValidationIssue(issueComponent.getDetails().getText()))
+				.map(issueComponent -> {
+					String diagnostics = issueComponent.getDiagnostics();
+					IssueSeverity issueSeverity =
+							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
+					String issueTypeCode = issueComponent.getCode().toCode();
+					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
+					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
+					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
+					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
+					issue.setDetails(issueDetails);
+					return issue;
+				})
 				.collect(Collectors.toList());
 	}
 
 	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
 		return new CodeValidationIssue(
 				theMessage,
-				// assume issue type is OperationOutcome.IssueType#CODEINVALID as it is the only match
 				IssueSeverity.ERROR,
 				CodeValidationIssueCode.INVALID,
 				CodeValidationIssueCoding.INVALID_CODE);

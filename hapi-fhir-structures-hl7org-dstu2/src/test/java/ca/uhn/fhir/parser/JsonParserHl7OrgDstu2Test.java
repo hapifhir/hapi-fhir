@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.UuidUtils;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
@@ -58,6 +59,7 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -391,69 +393,6 @@ public class JsonParserHl7OrgDstu2Test {
 	
 	
 	@Test
-	public void testEncodeContained() {
-		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
-		
-		// Create an organization, note that the organization does not have an ID
-		Organization org = new Organization();
-		org.getNameElement().setValue("Contained Test Organization");
-
-		// Create a patient
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-		
-		// Put the organization as a reference in the patient resource
-		patient.getManagingOrganization().setResource(org);
-		
-		String encoded = jsonParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-		
-		// Create a bundle with just the patient resource
-		Bundle b = new Bundle();
-		b.addEntry().setResource(patient);
-		
-		// Encode the bundle
-		encoded = jsonParser.encodeResourceToString(b);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-		
-		// Re-parse the bundle
-		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference());
-
-		assertNotNull(patient.getManagingOrganization().getResource());
-		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getIdElement().getValue());
-		assertEquals("Contained Test Organization", org.getName());
-		
-		// And re-encode a second time
-		encoded = jsonParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-		assertThat(encoded).doesNotContainPattern("(?s)\"contained\":.*\\[.*\"contained\":");
-
-		// And re-encode once more, with the references cleared
-		patient.getContained().clear();
-		patient.getManagingOrganization().setReference(null);
-		encoded = jsonParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
-    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
-
-		// And re-encode once more, with the references cleared and a manually set local ID
-		patient.getContained().clear();
-		patient.getManagingOrganization().setReference(null);
-		patient.getManagingOrganization().getResource().setId(("#333"));
-		encoded = jsonParser.encodeResourceToString(patient);
-		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\""));
-    assertThat(encoded).doesNotContainPattern("(?s).*\"contained\":.*\\[.*\"contained\":");
-
-	}
-	
-	@Test
 	public void testEncodeContained__() {
 		// Create an organization
 		Organization org = new Organization();
@@ -472,13 +411,16 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the buntdle
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
-		assertThat(encoded).contains("reference\": \"#1\"");
+		String organizationUuid = UuidUtils.findFirstUUID(encoded);
+		assertNotNull(organizationUuid);
+
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"" + organizationUuid + "\""));
+		assertThat(encoded).contains("reference\": \"#" + organizationUuid + "\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
-		assertThat(encoded).contains("reference\": \"#1\"");
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"" + organizationUuid + "\""));
+		assertThat(encoded).contains("reference\": \"#" + organizationUuid + "\"");
 	}
 
 	@Test
@@ -696,7 +638,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list);
 		ourLog.info(enc);
 
-		assertThat(enc).contains("\"id\": \"1\"");
+		assertThat(enc).containsPattern("\"id\": \"" + UUID_PATTERN);
 		
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
