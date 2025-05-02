@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
 public class QuantityPredicateBuilder extends BaseQuantityPredicateBuilder {

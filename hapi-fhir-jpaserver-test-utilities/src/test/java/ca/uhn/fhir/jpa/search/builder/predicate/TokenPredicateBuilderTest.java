@@ -44,8 +44,6 @@ public class TokenPredicateBuilderTest {
 	@Mock
 	private SearchQueryBuilder mySearchQueryBuilder;
 
-	private PartitionSettings myPartitionSettings = new PartitionSettings();
-
 	@BeforeEach
 	public void beforeEach() {
 		myLogger = (Logger) LoggerFactory.getLogger(TokenPredicateBuilder.class);
@@ -60,7 +58,7 @@ public class TokenPredicateBuilderTest {
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
 		when(mySearchQueryBuilder.getPartitionSettings()).thenReturn(new PartitionSettings());
-		myTokenPredicateBuilder = new TokenPredicateBuilder(mySearchQueryBuilder, myPartitionSettings);
+		myTokenPredicateBuilder = new TokenPredicateBuilder(mySearchQueryBuilder);
 		myTokenPredicateBuilder.setStorageSettingsForUnitTest(new JpaStorageSettings());
 	}
 

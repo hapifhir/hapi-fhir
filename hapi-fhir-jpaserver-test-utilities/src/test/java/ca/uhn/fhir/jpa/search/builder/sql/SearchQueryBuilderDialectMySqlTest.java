@@ -59,7 +59,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	private GeneratedSql buildSqlWithStringSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, myPartitionSettings));
-		StringPredicateBuilder stringPredicateBuilder = new StringPredicateBuilder(searchQueryBuilder, myPartitionSettings);
+		StringPredicateBuilder stringPredicateBuilder = new StringPredicateBuilder(searchQueryBuilder);
 		stringPredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(stringPredicateBuilder);
 
