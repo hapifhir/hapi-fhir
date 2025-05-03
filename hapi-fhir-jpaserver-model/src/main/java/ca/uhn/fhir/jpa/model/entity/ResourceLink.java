@@ -389,6 +389,10 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResourceTypeId;
 	}
 
+	public void setTargetResourceTypeId(Short theTargetResourceTypeId) {
+		myTargetResourceTypeId = theTargetResourceTypeId;
+	}
+
 	public ResourceTypeEntity getTargetResTypeEntity() {
 		return myTargetResTypeEntity;
 	}
@@ -464,6 +468,7 @@ public class ResourceLink extends BaseResourceIndex {
 			retVal.myTargetResourceId = myTargetResourceId;
 		} else if (getTargetResource() != null) {
 			retVal.myTargetResourceId = getTargetResource().getIdDt().getIdPart();
+			retVal.myTargetResourceTypeId = getTargetResource().getResourceTypeId();
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;

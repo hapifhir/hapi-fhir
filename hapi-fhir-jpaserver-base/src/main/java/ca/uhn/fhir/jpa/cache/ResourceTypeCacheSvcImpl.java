@@ -30,7 +30,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -61,32 +60,12 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 
 	@Override
 	public Short getResourceTypeId(String theResType) {
-		// theResType = "CustomRes101";
 		Short resTypeId = myMemoryCacheService.get(
 				MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, this::lookupResourceTypeId);
 
 		if (resTypeId == null) {
-			ourLog.info("Create new Resource Type [{}]", theResType);
-			resTypeId = createResourceType(theResType);
-		}
-		return resTypeId;
-	}
-
-	public Short getResourceTypeId0(String theResType) {
-		Short resTypeId =
-				myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType);
-		if (resTypeId != null) {
-			return resTypeId;
-		}
-
-		// Cache miss, check the database and add to cache if found
-		Optional<ResourceTypeEntity> resTypeEntity = myResourceTypeDao.findByResourceType(theResType);
-		if (resTypeEntity.isPresent()) {
-			resTypeId = resTypeEntity.get().getResourceTypeId();
-			addToCache(theResType, resTypeId);
-		} else {
-			ourLog.info("Adding new Resource Type [{}]", theResType);
-			resTypeId = createResourceType(theResType);
+			ourLog.info("Creating a new Resource Type [{}].", theResType);
+			resTypeId = createResourceType(theResType).getResourceTypeId();
 		}
 		return resTypeId;
 	}
@@ -94,23 +73,22 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	protected void initCache() {
 		List<ResourceTypeEntity> resTypes = myTxTemplate.execute(t -> myResourceTypeDao.findAll());
 		if (CollectionUtils.isEmpty(resTypes)) {
-			ourLog.warn("No resource types found in database");
+			ourLog.warn("No resource type found in database");
 			return;
 		}
 		ourLog.info("{} resource types found in database.", resTypes.size());
 		resTypes.forEach(resType -> addToCache(resType.getResourceType(), resType.getResourceTypeId()));
 	}
 
-	protected Short createResourceType(String theResourceType) {
-		ResourceTypeEntity resTypeEntity = myTxTemplate.execute(t -> {
+	protected ResourceTypeEntity createResourceType(String theResourceType) {
+		return myTxTemplate.execute(t -> {
 			ResourceTypeEntity entity = new ResourceTypeEntity();
 			entity.setResourceType(theResourceType);
-			return myResourceTypeDao.save(entity);
-		});
+			ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
 
-		assert resTypeEntity != null;
-		addToCache(resTypeEntity.getResourceType(), resTypeEntity.getResourceTypeId());
-		return resTypeEntity.getResourceTypeId();
+			addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
+			return savedEntity;
+		});
 	}
 
 	private void addToCache(String theResType, Short theResTypeId) {

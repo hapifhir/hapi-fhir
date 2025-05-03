@@ -27,9 +27,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.type.SqlTypes;
 
 import java.util.Objects;
 
@@ -44,7 +42,6 @@ public class ResourceTypeEntity {
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_TYPE", sequenceName = "SEQ_RESOURCE_TYPE", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_TYPE")
-	@JdbcTypeCode(SqlTypes.SMALLINT)
 	@Column(name = "RES_TYPE_ID")
 	private Short myResourceTypeId;
 
