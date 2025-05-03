@@ -184,7 +184,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myPatientDao.search(searchParameter);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(2570) + ":contains modifier is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(2417) + ":contains modifier is disabled on this server", e.getMessage());
 		}
 	}
 

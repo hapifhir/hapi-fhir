@@ -20,7 +20,7 @@ public class SubscriptionRulesInterceptorR5Test extends BaseResourceProviderR5Te
 	@Test
 	public void testCriteriaFilter() {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		registerInterceptor(interceptor);
 

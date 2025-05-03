@@ -33,8 +33,6 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	@Mock
 	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
-	protected final PartitionSettings myPartitionSettings = new PartitionSettings();
-
 	@BeforeEach
 	public void beforeInitMocks() {
 		when(myHibernatePropertiesProvider.getDialect())
@@ -50,7 +48,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, myPartitionSettings));
+		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
 		DatePredicateBuilder datetimePredicateBuilder = new DatePredicateBuilder(searchQueryBuilder);
 		datetimePredicateBuilder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(datetimePredicateBuilder);

@@ -48,16 +48,14 @@ public class Batch2SupportConfig {
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
-			IHapiTransactionService theTransactionService,
-			PartitionSettings thePartitionSettings) {
+			IHapiTransactionService theTransactionService) {
 		return new Batch2DaoSvcImpl(
 				theResourceTableDao,
 				theResourceLinkDao,
 				theMatchUrlService,
 				theDaoRegistry,
 				theFhirContext,
-				theTransactionService,
-				thePartitionSettings);
+				theTransactionService);
 	}
 
 	@Bean

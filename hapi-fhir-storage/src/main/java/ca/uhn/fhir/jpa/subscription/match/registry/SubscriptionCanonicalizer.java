@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -73,26 +72,30 @@ public class SubscriptionCanonicalizer {
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
 
-	private final PartitionSettings myPartitionSettings;
-
 	private IRequestPartitionHelperSvc myHelperSvc;
 
 	@Autowired
-	public SubscriptionCanonicalizer(
-			FhirContext theFhirContext,
-			SubscriptionSettings theSubscriptionSettings,
-			PartitionSettings thePartitionSettings) {
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
-		myPartitionSettings = thePartitionSettings;
 	}
-
 	// TODO GGG: Eventually, we will unify autowiring styles. It is this way now as this is the least destrctive method
 	// to accomplish a minimal MR. I recommend moving all dependencies to setter autowiring, but that is for another
 	// day.
 	@Autowired
 	public void setPartitionHelperSvc(IRequestPartitionHelperSvc thePartitionHelperSvc) {
 		myHelperSvc = thePartitionHelperSvc;
+	}
+
+	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
+
+	/**
+	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
+	 */
+	@Deprecated
+	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -795,7 +798,7 @@ public class SubscriptionCanonicalizer {
 
 		if (nonNull(requestPartitionId)) {
 			isSubscriptionCreatedOnDefaultPartition = myHelperSvc == null
-					? requestPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId())
+					? requestPartitionId.isDefaultPartition()
 					: myHelperSvc.isDefaultPartition(requestPartitionId);
 		}
 

@@ -250,9 +250,6 @@ public class JpaConfig {
 	public JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-
-	@Autowired
 	private FhirContext myFhirContext;
 
 	@Bean
@@ -686,7 +683,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new ResourceTablePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean

@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -64,16 +63,13 @@ public class SubscriptionRulesInterceptor {
 	private boolean myValidateRestHookEndpointIsReachable;
 
 	public SubscriptionRulesInterceptor(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull SubscriptionSettings theSubscriptionSettings,
-			PartitionSettings thePartitionSettings) {
+			@Nonnull FhirContext theFhirContext, @Nonnull SubscriptionSettings theSubscriptionSettings) {
 		Validate.notNull(theFhirContext, "FhirContext must not be null");
 		Validate.notNull(theSubscriptionSettings, "SubscriptionSettings must not be null");
 
 		myFhirContext = theFhirContext;
 		myVersion = myFhirContext.getVersion().getVersion();
-		mySubscriptionCanonicalizer =
-				new SubscriptionCanonicalizer(myFhirContext, theSubscriptionSettings, thePartitionSettings);
+		mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, theSubscriptionSettings);
 	}
 
 	/**

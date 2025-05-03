@@ -1,7 +1,0 @@
----
-type: fix
-issue: 6564
-title: "There were many places where it was assumed the default partition id
-        was null (when it is a configurable value).
-        This change fixes many of them.
-"

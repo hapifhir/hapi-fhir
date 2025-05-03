@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionRulesInterceptor;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.topic.R4SubscriptionTopicBuilder;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -15,9 +16,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static ca.uhn.fhir.interceptor.api.Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test {
 
@@ -25,7 +28,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 	@ValueSource(strings = {"REQUESTED", "ACTIVE"})
 	public void testCriteriaFilter(Subscription.SubscriptionStatus theInitialStatus) throws InterruptedException {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		registerInterceptor(interceptor);
 
@@ -64,7 +67,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 	@ValueSource(strings = {"REQUESTED", "ACTIVE"})
 	public void testValidateEndpoint(Subscription.SubscriptionStatus theInitialStatus) throws InterruptedException {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.setValidateRestHookEndpointIsReachable(true);
 		registerInterceptor(interceptor);
 
@@ -103,7 +106,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 	@Test
 	public void testR4SubscriptionTopic_NotAcceptable() {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		registerInterceptor(interceptor);
 
@@ -124,7 +127,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 	@Test
 	public void testR4SubscriptionTopic_Acceptable() {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		registerInterceptor(interceptor);
 
@@ -144,7 +147,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 	@Test
 	public void testR4SubscriptionTopic_NotSubscriptionTopic() {
 		// Setup
-		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings, myPartitionSettings);
+		SubscriptionRulesInterceptor interceptor = new SubscriptionRulesInterceptor(myFhirContext, mySubscriptionSettings);
 		interceptor.addAllowedCriteriaPattern(SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		registerInterceptor(interceptor);
 

@@ -33,7 +33,6 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		super.before();
 
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_GOLDEN_RESOURCE), null);

@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -70,8 +69,6 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	private final IHapiTransactionService myTransactionService;
 
-	private final PartitionSettings myPartitionSettings;
-
 	@Override
 	public boolean isAllResourceTypeSupported() {
 		return true;
@@ -83,15 +80,13 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			MatchUrlService theMatchUrlService,
 			DaoRegistry theDaoRegistry,
 			FhirContext theFhirContext,
-			IHapiTransactionService theTransactionService,
-			PartitionSettings thePartitionSettings) {
+			IHapiTransactionService theTransactionService) {
 		myResourceTableDao = theResourceTableDao;
 		myResourceLinkDao = theResourceLinkDao;
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
 		myTransactionService = theTransactionService;
-		myPartitionSettings = thePartitionSettings;
 	}
 
 	@Override
@@ -153,18 +148,17 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Nonnull
 	private Stream<TypedResourcePid> streamResourceIdsNoUrl(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
-		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		Stream<Object[]> rowStream;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
 			ourLog.debug("Search for resources - all partitions");
 			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
 					theStart, theEnd);
-		} else if (theRequestPartitionId.isDefaultPartition(defaultPartitionId)) {
+		} else if (theRequestPartitionId.isDefaultPartition()) {
 			ourLog.debug("Search for resources - default partition");
 			rowStream =
 					myResourceTableDao
 							.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
-									theStart, theEnd, defaultPartitionId);
+									theStart, theEnd);
 		} else {
 			ourLog.debug("Search for resources - partition {}", theRequestPartitionId);
 			rowStream =

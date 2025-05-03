@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
@@ -369,9 +368,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		// Subscription Validation
 		SubscriptionRulesInterceptor subscriptionCriteriaValidation = new SubscriptionRulesInterceptor(
-				myAppCtx.getBean(FhirContext.class),
-				myAppCtx.getBean(SubscriptionSettings.class),
-				myAppCtx.getBean(PartitionSettings.class));
+				myAppCtx.getBean(FhirContext.class), myAppCtx.getBean(SubscriptionSettings.class));
 		subscriptionCriteriaValidation.addAllowedCriteriaPattern(
 				SubscriptionRulesInterceptor.CRITERIA_WITH_AT_LEAST_ONE_PARAM);
 		subscriptionCriteriaValidation.setValidateRestHookEndpointIsReachable(true);
