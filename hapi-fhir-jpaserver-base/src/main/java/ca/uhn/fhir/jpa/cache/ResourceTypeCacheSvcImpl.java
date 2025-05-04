@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -64,8 +65,9 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 				MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, this::lookupResourceTypeId);
 
 		if (resTypeId == null) {
-			ourLog.info("Creating a new Resource Type [{}].", theResType);
-			resTypeId = createResourceType(theResType).getResourceTypeId();
+			ourLog.info("Creating a new Resource Type [{}]", theResType);
+			ResourceTypeEntity entity = createResourceType(theResType);
+			resTypeId = entity != null ? entity.getResourceTypeId() : null;
 		}
 		return resTypeId;
 	}
@@ -82,12 +84,17 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 
 	protected ResourceTypeEntity createResourceType(String theResourceType) {
 		return myTxTemplate.execute(t -> {
-			ResourceTypeEntity entity = new ResourceTypeEntity();
-			entity.setResourceType(theResourceType);
-			ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
-
-			addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
-			return savedEntity;
+			try {
+				ResourceTypeEntity entity = new ResourceTypeEntity();
+				entity.setResourceType(theResourceType);
+				ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
+				addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
+				return savedEntity;
+			} catch (DataIntegrityViolationException e) {
+				// This can happen if the resource type already exists in the database
+				ourLog.info("Resource type already exists: {}", theResourceType);
+				return myResourceTypeDao.findByResourceType(theResourceType);
+			}
 		});
 	}
 

@@ -25,13 +25,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface IResourceTypeDao extends JpaRepository<ResourceTypeEntity, Integer>, IHapiFhirJpaRepository {
 
 	@Query(value = "SELECT t FROM ResourceTypeEntity t WHERE t.myResourceType = :resType")
-	Optional<ResourceTypeEntity> findByResourceType(@Param("resType") String theResType);
+	ResourceTypeEntity findByResourceType(@Param("resType") String theResType);
 
 	@Query(value = "SELECT t.myResourceTypeId FROM ResourceTypeEntity t WHERE t.myResourceType = :resType")
 	Short findResourceIdByType(@Param("resType") String theResType);

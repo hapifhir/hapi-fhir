@@ -36,8 +36,9 @@ import static ca.uhn.fhir.rest.api.Constants.MAX_RESOURCE_NAME_LENGTH;
 @Entity
 @Table(
 		name = "HFJ_RESOURCE_TYPE",
-		uniqueConstraints = @UniqueConstraint(name = "IDX_RES_TYPE_NAME", columnNames = "RES_TYPE"))
+		uniqueConstraints = {@UniqueConstraint(name = ResourceTypeEntity.IDX_RES_TYPE_NAME, columnNames = "RES_TYPE")})
 public class ResourceTypeEntity {
+	public static final String IDX_RES_TYPE_NAME = "IDX_RES_TYPE_NAME";
 
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_TYPE", sequenceName = "SEQ_RESOURCE_TYPE", allocationSize = 1)
@@ -48,6 +49,8 @@ public class ResourceTypeEntity {
 	@FullTextField
 	@Column(name = "RES_TYPE", nullable = false, length = MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
+
+	public ResourceTypeEntity() {}
 
 	public Short getResourceTypeId() {
 		return myResourceTypeId;
