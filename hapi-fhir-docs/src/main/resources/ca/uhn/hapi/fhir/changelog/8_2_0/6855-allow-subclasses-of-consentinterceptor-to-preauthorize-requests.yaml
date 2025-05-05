@@ -1,5 +1,5 @@
 ---
 type: change
 issue: 6855
-title: "Subclasses of the `ConsentInterceptor` can now add functionality to pre-authorized a request based
+title: "Subclasses of the `ConsentInterceptor` can now add functionality to pre-authorize a request based
 on `RequestDetails`."
