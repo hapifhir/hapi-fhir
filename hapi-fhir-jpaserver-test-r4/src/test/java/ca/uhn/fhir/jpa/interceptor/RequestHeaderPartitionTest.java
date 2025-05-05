@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Propagation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -305,10 +306,9 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		};
 
 		entryWithOverride.getRequest().addExtension(PARTITION_EXTENSION_URL, new StringType("2"));
-
-
-		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(requestDetailsWithPartition1, transactionBundle));
-		assertThat(ex.getMessage()).contains("HAPI-2541"); //error code for incompatible partitions
+		assertThatThrownBy(() -> mySystemDao.transaction(requestDetailsWithPartition1, transactionBundle))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2541");
 	}
 
 
