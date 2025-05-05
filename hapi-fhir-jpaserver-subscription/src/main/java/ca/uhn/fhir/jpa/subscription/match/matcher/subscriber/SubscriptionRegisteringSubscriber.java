@@ -61,7 +61,7 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
+	@Autowired(required = false)
 	private PartitionSettings myPartitionSettings;
 
 	/**
@@ -120,6 +120,14 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		}
 	}
 
+	private Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+		ourLog.warn("No PartitionSettings available.");
+		return null;
+	}
+
 	/**
 	 * There were some situations where the RequestDetails attempted to use the default partition
 	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
@@ -127,7 +135,7 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
-		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
+		Integer defaultPartitionId = getDefaultPartitionId();
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition(defaultPartitionId)) {
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is

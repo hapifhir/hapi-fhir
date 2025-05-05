@@ -60,7 +60,7 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
+	@Autowired(required = false)
 	private PartitionSettings myPartitionSettings;
 
 	/**
@@ -130,13 +130,20 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		if (payloadPartitionId == null
-				|| payloadPartitionId.isDefaultPartition(myPartitionSettings.getDefaultPartitionId())) {
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition(getDefaultPartitionId())) {
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+	}
+
+	private Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+		ourLog.warn("No PartitionSettings available.");
+		return null;
 	}
 }

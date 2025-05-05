@@ -24,17 +24,25 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import jakarta.annotation.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class SubscriptionModelConfig {
 
+	/**
+	 * Lazily instantiation because the module providing PartitionSettings
+	 * might be higher up the chain (before these beans would be instantiated).
+	 * This gives us time to collect that bean before constructing this object.
+	 */
 	@Bean
+	@Lazy
 	public SubscriptionCanonicalizer subscriptionCanonicalizer(
 			FhirContext theFhirContext,
 			SubscriptionSettings theSubscriptionSettings,
-			PartitionSettings thePartitionSettings) {
+			@Nullable PartitionSettings thePartitionSettings) {
 		return new SubscriptionCanonicalizer(theFhirContext, theSubscriptionSettings, thePartitionSettings);
 	}
 

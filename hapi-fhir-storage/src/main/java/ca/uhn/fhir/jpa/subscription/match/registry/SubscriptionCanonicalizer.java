@@ -73,7 +73,7 @@ public class SubscriptionCanonicalizer {
 	final FhirContext myFhirContext;
 	private final SubscriptionSettings mySubscriptionSettings;
 
-	private final PartitionSettings myPartitionSettings;
+	private PartitionSettings myPartitionSettings;
 
 	private IRequestPartitionHelperSvc myHelperSvc;
 
@@ -81,9 +81,13 @@ public class SubscriptionCanonicalizer {
 	public SubscriptionCanonicalizer(
 			FhirContext theFhirContext,
 			SubscriptionSettings theSubscriptionSettings,
-			PartitionSettings thePartitionSettings) {
+			@Nullable PartitionSettings thePartitionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
+		setPartitionSettings(thePartitionSettings);
+	}
+
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 	}
 
@@ -785,6 +789,14 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
+	}
+
+	private Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+		ourLog.error("\nNO PARTITION SETTINGS\n");
+		return null;
 	}
 
 	private boolean handleCrossPartition(IBaseResource theSubscription) {
