@@ -137,13 +137,13 @@ public class HookParams {
 			b.append("  ")
 					.append(key.getSimpleName())
 					.append(": ")
-					.append(log(value))
+					.append(valueAsStringForLog(value))
 					.append("\n");
 		});
 		return b.toString();
 	}
 
-	private String log(Object theValue) {
+	private static String valueAsStringForLog(Object theValue) {
 		if (theValue instanceof IBaseResource) {
 			return ((IBaseResource) theValue).getIdElement().toString();
 		}

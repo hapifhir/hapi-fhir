@@ -38,7 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * for further details on asynchronous submissions.
  */
 public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatcherInterceptor {
-	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+	private static final Logger ourLog = Logs.getSubscriptionTroubleshootingLog();
 
 	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;

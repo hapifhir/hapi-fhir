@@ -67,6 +67,9 @@ public interface IMessage<T> {
 	 */
 	T getPayload();
 
+	/**
+	 * @return headers as a String to String map where all values are replaced with their toString() value
+	 */
 	default Map<String, String> getHeadersAsStrings() {
 		return getHeaders().entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
