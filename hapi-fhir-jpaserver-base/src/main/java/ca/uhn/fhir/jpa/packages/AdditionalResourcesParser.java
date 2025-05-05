@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
