@@ -39,7 +39,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	@Test
 	public void testRangeWithOffset() {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
+		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, myPartitionSettings));
 
 		GeneratedSql generatedSql = searchQueryBuilder.generate(10, 500);
 		logSql(generatedSql);
@@ -55,7 +55,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	@Test
 	public void testRangeWithoutOffset() {
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
+		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder, myPartitionSettings));
 
 		GeneratedSql generatedSql = searchQueryBuilder.generate(0, 500);
 		logSql(generatedSql);

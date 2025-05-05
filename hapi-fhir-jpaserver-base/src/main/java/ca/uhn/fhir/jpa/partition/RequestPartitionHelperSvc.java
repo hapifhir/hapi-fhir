@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
@@ -34,7 +35,13 @@ import java.util.Objects;
 public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 	@Autowired
-	IPartitionLookupSvc myPartitionConfigSvc;
+	private IPartitionLookupSvc myPartitionConfigSvc;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	public RequestPartitionHelperSvc() {}
+	;
 
 	@Override
 	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {

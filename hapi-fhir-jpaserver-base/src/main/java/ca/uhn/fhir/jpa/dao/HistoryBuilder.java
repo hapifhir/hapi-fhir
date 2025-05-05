@@ -191,6 +191,7 @@ public class HistoryBuilder {
 			CriteriaQuery<?> theQuery,
 			Root<ResourceHistoryTable> theFrom,
 			HistorySearchStyleEnum theHistorySearchStyle) {
+		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (myResourceId != null) {
@@ -208,9 +209,9 @@ public class HistoryBuilder {
 		} else {
 
 			if (!thePartitionId.isAllPartitions()) {
-				if (thePartitionId.isDefaultPartition()) {
+				if (thePartitionId.isDefaultPartition(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")));
-				} else if (thePartitionId.hasDefaultPartitionId()) {
+				} else if (thePartitionId.hasDefaultPartitionId(defaultPartitionId)) {
 					predicates.add(theCriteriaBuilder.or(
 							theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue")),
 							theFrom.get("myPartitionIdValue").in(thePartitionId.getPartitionIdsWithoutDefault())));
