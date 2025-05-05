@@ -165,6 +165,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
+		initResourceTypeCache();
 
 		myCaptureQueriesListener.clear();
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -3009,6 +3010,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			addNextTargetPartitionForCreate(1, null);
 		}
 
+		initResourceTypeCache();
+
 		// Pre-fetch the partition ID from the partition lookup table
 		createPatient(withPartition(1), withActiveTrue());
 
@@ -3084,6 +3087,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
+		initResourceTypeCache();
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(requestDetails, input);

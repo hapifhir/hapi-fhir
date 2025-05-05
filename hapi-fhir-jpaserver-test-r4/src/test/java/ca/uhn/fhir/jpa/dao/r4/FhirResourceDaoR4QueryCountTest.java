@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -3644,6 +3642,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testTriggerSubscription_Sync() throws Exception {
 		// Setup
+		initResourceTypeCache();
 		IntStream.range(0, 200).forEach(i -> createAPatient());
 
 		mySubscriptionTestUtil.registerRestHookInterceptor();
@@ -3682,6 +3681,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testTriggerSubscription_Async() throws Exception {
 		// Setup
+		initResourceTypeCache();
 		IntStream.range(0, 200).forEach(i -> createAPatient());
 
 		mySubscriptionTestUtil.registerRestHookInterceptor();
@@ -4462,13 +4462,5 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myInterceptorRegistry.registerInterceptor(myAuthInterceptor);
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
-	}
-
-	private void initResourceTypeCache() {
-		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
-		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
-		for (int i = 0; i < resTypes.size(); i++) {
-			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
-		}
 	}
 }

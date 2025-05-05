@@ -176,6 +176,8 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		patient.setActive(false);
 		resources.add(patient);
 
+		initResourceTypeCache();
+
 		// Execute
 
 		myCaptureQueriesListener.clear();

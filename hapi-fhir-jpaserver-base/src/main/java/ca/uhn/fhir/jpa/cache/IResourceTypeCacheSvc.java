@@ -21,4 +21,6 @@ package ca.uhn.fhir.jpa.cache;
 
 public interface IResourceTypeCacheSvc {
 	Short getResourceTypeId(String theResType);
+
+	void addToCache(String theResType, Short theResTypeId);
 }

@@ -72,6 +72,11 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 		return resTypeId;
 	}
 
+	@Override
+	public void addToCache(String theResType, Short theResTypeId) {
+		myMemoryCacheService.put(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, theResTypeId);
+	}
+
 	protected void initCache() {
 		List<ResourceTypeEntity> resTypes = myTxTemplate.execute(t -> myResourceTypeDao.findAll());
 		if (CollectionUtils.isEmpty(resTypes)) {
@@ -93,13 +98,9 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 			} catch (DataIntegrityViolationException e) {
 				// This can happen if the resource type already exists in the database
 				ourLog.info("Resource type already exists: {}", theResourceType);
-				return myResourceTypeDao.findByResourceType(theResourceType);
+				return myTxTemplate.execute(tx -> myResourceTypeDao.findByResourceType(theResourceType));
 			}
 		});
-	}
-
-	private void addToCache(String theResType, Short theResTypeId) {
-		myMemoryCacheService.put(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, theResTypeId);
 	}
 
 	private Short lookupResourceTypeId(String theResourceType) {

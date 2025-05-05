@@ -43,6 +43,8 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
@@ -63,6 +65,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
@@ -571,6 +574,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
 
+	@Autowired
+	protected IResourceTypeDao myResourceTypeDao;
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
+
 	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -1012,6 +1020,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		String uuid = uuidParams[0];
 		return uuid;
+	}
+
+	public void initResourceTypeCache() {
+		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
+		for (int i = 0; i < resTypes.size(); i++) {
+			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
+		}
 	}
 
 	public void assertHasErrors(OperationOutcome theOperationOutcome) {

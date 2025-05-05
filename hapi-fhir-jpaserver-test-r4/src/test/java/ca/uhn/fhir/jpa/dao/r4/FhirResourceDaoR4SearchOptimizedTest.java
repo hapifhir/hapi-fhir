@@ -1264,6 +1264,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testCreateClientAssignedId() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
+		initResourceTypeCache();
 		myCaptureQueriesListener.clear();
 		ourLog.info("** Starting Update Non-Existing resource with client assigned ID");
 		Patient p = new Patient();
@@ -1397,6 +1398,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		SearchParameterMap m1 = new SearchParameterMap().add("gender", new TokenParam("male")).setLoadSynchronous(true);
 		SearchParameterMap m2 = new SearchParameterMap().add("gender", new TokenParam("female")).setLoadSynchronous(true);
 
+		initResourceTypeCache();
 		myCaptureQueriesListener.clear();
 
 		Patient pt = new Patient();

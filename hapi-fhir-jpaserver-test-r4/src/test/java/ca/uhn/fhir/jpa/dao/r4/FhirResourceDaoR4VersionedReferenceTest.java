@@ -431,6 +431,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			observation.getSubject().setReference(patient.getId()); // versioned
 			builder.addTransactionCreateEntry(observation);
 
+			initResourceTypeCache();
 			myCaptureQueriesListener.clear();
 			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
 				List.of("200 OK", "201 Created"), List.of("3", "1"));
@@ -465,6 +466,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			observation.getSubject().setReference(patient.getId()); // versioned
 			builder.addTransactionCreateEntry(observation);
 
+			initResourceTypeCache();
 			myCaptureQueriesListener.clear();
 
 			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
