@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -47,7 +48,8 @@ import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTyp
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SubscriptionMatchingListener implements IMessageListener<ResourceModifiedMessage> {
-	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingListener.class);
+	private static final Logger ourLog = Logs.getSubscriptionTroubleshootingLog();
+
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired

@@ -4,15 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
-import jakarta.validation.constraints.NotNull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.*;
 
 public class AdditionalResourcesParser {
 
@@ -31,7 +35,7 @@ public class AdditionalResourcesParser {
 		return bundleBuilder.getBundle();
 	}
 
-	@NotNull
+	@Nonnull
 	public static List<IBaseResource> getAdditionalResources(
 			Set<String> folderNames, NpmPackage npmPackage, FhirContext fhirContext) {
 
