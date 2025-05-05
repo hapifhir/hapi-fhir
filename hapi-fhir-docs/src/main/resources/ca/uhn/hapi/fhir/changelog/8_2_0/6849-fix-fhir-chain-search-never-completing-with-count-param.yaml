@@ -6,7 +6,7 @@ title: "Previously, performing a FHIR chained search with the `_count` parameter
 when several specific conditions were met:
 <ul>
 <li>the result contains multiple pages</li>
-<li>the result contains mix of resources that have a single reference and have multiple references</li>
+<li>the result contains a mix of resources that have a single reference and have multiple references</li>
 <li>the total number of resource references exceeds internal pre-fetch thresholds</li>
 </ul>
 This has now been fixed. Please see the [Github issue](https://github.com/hapifhir/hapi-fhir/issues/6849) for more 
