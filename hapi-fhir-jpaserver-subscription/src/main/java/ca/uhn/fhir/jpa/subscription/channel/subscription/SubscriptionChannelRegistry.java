@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class SubscriptionChannelRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
