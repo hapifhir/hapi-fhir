@@ -39,7 +39,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
 
-	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
+	// FIXME KHS
+	private static final int DEFAULT_TIMEOUT_SECONDS = 1000;
+//	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
 
 	private final String myName;
 	private final IPointcut myPointcut;
