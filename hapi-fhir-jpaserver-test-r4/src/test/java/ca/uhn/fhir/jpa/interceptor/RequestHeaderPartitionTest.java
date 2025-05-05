@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -8,31 +9,37 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.transaction.annotation.Propagation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 /**
  * This test class is used to test the partitioning functionality
  * when using the {@link RequestHeaderPartitionInterceptor}.
  */
-public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
+public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 
 	private static final String PARTITION_EXTENSION_URL = "http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids";
-	private static RestfulServer ourServer = new RestfulServer();
 
 	private IIdType myPatientIdInPartition1;
+
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -41,8 +48,7 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		RequestHeaderPartitionInterceptor myPartitionInterceptor = new RequestHeaderPartitionInterceptor();
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		RequestDetails requestDetails = createRequestDetailsWithPartitionHeader("1");
-		myPatientIdInPartition1 = myPatientDao.create(new Patient(), requestDetails).getId().toVersionless();
+		myPatientIdInPartition1 = createPatientInPartition(new Patient(), "1").getIdElement().toVersionless();
 	}
 
 	@ParameterizedTest
@@ -176,7 +182,6 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 
 		// in this test, we submit a transaction bundle with partition id 1 in the header
 		// but override it with partition 2 for an entry in the bundle
-		RequestDetails requestDetailsWithPartition1 = createRequestDetailsWithPartitionHeader("1");
 
 		Bundle transactionBundle = new Bundle();
 		transactionBundle.setType(Bundle.BundleType.TRANSACTION);
@@ -185,16 +190,24 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		entry.getRequest().setMethod(Bundle.HTTPVerb.POST);
 		entry.getRequest().setUrl("Patient");
 		entry.getRequest().addExtension(PARTITION_EXTENSION_URL, new StringType("2"));
+
+		Bundle.BundleEntryComponent entry2 = transactionBundle.addEntry();
+		entry2.setResource(new Patient());
+		entry2.getRequest().setMethod(Bundle.HTTPVerb.POST);
+		entry2.getRequest().setUrl("Patient");
+
+		RequestDetails requestDetailsWithPartition1 = createRequestDetailsWithPartitionHeader("1");
 		Bundle transactionResponseBundle = mySystemDao.transaction(requestDetailsWithPartition1, transactionBundle);
-
 		assertThat(transactionResponseBundle).isNotNull();
-		assertThat(transactionResponseBundle.getEntry()).hasSize(1);
-		String createdResourceLocation = transactionResponseBundle.getEntry().get(0).getResponse().getLocation();
+		assertThat(transactionResponseBundle.getEntry()).hasSize(2);
+		String createdResourceLocation1 = transactionResponseBundle.getEntry().get(0).getResponse().getLocation();
+		String createdResourceLocation2 = transactionResponseBundle.getEntry().get(1).getResponse().getLocation();
 
-
-		//reading the resource from partition 2 should succeed
+		//reading the first resource from partition 2 should succeed
 		RequestDetails requestDetailsWithPartition2 = createRequestDetailsWithPartitionHeader("2");
-		myPatientDao.read(new IdType(createdResourceLocation), requestDetailsWithPartition2);
+		myPatientDao.read(new IdType(createdResourceLocation1), requestDetailsWithPartition2);
+		// the second resource should be in partition 1
+		myPatientDao.read(new IdType(createdResourceLocation2), createRequestDetailsWithPartitionHeader("1"));
 	}
 
 
@@ -203,7 +216,6 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 
 		// in this test, we submit a transaction bundle with 2 resources. We specify partition id 1 in the req header
 		// but override it to partition 2 for one of the resource entries in the bundle.
-		RequestDetails requestDetailsWithPartition1 = createRequestDetailsWithPartitionHeader("1");
 
 		Bundle transactionBundle = new Bundle();
 		transactionBundle.setType(Bundle.BundleType.TRANSACTION);
@@ -222,7 +234,7 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		entryWithoutOverride.getRequest().setMethod(Bundle.HTTPVerb.POST);
 		entryWithoutOverride.getRequest().setUrl("Patient");
 
-		Bundle transactionResponseBundle = mySystemDao.transaction(requestDetailsWithPartition1, transactionBundle);
+		Bundle transactionResponseBundle = mySystemDao.transaction(createRequestDetailsWithPartitionHeader("1"), transactionBundle);
 
 		assertThat(transactionResponseBundle).isNotNull();
 		assertThat(transactionResponseBundle.getEntry()).hasSize(2);
@@ -230,21 +242,87 @@ public class RequestHeaderPartitionTest  extends BaseJpaR4Test {
 		String createdResourceLocation2 = transactionResponseBundle.getEntry().get(1).getResponse().getLocation();
 
 
-		RequestDetails requestDetailsWithPartition2 = createRequestDetailsWithPartitionHeader("2");
-
 		//resource 1 is expected to be in partition 2
-		Patient firstPatient = myPatientDao.read(new IdType(createdResourceLocation1), requestDetailsWithPartition2);
+		Patient firstPatient = myPatientDao.read(new IdType(createdResourceLocation1), createRequestDetailsWithPartitionHeader("2"));
 		assertThat(firstPatient.getName().get(0).getNameAsSingleString()).isEqualTo("patientWithOverride");
 		//resource 2 is expected to be in partition 1
-		Patient secondsPatient = myPatientDao.read(new IdType(createdResourceLocation2), requestDetailsWithPartition1);
+		Patient secondsPatient = myPatientDao.read(new IdType(createdResourceLocation2), createRequestDetailsWithPartitionHeader("1"));
 		assertThat(secondsPatient.getName().get(0).getNameAsSingleString()).isEqualTo("patientWithoutOverride");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"POST","PUT","PATCH","DELETE"})
+	public void testTransactionBundle_WithMultipleResourcesAndSomeRequestEntryExtension_IncompatiblePartitions_Fails(String theOperationWithOverride) {
+
+		// set this so that the partition 1 and partition 2 are considered not compatible for the same transaction
+		myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+		// in this test, we submit a transaction bundle with different operation types.
+		// We specify partition id 1 in the req header, but override it to partition 2 for one of the resource entries in the bundle,
+		// depending on the test parameter.
+		RequestDetails requestDetailsWithPartition1 = createRequestDetailsWithPartitionHeader("1");
+
+		Bundle transactionBundle = new Bundle();
+		transactionBundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Bundle.BundleEntryComponent postEntry = transactionBundle.addEntry();
+		Patient postPatient= new Patient();
+		postEntry.setResource(postPatient);
+		postEntry.getRequest().setMethod(Bundle.HTTPVerb.POST);
+		postEntry.getRequest().setUrl("Patient");
+
+
+		Bundle.BundleEntryComponent putEntry = transactionBundle.addEntry();
+		Patient putPatient = new Patient();
+		putPatient.setId("abc");
+		putEntry.setResource(putPatient);
+		putEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
+		putEntry.getRequest().setUrl("Patient/pat-to-put");
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		Bundle.BundleEntryComponent patchEntry = transactionBundle.addEntry();
+		patchEntry.setResource(patch);
+		patchEntry.getRequest().setMethod(Bundle.HTTPVerb.PATCH);
+		patchEntry.getRequest().setUrl("/Patient/pat-to-patch");
+
+		Bundle.BundleEntryComponent deleteEntry = transactionBundle.addEntry();
+		deleteEntry.getRequest().setMethod(Bundle.HTTPVerb.DELETE);
+		deleteEntry.getRequest().setUrl("/Patient/pat-to-delete");
+
+
+		//override the partition id to 2 for one of the entries based on the test parameter
+		Bundle.BundleEntryComponent entryWithOverride = switch (theOperationWithOverride) {
+			case "POST" -> postEntry;
+			case "PUT" -> putEntry;
+			case "PATCH" -> patchEntry;
+			case "DELETE" -> deleteEntry;
+			default -> throw new IllegalStateException("Unexpected value: " + theOperationWithOverride);
+		};
+
+		entryWithOverride.getRequest().addExtension(PARTITION_EXTENSION_URL, new StringType("2"));
+
+
+		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(requestDetailsWithPartition1, transactionBundle));
+		assertThat(ex.getMessage()).contains("HAPI-2541"); //error code for incompatible partitions
+	}
+
+
+	private Patient createPatientInPartition(Patient thePatient, String thePartitionId) {
+		// Create a new patient in the specified partition
+		RequestDetails requestDetails = createRequestDetailsWithPartitionHeader(thePartitionId);
+		return (Patient) myPatientDao.create(thePatient, requestDetails).getResource();
 	}
 
 	private ServletRequestDetails createRequestDetails() {
 		ServletRequestDetails requestDetails = new ServletRequestDetails(mySrdInterceptorService);
 		MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
 		requestDetails.setServletRequest(mockHttpServletRequest);
-		requestDetails.setServer(ourServer);
+		requestDetails.setServer(new RestfulServer(myFhirContext));
 		return requestDetails;
 	}
 
