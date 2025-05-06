@@ -13,6 +13,8 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import com.apicatalog.jsonld.StringUtils;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -26,7 +28,6 @@ import org.hl7.fhir.r4b.model.Observation;
 import org.hl7.fhir.r4b.model.Organization;
 import org.hl7.fhir.r4b.model.Patient;
 import org.hl7.fhir.r4b.model.Subscription;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +35,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -106,11 +105,10 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 
 		myCountingInterceptor = new CountingInterceptor();
 
-		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-
-		if (processingChannel != null) {
-			processingChannel.clearInterceptorsForUnitTest();
-			processingChannel.addInterceptor(myCountingInterceptor);
+		LinkedBlockingChannel matchingChannel = mySubscriptionTestUtil.getMatchingChannel();
+		if (matchingChannel != null) {
+			matchingChannel.clearInterceptorsForUnitTest();
+			matchingChannel.addInterceptor(myCountingInterceptor);
 		}
 	}
 

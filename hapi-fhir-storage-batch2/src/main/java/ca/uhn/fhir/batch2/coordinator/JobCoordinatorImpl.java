@@ -20,10 +20,8 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
@@ -33,22 +31,17 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Arrays;
@@ -62,10 +55,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
-	private final BatchJobSender myBatchJobSender;
-	private final IChannelReceiver myWorkChannelReceiver;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
-	private final MessageHandler myReceiverHandler;
 	private final JobQuerySvc myJobQuerySvc;
 	private final JobParameterJsonValidator myJobParameterJsonValidator;
 	private final IHapiTransactionService myTransactionService;
@@ -74,29 +64,14 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	 * Constructor
 	 */
 	public JobCoordinatorImpl(
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull IChannelReceiver theWorkChannelReceiver,
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull WorkChunkProcessor theExecutorSvc,
-			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			@Nonnull IHapiTransactionService theTransactionService,
-			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
+			@Nonnull IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
-		myBatchJobSender = theBatchJobSender;
-		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(
-				theJobPersistence,
-				theJobDefinitionRegistry,
-				theBatchJobSender,
-				theExecutorSvc,
-				theJobMaintenanceService,
-				theTransactionService,
-				theInterceptorBroadcaster);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 		myTransactionService = theTransactionService;
@@ -220,15 +195,5 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);
-	}
-
-	@PostConstruct
-	public void start() {
-		myWorkChannelReceiver.subscribe(myReceiverHandler);
-	}
-
-	@PreDestroy
-	public void stop() {
-		myWorkChannelReceiver.unsubscribe(myReceiverHandler);
 	}
 }

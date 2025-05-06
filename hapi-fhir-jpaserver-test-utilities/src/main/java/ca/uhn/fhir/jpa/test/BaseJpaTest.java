@@ -176,6 +176,7 @@ import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -1038,6 +1039,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void afterResetInterceptors() {
 		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
 		myRegisteredInterceptors.clear();
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 	}
 
 	/**

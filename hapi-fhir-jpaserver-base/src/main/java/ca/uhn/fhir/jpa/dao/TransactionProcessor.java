@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
@@ -81,8 +82,8 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -94,8 +95,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	/**
 	 * Matches conditional URLs in the form of [resourceType]?[paramName]=[paramValue]{...more params...}
-	 *
-	 *
 	 */
 	public static final Pattern MATCH_URL_PATTERN = Pattern.compile("^[^?]++[?][a-z0-9-]+=[^&,]++");
 
@@ -329,10 +328,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
-		// Key: The ID of the resource
-		// Value: TRUE if we should prefetch the existing resource details and all stored indexes,
-		//        FALSE if we should prefetch only the identity (resource ID and deleted status)
-		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
+		enum PrefetchReasonEnum {
+			/**
+			 * The ID is being prefetched because it is the ID in a resource reference
+			 * within a resource being updated. In this case, we care whether the resource
+			 * is deleted (since you can't reference a deleted resource), but we don't
+			 * need to fetch the body since we don't actually care about its contents.
+			 */
+			REFERENCE_TARGET,
+			/**
+			 * The ID is being prefetched because it is the ID of a resource being
+			 * updated directly by the transaction. In this case we don't care if it's
+			 * deleted (since it's fine to update a deleted resource), and we do need
+			 * to prefetch the current body so we can tell how it has changed.
+			 */
+			DIRECT_TARGET
+		}
+		Map<IIdType, PrefetchReasonEnum> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
@@ -340,7 +352,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 
 				/*
-				 * Pre-fetch any resources that are potentially being directly updated by ID
+				 * Pre-fetch any resources that are being updated or patched within
+				 * the transaction
 				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
@@ -348,14 +361,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
-						idsToPreResolve.put(unqualifiedVersionless, Boolean.TRUE);
+						idsToPreResolve.put(unqualifiedVersionless, PrefetchReasonEnum.DIRECT_TARGET);
 					}
 				}
 
 				/*
-				 * Pre-fetch any resources that are referred to directly by ID (don't replace
-				 * the TRUE flag with FALSE in case we're updating a resource but also
-				 * pointing to that resource elsewhere in the bundle)
+				 * If there are any resource references anywhere in any resources being
+				 * created or updated that point to another target resource directly by
+				 * ID, we also want to prefetch the identity of that target ID
 				 */
 				if ("PUT".equals(verb) || "POST".equals(verb)) {
 					for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
@@ -366,7 +379,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 								&& reference.hasResourceType()
 								&& reference.hasIdPart()
 								&& !reference.getValue().contains("?")) {
-							idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
+
+							// We use putIfAbsent here because if we're already fetching
+							// as a direct target we don't want to downgrade to just a
+							// reference target
+							idsToPreResolve.putIfAbsent(
+									reference.toUnqualifiedVersionless(), PrefetchReasonEnum.REFERENCE_TARGET);
 						}
 					}
 				}
@@ -374,34 +392,52 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 
 		/*
-		 * If all the entries in the pre-fetch ID map have a value of TRUE, this
-		 * means we only have IDs associated with resources we're going to directly
-		 * update/patch within the transaction. In that case, it's fine to include
-		 * deleted resources, since updating them will bring them back to life.
+		 * If any of the entries in the pre-fetch ID map have a value of REFERENCE_TARGET,
+		 * this means we can't rely on cached identities because we need to know the
+		 * current deleted status of at least one of them. This is because another thread
+		 * (or potentially even another process elsewhere) could have moved the resource
+		 * to "deleted", and we can't allow someone to add a reference to a deleted
+		 * resource. If deletes are disabled on this server though, we can trust that
+		 * nothing has been moved to "deleted" status since it was put in the cache, and
+		 * it's safe to use the cache.
 		 *
-		 * If we have any FALSE entries, we're also pre-fetching reference targets
-		 * which means we don't want deleted resources, because those are not OK
-		 * to reference.
+		 * On the other hand, if all resource IDs we want to prefetch have a value of
+		 * DIRECT_UPDATE, that means these IDs are all resources we're about to
+		 * modify. In that case it doesn't even matter if the resource is currently
+		 * deleted because we're going to resurrect it in that case.
 		 */
-		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
+		boolean preFetchIncludesReferences =
+				idsToPreResolve.values().stream().anyMatch(t -> t == PrefetchReasonEnum.REFERENCE_TARGET);
 		ResolveIdentityMode resolveMode = preFetchIncludesReferences
-				? ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled()
+				? ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled()
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
-		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
+		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
+						outcomes.entrySet().iterator();
+				iterator.hasNext(); ) {
+			Map.Entry<IIdType, IResourceLookup<JpaPid>> entry = iterator.next();
 			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
-			foundIds.add(unqualifiedVersionlessId.getValue());
-			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
-			if (idsToPreResolve.get(unqualifiedVersionlessId) == Boolean.TRUE) {
-				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-						|| (next.getAssociatedResourceId() != null
-								&& !next.getAssociatedResourceId().isIdPartValidLong())) {
-					theIdsToPreFetchBodiesFor.add(next);
+			switch (idsToPreResolve.get(unqualifiedVersionlessId)) {
+				case DIRECT_TARGET -> {
+					if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
+							|| (next.getAssociatedResourceId() != null
+									&& !next.getAssociatedResourceId().isIdPartValidLong())) {
+						theIdsToPreFetchBodiesFor.add(next);
+					}
+				}
+				case REFERENCE_TARGET -> {
+					if (entry.getValue().getDeleted() != null) {
+						iterator.remove();
+						continue;
+					}
 				}
 			}
+
+			foundIds.add(unqualifiedVersionlessId.getValue());
+			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
 		}
 
 		// Any IDs that could not be resolved are presumably not there, so
@@ -500,18 +536,18 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * This method attempts to resolve a collection of conditional URLs that were found
 	 * in a FHIR transaction bundle being processed.
 	 *
-	 * @param theRequestDetails        The active request
-	 * @param theTransactionDetails    The active transaction details
-	 * @param theRequestPartitionId    The active partition
-	 * @param theInputParameters       These are the conditional URLs that will actually be resolved
+	 * @param theRequestDetails              The active request
+	 * @param theTransactionDetails          The active transaction details
+	 * @param theRequestPartitionId          The active partition
+	 * @param theInputParameters             These are the conditional URLs that will actually be resolved
 	 * @param theOutputPidsToLoadBodiesFor   This list will be added to with any resource PIDs that need to be fully
-	 *                                 preloaded (i.e. fetch the actual resource body since we're presumably
-	 *                                 going to update it and will need to see its current state eventually)
+	 *                                       preloaded (i.e. fetch the actual resource body since we're presumably
+	 *                                       going to update it and will need to see its current state eventually)
 	 * @param theOutputPidsToLoadVersionsFor This list will be added to with any resource PIDs that need to have
-	 *                                 their current version resolved. This is used for conditional creates,
-	 *                                 where we don't actually care about the body of the resource, only
-	 *                                 the version it has (since the version is returned in the response,
-	 *                                 and potentially used if we're auto-versioning references).
+	 *                                       their current version resolved. This is used for conditional creates,
+	 *                                       where we don't actually care about the body of the resource, only
+	 *                                       the version it has (since the version is returned in the response,
+	 *                                       and potentially used if we're auto-versioning references).
 	 */
 	@VisibleForTesting
 	public void preFetchSearchParameterMaps(
@@ -544,8 +580,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
-				if (param instanceof TokenParam) {
-					TokenParam tokenParam = (TokenParam) param;
+				if (param instanceof TokenParam tokenParam) {
 					canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
 							tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
 				}
@@ -829,11 +864,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					updateCount);
 		} catch (PersistenceException e) {
 			if (myHapiFhirHibernateJpaDialect != null) {
-				List<String> types = theIdToPersistedOutcome.keySet().stream()
-						.filter(Objects::nonNull)
-						.map(IIdType::getResourceType)
-						.collect(Collectors.toList());
-				String message = "Error flushing transaction with resource types: " + types;
+				String transactionTypes = createDescriptionOfResourceTypesInBundle(theIdToPersistedOutcome);
+				String message = "Error flushing transaction with resource types: " + transactionTypes;
 				throw myHapiFhirHibernateJpaDialect.translate(e, message);
 			}
 			throw e;
@@ -848,6 +880,47 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@VisibleForTesting
 	public void setApplicationContextForUnitTest(ApplicationContext theAppCtx) {
 		myApplicationContext = theAppCtx;
+	}
+
+	/**
+	 * Creates a description of resource types in the provided bundle, indicating the types of resources
+	 * and their counts within the input map. This is intended only to be helpful for troubleshooting, since
+	 * it can be helpful to see details about the transaction which failed in the logs.
+	 * <p>
+	 * Example output: <code>[Patient (x3), Observation (x14)]</code>
+	 * </p>
+	 *
+	 * @param theIdToPersistedOutcome A map where the key is an {@code IIdType} object representing a resource ID
+	 *                                and the value is a {@code DaoMethodOutcome} object representing the outcome
+	 *                                of the persistence operation for that resource.
+	 * @return A string describing the resource types and their respective counts in a formatted list.
+	 */
+	@Nonnull
+	private static String createDescriptionOfResourceTypesInBundle(
+			Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+		TreeMap<String, Integer> types = new TreeMap<>();
+		for (IIdType t : theIdToPersistedOutcome.keySet()) {
+			if (t != null) {
+				String resourceType = t.getResourceType();
+				int count = types.getOrDefault(resourceType, 0);
+				types.put(resourceType, count + 1);
+			}
+		}
+
+		StringBuilder typesBuilder = new StringBuilder();
+		typesBuilder.append("[");
+		for (Iterator<Map.Entry<String, Integer>> iter = types.entrySet().iterator(); iter.hasNext(); ) {
+			Map.Entry<String, Integer> entry = iter.next();
+			typesBuilder.append(entry.getKey());
+			if (entry.getValue() > 1) {
+				typesBuilder.append(" (x").append(entry.getValue()).append(")");
+			}
+			if (iter.hasNext()) {
+				typesBuilder.append(", ");
+			}
+		}
+		typesBuilder.append("]");
+		return typesBuilder.toString();
 	}
 
 	public static class MatchUrlToResolve {

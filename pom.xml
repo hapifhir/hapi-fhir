@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.1.5-SNAPSHOT</version>
+	<version>8.3.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -989,6 +989,10 @@
 			<name>Berkant Karduman</name>
 			<organization>TigaHealth</organization>
 		</developer>
+		<developer>
+			<id>xytis</id>
+			<name>Vytis Valentinavičius</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -999,7 +1003,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.5.18-tmp-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>6.5.18</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
@@ -1036,7 +1040,7 @@
 		<commons_lang3_version>3.17.0</commons_lang3_version>
 		<com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
 		<error_prone_core_version>2.36.0</error_prone_core_version>
-		<mockito_version>5.8.0</mockito_version>
+		<mockito_version>5.17.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>33.2.1-jre</guava_version>
 		<gson_version>2.8.9</gson_version>

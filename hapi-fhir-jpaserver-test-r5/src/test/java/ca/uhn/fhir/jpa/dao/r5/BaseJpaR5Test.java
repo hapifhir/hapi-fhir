@@ -118,6 +118,7 @@ import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.ServiceRequest;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.Subscription;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.hl7.fhir.r5.model.Substance;
 import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -349,6 +350,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("mySubscriptionDaoR5")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+	@Autowired
+	@Qualifier("mySubscriptionTopicDaoR5")
+	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	@Autowired
 	@Qualifier("mySubstanceDaoR5")
 	protected IFhirResourceDao<Substance> mySubstanceDao;

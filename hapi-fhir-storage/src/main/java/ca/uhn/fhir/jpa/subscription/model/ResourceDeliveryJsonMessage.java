@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
+import ca.uhn.fhir.rest.server.messaging.ICanNullPayload;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
+public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> implements ICanNullPayload {
 	private static final ObjectMapper ourObjectMapper =
 			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
@@ -57,24 +57,6 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 	}
 
 	@Override
-	@Nullable
-	public String getMessageKey() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKey();
-	}
-
-	@Override
-	@Nullable
-	public String getMessageKeyOrDefault() {
-		if (myPayload == null) {
-			return null;
-		}
-		return myPayload.getMessageKeyOrDefault();
-	}
-
-	@Override
 	public String toString() {
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
@@ -85,5 +67,12 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	public String asJson() throws JsonProcessingException {
 		return ourObjectMapper.writeValueAsString(this);
+	}
+
+	@Override
+	public void setPayloadToNull() {
+		if (myPayload != null) {
+			myPayload.setPayloadToNull();
+		}
 	}
 }

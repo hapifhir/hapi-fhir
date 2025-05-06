@@ -63,7 +63,7 @@ public class SubscriptionTriggerMatcher {
 			MemoryCacheService theMemoryCacheService) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myOperation = theMsg.getOperationType();
-		myResource = theMsg.getPayload(theSubscriptionTopicSupport.getFhirContext());
+		myResource = theMsg.getResource(theSubscriptionTopicSupport.getFhirContext());
 		myResourceName = myResource.fhirType();
 		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
 		myTrigger = theTrigger;

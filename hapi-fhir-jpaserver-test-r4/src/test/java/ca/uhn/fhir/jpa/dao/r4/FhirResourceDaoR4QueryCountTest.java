@@ -4332,6 +4332,61 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testTransactionWithMultiplePreExistingInlineMatchUrls(boolean theMatchUrlCacheEnabled) {
+		// Setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+
+		for (int i = 0; i < 5; i++) {
+			Organization org = new Organization();
+			org.addIdentifier().setSystem("http://system").setValue(Integer.toString(i));
+			myOrganizationDao.create(org, mySrd);
+		}
+
+		Supplier<Bundle> input = ()-> {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			for (int i = 0; i < 5; i++) {
+				Patient patient = new Patient();
+				patient.addGeneralPractitioner(new Reference("Organization?identifier=http://system|" + i));
+				bb.addTransactionCreateEntry(patient);
+			}
+			return bb.getBundleTyped();
+		};
+
+		// Test
+		myMemoryCacheService.invalidateAllCaches();
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		// Test 2 - Use the same URLs (caching should now reduce the number of selects needed)
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input.get());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		if (theMatchUrlCacheEnabled) {
+			assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		} else {
+			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		}
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+
 	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(theExpectedSelectCount);
