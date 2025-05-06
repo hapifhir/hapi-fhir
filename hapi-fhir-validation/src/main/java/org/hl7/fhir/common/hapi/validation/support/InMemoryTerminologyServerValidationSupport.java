@@ -49,8 +49,11 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private final FhirContext myCtx;
-	private final VersionCanonicalizer myVersionCanonicalizer;
 	private IssueSeverity myIssueSeverityForCodeDisplayMismatch = IssueSeverity.WARNING;
+	private VersionCanonicalizer myVersionCanonicalizer;
+
+	private static final String CANONICAL_USERDATA_KEY =
+		InMemoryTerminologyServerValidationSupport.class.getName() + "_CANONICAL_USERDATA_KEY";
 
 	/**
 	 * Constructor
@@ -73,6 +76,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		myCtx = theCtx;
 		myVersionCanonicalizer =
 				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theCtx);
+	}
+
+	// FIXME ND
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override

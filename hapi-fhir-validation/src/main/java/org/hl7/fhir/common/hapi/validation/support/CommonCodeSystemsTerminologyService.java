@@ -68,10 +68,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
-	private final VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
 	private volatile Map<String, String> myLanguagesLanugageMap;
 	private volatile Map<String, String> myLanguagesRegionMap;
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -89,6 +89,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		myFhirContext = theFhirContext;
 		myVersionCanonicalizer =
 				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theFhirContext);
+	}
+
+	// FIXME ND
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override

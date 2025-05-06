@@ -326,6 +326,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return myAllowExamples;
 	}
 
+	// FIXME ND
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		if (myWrappedWorkerContext != null) {
+			myWrappedWorkerContext.setVersionCanonicalizer(theVersionCanonicalizer);
+		}
+	}
+
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
 
 		@Override

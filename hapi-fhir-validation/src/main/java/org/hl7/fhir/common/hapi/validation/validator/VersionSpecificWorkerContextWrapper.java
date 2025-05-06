@@ -90,7 +90,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
-	private final VersionCanonicalizer myVersionCanonicalizer;
+
+	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
@@ -102,6 +103,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myVersionCanonicalizer = theVersionCanonicalizer;
 
 		setValidationMessageLanguage(getLocale());
+	}
+
+	// FIXME ND
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.validation.performance;
+package ca.uhn.fhir.jpa.provider.validation.performance;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
@@ -55,6 +55,10 @@ public class ConverterInvocation {
 		sb.append("\t").append(element);
     }
 	return sb.toString();
+	}
+
+	public String getResourceId() {
+		return myResourceId;
 	}
 
 	public static class ElapsedTimeComparator implements Comparator<ConverterInvocation> {

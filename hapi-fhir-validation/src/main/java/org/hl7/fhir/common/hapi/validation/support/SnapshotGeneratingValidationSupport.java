@@ -40,9 +40,9 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final FhirContext myCtx;
-	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final IWorkerContext myWorkerContext;
 	private final FHIRPathEngine myFHIRPathEngine;
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -81,6 +81,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		myFHIRPathEngine = theFHIRPathEngine;
 		myVersionCanonicalizer =
 				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theFhirContext);
+	}
+
+	// FIXME ND
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@SuppressWarnings("EnhancedSwitchMigration")
