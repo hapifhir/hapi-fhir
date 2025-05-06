@@ -1,14 +1,20 @@
 package ca.uhn.fhir.jpa.provider.validation.performance;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Narrative;
@@ -21,6 +27,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +82,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		myValueSet2 = CreateTerminologyTestUtil.createValueSetFromCodeSystemUrl("valueset-2", "Value Set Two", myCodeSystem2.getUrl());
 		myValueSetCombined = CreateTerminologyTestUtil.createValueSetFromValueSets("valueset-combined", "Value Set Combined", myValueSet1, myValueSet2);
 		myAllValueSets = List.of(myValueSet1, myValueSet2, myValueSetCombined);
-	}
 
-	@Test
-	public void testCanonicalization() {
 
 		loadTerminology();
 		loadStructureDefinitions();
@@ -99,37 +103,12 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
 		});
+	}
 
-		Procedure procedure = new Procedure();
-		procedure.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Empty</div>");
-		procedure.getMeta().addProfile(myStructureDefinition.getUrl());
-		procedure.setStatus(Procedure.ProcedureStatus.INPROGRESS);
-
-		int lastConceptIndex = NUM_CONCEPTS - 1;
-
-		// add code from ValueSet 1 (has all concepts in include)
-		assertEquals(1, myValueSet1.getCompose().getInclude().size());
-		assertEquals(NUM_CONCEPTS, myValueSet1.getCompose().getInclude().get(0).getConcept().size());
-		ValueSet.ConceptReferenceComponent valueSet1LastConcept = myValueSet1.getCompose().getInclude().get(0).getConcept().get(lastConceptIndex);
-		procedure.getCode().addCoding()
-				.setSystem(myCodeSystem1.getUrl())
-				.setCode(valueSet1LastConcept.getCode())
-				.setDisplay(valueSet1LastConcept.getDisplay());
-
-		// add code from ValueSet 2 (has no concepts included and must be expanded)
-		assertEquals(1, myValueSet2.getCompose().getInclude().size());
-		assertTrue(myValueSet2.getCompose().getInclude().get(0).getConcept().isEmpty());
-		procedure.getCode().addCoding()
-				.setSystem(myCodeSystem2.getUrl())
-				.setCode("codesystem-2-concept-" + NUM_CONCEPTS)
-				.setDisplay("Code System Two Concept " + NUM_CONCEPTS);
-
-		// add invalid code to ensure validation is functioning properly
-		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
-
-		Patient subject = new Patient();
-		subject.setId("subject-1");
-		procedure.setSubject(new Reference(subject));
+	@Test
+	@Order(1)
+	public void testCanonicalizationOnLocalServer() {
+		Procedure procedure = createProcedure();
 
 
 		long totalTime = 0L;
@@ -163,6 +142,66 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		logSummary(totalTime, max, totalConversionTime.get());
 	}
 
+	@Test
+	@Order(2)
+	public void testCanonicalizationWithRemoteTerminology(){
+		ValidationSupportChain supportChain = new ValidationSupportChain();
+		supportChain.addValidationSupport(new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase));
+		supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
+		supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext, ourVersionCanonicalizer));
+
+
+		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
+		for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
+			prePopulatedSupport.addStructureDefinition(structureDefinition);
+			ourLog.info("Loaded StructureDefinition: {}", structureDefinition.getId());
+		}
+
+		supportChain.addValidationSupport(prePopulatedSupport);
+
+		FhirInstanceValidator module = new FhirInstanceValidator(supportChain, ourVersionCanonicalizer);
+		FhirValidator validator = ourFhirContext.newValidator();
+		validator.registerValidatorModule(module);
+
+		Procedure procedure = createProcedure();
+		ValidationResult validationResult = validator.validateWithResult(procedure);
+
+		int i = 0;
+	}
+
+	private Procedure createProcedure() {
+		Procedure procedure = new Procedure();
+		procedure.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">Empty</div>");
+		procedure.getMeta().addProfile(myStructureDefinition.getUrl());
+		procedure.setStatus(Procedure.ProcedureStatus.INPROGRESS);
+
+		int lastConceptIndex = NUM_CONCEPTS - 1;
+
+		// add code from ValueSet 1 (has all concepts in include)
+		assertEquals(1, myValueSet1.getCompose().getInclude().size());
+		assertEquals(NUM_CONCEPTS, myValueSet1.getCompose().getInclude().get(0).getConcept().size());
+		ValueSet.ConceptReferenceComponent valueSet1LastConcept = myValueSet1.getCompose().getInclude().get(0).getConcept().get(lastConceptIndex);
+		procedure.getCode().addCoding()
+				.setSystem(myCodeSystem1.getUrl())
+				.setCode(valueSet1LastConcept.getCode())
+				.setDisplay(valueSet1LastConcept.getDisplay());
+
+		// add code from ValueSet 2 (has no concepts included and must be expanded)
+		assertEquals(1, myValueSet2.getCompose().getInclude().size());
+		assertTrue(myValueSet2.getCompose().getInclude().get(0).getConcept().isEmpty());
+		procedure.getCode().addCoding()
+				.setSystem(myCodeSystem2.getUrl())
+				.setCode("codesystem-2-concept-" + NUM_CONCEPTS)
+				.setDisplay("Code System Two Concept " + NUM_CONCEPTS);
+
+		// add invalid code to ensure validation is functioning properly
+		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
+
+		Patient subject = new Patient();
+		subject.setId("subject-1");
+		procedure.setSubject(new Reference(subject));
+		return procedure;
+	}
 
 	private void logSummary(long totalTime, long max, long totalConversionTime) {
 		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | AVERAGE TIME: {}ms | CONVERSION TIME: {}ms =====", NUM_RUNS, totalTime, max, totalTime / NUM_RUNS, totalConversionTime);
