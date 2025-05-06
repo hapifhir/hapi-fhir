@@ -168,20 +168,6 @@ public class HapiFhirJpaMigrationTasksTest {
 	}
 
 	@Test
-	public void testGenerateResourceTypes() {
-		// setup
-		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
-
-		// execute
-		List<String> resourceTypes = tasks.generateResourceTypes();
-
-		// verify
-		assertThat(resourceTypes).isNotNull().isNotEmpty();
-		ourLog.info("Resource type size: {}", resourceTypes.size());
-		resourceTypes.forEach(ourLog::debug);
-	}
-
-	@Test
 	public void testGetResourceTypeData() {
 		// setup
 		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());

@@ -541,8 +541,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					assertThat(e.getMessage()).contains("duplicate unique index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale");
 				} catch (ResourceVersionConflictException e) {
 					// expected - This is as a result of the unique SP
-					//assertThat(e.getMessage()).contains("duplicate");
-					assertThat(e.getMessage()).contains("HAPI-0550: HAPI-0824");
+					assertThat(e.getMessage()).contains("duplicate");
 				}
 			};
 			Future<?> future = myExecutor.submit(task);

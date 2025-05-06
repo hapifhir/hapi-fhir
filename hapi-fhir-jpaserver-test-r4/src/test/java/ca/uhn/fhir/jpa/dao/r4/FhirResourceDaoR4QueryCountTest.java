@@ -234,9 +234,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myValidationSupport.fetchAllStructureDefinitions();
 
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
-
-		// Pre-cache all resource types so that no extra queries are made for resource types
-		initResourceTypeCache();
 	}
 
 	@ParameterizedTest
@@ -1494,6 +1491,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Now invalidate the caches, should add one more query
 		myMemoryCacheService.invalidateAllCaches();
+		initResourceTypeCache();
 		map = SearchParameterMap.newSynchronous();
 		map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, idValueArray));
 		myCaptureQueriesListener.clear();
@@ -3642,7 +3640,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testTriggerSubscription_Sync() throws Exception {
 		// Setup
-		initResourceTypeCache();
 		IntStream.range(0, 200).forEach(i -> createAPatient());
 
 		mySubscriptionTestUtil.registerRestHookInterceptor();
@@ -3681,7 +3678,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testTriggerSubscription_Async() throws Exception {
 		// Setup
-		initResourceTypeCache();
 		IntStream.range(0, 200).forEach(i -> createAPatient());
 
 		mySubscriptionTestUtil.registerRestHookInterceptor();

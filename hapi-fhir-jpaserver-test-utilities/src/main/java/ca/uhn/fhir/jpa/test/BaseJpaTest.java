@@ -34,7 +34,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -53,6 +55,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -87,6 +90,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -121,6 +125,7 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -155,7 +160,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -176,7 +185,6 @@ import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -315,6 +323,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceTypeDao myResourceTypeDao;
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
+	@Autowired
+	protected DataSource dataSource;
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
@@ -343,6 +357,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	@BeforeEach
 	public void beforeInitSearchParams() {
 		myStorageSettings.setWriteToSearchParamIdentityTable(false);
+	}
+
+	@BeforeEach
+	public void beforeProcessResources() {
+		populateResourceTypeTable();
+		initResourceTypeCache();
 	}
 
 	@SuppressWarnings("BusyWait")
@@ -1075,5 +1095,36 @@ public abstract class BaseJpaTest extends BaseTest {
 				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
 			);
 		}
+	}
+
+	protected void populateResourceTypeTable() {
+		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
+		String data = resTypes.stream()
+			.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
+			.collect(Collectors.joining(","));
+		String insertSql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES " + data;
+
+		runInTransaction(() -> {
+			List<ResourceTypeEntity> entityList = myResourceTypeDao.findAll();
+			if (CollectionUtils.isEmpty(entityList)) {
+				try (Connection connection = dataSource.getConnection()) {
+					Statement stmt = connection.createStatement();
+					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
+					stmt.executeUpdate(insertSql);
+				} catch (SQLException e) {
+					throw new RuntimeException("Failed to insert resource types", e);
+				}
+			}
+		});
+	}
+
+	protected void initResourceTypeCache() {
+		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+		// Cache is not loaded from database since it addS a SELECT query that will break some existing tests
+		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
+		for (int i = 0; i < resTypes.size(); i++) {
+			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
+		}
+		ourLog.debug("Resource Type cache size: {}", resTypes.size());
 	}
 }

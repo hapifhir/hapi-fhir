@@ -573,12 +573,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
-
-	@Autowired
-	protected IResourceTypeDao myResourceTypeDao;
-	@Autowired
-	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
-
+	
 	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -1020,14 +1015,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		String uuid = uuidParams[0];
 		return uuid;
-	}
-
-	public void initResourceTypeCache() {
-		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
-		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
-		for (int i = 0; i < resTypes.size(); i++) {
-			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
-		}
 	}
 
 	public void assertHasErrors(OperationOutcome theOperationOutcome) {

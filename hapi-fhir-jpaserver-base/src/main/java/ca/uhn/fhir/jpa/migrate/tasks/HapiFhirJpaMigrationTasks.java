@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.migrate.tasks;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -60,7 +59,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 
@@ -186,7 +184,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("RES_TYPE");
 
 			// Populate HFJ_RESOURCE_TYPE table
-			List<String> resTypes = generateResourceTypes();
+			List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
 			Map<DriverTypeEnum, String> resTypeInsertion = new HashMap<>();
 			String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES ";
 
@@ -4463,15 +4461,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
 		hfjResVer.modifyColumn("20180115.3", "RES_ENCODING").nullable();
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
-	}
-
-	protected List<String> generateResourceTypes() {
-		return Stream.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5)
-				.map(FhirContext::forVersion)
-				.flatMap(c -> c.getResourceTypes().stream())
-				.distinct()
-				.sorted()
-				.collect(Collectors.toList());
 	}
 
 	protected String getResourceTypeSqlData(DriverTypeEnum theDriverType, List<String> theResTypes) {
