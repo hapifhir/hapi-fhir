@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Propagation;
 
+import static ca.uhn.fhir.jpa.dao.tx.HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,14 +45,26 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 
+	private RequestHeaderPartitionInterceptor myPartitionInterceptor;
+
 	@BeforeEach
 	public void beforeEach() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		RequestHeaderPartitionInterceptor myPartitionInterceptor = new RequestHeaderPartitionInterceptor();
+		myPartitionInterceptor = new RequestHeaderPartitionInterceptor();
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
 		myPatientIdInPartition1 = createPatientInPartition(new Patient(), "1").getIdElement().toVersionless();
+	}
+
+
+	@AfterEach
+	public void after() {
+		//reset settings to back to defaults
+		PartitionSettings defaultPartitionSettings = new PartitionSettings();
+		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
+		mySrdInterceptorService.unregisterInterceptor(myPartitionInterceptor);
+		myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
 
 	@ParameterizedTest
