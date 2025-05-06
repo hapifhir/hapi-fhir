@@ -1099,16 +1099,23 @@ public abstract class BaseJpaTest extends BaseTest {
 		String insertSql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES " + data;
 
 		runInTransaction(() -> {
+			int insertedRows = 0;
 			List<ResourceTypeEntity> entityList = myResourceTypeDao.findAll();
-			if (CollectionUtils.isEmpty(entityList)) {
-				try (Connection connection = dataSource.getConnection()) {
-					Statement stmt = connection.createStatement();
-					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
-					int rows = stmt.executeUpdate(insertSql);
-					ourLog.info("Resource Type entity list size: {}", rows);
-				} catch (SQLException e) {
-					ourLog.error("Failed to insert resource types", e);
+			ourLog.info("Number of Resource Types in table: {}", entityList.size());
+
+			try (Connection connection = dataSource.getConnection()) {
+				Statement stmt = connection.createStatement();
+				if (CollectionUtils.isEmpty(entityList)) {
+					insertedRows = stmt.executeUpdate(insertSql);
+					ourLog.info("Resource Type entity list size: {}", insertedRows);
+				} else if (entityList.size() < resTypes.size()) {
+					stmt.executeUpdate("DELETE FROM HFJ_RESOURCE_TYPE");
+					stmt.executeUpdate("ALTER SEQUENCE SEQ_RESOURCE_TYPE RESTART WITH 1");
+					insertedRows = stmt.executeUpdate(insertSql);
 				}
+				ourLog.info("Number of Resource Types inserted: {}", insertedRows);
+			} catch (SQLException e) {
+				ourLog.error("Failed to insert resource types", e);
 			}
 		});
 	}
