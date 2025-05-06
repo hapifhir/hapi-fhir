@@ -24,6 +24,7 @@ public class DbpmEnabledTest extends BaseDbpmJpaR5Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 
 		registerPartitionInterceptorAndCreatePartitions();
+		initResourceTypeCache();
 	}
 
 

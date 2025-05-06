@@ -359,12 +359,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		myStorageSettings.setWriteToSearchParamIdentityTable(false);
 	}
 
-	@BeforeEach
-	public void beforeProcessResources() {
-		populateResourceTypeTable();
-		initResourceTypeCache();
-	}
-
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
@@ -1110,9 +1104,10 @@ public abstract class BaseJpaTest extends BaseTest {
 				try (Connection connection = dataSource.getConnection()) {
 					Statement stmt = connection.createStatement();
 					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
-					stmt.executeUpdate(insertSql);
+					int rows = stmt.executeUpdate(insertSql);
+					ourLog.info("Resource Type entity list size: {}", rows);
 				} catch (SQLException e) {
-					throw new RuntimeException("Failed to insert resource types", e);
+					ourLog.error("Failed to insert resource types", e);
 				}
 			}
 		});

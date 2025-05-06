@@ -20,6 +20,7 @@ public class FhirResourceDaoR5IndexStorageOptimizedTest {
 		@BeforeEach
 		public void setUp() {
 			myStorageSettings.setIndexStorageOptimized(true);
+			initResourceTypeCache();
 		}
 
 		@AfterEach
@@ -33,6 +34,7 @@ public class FhirResourceDaoR5IndexStorageOptimizedTest {
 		@BeforeEach
 		public void setUp() {
 			myStorageSettings.setIndexStorageOptimized(true);
+			initResourceTypeCache();
 		}
 
 		@AfterEach
@@ -47,6 +49,7 @@ public class FhirResourceDaoR5IndexStorageOptimizedTest {
 		public void setUp() {
 			myStorageSettings.setWriteToSearchParamIdentityTable(true);
 			myStorageSettings.setIndexStorageOptimized(true);
+			initResourceTypeCache();
 		}
 
 		@AfterEach

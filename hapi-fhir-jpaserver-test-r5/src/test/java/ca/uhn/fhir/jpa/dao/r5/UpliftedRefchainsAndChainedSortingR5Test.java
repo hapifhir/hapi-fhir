@@ -76,6 +76,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		myStorageSettings.setIndexOnUpliftedRefchains(true);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		initResourceTypeCache();
 	}
 
 	@Override
