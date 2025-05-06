@@ -23,6 +23,7 @@ import ca.uhn.fhir.broker.api.BrokerListenerClosedException;
 import ca.uhn.fhir.broker.api.IMessageListener;
 import ca.uhn.fhir.broker.api.IRetryAwareMessageListener;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessageDeliveryContext;
 import ca.uhn.fhir.util.IoUtils;
@@ -80,7 +81,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 		checkState();
 
 		if (!getPayloadType().isAssignableFrom(theListener.getPayloadType())) {
-			throw new ConfigurationException("Expecting listener of type " + getPayloadType()
+			throw new ConfigurationException(Msg.code(2658) + "Expecting listener of type " + getPayloadType()
 					+ ". But listener was for type: " + theListener.getPayloadType());
 		}
 		return mySubListeners.add(theListener);
@@ -106,7 +107,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	private void checkState() {
 		if (myClosed) {
 			throw new BrokerListenerClosedException(
-					"Attempted to use a closed " + MultiplexingListener.class.getSimpleName());
+				Msg.code(2659) + "Attempted to use a closed " + MultiplexingListener.class.getSimpleName());
 		}
 	}
 

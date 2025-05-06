@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.interceptor.executor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
 
 import java.util.function.Supplier;
@@ -46,7 +47,7 @@ public class SupplierFilterHookWrapper<T> implements Supplier<T> {
 
 		if (!trackingSupplierWrapper.wasExecuted()) {
 			throw new IllegalStateException(
-					"Supplier was not executed in filter produced by " + myMessageSupplier.get());
+				Msg.code(2648) + "Supplier was not executed in filter produced by " + myMessageSupplier.get());
 		}
 
 		return trackingSupplierWrapper.getResult();

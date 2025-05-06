@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+	"-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+	"https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+	<suppress files="[/\\]resources[/\\]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]target[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-fhir-docs[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-fhir-checkstyle[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-fhir-jpaserver-test-utilities[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-fhir-test-utilities[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-tinder-plugin[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]osgi[\\/]" checks="[a-zA-Z0-9]*"/>
+
+	<!-- Name suppressions -->
+	<!-- We don't care if test files have `base` or abstract in the name`  -->
+	<suppress files="[/\\]test[/\\]" checks="AbstractClassName" />
+	<suppress files="[/\\]test[/\\]" checks="ca.uhn.fhir.checks.HapiErrorCodeCheck" id="HapiErrorCodeUniqueness"/>
+
+	<suppress files="Base64BinaryDt\.java" checks="AbstractClassName"/>
+	<!-- TODO CHECKSTYLE KHS cdr instantiates these.  Remove them once cdr has been fixed. -->
+	<suppress files="BaseMigrationTasks\.java" checks="AbstractClassName"/>
+	<suppress files="BaseLoincTop2000LabResultsHandler\.java" checks="AbstractClassName"/>
+
+	<!-- Missing "Base" prefix suppressions -->
+	<suppress files="ResourceMetadataKeyEnum\.java" checks="AbstractClassName"/>
+	<suppress files="RequestDetails\.java" checks="AbstractClassName"/>
+	<suppress files="RestfulClientFactory\.java" checks="AbstractClassName"/>
+	<suppress files="MatchUrlService\.java" checks="AbstractClassName"/>
+	<suppress files="BaseController\.java" checks="AbstractClassName"/>
+
+</suppressions>

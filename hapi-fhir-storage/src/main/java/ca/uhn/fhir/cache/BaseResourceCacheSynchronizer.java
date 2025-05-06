@@ -21,6 +21,7 @@ package ca.uhn.fhir.cache;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -144,21 +145,21 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	@Override
 	public void forceRefresh() {
 		if (daoNotAvailable()) {
-			throw new ConfigurationException("Attempt to force refresh without a dao");
+			throw new ConfigurationException(Msg.code(2652) + "Attempt to force refresh without a dao");
 		}
 		try {
 			if (mySyncResourcesSemaphore.tryAcquire(FORCE_REFRESH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				doSyncResourcesWithRetry();
 			} else {
 				String errorMessage = String.format(
-						"Timed out waiting %s %s to refresh %s cache",
+					Msg.code(2653) + "Timed out waiting %s %s to refresh %s cache",
 						FORCE_REFRESH_TIMEOUT_SECONDS, "seconds", myResourceName);
 				ourLog.error(errorMessage);
-				throw new ConfigurationException(errorMessage);
+				throw new ConfigurationException(Msg.code(2663) + errorMessage);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2654) + e);
 		} finally {
 			mySyncResourcesSemaphore.release();
 		}

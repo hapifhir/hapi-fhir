@@ -23,6 +23,7 @@ import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.broker.impl.SpringMessagingSendResult;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -51,12 +52,12 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
 		if (!myMessageType.isAssignableFrom(theMessage.getClass())) {
-			throw new ConfigurationException("Expecting message of type " + myMessageType
+			throw new ConfigurationException(Msg.code(2665) + "Expecting message of type " + myMessageType
 					+ ". But received message of type: " + theMessage.getClass());
 		}
 
 		if (!Message.class.isAssignableFrom(theMessage.getClass())) {
-			throw new ConfigurationException("Expecting message of type " + Message.class
+			throw new ConfigurationException(Msg.code(2664) + "Expecting message of type " + Message.class
 					+ ". But received message of type: " + theMessage.getClass());
 		}
 		Message<?> message = (Message<?>) theMessage;

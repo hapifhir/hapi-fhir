@@ -206,7 +206,7 @@ public class CdsPrefetchSvc {
 			} else if (theStrategy == CdsResolutionStrategyEnum.DAO) {
 				resource = getResourceFromDaoWithPermissionCheck(theUrl);
 			} else {
-				throw new IllegalStateException("Unexpected strategy: " + theStrategy);
+				throw new IllegalStateException(Msg.code(2675) + "Unexpected strategy: " + theStrategy);
 			}
 			prefetchCallSucceeded = true;
 
