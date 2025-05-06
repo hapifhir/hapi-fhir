@@ -211,7 +211,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	public void testStringAndToken_CreateAndUpdate() {
 		createStringAndTokenCombo_NameAndGender();
 
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 
 		// Create a resource patching the unique SP
 		myCaptureQueriesListener.clear();

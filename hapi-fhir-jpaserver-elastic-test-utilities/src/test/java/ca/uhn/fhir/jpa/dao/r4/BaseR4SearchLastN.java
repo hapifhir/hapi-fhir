@@ -145,7 +145,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		myStorageSettings.setAdvancedHSearchIndexing(hsearchSaved);
 
 		populateResourceTypeTable();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 
 	}
 

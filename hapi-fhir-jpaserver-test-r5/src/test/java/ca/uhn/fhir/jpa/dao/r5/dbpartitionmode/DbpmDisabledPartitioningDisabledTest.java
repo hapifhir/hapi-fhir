@@ -15,7 +15,7 @@ public class DbpmDisabledPartitioningDisabledTest extends BaseDbpmJpaR5Test {
 	public void before() throws Exception {
 		super.before();
 		populateResourceTypeTable();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Nested

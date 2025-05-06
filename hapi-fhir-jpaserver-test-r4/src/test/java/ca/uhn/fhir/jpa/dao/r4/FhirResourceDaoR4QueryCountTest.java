@@ -1491,7 +1491,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Now invalidate the caches, should add one more query
 		myMemoryCacheService.invalidateAllCaches();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 		map = SearchParameterMap.newSynchronous();
 		map.add(IAnyResource.SP_RES_ID, new TokenOrListParam(null, idValueArray));
 		myCaptureQueriesListener.clear();
@@ -2521,7 +2521,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myLocationDao.update(loc, mySrd);
 
 		myMemoryCacheService.invalidateAllCaches();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		for (int i = 0; i < 5; i++) {
@@ -2577,7 +2577,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myLocationDao.create(loc, mySrd);
 
 		myMemoryCacheService.invalidateAllCaches();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		for (int i = 0; i < 5; i++) {
@@ -4062,7 +4062,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		myMemoryCacheService.invalidateAllCaches();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 
 		mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 		myCaptureQueriesListener.logSelectQueries();
@@ -4365,7 +4365,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Test
 		myMemoryCacheService.invalidateAllCaches();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
 

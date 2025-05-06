@@ -1119,13 +1119,29 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void initResourceTypeCache() {
+	/**
+	 * Initializes the resource type cache from the configuration instead of the database.
+	 * This is useful for some tests that validate the SELECT query counts. It will avoid an extra SELECT query
+	 * being added to the count
+	 */
+	protected void initResourceTypeCacheFromConfig() {
 		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+
 		// Cache is not loaded from database since it adds a SELECT query that will break some existing tests
 		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
 		for (int i = 0; i < resTypes.size(); i++) {
 			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
 		}
-		ourLog.debug("Resource Type cache size: {}", resTypes.size());
 	}
+
+	protected void initResourceTypeCacheFromDatabase() {
+		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+
+		List<ResourceTypeEntity> resTypes = myResourceTypeDao.findAll();
+		resTypes.forEach(t -> myResourceTypeCacheSvc.addToCache(t.getResourceType(), t.getResourceTypeId()));
+		ourLog.debug("Resource Type cache size: {}", myMemoryCacheService.getEstimatedSize(
+			MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID));
+	}
+
+
 }

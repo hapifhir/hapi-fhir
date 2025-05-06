@@ -27,7 +27,7 @@ public class BaseDbpmJpaR5Test extends BaseJpaR5Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override

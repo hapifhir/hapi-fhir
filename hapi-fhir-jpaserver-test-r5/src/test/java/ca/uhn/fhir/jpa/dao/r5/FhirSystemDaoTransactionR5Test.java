@@ -58,7 +58,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 	@Override
 	@BeforeEach
 	public void before() {
-		initResourceTypeCache();
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
