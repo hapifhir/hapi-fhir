@@ -63,6 +63,7 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 		//reset settings to back to defaults
 		PartitionSettings defaultPartitionSettings = new PartitionSettings();
 		myPartitionSettings.setPartitioningEnabled(defaultPartitionSettings.isPartitioningEnabled());
+		myPartitionSettings.setUnnamedPartitionMode(defaultPartitionSettings.isUnnamedPartitionMode());
 		mySrdInterceptorService.unregisterInterceptor(myPartitionInterceptor);
 		myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
