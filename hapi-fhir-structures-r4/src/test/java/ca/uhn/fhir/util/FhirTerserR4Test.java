@@ -39,6 +39,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Provenance;
@@ -645,11 +646,22 @@ public class FhirTerserR4Test {
 
 	@Test
 	public void testGetValues_withChoiceNode() {
-		Observation o = new Observation();
-		o.setEffective(new DateTimeType("2025-05-06T15:47:30-04:00"));
+		// set up
+		Observation o1 = new Observation();
+		o1.setEffective(new DateTimeType("2025-05-06T15:47:30-04:00"));
 
-		List<IBase> values = myCtx.newTerser().getValues(o, "Observation.effectivePeriod.start");
-		assertThat(values).isNotNull().isEmpty();
+		Observation o2 = new Observation();
+		o2.setEffective(new Period().setStartElement(new DateTimeType("2025-05-06T16:05:34-04:00")));
+
+		// execute
+		List<IBase> values1 = myCtx.newTerser().getValues(o1, "Observation.effectivePeriod.start");
+		List<IBase> values2 = myCtx.newTerser().getValues(o2, "Observation.effectivePeriod.start");
+
+		//validate
+		assertThat(values1).isNotNull().isEmpty();
+		assertThat(values2).isNotNull().hasSize(1);
+		assertThat(values2.get(0)).isInstanceOf(DateTimeType.class);
+		assertThat(((DateTimeType)values2.get(0)).getValueAsString()).isEqualTo("2025-05-06T16:05:34-04:00");
 	}
 
 	@Test
