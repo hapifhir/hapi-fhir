@@ -56,6 +56,8 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setLastNEnabled(true);
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
+
+		initResourceTypeCache();
 	}
 
 	@AfterEach

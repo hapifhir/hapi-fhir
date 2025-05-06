@@ -144,6 +144,9 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// turn off the setting enabled earlier
 		myStorageSettings.setAdvancedHSearchIndexing(hsearchSaved);
 
+		populateResourceTypeTable();
+		initResourceTypeCache();
+
 	}
 
 	private void createObservationsForPatient(IIdType thePatientId) {

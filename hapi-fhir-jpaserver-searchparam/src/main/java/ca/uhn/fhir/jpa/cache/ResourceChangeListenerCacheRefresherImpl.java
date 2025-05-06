@@ -82,7 +82,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTarget.refreshExpiredCachesAndNotifyListeners();
+			// myTarget.refreshExpiredCachesAndNotifyListeners();
 		}
 	}
 
