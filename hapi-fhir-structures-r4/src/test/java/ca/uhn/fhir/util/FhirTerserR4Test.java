@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -640,6 +641,15 @@ public class FhirTerserR4Test {
 		assertInstanceOf(Extension.class, values.get(0));
 		assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testGetValues_withChoiceNode() {
+		Observation o = new Observation();
+		o.setEffective(new DateTimeType("2025-05-06T15:47:30-04:00"));
+
+		List<IBase> values = myCtx.newTerser().getValues(o, "Observation.effectivePeriod.start");
+		assertThat(values).isNotNull().isEmpty();
 	}
 
 	@Test
