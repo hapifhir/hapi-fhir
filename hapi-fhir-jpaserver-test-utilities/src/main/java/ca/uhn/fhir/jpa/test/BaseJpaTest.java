@@ -1096,24 +1096,23 @@ public abstract class BaseJpaTest extends BaseTest {
 		String data = resTypes.stream()
 			.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
 			.collect(Collectors.joining(","));
-		String insertSql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES " + data;
+		String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES %s".formatted(data);
 
 		runInTransaction(() -> {
 			int insertedRows = 0;
 			List<ResourceTypeEntity> entityList = myResourceTypeDao.findAll();
-			ourLog.info("Number of Resource Types in table: {}", entityList.size());
+			ourLog.debug("Number of Resource Types in table: {}", entityList.size());
 
 			try (Connection connection = dataSource.getConnection()) {
 				Statement stmt = connection.createStatement();
 				if (CollectionUtils.isEmpty(entityList)) {
-					insertedRows = stmt.executeUpdate(insertSql);
-					ourLog.info("Resource Type entity list size: {}", insertedRows);
+					insertedRows = stmt.executeUpdate(sql);
 				} else if (entityList.size() < resTypes.size()) {
 					stmt.executeUpdate("DELETE FROM HFJ_RESOURCE_TYPE");
 					stmt.executeUpdate("ALTER SEQUENCE SEQ_RESOURCE_TYPE RESTART WITH 1");
-					insertedRows = stmt.executeUpdate(insertSql);
+					insertedRows = stmt.executeUpdate(sql);
 				}
-				ourLog.info("Number of Resource Types inserted: {}", insertedRows);
+				ourLog.debug("Number of Resource Types inserted: {}", insertedRows);
 			} catch (SQLException e) {
 				ourLog.error("Failed to insert resource types", e);
 			}
@@ -1122,7 +1121,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected void initResourceTypeCache() {
 		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
-		// Cache is not loaded from database since it addS a SELECT query that will break some existing tests
+		// Cache is not loaded from database since it adds a SELECT query that will break some existing tests
 		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
 		for (int i = 0; i < resTypes.size(); i++) {
 			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
