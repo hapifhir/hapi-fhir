@@ -914,12 +914,12 @@ public class SearchQueryBuilder {
 				ComboExpression.Op.SUBTRACT, theCoordsBuilder.getColumnLongitude(), longitudePlaceholder);
 
 		ComboExpression squaredLatitudeDiff =
-			new ComboExpression(ComboExpression.Op.MULTIPLY, latitudeDiff, latitudeDiff);
+				new ComboExpression(ComboExpression.Op.MULTIPLY, latitudeDiff, latitudeDiff);
 		ComboExpression squaredLongitudeDiff =
-			new ComboExpression(ComboExpression.Op.MULTIPLY, longitudeDiff, longitudeDiff);
+				new ComboExpression(ComboExpression.Op.MULTIPLY, longitudeDiff, longitudeDiff);
 		FunctionCall euclideanDistance = new FunctionCall("SQRT")
-			.addCustomParams(
-				new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
+				.addCustomParams(
+						new ComboExpression(ComboExpression.Op.ADD, squaredLatitudeDiff, squaredLongitudeDiff));
 
 		String columnName = "EUC_DIST" + (myNextNearnessColumnId++);
 		mySelect.addAliasedColumn(euclideanDistance, columnName);
