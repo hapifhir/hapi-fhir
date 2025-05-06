@@ -599,10 +599,10 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceTypeCacheSvc resourceTypeCacheSvc(
-			@Autowired HapiTransactionService theHapiTxService,
 			@Autowired IResourceTypeDao theResourceTypeDao,
+			@Autowired PlatformTransactionManager theTxManager,
 			@Autowired MemoryCacheService theMemoryCacheService) {
-		return new ResourceTypeCacheSvcImpl(theHapiTxService, theResourceTypeDao, theMemoryCacheService);
+		return new ResourceTypeCacheSvcImpl(theResourceTypeDao, theTxManager, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *

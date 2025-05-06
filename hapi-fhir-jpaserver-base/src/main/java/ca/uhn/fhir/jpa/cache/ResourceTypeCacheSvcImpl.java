@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import jakarta.annotation.PostConstruct;
@@ -28,7 +27,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -38,16 +38,17 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	private static final Logger ourLog = getLogger(ResourceTypeCacheSvcImpl.class);
 
-	private final HapiTransactionService myHapiTxService;
 	private final IResourceTypeDao myResourceTypeDao;
+	private final TransactionTemplate myTxTemplate;
 	private final MemoryCacheService myMemoryCacheService;
 
 	public ResourceTypeCacheSvcImpl(
-			HapiTransactionService theHapiTxService,
 			IResourceTypeDao theResourceTypeDao,
+			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
-		myHapiTxService = theHapiTxService;
 		myResourceTypeDao = theResourceTypeDao;
+		myTxTemplate = new TransactionTemplate(theTxManager);
+		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		myMemoryCacheService = theMemoryCacheService;
 	}
 
@@ -78,10 +79,7 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	}
 
 	protected void initCache() {
-		List<ResourceTypeEntity> resTypes = myHapiTxService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(t -> myResourceTypeDao.findAll());
+		List<ResourceTypeEntity> resTypes = myTxTemplate.execute(t -> myResourceTypeDao.findAll());
 		if (CollectionUtils.isEmpty(resTypes)) {
 			ourLog.warn("No resource type found in database");
 			return;
@@ -91,28 +89,22 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	}
 
 	protected ResourceTypeEntity createResourceType(String theResourceType) {
-		return myHapiTxService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(t -> {
-					try {
-						ResourceTypeEntity entity = new ResourceTypeEntity();
-						entity.setResourceType(theResourceType);
-						ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
-						addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
-						return savedEntity;
-					} catch (DataIntegrityViolationException e) {
-						// This can happen if the resource type already exists in the database
-						ourLog.info("Resource type already exists: {}", theResourceType);
-						return myResourceTypeDao.findByResourceType(theResourceType);
-					}
-				});
+		return myTxTemplate.execute(t -> {
+			try {
+				ResourceTypeEntity entity = new ResourceTypeEntity();
+				entity.setResourceType(theResourceType);
+				ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
+				addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
+				return savedEntity;
+			} catch (DataIntegrityViolationException e) {
+				// This can happen if the resource type already exists in the database
+				ourLog.info("Resource type already exists: {}", theResourceType);
+				return myTxTemplate.execute(tx -> myResourceTypeDao.findByResourceType(theResourceType));
+			}
+		});
 	}
 
 	private Short lookupResourceTypeId(String theResourceType) {
-		return myHapiTxService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(t -> myResourceTypeDao.findResourceIdByType(theResourceType));
+		return myTxTemplate.execute(t -> myResourceTypeDao.findResourceIdByType(theResourceType));
 	}
 }
