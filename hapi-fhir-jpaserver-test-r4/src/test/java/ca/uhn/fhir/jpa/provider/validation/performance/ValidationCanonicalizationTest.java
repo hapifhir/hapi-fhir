@@ -110,13 +110,19 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				StopWatch sw = new StopWatch();
 				MethodOutcome methodOutcome = myClient.validate().resource(procedure).execute();
 
-				TestRun testRun = new TestRun(runNumber, ourVersionCanonicalizer.getMetrics(), sw.getMillis());
+
+				CanonicalizationMetrics metrics = ourVersionCanonicalizer.getMetrics();
+				TestRun testRun = new TestRun(runNumber, metrics, sw.getMillis());
 				testRuns.add(testRun);
 
 				logMetrics(testRun);
 
 				assertInstanceOf(OperationOutcome.class, methodOutcome.getOperationOutcome());
 				assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
+
+				if (runNumber > 1){
+					assertCorrectCaching(metrics);
+				}
 			}
 
 			logSummary(testRuns);
@@ -165,11 +171,15 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				StopWatch sw = new StopWatch();
 				ValidationResult validationResult = validator.validateWithResult(procedure);
 
-				TestRun run = new TestRun(runNumber, ourVersionCanonicalizer.getMetrics(), sw.getMillis());
+				CanonicalizationMetrics metrics = ourVersionCanonicalizer.getMetrics();
+				TestRun run = new TestRun(runNumber, metrics, sw.getMillis());
 				testRuns.add(run);
 
 				logMetrics(run);
 				assertValidationErrors(validationResult);
+				if (runNumber > 1){
+					assertCorrectCaching(metrics);
+				}
 			}
 
 			logSummary(testRuns);
@@ -225,6 +235,10 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
 			assertEquals(expectedMessage3, message3.getMessage());
 		}
+	}
+
+	private void assertCorrectCaching(CanonicalizationMetrics theMetrics){
+		assertEquals(0, theMetrics.getTotalInvocations());
 	}
 
 	private void setVersionCanonicalizer() {
