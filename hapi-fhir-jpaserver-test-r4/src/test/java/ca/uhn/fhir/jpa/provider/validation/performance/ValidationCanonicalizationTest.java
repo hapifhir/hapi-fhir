@@ -5,40 +5,30 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
@@ -48,9 +38,11 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private JpaValidationSupportChain myJpaValidationSupportChain;
 
-	private static final int NUM_RUNS = 10;
-//	private static final int NUM_CONCEPTS = 100_000;
+	private static final int NUM_RUNS = 3;
+
 	private static final int NUM_CONCEPTS = 1000;
+//	private static final int NUM_CONCEPTS = 50_000;
+//	private static final int NUM_CONCEPTS = 100_000;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationCanonicalizationTest.class);
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -70,6 +62,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeEach(){
+		setVersionCanonicalizer();
+
 		myStructureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, "/validation/structure-definitions/procedure-structuredefinition.json");
 		myAllStructureDefinitions = List.of(myStructureDefinition);
 
@@ -83,10 +77,163 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		myValueSetCombined = CreateTerminologyTestUtil.createValueSetFromValueSets("valueset-combined", "Value Set Combined", myValueSet1, myValueSet2);
 		myAllValueSets = List.of(myValueSet1, myValueSet2, myValueSetCombined);
 
+		List<IBaseResource> allResources = new ArrayList<>();
+		Stream.of(myAllCodeSystems, myAllValueSets, myAllStructureDefinitions).flatMap(List::stream).forEach(allResources::add);
+		for (IBaseResource resource : allResources){
+			myClient.update().resource(resource).execute();
+			ourLog.info("Loaded Resource {}", resource.getIdElement().getIdPart());
+		}
+	}
 
-		loadTerminology();
-		loadStructureDefinitions();
+	@AfterEach
+	public void afterEach(){
+		resetMetrics();
+	}
 
+	@Nested
+	@Order(1)
+	class ValidateCanonicalization {
+
+		@Test
+		public void testCanonicalization() {
+			Procedure procedure = createProcedure();
+
+			long totalTime = 0L;
+			AtomicLong totalConversionTime = new AtomicLong();
+			long max = 0L;
+
+			for (int run = 1; run <= NUM_RUNS; run++){
+				ourLog.info("Start Run #{}", run);
+				resetMetrics();
+
+				StopWatch sw = new StopWatch();
+				MethodOutcome methodOutcome = myClient.validate().resource(procedure).execute();
+				long millis = sw.getMillis();
+
+				totalTime += millis;
+				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+
+				if (millis > max){
+					max = millis;
+				}
+
+				logMetrics(run, millis);
+
+				assertInstanceOf(OperationOutcome.class, methodOutcome.getOperationOutcome());
+				assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
+			}
+
+			logSummary(totalTime, max, totalConversionTime.get());
+		}
+
+		private void assertHasInvalidCodeError(OperationOutcome theOperationOutcome) {
+			List<OperationOutcomeIssueComponent> issues = theOperationOutcome.getIssue();
+			assertEquals(3, issues.size());
+
+			OperationOutcomeIssueComponent issue1 = issues.get(0);
+			assertEquals(IssueSeverity.ERROR, issue1.getSeverity());
+			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code", issue1.getLocation().get(0).getValue());
+			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-1000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-1000, http://acme.org/invalid#invalid)";
+			assertEquals(expectedMessage1, issue1.getDiagnostics());
+
+			OperationOutcomeIssueComponent issue2 = issues.get(1);
+			assertEquals(IssueSeverity.INFORMATION, issue2.getSeverity());
+			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code.coding[2]", issue2.getLocation().get(0).getValue());
+			String expectedMessage2 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice1' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-1'))";
+			assertEquals(expectedMessage2, issue2.getDiagnostics());
+
+			OperationOutcomeIssueComponent issue3= issues.get(2);
+			assertEquals(IssueSeverity.INFORMATION, issue3.getSeverity());
+			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code.coding[2]", issue3.getLocation().get(0).getValue());
+			String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice2' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-2'))";
+			assertEquals(expectedMessage3, issue3.getDiagnostics());
+		}
+	}
+
+	@Nested
+	@Order(2)
+	class RemoteTerminologyValidateCanonicalization {
+
+		private FhirValidator myValidator;
+
+		@BeforeEach
+		public void beforeEach(){
+			myValidator = createValidator();
+		}
+
+		@Test
+		public void testCanonicalization(){
+			Procedure procedure = createProcedure();
+
+			long totalTime = 0L;
+			AtomicLong totalConversionTime = new AtomicLong();
+			long max = 0L;
+
+			for (int run = 1; run <= NUM_RUNS; run++){
+				ourLog.info("Start Run #{}", run);
+				resetMetrics();
+
+				StopWatch sw = new StopWatch();
+				ValidationResult validationResult = myValidator.validateWithResult(procedure);
+				long millis = sw.getMillis();
+
+				totalTime += millis;
+				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+
+				if (millis > max){
+					max = millis;
+				}
+
+				logMetrics(run, millis);
+				assertValidationErrors(validationResult);
+			}
+			logSummary(totalTime, max, totalConversionTime.get());
+		}
+
+		private FhirValidator createValidator(){
+			ValidationSupportChain supportChain = new ValidationSupportChain();
+
+			RemoteTerminologyServiceValidationSupport remoteTermSupport = new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase);
+			remoteTermSupport.addClientInterceptor(new LoggingInterceptor(true));
+
+			supportChain.addValidationSupport(remoteTermSupport);
+			supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
+			supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext, ourVersionCanonicalizer));
+
+			PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
+			for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
+				prePopulatedSupport.addStructureDefinition(structureDefinition);
+				ourLog.info("Loaded StructureDefinition: {}", structureDefinition.getId());
+			}
+
+			supportChain.addValidationSupport(prePopulatedSupport);
+
+			FhirInstanceValidator module = new FhirInstanceValidator(supportChain, ourVersionCanonicalizer);
+			FhirValidator validator = ourFhirContext.newValidator();
+			validator.registerValidatorModule(module);
+			return validator;
+		}
+
+		private void assertValidationErrors(ValidationResult theValidationResult){
+			assertFalse(theValidationResult.isSuccessful());
+			assertEquals(2, theValidationResult.getMessages().size());
+
+			SingleValidationMessage message1 = theValidationResult.getMessages().get(0);
+			assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
+			assertEquals("Procedure.code", message1.getLocationString());
+			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-100000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-100000, http://acme.org/invalid#invalid)";
+			assertEquals(expectedMessage1, message1.getMessage());
+
+			SingleValidationMessage message2 = theValidationResult.getMessages().get(1);
+			assertEquals(ResultSeverityEnum.INFORMATION, message2.getSeverity());
+			assertEquals("Procedure.code.coding[2]", message2.getLocationString());
+			String expectedMessage2= "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
+			assertEquals(expectedMessage2, message2.getMessage());
+
+		}
+	}
+
+	private void setVersionCanonicalizer() {
 		// initialize VersionSpecificWorkerContextWrapper
 		myClient.validate().resource(new Patient().setActive(true)).execute();
 
@@ -103,70 +250,6 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
 		});
-	}
-
-	@Test
-	@Order(1)
-	public void testCanonicalizationOnLocalServer() {
-		Procedure procedure = createProcedure();
-
-
-		long totalTime = 0L;
-		AtomicLong totalConversionTime = new AtomicLong();
-		long max = 0L;
-
-		logMetrics();
-
-		for (int run = 1; run <= NUM_RUNS; run++){
-			resetMetrics();
-
-			StopWatch sw = new StopWatch();
-			MethodOutcome methodOutcome = myClient.validate().resource(procedure).execute();
-			long millis = sw.getMillis();
-
-			ourLog.info("=== Run #{} - Validated resource in: {}ms ===", run, millis);
-
-			totalTime += millis;
-			ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
-
-			if (millis > max){
-				max = millis;
-			}
-
-			logMetrics();
-
-			assertInstanceOf(OperationOutcome.class, methodOutcome.getOperationOutcome());
-			assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
-		}
-
-		logSummary(totalTime, max, totalConversionTime.get());
-	}
-
-	@Test
-	@Order(2)
-	public void testCanonicalizationWithRemoteTerminology(){
-		ValidationSupportChain supportChain = new ValidationSupportChain();
-		supportChain.addValidationSupport(new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase));
-		supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
-		supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext, ourVersionCanonicalizer));
-
-
-		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
-		for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
-			prePopulatedSupport.addStructureDefinition(structureDefinition);
-			ourLog.info("Loaded StructureDefinition: {}", structureDefinition.getId());
-		}
-
-		supportChain.addValidationSupport(prePopulatedSupport);
-
-		FhirInstanceValidator module = new FhirInstanceValidator(supportChain, ourVersionCanonicalizer);
-		FhirValidator validator = ourFhirContext.newValidator();
-		validator.registerValidatorModule(module);
-
-		Procedure procedure = createProcedure();
-		ValidationResult validationResult = validator.validateWithResult(procedure);
-
-		int i = 0;
 	}
 
 	private Procedure createProcedure() {
@@ -207,56 +290,16 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | AVERAGE TIME: {}ms | CONVERSION TIME: {}ms =====", NUM_RUNS, totalTime, max, totalTime / NUM_RUNS, totalConversionTime);
 	}
 
-	private void assertHasInvalidCodeError(OperationOutcome theOperationOutcome) {
-		List<OperationOutcomeIssueComponent> issues = theOperationOutcome.getIssue();
-		assertEquals(3, issues.size());
-
-		OperationOutcomeIssueComponent issue1 = issues.get(0);
-		assertEquals(IssueSeverity.ERROR, issue1.getSeverity());
-		assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code", issue1.getLocation().get(0).getValue());
-		String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-1000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-1000, http://acme.org/invalid#invalid)";
-		assertEquals(expectedMessage1, issue1.getDiagnostics());
-
-		OperationOutcomeIssueComponent issue2 = issues.get(1);
-		assertEquals(IssueSeverity.INFORMATION, issue2.getSeverity());
-		assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code.coding[2]", issue2.getLocation().get(0).getValue());
-		String expectedMessage2 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice1' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-1'))";
-		assertEquals(expectedMessage2, issue2.getDiagnostics());
-
-		OperationOutcomeIssueComponent issue3= issues.get(2);
-		assertEquals(IssueSeverity.INFORMATION, issue3.getSeverity());
-		assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code.coding[2]", issue3.getLocation().get(0).getValue());
-		String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice2' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-2'))";
-		assertEquals(expectedMessage3, issue3.getDiagnostics());
-	}
-
 	private void resetMetrics(){
 		ourVersionCanonicalizer.resetMetrics();
 		assertTrue(ourVersionCanonicalizer.getMetrics().isEmpty());
 	}
 
-	private void logMetrics(){
+	private void logMetrics(int theRun, long theMillis){
+		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theRun, theMillis);
 		ourVersionCanonicalizer.getMetrics().forEach(metric -> {
 			String metrics = metric.writeMetrics(10_000, new ConverterInvocation.ElapsedTimeComparator());
 			ourLog.info("{}", metrics);
 		});
-	}
-
-	private void loadTerminology(){
-		for (CodeSystem codeSystem : myAllCodeSystems){
-			myClient.update().resource(codeSystem).execute();
-			ourLog.info("Loaded CodeSystem {}", codeSystem.getId());
-		}
-		for (ValueSet valueSet : myAllValueSets) {
-			myClient.update().resource(valueSet).execute();
-			ourLog.info("Loaded ValueSet {}", valueSet.getId());
-		}
-	}
-
-	private void loadStructureDefinitions() {
-		for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
-			myClient.update().resource(structureDefinition).execute();
-			ourLog.info("Loaded StructureDefinition: {}", structureDefinition.getId());
-		}
 	}
 }
