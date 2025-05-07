@@ -47,7 +47,7 @@ public class ConverterMetric {
 
 		myInvocations.stream()
 			.limit(theInvocationLimit)
-//      .filter(invocation -> !invocation.getResource().startsWith("StructureDefinition"))
+      		.filter(invocation -> !invocation.getResourceId().startsWith("StructureDefinition"))
 			.forEach(invocation -> sb.append("\n").append(invocation));
 
 		return sb.toString();
