@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.validation.performance.MetricCapturingVersionCanonicalizer.CanonicalizationMetrics;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -44,8 +44,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 	private static final int NUM_RUNS = 10;
 
-	private static final int NUM_CONCEPTS = 1000;
-//	private static final int NUM_CONCEPTS = 50_000;
+//	private static final int NUM_CONCEPTS = 1000;
+	private static final int NUM_CONCEPTS = 50_000;
 //	private static final int NUM_CONCEPTS = 100_000;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationCanonicalizationTest.class);
@@ -101,35 +101,25 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		@Test
 		public void testCanonicalization() {
 			Procedure procedure = createProcedure();
+			List<TestRun> testRuns = new ArrayList<>();
 
-			long totalTime = 0L;
-			AtomicLong totalConversionTime = new AtomicLong();
-			long max = 0L;
-			long totalInvocations = 0L;
-
-			for (int run = 1; run <= NUM_RUNS; run++) {
-				ourLog.info("Start Run #{}", run);
+			for (int runNumber = 1; runNumber <= NUM_RUNS; runNumber++) {
+				ourLog.info("Start Run #{}", runNumber);
 				resetMetrics();
 
 				StopWatch sw = new StopWatch();
 				MethodOutcome methodOutcome = myClient.validate().resource(procedure).execute();
-				long millis = sw.getMillis();
 
-				totalTime += millis;
-				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
-				ourVersionCanonicalizer.getCanonicalizationMethods().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+				TestRun testRun = new TestRun(runNumber, ourVersionCanonicalizer.getMetrics(), sw.getMillis());
+				testRuns.add(testRun);
 
-				if (millis > max) {
-					max = millis;
-				}
-
-				logMetrics(run, millis);
+				logMetrics(testRun);
 
 				assertInstanceOf(OperationOutcome.class, methodOutcome.getOperationOutcome());
 				assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
 			}
 
-			logSummary(totalTime, max, totalConversionTime.get(), totalInvocations);
+			logSummary(testRuns);
 		}
 
 		private void assertHasInvalidCodeError(OperationOutcome theOperationOutcome) {
@@ -176,32 +166,23 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		@Test
 		public void testCanonicalization() {
 			Procedure procedure = createProcedure();
+			List<TestRun> testRuns = new ArrayList<>();
 
-			long totalTime = 0L;
-			AtomicLong totalConversionTime = new AtomicLong();
-			long max = 0L;
-			long totalInvocations = 0L;
-
-			for (int run = 1; run <= NUM_RUNS; run++) {
-				ourLog.info("Start Run #{}", run);
+			for (int runNumber = 1; runNumber <= NUM_RUNS; runNumber++) {
+				ourLog.info("Start Run #{}", runNumber);
 				resetMetrics();
 
 				StopWatch sw = new StopWatch();
 				ValidationResult validationResult = myValidator.validateWithResult(procedure);
-				long millis = sw.getMillis();
 
-				totalTime += millis;
-				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
-				ourVersionCanonicalizer.getCanonicalizationMethods().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+				TestRun run = new TestRun(runNumber, ourVersionCanonicalizer.getMetrics(), sw.getMillis());
+				testRuns.add(run);
 
-				if (millis > max) {
-					max = millis;
-				}
-
-				logMetrics(run, millis);
+				logMetrics(run);
 				assertValidationErrors(validationResult);
 			}
-			logSummary(totalTime, max, totalConversionTime.get(), totalInvocations);
+
+			logSummary(testRuns);
 		}
 
 		private FhirValidator createValidator() {
@@ -304,9 +285,24 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		return procedure;
 	}
 
-	private void logSummary(long totalTime, long max, long totalConversionTime, long theTotalInvocations) {
+	private void logSummary(List<TestRun> theTestRuns) {
+		long totalTime = 0L;
+		long max = 0L;
+		long totalConversionTime = 0L;
+		long totalInvocations = 0L;
+
+		for (TestRun testRun : theTestRuns){
+			long elapsedTime = testRun.getElapsedTime();
+			if (elapsedTime > max){
+				max = elapsedTime;
+			}
+			totalTime += elapsedTime;
+			totalConversionTime += testRun.getTotalConversionTime();
+			totalInvocations += testRun.getTotalInvocations();
+		}
+
 		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | CONVERSION TIME: {}ms | TOTAL INVOCATIONS: {} =====",
-				NUM_RUNS, totalTime, max, totalConversionTime, theTotalInvocations);
+				NUM_RUNS, totalTime, max, totalConversionTime, totalInvocations);
 	}
 
 	private void resetMetrics() {
@@ -314,8 +310,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		assertTrue(ourVersionCanonicalizer.getCanonicalizationMethods().isEmpty());
 	}
 
-	private void logMetrics(int theRun, long theMillis) {
-		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theRun, theMillis);
+	private void logMetrics(TestRun theTestRun) {
+		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theTestRun.getNumber(), theTestRun.getElapsedTime());
 
 		CanonicalizationMethodInvocation.ElapsedTimeComparator comparator = new CanonicalizationMethodInvocation.ElapsedTimeComparator();
 		Predicate<CanonicalizationMethodInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
@@ -324,5 +320,33 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			String metrics = metric.writeMetrics(10_000, comparator, filter);
 			ourLog.info("{}", metrics);
 		});
+	}
+
+	static class TestRun {
+		private final int myNumber;
+		private final CanonicalizationMetrics myCanonicalizationMetrics;
+		private final long myElapsedTime;
+
+		public TestRun(int theNumber, CanonicalizationMetrics theCanonicalizationMetrics, long theElapsedTime) {
+			myNumber = theNumber;
+			myCanonicalizationMetrics = theCanonicalizationMetrics;
+			myElapsedTime = theElapsedTime;
+		}
+
+		public int getNumber() {
+			return myNumber;
+		}
+
+		public long getElapsedTime() {
+			return myElapsedTime;
+		}
+
+		public long getTotalConversionTime() {
+			return myCanonicalizationMetrics.getTotalConversionTime();
+		}
+
+		public long getTotalInvocations(){
+			return myCanonicalizationMetrics.getTotalInvocations();
+		}
 	}
 }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
@@ -176,6 +177,10 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 		);
 	}
 
+	public CanonicalizationMetrics getMetrics(){
+		return myMetrics;
+	}
+
 	public List<CanonicalizationMethod> getCanonicalizationMethods() {
 		return myMetrics.getCanonicalizationMethods();
 	}
@@ -238,6 +243,20 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 
 		public CanonicalizationMethod getOrAddCanonicalizationMethod(String theMethodName){
 			return myMetrics.computeIfAbsent(theMethodName, CanonicalizationMethod::new);
+		}
+
+		public long getTotalConversionTime(){
+			AtomicLong totalConversionTime = new AtomicLong();
+			getCanonicalizationMethods().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+			return totalConversionTime.get();
+		}
+
+		public long getTotalInvocations() {
+			long total = 0;
+			for (CanonicalizationMethod metric : getCanonicalizationMethods()){
+				total += metric.getInvocations().size();
+			}
+			return total;
 		}
 	}
 }
