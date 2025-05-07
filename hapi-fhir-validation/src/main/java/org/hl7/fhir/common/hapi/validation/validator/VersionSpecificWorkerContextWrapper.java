@@ -734,58 +734,29 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			String theCode,
 			String display,
 			ValueSet theValueSet) {
-		IBaseResource convertedVs = null;
-
-		try {
-			if (theValueSet != null) {
-				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
-			}
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(689) + e);
-		}
 
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-
-		return doValidation(convertedVs, validationOptions, theSystem, theCode, display);
+		return doValidation(theValueSet, validationOptions, theSystem, theCode, display);
 	}
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet theValueSet) {
-		IBaseResource convertedVs = null;
-		try {
-			if (theValueSet != null) {
-				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
-			}
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(690) + e);
-		}
-
 		String system = ValidationSupportUtils.extractCodeSystemForCode(theValueSet, code);
 
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(convertedVs, validationOptions, system, code, null);
+		return doValidation(theValueSet, validationOptions, system, code, null);
 	}
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCoding, ValueSet theValueSet) {
-		IBaseResource convertedVs = null;
-
-		try {
-			if (theValueSet != null) {
-				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
-			}
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(691) + e);
-		}
-
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		String system = theCoding.getSystem();
 		String code = theCoding.getCode();
 		String display = theCoding.getDisplay();
 
-		return doValidation(convertedVs, validationOptions, system, code, display);
+		return doValidation(theValueSet, validationOptions, system, code, display);
 	}
 
 	@Override
@@ -812,14 +783,25 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Nonnull
 	private ValidationResult doValidation(
-			IBaseResource theValueSet,
+			ValueSet theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
 			String theCode,
 			String theDisplay) {
+
+		IBaseResource convertedVs = null;
+
+		try {
+			if (theValueSet != null) {
+				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
+			}
+		} catch (FHIRException e) {
+			throw new InternalErrorException(Msg.code(689) + e);
+		}
+
 		IValidationSupport.CodeValidationResult result;
-		if (theValueSet != null) {
-			result = validateCodeInValueSet(theValueSet, theValidationOptions, theSystem, theCode, theDisplay);
+		if (convertedVs != null) {
+			result = validateCodeInValueSet(convertedVs, theValidationOptions, theSystem, theCode, theDisplay);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 		}
