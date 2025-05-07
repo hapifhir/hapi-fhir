@@ -202,4 +202,33 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testNearSearchDistance5000Km() {
+		// Mannheim
+		double latitude = 49.49;
+		double longitude = 8.46;
+
+		// Create 3 real locations around Mannheim
+		createLocation(49.3988, 8.6724); // Heidelberg
+		createLocation(49.4774, 8.4452); // Ludwigshafen
+		String mannheimLocId = createLocation(latitude, longitude).toUnqualifiedVersionless().getValue();
+
+		// Search near Mannheim, 5000 km
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+			"Location?near=49.49|8.46|5000|km",
+			myFhirContext.getResourceDefinition("Location"));
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
+
+		// Should contain all 3 locations
+		assertThat(ids).contains(mannheimLocId);
+		assertThat(ids.size()).isGreaterThanOrEqualTo(3);
+	}
+
+	private IIdType createLocation(double lat, double lon) {
+		Location loc = new Location();
+		loc.setPosition(new Location.LocationPositionComponent().setLatitude(lat).setLongitude(lon));
+		return myLocationDao.create(loc).getId();
+	}
+
 }
