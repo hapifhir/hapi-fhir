@@ -185,14 +185,6 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 		return myMetrics.getCanonicalizationMethods();
 	}
 
-	public long getTotalInvocations() {
-		long total = 0;
-		for (CanonicalizationMethod metric : getCanonicalizationMethods()){
-			total += metric.getInvocations().size();
-		}
-		return total;
-	}
-
 	public void resetMetrics() {
 		myMetrics = new CanonicalizationMetrics();
 	}

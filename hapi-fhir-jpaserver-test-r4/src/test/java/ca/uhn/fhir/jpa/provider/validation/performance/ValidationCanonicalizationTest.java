@@ -110,7 +110,6 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				StopWatch sw = new StopWatch();
 				MethodOutcome methodOutcome = myClient.validate().resource(procedure).execute();
 
-
 				CanonicalizationMetrics metrics = ourVersionCanonicalizer.getMetrics();
 				TestRun testRun = new TestRun(runNumber, metrics, sw.getMillis());
 				testRuns.add(testRun);
@@ -134,9 +133,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 			OperationOutcomeIssueComponent issue1 = issues.get(0);
 			assertEquals(IssueSeverity.ERROR, issue1.getSeverity());
-
-			Map<String, String> formatValues = Map.of("conceptNumber", String.valueOf(NUM_CONCEPTS));
 			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code", issue1.getLocation().get(0).getValue());
+			Map<String, String> formatValues = Map.of("conceptNumber", String.valueOf(NUM_CONCEPTS));
 			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-${conceptNumber}, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-${conceptNumber}, http://acme.org/invalid#invalid)";
 			assertEquals(formatMessage(expectedMessage1, formatValues), issue1.getDiagnostics());
 
@@ -298,6 +296,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		Patient subject = new Patient();
 		subject.setId("subject-1");
 		procedure.setSubject(new Reference(subject));
+
 		return procedure;
 	}
 
@@ -346,7 +345,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theTestRun.getNumber(), theTestRun.getElapsedTime());
 
 		CanonicalizationMethodInvocation.ElapsedTimeComparator comparator = new CanonicalizationMethodInvocation.ElapsedTimeComparator();
-		Predicate<CanonicalizationMethodInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
+		Predicate<CanonicalizationMethodInvocation> filter = null;
+//		Predicate<CanonicalizationMethodInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
 
 		ourVersionCanonicalizer.getCanonicalizationMethods().forEach(metric -> {
 			String metrics = metric.writeMetrics(10_000, comparator, filter);
