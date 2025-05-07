@@ -55,7 +55,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -816,7 +815,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		IBaseResource convertedValueSet = (IBaseResource) theValueSet.getUserData(FROM_CANONICAL_USERDATA_KEY);
 		if (convertedValueSet != null){
-			ourLog.debug("Using user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, theValueSet.getId());
+			ourLog.debug("Using user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, toResourceId(convertedValueSet));
 			return convertedValueSet;
 		}
 		return myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
@@ -827,7 +826,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return;
 		}
 		theValueSet.setUserData(FROM_CANONICAL_USERDATA_KEY, theConvertedValueSet);
-		ourLog.debug("Added user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, theValueSet.getId());
+		ourLog.debug("Added user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, toResourceId(theConvertedValueSet));
+	}
+
+	private @Nullable String toResourceId(IBaseResource theResource){
+		if (theResource == null){
+			return "unknown";
+		} else if (theResource.getIdElement() == null) {
+			return theResource.fhirType() + "/";
+		}
+		return theResource.getIdElement().getIdPart();
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInValueSet(
