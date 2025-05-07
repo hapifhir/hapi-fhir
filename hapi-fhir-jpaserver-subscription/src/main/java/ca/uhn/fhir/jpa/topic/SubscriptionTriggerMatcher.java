@@ -33,8 +33,8 @@ import ca.uhn.fhir.util.Logs;
 import com.google.common.base.Strings;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
@@ -188,7 +188,7 @@ public class SubscriptionTriggerMatcher {
 					.getMessage());
 		}
 
-		if (!(result.get(0) instanceof BooleanType)) {
+		if (!(result.get(0) instanceof IBaseBooleanDatatype)) {
 			return InMemoryMatchResult.unsupportedFromReason(MessageFormatter.arrayFormat(
 							"FhirPath evaluation criteria '{}' from Subscription topic: '{}' resulted in a non-boolean result: '{}'",
 							new String[] {
@@ -198,7 +198,7 @@ public class SubscriptionTriggerMatcher {
 							})
 					.getMessage());
 		}
-		return InMemoryMatchResult.fromBoolean(((BooleanType) result.get(0)).booleanValue());
+		return InMemoryMatchResult.fromBoolean(((IBaseBooleanDatatype) result.get(0)).getValue());
 	}
 
 	private InMemoryMatchResult matchResource(IBaseResource theResource, String theCriteria) {
