@@ -1331,13 +1331,13 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		@Override
 		public String toString() {
-			return "ValidateCodeKey{" + "mySystem='"
-					+ mySystem + '\'' + ", myCode='"
-					+ myCode + '\'' + ", myDisplay='"
-					+ myDisplay + '\'' + ", myValueSetUrl='"
-					+ myValueSetUrl + '\'' + ", myHashCode="
-					+ myHashCode + ", myOptions="
-					+ myOptions + '}';
+			return "ValidateCodeKey{"
+					+ "mySystem='" + mySystem + '\''
+					+ ", myCode='" + myCode + '\''
+					+ ", myDisplay='" + myDisplay + '\''
+					+ ", myValueSetUrl='" + myValueSetUrl + '\''
+					+ ", myHashCode=" + myHashCode + '\''
+					+ ", myOptions=" + myOptions + '}';
 		}
 	}
 
