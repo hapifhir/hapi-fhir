@@ -53,7 +53,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	private VersionCanonicalizer myVersionCanonicalizer;
 
 	private static final String CANONICAL_USERDATA_KEY =
-		InMemoryTerminologyServerValidationSupport.class.getName() + "_CANONICAL_USERDATA_KEY";
+			InMemoryTerminologyServerValidationSupport.class.getName() + "_CANONICAL_USERDATA_KEY";
 
 	/**
 	 * Constructor
@@ -79,7 +79,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	// FIXME ND
-	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 

@@ -93,7 +93,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	 * the conversion back from the canonical version.
 	 */
 	private static final String FROM_CANONICAL_USERDATA_KEY =
-		VersionSpecificWorkerContextWrapper.class.getName() + "_FROM_CANONICAL_USERDATA_KEY";
+			VersionSpecificWorkerContextWrapper.class.getName() + "_FROM_CANONICAL_USERDATA_KEY";
 
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
@@ -113,7 +113,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	// FIXME ND
-	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
@@ -808,29 +808,35 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return convertValidationResult(theSystem, result);
 	}
 
-	private IBaseResource getOrConvertValueSet(ValueSet theValueSet){
+	private IBaseResource getOrConvertValueSet(ValueSet theValueSet) {
 		if (theValueSet == null) {
 			return null;
 		}
 
 		IBaseResource convertedValueSet = (IBaseResource) theValueSet.getUserData(FROM_CANONICAL_USERDATA_KEY);
-		if (convertedValueSet != null){
-			ourLog.debug("Using user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, toResourceId(convertedValueSet));
+		if (convertedValueSet != null) {
+			ourLog.debug(
+					"Using user data - Key: {}, ValueSet: {}",
+					FROM_CANONICAL_USERDATA_KEY,
+					toResourceId(convertedValueSet));
 			return convertedValueSet;
 		}
 		return myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
 	}
 
-	private void cacheConvertedValueSet(ValueSet theValueSet, IBaseResource theConvertedValueSet){
-		if (theValueSet == null || theConvertedValueSet == null){
+	private void cacheConvertedValueSet(ValueSet theValueSet, IBaseResource theConvertedValueSet) {
+		if (theValueSet == null || theConvertedValueSet == null) {
 			return;
 		}
 		theValueSet.setUserData(FROM_CANONICAL_USERDATA_KEY, theConvertedValueSet);
-		ourLog.debug("Added user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, toResourceId(theConvertedValueSet));
+		ourLog.debug(
+				"Added user data - Key: {}, ValueSet: {}",
+				FROM_CANONICAL_USERDATA_KEY,
+				toResourceId(theConvertedValueSet));
 	}
 
-	private @Nullable String toResourceId(IBaseResource theResource){
-		if (theResource == null){
+	private @Nullable String toResourceId(IBaseResource theResource) {
+		if (theResource == null) {
 			return "unknown";
 		} else if (theResource.getIdElement() == null) {
 			return theResource.fhirType() + "/";

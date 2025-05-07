@@ -29,11 +29,9 @@ public class ConceptValidationOptions {
 	private boolean myValidateDisplay;
 	private boolean myInferSystem;
 
-	public ConceptValidationOptions(){
+	public ConceptValidationOptions() {}
 
-	}
-
-	public ConceptValidationOptions(ConceptValidationOptions theOptions){
+	public ConceptValidationOptions(ConceptValidationOptions theOptions) {
 		this.myValidateDisplay = theOptions.isValidateDisplay();
 		this.myInferSystem = theOptions.isInferSystem();
 	}

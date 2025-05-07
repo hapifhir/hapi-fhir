@@ -92,7 +92,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	// FIXME ND
-	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer){
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
