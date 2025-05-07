@@ -21,7 +21,7 @@ public class CreateTerminologyTestUtil {
 		codeSystem.setDescription(theTitle + " - Description");
 		codeSystem.setContent(theContentMode);
 
-		for (int i = 1; i <= theNumConcepts; i++){
+		for (int i = 1; i <= theNumConcepts; i++) {
 			CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept();
 			concept
 				.setCode(theId + "-concept-" + i)
@@ -43,7 +43,7 @@ public class CreateTerminologyTestUtil {
 		ValueSet.ConceptSetComponent include = valueSet.getCompose().addInclude();
 		include.setSystem(theCodeSystem.getUrl());
 
-		for (CodeSystem.ConceptDefinitionComponent concept : theCodeSystem.getConcept()){
+		for (CodeSystem.ConceptDefinitionComponent concept : theCodeSystem.getConcept()) {
 			CodeSystem.ConceptDefinitionDesignationComponent designation = concept.getDesignationFirstRep();
 			include
 				.addConcept()
@@ -70,7 +70,7 @@ public class CreateTerminologyTestUtil {
 	public static ValueSet createValueSetFromValueSets(String theId, String theTitle, ValueSet... theValueSets) {
 		ValueSet combinedValueSet = createValueSetWithMetaInfo(theId, theTitle);
 		ValueSet.ConceptSetComponent include = combinedValueSet.getCompose().addInclude();
-		for (ValueSet valueSet : theValueSets){
+		for (ValueSet valueSet : theValueSets) {
 			include.addValueSet(valueSet.getUrl());
 		}
 		return combinedValueSet;

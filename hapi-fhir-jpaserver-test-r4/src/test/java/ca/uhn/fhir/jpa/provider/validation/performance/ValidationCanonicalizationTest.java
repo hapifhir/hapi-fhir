@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +63,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 	private List<ValueSet> myAllValueSets;
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 		setVersionCanonicalizer();
 
 		myStructureDefinition = ClasspathUtil.loadResource(ourFhirContext, StructureDefinition.class, "/validation/structure-definitions/procedure-structuredefinition.json");
@@ -80,14 +81,14 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 		List<IBaseResource> allResources = new ArrayList<>();
 		Stream.of(myAllCodeSystems, myAllValueSets, myAllStructureDefinitions).flatMap(List::stream).forEach(allResources::add);
-		for (IBaseResource resource : allResources){
+		for (IBaseResource resource : allResources) {
 			myClient.update().resource(resource).execute();
 			ourLog.info("Loaded Resource {}", resource.getIdElement().getIdPart());
 		}
 	}
 
 	@AfterEach
-	public void afterEach(){
+	public void afterEach() {
 		resetMetrics();
 	}
 
@@ -103,7 +104,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			AtomicLong totalConversionTime = new AtomicLong();
 			long max = 0L;
 
-			for (int run = 1; run <= NUM_RUNS; run++){
+			for (int run = 1; run <= NUM_RUNS; run++) {
 				ourLog.info("Start Run #{}", run);
 				resetMetrics();
 
@@ -114,7 +115,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				totalTime += millis;
 				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
-				if (millis > max){
+				if (millis > max) {
 					max = millis;
 				}
 
@@ -143,7 +144,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			String expectedMessage2 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice1' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-1'))";
 			assertEquals(expectedMessage2, issue2.getDiagnostics());
 
-			OperationOutcomeIssueComponent issue3= issues.get(2);
+			OperationOutcomeIssueComponent issue3 = issues.get(2);
 			assertEquals(IssueSeverity.INFORMATION, issue3.getSeverity());
 			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code.coding[2]", issue3.getLocation().get(0).getValue());
 			String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice2' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-2'))";
@@ -158,19 +159,19 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		private FhirValidator myValidator;
 
 		@BeforeEach
-		public void beforeEach(){
+		public void beforeEach() {
 			myValidator = createValidator();
 		}
 
 		@Test
-		public void testCanonicalization(){
+		public void testCanonicalization() {
 			Procedure procedure = createProcedure();
 
 			long totalTime = 0L;
 			AtomicLong totalConversionTime = new AtomicLong();
 			long max = 0L;
 
-			for (int run = 1; run <= NUM_RUNS; run++){
+			for (int run = 1; run <= NUM_RUNS; run++) {
 				ourLog.info("Start Run #{}", run);
 				resetMetrics();
 
@@ -181,7 +182,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				totalTime += millis;
 				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
-				if (millis > max){
+				if (millis > max) {
 					max = millis;
 				}
 
@@ -191,7 +192,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			logSummary(totalTime, max, totalConversionTime.get());
 		}
 
-		private FhirValidator createValidator(){
+		private FhirValidator createValidator() {
 			ValidationSupportChain supportChain = new ValidationSupportChain();
 
 			RemoteTerminologyServiceValidationSupport remoteTermSupport = new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase);
@@ -216,7 +217,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			return validator;
 		}
 
-		private void assertValidationErrors(ValidationResult theValidationResult){
+		private void assertValidationErrors(ValidationResult theValidationResult) {
 			assertFalse(theValidationResult.isSuccessful());
 			assertEquals(2, theValidationResult.getMessages().size());
 
@@ -229,7 +230,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			SingleValidationMessage message2 = theValidationResult.getMessages().get(1);
 			assertEquals(ResultSeverityEnum.INFORMATION, message2.getSeverity());
 			assertEquals("Procedure.code.coding[2]", message2.getLocationString());
-			String expectedMessage2= "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
+			String expectedMessage2 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
 			assertEquals(expectedMessage2, message2.getMessage());
 
 		}
@@ -243,15 +244,15 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		setVersionCanonicalizer(myJpaValidationSupportChain.getValidationSupports());
 	}
 
-	private void setVersionCanonicalizer(List<IValidationSupport> theSupports){
-		for (IValidationSupport support : theSupports){
-			if (support instanceof InMemoryTerminologyServerValidationSupport inMemory){
+	private void setVersionCanonicalizer(List<IValidationSupport> theSupports) {
+		for (IValidationSupport support : theSupports) {
+			if (support instanceof InMemoryTerminologyServerValidationSupport inMemory) {
 				inMemory.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
-			if (support instanceof CommonCodeSystemsTerminologyService commonCodeSystem){
+			if (support instanceof CommonCodeSystemsTerminologyService commonCodeSystem) {
 				commonCodeSystem.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
-			if (support instanceof SnapshotGeneratingValidationSupport snapshotGenerating){
+			if (support instanceof SnapshotGeneratingValidationSupport snapshotGenerating) {
 				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
 		}
@@ -295,15 +296,19 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | AVERAGE TIME: {}ms | CONVERSION TIME: {}ms =====", NUM_RUNS, totalTime, max, totalTime / NUM_RUNS, totalConversionTime);
 	}
 
-	private void resetMetrics(){
+	private void resetMetrics() {
 		ourVersionCanonicalizer.resetMetrics();
 		assertTrue(ourVersionCanonicalizer.getMetrics().isEmpty());
 	}
 
-	private void logMetrics(int theRun, long theMillis){
+	private void logMetrics(int theRun, long theMillis) {
 		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theRun, theMillis);
+
+		ConverterInvocation.ElapsedTimeComparator comparator = new ConverterInvocation.ElapsedTimeComparator();
+		Predicate<ConverterInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
+
 		ourVersionCanonicalizer.getMetrics().forEach(metric -> {
-			String metrics = metric.writeMetrics(10_000, new ConverterInvocation.ElapsedTimeComparator());
+			String metrics = metric.writeMetrics(10_000, comparator, filter);
 			ourLog.info("{}", metrics);
 		});
 	}

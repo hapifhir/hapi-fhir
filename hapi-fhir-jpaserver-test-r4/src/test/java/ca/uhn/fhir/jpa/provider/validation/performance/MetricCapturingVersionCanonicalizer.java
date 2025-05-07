@@ -176,37 +176,12 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 		);
 	}
 
-	public List<ConverterMetric> getMetrics(){
+	public List<ConverterMetric> getMetrics() {
 		return new ArrayList<>(myMetrics.values());
 	}
 
 	public void resetMetrics() {
 		myMetrics = new LinkedHashMap<>();
-	}
-
-	private String resourceString(IBaseResource theResource){
-		return theResource == null ? "NULL" : theResource.getClass().getSimpleName() + "/" + theResource.getIdElement().getIdPart();
-	}
-
-	private List<String> formatStackTrace(StackTraceElement[] stackTrace){
-
-		List<String> retVal = new ArrayList<>();
-		for (StackTraceElement element : stackTrace){
-			String className = element.getClassName();
-			String method = element.getMethodName();
-			int lineNumber = element.getLineNumber();
-			retVal.add(className + "#" + method + "() [line:" + lineNumber + "]");
-		}
-		return retVal;
-	}
-
-	private ConverterMetric getOrAddMetric(String theMethodName){
-		ConverterMetric converterMetric = myMetrics.get(theMethodName);
-		if (converterMetric == null) {
-			converterMetric = new ConverterMetric(theMethodName);
-			myMetrics.put(theMethodName, converterMetric);
-		}
-		return converterMetric;
 	}
 
 	private <T> T addMetric(String theMethodName, IBaseResource theResource, Supplier<T> theSupplier) {
@@ -218,14 +193,31 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 	}
 
 	private <T> T addMetric(String theMethodName, String theId, Supplier<T> theSupplier) {
-		ConverterMetric metric = getOrAddMetric(theMethodName);
+		ConverterMetric metric = myMetrics.computeIfAbsent(theMethodName, ConverterMetric::new);
 		StopWatch sw = new StopWatch();
 
 		T result = theSupplier.get();
 
 		int threadOffSet = 4; // don't include addMetric methods or delegate methods in stacktrace
-		metric.addInvocation(theId, sw.getMillis(), formatStackTrace(Thread.currentThread().getStackTrace()), threadOffSet);
+		int maxThreadCount = 10;
+		metric.addInvocation(theId, sw.getMillis(), formatStackTrace(Thread.currentThread().getStackTrace()), threadOffSet, maxThreadCount);
 
 		return result;
+	}
+
+	private String resourceString(IBaseResource theResource) {
+		return theResource == null ? "NULL" : theResource.getClass().getSimpleName() + "/" + theResource.getIdElement().getIdPart();
+	}
+
+	private List<String> formatStackTrace(StackTraceElement[] stackTrace) {
+
+		List<String> retVal = new ArrayList<>();
+		for (StackTraceElement element : stackTrace) {
+			String className = element.getClassName();
+			String method = element.getMethodName();
+			int lineNumber = element.getLineNumber();
+			retVal.add(className + "#" + method + "() [line:" + lineNumber + "]");
+		}
+		return retVal;
 	}
 }
