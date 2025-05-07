@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 
-	private Map<String, ConverterMetric> myMetrics = new LinkedHashMap<>();
+	private CanonicalizationMetrics myMetrics = new CanonicalizationMetrics();
 
 	public MetricCapturingVersionCanonicalizer(FhirContext theTargetContext) {
 		super(theTargetContext);
@@ -176,20 +176,20 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 		);
 	}
 
-	public List<ConverterMetric> getMetrics() {
-		return new ArrayList<>(myMetrics.values());
+	public List<CanonicalizationMethod> getCanonicalizationMethods() {
+		return myMetrics.getCanonicalizationMethods();
 	}
 
 	public long getTotalInvocations() {
 		long total = 0;
-		for (ConverterMetric metric : getMetrics()){
+		for (CanonicalizationMethod metric : getCanonicalizationMethods()){
 			total += metric.getInvocations().size();
 		}
 		return total;
 	}
 
 	public void resetMetrics() {
-		myMetrics = new LinkedHashMap<>();
+		myMetrics = new CanonicalizationMetrics();
 	}
 
 	private <T> T addMetric(String theMethodName, IBaseResource theResource, Supplier<T> theSupplier) {
@@ -201,14 +201,14 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 	}
 
 	private <T> T addMetric(String theMethodName, String theId, Supplier<T> theSupplier) {
-		ConverterMetric metric = myMetrics.computeIfAbsent(theMethodName, ConverterMetric::new);
+		CanonicalizationMethod method = myMetrics.getOrAddCanonicalizationMethod(theMethodName);
 		StopWatch sw = new StopWatch();
 
 		T result = theSupplier.get();
 
 		int threadOffSet = 4; // don't include addMetric methods or delegate methods in stacktrace
 		int maxThreadCount = 10;
-		metric.addInvocation(theId, sw.getMillis(), formatStackTrace(Thread.currentThread().getStackTrace()), threadOffSet, maxThreadCount);
+		method.addInvocation(theId, sw.getMillis(), formatStackTrace(Thread.currentThread().getStackTrace()), threadOffSet, maxThreadCount);
 
 		return result;
 	}
@@ -227,5 +227,17 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 			retVal.add(className + "#" + method + "() [line:" + lineNumber + "]");
 		}
 		return retVal;
+	}
+
+	public static class CanonicalizationMetrics {
+		private final Map<String, CanonicalizationMethod> myMetrics = new LinkedHashMap<>();
+
+		public List<CanonicalizationMethod> getCanonicalizationMethods(){
+			return new ArrayList<>(myMetrics.values());
+		}
+
+		public CanonicalizationMethod getOrAddCanonicalizationMethod(String theMethodName){
+			return myMetrics.computeIfAbsent(theMethodName, CanonicalizationMethod::new);
+		}
 	}
 }

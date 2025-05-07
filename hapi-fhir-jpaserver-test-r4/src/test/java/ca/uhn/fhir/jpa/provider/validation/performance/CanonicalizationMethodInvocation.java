@@ -9,11 +9,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class ConverterInvocation {
+public class CanonicalizationMethodInvocation {
 
 	private static final DateTimeFormatter OUR_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
 
-	private final ConverterMetric myMetric;
+	private final CanonicalizationMethod myMethod;
 	private final String myResourceId;
 	private final long myElapsedTime;
 	private final List<String> myStacktrace;
@@ -21,8 +21,8 @@ public class ConverterInvocation {
 	private final int myMaxThreadCount;
 	private final Instant myInvocatedAt;
 
-	public ConverterInvocation(ConverterMetric theMetric, String theResource, long theTime, List<String> theStacktrace, int theThreadOffSet, int theMaxThreadCount) {
-		myMetric = theMetric;
+	public CanonicalizationMethodInvocation(CanonicalizationMethod theMethod, String theResource, long theTime, List<String> theStacktrace, int theThreadOffSet, int theMaxThreadCount) {
+		myMethod = theMethod;
 		myResourceId = theResource;
 		myElapsedTime = theTime;
 		myStacktrace = theStacktrace;
@@ -44,7 +44,7 @@ public class ConverterInvocation {
 
 		StringBuilder sb = new StringBuilder()
 			.append("[")
-			.append("method=").append(myMetric.getMethod())
+			.append("method=").append(myMethod.getName())
 			.append(", timestamp=").append(OUR_FORMATTER.format(myInvocatedAt))
 			.append(", resource=").append(myResourceId)
 			.append(", time=").append(myElapsedTime).append("ms")
@@ -61,9 +61,9 @@ public class ConverterInvocation {
 		return sb.toString();
 	}
 
-	public static class ElapsedTimeComparator implements Comparator<ConverterInvocation> {
+	public static class ElapsedTimeComparator implements Comparator<CanonicalizationMethodInvocation> {
 		@Override
-		public int compare(ConverterInvocation theO1, ConverterInvocation theO2) {
+		public int compare(CanonicalizationMethodInvocation theO1, CanonicalizationMethodInvocation theO2) {
 			return new CompareToBuilder()
 				.append(theO1.myElapsedTime, theO2.myElapsedTime)
 				.toComparison();

@@ -9,27 +9,27 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ConverterMetric {
+public class CanonicalizationMethod {
 
-	private final String myMethod;
-	private final List<ConverterInvocation> myInvocations;
+	private final String name;
+	private final List<CanonicalizationMethodInvocation> myInvocations;
 
-	public ConverterMetric(String theMethod) {
-		myMethod = theMethod;
+	public CanonicalizationMethod(String theName) {
+		name = theName;
 		myInvocations = new ArrayList<>();
 	}
 
 	public void addInvocation(String theResource, long theMillis, List<String> theStacktrace, int theThreadOffSet, int theMaxThreadCount) {
-		myInvocations.add(new ConverterInvocation(this, theResource, theMillis, theStacktrace, theThreadOffSet, theMaxThreadCount));
+		myInvocations.add(new CanonicalizationMethodInvocation(this, theResource, theMillis, theStacktrace, theThreadOffSet, theMaxThreadCount));
 	}
 
 	public void reset() {
 		myInvocations.clear();
 	}
 
-	public String writeMetrics(int theInvocationLimit, @Nullable Comparator<ConverterInvocation> theComparator, @Nullable Predicate<ConverterInvocation> theFilter) {
+	public String writeMetrics(int theInvocationLimit, @Nullable Comparator<CanonicalizationMethodInvocation> theComparator, @Nullable Predicate<CanonicalizationMethodInvocation> theFilter) {
 		StringBuilder sb = new StringBuilder()
-			.append("=== Invocations for ").append(myMethod)
+			.append("=== Invocations for ").append(name)
 			.append(" [")
 			.append("time=").append(getElapsedTime()).append("ms")
 			.append(", count=").append(getCount())
@@ -37,12 +37,12 @@ public class ConverterMetric {
 			.append("] ===");
 
 
-		List<ConverterInvocation> invocations = getInvocations();
+		List<CanonicalizationMethodInvocation> invocations = getInvocations();
 		if (theComparator != null) {
 			invocations.sort(theComparator);
 		}
 
-		Stream<ConverterInvocation> stream = myInvocations.stream().limit(theInvocationLimit);
+		Stream<CanonicalizationMethodInvocation> stream = myInvocations.stream().limit(theInvocationLimit);
 		if (theFilter != null){
 			stream = stream.filter(theFilter);
 		}
@@ -52,11 +52,11 @@ public class ConverterMetric {
 		return sb.toString();
 	}
 
-	public String getMethod() {
-		return myMethod;
+	public String getName() {
+		return name;
 	}
 
-	public List<ConverterInvocation> getInvocations() {
+	public List<CanonicalizationMethodInvocation> getInvocations() {
 		return myInvocations;
 	}
 

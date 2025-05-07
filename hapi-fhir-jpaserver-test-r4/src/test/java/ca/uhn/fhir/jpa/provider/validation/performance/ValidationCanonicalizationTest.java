@@ -117,7 +117,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 				totalTime += millis;
 				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
-				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+				ourVersionCanonicalizer.getCanonicalizationMethods().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
 				if (millis > max) {
 					max = millis;
@@ -192,7 +192,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 				totalTime += millis;
 				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
-				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
+				ourVersionCanonicalizer.getCanonicalizationMethods().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
 				if (millis > max) {
 					max = millis;
@@ -311,16 +311,16 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 	private void resetMetrics() {
 		ourVersionCanonicalizer.resetMetrics();
-		assertTrue(ourVersionCanonicalizer.getMetrics().isEmpty());
+		assertTrue(ourVersionCanonicalizer.getCanonicalizationMethods().isEmpty());
 	}
 
 	private void logMetrics(int theRun, long theMillis) {
 		ourLog.info("=== End Run #{} - Validated resource in: {}ms ===", theRun, theMillis);
 
-		ConverterInvocation.ElapsedTimeComparator comparator = new ConverterInvocation.ElapsedTimeComparator();
-		Predicate<ConverterInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
+		CanonicalizationMethodInvocation.ElapsedTimeComparator comparator = new CanonicalizationMethodInvocation.ElapsedTimeComparator();
+		Predicate<CanonicalizationMethodInvocation> filter = invocation -> !invocation.getResourceId().startsWith("StructureDefinition");
 
-		ourVersionCanonicalizer.getMetrics().forEach(metric -> {
+		ourVersionCanonicalizer.getCanonicalizationMethods().forEach(metric -> {
 			String metrics = metric.writeMetrics(10_000, comparator, filter);
 			ourLog.info("{}", metrics);
 		});
