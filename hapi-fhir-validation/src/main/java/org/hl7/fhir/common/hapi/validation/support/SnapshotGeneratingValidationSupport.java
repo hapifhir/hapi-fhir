@@ -134,24 +134,16 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedDstu3.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedDstu3.getSnapshot().getElement()));
 					break;
 				case R4:
 					org.hl7.fhir.r4.model.StructureDefinition generatedR4 = (org.hl7.fhir.r4.model.StructureDefinition)
 							myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedR4.getSnapshot().getElement()));
 					break;
 				case R4B:
 					org.hl7.fhir.r4b.model.StructureDefinition generatedR4b =
@@ -159,12 +151,8 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4b.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedR4b.getSnapshot().getElement()));
 					break;
 				case R5:
 					// nothing

@@ -1,5 +1,9 @@
 ---
 type: add
 issue: 6865
-title: "Add new APIs to IHapiPackageCacheManager and JpaPackageCache to inspect and help mitigate duplicate resources
-        among different NPM packages."
+title: "Added new NPM package management APIs to help manage duplicate resources by canonical URL across multiple packages. `IHapiPackageCacheManager` has two new methods:
+<ul>
+    <li>`List<NpmPackageAssetInfoJson> findPackageAssetInfoByUrl(FhirVersionEnum theVersion, String theCanonicalUrl)`: Shows details of the packages that are duplicated with url</li>
+    <li>`IBaseResource findPackageAsset(FindPackageAssetRequest theFindPackageAssetRequest)`: Allows viewing the specific resource JSON for that canonical URL, package ID and version to help determine which is the resource and package that should be kept.</li>
+</ul>
+"
