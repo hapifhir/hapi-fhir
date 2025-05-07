@@ -40,13 +40,6 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 
-	@Override
-	@BeforeEach
-	public void before() {
-		populateResourceTypeTable();
-		initResourceTypeCacheFromDatabase();
-	}
-
 	@Test
 	public void testDuplicateLinkChangeEvent() throws InterruptedException {
 		Patient patient1 = buildJanePatient();

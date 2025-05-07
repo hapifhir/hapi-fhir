@@ -211,7 +211,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version.executeRawSql("20250422.10", resTypeInsertion);
 			version.executeRawSql(
-							"20250422.20", "UPDATE SEQ_RESOURCE_TYPE SET next_val = %d'".formatted(resTypes.size() + 1))
+							"20250422.20", "UPDATE SEQ_RESOURCE_TYPE SET next_val = %d".formatted(resTypes.size() + 1))
 					.onlyAppliesToPlatforms(DriverTypeEnum.MYSQL_5_7, DriverTypeEnum.MARIADB_10_1);
 
 			// Add column RES_TYPE_ID and FK to HFJ_RESOURCE
