@@ -143,6 +143,14 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 		if (myPartitionSettings != null) {
 			return myPartitionSettings.getDefaultPartitionId();
 		}
+		/*
+		 * We log a warning because in most cases you will want a partitionsettings
+		 * object.
+		 * However, PartitionSettings beans are not provided in the same
+		 * config as the one that provides this bean; as such, it is the responsibility
+		 * of whomever includes the config for this bean to also provide a PartitionSettings
+		 * bean (or import a config that does)
+		 */
 		ourLog.warn("No PartitionSettings available.");
 		return null;
 	}
