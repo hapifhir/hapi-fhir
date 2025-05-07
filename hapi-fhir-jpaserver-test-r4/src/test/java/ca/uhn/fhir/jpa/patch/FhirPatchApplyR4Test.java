@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -12,12 +14,16 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
@@ -28,11 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.XmlExpectationsHelper;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Encounter.EncounterLocationStatus.RESERVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -700,11 +706,6 @@ public class FhirPatchApplyR4Test {
 		return createPatchOperation("replace", thePath, null , theValue, null);
 	}
 
-	private Parameters.ParametersParameterComponent createPatchInsertOperation(String thePath, Type theValue) {
-		return createPatchOperation("replace", thePath, null , theValue, null);
-	}
-
-
 	@Nonnull
 	private Parameters.ParametersParameterComponent createPatchOperation(String theType, String thePath, String theName, Type theValue, Integer theIndex) {
 		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
@@ -737,9 +738,92 @@ public class FhirPatchApplyR4Test {
 		return operation;
 	}
 
+	@Test
+	public void testPatchResource_withEnumerationAsPrimitiveValue() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Encounter encounter = new Encounter();
+
+		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Encounter.status"));
+
+		Encounter.EncounterStatusEnumFactory encounterStatusEnumFactory = new Encounter.EncounterStatusEnumFactory();
+		Enumeration<Encounter.EncounterStatus> encounterLocationStatus = new Enumeration<>(encounterStatusEnumFactory, "arrived");
+
+		operation.addPart()
+			.setName("value")
+			.setValue(encounterLocationStatus);
+
+		logResource(patch);
+
+		svc.apply(encounter, patch);
+		assertThat(encounter.getStatus()).isEqualTo(Encounter.EncounterStatus.ARRIVED);
+	}
+
+	@Test
+	public void testPatchResource_withCompositeValues() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Encounter encounter = new Encounter();
+		EncounterLocationComponent encounterLocationComponent = encounter.addLocation();
+		encounterLocationComponent.setStatus(RESERVED);
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Encounter.location"));
+
+		Parameters.ParametersParameterComponent partList = operation.addPart().setName("value");
+
+		Reference expectedReference = new Reference("Location/123");
+		partList.addPart().setName("location").setValue(expectedReference);
+
+		CodeableConcept expectedCodeableConcept = new CodeableConcept(new Coding("some-system", "some-code", null));
+		partList.addPart().setName("physicalType").setValue(expectedCodeableConcept);
+
+		Encounter.EncounterLocationStatusEnumFactory encounterLocationStatusEnumFactory = new Encounter.EncounterLocationStatusEnumFactory();
+		Enumeration<Encounter.EncounterLocationStatus> encounterLocationStatus = new Enumeration<>(encounterLocationStatusEnumFactory, "active");
+		partList.addPart().setName("status").setValue(encounterLocationStatus);
+
+		logResource(patch);
+
+		svc.apply(encounter, patch);
+		logResource(encounter);
+		EncounterLocationComponent locationComponent = encounter.getLocationFirstRep();
+
+		assertThat(locationComponent.getLocation().getReference()).isEqualTo(expectedReference.getReference());
+		assertThat(locationComponent.getPhysicalType().getCodingFirstRep().getSystem()).isEqualTo(expectedCodeableConcept.getCodingFirstRep().getSystem());
+		assertThat(locationComponent.getPhysicalType().getCodingFirstRep().getCode()).isEqualTo(expectedCodeableConcept.getCodingFirstRep().getCode());
+		assertThat(locationComponent.getStatus()).isEqualTo(ACTIVE);
+	}
+
+	public String logResource(IBaseResource theResource) {
+		String resourceAsString = FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		ourLog.info(resourceAsString);
+		return resourceAsString;
+	}
+
 	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {
 		Parameters.ParametersParameterComponent component = theDiff.getParameter().stream().filter(t -> t.getName().equals(theParameterName)).collect(Collectors.toList()).get(theIndex);
-		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		Parameters.ParametersParameterComponent part = component.getPart().stream().filter(t -> t.getName().equals(thePartName)).findFirst().orElseThrow(IllegalArgumentException::new);
 		return ((IPrimitiveType) part.getValue()).getValueAsString();
 	}
 
