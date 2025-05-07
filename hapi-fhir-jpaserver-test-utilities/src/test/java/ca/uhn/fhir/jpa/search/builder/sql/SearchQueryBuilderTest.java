@@ -441,7 +441,7 @@ public class SearchQueryBuilderTest {
 		@Bean
 		@Scope("prototype")
 		public ResourceTablePredicateBuilder ResourceTablePredicateBuilder(SearchQueryBuilder theSearchQueryBuilder) {
-			return new ResourceTablePredicateBuilder(theSearchQueryBuilder, partitionSettings());
+			return new ResourceTablePredicateBuilder(theSearchQueryBuilder);
 		}
 
 		@Bean

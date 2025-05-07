@@ -686,7 +686,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-		return new ResourceTablePredicateBuilder(theSearchBuilder, myPartitionSettings);
+		return new ResourceTablePredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean
