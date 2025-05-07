@@ -317,7 +317,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		}
 
 		StringBuilder output = new StringBuilder();
-		String summary = "\n===== RUNS: %s | TOTAL TIME: %sms | MAX: %sms | CONVERSION TIME: %sms | TOTAL INVOCATIONS: %s | CONCEPTS: %s =====".formatted(
+		String summary = "\n===== RUNS: %s | TOTAL TIME: %sms | MAX: %sms | CONVERSION TIME: %sms | TOTAL CANONICALIZATIONS: %s | CONCEPTS: %s =====".formatted(
 			NUM_RUNS, totalTime, max, totalConversionTime, totalInvocations, NUM_CONCEPTS
 		);
 		output.append(summary);
@@ -329,7 +329,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 	private StringBuilder formatRuns(List<TestRun> theTestRuns) {
 		StringBuilder retVal = new StringBuilder();
 		for (TestRun testRun : theTestRuns){
-			retVal.append("\nRUN: %s | ELAPSED TIME: %sms, | TOTAL INVOCATIONS: %s".formatted(
+			retVal.append("\nRUN: %s | ELAPSED TIME: %sms, | TOTAL CANONICALIZATIONS: %s".formatted(
 					testRun.getNumber(), testRun.getElapsedTime(), testRun.getTotalInvocations())
 			);
 		}
