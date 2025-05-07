@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -73,7 +74,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	/**
 	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
@@ -85,8 +86,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	 * cached by {@link org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain},
 	 * the converted version gets cached too.
 	 */
-	private static final String CANONICAL_USERDATA_KEY =
-			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+	private static final String TO_CANONICAL_USERDATA_KEY =
+			VersionSpecificWorkerContextWrapper.class.getName() + "_TO_CANONICAL_USERDATA_KEY";
+
+	/**
+	 * This serves a similar purpose as TO_CANONICAL_USERDATA_KEY, expect this key stores
+	 * the conversion back from the canonical version.
+	 */
+	private static final String FROM_CANONICAL_USERDATA_KEY =
+		VersionSpecificWorkerContextWrapper.class.getName() + "_FROM_CANONICAL_USERDATA_KEY";
 
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
@@ -783,29 +791,43 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Nonnull
 	private ValidationResult doValidation(
-			ValueSet theValueSet,
+			@Nullable ValueSet theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
 			String theCode,
 			String theDisplay) {
 
-		IBaseResource convertedVs = null;
-
-		try {
-			if (theValueSet != null) {
-				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
-			}
-		} catch (FHIRException e) {
-			throw new InternalErrorException(Msg.code(689) + e);
-		}
+		IBaseResource convertedVs = getOrConvertValueSet(theValueSet);
 
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
 			result = validateCodeInValueSet(convertedVs, theValidationOptions, theSystem, theCode, theDisplay);
+			cacheConvertedValueSet(theValueSet, convertedVs);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 		}
 		return convertValidationResult(theSystem, result);
+	}
+
+	private IBaseResource getOrConvertValueSet(ValueSet theValueSet){
+		if (theValueSet == null) {
+			return null;
+		}
+
+		IBaseResource convertedValueSet = (IBaseResource) theValueSet.getUserData(FROM_CANONICAL_USERDATA_KEY);
+		if (convertedValueSet != null){
+			ourLog.debug("Using user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, theValueSet.getId());
+			return convertedValueSet;
+		}
+		return myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
+	}
+
+	private void cacheConvertedValueSet(ValueSet theValueSet, IBaseResource theConvertedValueSet){
+		if (theValueSet == null || theConvertedValueSet == null){
+			return;
+		}
+		theValueSet.setUserData(FROM_CANONICAL_USERDATA_KEY, theConvertedValueSet);
+		ourLog.debug("Added user data - Key: {}, ValueSet: {}", FROM_CANONICAL_USERDATA_KEY, theValueSet.getId());
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInValueSet(
@@ -1084,7 +1106,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		synchronized (theResource) {
-			Resource canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
+			Resource canonical = (Resource) theResource.getUserData(TO_CANONICAL_USERDATA_KEY);
 			if (canonical != null) {
 				return canonical;
 			}
@@ -1138,7 +1160,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 
 			if (storeCanonical) {
-				theResource.setUserData(CANONICAL_USERDATA_KEY, canonical);
+				theResource.setUserData(TO_CANONICAL_USERDATA_KEY, canonical);
 			}
 			return canonical;
 		}
