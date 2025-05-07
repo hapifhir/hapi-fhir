@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6939
+title: "BaseResourceCacheSynchronizer class, which is mainly used for caching Subscription and 
+SubscriptionTopic resources, was using a null RequestDetails object when querying the database, if its 
+`requestRefresh` method is called before the `registerListener` method during initialization. This has now been fixed."
