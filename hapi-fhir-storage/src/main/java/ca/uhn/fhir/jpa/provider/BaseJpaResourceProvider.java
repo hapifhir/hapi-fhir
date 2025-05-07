@@ -54,15 +54,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.util.StopWatch;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -72,8 +69,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider
 		implements IResourceProvider {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaResourceProvider.class);
 
 	private IFhirResourceDao<T> myDao;
 
@@ -357,22 +352,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 			@Validate.Mode ValidationModeEnum theMode,
 			@Validate.Profile String theProfile,
 			RequestDetails theRequestDetails) {
-
-		//		FIXME
-		//		ConverterMetricUtil.setUseCache(true);
-		//		ConverterMetricUtil.resetMetrics();
-		//		ourLog.info("===Start Metrics===");
-		//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
-
-		StopWatch sw = new StopWatch();
-		MethodOutcome outcome =
-				validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
-		//		ourLog.info("===Validated resource in {} ms===", sw.getMillis());
-		//
-		//		ourLog.info("===End Metrics===");
-		//		ConverterMetricUtil.getMetrics().forEach(metric -> ourLog.info("{}", metric.writeMetrics(20)));
-
-		return outcome;
+		return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
 
 	@Validate
