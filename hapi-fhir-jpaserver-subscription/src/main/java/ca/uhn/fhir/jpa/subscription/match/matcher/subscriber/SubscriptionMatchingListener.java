@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -32,11 +33,11 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -46,7 +47,8 @@ import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTyp
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SubscriptionMatchingListener implements IMessageListener<ResourceModifiedMessage> {
-	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingListener.class);
+	private static final Logger ourLog = Logs.getSubscriptionTroubleshootingLog();
+
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -132,7 +134,8 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		boolean anySubscriptionsMatchedResource = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-			anySubscriptionsMatchedResource |= processSubscription(theMsg, resourceId, nextActiveSubscription);
+			anySubscriptionsMatchedResource |= processSubscription(theMsg, resourceId, nextActiveSubscription)
+					.isSuccessful();
 		}
 
 		if (!anySubscriptionsMatchedResource) {
@@ -143,9 +146,9 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 	}
 
 	/**
-	 * Returns true if subscription matched, and processing completed successfully, and the message was sent to the delivery channel. False otherwise.
+	 * Returns ISendResult.isSuccessful() if subscription matched, and processing completed successfully, and the message was sent to the delivery channel. False otherwise.
 	 */
-	private boolean processSubscription(
+	private ISendResult processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
 
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
@@ -155,7 +158,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 				&& theMsg.getPartitionId().hasPartitionIds()
 				&& !subscription.isCrossPartitionEnabled()
 				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
-			return false;
+			return ISendResult.FAILURE;
 		}
 
 		String nextSubscriptionId = theActiveSubscription.getId();
@@ -167,18 +170,18 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 						"Ignoring subscription {} because it is not {}",
 						nextSubscriptionId,
 						theMsg.getSubscriptionId());
-				return false;
+				return ISendResult.FAILURE;
 			}
 		}
 
 		if (!resourceTypeIsAppropriateForSubscription(theActiveSubscription, theResourceId)) {
-			return false;
+			return ISendResult.FAILURE;
 		}
 
 		if (theMsg.getOperationType().equals(DELETE)) {
 			if (!theActiveSubscription.getSubscription().getSendDeleteMessages()) {
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
-				return false;
+				return ISendResult.FAILURE;
 			}
 		}
 
@@ -191,7 +194,7 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 						theActiveSubscription.getId(),
 						theResourceId.toUnqualifiedVersionless().getValue(),
 						matchResult.isInMemory() ? "in-memory" : "by querying the repository");
-				return false;
+				return ISendResult.FAILURE;
 			}
 			ourLog.debug(
 					"Subscription {} was matched by resource {} {}",
