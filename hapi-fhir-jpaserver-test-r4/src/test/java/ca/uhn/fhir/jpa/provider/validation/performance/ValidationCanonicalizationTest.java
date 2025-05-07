@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.validation.performance;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -198,7 +199,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 			supportChain.addValidationSupport(remoteTermSupport);
 			supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
-			supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext, ourVersionCanonicalizer));
+			supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext));
 
 			PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
 			for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
@@ -207,8 +208,9 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			}
 
 			supportChain.addValidationSupport(prePopulatedSupport);
+			setVersionCanonicalizer(supportChain.getValidationSupports());
 
-			FhirInstanceValidator module = new FhirInstanceValidator(supportChain, ourVersionCanonicalizer);
+			FhirInstanceValidator module = new FhirInstanceValidator(supportChain);
 			FhirValidator validator = ourFhirContext.newValidator();
 			validator.registerValidatorModule(module);
 			return validator;
@@ -237,9 +239,12 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		// initialize VersionSpecificWorkerContextWrapper
 		myClient.validate().resource(new Patient().setActive(true)).execute();
 
-		// FIXME move to config
-		myInstanceValidator.setVersionCanonicalizer(ourVersionCanonicalizer);
-		myJpaValidationSupportChain.getValidationSupports().forEach(support -> {
+		myInstanceValidator.getWorkerContext().setVersionCanonicalizer(ourVersionCanonicalizer);
+		setVersionCanonicalizer(myJpaValidationSupportChain.getValidationSupports());
+	}
+
+	private void setVersionCanonicalizer(List<IValidationSupport> theSupports){
+		for (IValidationSupport support : theSupports){
 			if (support instanceof InMemoryTerminologyServerValidationSupport inMemory){
 				inMemory.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
@@ -249,7 +254,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			if (support instanceof SnapshotGeneratingValidationSupport snapshotGenerating){
 				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
-		});
+		}
 	}
 
 	private Procedure createProcedure() {

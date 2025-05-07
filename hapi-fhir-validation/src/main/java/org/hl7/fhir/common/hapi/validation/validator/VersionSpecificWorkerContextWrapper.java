@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +98,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
-
 	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
@@ -112,7 +112,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		setValidationMessageLanguage(getLocale());
 	}
 
-	// FIXME ND
+	@VisibleForTesting
 	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
@@ -1012,17 +1012,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Nonnull
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport) {
-		return newVersionSpecificWorkerContextWrapper(theValidationSupport, null);
-	}
-
-	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
-			IValidationSupport theValidationSupport, @Nullable VersionCanonicalizer theVersionCanonicalizer) {
-
-		VersionCanonicalizer versionCanonicalizer = theVersionCanonicalizer != null
-				? theVersionCanonicalizer
-				: new VersionCanonicalizer(theValidationSupport.getFhirContext());
-
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
 		return new VersionSpecificWorkerContextWrapper(
 				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
 	}
@@ -1119,65 +1109,64 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
+		Resource canonical;
 		synchronized (theResource) {
-			Resource canonical = (Resource) theResource.getUserData(TO_CANONICAL_USERDATA_KEY);
-			if (canonical != null) {
-				return canonical;
-			}
+			canonical = (Resource) theResource.getUserData(TO_CANONICAL_USERDATA_KEY);
+			if (canonical == null) {
+				boolean storeCanonical = true;
+				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
 
-			boolean storeCanonical = true;
-			canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
+				if (canonical instanceof StructureDefinition) {
+					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+					if (canonicalSd.getSnapshot().isEmpty()) {
+						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+						IBaseResource resource = theResource;
+						try {
 
-			if (canonical instanceof StructureDefinition) {
-				StructureDefinition canonicalSd = (StructureDefinition) canonical;
-				if (canonicalSd.getSnapshot().isEmpty()) {
-					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-					IBaseResource resource = theResource;
-					try {
+							FhirContext fhirContext = myValidationSupportContext
+									.getRootValidationSupport()
+									.getFhirContext();
+							SnapshotGeneratingValidationSupport snapshotGenerator =
+									new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
+							resource = snapshotGenerator.generateSnapshot(
+									myValidationSupportContext, resource, "", null, "");
+							Validate.isTrue(
+									resource != null,
+									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+									canonicalSd.getUrl());
 
-						FhirContext fhirContext = myValidationSupportContext
-								.getRootValidationSupport()
-								.getFhirContext();
-						SnapshotGeneratingValidationSupport snapshotGenerator =
-								new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
-						resource =
-								snapshotGenerator.generateSnapshot(myValidationSupportContext, resource, "", null, "");
-						Validate.isTrue(
-								resource != null,
-								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-								canonicalSd.getUrl());
-
-					} catch (BaseServerResponseException e) {
-						if (thePropagateSnapshotException) {
-							throw e;
+						} catch (BaseServerResponseException e) {
+							if (thePropagateSnapshotException) {
+								throw e;
+							}
+							String message = e.toString();
+							Throwable rootCause = ExceptionUtils.getRootCause(e);
+							if (rootCause != null) {
+								message = rootCause.getMessage();
+							}
+							ourLog.warn(
+									"Failed to generate snapshot for profile with URL[{}]: {}",
+									canonicalSd.getUrl(),
+									message);
+							storeCanonical = false;
 						}
-						String message = e.toString();
-						Throwable rootCause = ExceptionUtils.getRootCause(e);
-						if (rootCause != null) {
-							message = rootCause.getMessage();
-						}
-						ourLog.warn(
-								"Failed to generate snapshot for profile with URL[{}]: {}",
-								canonicalSd.getUrl(),
-								message);
-						storeCanonical = false;
+
+						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
 					}
+				}
 
-					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(resource);
+				String sourcePackageId =
+						(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
+				if (sourcePackageId != null) {
+					canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
+				}
+
+				if (storeCanonical) {
+					theResource.setUserData(TO_CANONICAL_USERDATA_KEY, canonical);
 				}
 			}
-
-			String sourcePackageId =
-					(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
-			if (sourcePackageId != null) {
-				canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
-			}
-
-			if (storeCanonical) {
-				theResource.setUserData(TO_CANONICAL_USERDATA_KEY, canonical);
-			}
-			return canonical;
 		}
+		return canonical;
 	}
 
 	private FHIRPathEngine getFHIRPathEngine() {

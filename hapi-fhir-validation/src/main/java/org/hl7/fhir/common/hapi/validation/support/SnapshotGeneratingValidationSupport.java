@@ -10,8 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -23,6 +22,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
@@ -48,42 +48,19 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	 * Constructor
 	 */
 	public SnapshotGeneratingValidationSupport(FhirContext theFhirContext) {
-		this(theFhirContext, null);
+		this(theFhirContext, null, null);
 	}
 
-	/**
-	 * Constructor
-	 */
-	public SnapshotGeneratingValidationSupport(
-			FhirContext theFhirContext, VersionCanonicalizer theVersionCanonicalizer) {
-		this(theFhirContext, null, null, theVersionCanonicalizer);
-	}
-
-	/**
-	 * Constructor
-	 */
 	public SnapshotGeneratingValidationSupport(
 			FhirContext theFhirContext, IWorkerContext theWorkerContext, FHIRPathEngine theFHIRPathEngine) {
-		this(theFhirContext, theWorkerContext, theFHIRPathEngine, null);
-	}
-
-	/**
-	 * Constructor
-	 */
-	public SnapshotGeneratingValidationSupport(
-			FhirContext theFhirContext,
-			@Nullable IWorkerContext theWorkerContext,
-			@Nullable FHIRPathEngine theFHIRPathEngine,
-			@Nullable VersionCanonicalizer theVersionCanonicalizer) {
-		Validate.notNull(theFhirContext);
+		Objects.requireNonNull(theFhirContext);
 		myCtx = theFhirContext;
+		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
 		myFHIRPathEngine = theFHIRPathEngine;
-		myVersionCanonicalizer =
-				theVersionCanonicalizer != null ? theVersionCanonicalizer : new VersionCanonicalizer(theFhirContext);
 	}
 
-	// FIXME ND
+	@VisibleForTesting
 	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
