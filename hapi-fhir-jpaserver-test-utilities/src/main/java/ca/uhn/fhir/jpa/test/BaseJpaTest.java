@@ -1093,30 +1093,25 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected void populateResourceTypeTable() {
 		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
-		String data = resTypes.stream()
-			.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
-			.collect(Collectors.joining(","));
-		String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES %s".formatted(data);
+		String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES " +
+			resTypes.stream()
+				.map("(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'%s')"::formatted)
+				.collect(Collectors.joining(","));
+
+		ourLog.info("BaseJpaTest::Resource Types from config: {}", resTypes.size());
 
 		runInTransaction(() -> {
-			int insertedRows = 0;
-			List<ResourceTypeEntity> entityList = myResourceTypeDao.findAll();
-			ourLog.debug("Number of Resource Types in table: {}", entityList.size());
+			List<ResourceTypeEntity> entities = myResourceTypeDao.findAll();
 
-			try (Connection connection = dataSource.getConnection()) {
-				Statement stmt = connection.createStatement();
-				if (CollectionUtils.isEmpty(entityList)) {
+			if (CollectionUtils.isEmpty(entities)) {
+				try (Connection connection = dataSource.getConnection();
+					 Statement stmt = connection.createStatement()) {
 					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
-					insertedRows = stmt.executeUpdate(sql);
-				} else if (entityList.size() < resTypes.size()) {
-					// Some IT tests have resource type entities in the transaction before @BeforeEach is called
-					myResourceTypeDao.deleteAll();
-					stmt.executeUpdate("ALTER SEQUENCE SEQ_RESOURCE_TYPE RESTART WITH 1");
-					insertedRows = stmt.executeUpdate(sql);
+					int row = stmt.executeUpdate(sql);
+					ourLog.info("BaseJpaTest::Resource Types inserted: {}", row);
+				} catch (SQLException e) {
+					ourLog.error("Failed to insert resource types", e);
 				}
-				ourLog.debug("Number of Resource Types inserted: {}", insertedRows);
-			} catch (SQLException e) {
-				ourLog.error("Failed to insert resource types", e);
 			}
 		});
 	}
@@ -1129,7 +1124,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void initResourceTypeCacheFromConfig() {
 		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
 
-		// Cache is not loaded from database since it adds a SELECT query that will break some existing tests
 		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
 		for (int i = 0; i < resTypes.size(); i++) {
 			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
@@ -1144,6 +1138,5 @@ public abstract class BaseJpaTest extends BaseTest {
 		ourLog.debug("Resource Type cache size: {}", myMemoryCacheService.getEstimatedSize(
 			MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID));
 	}
-
 
 }
