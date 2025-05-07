@@ -73,9 +73,6 @@ public class MetaSourceTest extends BaseJpaR4Test {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogRequestBody(true);
 		loggingInterceptor.setLogResponseBody(true);
-
-		populateResourceTypeTable();
-		initResourceTypeCacheFromDatabase();
 	}
 
 

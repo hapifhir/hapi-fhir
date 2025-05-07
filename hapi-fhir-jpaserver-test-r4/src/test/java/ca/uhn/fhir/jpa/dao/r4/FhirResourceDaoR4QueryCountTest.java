@@ -4359,6 +4359,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Test
 		myMemoryCacheService.invalidateAllCaches();
+		initResourceTypeCacheFromConfig();
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, bb.getBundleTyped());
 

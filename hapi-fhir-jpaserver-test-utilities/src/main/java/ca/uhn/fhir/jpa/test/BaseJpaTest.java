@@ -1106,9 +1106,11 @@ public abstract class BaseJpaTest extends BaseTest {
 			try (Connection connection = dataSource.getConnection()) {
 				Statement stmt = connection.createStatement();
 				if (CollectionUtils.isEmpty(entityList)) {
+					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
 					insertedRows = stmt.executeUpdate(sql);
 				} else if (entityList.size() < resTypes.size()) {
-					stmt.executeUpdate("DELETE FROM HFJ_RESOURCE_TYPE");
+					// Some IT tests have resource type entities in the transaction before @BeforeEach is called
+					myResourceTypeDao.deleteAll();
 					stmt.executeUpdate("ALTER SEQUENCE SEQ_RESOURCE_TYPE RESTART WITH 1");
 					insertedRows = stmt.executeUpdate(sql);
 				}
