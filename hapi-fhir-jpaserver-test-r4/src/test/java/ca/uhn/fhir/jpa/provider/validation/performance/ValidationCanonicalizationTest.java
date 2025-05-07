@@ -206,6 +206,10 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			FhirInstanceValidator module = new FhirInstanceValidator(supportChain);
 			FhirValidator validator = ourFhirContext.newValidator();
 			validator.registerValidatorModule(module);
+
+			validator.validateWithResult(new Patient().setActive(true));
+			module.getWorkerContext().setVersionCanonicalizer(ourVersionCanonicalizer);
+
 			return validator;
 		}
 
