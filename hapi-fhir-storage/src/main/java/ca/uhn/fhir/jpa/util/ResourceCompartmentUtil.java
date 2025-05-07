@@ -37,7 +37,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static ca.uhn.fhir.util.ObjectUtil.castIfInstanceof;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResourceCompartmentUtil {
@@ -69,7 +71,8 @@ public class ResourceCompartmentUtil {
 			String compartmentIdentity = theResource.getIdElement().getIdPart();
 			if (isBlank(compartmentIdentity)) {
 				throw new MethodNotAllowedException(
-						Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(2475)
+								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
 			return Optional.of(compartmentIdentity);
 		}
@@ -91,16 +94,7 @@ public class ResourceCompartmentUtil {
 			List<RuntimeSearchParam> theCompartmentSps,
 			ISearchParamExtractor mySearchParamExtractor) {
 		// TODO KHS consolidate with FhirTerser.getCompartmentOwnersForResource()
-		return theCompartmentSps.stream()
-				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
-				.filter(StringUtils::isNotBlank)
-				.map(path -> mySearchParamExtractor
-						.getPathValueExtractor(theResource, path)
-						.get())
-				.filter(t -> !t.isEmpty())
-				.map(t -> t.get(0))
-				.filter(t -> t instanceof IBaseReference)
-				.map(t -> (IBaseReference) t)
+		return getResourceCompartmentReferences(theResource, theCompartmentSps, mySearchParamExtractor)
 				.map(t -> t.getReferenceElement().getValue())
 				.map(IdType::new)
 				.filter(t -> theCompartmentName.equals(
@@ -108,6 +102,18 @@ public class ResourceCompartmentUtil {
 				.map(IdType::getIdPart)
 				.filter(StringUtils::isNotBlank)
 				.findFirst();
+	}
+
+	@Nonnull
+	public static Stream<IBaseReference> getResourceCompartmentReferences(
+			IBaseResource theResource,
+			List<RuntimeSearchParam> theCompartmentSps,
+			ISearchParamExtractor mySearchParamExtractor) {
+		return theCompartmentSps.stream()
+				.flatMap(param -> Arrays.stream(BaseSearchParamExtractor.splitPathsR4(param.getPath())))
+				.filter(StringUtils::isNotBlank)
+				.flatMap(path -> mySearchParamExtractor.getPathValueExtractor(theResource, path).get().stream())
+				.flatMap(base -> castIfInstanceof(base, IBaseReference.class).stream());
 	}
 
 	/**
