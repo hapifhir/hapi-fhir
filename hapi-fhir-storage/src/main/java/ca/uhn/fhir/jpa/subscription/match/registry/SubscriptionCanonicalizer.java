@@ -84,10 +84,6 @@ public class SubscriptionCanonicalizer {
 			@Nullable PartitionSettings thePartitionSettings) {
 		myFhirContext = theFhirContext;
 		mySubscriptionSettings = theSubscriptionSettings;
-		setPartitionSettings(thePartitionSettings);
-	}
-
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
 	}
 
@@ -795,7 +791,7 @@ public class SubscriptionCanonicalizer {
 		if (myPartitionSettings != null) {
 			return myPartitionSettings.getDefaultPartitionId();
 		}
-		ourLog.error("\nNO PARTITION SETTINGS\n");
+		ourLog.warn("No partition settings found.");
 		return null;
 	}
 
