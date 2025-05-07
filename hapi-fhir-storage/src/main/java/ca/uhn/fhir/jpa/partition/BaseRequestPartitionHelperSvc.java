@@ -319,7 +319,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// to DEFAULT
 		if (nonPartitionableResource && requestPartitionId == null) {
 			logNonPartitionableType(theResourceType);
-			requestPartitionId = RequestPartitionId.defaultPartition();
+			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 		}
 
 		validateRequestPartitionNotNull(
