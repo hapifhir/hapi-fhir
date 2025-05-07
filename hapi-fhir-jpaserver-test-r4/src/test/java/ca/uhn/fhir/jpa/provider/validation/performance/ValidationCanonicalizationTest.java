@@ -13,6 +13,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -40,7 +42,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private JpaValidationSupportChain myJpaValidationSupportChain;
 
-	private static final int NUM_RUNS = 3;
+	private static final int NUM_RUNS = 10;
 
 	private static final int NUM_CONCEPTS = 1000;
 //	private static final int NUM_CONCEPTS = 50_000;
@@ -103,6 +105,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			long totalTime = 0L;
 			AtomicLong totalConversionTime = new AtomicLong();
 			long max = 0L;
+			long totalInvocations = 0L;
 
 			for (int run = 1; run <= NUM_RUNS; run++) {
 				ourLog.info("Start Run #{}", run);
@@ -113,6 +116,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				long millis = sw.getMillis();
 
 				totalTime += millis;
+				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
 				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
 				if (millis > max) {
@@ -125,7 +129,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
 			}
 
-			logSummary(totalTime, max, totalConversionTime.get());
+			logSummary(totalTime, max, totalConversionTime.get(), totalInvocations);
 		}
 
 		private void assertHasInvalidCodeError(OperationOutcome theOperationOutcome) {
@@ -134,9 +138,11 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 			OperationOutcomeIssueComponent issue1 = issues.get(0);
 			assertEquals(IssueSeverity.ERROR, issue1.getSeverity());
+
+			Map<String, String> formatValues = Map.of("conceptNumber", String.valueOf(NUM_CONCEPTS));
 			assertEquals("Parameters.parameter[0].resource/*Procedure/null*/.code", issue1.getLocation().get(0).getValue());
-			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-1000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-1000, http://acme.org/invalid#invalid)";
-			assertEquals(expectedMessage1, issue1.getDiagnostics());
+			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-${conceptNumber}, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-${conceptNumber}, http://acme.org/invalid#invalid)";
+			assertEquals(formatMessage(expectedMessage1, formatValues), issue1.getDiagnostics());
 
 			OperationOutcomeIssueComponent issue2 = issues.get(1);
 			assertEquals(IssueSeverity.INFORMATION, issue2.getSeverity());
@@ -150,6 +156,10 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice) - Does not match slice 'slice2' (discriminator: ($this memberOf 'http://acme.org/ValueSet/valueset-2'))";
 			assertEquals(expectedMessage3, issue3.getDiagnostics());
 		}
+	}
+
+	private String formatMessage(String theMessage, Map<String, String> theFormatValues){
+		return StringSubstitutor.replace(theMessage, theFormatValues);
 	}
 
 	@Nested
@@ -170,6 +180,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			long totalTime = 0L;
 			AtomicLong totalConversionTime = new AtomicLong();
 			long max = 0L;
+			long totalInvocations = 0L;
 
 			for (int run = 1; run <= NUM_RUNS; run++) {
 				ourLog.info("Start Run #{}", run);
@@ -180,6 +191,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				long millis = sw.getMillis();
 
 				totalTime += millis;
+				totalInvocations += ourVersionCanonicalizer.getTotalInvocations();
 				ourVersionCanonicalizer.getMetrics().forEach(m -> totalConversionTime.addAndGet(m.getElapsedTime()));
 
 				if (millis > max) {
@@ -189,14 +201,14 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				logMetrics(run, millis);
 				assertValidationErrors(validationResult);
 			}
-			logSummary(totalTime, max, totalConversionTime.get());
+			logSummary(totalTime, max, totalConversionTime.get(), totalInvocations);
 		}
 
 		private FhirValidator createValidator() {
 			ValidationSupportChain supportChain = new ValidationSupportChain();
 
 			RemoteTerminologyServiceValidationSupport remoteTermSupport = new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase);
-			remoteTermSupport.addClientInterceptor(new LoggingInterceptor(true));
+			remoteTermSupport.addClientInterceptor(new LoggingInterceptor());
 
 			supportChain.addValidationSupport(remoteTermSupport);
 			supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
@@ -292,8 +304,9 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		return procedure;
 	}
 
-	private void logSummary(long totalTime, long max, long totalConversionTime) {
-		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | AVERAGE TIME: {}ms | CONVERSION TIME: {}ms =====", NUM_RUNS, totalTime, max, totalTime / NUM_RUNS, totalConversionTime);
+	private void logSummary(long totalTime, long max, long totalConversionTime, long theTotalInvocations) {
+		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | CONVERSION TIME: {}ms | TOTAL INVOCATIONS: {} =====",
+				NUM_RUNS, totalTime, max, totalConversionTime, theTotalInvocations);
 	}
 
 	private void resetMetrics() {

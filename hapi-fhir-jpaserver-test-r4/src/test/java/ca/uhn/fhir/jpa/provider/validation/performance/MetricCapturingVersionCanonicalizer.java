@@ -180,6 +180,14 @@ public class MetricCapturingVersionCanonicalizer extends VersionCanonicalizer {
 		return new ArrayList<>(myMetrics.values());
 	}
 
+	public long getTotalInvocations() {
+		long total = 0;
+		for (ConverterMetric metric : getMetrics()){
+			total += metric.getInvocations().size();
+		}
+		return total;
+	}
+
 	public void resetMetrics() {
 		myMetrics = new LinkedHashMap<>();
 	}
