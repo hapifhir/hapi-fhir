@@ -44,8 +44,8 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 	private static final int NUM_RUNS = 10;
 
-//	private static final int NUM_CONCEPTS = 1000;
-	private static final int NUM_CONCEPTS = 50_000;
+	private static final int NUM_CONCEPTS = 1000;
+//	private static final int NUM_CONCEPTS = 50_000;
 //	private static final int NUM_CONCEPTS = 100_000;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationCanonicalizationTest.class);
@@ -148,23 +148,13 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private String formatMessage(String theMessage, Map<String, String> theFormatValues){
-		return StringSubstitutor.replace(theMessage, theFormatValues);
-	}
-
 	@Nested
 	@Order(2)
 	class RemoteTerminologyValidateCanonicalization {
 
-		private FhirValidator myValidator;
-
-		@BeforeEach
-		public void beforeEach() {
-			myValidator = createValidator();
-		}
-
 		@Test
 		public void testCanonicalization() {
+			FhirValidator validator = createRemoteTerminologyValidator();
 			Procedure procedure = createProcedure();
 			List<TestRun> testRuns = new ArrayList<>();
 
@@ -173,7 +163,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				resetMetrics();
 
 				StopWatch sw = new StopWatch();
-				ValidationResult validationResult = myValidator.validateWithResult(procedure);
+				ValidationResult validationResult = validator.validateWithResult(procedure);
 
 				TestRun run = new TestRun(runNumber, ourVersionCanonicalizer.getMetrics(), sw.getMillis());
 				testRuns.add(run);
@@ -185,7 +175,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			logSummary(testRuns);
 		}
 
-		private FhirValidator createValidator() {
+		private FhirValidator createRemoteTerminologyValidator() {
 			ValidationSupportChain supportChain = new ValidationSupportChain();
 
 			RemoteTerminologyServiceValidationSupport remoteTermSupport = new RemoteTerminologyServiceValidationSupport(ourFhirContext, myServerBase);
@@ -194,6 +184,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			supportChain.addValidationSupport(remoteTermSupport);
 			supportChain.addValidationSupport(new DefaultProfileValidationSupport(ourFhirContext));
 			supportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(ourFhirContext));
+			supportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(ourFhirContext));
 
 			PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ourFhirContext);
 			for (StructureDefinition structureDefinition : myAllStructureDefinitions) {
@@ -212,20 +203,27 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 		private void assertValidationErrors(ValidationResult theValidationResult) {
 			assertFalse(theValidationResult.isSuccessful());
-			assertEquals(2, theValidationResult.getMessages().size());
+			assertEquals(3, theValidationResult.getMessages().size());
 
 			SingleValidationMessage message1 = theValidationResult.getMessages().get(0);
 			assertEquals(ResultSeverityEnum.ERROR, message1.getSeverity());
 			assertEquals("Procedure.code", message1.getLocationString());
-			String expectedMessage1 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-100000, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-100000, http://acme.org/invalid#invalid)";
+			String expectedMessage1 = "Unknown code \"http://acme.org/invalid#invalid\" for ValueSet with URL \"http://acme.org/ValueSet/valueset-combined\". The Remote Terminology server %s returned Unknown code 'http://acme.org/invalid#invalid' for in-memory expansion of ValueSet 'http://acme.org/ValueSet/valueset-combined'"
+				.formatted(myServerBase);
 			assertEquals(expectedMessage1, message1.getMessage());
 
 			SingleValidationMessage message2 = theValidationResult.getMessages().get(1);
-			assertEquals(ResultSeverityEnum.INFORMATION, message2.getSeverity());
-			assertEquals("Procedure.code.coding[2]", message2.getLocationString());
-			String expectedMessage2 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
-			assertEquals(expectedMessage2, message2.getMessage());
+			assertEquals(ResultSeverityEnum.ERROR, message2.getSeverity());
+			assertEquals("Procedure.code", message2.getLocationString());
+			Map<String, String> formatValues = Map.of("conceptNumber", String.valueOf(NUM_CONCEPTS));
+			String expectedMessage2 = "None of the codings provided are in the value set 'Value Set Combined' (http://acme.org/ValueSet/valueset-combined|1), and a coding from this value set is required) (codes = http://acme.org/CodeSystem/codesystem-1#codesystem-1-concept-${conceptNumber}, http://acme.org/CodeSystem/codesystem-2#codesystem-2-concept-${conceptNumber}, http://acme.org/invalid#invalid)";
+			assertEquals(formatMessage(expectedMessage2, formatValues), message2.getMessage());
 
+			SingleValidationMessage message3 = theValidationResult.getMessages().get(2);
+			assertEquals(ResultSeverityEnum.INFORMATION, message3.getSeverity());
+			assertEquals("Procedure.code.coding[2]", message3.getLocationString());
+			String expectedMessage3 = "This element does not match any known slice defined in the profile http://example.org/fhir/StructureDefinition/TestProcedure|1.0.0 (this may not be a problem, but you should check that it's not intended to match a slice)";
+			assertEquals(expectedMessage3, message3.getMessage());
 		}
 	}
 
@@ -249,6 +247,10 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
 		}
+	}
+
+	private String formatMessage(String theMessage, Map<String, String> theFormatValues){
+		return StringSubstitutor.replace(theMessage, theFormatValues);
 	}
 
 	private Procedure createProcedure() {
