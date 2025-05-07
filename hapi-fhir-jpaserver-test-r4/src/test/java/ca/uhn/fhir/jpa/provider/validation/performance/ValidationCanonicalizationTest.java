@@ -301,8 +301,24 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			totalInvocations += testRun.getTotalInvocations();
 		}
 
-		ourLog.info("\n===== RUNS: {} | TOTAL TIME: {}ms | MAX: {}ms | CONVERSION TIME: {}ms | TOTAL INVOCATIONS: {} =====",
-				NUM_RUNS, totalTime, max, totalConversionTime, totalInvocations);
+		StringBuilder output = new StringBuilder();
+		String summary = "\n===== RUNS: %s | TOTAL TIME: %sms | MAX: %sms | CONVERSION TIME: %sms | TOTAL INVOCATIONS: %s =====".formatted(
+			NUM_RUNS, totalTime, max, totalConversionTime, totalInvocations
+		);
+		output.append(summary);
+		output.append(formatRuns(theTestRuns));
+
+		ourLog.info("{}", output);
+	}
+
+	private StringBuilder formatRuns(List<TestRun> theTestRuns) {
+		StringBuilder retVal = new StringBuilder();
+		for (TestRun testRun : theTestRuns){
+			retVal.append("\nRUN: %s | ELAPSED TIME: %sms, | TOTAL INVOCATIONS: %s".formatted(
+					testRun.getNumber(), testRun.getElapsedTime(), testRun.getTotalInvocations())
+			);
+		}
+		return retVal;
 	}
 
 	private void resetMetrics() {
