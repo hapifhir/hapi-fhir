@@ -238,7 +238,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElasticSearch) throws Exception {
+	public void syncDatabaseToCache_elasticSearchOrJPA_shouldNotFail(boolean theUseElasticSearch) {
 		// setup
 		if (theUseElasticSearch) {
 			myStorageSettings.setStoreResourceInHSearchIndex(true);
@@ -4336,6 +4336,40 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
+	public void testTransactionWithMultiplePreExistingInlineMatchUrls() {
+		// Setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+
+		for (int i = 0; i < 5; i++) {
+			Organization org = new Organization();
+			org.addIdentifier().setSystem("http://system").setValue(Integer.toString(i));
+			myOrganizationDao.create(org, mySrd);
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 5; i++) {
+			Patient patient = new Patient();
+			patient.addGeneralPractitioner(new Reference("Organization?identifier=http://system|" + i));
+			bb.addTransactionCreateEntry(patient);
+		}
+
+		// Test
+		myMemoryCacheService.invalidateAllCaches();
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
 
 	/**
 	 * See the class javadoc before changing the counts in this test!

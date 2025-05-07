@@ -328,10 +328,23 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 		FhirTerser terser = myFhirContext.newTerser();
 
-		// Key: The ID of the resource
-		// Value: TRUE if we should prefetch the existing resource details and all stored indexes,
-		//        FALSE if we should prefetch only the identity (resource ID and deleted status)
-		Map<IIdType, Boolean> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
+		enum PrefetchReasonEnum {
+			/**
+			 * The ID is being prefetched because it is the ID in a resource reference
+			 * within a resource being updated. In this case, we care whether the resource
+			 * is deleted (since you can't reference a deleted resource), but we don't
+			 * need to fetch the body since we don't actually care about its contents.
+			 */
+			REFERENCE_TARGET,
+			/**
+			 * The ID is being prefetched because it is the ID of a resource being
+			 * updated directly by the transaction. In this case we don't care if it's
+			 * deleted (since it's fine to update a deleted resource), and we do need
+			 * to prefetch the current body so we can tell how it has changed.
+			 */
+			DIRECT_TARGET
+		}
+		Map<IIdType, PrefetchReasonEnum> idsToPreResolve = new HashMap<>(theEntries.size() * 3);
 
 		for (IBase nextEntry : theEntries) {
 			IBaseResource resource = theVersionAdapter.getResource(nextEntry);
@@ -339,7 +352,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 
 				/*
-				 * Pre-fetch any resources that are potentially being directly updated by ID
+				 * Pre-fetch any resources that are being updated or patched within
+				 * the transaction
 				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
@@ -347,14 +361,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
-						idsToPreResolve.put(unqualifiedVersionless, Boolean.TRUE);
+						idsToPreResolve.put(unqualifiedVersionless, PrefetchReasonEnum.DIRECT_TARGET);
 					}
 				}
 
 				/*
-				 * Pre-fetch any resources that are referred to directly by ID (don't replace
-				 * the TRUE flag with FALSE in case we're updating a resource but also
-				 * pointing to that resource elsewhere in the bundle)
+				 * If there are any resource references anywhere in any resources being
+				 * created or updated that point to another target resource directly by
+				 * ID, we also want to prefetch the identity of that target ID
 				 */
 				if ("PUT".equals(verb) || "POST".equals(verb)) {
 					for (ResourceReferenceInfo referenceInfo : terser.getAllResourceReferences(resource)) {
@@ -365,7 +379,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 								&& reference.hasResourceType()
 								&& reference.hasIdPart()
 								&& !reference.getValue().contains("?")) {
-							idsToPreResolve.putIfAbsent(reference.toUnqualifiedVersionless(), Boolean.FALSE);
+
+							// We use putIfAbsent here because if we're already fetching
+							// as a direct target we don't want to downgrade to just a
+							// reference target
+							idsToPreResolve.putIfAbsent(
+									reference.toUnqualifiedVersionless(), PrefetchReasonEnum.REFERENCE_TARGET);
 						}
 					}
 				}
@@ -373,34 +392,52 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 
 		/*
-		 * If all the entries in the pre-fetch ID map have a value of TRUE, this
-		 * means we only have IDs associated with resources we're going to directly
-		 * update/patch within the transaction. In that case, it's fine to include
-		 * deleted resources, since updating them will bring them back to life.
+		 * If any of the entries in the pre-fetch ID map have a value of REFERENCE_TARGET,
+		 * this means we can't rely on cached identities because we need to know the
+		 * current deleted status of at least one of them. This is because another thread
+		 * (or potentially even another process elsewhere) could have moved the resource
+		 * to "deleted", and we can't allow someone to add a reference to a deleted
+		 * resource. If deletes are disabled on this server though, we can trust that
+		 * nothing has been moved to "deleted" status since it was put in the cache, and
+		 * it's safe to use the cache.
 		 *
-		 * If we have any FALSE entries, we're also pre-fetching reference targets
-		 * which means we don't want deleted resources, because those are not OK
-		 * to reference.
+		 * On the other hand, if all resource IDs we want to prefetch have a value of
+		 * DIRECT_UPDATE, that means these IDs are all resources we're about to
+		 * modify. In that case it doesn't even matter if the resource is currently
+		 * deleted because we're going to resurrect it in that case.
 		 */
-		boolean preFetchIncludesReferences = idsToPreResolve.values().stream().anyMatch(t -> !t);
+		boolean preFetchIncludesReferences =
+				idsToPreResolve.values().stream().anyMatch(t -> t == PrefetchReasonEnum.REFERENCE_TARGET);
 		ResolveIdentityMode resolveMode = preFetchIncludesReferences
-				? ResolveIdentityMode.excludeDeleted().noCacheUnlessDeletesDisabled()
+				? ResolveIdentityMode.includeDeleted().noCacheUnlessDeletesDisabled()
 				: ResolveIdentityMode.includeDeleted().cacheOk();
 
 		Map<IIdType, IResourceLookup<JpaPid>> outcomes = myIdHelperService.resolveResourceIdentities(
 				theRequestPartitionId, idsToPreResolve.keySet(), resolveMode);
-		for (Map.Entry<IIdType, IResourceLookup<JpaPid>> entry : outcomes.entrySet()) {
+		for (Iterator<Map.Entry<IIdType, IResourceLookup<JpaPid>>> iterator =
+						outcomes.entrySet().iterator();
+				iterator.hasNext(); ) {
+			Map.Entry<IIdType, IResourceLookup<JpaPid>> entry = iterator.next();
 			JpaPid next = entry.getValue().getPersistentId();
 			IIdType unqualifiedVersionlessId = entry.getKey();
-			foundIds.add(unqualifiedVersionlessId.getValue());
-			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
-			if (idsToPreResolve.get(unqualifiedVersionlessId) == Boolean.TRUE) {
-				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
-						|| (next.getAssociatedResourceId() != null
-								&& !next.getAssociatedResourceId().isIdPartValidLong())) {
-					theIdsToPreFetchBodiesFor.add(next);
+			switch (idsToPreResolve.get(unqualifiedVersionlessId)) {
+				case DIRECT_TARGET -> {
+					if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY
+							|| (next.getAssociatedResourceId() != null
+									&& !next.getAssociatedResourceId().isIdPartValidLong())) {
+						theIdsToPreFetchBodiesFor.add(next);
+					}
+				}
+				case REFERENCE_TARGET -> {
+					if (entry.getValue().getDeleted() != null) {
+						iterator.remove();
+						continue;
+					}
 				}
 			}
+
+			foundIds.add(unqualifiedVersionlessId.getValue());
+			theTransactionDetails.addResolvedResourceId(unqualifiedVersionlessId, next);
 		}
 
 		// Any IDs that could not be resolved are presumably not there, so
@@ -543,8 +580,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
 				IQueryParameterType param = andList.get(0).get(0);
 
-				if (param instanceof TokenParam) {
-					TokenParam tokenParam = (TokenParam) param;
+				if (param instanceof TokenParam tokenParam) {
 					canBeHandledInAggregateQuery = buildHashPredicateFromTokenParam(
 							tokenParam, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
 				}
@@ -877,15 +913,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Map.Entry<String, Integer> entry = iter.next();
 			typesBuilder.append(entry.getKey());
 			if (entry.getValue() > 1) {
-				typesBuilder.append(" (x").append(entry.getValue() + ")");
+				typesBuilder.append(" (x").append(entry.getValue()).append(")");
 			}
 			if (iter.hasNext()) {
 				typesBuilder.append(", ");
 			}
 		}
 		typesBuilder.append("]");
-		String transactionTypes = typesBuilder.toString();
-		return transactionTypes;
+		return typesBuilder.toString();
 	}
 
 	public static class MatchUrlToResolve {

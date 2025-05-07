@@ -166,6 +166,10 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {
+					// TODO - performance
+					//  this line breaks testCrossPartitionReference_CreateWithConditionalUrl since we don't call
+					// JPA_RESOLVE_CROSS_PARTITION_REFERENCE on this path
+					//					theTransactionDetails.addResolvedResourceId(newId, match);
 					String previousReference = nextRef.getReferenceElement().getValue();
 					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
 				}
