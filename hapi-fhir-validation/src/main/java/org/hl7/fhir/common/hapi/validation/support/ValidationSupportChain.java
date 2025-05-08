@@ -1304,7 +1304,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				String theDisplay,
 				String theValueSetUrl) {
 			// copy ConceptValidationOptions because it is mutable
-			myOptions = new ConceptValidationOptions(theOptions);
+			myOptions = ConceptValidationOptions.copy(theOptions);
 			mySystem = theSystem;
 			myCode = theCode;
 			myDisplay = theDisplay;

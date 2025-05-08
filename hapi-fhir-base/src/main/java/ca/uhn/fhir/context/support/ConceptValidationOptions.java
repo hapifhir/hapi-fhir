@@ -29,11 +29,15 @@ public class ConceptValidationOptions {
 	private boolean myValidateDisplay;
 	private boolean myInferSystem;
 
-	public ConceptValidationOptions() {}
+	public static ConceptValidationOptions copy(ConceptValidationOptions theOriginal) {
+		if (theOriginal == null) {
+			return null;
+		}
 
-	public ConceptValidationOptions(ConceptValidationOptions theOptions) {
-		this.myValidateDisplay = theOptions.isValidateDisplay();
-		this.myInferSystem = theOptions.isInferSystem();
+		ConceptValidationOptions copy = new ConceptValidationOptions();
+		copy.setValidateDisplay(theOriginal.isValidateDisplay());
+		copy.setInferSystem(theOriginal.isInferSystem());
+		return copy;
 	}
 
 	@Override
