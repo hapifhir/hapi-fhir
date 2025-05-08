@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -47,8 +48,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionIfAssigned;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -57,6 +60,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This interceptor allows JPA servers to be partitioned by Patient ID. It selects the compartment for read/create operations
  * based on the patient ID associated with the resource (and uses a default partition ID for any resources
  * not in the patient compartment).
+ * This works better with IdStrategyEnum.UUID and CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED.
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
@@ -87,26 +91,47 @@ public class PatientIdPartitionInterceptor {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
-		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
 			IIdType idElement = theResource.getIdElement();
-			oCompartmentIdentity = Optional.ofNullable(idElement.getIdPart());
-			if (idElement.isUuid() || oCompartmentIdentity.isEmpty()) {
+			if (idElement.getIdPart() == null || idElement.isUuid()) {
 				throw new MethodNotAllowedException(
-						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
+						Msg.code(1321)
+								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
+			return provideCompartmentMemberInstanceResponse(theRequestDetails, idElement.getIdPart());
 		} else {
-			oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
+			Optional<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartment(
 					"Patient", theResource, compartmentSps, mySearchParamExtractor);
-		}
 
-		return oCompartmentIdentity
-				.map(ci -> provideCompartmentMemberInstanceResponse(theRequestDetails, ci))
-				.orElseGet(() -> provideNonCompartmentMemberInstanceResponse(theResource));
+			if (oCompartmentIdentity.isPresent()) {
+				return provideCompartmentMemberInstanceResponse(theRequestDetails, oCompartmentIdentity.get());
+			} else {
+				return getPartitionViaPartiallyProcessedReference(theResource)
+						// or give up and fail
+						.orElseGet(() -> throwNonCompartmentMemberInstanceFailureResponse(theResource));
+			}
+		}
+	}
+
+	/**
+	 * HACK: enable synthea bundles to sneak through with a server-assigned UUID.
+	 * If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
+	 * and a reference points to the Patient which has already been processed and assigned a partition.
+	 */
+	@Nonnull
+	private Optional<RequestPartitionId> getPartitionViaPartiallyProcessedReference(IBaseResource theResource) {
+		return myFhirContext
+				.newTerser()
+				.getCompartmentReferencesForResource("Patient", theResource, null)
+				.map(IBaseReference::getResource)
+				.filter(Objects::nonNull)
+				.flatMap(nextResource -> getPartitionIfAssigned(nextResource).stream())
+				.findFirst();
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -156,7 +181,7 @@ public class PatientIdPartitionInterceptor {
 				String extendedOp = theReadDetails.getExtendedOperationName();
 				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
 						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
-					return provideNonPatientSpecificQueryResponse(theReadDetails);
+					return provideNonPatientSpecificQueryResponse();
 				}
 				break;
 			default:
@@ -173,9 +198,10 @@ public class PatientIdPartitionInterceptor {
 			return identifyForCreate(theReadDetails.getConditionalTargetOrNull(), theRequestDetails);
 		}
 
-		return provideNonPatientSpecificQueryResponse(theReadDetails);
+		return provideNonPatientSpecificQueryResponse();
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdList(
 			SearchParameterMap theParams, String theParamName, String theResourceType, boolean theExpectOnlyOneBool) {
 		List<List<IQueryParameterType>> idParamAndList = theParams.get(theParamName);
@@ -213,8 +239,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Return a partition or throw an error for FHIR operations that can not be used with this interceptor
 	 */
-	protected RequestPartitionId provideNonPatientSpecificQueryResponse(
-			ReadPartitionIdRequestDetails theRequestDetails) {
+	protected RequestPartitionId provideNonPatientSpecificQueryResponse() {
 		return RequestPartitionId.allPartitions();
 	}
 
@@ -250,7 +275,7 @@ public class PatientIdPartitionInterceptor {
 	 * is not identified in the URL.
 	 */
 	@Nonnull
-	protected RequestPartitionId provideNonCompartmentMemberInstanceResponse(IBaseResource theResource) {
+	protected RequestPartitionId throwNonCompartmentMemberInstanceFailureResponse(IBaseResource theResource) {
 		throw new MethodNotAllowedException(Msg.code(1326) + "Resource of type "
 				+ myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
 	}

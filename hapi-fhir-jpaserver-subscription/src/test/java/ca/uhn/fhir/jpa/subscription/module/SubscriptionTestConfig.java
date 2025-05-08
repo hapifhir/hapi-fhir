@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
+import ca.uhn.fhir.broker.api.IBrokerClient;
+import ca.uhn.fhir.broker.api.IChannelNamer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -54,13 +54,13 @@ public class SubscriptionTestConfig {
 	}
 
 	@Bean
-	public IChannelFactory subscribableChannelFactory() {
+	public LinkedBlockingChannelFactory subscribableChannelFactory() {
 		return new LinkedBlockingChannelFactory(myChannelNamer, myRetryPolicyProvider);
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
-		return new SubscriptionChannelFactory(theQueueChannelFactory);
+	public SubscriptionChannelFactory subscriptionChannelFactory(IBrokerClient theBrokerClient) {
+		return new SubscriptionChannelFactory(theBrokerClient);
 	}
 
 

@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.test.util;
 
+import ca.uhn.fhir.broker.jms.SpringMessagingProducerAdapter;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionResourceDeliveryMessageConsumer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailListener;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
@@ -56,8 +58,7 @@ public class SubscriptionTestUtil {
 	private IInterceptorService myInterceptorRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
-		return channel.getQueueSizeForUnitTest();
+		return getMatchingChannel().getQueueSizeForUnitTest();
 	}
 
 	// TODO KHS replace this and similar functions with CountdownLatch
@@ -114,8 +115,8 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
+		SubscriptionResourceDeliveryMessageConsumer deliveryConsumerWithListeners = mySubscriptionChannelRegistry.getDeliveryConsumerWithListeners(activeSubscription.getChannelName());
+		SubscriptionDeliveringEmailListener subscriber = deliveryConsumerWithListeners.getListenerOfTypeOrNull(SubscriptionDeliveringEmailListener.class);
 		subscriber.setEmailSender(theEmailSender);
 	}
 
@@ -123,4 +124,11 @@ public class SubscriptionTestUtil {
 		return mySubscriptionRegistry.size();
 	}
 
+	public LinkedBlockingChannel getMatchingChannel() {
+		SpringMessagingProducerAdapter<ResourceModifiedMessage> producer = (SpringMessagingProducerAdapter<ResourceModifiedMessage>)myResourceModifiedSubmitterSvc.getMatchingChannelProducerForUnitTest();
+		if (producer == null) {
+			return null;
+		}
+		return (LinkedBlockingChannel)producer.getSpringMessagingProducer();
+	}
 }

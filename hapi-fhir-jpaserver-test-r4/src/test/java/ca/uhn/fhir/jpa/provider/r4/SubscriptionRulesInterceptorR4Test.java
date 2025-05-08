@@ -83,8 +83,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 		subsGood.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		latch.setExpectedCount(1);
 		mySubscriptionDao.update(subsGood, mySrd);
-		// FIXME: remove timeout
-		latch.awaitExpectedWithTimeout(1000000);
+		latch.awaitExpected();
 
 		Subscription subsBad = new Subscription();
 		subsBad.setId("BAD");

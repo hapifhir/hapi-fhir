@@ -86,6 +86,17 @@ public class VectorMatchResultMap {
 		}
 	}
 
+	/**
+	 * Calculates the vector for the match rule.
+	 *
+	 * This calculation uses the index of the match field and the binary
+	 * shift operator (<<) to calculate the field.
+	 *
+	 * See {@link ca.uhn.fhir.mdm.rules.matcher.util.MatchRuleUtil#MAX_RULE_COUNT}
+	 *
+	 * @param theFieldMatchNames the match rule (eg, "match_field1,match_field2")
+	 * @return the vector expressed as a long
+	 */
 	public long getVector(String theFieldMatchNames) {
 		long retval = 0;
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
@@ -93,7 +104,7 @@ public class VectorMatchResultMap {
 			if (index == -1) {
 				throw new ConfigurationException(Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
 			}
-			retval |= (1 << index);
+			retval |= (1L << index);
 		}
 		return retval;
 	}

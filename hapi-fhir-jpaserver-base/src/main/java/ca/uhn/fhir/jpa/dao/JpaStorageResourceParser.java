@@ -553,6 +553,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			meta.setVersionId(id.getVersionIdPart());
 			meta.setLastUpdated(theEntitySource.getUpdatedDate());
 		}
+
+		populateResourcePartitionInformation(theEntitySource, theResourceTarget);
 	}
 
 	private FhirContext getContext(FhirVersionEnum theVersion) {

@@ -189,7 +189,7 @@ public class TransactionProcessorTest {
 		// Verify
 		verify(myPatientDao, times(3)).update(any(), any(), anyBoolean(), anyBoolean(), any(), any());
 
-		TransactionUtil.TransactionResponse resp = TransactionUtil.parseTransactionResponse(myFhirContext, outcome);
+		TransactionUtil.TransactionResponse resp = TransactionUtil.parseTransactionResponse(myFhirContext, input, outcome);
 		assertEquals("Expected error", resp.getStorageOutcomes().get(0).getErrorMessage());
 		assertEquals(500, resp.getStorageOutcomes().get(0).getStatusCode());
 
