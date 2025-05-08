@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
@@ -264,7 +265,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toRequestPartitionId());
 			} else {
-				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, myPartitionSettings.getDefaultPartitionId());
+				retVal.setUserData(Constants.RESOURCE_PARTITION_ID,
+					RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 			}
 		}
 	}
