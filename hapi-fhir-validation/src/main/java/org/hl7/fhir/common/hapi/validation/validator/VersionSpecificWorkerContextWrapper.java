@@ -801,7 +801,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
 			result = validateCodeInValueSet(convertedVs, theValidationOptions, theSystem, theCode, theDisplay);
-			cacheConvertedValueSet(theValueSet, convertedVs);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 		}
@@ -821,7 +820,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					toResourceId(convertedValueSet));
 			return convertedValueSet;
 		}
-		return myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
+		convertedValueSet = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
+		cacheConvertedValueSet(theValueSet, convertedValueSet);
+
+		return convertedValueSet;
 	}
 
 	private void cacheConvertedValueSet(ValueSet theValueSet, IBaseResource theConvertedValueSet) {
