@@ -25,6 +25,7 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;
 
 	private Integer myConcurrentConsumers = DEFAULT_CHANNEL_CONSUMERS;
+
 	@Nullable
 	private String myProducerSuffix;
 
@@ -51,9 +52,9 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	 * 	control of the suffix used.
 	 */
 	@Nullable
-    public String getProducerNameSuffix() {
+	public String getProducerNameSuffix() {
 		return myProducerSuffix;
-    }
+	}
 
 	/**
 	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows

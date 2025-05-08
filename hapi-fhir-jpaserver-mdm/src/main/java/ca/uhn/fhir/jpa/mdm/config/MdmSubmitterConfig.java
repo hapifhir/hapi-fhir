@@ -49,7 +49,10 @@ public class MdmSubmitterConfig {
 
 	@Bean
 	@Lazy
-	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IBrokerClient theBrokerClient, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(
+			FhirContext theFhirContext,
+			IBrokerClient theBrokerClient,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new MdmChannelSubmitterSvcImpl(theFhirContext, theBrokerClient, theInterceptorBroadcaster);
 	}
 

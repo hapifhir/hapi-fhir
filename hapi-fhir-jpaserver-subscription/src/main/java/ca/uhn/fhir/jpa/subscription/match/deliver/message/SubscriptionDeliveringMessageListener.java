@@ -132,7 +132,8 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		channelSettings.setQualifyChannelName(false);
 
 		if (myChannelProducer == null) {
-			myChannelProducer = myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
+			myChannelProducer =
+					myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
 		}
 
 		// Grab the payload type (encoding mimetype) from the subscription
@@ -163,7 +164,6 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
 	}
-
 
 	@Override
 	public void close() throws Exception {
