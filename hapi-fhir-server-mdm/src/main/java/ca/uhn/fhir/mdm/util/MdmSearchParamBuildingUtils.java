@@ -25,11 +25,10 @@ import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
+import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
+
 public class MdmSearchParamBuildingUtils {
-
-	private static final String IDENTIFIER = "identifier";
-
-	private static final String TAG = "_tag";
 
 	/**
 	 * Builds a search parameter map that can be used to find the
@@ -43,7 +42,7 @@ public class MdmSearchParamBuildingUtils {
 		tagsToSearch.addAnd(new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		tagsToSearch.addAnd(new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED));
 
-		map.add(TAG, tagsToSearch);
+		map.add(PARAM_TAG, tagsToSearch);
 		return map;
 	}
 
@@ -54,7 +53,7 @@ public class MdmSearchParamBuildingUtils {
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
 		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theEid);
-		map.add(IDENTIFIER, new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+		map.add(SP_IDENTIFIER, new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		return map;
 	}
 
@@ -64,7 +63,7 @@ public class MdmSearchParamBuildingUtils {
 	public static SearchParameterMap buildBasicGoldenResourceSearchParameterMap(String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add(TAG, new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
+		map.add(PARAM_TAG, new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		return map;
 	}
 }
