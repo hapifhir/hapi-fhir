@@ -814,10 +814,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		IBaseResource convertedValueSet = (IBaseResource) theValueSet.getUserData(FROM_CANONICAL_USERDATA_KEY);
 		if (convertedValueSet != null) {
-			ourLog.debug(
-					"Using user data - Key: {}, ValueSet: {}",
-					FROM_CANONICAL_USERDATA_KEY,
-					toResourceId(convertedValueSet));
+			final IBaseResource finalConvertedValueSet = convertedValueSet;
+			ourLog.atDebug()
+					.setMessage("Using user data - Key: {}, ValueSet: {}")
+					.addArgument(FROM_CANONICAL_USERDATA_KEY)
+					.addArgument(() -> toResourceId(finalConvertedValueSet))
+					.log();
 			return convertedValueSet;
 		}
 		convertedValueSet = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
@@ -831,10 +833,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return;
 		}
 		theValueSet.setUserData(FROM_CANONICAL_USERDATA_KEY, theConvertedValueSet);
-		ourLog.debug(
-				"Added user data - Key: {}, ValueSet: {}",
-				FROM_CANONICAL_USERDATA_KEY,
-				toResourceId(theConvertedValueSet));
+		ourLog.atDebug()
+				.setMessage("Added user data - Key: {}, ValueSet: {}")
+				.addArgument(FROM_CANONICAL_USERDATA_KEY)
+				.addArgument(() -> toResourceId(theConvertedValueSet))
+				.log();
 	}
 
 	private @Nullable String toResourceId(IBaseResource theResource) {
