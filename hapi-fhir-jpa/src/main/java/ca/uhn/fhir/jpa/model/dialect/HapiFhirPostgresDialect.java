@@ -36,7 +36,6 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect implements IHapiF
 
 	public HapiFhirPostgresDialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
 
 	/**
