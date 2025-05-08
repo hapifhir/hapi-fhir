@@ -55,7 +55,10 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc, Auto
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IBrokerClient theBrokerClient, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public MdmChannelSubmitterSvcImpl(
+			FhirContext theFhirContext,
+			IBrokerClient theBrokerClient,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myFhirContext = theFhirContext;
 		myBrokerClient = theBrokerClient;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
