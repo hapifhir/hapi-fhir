@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
@@ -48,8 +49,8 @@ public class MdmSubmitterConfig {
 
 	@Bean
 	@Lazy
-	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IBrokerClient theBrokerClient) {
-		return new MdmChannelSubmitterSvcImpl(theFhirContext, theBrokerClient);
+	IMdmChannelSubmitterSvc mdmChannelSubmitterSvc(FhirContext theFhirContext, IBrokerClient theBrokerClient, IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new MdmChannelSubmitterSvcImpl(theFhirContext, theBrokerClient, theInterceptorBroadcaster);
 	}
 
 	@Bean
