@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.broker.api.IChannelProducer;
+import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.broker.api.PayloadTooLargeException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -57,7 +58,7 @@ public class SubscriptionMatchDeliverer {
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverPayload(
+	public ISendResult deliverPayload(
 			@Nullable IBaseResource thePayload,
 			@Nonnull ResourceModifiedMessage theMsg,
 			@Nonnull ActiveSubscription theActiveSubscription,
@@ -75,7 +76,7 @@ public class SubscriptionMatchDeliverer {
 		return sendToDeliveryChannel(theActiveSubscription, theInMemoryMatchResult, deliveryMsg);
 	}
 
-	public boolean deliverPayload(
+	public ISendResult deliverPayload(
 			@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest,
 			@Nullable InMemoryMatchResult theInMemoryMatchResult) {
 		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
@@ -84,25 +85,23 @@ public class SubscriptionMatchDeliverer {
 				subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg);
 	}
 
-	private boolean sendToDeliveryChannel(
+	private ISendResult sendToDeliveryChannel(
 			@Nonnull ActiveSubscription theActiveSubscription,
 			@Nullable InMemoryMatchResult theInMemoryMatchResult,
 			@Nonnull ResourceDeliveryMessage deliveryMsg) {
 		if (!callHooks(theActiveSubscription, theInMemoryMatchResult, deliveryMsg)) {
-			return false;
+			return ISendResult.FAILURE;
 		}
 
-		boolean retVal = false;
 		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 		IChannelProducer<ResourceDeliveryMessage> deliveryProducer =
 				mySubscriptionChannelRegistry.getDeliveryChannelProducer(theActiveSubscription.getChannelName());
 		if (deliveryProducer != null) {
-			retVal = true;
-			trySendToDeliveryChannel(wrappedMsg, deliveryProducer);
+			return trySendToDeliveryChannel(wrappedMsg, deliveryProducer);
 		} else {
 			ourLog.warn("Do not have delivery channel for subscription {}", theActiveSubscription.getId());
 		}
-		return retVal;
+		return ISendResult.FAILURE;
 	}
 
 	private ResourceDeliveryMessage buildResourceDeliveryMessage(@Nonnull SubscriptionDeliveryRequest theRequest) {
@@ -148,19 +147,20 @@ public class SubscriptionMatchDeliverer {
 		return true;
 	}
 
-	private void trySendToDeliveryChannel(
+	private ISendResult trySendToDeliveryChannel(
 			ResourceDeliveryJsonMessage theWrappedMsg, IChannelProducer<ResourceDeliveryMessage> theDeliveryProducer) {
 		try {
-			boolean success = theDeliveryProducer.send(theWrappedMsg).isSuccessful();
-			if (!success) {
+			ISendResult retval = theDeliveryProducer.send(theWrappedMsg);
+			if (!retval.isSuccessful()) {
 				ourLog.warn("Failed to send message to Delivery Channel.");
 			}
+			return retval;
 		} catch (RuntimeException e) {
 			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
 				ourLog.warn("Failed to send message to Delivery Channel because the payload size is larger than broker "
 						+ "max message size. Retry is about to be performed without payload.");
 				ResourceDeliveryJsonMessage msgPayloadLess = nullOutPayload(theWrappedMsg);
-				trySendToDeliveryChannel(msgPayloadLess, theDeliveryProducer);
+				return trySendToDeliveryChannel(msgPayloadLess, theDeliveryProducer);
 			} else {
 				ourLog.error("Failed to send message to Delivery Channel", e);
 				throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);

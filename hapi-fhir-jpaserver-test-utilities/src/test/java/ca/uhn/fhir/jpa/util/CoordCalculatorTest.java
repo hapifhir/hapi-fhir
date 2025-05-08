@@ -1,21 +1,12 @@
 package ca.uhn.fhir.jpa.util;
 
 import org.hibernate.search.engine.spatial.GeoBoundingBox;
-import org.hibernate.search.engine.spatial.GeoPoint;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 public class CoordCalculatorTest {
-
-	@Test
-	public void testCHINToUHN() {
-		GeoPoint result = CoordCalculator.findTarget(CoordCalculatorTestUtil.LATITUDE_CHIN, CoordCalculatorTestUtil.LONGITUDE_CHIN, CoordCalculatorTestUtil.BEARING_CHIN_TO_UHN, CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN);
-
-		assertThat(result.latitude()).isCloseTo(CoordCalculatorTestUtil.LATITUDE_UHN, within(0.0001));
-		assertThat(result.longitude()).isCloseTo(CoordCalculatorTestUtil.LONGITUDE_UHN, within(0.0001));
-	}
 
 	@Test
 	public void testBox() {

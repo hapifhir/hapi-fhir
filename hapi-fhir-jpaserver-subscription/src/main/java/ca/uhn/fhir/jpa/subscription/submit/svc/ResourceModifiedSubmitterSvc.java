@@ -35,7 +35,9 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import ca.uhn.fhir.util.IoUtils;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +63,7 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetries {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
-	private volatile IChannelProducer<ResourceModifiedMessage> myMatchingChannel;
+	private volatile IChannelProducer<ResourceModifiedMessage> myMatchingChannelProducer;
 
 	private final SubscriptionSettings mySubscriptionSettings;
 	private final SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -76,8 +78,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
-		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingProducer(
+		if (myMatchingChannelProducer == null) {
+			myMatchingChannelProducer = mySubscriptionChannelFactory.newMatchingProducer(
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}
@@ -105,9 +107,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(
-				myMatchingChannel,
+				myMatchingChannelProducer,
 				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		return myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
+		return myMatchingChannelProducer.send(new ResourceModifiedJsonMessage(theMsg));
 	}
 
 	/**
@@ -215,9 +217,16 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		return channelProducerSettings;
 	}
 
+	@PreDestroy
+	public void shutdown() throws Exception {
+		if (myMatchingChannelProducer instanceof AutoCloseable producer) {
+			IoUtils.closeQuietly(producer, ourLog);
+		}
+	}
+
 	@VisibleForTesting
 	public IChannelProducer<ResourceModifiedMessage> getMatchingChannelProducerForUnitTest() {
 		startIfNeeded();
-		return myMatchingChannel;
+		return myMatchingChannelProducer;
 	}
 }
