@@ -31,10 +31,12 @@ public class HapiFhirCockroachDialect extends CockroachDialect implements IHapiF
 
 	public HapiFhirCockroachDialect() {
 		super();
+		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirCockroachDialect(DialectResolutionInfo info) {
 		super(info);
+		// No need to register version with Hibernate 6.6+
 	}
 
 	/**

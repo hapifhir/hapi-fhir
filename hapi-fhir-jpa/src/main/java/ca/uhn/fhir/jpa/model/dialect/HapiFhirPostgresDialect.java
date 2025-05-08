@@ -23,14 +23,20 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
+/**
+ * Dialect for PostgreSQL database.
+ * Minimum version: 12.0.0
+ */
 public class HapiFhirPostgresDialect extends PostgreSQLDialect implements IHapiFhirDialect {
 
 	public HapiFhirPostgresDialect() {
 		super();
+		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirPostgresDialect(DialectResolutionInfo info) {
 		super(info);
+		// No need to register version with Hibernate 6.6+
 	}
 
 	/**

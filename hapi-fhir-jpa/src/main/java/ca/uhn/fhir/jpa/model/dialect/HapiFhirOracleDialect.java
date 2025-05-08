@@ -31,11 +31,15 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 
 	public HapiFhirOracleDialect() {
 		super();
+		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirOracleDialect(DialectResolutionInfo info) {
 		super(info);
+		// No need to register version with Hibernate 6.6+
 	}
+
+	// Version check is handled by Hibernate 6.6+
 
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
