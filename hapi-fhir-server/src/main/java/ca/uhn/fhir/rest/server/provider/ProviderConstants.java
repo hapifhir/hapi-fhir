@@ -299,6 +299,7 @@ public class ProviderConstants {
 	public static final String OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING = "512";
 	public static final Integer OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT =
 			Integer.parseInt(OPERATION_REPLACE_REFERENCES_RESOURCE_LIMIT_DEFAULT_STRING);
+
 	public static final String OPERATION_MDM_BUNDLE_MATCH = "$mdm-bundle-match";
 	public static final String MDM_BUNDLE_MATCH_PARAM_INPUT_BUNDLE = "bundle";
 }
