@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.Set;
