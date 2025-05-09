@@ -162,13 +162,15 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
-		myDaoRegistry.getResourceDao("Subscription").create(subscription, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
+		myDaoRegistry.getResourceDao("Subscription").create(subscription,
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId())));
 
 		waitForActivatedSubscriptionCount(1);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(
+			RequestPartitionId.fromPartitionId(2)));
 
 		// Should see 0 subscription notification
 		waitForQueueToDrain();

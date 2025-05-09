@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -59,6 +60,9 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired(required = false)
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -116,6 +120,22 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		}
 	}
 
+	private Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+		/*
+		 * We log a warning because in most cases you will want a partitionsettings
+		 * object.
+		 * However, PartitionSettings beans are not provided in the same
+		 * config as the one that provides this bean; as such, it is the responsibility
+		 * of whomever includes the config for this bean to also provide a PartitionSettings
+		 * bean (or import a config that does)
+		 */
+		ourLog.warn("No PartitionSettings available.");
+		return null;
+	}
+
 	/**
 	 * There were some situations where the RequestDetails attempted to use the default partition
 	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
@@ -123,8 +143,9 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+		Integer defaultPartitionId = getDefaultPartitionId();
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition(defaultPartitionId)) {
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.

@@ -33,6 +33,8 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	@Mock
 	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
+	protected final PartitionSettings myPartitionSettings = new PartitionSettings();
+
 	@BeforeEach
 	public void beforeInitMocks() {
 		when(myHibernatePropertiesProvider.getDialect())

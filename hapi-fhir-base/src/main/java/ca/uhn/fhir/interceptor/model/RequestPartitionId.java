@@ -354,12 +354,14 @@ public class RequestPartitionId implements IModelJson {
 		return ALL_PARTITIONS;
 	}
 
+	@Deprecated
 	@Nonnull
 	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
 	public static RequestPartitionId defaultPartition() {
 		return fromPartitionIds(Collections.singletonList(null));
 	}
 
+	@Deprecated
 	@Nonnull
 	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
 	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {

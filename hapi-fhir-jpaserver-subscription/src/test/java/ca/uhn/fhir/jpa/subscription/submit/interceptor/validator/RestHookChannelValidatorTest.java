@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor.validator;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -19,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class RestHookChannelValidatorTest {
 	private final FhirContext myCtx = FhirContext.forR4();
 	private final SubscriptionSettings mySubscriptionSettings = new SubscriptionSettings();
-	private final SubscriptionCanonicalizer mySubscriptionCanonicalizer= new SubscriptionCanonicalizer(myCtx, mySubscriptionSettings);
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
+	private final SubscriptionCanonicalizer mySubscriptionCanonicalizer= new SubscriptionCanonicalizer(myCtx, mySubscriptionSettings, myPartitionSettings);
 
 	private final String NO_PAYLOAD = StringUtils.EMPTY;
 
