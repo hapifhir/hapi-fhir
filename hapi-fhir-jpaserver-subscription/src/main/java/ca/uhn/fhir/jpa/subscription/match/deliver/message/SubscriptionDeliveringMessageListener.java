@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.IoUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +45,11 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
-public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliveryListener {
+public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliveryListener implements AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageListener.class);
 
 	private final IBrokerClient myBrokerClient;
+	private IChannelProducer<ResourceModifiedMessage> myChannelProducer;
 
 	/**
 	 * Constructor
@@ -129,8 +131,10 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setQualifyChannelName(false);
 
-		IChannelProducer<ResourceModifiedMessage> channelProducer =
-				myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
+		if (myChannelProducer == null) {
+			myChannelProducer =
+					myBrokerClient.getOrCreateProducer(queueName, ResourceModifiedJsonMessage.class, channelSettings);
+		}
 
 		// Grab the payload type (encoding mimetype) from the subscription
 		String payloadString = subscription.getPayloadString();
@@ -144,7 +148,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 					Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
-		doDelivery(theMessage, subscription, channelProducer, messageWrapperToSend);
+		doDelivery(theMessage, subscription, myChannelProducer, messageWrapperToSend);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_MESSAGE_DELIVERY
 		params = new HookParams()
@@ -159,5 +163,12 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (myChannelProducer instanceof AutoCloseable) {
+			IoUtils.closeQuietly((AutoCloseable) myChannelProducer, ourLog);
+		}
 	}
 }
