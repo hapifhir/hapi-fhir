@@ -61,7 +61,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	@Autowired
 	PartitionSettings myPartitionSettings;
 
 	protected BaseRequestPartitionHelperSvc() {
@@ -85,6 +84,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		myNonPartitionableResourceNames.add("ValueSet");
 		myNonPartitionableResourceNames.add("NamingSystem");
 		myNonPartitionableResourceNames.add("StructureMap");
+	}
+
+	@Autowired
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**

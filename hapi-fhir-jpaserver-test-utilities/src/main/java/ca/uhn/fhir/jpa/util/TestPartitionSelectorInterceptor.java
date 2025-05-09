@@ -40,14 +40,12 @@ public class TestPartitionSelectorInterceptor {
 	private final Set<String> myNonPartitionableResources = new HashSet<>();
 	private BaseRequestPartitionHelperSvc myHelperSvc = new RequestPartitionHelperSvc();
 
-	@Autowired
-	PartitionSettings myPartitionSettings;
-
 	/**
 	 * Constructor
 	 */
 	public TestPartitionSelectorInterceptor() {
 		super();
+		myHelperSvc.setPartitionSettings(new PartitionSettings());
 	}
 
 	public TestPartitionSelectorInterceptor addNonPartitionableResource(@Nonnull String theResourceName) {
@@ -80,10 +78,10 @@ public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId selectPartition(String theResourceType) {
 		if (theResourceType != null) {
 			if (!myHelperSvc.isResourcePartitionable(theResourceType)) {
-				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
 			}
 			if (myNonPartitionableResources.contains(theResourceType)) {
-				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
 			}
 		}
 
