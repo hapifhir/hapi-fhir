@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -103,14 +104,15 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
 		List<MatchedTarget> retval = new ArrayList<>();
 		for (CanonicalEID eid : eidFromResource) {
-			retval.addAll(searchForResourceByEID(eid.getValue(),
+			retval.addAll(searchForResourceByEID(theResource.getIdElement().toUnqualifiedVersionless(),
+				eid.getValue(),
 				theResourceType,
 				theRequestPartitionId));
 		}
 		return retval;
 	}
 
-	private Collection<? extends MatchedTarget> searchForResourceByEID(String theEid, String theResourceType, RequestPartitionId theRequestPartitionId) {
+	private Collection<? extends MatchedTarget> searchForResourceByEID(IIdType theResourceIdToExclude, String theEid, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(SP_IDENTIFIER, new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 
@@ -120,6 +122,8 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		return search.getAllResources().stream()
 			.map(IAnyResource.class::cast)
+			// Exclude the incoming resource from the matched results
+			.filter(resource -> !theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
 			.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
 			.toList();
 	}
