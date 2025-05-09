@@ -303,7 +303,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical, int i) {
-		throw new UnsupportedOperationException(Msg.code(2128));
+		throw new UnsupportedOperationException(Msg.code(2650));
 	}
 
 	/*1@Override
