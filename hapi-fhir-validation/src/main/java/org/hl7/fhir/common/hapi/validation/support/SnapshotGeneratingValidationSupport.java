@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,9 +40,9 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final FhirContext myCtx;
-	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final IWorkerContext myWorkerContext;
 	private final FHIRPathEngine myFHIRPathEngine;
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -57,6 +58,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
 		myFHIRPathEngine = theFHIRPathEngine;
+	}
+
+	@VisibleForTesting
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@SuppressWarnings("EnhancedSwitchMigration")
