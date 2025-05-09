@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -44,6 +45,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -1720,6 +1722,15 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Test
 	public void testPatientMultipleCommunicationLanguages_en_US_and_en_DASH() throws IOException {
 		final String encoded = loadResource("patient-with-multiple-comm-langs-en-US-and-en-DASH.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(errors).isEmpty();
+	}
+
+	@Test
+	void testValidate_ResourceContainedSameResourceIsValid() throws IOException {
+		final String encoded = loadResource("medication-with-contained-medication-ingredient.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
