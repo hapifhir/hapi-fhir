@@ -1,7 +1,6 @@
 ---
 type: fix
 issue: 6749
-jira: 9806
-title: "Previously, performing a search on a `Timing` datatype field with DAY precision would improperly miss results that
-were within the search date range if `dao_config.use_ordinal_dates_for_day_precision_searches` was enabled. This has now
-been fixed."
+jira: SMILE-9806
+title: "Previously, performing a search on a `Timing` datatype field with `DAY` precision (e.g. `ServiceRequest?occurence=ge2025-01-01`) 
+would improperly miss results. This has now been fixed."
