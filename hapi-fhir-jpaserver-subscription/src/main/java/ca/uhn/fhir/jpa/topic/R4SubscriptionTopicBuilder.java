@@ -339,20 +339,22 @@ public class R4SubscriptionTopicBuilder {
 
 	private void checkCurrentResourceTrigger() {
 		if (myCurrentResourceTrigger == null) {
-			throw new IllegalStateException(Msg.code(2668) + "No current resource trigger defined. Call addResourceTrigger() first.");
+			throw new IllegalStateException(
+					Msg.code(2668) + "No current resource trigger defined. Call addResourceTrigger() first.");
 		}
 	}
 
 	private void checkCurrentCanFilterBy() {
 		if (myCurrentCanFilterBy == null) {
-			throw new IllegalStateException(Msg.code(2669) + "No current can-filter-by defined. Call addCanFilterBy() first.");
+			throw new IllegalStateException(
+					Msg.code(2669) + "No current can-filter-by defined. Call addCanFilterBy() first.");
 		}
 	}
 
 	private void checkCurrentNotificationShape() {
 		if (myCurrentNotificationShape == null) {
 			throw new IllegalStateException(
-				Msg.code(2670) + "No current notification shape defined. Call addNotificationShape() first.");
+					Msg.code(2670) + "No current notification shape defined. Call addNotificationShape() first.");
 		}
 	}
 

@@ -56,8 +56,9 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 			systemRequestDetails.setRequestPartitionId(theResourceDeliveryMessage.getRequestPartitionId());
 			resource = myDaoRegistry.getSubscriptionDao().read(theSubscriptionId, systemRequestDetails);
 		} catch (ResourceNotFoundException e) {
-			throw new SubscriptionInactiveException(Msg.code(2667) + "Attempting to deliver " + theResourceDeliveryMessage.getPayloadId()
-					+ " to deleted subscription " + theSubscriptionId + ".  Aborting delivery.");
+			throw new SubscriptionInactiveException(
+					Msg.code(2667) + "Attempting to deliver " + theResourceDeliveryMessage.getPayloadId()
+							+ " to deleted subscription " + theSubscriptionId + ".  Aborting delivery.");
 		}
 		ourLog.debug("Retrieved resource {}", resource.getIdElement());
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(resource);

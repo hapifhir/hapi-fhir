@@ -129,7 +129,8 @@ public class GenerateReportReductionStep
 		reportJson.setReportMsg(reportString);
 
 		if (hasErrors) {
-			throw new ReductionStepFailureException(Msg.code(2673) + "Job completed with at least one failure", reportJson);
+			throw new ReductionStepFailureException(
+					Msg.code(2673) + "Job completed with at least one failure", reportJson);
 		}
 
 		theDataSink.accept(reportJson);

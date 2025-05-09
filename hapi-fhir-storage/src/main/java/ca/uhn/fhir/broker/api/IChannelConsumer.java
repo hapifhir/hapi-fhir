@@ -77,8 +77,8 @@ public interface IChannelConsumer<T> extends AutoCloseable {
 	 */
 	default void checkState() {
 		if (isClosed()) {
-			throw new BrokerConsumerClosedException(
-				Msg.code(2657) + "Attempted to use a closed " + this.getClass().getSimpleName() + ": " + this);
+			throw new BrokerConsumerClosedException(Msg.code(2657) + "Attempted to use a closed "
+					+ this.getClass().getSimpleName() + ": " + this);
 		}
 	}
 }

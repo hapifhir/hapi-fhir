@@ -107,7 +107,7 @@ public class MultiplexingListener<T> implements IRetryAwareMessageListener<T>, A
 	private void checkState() {
 		if (myClosed) {
 			throw new BrokerListenerClosedException(
-				Msg.code(2659) + "Attempted to use a closed " + MultiplexingListener.class.getSimpleName());
+					Msg.code(2659) + "Attempted to use a closed " + MultiplexingListener.class.getSimpleName());
 		}
 	}
 

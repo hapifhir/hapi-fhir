@@ -152,8 +152,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 				doSyncResourcesWithRetry();
 			} else {
 				String errorMessage = String.format(
-					Msg.code(2653) + "Timed out waiting %s %s to refresh %s cache",
-						FORCE_REFRESH_TIMEOUT_SECONDS, "seconds", myResourceName);
+						Msg.code(2653) + "Timed out waiting %s %s to refresh %s cache",
+						FORCE_REFRESH_TIMEOUT_SECONDS,
+						"seconds",
+						myResourceName);
 				ourLog.error(errorMessage);
 				throw new ConfigurationException(Msg.code(2663) + errorMessage);
 			}
