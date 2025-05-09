@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.3.3-SNAPSHOT</version>
+	<version>8.3.4-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1090,7 +1090,7 @@
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_version>2.2.25</swagger_version>
+		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
 		<spring_version>6.1.14</spring_version>
@@ -1111,7 +1111,7 @@
 		<ucum_version>1.0.9</ucum_version>
 
 		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.17.0</clinical-reasoning.version>
+		<clinical-reasoning.version>3.19.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1545,17 +1545,17 @@
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-annotations-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-models-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-core-jakarta</artifactId>
-				<version>${swagger_version}</version>
+				<version>${swagger_jakarta_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.mysql</groupId>
@@ -2308,7 +2308,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>4.19.1</version>
+				<version>5.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>

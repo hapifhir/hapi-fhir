@@ -61,13 +61,12 @@ public class CdsPrefetchSvc {
 			CdsPrefetchDaoSvc theResourcePrefetchDao,
 			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
 			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc,
-			FhirContext theFhirContext,
 			@Nullable IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myCdsResolutionStrategySvc = theCdsResolutionStrategySvc;
 		myResourcePrefetchDao = theResourcePrefetchDao;
 		myResourcePrefetchFhirClient = theResourcePrefetchFhirClient;
 		myCdsHooksDaoAuthorizationSvc = theCdsHooksDaoAuthorizationSvc;
-		myFhirContext = theFhirContext;
+		myFhirContext = theResourcePrefetchDao.getFhirContext();
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
@@ -167,7 +166,7 @@ public class CdsPrefetchSvc {
 				continue;
 			}
 			String url = PrefetchTemplateUtil.substituteTemplate(
-					template, theCdsServiceRequestJson.getContext(), myResourcePrefetchDao.getFhirContext());
+					template, theCdsServiceRequestJson.getContext(), myFhirContext);
 			ourLog.info("missing: {}.  Fetching with {}", theMissingPrefetch, url);
 
 			CdsHookPrefetchPointcutContextJson cdsHookPrefetchPointcutContext =
