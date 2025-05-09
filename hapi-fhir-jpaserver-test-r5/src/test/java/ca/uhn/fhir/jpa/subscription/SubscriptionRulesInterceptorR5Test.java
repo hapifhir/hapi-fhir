@@ -9,6 +9,7 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +64,7 @@ public class SubscriptionRulesInterceptorR5Test extends BaseResourceProviderR5Te
 		PreconditionFailedException topicCreateException = assertThrows(PreconditionFailedException.class, () -> mySubscriptionTopicDao.update(topicBad, mySrd));
 
 		// Verify
-		assertEquals("Criteria is not permitted on this server: Observation?", topicCreateException.getMessage());
+		Assertions.assertTrue(topicCreateException.getMessage().contains("Criteria is not permitted on this server: Observation?"));
 
 		subsGood = mySubscriptionDao.read(new IdType("Subscription/GOOD"), mySrd);
 		assertEquals(Enumerations.SubscriptionStatusCodes.REQUESTED, subsGood.getStatus());

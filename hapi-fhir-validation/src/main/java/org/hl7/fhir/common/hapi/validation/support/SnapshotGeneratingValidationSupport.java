@@ -80,6 +80,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 				ourLog.warn("Detected circular dependency, already generating snapshot for: {}", inputUrl);
 				return theInput;
 			}
+			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
 
 			String baseDefinition = inputCanonical.getBaseDefinition();
 			if (isBlank(baseDefinition)) {
@@ -116,8 +117,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 				profileUtilities =
 						new ProfileUtilities(myWorkerContext, messages, profileKnowledgeProvider, myFHIRPathEngine);
 			}
-			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
-			ourLog.info("Generating snapshot for StructureDefinition: {}", inputCanonical.getUrl());
+
 			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
 
 			switch (getFhirVersionEnum(
