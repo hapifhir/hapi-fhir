@@ -24,11 +24,13 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +39,9 @@ public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId myNextPartition;
 	private final Set<String> myNonPartitionableResources = new HashSet<>();
 	private BaseRequestPartitionHelperSvc myHelperSvc = new RequestPartitionHelperSvc();
+
+	@Autowired
+	PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -75,10 +80,10 @@ public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId selectPartition(String theResourceType) {
 		if (theResourceType != null) {
 			if (!myHelperSvc.isResourcePartitionable(theResourceType)) {
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			}
 			if (myNonPartitionableResources.contains(theResourceType)) {
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			}
 		}
 
