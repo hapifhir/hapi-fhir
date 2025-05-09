@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6947
+title: "Added support for closeable producers in mdm. Also added producer suffixes to broker producer config
+for brokers that name publishers."
