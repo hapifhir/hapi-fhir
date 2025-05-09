@@ -53,7 +53,9 @@ public class MdmSearchParamBuildingUtils {
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
 		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theEid);
-		map.add(SP_IDENTIFIER, new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+		map.add(
+				SP_IDENTIFIER,
+				new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		return map;
 	}
 
