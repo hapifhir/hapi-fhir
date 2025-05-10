@@ -26,7 +26,7 @@ import java.util.Stack;
  * this will be made version independent and moved out of the validation module
  * in a future release.
  *
- * @author Marcel Parciak <marcel.parciak@med.uni-goettingen.de>
+ * @author Marcel Parciak {@code <marcel.parciak@med.uni-goettingen.de>}
  */
 public class FHIRPathResourceGeneratorR4<T extends Resource> {
 
@@ -74,7 +74,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 	/**
 	 * Constructor that allows to provide a mapping right away.
 	 *
-	 * @param mapping Map<String, String> a mapping of FHIRPath to value Strings
+	 * @param mapping Map&lt;String, String&gt; a mapping of FHIRPath to value Strings
 	 *                that will be used to create a Resource.
 	 */
 	public FHIRPathResourceGeneratorR4(Map<String, String> mapping) {
@@ -85,7 +85,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 	/**
 	 * Setter for the FHIRPath mapping Map instance.
 	 *
-	 * @param mapping Map<String, String> a mapping of FHIRPath to value Strings
+	 * @param mapping Map&lt;String, String&gt; a mapping of FHIRPath to value Strings
 	 *                that will be used to create a Resource.
 	 */
 	public void setMapping(Map<String, String> mapping) {

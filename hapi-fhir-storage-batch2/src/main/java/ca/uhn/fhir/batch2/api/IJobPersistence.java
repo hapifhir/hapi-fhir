@@ -102,7 +102,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 
 	/**
-	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime <= now
+	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime {@code <=} now
 	 * for the given Job Instance.
 	 * @param theInstanceId the instance id
 	 * @return the number of updated chunks

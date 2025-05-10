@@ -25,7 +25,7 @@ import java.util.List;
 
 public class MatchRuleUtil {
 	/**
-	 * We use the binary shift operator (<<) to determine
+	 * We use the binary shift operator ({@code <<}) to determine
 	 * the "vector" used by
 	 *
 	 * By taking the log base 2 of a number N, we will know
@@ -33,7 +33,7 @@ public class MatchRuleUtil {
 	 * 1 more digit than that hits our overflow for a long value.
 	 *
 	 * ie, we cannot calculate vector values accurately after this,
-	 * because we're hitting overflows and the << operator might lead
+	 * because we're hitting overflows and the {@code <<} operator might lead
 	 * to collisions or negative numbers that mean nothing.
 	 *
 	 * Note: by log rule -> log10(N) / log10(X) -> LogX(N)
