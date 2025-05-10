@@ -50,7 +50,7 @@ public interface IRequestPartitionHelperSvc {
 	}
 
 	/**
-	 * Determine the partition to use when performing database reads based on a resource instance.
+	 * Determine partition to use when performing database reads based on a resource instance.
 	 * @param theRequest the request details from the context of the call
 	 * @param theId the id of the resource instance
 	 * @return the partition id which should be used for the database read

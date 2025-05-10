@@ -2710,29 +2710,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.6.3</version> <executions>
-				<execution>
-					<id>aggregate-javadoc</id>
-					<goals>
-						<goal>aggregate-no-fork</goal> </goals>
-					<phase>package</phase>
-					<configuration>
-						<reportOutputDirectory>${project.build.directory}/apidocs-aggregate</reportOutputDirectory>
-						<source>17</source>
-						<additionalJOption>-Xdoclint:none</additionalJOption>
-						<minmemory>128m</minmemory>
-						<maxmemory>4g</maxmemory>
-						<linksource>true</linksource>
-						<verbose>false</verbose>
-						<debug>false</debug>
-						<detectOfflineLinks>true</detectOfflineLinks>
-					</configuration>
-				</execution>
-			</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<inherited>true</inherited>
 				<version>${maven-checkstyle-version}</version>
@@ -2776,91 +2753,91 @@
 						</goals>
 						<configuration>
 							<target>
-<!--								<copy todir="target/site/apidocs">-->
-<!--									<fileset dir="hapi-fhir-base/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-dstu2">-->
-<!--									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-dstu3">-->
-<!--									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-r4">-->
-<!--									<fileset dir="hapi-fhir-structures-r4/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-r5">-->
-<!--									<fileset dir="hapi-fhir-structures-r5/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-jpaserver">-->
-<!--									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-jpaserver-ips">-->
-<!--									<fileset dir="hapi-fhir-jpaserver-ips/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-jpaserver-mdm">-->
-<!--									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-storage-batch2">-->
-<!--									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-client">-->
-<!--									<fileset dir="hapi-fhir-client/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-server">-->
-<!--									<fileset dir="hapi-fhir-server/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-server-mdm">-->
-<!--									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>-->
-<!--								</copy>-->
-<!--								<copy todir="target/site/apidocs-server-openapi">-->
-<!--									<fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>-->
-<!--								</copy>-->
+								<copy todir="target/site/apidocs">
+									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu2">
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu3">
+									<fileset dir="hapi-fhir-structures-dstu3/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-r4">
+									<fileset dir="hapi-fhir-structures-r4/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-r5">
+									<fileset dir="hapi-fhir-structures-r5/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver">
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver-ips">
+									<fileset dir="hapi-fhir-jpaserver-ips/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver-mdm">
+									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-storage-batch2">
+									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-client">
+									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server">
+									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server-mdm">
+									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server-openapi">
+									<fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
 								<copy todir="target/site/xref-base">
 									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
-								 <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy>
-<!--								<copy todir="target/site">-->
-<!--									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>-->
-<!--								</copy>-->
-<!--								<echo>Fixing Checkstyle Report</echo>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="checkstyle.html"/>-->
-<!--									<replacetoken>"../../</replacetoken>-->
-<!--									<replacevalue>"./</replacevalue>-->
-<!--								</replace>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="*.html"/>-->
-<!--									<replacetoken>-->
-<!--										http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css-->
-<!--									</replacetoken>-->
-<!--									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>-->
-<!--								</replace>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="*.html"/>-->
-<!--									<replacetoken>http://netdna.bootstrapcd</replacetoken>-->
-<!--									<replacevalue>https://netdna.bootstrapcd</replacevalue>-->
-<!--								</replace>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="*.html"/>-->
-<!--									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css-->
-<!--									</replacetoken>-->
-<!--									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css-->
-<!--									</replacevalue>-->
-<!--								</replace>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="*.html"/>-->
-<!--									<replacetoken>http://ajax.googleapis</replacetoken>-->
-<!--									<replacevalue>https://ajax.googleapis</replacevalue>-->
-<!--								</replace>-->
-<!--								<replace dir="target/site" summary="true">-->
-<!--									<include name="*.html"/>-->
-<!--									<replacetoken>\t</replacetoken>-->
-<!--									<replacevalue>-->
-<!--									</replacevalue>-->
-<!--								</replace>-->
+								<!-- <copy todir="target/site/cobertura"> <fileset dir="hapi-fhir-cobertura/target/site/cobertura" /> </copy> -->
+								<copy todir="target/site">
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
+								</copy>
+								<echo>Fixing Checkstyle Report</echo>
+								<replace dir="target/site" summary="true">
+									<include name="checkstyle.html"/>
+									<replacetoken>"../../</replacetoken>
+									<replacevalue>"./</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>
+										http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css
+									</replacetoken>
+									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>http://netdna.bootstrapcd</replacetoken>
+									<replacevalue>https://netdna.bootstrapcd</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacetoken>
+									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>http://ajax.googleapis</replacetoken>
+									<replacevalue>https://ajax.googleapis</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"/>
+									<replacetoken>\t</replacetoken>
+									<replacevalue>
+									</replacevalue>
+								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
@@ -3091,28 +3068,6 @@
 			<id>DIST</id>
 			<build>
 				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<inherited>true</inherited>
-						<configuration>
-							<minmemory>128m</minmemory>
-							<maxmemory>4g</maxmemory>
-							<linksource>true</linksource>
-							<verbose>false</verbose>
-							<debug>false</debug>
-							<additionalJOption>-Xdoclint:none</additionalJOption>
-							<source>17</source>
-						</configuration>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>license-maven-plugin</artifactId>
