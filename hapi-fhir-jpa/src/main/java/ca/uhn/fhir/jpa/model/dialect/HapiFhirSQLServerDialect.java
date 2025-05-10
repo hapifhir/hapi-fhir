@@ -31,15 +31,11 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 
 	public HapiFhirSQLServerDialect() {
 		super();
-		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirSQLServerDialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
-
-	// Version check is handled by Hibernate 6.6+
 
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this

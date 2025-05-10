@@ -31,12 +31,10 @@ public class HapiFhirMySQLDialect extends MySQLDialect implements IHapiFhirDiale
 
 	public HapiFhirMySQLDialect() {
 		super();
-		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirMySQLDialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
 
 	/**

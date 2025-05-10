@@ -31,12 +31,10 @@ public class HapiFhirDerbyDialect extends DerbyDialect implements IHapiFhirDiale
 
 	public HapiFhirDerbyDialect() {
 		super();
-		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirDerbyDialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
 
 	/**

@@ -31,12 +31,10 @@ public class HapiFhirH2Dialect extends H2Dialect implements IHapiFhirDialect {
 
 	public HapiFhirH2Dialect() {
 		super();
-		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirH2Dialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
 
 	/**

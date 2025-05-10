@@ -31,12 +31,10 @@ public class HapiFhirMariaDBDialect extends MariaDBDialect implements IHapiFhirD
 
 	public HapiFhirMariaDBDialect() {
 		super();
-		// No need to register version with Hibernate 6.6+
 	}
 
 	public HapiFhirMariaDBDialect(DialectResolutionInfo info) {
 		super(info);
-		// No need to register version with Hibernate 6.6+
 	}
 
 	/**
