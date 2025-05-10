@@ -192,7 +192,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	/**
 	 * Returns the system for this token. Note that if a {@link #getModifier()} is being used, the entire value of the
 	 * parameter will be placed in {@link #getValue() value} and this method will return <code>null</code>.
-	 * <p
+	 * <p>
 	 * Also note that this value may be <code>null</code> or <code>""</code> (empty string) and that
 	 * each of these have a different meaning. When a token is passed on a URL and it has no
 	 * vertical bar (often meaning "return values that match the given code in any codesystem")
