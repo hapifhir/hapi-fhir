@@ -2640,7 +2640,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>${maven-license-plugin-version}</version>
 					<configuration>
-						<verbose>true</verbose>
+						<verbose>false</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
 						<encoding>UTF-8</encoding>
 					</configuration>
