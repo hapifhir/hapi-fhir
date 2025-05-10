@@ -399,7 +399,7 @@ public abstract class BaseClient implements IRestfulClient {
 						try {
 							// TODO: handle if something other than OO comes back
 							oo = (IBaseOperationOutcome) p.parseResource(body);
-							String details = OperationOutcomeUtil.getFirstIssueDetails(getFhirContext(), oo);
+							String details = OperationOutcomeUtil.getFirstIssueDiagnostics(getFhirContext(), oo);
 							if (isNotBlank(details)) {
 								message = message + ": " + details;
 							}

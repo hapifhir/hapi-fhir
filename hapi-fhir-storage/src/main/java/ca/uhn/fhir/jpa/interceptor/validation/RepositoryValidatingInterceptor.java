@@ -154,7 +154,7 @@ public class RepositoryValidatingInterceptor {
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
 			String firstIssue =
-					OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
+					OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirContext, theOutcome.getOperationOutcome());
 			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
 		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());

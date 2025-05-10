@@ -34,7 +34,7 @@ public class ValidationFailureException extends RuntimeException {
 
 	private static String toDescription(FhirContext theCtx, IBaseOperationOutcome theOo) {
 		StringBuilder b = new StringBuilder();
-		b.append(OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOo));
+		b.append(OperationOutcomeUtil.getFirstIssueDiagnostics(theCtx, theOo));
 		//		b.append(" - ");
 		//		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
 		return b.toString();
