@@ -2715,7 +2715,7 @@
 				<execution>
 					<id>aggregate-javadoc</id>
 					<goals>
-						<goal>aggregate</goal> </goals>
+						<goal>aggregate-no-fork</goal> </goals>
 					<phase>package</phase>
 					<configuration>
 						<reportOutputDirectory>${project.build.directory}/apidocs-aggregate</reportOutputDirectory>
@@ -2727,13 +2727,6 @@
 						<verbose>false</verbose>
 						<debug>false</debug>
 						<detectOfflineLinks>true</detectOfflineLinks>
-
-<!--						<links>-->
-<!--							<link>https://docs.oracle.com/en/java/javase/11/docs/api/</link>-->
-<!--							<link>https://jakarta.ee/specifications/servlet/5.0/apidocs/</link> <link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base</link>-->
-<!--							<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-dstu2</link>-->
-<!--						</links>-->
-
 					</configuration>
 				</execution>
 			</executions>
