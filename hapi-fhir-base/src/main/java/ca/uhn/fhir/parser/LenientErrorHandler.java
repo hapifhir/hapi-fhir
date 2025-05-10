@@ -28,21 +28,22 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * The default error handler, which logs issues but does not abort parsing, with only two exceptions:
  * <p>
- * The {@link #invalidValue(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation, String, String)}
+ * The {@link #invalidValue}
  * method will throw a {@link DataFormatException} by default since ignoring this type of error
  * can lead to data loss (since invalid values are silently ignored). See
- * {@link #setErrorOnInvalidValue(boolean)} for information on this.
+ * {@link #setErrorOnInvalidValue} for information on this.
+ * </p>
+ *
+ * <p>
+ * The {@link #extensionContainsValueAndNestedExtensions}
+ * method will throw a {@link DataFormatException} by default since ignoring this type of error will allow malformed
+ * resouces to be created and result in errors when attempts to read, update or delete the resource in the future.
+ *  See {@link #setErrorOnInvalidExtension} for information on this.
  * </p>
  *
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  *
- * <p>
- * The {@link #extensionContainsValueAndNestedExtensions(ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation)}
- * method will throw a {@link DataFormatException} by default since ignoring this type of error will allow malformed
- * resouces to be created and result in errors when attempts to read, update or delete the resource in the future.
- *  See {@link #setErrorOnInvalidExtension(boolean)} for information on this.
- * </p>
  */
 public class LenientErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 

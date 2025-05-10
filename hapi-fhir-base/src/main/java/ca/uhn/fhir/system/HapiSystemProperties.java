@@ -144,7 +144,7 @@ public final class HapiSystemProperties {
 	}
 
 	/**
-	 * This property sets {@link JpaStorageSettings#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
+	 * This property sets JpaStorageSettings#setStatusBasedReindexingDisabled(Boolean) to true when the system starts up.
 	 */
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);

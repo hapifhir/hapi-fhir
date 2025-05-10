@@ -32,7 +32,7 @@ public interface ICompositeElement extends IElement {
 	 * point to keeping it around. We are not deleting it just so that we don't break
 	 * existing implementer code, but you do not need to supply an implementation
 	 * of this code in your own structures. Deprecated in HAPI FHIR 2.3 (Jan 2017).
-	 * See See <a href="https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/hapi-fhir/AeV2hTDt--E/6EOgRA8YBwAJ"> for
+	 * See See <a href="https://groups.google.com/g/hapi-fhir/c/AeV2hTDt--E/m/6EOgRA8YBwAJ"> for
 	 * a discussion about this.
 	 */
 	@Deprecated
