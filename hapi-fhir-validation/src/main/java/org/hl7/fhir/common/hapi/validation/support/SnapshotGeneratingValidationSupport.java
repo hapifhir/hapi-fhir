@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import org.apache.commons.lang3.Validate;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,6 +22,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
@@ -39,9 +40,9 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final FhirContext myCtx;
-	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final IWorkerContext myWorkerContext;
 	private final FHIRPathEngine myFHIRPathEngine;
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	/**
 	 * Constructor
@@ -52,11 +53,16 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 	public SnapshotGeneratingValidationSupport(
 			FhirContext theFhirContext, IWorkerContext theWorkerContext, FHIRPathEngine theFHIRPathEngine) {
-		Validate.notNull(theFhirContext);
+		Objects.requireNonNull(theFhirContext);
 		myCtx = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
 		myFHIRPathEngine = theFHIRPathEngine;
+	}
+
+	@VisibleForTesting
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@SuppressWarnings("EnhancedSwitchMigration")
@@ -128,24 +134,16 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedDstu3.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedDstu3.getSnapshot().getElement()));
 					break;
 				case R4:
 					org.hl7.fhir.r4.model.StructureDefinition generatedR4 = (org.hl7.fhir.r4.model.StructureDefinition)
 							myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedR4.getSnapshot().getElement()));
 					break;
 				case R4B:
 					org.hl7.fhir.r4b.model.StructureDefinition generatedR4b =
@@ -153,12 +151,8 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
 							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4b.getSnapshot().getElement());
+							.setElement(
+									new ArrayList<>(generatedR4b.getSnapshot().getElement()));
 					break;
 				case R5:
 					// nothing

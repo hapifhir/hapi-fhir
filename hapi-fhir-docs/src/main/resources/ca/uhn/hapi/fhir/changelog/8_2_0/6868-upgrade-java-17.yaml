@@ -1,4 +1,4 @@
 ---
 type: change
 issue: 6868
-title: "Hapi Fhir now targets Java 17."
+title: "Support for Java 11 has been dropped. A minimum of Java 17 is now required for HAPI FHIR. Java 21 is also supported."
