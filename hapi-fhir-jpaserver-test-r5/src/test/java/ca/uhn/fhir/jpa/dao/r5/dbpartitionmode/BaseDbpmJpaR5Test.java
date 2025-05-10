@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.util.TestPartitionSelectorInterceptor;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,6 +22,13 @@ public class BaseDbpmJpaR5Test extends BaseJpaR5Test {
 
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+		initResourceTypeCacheFromConfig();
+	}
 
 	@Override
 	@AfterEach

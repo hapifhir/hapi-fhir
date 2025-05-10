@@ -135,6 +135,9 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeSetRequestDetails() {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
+
+		populateResourceTypeTable();
+		initResourceTypeCacheFromDatabase();
 	}
 
 	@Override

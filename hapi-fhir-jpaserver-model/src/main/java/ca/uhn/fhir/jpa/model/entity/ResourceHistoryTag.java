@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -88,6 +89,17 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_RES_TYPE"),
+			insertable = false,
+			updatable = false,
+			nullable = true)
+	private ResourceTypeEntity myResourceTypeEntity;
+
+	@Column(name = "RES_TYPE_ID", nullable = true)
+	private Short myResourceTypeId;
 	/**
 	 * Constructor
 	 */
@@ -107,6 +119,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId().getId());
 		setResourceType(theResourceHistoryTable.getResourceType());
+		setResourceTypeId(theResourceHistoryTable.getResourceTypeId());
 		setPartitionId(theRequestPartitionId);
 	}
 
@@ -124,6 +137,18 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	public void setResourceId(Long theResourceId) {
 		myResourceId = theResourceId;
+	}
+
+	public Short getResourceTypeId() {
+		return myResourceTypeId;
+	}
+
+	public void setResourceTypeId(Short theResourceTypeId) {
+		myResourceTypeId = theResourceTypeId;
+	}
+
+	public ResourceTypeEntity getResourceTypeEntity() {
+		return myResourceTypeEntity;
 	}
 
 	public ResourceHistoryTable getResourceHistory() {
@@ -159,6 +184,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		}
 		b.append("versionId", myResourceHistoryPid);
 		b.append("resId", getResourceId());
+		b.append("resTypeId", getResourceTypeId());
 		b.append("tag", getTagId());
 		return b.build();
 	}

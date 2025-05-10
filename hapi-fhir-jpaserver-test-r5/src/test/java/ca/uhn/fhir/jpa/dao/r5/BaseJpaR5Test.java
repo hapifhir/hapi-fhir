@@ -128,7 +128,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -479,6 +478,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@BeforeEach
 	public void beforeResetConfig() {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+	}
+
+	@BeforeEach
+	public void beforeProcessResources() {
+		populateResourceTypeTable();
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override

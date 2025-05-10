@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
@@ -105,6 +106,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				}
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
+				}
+				if (constraintName.contains(ResourceTypeEntity.IDX_RES_TYPE_NAME)) {
+					throw new ResourceVersionConflictException(
+							Msg.code(824) + makeErrorMessage(messageToPrepend, "resourceTypeUniqueConstraintFailure"));
 				}
 			}
 		}

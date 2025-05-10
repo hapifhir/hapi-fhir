@@ -394,6 +394,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Test
 	public void testTransaction_SystemRequestDetails() throws IOException {
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
+
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 		myCaptureQueriesListener.logSelectQueries();
