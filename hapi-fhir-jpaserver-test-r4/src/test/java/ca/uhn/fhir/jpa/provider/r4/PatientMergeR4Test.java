@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
@@ -32,7 +33,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl.RESOURCE_TYPES_SYSTEM;
@@ -78,12 +81,16 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}, async={3}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview, isAsync
 		"true, true, true, false",
@@ -106,7 +113,6 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	})
 	public void testMerge(boolean withDelete, boolean withInputResultPatient, boolean withPreview, boolean isAsync) {
 		// setup
-
 		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
 		myTestHelper.setSourceAndTarget(inParams);
 		inParams.deleteSource = withDelete;
@@ -139,6 +145,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		List<Identifier> expectedIdentifiersOnTargetAfterMerge =
 			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(withInputResultPatient);
+
 
 		// Assert Task inAsync mode, unless it is preview in which case we don't return a task
 		if (isAsync && !withPreview) {
@@ -225,6 +232,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			myTestHelper.assertAllReferencesUpdated(withDelete);
 			myTestHelper.assertSourcePatientUpdatedOrDeleted(withDelete);
 			myTestHelper.assertTargetPatientUpdated(withDelete, expectedIdentifiersOnTargetAfterMerge);
+			myTestHelper.assertMergeProvenance(withDelete);
 		}
 	}
 
@@ -241,6 +249,55 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 			.isInstanceOf(PreconditionFailedException.class)
 			.satisfies(ex -> assertThat(extractFailureMessage((BaseServerResponseException) ex)).isEqualTo("HAPI-2597: Number of resources with references to "+ myTestHelper.getSourcePatientId() + " exceeds the resource-limit 5. Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'."));
 	}
+
+	@ParameterizedTest(name = "{index}: deleteSource={0}, async={1}")
+	@CsvSource({
+		"true, false",
+		"false, false",
+		"true, true",
+		"false, true",
+	})
+	void testMerge_sourceResourceWithoutAnyReference(boolean theDeleteSource, boolean theAsync) {
+
+		Patient sourcePatient = new Patient();
+		sourcePatient = (Patient)myPatientDao.create(sourcePatient, mySrd).getResource();
+
+
+		Patient targetPatient = new Patient();
+		targetPatient = (Patient) myPatientDao.create(targetPatient, mySrd).getResource();
+
+		ReplaceReferencesTestHelper.PatientMergeInputParameters inParams = new ReplaceReferencesTestHelper.PatientMergeInputParameters();
+		inParams.sourcePatient = new Reference(sourcePatient.getIdElement().toVersionless());
+		inParams.targetPatient = new Reference(targetPatient.getIdElement().toVersionless());
+		if (theDeleteSource) {
+			inParams.deleteSource = true;
+		}
+
+		Parameters outParams = callMergeOperation(inParams.asParametersResource(), theAsync);
+
+		if (theAsync) {
+			assertThat(getLastHttpStatusCode()).isEqualTo(HttpServletResponse.SC_ACCEPTED);
+			Task task = (Task) outParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_TASK).getResource();
+			assertNull(task.getIdElement().getVersionIdPart());
+			ourLog.info("Got task {}", task.getId());
+			String jobId = myTestHelper.getJobIdFromTask(task);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+		}
+
+		IIdType theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("2");
+		if (theDeleteSource) {
+			// when the source resource is being deleted and since there is no identifiers to copy over to the target
+			// in this test, the target is not actually updated, so its version will remain the same
+			theExpectedTargetIdWithVersion = targetPatient.getIdElement().withVersion("1");
+		}
+
+		myTestHelper.assertMergeProvenance(theDeleteSource,
+			sourcePatient.getIdElement().withVersion("2"),
+			theExpectedTargetIdWithVersion,
+			0,
+			Collections.EMPTY_SET);
+	}
+
 
 	@Test
 	void testMerge_SourceResourceCannotBeDeletedBecauseAnotherResourceReferencingSourceWasAddedWhileJobIsRunning_JobFails() {
@@ -280,7 +337,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 		assertThat(taskAfterJobFailure.getStatus()).isEqualTo(Task.TaskStatus.FAILED);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview
 		"true, true, true",
@@ -301,7 +358,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{index}: deleteSource={0}, resultPatient={1}, preview={2}")
 	@CsvSource({
 		// withDelete, withInputResultPatient, withPreview
 		"true, true, true",
@@ -361,8 +418,7 @@ public class PatientMergeR4Test extends BaseResourceProviderR4Test {
 	class MyExceptionHandler implements TestExecutionExceptionHandler {
 		@Override
 		public void handleTestExecutionException(ExtensionContext theExtensionContext, Throwable theThrowable) throws Throwable {
-			if (theThrowable instanceof BaseServerResponseException) {
-				BaseServerResponseException ex = (BaseServerResponseException) theThrowable;
+			if (theThrowable instanceof BaseServerResponseException ex) {
 				String message = extractFailureMessage(ex);
 				throw ex.getClass().getDeclaredConstructor(String.class, Throwable.class).newInstance(message, ex);
 			}
