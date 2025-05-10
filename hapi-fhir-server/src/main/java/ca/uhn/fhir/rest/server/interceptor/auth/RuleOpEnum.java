@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-enum RuleOpEnum {
+public enum RuleOpEnum {
 	READ,
 	WRITE,
 	ALL,
