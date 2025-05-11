@@ -48,7 +48,7 @@ public class MdmResourceFilteringSvc {
 	/**
 	 * Given a resource from the MDM Channel, determine whether or not MDM processing should occur on it.
 	 *
-	 * MDM processing should occur if for any {@link MdmResourceSearchParamJson ) Search Param, the resource contains a value.
+	 * MDM processing should occur if for any {@link MdmResourceSearchParamJson} Search Param, the resource contains a value.
 	 *
 	 * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
 	 * sufficient information to perform meaningful MDM processing. (For example, how can MDM processing occur on a patient that has _no_ attributes?)

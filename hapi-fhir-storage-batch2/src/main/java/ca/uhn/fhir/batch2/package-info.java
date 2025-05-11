@@ -46,7 +46,7 @@
  *
  * </p><p>
  *
- * Job and chunk processing follow state machines described {@link hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md}
+ * Job and chunk processing follow state machines described in the batch2_states.md documentation
  * Chunks have a simple {@link ca.uhn.fhir.batch2.model.WorkChunkStatusEnum state system} with states
  * READY, QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED.
  * The initial state is READY, and the final states are FAILED, and COMPLETED.
