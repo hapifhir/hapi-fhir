@@ -77,7 +77,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * for<br/>
  * <code>http://baseurl/Observation?category=laboratory</code><br/>
  * would receive results as though they had requested<br/>
- * <code>http://baseurl/Observation?subject=Patient/123&category=laboratory</code>
+ * <code>http://baseurl/Observation?subject=Patient/123{@code &}category=laboratory</code>
  * </p>
  * <p>
  * Note that this interceptor should be used in combination with {@link AuthorizationInterceptor}

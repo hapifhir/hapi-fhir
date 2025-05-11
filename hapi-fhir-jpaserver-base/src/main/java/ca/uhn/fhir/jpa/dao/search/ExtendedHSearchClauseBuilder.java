@@ -426,7 +426,7 @@ public class ExtendedHSearchClauseBuilder {
 	 * }
 	 * </pre>
 	 *
-	 * <p>Example 3 between dates: <code>http://fhirserver/Observation?date=ge2010-01-01&date=le2020-01</code></p>
+	 * <p>Example 3 between dates: <code>http://fhirserver/Observation?date=ge2010-01-01{@code &}date=le2020-01</code></p>
 	 * <pre>
 	 * {@code
 	 * {
