@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -58,6 +59,9 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	@Autowired(required = false)
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -126,12 +130,28 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition(getDefaultPartitionId())) {
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+	}
+
+	private Integer getDefaultPartitionId() {
+		if (myPartitionSettings != null) {
+			return myPartitionSettings.getDefaultPartitionId();
+		}
+		/*
+		 * We log a warning because in most cases you will want a partitionsettings
+		 * object.
+		 * However, PartitionSettings beans are not provided in the same
+		 * config as the one that provides this bean; as such, it is the responsibility
+		 * of whomever includes the config for this bean to also provide a PartitionSettings
+		 * bean (or import a config that does)
+		 */
+		ourLog.warn("No PartitionSettings available.");
+		return null;
 	}
 }

@@ -265,7 +265,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toRequestPartitionId());
 			} else {
-				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.defaultPartition());
+				retVal.setUserData(
+						Constants.RESOURCE_PARTITION_ID,
+						RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 			}
 		}
 	}

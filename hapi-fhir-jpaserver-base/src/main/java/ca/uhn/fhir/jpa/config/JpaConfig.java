@@ -250,6 +250,9 @@ public class JpaConfig {
 	public JpaStorageSettings myStorageSettings;
 
 	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	@Autowired
 	private FhirContext myFhirContext;
 
 	@Bean
