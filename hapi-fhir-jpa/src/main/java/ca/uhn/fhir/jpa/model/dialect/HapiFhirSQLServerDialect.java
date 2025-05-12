@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
