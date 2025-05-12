@@ -45,16 +45,26 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 		assertNotNull(result);
 		assertEquals(1, result.getContained().size());
 
-		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(null, null, null, url, version, patientID,
+		var resultR5 = (Parameters) myPlanDefinitionApplyProvider.applyR5(null, null, null, url, version, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, new BooleanType(true), null, null,
 			null, null, null,
 			requestDetails);
 
 		assertNotNull(resultR5);
-		var questionnaireResponse = (QuestionnaireResponse) resultR5.getEntry().get(1).getResource();
+		var resultBundle = (Bundle) resultR5.getParameter("return").getResource();
+		assertNotNull(resultBundle);
+		var questionnaireResponse = (QuestionnaireResponse) resultBundle.getEntry().stream()
+			.filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
+			.map(Bundle.BundleEntryComponent::getResource)
+			.findFirst()
+			.orElse(null);
 		assertNotNull(questionnaireResponse);
-		var questionnaire = (Questionnaire) questionnaireResponse.getContained().get(0);
+		var questionnaire = (Questionnaire) resultBundle.getEntry().stream()
+			.filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
+			.map(Bundle.BundleEntryComponent::getResource)
+			.findFirst()
+			.orElse(null);
 		assertNotNull(questionnaire);
 		assertThat(questionnaire.getItem().get(0)
 				.getItem().get(0)

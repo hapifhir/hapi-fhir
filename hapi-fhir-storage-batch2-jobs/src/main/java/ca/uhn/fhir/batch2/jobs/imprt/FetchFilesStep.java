@@ -317,7 +317,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 	}
 
 	private static void transmitBuffer(
-			@javax.annotation.Nonnull IJobDataSink<NdJsonFileJson> theDataSink,
+			@Nonnull IJobDataSink<NdJsonFileJson> theDataSink,
 			String nextUrl,
 			int chunkCount,
 			FileBuffer buffer,

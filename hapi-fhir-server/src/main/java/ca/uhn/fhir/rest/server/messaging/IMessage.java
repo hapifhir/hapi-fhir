@@ -25,6 +25,7 @@ import jakarta.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * This interface is implemented by serializable "wrapper" message classes that are exchanged with Massage Brokers. HAPI-FHIR
@@ -65,4 +66,12 @@ public interface IMessage<T> {
 	 * @return the de-serialized value of the message
 	 */
 	T getPayload();
+
+	/**
+	 * @return headers as a String to String map where all values are replaced with their toString() value
+	 */
+	default Map<String, String> getHeadersAsStrings() {
+		return getHeaders().entrySet().stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+	}
 }

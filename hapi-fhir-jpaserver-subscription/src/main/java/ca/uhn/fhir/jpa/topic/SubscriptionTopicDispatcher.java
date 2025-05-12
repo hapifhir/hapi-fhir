@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliveryRequest;
@@ -101,8 +102,8 @@ public class SubscriptionTopicDispatcher {
 				mySubscriptionRegistry.getTopicSubscriptionsByTopic(theSubscriptionTopicDispatchRequest.getTopicUrl());
 		if (!topicSubscriptions.isEmpty()) {
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
-				boolean success = matchFiltersAndDeliver(theSubscriptionTopicDispatchRequest, activeSubscription);
-				if (success) {
+				ISendResult result = matchFiltersAndDeliver(theSubscriptionTopicDispatchRequest, activeSubscription);
+				if (result.isSuccessful()) {
 					count++;
 				}
 			}
@@ -110,7 +111,7 @@ public class SubscriptionTopicDispatcher {
 		return count;
 	}
 
-	private boolean matchFiltersAndDeliver(
+	private ISendResult matchFiltersAndDeliver(
 			SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest,
 			ActiveSubscription theActiveSubscription) {
 
@@ -136,7 +137,7 @@ public class SubscriptionTopicDispatcher {
 
 				if (!SubscriptionTopicFilterUtil.matchFilters(
 						firstResource, resourceType, subscriptionTopicFilterMatcher, topicSubscription)) {
-					return false;
+					return ISendResult.FAILURE;
 				}
 			}
 		}

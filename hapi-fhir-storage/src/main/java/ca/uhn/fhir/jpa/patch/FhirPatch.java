@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class FhirPatch {
@@ -126,7 +127,7 @@ public class FhirPatch {
 		for (IBase nextElement : containingElements) {
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+			IBase newValue = getNewValue(theParameters, childDefinition);
 
 			childDefinition.getChildDef().getMutator().addValue(nextElement, newValue);
 		}
@@ -148,7 +149,7 @@ public class FhirPatch {
 
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			IBase newValue = getNewValue(theParameters, nextElement, childDefinition);
+			IBase newValue = getNewValue(theParameters, childDefinition);
 
 			List<IBase> existingValues =
 					new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
@@ -220,7 +221,7 @@ public class FhirPatch {
 		for (IBase containingElement : containingElements) {
 
 			ChildDefinition childDefinition = findChildDefinition(containingElement, parsedPath.getLastElementName());
-			IBase newValue = getNewValue(theParameters, containingElement, childDefinition);
+			IBase newValue = getNewValue(theParameters, childDefinition);
 			if (parsedPath.getEndsWithAFilterOrIndex()) {
 				// if the path ends with a filter or index, we must be dealing with a list
 				replaceInList(newValue, theResource, containingElement, childDefinition, path);
@@ -328,19 +329,26 @@ public class FhirPatch {
 		return new ChildDefinition(childDef, childElement);
 	}
 
-	private IBase getNewValue(IBase theParameters, IBase theElement, ChildDefinition theChildDefinition) {
+	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {
 		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
 		Optional<IBase> valuePartValue =
 				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
 		IBase newValue;
 		if (valuePartValue.isPresent()) {
-			newValue = valuePartValue.get();
+			newValue = maybeMassageToEnumeration(valuePartValue.get(), theChildDefinition);
+
 		} else {
 			List<IBase> partParts = valuePart.map(this::extractPartsFromPart).orElse(Collections.emptyList());
 
 			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
+
+		return newValue;
+	}
+
+	private IBase maybeMassageToEnumeration(IBase theValue, ChildDefinition theChildDefinition) {
+		IBase retVal = theValue;
 
 		if (IBaseEnumeration.class.isAssignableFrom(
 						theChildDefinition.getChildElement().getImplementingClass())
@@ -358,11 +366,11 @@ public class FhirPatch {
 				newValueInstance =
 						(IPrimitiveType<?>) theChildDefinition.getChildElement().newInstance();
 			}
-			newValueInstance.setValueAsString(((IPrimitiveType<?>) newValue).getValueAsString());
-			theChildDefinition.getChildDef().getMutator().setValue(theElement, newValueInstance);
-			newValue = newValueInstance;
+			newValueInstance.setValueAsString(((IPrimitiveType<?>) theValue).getValueAsString());
+			retVal = newValueInstance;
 		}
-		return newValue;
+
+		return retVal;
 	}
 
 	@Nonnull
@@ -371,8 +379,8 @@ public class FhirPatch {
 	}
 
 	/**
-	 * this method will instantiate an element according to the provided Definition and it according to
-	 * the properties found in thePartParts.  a part usually represent a datatype as a name/value[X] pair.
+	 * this method will instantiate an element according to the provided Definition and initialize its fields
+	 * from the values provided in thePartParts.  a part usually represent a datatype as a name/value[X] pair.
 	 * it may also represent a complex type like an Extension.
 	 *
 	 * @param theDefinition wrapper around the runtime definition of the element to be populated
@@ -394,17 +402,24 @@ public class FhirPatch {
 				continue;
 			}
 
-			Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+			Optional<IBase> optionalValue =
+					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 
-			if (value.isPresent()) {
+			if (optionalValue.isPresent()) {
 				// we have a dataType. let's extract its value and assign it.
+
+				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+				IBase newValue = maybeMassageToEnumeration(optionalValue.get(), childDefinition);
+
 				BaseRuntimeChildDefinition partChildDef =
 						theDefinition.getChildElement().getChildByName(name);
-				if (partChildDef == null) {
+
+				if (isNull(partChildDef)) {
 					name = name + "[x]";
 					partChildDef = theDefinition.getChildElement().getChildByName(name);
 				}
-				partChildDef.getMutator().addValue(newElement, value.get());
+
+				partChildDef.getMutator().setValue(newElement, newValue);
 
 				// a part represent a datatype or a complexType but not both at the same time.
 				continue;
