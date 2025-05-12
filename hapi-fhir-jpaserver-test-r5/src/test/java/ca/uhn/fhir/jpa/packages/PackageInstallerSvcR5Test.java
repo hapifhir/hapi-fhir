@@ -6,10 +6,16 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +82,11 @@ public class PackageInstallerSvcR5Test extends BaseJpaR5Test {
 		myPackageInstallerSvc.install(spec);
 
 
+		String inputString = ClasspathUtil.loadResource("/Bundle-ExampleEstablishmentRegistration.xml");
+		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputString);
+		MethodOutcome outcome = myBundleDao.validate(inputBundle, null, inputString, EncodingEnum.XML, ValidationModeEnum.CREATE, null, new SystemRequestDetails());
+		IBaseOperationOutcome oo = outcome.getOperationOutcome();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 	}
 
 
