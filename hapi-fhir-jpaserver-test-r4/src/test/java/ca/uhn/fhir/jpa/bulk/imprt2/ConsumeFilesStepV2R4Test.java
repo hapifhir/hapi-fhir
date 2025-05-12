@@ -101,7 +101,8 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		if (partitionEnabled) {
 			myPartitionSettings.setPartitioningEnabled(true);
 			myPartitionSettings.setIncludePartitionInSearchHashes(true);
-			addNextTargetPartitionNTimesForCreate(1, 2);
+			addNextTargetPartitionForCreateWithId(1);
+			addNextTargetPartitionForCreateWithId(1);
 		}
 		Patient patient = new Patient();
 		patient.setId("A");

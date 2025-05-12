@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.annotations.VisibleForTesting;
 
 public interface IResourceRepositoryCache {
@@ -33,6 +34,6 @@ public interface IResourceRepositoryCache {
 	 */
 	@VisibleForTesting
 	default void forceRefresh() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2649));
 	}
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +32,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,6 +100,11 @@ public class RequestPartitionId implements IModelJson {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	@Nonnull
+	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
+		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 	}
 
 	/**
@@ -167,6 +175,20 @@ public class RequestPartitionId implements IModelJson {
 			b.append("allPartitions", myAllPartitions);
 		}
 		return b.build();
+	}
+
+	/**
+	 * Returns true if this partition defintion contains the other.
+	 * Compatible with equals: a.contains(b) && b.contains(a) ==> a.equals(b).
+	 * We can't implement Comparable because this is only a partial order.
+	 */
+	public boolean contains(RequestPartitionId theOther) {
+		if (this.isAllPartitions()) {
+			return true;
+		} else if (theOther.isAllPartitions()) {
+			return false;
+		}
+		return this.myPartitionIds.containsAll(theOther.myPartitionIds);
 	}
 
 	@Override

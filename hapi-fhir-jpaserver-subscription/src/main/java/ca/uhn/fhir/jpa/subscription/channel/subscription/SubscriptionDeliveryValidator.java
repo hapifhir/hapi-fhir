@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -55,8 +56,9 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 			systemRequestDetails.setRequestPartitionId(theResourceDeliveryMessage.getRequestPartitionId());
 			resource = myDaoRegistry.getSubscriptionDao().read(theSubscriptionId, systemRequestDetails);
 		} catch (ResourceNotFoundException e) {
-			throw new SubscriptionInactiveException("Attempting to deliver " + theResourceDeliveryMessage.getPayloadId()
-					+ " to deleted subscription " + theSubscriptionId + ".  Aborting delivery.");
+			throw new SubscriptionInactiveException(
+					Msg.code(2667) + "Attempting to deliver " + theResourceDeliveryMessage.getPayloadId()
+							+ " to deleted subscription " + theSubscriptionId + ".  Aborting delivery.");
 		}
 		ourLog.debug("Retrieved resource {}", resource.getIdElement());
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(resource);
@@ -69,7 +71,7 @@ public class SubscriptionDeliveryValidator implements ISubscriptionDeliveryValid
 			case OFF:
 			case NULL:
 			default:
-				throw new SubscriptionInactiveException("Attempting to deliver "
+				throw new SubscriptionInactiveException(Msg.code(2668) + "Attempting to deliver "
 						+ theResourceDeliveryMessage.getPayloadId() + " to disabled subscription "
 						+ subscription.getIdElementString() + ".  Aborting delivery.");
 		}
