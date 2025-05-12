@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
@@ -75,6 +74,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Object mySyncResourcesLock = new Object();
 
 	private Integer myMaxRetryCount = null;
+	private boolean myInitialized = false;
 
 	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
@@ -90,12 +90,15 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	/**
-	 * This method performs a search in the DB, so use the {@link ContextStartedEvent}
+	 * This method performs a search in the DB, so use the {@link ContextRefreshedEvent}
 	 * to ensure that it runs after the database initializer
 	 */
 	@EventListener(classes = ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void registerListener() {
+		if (myInitialized) {
+			return;
+		}
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
@@ -106,6 +109,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
+		myInitialized = true;
 	}
 
 	private SearchParameterMap provideSearchParameterMap() {

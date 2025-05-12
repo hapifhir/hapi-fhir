@@ -44,17 +44,14 @@ class SubscriptionConsumerCache {
 		myCache.put(theChannelName, theValue);
 	}
 
-	synchronized void closeAndRemove(String theChannelName) {
+	void closeAndRemove(String theChannelName) {
 		Validate.notBlank(theChannelName);
 
 		SubscriptionResourceDeliveryMessageConsumer subscriptionResourceDeliveryMessageConsumer =
-				myCache.get(theChannelName);
-		if (subscriptionResourceDeliveryMessageConsumer == null) {
-			return;
+				myCache.remove(theChannelName);
+		if (subscriptionResourceDeliveryMessageConsumer != null) {
+			subscriptionResourceDeliveryMessageConsumer.close();
 		}
-
-		subscriptionResourceDeliveryMessageConsumer.close();
-		myCache.remove(theChannelName);
 	}
 
 	public boolean containsKey(String theChannelName) {
