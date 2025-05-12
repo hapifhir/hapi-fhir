@@ -1,16 +1,28 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +32,11 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
@@ -46,6 +61,170 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 	}
+
+	@Test
+	public void patchResource_withRegisteredInterceptorAnd_works() {
+		// setup
+		IParser jsonParser = myFhirContext.newJsonParser();
+		IFhirResourceDao<Encounter> encounterDao = myDaoRegistry.getResourceDao(Encounter.class);
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		// use a non-default partition
+		requestDetails.setRequestPartitionId(
+			RequestPartitionId.fromPartitionId(myPartitionId2)
+		);
+
+		/*
+		 * This interceptor does nothing; but we need it registered
+		 * for the RuntimeConfig lookup we're testing to run
+		 */
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_PARTITION_SELECTED)
+			public void partitionSelected(
+				RequestDetails theRequestDetails,
+				RequestPartitionId theRequestPartitionId,
+				RuntimeResourceDefinition theRuntimeResourceDefinition) {
+				// do nothing
+			}
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
+
+		try {
+			Bundle bundle;
+			Encounter encounter;
+			Location location;
+			{
+				@Language("JSON")
+				String encString = """
+					{
+					    "resourceType": "Encounter",
+					    "identifier": [
+					        {
+					            "system": "urn:th:HS:0075240H:vn",
+					            "value": "3209505"
+					        }
+					    ],
+					    "status": "in-progress"
+					}
+					""";
+				encounter = jsonParser.parseResource(Encounter.class, encString);
+			}
+			{
+				@Language("JSON")
+				String locationStr = """
+					{
+					    "resourceType": "Location",
+					    "identifier": [
+					        {
+					            "system": "urn:th:HS:0075240H:bd",
+					            "value": "SSU-01A"
+					        }
+					    ],
+					    "status": "suspended",
+					    "name": "South Wing, second floor"
+					}
+					""";
+				location = jsonParser.parseResource(Location.class, locationStr);
+			}
+			{
+				String bundleStr = """
+					{
+					    "entry": [
+					        {
+					            "request": {
+					                "method": "PATCH",
+					                "url": "Encounter?identifier=urn:th:HS:0075240H:vn|3209505"
+					            },
+					            "resource": {
+					                "parameter": [
+					                    {
+					                        "part": [
+					                            {
+					                                "name": "type",
+					                                "valueCode": "replace"
+					                            },
+					                            {
+					                                "valueString": "Encounter.location",
+					                                "name": "path"
+					                            },
+					                            {
+					                                "part": [
+					                                    {
+					                                        "valueReference": {
+					                                            "reference": "Location?identifier=urn:th:HS:0075240H:bd|SSU-01A"
+					                                        },
+					                                        "name": "location"
+					                                    },
+					                                    {
+					                                        "name": "status",
+					                                        "valueCode": "active"
+					                                    },
+					                                    {
+					                                        "valueCodeableConcept": {
+					                                            "coding": [
+					                                                {
+					                                                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+					                                                    "code": "bd"
+					                                                }
+					                                            ]
+					                                        },
+					                                        "name": "physicalType"
+					                                    },
+					                                    {
+					                                        "valuePeriod": {
+					                                            "start": "2025-03-19T06:44:55.6462761+02:00"
+					                                        },
+					                                        "name": "period"
+					                                    }
+					                                ],
+					                                "name": "value"
+					                            }
+					                        ],
+					                        "name": "operation"
+					                    }
+					                ],
+					                "resourceType": "Parameters"
+					            }
+					        }
+					    ],
+					    "id": "4e867c2a-897b-4540-9dc6-158085765705",
+					    "type": "transaction",
+					    "resourceType": "Bundle"
+					}
+					""";
+				bundle = jsonParser.parseResource(Bundle.class, bundleStr);
+			}
+
+			// create resources
+			myDaoRegistry.getResourceDao(Location.class)
+				.create(location, requestDetails);
+			DaoMethodOutcome encounterCreate = encounterDao
+				.create(encounter, requestDetails);
+			// no location for initial create
+			Encounter enc = encounterDao
+				.read(encounterCreate.getId().toUnqualifiedVersionless(), requestDetails);
+			assertTrue(enc.getLocation().isEmpty());
+
+			// test
+			Bundle result = mySystemDao.transaction(requestDetails, bundle);
+
+			assertNotNull(result);
+			assertEquals(1, result.getEntry().size());
+			assertEquals("200 OK", result.getEntry().get(0)
+				.getResponse()
+				.getStatus());
+
+			// verify we've now got a location object
+			Encounter updated = encounterDao
+				.read(encounterCreate.getId().toUnqualifiedVersionless(), requestDetails);
+			assertNotNull(updated);
+			assertEquals(1, updated.getLocation().size());
+		} finally {
+			// cleanup
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
 
 	@Test
 	public void testCreateAndSearch_NonPartitionable() {
