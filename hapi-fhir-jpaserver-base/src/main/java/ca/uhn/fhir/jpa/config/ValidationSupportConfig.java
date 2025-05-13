@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -69,8 +70,13 @@ public class ValidationSupportConfig {
 
 	@Bean(name = "myInstanceValidator")
 	public IInstanceValidatorModule instanceValidator(
-			FhirContext theFhirContext, IValidationSupport theValidationSupportChain, DaoRegistry theDaoRegistry) {
-		FhirInstanceValidator val = new FhirInstanceValidator(theValidationSupportChain);
+			FhirContext theFhirContext,
+			IValidationSupport theValidationSupportChain,
+			DaoRegistry theDaoRegistry,
+			VersionSpecificWorkerContextWrapper theWrappedWorkerContext) {
+		FhirInstanceValidator val = new FhirInstanceValidator(theFhirContext);
+		val.setWrappedWorkerContext(theValidationSupportChain, theWrappedWorkerContext);
+
 		val.setValidatorResourceFetcher(
 				jpaValidatorResourceFetcher(theFhirContext, theValidationSupportChain, theDaoRegistry));
 		val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());

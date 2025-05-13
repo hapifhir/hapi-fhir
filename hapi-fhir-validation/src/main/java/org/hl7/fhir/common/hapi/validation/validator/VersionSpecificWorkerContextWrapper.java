@@ -84,7 +84,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	 * the converted version gets cached too.
 	 */
 	private static final String CANONICAL_USERDATA_KEY =
-		VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+
 	private IValidationSupport myValidationSupport;
 	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile List<StructureDefinition> myAllStructures;
@@ -93,17 +94,24 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile FHIRPathEngine myFHIRPathEngine;
 	private FhirContext myFhirContext;
 
-	public VersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
+	/**
+	 * Constructor
+	 *
+	 * @param theValidationSupport Can be null, in which case {@link #setValidationSupport(IValidationSupport)} should be called
+	 */
+	public VersionSpecificWorkerContextWrapper(@Nullable IValidationSupport theValidationSupport) {
 		if (theValidationSupport != null) {
 			setValidationSupport(theValidationSupport);
 		}
-		setValidationMessageLanguage(getLocale());
 	}
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		Validate.isTrue(
+				myValidationSupport == null, "Can not set the validation support after it has already been set");
 		myValidationSupport = theValidationSupport;
 		myFhirContext = theValidationSupport.getFhirContext();
 		myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
+		setValidationMessageLanguage(getLocale());
 	}
 
 	@Override
@@ -133,7 +141,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public int loadFromPackageAndDependencies(NpmPackage pi, IContextResourceLoader loader, BasePackageCacheManager pcm)
-		throws FHIRException {
+			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(654));
 	}
 
@@ -184,7 +192,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public PEBuilder getProfiledElementBuilder(
-		PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
+			PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
 		throw new UnsupportedOperationException(Msg.code(2264));
 	}
 
@@ -214,12 +222,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
-			List<IBaseResource> allStructureDefinitions =
-				myValidationSupport.fetchAllStructureDefinitions();
+			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllStructureDefinitions();
 			assert allStructureDefinitions != null;
-
-			// FIXME: remove
-			ourLog.warn("**** Calculating SDs");
 
 			/*
 			 * This method (allStructureDefinitions()) gets called recursively - As we
@@ -238,8 +242,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			 * generate useful error messages for the user.
 			 */
 			retVal = allStructureDefinitions.stream()
-				.map(myVersionCanonicalizer::structureDefinitionToCanonical)
-				.collect(Collectors.toList());
+					.map(myVersionCanonicalizer::structureDefinitionToCanonical)
+					.collect(Collectors.toList());
 			myAllStructures = retVal;
 
 			try {
@@ -259,20 +263,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void cacheResource(Resource res) {
-	}
+	public void cacheResource(Resource res) {}
 
 	@Override
-	public void cacheResourceFromPackage(Resource res, PackageInformation packageDetails) throws FHIRException {
-	}
+	public void cacheResourceFromPackage(Resource res, PackageInformation packageDetails) throws FHIRException {}
 
 	@Override
-	public void cachePackage(PackageInformation packageInformation) {
-	}
+	public void cachePackage(PackageInformation packageInformation) {}
 
 	@Nonnull
 	private ValidationResult convertValidationResult(
-		String theSystem, @Nullable IValidationSupport.CodeValidationResult theResult) {
+			String theSystem, @Nullable IValidationSupport.CodeValidationResult theResult) {
 		ValidationResult retVal = null;
 		if (theResult != null) {
 			String code = theResult.getCode();
@@ -290,18 +291,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent = null;
 			if (code != null) {
 				conceptDefinitionComponent = new CodeSystem.ConceptDefinitionComponent()
-					.setCode(code)
-					.setDisplay(display);
+						.setCode(code)
+						.setDisplay(display);
 			}
 
 			retVal = new ValidationResult(
-				issueSeverity,
-				message,
-				theSystem,
-				theResult.getCodeSystemVersion(),
-				conceptDefinitionComponent,
-				display,
-				getIssuesForCodeValidation(theResult.getIssues()));
+					issueSeverity,
+					message,
+					theSystem,
+					theResult.getCodeSystemVersion(),
+					conceptDefinitionComponent,
+					display,
+					getIssuesForCodeValidation(theResult.getIssues()));
 		}
 
 		if (retVal == null) {
@@ -312,33 +313,33 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesForCodeValidation(
-		List<IValidationSupport.CodeValidationIssue> theIssues) {
+			List<IValidationSupport.CodeValidationIssue> theIssues) {
 		List<OperationOutcome.OperationOutcomeIssueComponent> issueComponents = new ArrayList<>();
 
 		for (IValidationSupport.CodeValidationIssue issue : theIssues) {
 			OperationOutcome.IssueSeverity severity =
-				OperationOutcome.IssueSeverity.fromCode(issue.getSeverity().getCode());
+					OperationOutcome.IssueSeverity.fromCode(issue.getSeverity().getCode());
 			OperationOutcome.IssueType issueType =
-				OperationOutcome.IssueType.fromCode(issue.getType().getCode());
+					OperationOutcome.IssueType.fromCode(issue.getType().getCode());
 			String diagnostics = issue.getDiagnostics();
 
 			IValidationSupport.CodeValidationIssueDetails details = issue.getDetails();
 			CodeableConcept codeableConcept = new CodeableConcept().setText(details.getText());
 			details.getCodings().forEach(detailCoding -> codeableConcept
-				.addCoding()
-				.setSystem(detailCoding.getSystem())
-				.setCode(detailCoding.getCode()));
+					.addCoding()
+					.setSystem(detailCoding.getSystem())
+					.setCode(detailCoding.getCode()));
 
 			OperationOutcome.OperationOutcomeIssueComponent issueComponent =
-				new OperationOutcome.OperationOutcomeIssueComponent()
-					.setSeverity(severity)
-					.setCode(issueType)
-					.setDetails(codeableConcept)
-					.setDiagnostics(diagnostics);
+					new OperationOutcome.OperationOutcomeIssueComponent()
+							.setSeverity(severity)
+							.setCode(issueType)
+							.setDetails(codeableConcept)
+							.setDiagnostics(diagnostics);
 			issueComponent
-				.addExtension()
-				.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
-				.setValue(new StringType("Terminology_PassThrough_TX_Message"));
+					.addExtension()
+					.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
+					.setValue(new StringType("Terminology_PassThrough_TX_Message"));
 			issueComponents.add(issueComponent);
 		}
 		return issueComponents;
@@ -352,8 +353,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(661) + e);
 		}
-		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport
-			.expandValueSet(new ValidationSupportContext(myValidationSupport), null, convertedSource);
+		IValidationSupport.ValueSetExpansionOutcome expanded =
+				myValidationSupport.expandValueSet(newValidationSupportContext(), null, convertedSource);
 
 		ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
@@ -377,21 +378,21 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(
-		Resource src,
-		ElementDefinition.ElementDefinitionBindingComponent binding,
-		boolean cacheOk,
-		boolean Hierarchical) {
+			Resource src,
+			ElementDefinition.ElementDefinitionBindingComponent binding,
+			boolean cacheOk,
+			boolean Hierarchical) {
 		ValueSet valueSet = fetchResource(ValueSet.class, binding.getValueSet(), src);
 		return expandVS(valueSet, cacheOk, Hierarchical);
 	}
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(
-		ITerminologyOperationDetails iTerminologyOperationDetails,
-		ValueSet.ConceptSetComponent conceptSetComponent,
-		boolean b,
-		boolean b1)
-		throws TerminologyServiceException {
+			ITerminologyOperationDetails iTerminologyOperationDetails,
+			ValueSet.ConceptSetComponent conceptSetComponent,
+			boolean b,
+			boolean b1)
+			throws TerminologyServiceException {
 		return null;
 	}
 
@@ -403,9 +404,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Locale getLocale() {
-		return myFhirContext
-			.getLocalizer()
-			.getLocale();
+		return myFhirContext.getLocalizer().getLocale();
 	}
 
 	@Override
@@ -415,8 +414,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system) {
-		IBaseResource fetched =
-			myValidationSupport.fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
@@ -429,8 +427,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String verison) {
-		IBaseResource fetched =
-			myValidationSupport.fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
@@ -508,7 +505,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		T retVal = fetchResource(class_, uri);
 		if (retVal == null) {
 			throw new FHIRException(
-				Msg.code(667) + "Can not find resource of type " + class_.getSimpleName() + " with uri " + uri);
+					Msg.code(667) + "Can not find resource of type " + class_.getSimpleName() + " with uri " + uri);
 		}
 		return retVal;
 	}
@@ -525,7 +522,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T fetchResource(
-		Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
+			Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
 		return null;
 	}
 
@@ -541,7 +538,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference)
-		throws FHIRException {
+			throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2214));
 	}
 
@@ -597,11 +594,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		if (retVal == null) {
 			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
 			retVal = allStructureDefinitions().stream()
-				.filter(structureDefinition ->
-					structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
-				.map(StructureDefinition::getName)
-				.filter(Objects::nonNull)
-				.collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+					.filter(structureDefinition ->
+							structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
+					.map(StructureDefinition::getName)
+					.filter(Objects::nonNull)
+					.collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
 			myAllPrimitiveTypes = retVal;
 		}
 
@@ -625,10 +622,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public String getVersion() {
-		return myFhirContext
-			.getVersion()
-			.getVersion()
-			.getFhirVersionString();
+		return myFhirContext.getVersion().getVersion().getFhirVersionString();
 	}
 
 	@Override
@@ -677,14 +671,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void setLogger(org.hl7.fhir.r5.context.ILoggingService logger) {
+	public void setLogger(@Nonnull org.hl7.fhir.r5.context.ILoggingService logger) {
 		throw new UnsupportedOperationException(Msg.code(687));
 	}
 
 	@Override
 	public boolean supportsSystem(String system) {
-		return myValidationSupport
-			.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system);
+		return myValidationSupport.isCodeSystemSupported(newValidationSupportContext(), system);
 	}
 
 	@Override
@@ -694,7 +687,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValueSetExpansionOutcome expandVS(
-		ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
+			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;
 	}
 
@@ -705,19 +698,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(
-		ValidationOptions theOptions, String system, String version, String code, String display) {
+			ValidationOptions theOptions, String system, String version, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		return doValidation(null, validationOptions, system, code, display);
 	}
 
 	@Override
 	public ValidationResult validateCode(
-		ValidationOptions theOptions,
-		String theSystem,
-		String version,
-		String theCode,
-		String display,
-		ValueSet theValueSet) {
+			ValidationOptions theOptions,
+			String theSystem,
+			String version,
+			String theCode,
+			String display,
+			ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {
@@ -747,7 +740,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String system = ValidationSupportUtils.extractCodeSystemForCode(theValueSet, code);
 
 		ConceptValidationOptions validationOptions =
-			convertConceptValidationOptions(theOptions).setInferSystem(true);
+				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
 		return doValidation(convertedVs, validationOptions, system, code, null);
 	}
@@ -774,13 +767,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(
-		ValidationOptions options, Coding code, ValueSet vs, ValidationContextCarrier ctxt) {
+			ValidationOptions options, Coding code, ValueSet vs, ValidationContextCarrier ctxt) {
 		return validateCode(options, code, vs);
 	}
 
 	@Override
 	public void validateCodeBatch(
-		ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
+			ValidationOptions options, List<? extends CodingValidationRequest> codes, ValueSet vs) {
 		for (CodingValidationRequest next : codes) {
 			ValidationResult outcome = validateCode(options, next.getCoding(), vs);
 			next.setResult(outcome);
@@ -789,18 +782,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public void validateCodeBatchByRef(
-		ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
+			ValidationOptions validationOptions, List<? extends CodingValidationRequest> list, String s) {
 		ValueSet valueSet = fetchResource(ValueSet.class, s);
 		validateCodeBatch(validationOptions, list, valueSet);
 	}
 
 	@Nonnull
 	private ValidationResult doValidation(
-		IBaseResource theValueSet,
-		ConceptValidationOptions theValidationOptions,
-		String theSystem,
-		String theCode,
-		String theDisplay) {
+			IBaseResource theValueSet,
+			ConceptValidationOptions theValidationOptions,
+			String theSystem,
+			String theCode,
+			String theDisplay) {
 		IValidationSupport.CodeValidationResult result;
 		if (theValueSet != null) {
 			result = validateCodeInValueSet(theValueSet, theValidationOptions, theSystem, theCode, theDisplay);
@@ -811,24 +804,22 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInValueSet(
-		IBaseResource theValueSet,
-		ConceptValidationOptions theValidationOptions,
-		String theSystem,
-		String theCode,
-		String theDisplay) {
-		IValidationSupport.CodeValidationResult result = myValidationSupport
-			.validateCodeInValueSet(
-				// FIXME: replace all new ValidationSupportContext(myValidationSupport) with a method
-				new ValidationSupportContext(myValidationSupport), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+			IBaseResource theValueSet,
+			ConceptValidationOptions theValidationOptions,
+			String theSystem,
+			String theCode,
+			String theDisplay) {
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
+				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
 			*/
 			IValidationSupport.CodeValidationResult codeSystemResult =
-				validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
-				.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
+					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
@@ -843,10 +834,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return result;
 	}
 
+	@Nonnull
+	private ValidationSupportContext newValidationSupportContext() {
+		return new ValidationSupportContext(myValidationSupport);
+	}
+
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
-		ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
-		return myValidationSupport
-			.validateCode(new ValidationSupportContext(myValidationSupport), theValidationOptions, theSystem, theCode, theDisplay, null);
+			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+		return myValidationSupport.validateCode(
+				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, null);
 	}
 
 	@Override
@@ -857,13 +853,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (Coding next : code.getCoding()) {
 			if (!next.hasSystem()) {
 				String message =
-					"Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
+						"Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
 				OperationOutcome.OperationOutcomeIssueComponent issue =
-					new OperationOutcome.OperationOutcomeIssueComponent()
-						.setSeverity(OperationOutcome.IssueSeverity.WARNING)
-						.setCode(OperationOutcome.IssueType.NOTFOUND)
-						.setDiagnostics(message)
-						.setDetails(new CodeableConcept().setText(message));
+						new OperationOutcome.OperationOutcomeIssueComponent()
+								.setSeverity(OperationOutcome.IssueSeverity.WARNING)
+								.setCode(OperationOutcome.IssueType.NOTFOUND)
+								.setDiagnostics(message)
+								.setDetails(new CodeableConcept().setText(message));
 
 				issues.add(issue);
 			}
@@ -871,19 +867,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			if (retVal.isOk()) {
 				validationResultsOk.add(retVal);
 			} else {
-				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
-					issues.add(issue);
-				}
+				issues.addAll(retVal.getIssues());
 			}
 		}
 
-		if (code.getCoding().size() > 0) {
+		if (!code.getCoding().isEmpty()) {
 			if (!myValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()) {
 				if (validationResultsOk.size() == code.getCoding().size()) {
 					return validationResultsOk.get(0);
 				}
 			} else {
-				if (validationResultsOk.size() > 0) {
+				if (!validationResultsOk.isEmpty()) {
 					return validationResultsOk.get(0);
 				}
 			}
@@ -896,6 +890,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		// nothing for now
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
@@ -962,10 +957,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private IBaseResource fetchResource(String theResourceType, String theUrl) {
 		String fetchResourceName = theResourceType;
-		if (myFhirContext
-			.getVersion()
-			.getVersion()
-			== FhirVersionEnum.DSTU2) {
+		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 			if ("CodeSystem".equals(fetchResourceName)) {
 				fetchResourceName = "ValueSet";
 			}
@@ -975,13 +967,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		if (fetchResourceName.equals("Resource")) {
 			fetchResourceType = null;
 		} else {
-			fetchResourceType = myFhirContext
-				.getResourceDefinition(fetchResourceName)
-				.getImplementingClass();
+			fetchResourceType =
+					myFhirContext.getResourceDefinition(fetchResourceName).getImplementingClass();
 		}
 
-		IBaseResource fetched =
-			myValidationSupport.fetchResource(fetchResourceType, theUrl);
+		IBaseResource fetched = myValidationSupport.fetchResource(fetchResourceType, theUrl);
 
 		if (fetched == null) {
 			return null;
@@ -991,7 +981,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
-		@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
+			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		Resource canonical;
 		synchronized (theResource) {
 			canonical = (Resource) theResource.getUserData(CANONICAL_USERDATA_KEY);
@@ -999,21 +989,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				boolean storeCanonical = true;
 				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
 
-				if (canonical instanceof StructureDefinition) {
-					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+				if (canonical instanceof StructureDefinition canonicalSd) {
 					if (canonicalSd.getSnapshot().isEmpty()) {
-						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 						IBaseResource resource = theResource;
 						try {
 
 							SnapshotGeneratingValidationSupport snapshotGenerator =
-								new SnapshotGeneratingValidationSupport(myFhirContext, this, getFHIRPathEngine());
+									new SnapshotGeneratingValidationSupport(myFhirContext, this, getFHIRPathEngine());
 							resource = snapshotGenerator.generateSnapshot(
-								new ValidationSupportContext(myValidationSupport), resource, "", null, "");
+									newValidationSupportContext(), resource, "", null, "");
 							Validate.isTrue(
-								resource != null,
-								"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
-								canonicalSd.getUrl());
+									resource != null,
+									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
+									canonicalSd.getUrl());
 
 						} catch (BaseServerResponseException e) {
 							if (thePropagateSnapshotException) {
@@ -1025,9 +1013,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								message = rootCause.getMessage();
 							}
 							ourLog.warn(
-								"Failed to generate snapshot for profile with URL[{}]: {}",
-								canonicalSd.getUrl(),
-								message);
+									"Failed to generate snapshot for profile with URL[{}]: {}",
+									canonicalSd.getUrl(),
+									message);
 							storeCanonical = false;
 						}
 
@@ -1036,7 +1024,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				}
 
 				String sourcePackageId =
-					(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
+						(String) theResource.getUserData(DefaultProfileValidationSupport.SOURCE_PACKAGE_ID);
 				if (sourcePackageId != null) {
 					canonical.setSourcePackage(new PackageInformation(sourcePackageId, null, null, new Date()));
 				}
@@ -1069,18 +1057,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
 	}
 
-	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
-		String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
-		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-			.setDiagnostics(message);
-		issue.getDetails().setText(message);
-
-		issue.setCode(issueCode);
-		issue.getDetails().addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type", txIssueTypeCode, null);
-		return issue;
-	}
-
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
 		ConceptValidationOptions retVal = new ConceptValidationOptions();
 		if (theOptions.isGuessSystem()) {
@@ -1091,7 +1067,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Nonnull
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
-		IValidationSupport theValidationSupport) {
+			IValidationSupport theValidationSupport) {
 		return new VersionSpecificWorkerContextWrapper(theValidationSupport);
 	}
 }

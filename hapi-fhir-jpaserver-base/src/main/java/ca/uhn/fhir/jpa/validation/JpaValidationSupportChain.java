@@ -32,12 +32,15 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	private final FhirContext myFhirContext;
+	private final VersionSpecificWorkerContextWrapper myVersionSpecificWorkerContextWrapper;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
@@ -66,13 +69,16 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	 * Constructor
 	 */
 	public JpaValidationSupportChain(
-			FhirContext theFhirContext, ValidationSupportChain.CacheConfiguration theCacheConfiguration) {
+			FhirContext theFhirContext,
+			CacheConfiguration theCacheConfiguration,
+			VersionSpecificWorkerContextWrapper theVersionSpecificWorkerContextWrapper) {
 		super(theCacheConfiguration);
 
 		assert theFhirContext != null;
 		assert theCacheConfiguration != null;
 
 		myFhirContext = theFhirContext;
+		myVersionSpecificWorkerContextWrapper = theVersionSpecificWorkerContextWrapper;
 	}
 
 	@Override
@@ -87,10 +93,15 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
+		myVersionSpecificWorkerContextWrapper.setValidationSupport(this);
+
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
-		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+		addValidationSupport(new SnapshotGeneratingValidationSupport(
+				myFhirContext,
+				myVersionSpecificWorkerContextWrapper,
+				new FHIRPathEngine(myVersionSpecificWorkerContextWrapper)));
 		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));

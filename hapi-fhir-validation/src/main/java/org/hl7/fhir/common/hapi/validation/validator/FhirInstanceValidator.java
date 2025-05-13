@@ -153,6 +153,19 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
+	 * Sets the {@link IValidationSupport validation support} in use by this validator, as well
+	 * as a {@link VersionSpecificWorkerContextWrapper}. This is useful if a single instance of
+	 * the latter should be shared in multiple places.
+	 *
+	 * @since 8.4.0
+	 */
+	public void setWrappedWorkerContext(
+			IValidationSupport theValidationSupport, VersionSpecificWorkerContextWrapper theWrappedWorkerContext) {
+		myValidationSupport = theValidationSupport;
+		myWrappedWorkerContext = theWrappedWorkerContext;
+	}
+
+	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
 	 * validator (e.g. because they have not been explicitly declared in a profile) will
 	 * be validated but will not cause an error.

@@ -1,7 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
 
 /**
  * Simple validation support module that handles profile snapshot generation.
@@ -38,11 +37,15 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
  * </ul>
  */
 public class SnapshotGeneratingValidationSupport implements IValidationSupport {
+	@VisibleForTesting
+	public static final String GENERATING_SNAPSHOT_LOG_MSG = "Generating snapshot for StructureDefinition: {}";
+
+	public static final String CURRENTLY_GENERATING_USERDATA_KEY =
+			SnapshotGeneratingValidationSupport.class.getName() + "_CURRENTLY_GENERATING";
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final FhirContext myCtx;
 	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final IWorkerContext myWorkerContext;
-	private final FHIRPathEngine myFHIRPathEngine;
 
 	/**
 	 * Constructor
@@ -57,10 +60,8 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		myCtx = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
-		myFHIRPathEngine = theFHIRPathEngine;
 	}
 
-	@SuppressWarnings("EnhancedSwitchMigration")
 	@Override
 	public IBaseResource generateSnapshot(
 			ValidationSupportContext theValidationSupportContext,
@@ -69,57 +70,54 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			String theWebUrl,
 			String theProfileName) {
 
-		String inputUrl = null;
-		try {
-			IBaseResource inputClone = myCtx.newTerser().clone(theInput);
-			org.hl7.fhir.r5.model.StructureDefinition inputCanonical =
-					myVersionCanonicalizer.structureDefinitionToCanonical(inputClone);
-
-			inputUrl = inputCanonical.getUrl();
-
-			// FIXME: remove?
-//			if (theValidationSupportContext.getCurrentlyGeneratingSnapshots().contains(inputUrl)) {
-//				ourLog.warn("Detected circular dependency, already generating snapshot for: {}", inputUrl);
-//				return theInput;
-//			}
-
-			String baseDefinition = inputCanonical.getBaseDefinition();
-			if (isBlank(baseDefinition)) {
-				throw new PreconditionFailedException(Msg.code(704) + "StructureDefinition[id="
-						+ inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
+		synchronized (theInput) {
+			if (theInput.getUserData(CURRENTLY_GENERATING_USERDATA_KEY) != null) {
+				String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(theInput, "url");
+				ourLog.info("Detected circular dependency, already generating snapshot for: {}", url);
+				return theInput;
 			}
 
-			IWorkerContext workerContext = myWorkerContext;
-			// FIXME: should we change so this cant be null?
-			if (workerContext == null) {
-				workerContext =
-					new VersionSpecificWorkerContextWrapper(theValidationSupportContext.getRootValidationSupport());
-			}
+			try {
+				theInput.setUserData(CURRENTLY_GENERATING_USERDATA_KEY, CURRENTLY_GENERATING_USERDATA_KEY);
 
-			StructureDefinition base = workerContext.fetchResource(StructureDefinition.class, baseDefinition);
-			if (base == null) {
-				throw new PreconditionFailedException(Msg.code(705) + "Unknown base definition: " + baseDefinition);
-			}
+				IBaseResource inputClone = myCtx.newTerser().clone(theInput);
+				org.hl7.fhir.r5.model.StructureDefinition inputCanonical =
+						myVersionCanonicalizer.structureDefinitionToCanonical(inputClone);
 
-			ArrayList<ValidationMessage> messages = new ArrayList<>();
-			ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
-			ProfileUtilities profileUtilities = new ProfileUtilities(workerContext, messages, profileKnowledgeProvider);
+				String baseDefinition = inputCanonical.getBaseDefinition();
+				if (isBlank(baseDefinition)) {
+					throw new PreconditionFailedException(Msg.code(704) + "StructureDefinition[id="
+							+ inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl()
+							+ "] has no base");
+				}
 
-			// FIXME: remove?
-//			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
+				IWorkerContext workerContext = myWorkerContext;
+				if (workerContext == null) {
+					workerContext = new VersionSpecificWorkerContextWrapper(
+							theValidationSupportContext.getRootValidationSupport());
+				}
 
-			ourLog.info("Generating snapshot for StructureDefinition: {}", inputCanonical.getUrl());
-			profileUtilities.generateSnapshot(base, inputCanonical, theUrl, theWebUrl, theProfileName);
+				StructureDefinition base = workerContext.fetchResource(StructureDefinition.class, baseDefinition);
+				if (base == null) {
+					throw new PreconditionFailedException(Msg.code(705) + "Unknown base definition: " + baseDefinition);
+				}
 
-			return myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
+				ArrayList<ValidationMessage> messages = new ArrayList<>();
+				ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
+				ProfileUtilities profileUtilities =
+						new ProfileUtilities(workerContext, messages, profileKnowledgeProvider);
 
-		} catch (BaseServerResponseException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InternalErrorException(Msg.code(707) + "Failed to generate snapshot", e);
-		} finally {
-			if (inputUrl != null) {
-				theValidationSupportContext.getCurrentlyGeneratingSnapshots().remove(inputUrl);
+				ourLog.info(GENERATING_SNAPSHOT_LOG_MSG, inputCanonical.getUrl());
+				profileUtilities.generateSnapshot(base, inputCanonical, theUrl, theWebUrl, theProfileName);
+
+				return myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
+
+			} catch (BaseServerResponseException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new InternalErrorException(Msg.code(707) + "Failed to generate snapshot", e);
+			} finally {
+				theInput.setUserData(CURRENTLY_GENERATING_USERDATA_KEY, null);
 			}
 		}
 	}
