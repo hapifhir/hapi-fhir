@@ -90,110 +90,9 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
 		try {
-			Bundle bundle;
-			Encounter encounter;
-			Location location;
-			{
-				@Language("JSON")
-				String encString = """
-					{
-					    "resourceType": "Encounter",
-					    "identifier": [
-					        {
-					            "system": "urn:th:HS:0075240H:vn",
-					            "value": "3209505"
-					        }
-					    ],
-					    "status": "in-progress"
-					}
-					""";
-				encounter = jsonParser.parseResource(Encounter.class, encString);
-			}
-			{
-				@Language("JSON")
-				String locationStr = """
-					{
-					    "resourceType": "Location",
-					    "identifier": [
-					        {
-					            "system": "urn:th:HS:0075240H:bd",
-					            "value": "SSU-01A"
-					        }
-					    ],
-					    "status": "suspended",
-					    "name": "South Wing, second floor"
-					}
-					""";
-				location = jsonParser.parseResource(Location.class, locationStr);
-			}
-			{
-				String bundleStr = """
-					{
-					    "entry": [
-					        {
-					            "request": {
-					                "method": "PATCH",
-					                "url": "Encounter?identifier=urn:th:HS:0075240H:vn|3209505"
-					            },
-					            "resource": {
-					                "parameter": [
-					                    {
-					                        "part": [
-					                            {
-					                                "name": "type",
-					                                "valueCode": "replace"
-					                            },
-					                            {
-					                                "valueString": "Encounter.location",
-					                                "name": "path"
-					                            },
-					                            {
-					                                "part": [
-					                                    {
-					                                        "valueReference": {
-					                                            "reference": "Location?identifier=urn:th:HS:0075240H:bd|SSU-01A"
-					                                        },
-					                                        "name": "location"
-					                                    },
-					                                    {
-					                                        "name": "status",
-					                                        "valueCode": "active"
-					                                    },
-					                                    {
-					                                        "valueCodeableConcept": {
-					                                            "coding": [
-					                                                {
-					                                                    "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
-					                                                    "code": "bd"
-					                                                }
-					                                            ]
-					                                        },
-					                                        "name": "physicalType"
-					                                    },
-					                                    {
-					                                        "valuePeriod": {
-					                                            "start": "2025-03-19T06:44:55.6462761+02:00"
-					                                        },
-					                                        "name": "period"
-					                                    }
-					                                ],
-					                                "name": "value"
-					                            }
-					                        ],
-					                        "name": "operation"
-					                    }
-					                ],
-					                "resourceType": "Parameters"
-					            }
-					        }
-					    ],
-					    "id": "4e867c2a-897b-4540-9dc6-158085765705",
-					    "type": "transaction",
-					    "resourceType": "Bundle"
-					}
-					""";
-				bundle = jsonParser.parseResource(Bundle.class, bundleStr);
-			}
+			Encounter encounter = createEncounter(jsonParser);
+			Location location = createLocation(jsonParser);
+			Bundle bundle = createPatchEncounterBundle(jsonParser);
 
 			// create resources
 			myDaoRegistry.getResourceDao(Location.class)
@@ -225,6 +124,98 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		}
 	}
 
+	private static Bundle createPatchEncounterBundle(IParser jsonParser) {
+		Bundle bundle;
+		{
+			String bundleStr = """
+				{
+					"entry": [
+						{
+							"request": {
+								"method": "PATCH",
+								"url": "Encounter?identifier=urn:th:HS:0075240H:vn|3209505"
+							},
+							"resource": {
+								"parameter": [
+									{
+										"part": [
+											{
+												"name": "type",
+												"valueCode": "replace"
+											},
+											{
+												"valueString": "Encounter.location",
+												"name": "path"
+											},
+											{
+												"part": [
+													{
+														"valueReference": {
+															"reference": "Location?identifier=urn:th:HS:0075240H:bd|SSU-01A"
+														},
+														"name": "location"
+													}
+												],
+												"name": "value"
+											}
+										],
+										"name": "operation"
+									}
+								],
+								"resourceType": "Parameters"
+							}
+						}
+					],
+					"id": "4e867c2a-897b-4540-9dc6-158085765705",
+					"type": "transaction",
+					"resourceType": "Bundle"
+				}
+				""";
+			bundle = jsonParser.parseResource(Bundle.class, bundleStr);
+		}
+		return bundle;
+	}
+
+	private static Location createLocation(IParser jsonParser) {
+		Location location;
+		{
+			@Language("JSON")
+			String locationStr = """
+				{
+					"resourceType": "Location",
+					"identifier": [
+						{
+							"system": "urn:th:HS:0075240H:bd",
+							"value": "SSU-01A"
+						}
+					]
+				}
+				""";
+			location = jsonParser.parseResource(Location.class, locationStr);
+		}
+		return location;
+	}
+
+	private static Encounter createEncounter(IParser jsonParser) {
+		Encounter encounter;
+		{
+			@Language("JSON")
+			String encString = """
+				{
+					"resourceType": "Encounter",
+					"identifier": [
+						{
+							"system": "urn:th:HS:0075240H:vn",
+							"value": "3209505"
+						}
+					],
+					"status": "in-progress"
+				}
+				""";
+			encounter = jsonParser.parseResource(Encounter.class, encString);
+		}
+		return encounter;
+	}
 
 	@Test
 	public void testCreateAndSearch_NonPartitionable() {
