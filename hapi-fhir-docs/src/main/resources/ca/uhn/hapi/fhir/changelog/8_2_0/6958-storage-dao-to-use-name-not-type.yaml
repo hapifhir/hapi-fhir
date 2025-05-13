@@ -3,8 +3,6 @@ type: fix
 issue: 6958
 title: "When attempting to patch a resource in a partitioned system
         with a registered `STORAGE_PARTITION_SELECTED` interceptor,
-        an error would result because of the use of getTypeName of a class
-        instead of getSimpleName (the former returning package info, the latter
-        just the class name).
+        an error would result.
         This has now been fixed.
 "
