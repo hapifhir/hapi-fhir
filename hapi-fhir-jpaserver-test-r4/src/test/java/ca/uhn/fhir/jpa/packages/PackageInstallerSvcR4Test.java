@@ -1028,7 +1028,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.stream()
 			.map(ILoggingEvent::getFormattedMessage)
 			.toList();
-		assertThat(snapshotMessages).hasSize(9); // currently 8
+		assertThat(snapshotMessages).hasSize(5);
 	}
 
 

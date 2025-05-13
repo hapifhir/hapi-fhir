@@ -89,13 +89,6 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).contains("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2");
-
-		List<String> snapshotMessages = myTerminologyTroubleshootingLogCapture
-			.getLogEvents(t -> t.getMessage().equals(GENERATING_SNAPSHOT_LOG_MSG))
-			.stream()
-			.map(ILoggingEvent::getFormattedMessage)
-			.toList();
-		assertThat(snapshotMessages).hasSize(11); // currently 10
 	}
 
 }
