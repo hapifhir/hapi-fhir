@@ -73,11 +73,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <p>
  * For example, this interceptor
  * could be used to restrict a user to only viewing data belonging to Patient/123 (i.e. data
- * in the <code>Patient/123</code> compartment). In this case, a user performing a search
+ * in the Patient/123 compartment). In this case, a user performing a search
  * for<br/>
- * <code>http://baseurl/Observation?category=laboratory</code><br/>
+ * {@code http://baseurl/Observation?category=laboratory}<br/>
  * would receive results as though they had requested<br/>
- * <code>http://baseurl/Observation?subject=Patient/123{@code &}category=laboratory</code>
+ * {@code http://baseurl/Observation?subject=Patient/123&category=laboratory}
  * </p>
  * <p>
  * Note that this interceptor should be used in combination with {@link AuthorizationInterceptor}
