@@ -216,6 +216,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
 			assert allStructureDefinitions != null;
 
+			// FIXME: remove
+			ourLog.warn("**** Calculating SDs");
+
 			/*
 			 * This method (allStructureDefinitions()) gets called recursively - As we
 			 * try to return all StructureDefinitions, we want to generate snapshots for
