@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
@@ -41,15 +40,13 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	public void setupValidationForBinary() {
 		myValidationSupport = mockValidationSupportWithTwoBinaries();
 		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(ourCtx);
-		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupportContext, versionCanonicalizer);
+		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 
 	public void setupValidation() {
 		myValidationSupport = mockValidationSupport();
 		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(ourCtx);
-		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupportContext, versionCanonicalizer);
+		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 
 	private IValidationSupport mockValidationSupportWithTwoBinaries() {
@@ -58,22 +55,6 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		when(validationSupport.fetchBinary(EXPECTED_BINARY_KEY_1)).thenReturn(EXPECTED_BINARY_CONTENT_1);
 		when(validationSupport.fetchBinary(EXPECTED_BINARY_KEY_2)).thenReturn(EXPECTED_BINARY_CONTENT_2);
 		return validationSupport;
-	}
-
-
-	private static ValidationSupportContext mockValidationSupportContext(IValidationSupport validationSupport) {
-		ValidationSupportContext mockContext;
-		mockContext = mock(ValidationSupportContext.class);
-		when(mockContext.getRootValidationSupport()).thenReturn(validationSupport);
-		return mockContext;
-	}
-
-
-	private static IValidationSupport mockValidationSupport() {
-		IValidationSupport mockValidationSupport;
-		mockValidationSupport = mock(IValidationSupport.class);
-		when(mockValidationSupport.getFhirContext()).thenReturn(ourCtx);
-		return mockValidationSupport;
 	}
 
 	@Test
@@ -204,11 +185,11 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		return List.of(personType, boolType, orgType, stringType);
 	}
 
-	private StructureDefinition createComplex(String name){
+	private StructureDefinition createComplex(String name) {
 		return createStructureDefinition(name).setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
 	}
 
-	private StructureDefinition createPrimitive(String name){
+	private StructureDefinition createPrimitive(String name) {
 		return createStructureDefinition(name).setKind(StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE);
 	}
 
@@ -217,5 +198,19 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 		sd.setUrl("http://hl7.org/fhir/StructureDefinition/" + name).setName(name);
 		sd.getSnapshot().addElement().setId("FOO");
 		return sd;
+	}
+
+	private static ValidationSupportContext mockValidationSupportContext(IValidationSupport validationSupport) {
+		ValidationSupportContext mockContext;
+		mockContext = mock(ValidationSupportContext.class);
+		when(mockContext.getRootValidationSupport()).thenReturn(validationSupport);
+		return mockContext;
+	}
+
+	private static IValidationSupport mockValidationSupport() {
+		IValidationSupport mockValidationSupport;
+		mockValidationSupport = mock(IValidationSupport.class);
+		when(mockValidationSupport.getFhirContext()).thenReturn(ourCtx);
+		return mockValidationSupport;
 	}
 }

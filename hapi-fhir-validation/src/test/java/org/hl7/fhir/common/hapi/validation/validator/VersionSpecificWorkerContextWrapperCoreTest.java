@@ -3,14 +3,10 @@ package org.hl7.fhir.common.hapi.validation.validator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
-
-import java.util.Set;
-
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -53,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -63,68 +60,59 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 /**
- This test class is included as useful debugging code.
-
- It is not currently intended to pass.
-
- It will remain disabled so as not to impede the build, but can be enabled in order to debug issues relating to the
- validation of codes and code systems.
-
- This test class was derived from an original test in org.hl7.fhir.core:
-
- https://github.com/hapifhir/org.hl7.fhir.core/blob/6.3.7/org.hl7.fhir.validation/src/test/java/org/hl7/fhir/terminology/tests/TerminologyServiceTests.java
-
- The original series of tests is loaded from the fhir-test-cases repository:
-
- https://github.com/FHIR/fhir-test-cases/tree/1.5.7/tx
-
- In the original test cases were executed using the core implementation of IWorkerContext, which is passed to this
- utility method:
-
- https://github.com/hapifhir/org.hl7.fhir.core/blob/d81fc5d82d0297d1a6f4b38bd9b81e52f859eb4f/org.hl7.fhir.validation/src/main/java/org/hl7/fhir/validation/special/TxServiceTestHelper.java#L25
-
- This executes a diff of the actual and expected results. In the core implementation of IWorkerContext, an actual server
- is used for terminology expansion and validation, and actual test results are meant to equal the expected ones.
-
- In HAPI,  we use a completely different implementation of IWorkerContext, with error messages that differ from the core
- implementation. InMemoryTerminologyServerValidationSupport for example, should not produce the same error code as a
- FHIR terminology server. Thus, these tests will produce different error messages, and will almost always fail. However,
- they can be used to debug the validation process, as well as to compare our validation results to the core.
-
- You can produce diffs in a local directory by setting the TX_SERVICE_TEST_DIFF_TARGET environment variable.
-
- The code below is left in the last 'working' state. It may contain dead code and other artifacts of being derived from
- the core library. It may have to be updated to suit a particular debugging task. The documentation above is meant to
- provide some guidance on how to derive similar debugging code from the org.hl7.fhir.core test cases.
+ * This test class is included as useful debugging code.
+ * <p>
+ * It is not currently intended to pass.
+ * <p>
+ * It will remain disabled so as not to impede the build, but can be enabled in order to debug issues relating to the
+ * validation of codes and code systems.
+ * <p>
+ * This test class was derived from an original test in org.hl7.fhir.core:
+ * <p>
+ * https://github.com/hapifhir/org.hl7.fhir.core/blob/6.3.7/org.hl7.fhir.validation/src/test/java/org/hl7/fhir/terminology/tests/TerminologyServiceTests.java
+ * <p>
+ * The original series of tests is loaded from the fhir-test-cases repository:
+ * <p>
+ * https://github.com/FHIR/fhir-test-cases/tree/1.5.7/tx
+ * <p>
+ * In the original test cases were executed using the core implementation of IWorkerContext, which is passed to this
+ * utility method:
+ * <p>
+ * https://github.com/hapifhir/org.hl7.fhir.core/blob/d81fc5d82d0297d1a6f4b38bd9b81e52f859eb4f/org.hl7.fhir.validation/src/main/java/org/hl7/fhir/validation/special/TxServiceTestHelper.java#L25
+ * <p>
+ * This executes a diff of the actual and expected results. In the core implementation of IWorkerContext, an actual server
+ * is used for terminology expansion and validation, and actual test results are meant to equal the expected ones.
+ * <p>
+ * In HAPI,  we use a completely different implementation of IWorkerContext, with error messages that differ from the core
+ * implementation. InMemoryTerminologyServerValidationSupport for example, should not produce the same error code as a
+ * FHIR terminology server. Thus, these tests will produce different error messages, and will almost always fail. However,
+ * they can be used to debug the validation process, as well as to compare our validation results to the core.
+ * <p>
+ * You can produce diffs in a local directory by setting the TX_SERVICE_TEST_DIFF_TARGET environment variable.
+ * <p>
+ * The code below is left in the last 'working' state. It may contain dead code and other artifacts of being derived from
+ * the core library. It may have to be updated to suit a particular debugging task. The documentation above is meant to
+ * provide some guidance on how to derive similar debugging code from the org.hl7.fhir.core test cases.
  */
 @Disabled
 public class VersionSpecificWorkerContextWrapperCoreTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionSpecificWorkerContextWrapperCoreTest.class);
-
-	private final Map<String, ValueSet> myValueSets = new HashMap<>();
-
-	private final Map<String, CodeSystem> myCodeSystems = new HashMap<>();
+	private static final String VALIDATE_CODE_OPERATION = "validate-code";
+	private static final String VALIDATE_CODESYSTEM_OPERATION = "cs-validate-code";
+	private static final String EXPAND_OPERATION = "expand";
 	private static FhirContext ourCtx = FhirContext.forR5();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
+	private final Map<String, ValueSet> myValueSets = new HashMap<>();
+	private final Map<String, CodeSystem> myCodeSystems = new HashMap<>();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
+	VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
 	private FhirInstanceValidator myInstanceVal;
 	private Map<String, ValueSet.ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ValidationSupportChain myValidationSupport;
-
-
-	private static final String VALIDATE_CODE_OPERATION = "validate-code";
-
-	private static final String VALIDATE_CODESYSTEM_OPERATION = "cs-validate-code";
-
-	private static final String EXPAND_OPERATION = "expand";
-
 	private VersionSpecificWorkerContextWrapper wrapper;
-
-	VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-
 
 	@BeforeEach
 	public void before() {
@@ -167,7 +155,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 								String url = (String) theInvocation.getArguments()[0];
 
 								ourLog.info("Looking for codeSystem: " + url);
-								return  myCodeSystems.get(url);
+								return myCodeSystems.get(url);
 							}
 						}
 			);
@@ -183,23 +171,8 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				unknownCodeSystemWarningValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
-		wrapper = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), versionCanonicalizer);
+		wrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
 		wrapper.setExpansionParameters(new Parameters());
-	}
-
-	public static Stream<Arguments> argumentSource() throws IOException {
-		TxTestData data = TxTestData.loadTestDataFromPackage(VersionSpecificWorkerContextWrapperCoreTest.class.getPackage().toString());
-
-		return data.getTestData().stream()
-			.filter( entry -> {
-					TxTestSetup testSetup = (TxTestSetup) entry[1];
-					return testSetup.getTest().asString("operation").equals("validate-code")
-						|| testSetup.getTest().asString("operation").equals("cs-validate-code");
-			}
-			)
-			.map(
-			entry ->
-				Arguments.of(entry[0], data, entry[1]));
 	}
 
 	@ParameterizedTest(name = "{0}")
@@ -211,7 +184,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 
 			Resource res = loadResource(s);
 			if ("ValueSet".equals(res.getResourceType().toString())) {
-				ValueSet valueSet = (ValueSet)res;
+				ValueSet valueSet = (ValueSet) res;
 				myValueSets.put(valueSet.getUrl(), valueSet);
 			} else if ("CodeSystem".equals(res.getResourceType().toString())) {
 				CodeSystem codeSystem = (CodeSystem) res;
@@ -229,19 +202,19 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 		if (fo.exists()) {
 			fo.delete();
 		}
-		 if (setup.getTest().asString("operation").equals("validate-code")) {
-      String diff =
-          TxServiceTestHelper.getDiffForValidation(
-              setup.getTest().str("name"),
-              wrapper,
-              setup.getTest().asString("name"),
-              req,
-              resp,
-              setup.getTest().asString("Content-Language"),
-              fp,
-              ext,
-              false,
-              Set.of());
+		if (setup.getTest().asString("operation").equals("validate-code")) {
+			String diff =
+				TxServiceTestHelper.getDiffForValidation(
+					setup.getTest().str("name"),
+					wrapper,
+					setup.getTest().asString("name"),
+					req,
+					resp,
+					setup.getTest().asString("Content-Language"),
+					fp,
+					ext,
+					false,
+					Set.of());
 			assertNull(diff, diff);
 		} else if (setup.getTest().asString("operation").equals("cs-validate-code")) {
 			String diff = TxServiceTestHelper.getDiffForValidation(setup.getTest().str("name"), wrapper, setup.getTest().asString("name"), req, resp, setup.getTest().asString("Content-Language"), fp, ext, true, Set.of());
@@ -281,5 +254,20 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 					throw new FHIRException("unknown version " + version);
 			}
 		}
+	}
+
+	public static Stream<Arguments> argumentSource() throws IOException {
+		TxTestData data = TxTestData.loadTestDataFromPackage(VersionSpecificWorkerContextWrapperCoreTest.class.getPackage().toString());
+
+		return data.getTestData().stream()
+			.filter(entry -> {
+					TxTestSetup testSetup = (TxTestSetup) entry[1];
+					return testSetup.getTest().asString("operation").equals("validate-code")
+						|| testSetup.getTest().asString("operation").equals("cs-validate-code");
+				}
+			)
+			.map(
+				entry ->
+					Arguments.of(entry[0], data, entry[1]));
 	}
 }

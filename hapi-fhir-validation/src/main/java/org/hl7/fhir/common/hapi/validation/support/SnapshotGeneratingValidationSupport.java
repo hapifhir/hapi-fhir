@@ -18,6 +18,7 @@ import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
 import org.hl7.fhir.r5.conformance.profile.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
+import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
 
@@ -70,16 +71,17 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 		String inputUrl = null;
 		try {
-			FhirVersionEnum version = theInput.getStructureFhirVersionEnum();
-
+			IBaseResource inputClone = myCtx.newTerser().clone(theInput);
 			org.hl7.fhir.r5.model.StructureDefinition inputCanonical =
-					myVersionCanonicalizer.structureDefinitionToCanonical(theInput);
+					myVersionCanonicalizer.structureDefinitionToCanonical(inputClone);
 
 			inputUrl = inputCanonical.getUrl();
-			if (theValidationSupportContext.getCurrentlyGeneratingSnapshots().contains(inputUrl)) {
-				ourLog.warn("Detected circular dependency, already generating snapshot for: {}", inputUrl);
-				return theInput;
-			}
+
+			// FIXME: remove?
+//			if (theValidationSupportContext.getCurrentlyGeneratingSnapshots().contains(inputUrl)) {
+//				ourLog.warn("Detected circular dependency, already generating snapshot for: {}", inputUrl);
+//				return theInput;
+//			}
 
 			String baseDefinition = inputCanonical.getBaseDefinition();
 			if (isBlank(baseDefinition)) {
@@ -87,91 +89,29 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 						+ inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
 			}
 
-			IBaseResource base =
-					theValidationSupportContext.getRootValidationSupport().fetchStructureDefinition(baseDefinition);
+			IWorkerContext workerContext = myWorkerContext;
+			// FIXME: should we change so this cant be null?
+			if (workerContext == null) {
+				workerContext =
+					new VersionSpecificWorkerContextWrapper(theValidationSupportContext.getRootValidationSupport());
+			}
+
+			StructureDefinition base = workerContext.fetchResource(StructureDefinition.class, baseDefinition);
 			if (base == null) {
 				throw new PreconditionFailedException(Msg.code(705) + "Unknown base definition: " + baseDefinition);
 			}
 
-			org.hl7.fhir.r5.model.StructureDefinition baseCanonical =
-					myVersionCanonicalizer.structureDefinitionToCanonical(base);
-
-			if (baseCanonical.getSnapshot().getElement().isEmpty()) {
-				// If the base definition also doesn't have a snapshot, generate that first
-				theValidationSupportContext
-						.getRootValidationSupport()
-						.generateSnapshot(theValidationSupportContext, base, null, null, null);
-				baseCanonical = myVersionCanonicalizer.structureDefinitionToCanonical(base);
-			}
-
 			ArrayList<ValidationMessage> messages = new ArrayList<>();
 			ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
+			ProfileUtilities profileUtilities = new ProfileUtilities(workerContext, messages, profileKnowledgeProvider);
 
-			ProfileUtilities profileUtilities;
-			if (myWorkerContext == null) {
-				IWorkerContext context =
-						new VersionSpecificWorkerContextWrapper(theValidationSupportContext, myVersionCanonicalizer);
-				profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
-			} else {
-				profileUtilities =
-						new ProfileUtilities(myWorkerContext, messages, profileKnowledgeProvider, myFHIRPathEngine);
-			}
-			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
+			// FIXME: remove?
+//			theValidationSupportContext.getCurrentlyGeneratingSnapshots().add(inputUrl);
+
 			ourLog.info("Generating snapshot for StructureDefinition: {}", inputCanonical.getUrl());
-			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
+			profileUtilities.generateSnapshot(base, inputCanonical, theUrl, theWebUrl, theProfileName);
 
-			switch (getFhirVersionEnum(
-					theValidationSupportContext.getRootValidationSupport().getFhirContext(), theInput)) {
-				case DSTU3:
-					org.hl7.fhir.dstu3.model.StructureDefinition generatedDstu3 =
-							(org.hl7.fhir.dstu3.model.StructureDefinition)
-									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
-					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedDstu3.getSnapshot().getElement());
-					break;
-				case R4:
-					org.hl7.fhir.r4.model.StructureDefinition generatedR4 = (org.hl7.fhir.r4.model.StructureDefinition)
-							myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
-					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4.getSnapshot().getElement());
-					break;
-				case R4B:
-					org.hl7.fhir.r4b.model.StructureDefinition generatedR4b =
-							(org.hl7.fhir.r4b.model.StructureDefinition)
-									myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
-					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.clear();
-					((org.hl7.fhir.r4b.model.StructureDefinition) theInput)
-							.getSnapshot()
-							.getElement()
-							.addAll(generatedR4b.getSnapshot().getElement());
-					break;
-				case R5:
-					// nothing
-					break;
-				case DSTU2:
-				case DSTU2_HL7ORG:
-				case DSTU2_1:
-				default:
-					throw new IllegalStateException(
-							Msg.code(706) + "Can not generate snapshot for version: " + version);
-			}
-
-			return theInput;
+			return myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 
 		} catch (BaseServerResponseException e) {
 			throw e;

@@ -1244,7 +1244,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 
 		when(resourceFetcher.fetch(any(), any(), any())).thenAnswer(t -> {
-			return new JsonParser(new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), new VersionCanonicalizer(ourCtx)))
+			return new JsonParser(new VersionSpecificWorkerContextWrapper(myValidationSupport))
 				.parse(ourCtx.newJsonParser().encodeResourceToString(patient), "Patient");
 		});
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
