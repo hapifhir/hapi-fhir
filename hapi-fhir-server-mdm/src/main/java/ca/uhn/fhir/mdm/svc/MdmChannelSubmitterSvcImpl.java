@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.IoUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 /**
  * This class is responsible for manual submissions of {@link IAnyResource} resources onto the MDM Channel.
  */
-public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
+public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc, AutoCloseable {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private IChannelProducer<ResourceModifiedMessage> myMdmChannelProducer;
@@ -51,8 +52,17 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private final IBrokerClient myBrokerClient;
 
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	public MdmChannelSubmitterSvcImpl(
+			FhirContext theFhirContext,
+			IBrokerClient theBrokerClient,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myFhirContext = theFhirContext;
+		myBrokerClient = theBrokerClient;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
 
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
@@ -77,18 +87,13 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 		}
 	}
 
-	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IBrokerClient theBrokerClient) {
-		myFhirContext = theFhirContext;
-		myBrokerClient = theBrokerClient;
-	}
-
 	protected ChannelProducerSettings getChannelProducerSettings() {
 		return new ChannelProducerSettings();
 	}
 
 	private void init() {
 		ChannelProducerSettings channelSettings = getChannelProducerSettings();
+		channelSettings.setProducerNameSuffix("mdm-submit");
 		myMdmChannelProducer = myBrokerClient.getOrCreateProducer(
 				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
@@ -98,5 +103,12 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 			init();
 		}
 		return myMdmChannelProducer;
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (myMdmChannelProducer instanceof AutoCloseable) {
+			IoUtils.closeQuietly((AutoCloseable) myMdmChannelProducer, ourLog);
+		}
 	}
 }
