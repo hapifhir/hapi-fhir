@@ -58,8 +58,13 @@ if result.status_code > 399:
     sys.exit(1)
 
 trigger_json = result.json()
-pipeline_id = trigger_json["pipeline_id"]
 
+# Abort early if we have skipped the pipeline generation
+if trigger_json["skipped"] == True:
+    print(f"Job skipped, as we have detected that this pull request contains a pom.xml version bump. [status={status}, duration={(now - start_time).total_seconds()}s]")
+    sys.exit(0)
+
+pipeline_id = trigger_json["pipeline_id"]
 print(f"Generated pipeline. [pipeline_id={pipeline_id}]")
 if "web_url" in trigger_json:
     print(f"Pipeline URL: {trigger_json['web_url']}")
