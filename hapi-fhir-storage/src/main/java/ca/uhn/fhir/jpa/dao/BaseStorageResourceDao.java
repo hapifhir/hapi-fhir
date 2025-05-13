@@ -119,8 +119,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 			RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-					.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, getResourceName());
+					.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
 
 			Set<IResourcePersistentId> match = getMatchResourceUrlService()
 					.processMatchUrl(
