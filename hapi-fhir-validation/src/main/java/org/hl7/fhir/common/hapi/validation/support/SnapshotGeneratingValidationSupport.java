@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
 import org.hl7.fhir.r5.conformance.profile.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
-import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.slf4j.Logger;
@@ -51,17 +50,20 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	 * Constructor
 	 */
 	public SnapshotGeneratingValidationSupport(FhirContext theFhirContext) {
-		this(theFhirContext, null, null);
+		this(theFhirContext, null);
 	}
 
-	public SnapshotGeneratingValidationSupport(
-			FhirContext theFhirContext, IWorkerContext theWorkerContext, FHIRPathEngine theFHIRPathEngine) {
-		Validate.notNull(theFhirContext);
+	/**
+	 * Constructor
+	 */
+	public SnapshotGeneratingValidationSupport(FhirContext theFhirContext, IWorkerContext theWorkerContext) {
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		myCtx = theFhirContext;
 		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myWorkerContext = theWorkerContext;
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	@Override
 	public IBaseResource generateSnapshot(
 			ValidationSupportContext theValidationSupportContext,

@@ -33,7 +33,6 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
-import org.hl7.fhir.r5.fhirpath.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -98,10 +97,8 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
-		addValidationSupport(new SnapshotGeneratingValidationSupport(
-				myFhirContext,
-				myVersionSpecificWorkerContextWrapper,
-				new FHIRPathEngine(myVersionSpecificWorkerContextWrapper)));
+		addValidationSupport(
+				new SnapshotGeneratingValidationSupport(myFhirContext, myVersionSpecificWorkerContextWrapper));
 		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));

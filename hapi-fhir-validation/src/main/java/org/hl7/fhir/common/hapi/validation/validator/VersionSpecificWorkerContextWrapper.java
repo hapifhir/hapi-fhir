@@ -980,6 +980,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return convertToCanonicalVersionAndGenerateSnapshot(fetched, true);
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		Resource canonical;
@@ -995,7 +996,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						try {
 
 							SnapshotGeneratingValidationSupport snapshotGenerator =
-									new SnapshotGeneratingValidationSupport(myFhirContext, this, getFHIRPathEngine());
+									new SnapshotGeneratingValidationSupport(myFhirContext, this);
 							resource = snapshotGenerator.generateSnapshot(
 									newValidationSupportContext(), resource, "", null, "");
 							Validate.isTrue(
