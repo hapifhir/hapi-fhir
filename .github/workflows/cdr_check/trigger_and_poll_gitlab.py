@@ -60,9 +60,6 @@ if result.status_code > 399:
 trigger_json = result.json()
 pipeline_id = trigger_json["pipeline_id"]
 
-
-
-
 print(f"Generated pipeline. [pipeline_id={pipeline_id}]")
 if "web_url" in trigger_json:
     print(f"Pipeline URL: {trigger_json['web_url']}")
