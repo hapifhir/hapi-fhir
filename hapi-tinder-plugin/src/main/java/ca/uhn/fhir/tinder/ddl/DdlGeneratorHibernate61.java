@@ -57,7 +57,7 @@ public class DdlGeneratorHibernate61 {
 	private File myOutputDirectory;
 	private MavenProject myProject;
 	private final HapiHibernateDialectSettingsService myHapiHibernateDialectSettingsService =
-		new HapiHibernateDialectSettingsService();
+			new HapiHibernateDialectSettingsService();
 
 	public void addPackage(String thePackage) {
 		Validate.notNull(thePackage, "thePackage must not be null");
@@ -93,19 +93,20 @@ public class DdlGeneratorHibernate61 {
 			String dialectClassName = nextDialect.getClassName();
 
 			StandardServiceRegistryBuilder registryBuilder =
-				new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
+					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
 			registryBuilder.applySetting(SchemaToolingSettings.HBM2DDL_AUTO, "create");
 
-			// Setting this prevents Hibernate from attempting to make DB connections to a local instance to pull metadata.
+			// Setting this prevents Hibernate from attempting to make DB connections to a local instance to pull
+			// metadata.
 			// This will always fail during DDL generation anyhow, as we aren't operating against live DB instances.
 			registryBuilder.applySetting(JdbcSettings.ALLOW_METADATA_ON_BOOT, false);
 
 			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
-//			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
+			//			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
-				ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
+					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			registryBuilder.addService(
-				HapiHibernateDialectSettingsService.class, myHapiHibernateDialectSettingsService);
+					HapiHibernateDialectSettingsService.class, myHapiHibernateDialectSettingsService);
 			StandardServiceRegistry standardRegistry = registryBuilder.build();
 			MetadataSources metadataSources = new MetadataSources(standardRegistry);
 
@@ -149,9 +150,9 @@ public class DdlGeneratorHibernate61 {
 			writeContentsToFile(nextDialect.getAppendFile(), classLoader, outputFile);
 
 			if (nextDialect.getDropStatementsContainingRegex() != null
-				&& !nextDialect.getDropStatementsContainingRegex().isEmpty()) {
+					&& !nextDialect.getDropStatementsContainingRegex().isEmpty()) {
 				ourLog.info(
-					"Dropping statements containing regex(s): {}", nextDialect.getDropStatementsContainingRegex());
+						"Dropping statements containing regex(s): {}", nextDialect.getDropStatementsContainingRegex());
 				try {
 					String fullFile;
 					try (FileReader fr = new FileReader(outputFileName, StandardCharsets.UTF_8)) {
@@ -163,16 +164,16 @@ public class DdlGeneratorHibernate61 {
 					for (Iterator<String> statementIter = statements.iterator(); statementIter.hasNext(); ) {
 						String statement = statementIter.next();
 						if (nextDialect.getDropStatementsContainingRegex().stream()
-							.anyMatch(regex -> Pattern.compile(regex)
-								.matcher(statement)
-								.find())) {
+								.anyMatch(regex -> Pattern.compile(regex)
+										.matcher(statement)
+										.find())) {
 							statementIter.remove();
 							count++;
 						}
 					}
 
 					ourLog.info(
-						"Filtered {} statement(s) from file for dialect: {}", count, nextDialect.getClassName());
+							"Filtered {} statement(s) from file for dialect: {}", count, nextDialect.getClassName());
 
 					try (FileWriter fw = new FileWriter(outputFileName, StandardCharsets.UTF_8)) {
 						for (String statement : statements) {
@@ -214,7 +215,7 @@ public class DdlGeneratorHibernate61 {
 
 	@Nonnull
 	private Set<Class<?>> scanClasspathForEntityClasses(Set<String> thePackages, ClassLoader theClassLoader)
-		throws MojoFailureException {
+			throws MojoFailureException {
 
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.setResourceLoader(new PathMatchingResourcePatternResolver(theClassLoader));
@@ -247,7 +248,7 @@ public class DdlGeneratorHibernate61 {
 	}
 
 	private static void writeContentsToFile(String prependFile, ClassLoader classLoader, File outputFile)
-		throws MojoFailureException {
+			throws MojoFailureException {
 		if (isNotBlank(prependFile)) {
 			ResourceLoader loader = new DefaultResourceLoader(classLoader);
 			Resource resource = loader.getResource(prependFile);
