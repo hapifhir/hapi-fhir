@@ -725,7 +725,7 @@ public class SearchParameterMap implements Serializable {
 
 	/**
 	 * For each search parameter in the map, extract any which have the given qualifier.
-	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
+	 * e.g. Take the url: {@code Observation?code:text=abc&code=123&code:text=def&reason:text=somereason}
 	 * <p>
 	 * If we call this function with `:text`, it will return a map that looks like:
 	 * <p>

@@ -90,7 +90,7 @@ public class VectorMatchResultMap {
 	 * Calculates the vector for the match rule.
 	 *
 	 * This calculation uses the index of the match field and the binary
-	 * shift operator (<<) to calculate the field.
+	 * shift operator ({@code <<}) to calculate the field.
 	 *
 	 * See {@link ca.uhn.fhir.mdm.rules.matcher.util.MatchRuleUtil#MAX_RULE_COUNT}
 	 *

@@ -64,7 +64,9 @@
 								<filter>
 									<artifact>*</artifact>
 									<excludes>
+										<exclude>module-info.class</exclude>
 										<exclude>**/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
 										<exclude>**/*.RSA</exclude>
 									</excludes>
 								</filter>
