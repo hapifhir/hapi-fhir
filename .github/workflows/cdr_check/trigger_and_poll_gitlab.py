@@ -36,7 +36,7 @@ if not target_cdr_branch:
 # Prepare data for Robogary request
 request_data = {
     "github_pr": github_pr,
-    "github_repo": "HAPI-FHIR",
+    "github_repo": "hapifhir/hapi-fhir",
     "github_requester": github_requester,
     "hapi_branch": current_hapi_branch,
     "cdr_branch": target_cdr_branch
