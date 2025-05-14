@@ -130,7 +130,7 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	/**
-	 * Use {@link this#getEnterpriseEIDSystemForResourceType(String)} instead.
+	 * Use {@link #getEnterpriseEIDSystemForResourceType(String)} instead.
 	 */
 	@Deprecated
 	public String getEnterpriseEIDSystem() {
@@ -138,7 +138,7 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	/**
-	 * Use {@link this#setEnterpriseEIDSystems(Map)} (String)} or {@link this#addEnterpriseEIDSystem(String, String)} instead.
+	 * Use {@link #setEnterpriseEIDSystems(Map)} or {@link #addEnterpriseEIDSystem(String, String)} instead.
 	 */
 	@Deprecated
 	public void setEnterpriseEIDSystem(String theEnterpriseEIDSystem) {

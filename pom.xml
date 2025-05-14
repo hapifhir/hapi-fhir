@@ -8,7 +8,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.3.5-SNAPSHOT</version>
+	<version>8.3.6-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1247,6 +1247,11 @@
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
 				<version>22.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.18.32</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -2555,7 +2560,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.3</version>
+					<version>3.11.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2640,7 +2645,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>${maven-license-plugin-version}</version>
 					<configuration>
-						<verbose>true</verbose>
+						<verbose>false</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -2727,13 +2732,12 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.5.4</version>
+									<version>3.9.9</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
 									<version>17</version>
 									<message>
-										HAPI FHIR is targeting JDK 11 for published binaries,
-										but we require JDK 17 to build and test this library.
+										HAPI FHIR is targeting JDK 17 for published binaries
 									</message>
 								</requireJavaVersion>
 							</rules>

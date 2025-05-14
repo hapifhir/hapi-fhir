@@ -137,7 +137,7 @@ public class ReflectionUtil {
 	}
 
 	/**
-	 * For a field of type List<Enumeration<Foo>>, returns Foo
+	 * For a field of type List&lt;Enumeration&lt;Foo&gt;&gt;, returns Foo.
 	 */
 	public static Class<?> getGenericCollectionTypeOfFieldWithSecondOrderForList(Field next) {
 		if (!List.class.isAssignableFrom(next.getType())) {
