@@ -76,7 +76,7 @@ public final class MdmMatchOutcome {
 	}
 
 	public boolean isMatch() {
-		return isEidMatch() || myMatchResultEnum == MdmMatchResultEnum.MATCH;
+		return myMatchResultEnum == MdmMatchResultEnum.MATCH;
 	}
 
 	public boolean isPossibleMatch() {

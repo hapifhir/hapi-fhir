@@ -37,10 +37,10 @@ import java.util.function.Supplier;
 @Service
 public class MdmProviderLoader {
 	@Autowired
-	protected FhirContext myFhirContext;
+	private FhirContext myFhirContext;
 
 	@Autowired
-	protected ResourceProviderFactory myResourceProviderFactory;
+	private ResourceProviderFactory myResourceProviderFactory;
 
 	@Autowired
 	private MdmControllerHelper myMdmControllerHelper;
@@ -60,7 +60,7 @@ public class MdmProviderLoader {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	protected Supplier<Object> myMdmProviderSupplier;
+	private Supplier<Object> myMdmProviderSupplier;
 	private Supplier<Object> myPatientMatchProviderSupplier;
 	private Supplier<Object> myMdmHistoryProviderSupplier;
 

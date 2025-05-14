@@ -473,11 +473,6 @@ public class BundleBuilder {
 		addEntryAndReturnRequest(theResource);
 	}
 
-	public void addDocumentEntry(IBaseResource theResource, String theFullUrl) {
-		setType("document");
-		addEntryAndReturnRequest(theResource, theFullUrl);
-	}
-
 	/**
 	 * Creates new entry and adds it to the bundle
 	 *
