@@ -102,7 +102,6 @@ public class DdlGeneratorHibernate61 {
 			registryBuilder.applySetting(JdbcSettings.ALLOW_METADATA_ON_BOOT, false);
 
 			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
-			//			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			registryBuilder.addService(
