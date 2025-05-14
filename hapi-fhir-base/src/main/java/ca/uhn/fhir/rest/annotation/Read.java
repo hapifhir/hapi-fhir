@@ -33,13 +33,7 @@ import java.lang.annotation.Target;
  * href="http://hl7.org/implement/standards/fhir/http.html#vread">vread</a> method.
  *
  * <p>
- * If this method has a parameter annotated with the {@link IdParam} annotation and a parameter annotated with the {@link VersionIdParam} annotation, the method will be treated as a vread method. If
- * the method has only a parameter annotated with the {@link IdParam} annotation, it will be treated as a read operation.
- * the
- * </p>
- * <p>
- * If you wish for your server to support both read and vread operations, you will need
- * two methods annotated with this annotation.
+ *     if you wish to support vread as well as read, you can use the {@link #version()} attribute to set it to true, indicating the method will handle both reads and vreads.
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)

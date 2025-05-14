@@ -58,5 +58,5 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 * operations (e.g. <code>$export-poll-status</code>) which return a plain json object instead of
 	 * a Parameters resource.
 	 */
-	IOperationUntypedWithInput<StringOutcome> returnForStringOutcome();
+	IOperationUntypedWithInput<StringOutcome> returnStringOutcome();
 }
