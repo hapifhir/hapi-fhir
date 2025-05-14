@@ -1246,7 +1246,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>22.3</version>
+				<version>23.1</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>

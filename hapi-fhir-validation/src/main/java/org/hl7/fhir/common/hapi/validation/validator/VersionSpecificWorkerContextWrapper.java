@@ -70,6 +70,52 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * HAPI uses a bunch of utility classes from corelib (org.hl7.fhir.core). These include the
+ * {@link org.hl7.fhir.validation.instance.InstanceValidator} (FHIR resource validator),
+ * {@link FHIRPathEngine} (FHIRPath engine), and
+ * {@link org.hl7.fhir.r5.conformance.profile.ProfileUtilities} (used for snapshot generation).
+ * These tools use the {@link IWorkerContext} interface as their way of requesting
+ * StructureDefinitions, concept lookups/validations, and other infrastructural things that
+ * get supplied by the runtime environment.
+ * <p>
+ * HAPI FHIR uses {@link IValidationSupport} for this purpose, although the scopes and
+ * intended design of these two interfaces don't line up exactly. This class is a
+ * bridge between {@link IWorkerContext} and {@link IValidationSupport}. You can think
+ * of it mostly as a dumb passthrough, where the method flow looks like the following
+ * example:
+ * </p>
+ * <pre>
+ *    InstanceValidator (is validating and needs a StructureDefinition)
+ *           |
+ *           | IWorkerContext#fetchResource("StructureDefinition", url)
+ *           V
+ *    VersionSpecificWorkerContextWrapper
+ *           |
+ *           | IValidationSupport#fetchResource("StructureDefinition", "url")
+ *           V
+ *    ValidationSupportChain
+ * </pre>
+ * <p>
+ * It does also add a couple of important functions:
+ * </p>
+ * <ul>
+ * <li>
+ *     The {@link IWorkerContext} interface expects resources to be supplied using the
+ *     canonical FHIR version (currently R5), where {@link IValidationSupport} works with
+ *     whatever version the associated {@link FhirContext} uses. So for example if
+ *     we're validating in an R4 server, the InstanceValidator asks this class
+ *     for an R5 StructureDefinition, and this class asks the {@link IValidationSupport}
+ *     for an R4 StructureDefinition and then converts it before returning it.
+ * </li>
+ * <li>
+ *     The validator also needs snapshots to be generated on StructureDefinitions before
+ *     it can use them. It will generate a snapshot itself if a differential profile
+ *     is supplied, but this is inefficient since it will do this every time it gets
+ *     such a profile. So this class generates and caches the snapshot.
+ * </li>
+ * </ul>
+ */
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
