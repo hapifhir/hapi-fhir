@@ -1,6 +1,0 @@
----
-type: add
-issue: 6928
-title: "The logic to detect and resolve circular StructureDefinition dependencies when
-  generating snapshots has been improved to be more resilient and better able to
-  successfully generate a snapshot."

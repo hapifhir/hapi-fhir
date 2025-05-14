@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -64,11 +65,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -994,26 +995,6 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		);
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("de.basisprofil.r4", "1.2.0").isPresent());
-		});
-	}
-
-	@Test
-	public void testInstallR4PackageCircularDependency() throws Exception {
-
-		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test.circular.snapshot-0.0.1.tgz");
-		myFakeNpmServlet.responses.put("/test.circular.snapshot/0.0.1", bytes);
-
-		myPackageInstallerSvc.install(new PackageInstallationSpec()
-			.setName("test.circular.snapshot")
-			.setVersion("0.0.1")
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-		);
-
-		// Be sure no further communication with the server
-		myServer.stopServer();
-
-		runInTransaction(() -> {
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("test.circular.snapshot", "0.0.1").isPresent());
 		});
 	}
 

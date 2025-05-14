@@ -404,7 +404,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			}
 		}
 
-		ourLog.info("Storing resource with ID: {}", id.getValue());
+		ourLog.info("Storing{}resource with ID: {}", theDeleted ? " deleted " : " ", id.getValue());
 
 		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
