@@ -73,6 +73,12 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			String theProfileName) {
 
 		synchronized (theInput) {
+
+			/*
+			 * In cases of circular dependencies between StructureDefinitions, we can
+			 * end up in a recursive loop. We use a userData variable in the
+			 * StructureDefinition to flag and detect this situation.
+			 */
 			if (theInput.getUserData(CURRENTLY_GENERATING_USERDATA_KEY) != null) {
 				String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(theInput, "url");
 				ourLog.info("Detected circular dependency, already generating snapshot for: {}", url);
@@ -82,6 +88,13 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			try {
 				theInput.setUserData(CURRENTLY_GENERATING_USERDATA_KEY, CURRENTLY_GENERATING_USERDATA_KEY);
 
+				/*
+				 * We clone the resource that we're generating a snapshot for because
+				 * the ProfileUtilities snapshot generator modifies the SD that gets
+				 * passed in, and there is no guarantee that other threads aren't
+				 * looking at it or even trying to iterate through the existing
+				 * snapshot (if there is one) at the time we do this.
+				 */
 				IBaseResource inputClone = myCtx.newTerser().clone(theInput);
 				org.hl7.fhir.r5.model.StructureDefinition inputCanonical =
 						myVersionCanonicalizer.structureDefinitionToCanonical(inputClone);
