@@ -41,6 +41,11 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 	public void before() throws Exception {
 		super.before();
 
+		// keep the version on Provenance.target fields to verify that Provenance resources were saved
+		// with versioned target references
+		myFhirContext.getParserOptions()
+			.setDontStripVersionsFromReferencesAtPaths("Provenance.target");
+
 		myTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 		myTestHelper.beforeEach();
 
@@ -65,6 +70,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 			"Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();
+		myTestHelper.assertReplaceReferencesProvenance();
 	}
 
 
