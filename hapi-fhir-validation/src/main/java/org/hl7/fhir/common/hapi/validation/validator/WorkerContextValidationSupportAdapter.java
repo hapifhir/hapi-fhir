@@ -90,11 +90,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *           |
  *           | IWorkerContext#fetchResource("StructureDefinition", url)
  *           V
- *    VersionSpecificWorkerContextWrapper
+ *    VersionSpecificWorkerContextWrapper (implements IWorkerContext)
  *           |
  *           | IValidationSupport#fetchResource("StructureDefinition", "url")
  *           V
- *    ValidationSupportChain
+ *    ValidationSupportChain (implements IValidationSupport)
  * </pre>
  * <p>
  * It does also add a couple of important functions:
@@ -116,9 +116,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </li>
  * </ul>
  */
-public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
+public class WorkerContextValidationSupportAdapter extends I18nBase implements IWorkerContext {
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(WorkerContextValidationSupportAdapter.class);
 	/**
 	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
 	 * they will be returned using whatever version of FHIR the underlying infrastructure is
@@ -130,7 +130,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	 * the converted version gets cached too.
 	 */
 	private static final String CANONICAL_USERDATA_KEY =
-			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+			WorkerContextValidationSupportAdapter.class.getName() + "_CANONICAL_USERDATA_KEY";
 
 	private IValidationSupport myValidationSupport;
 	private VersionCanonicalizer myVersionCanonicalizer;
@@ -142,15 +142,25 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	/**
 	 * Constructor
+	 */
+	public WorkerContextValidationSupportAdapter() {
+		this(null);
+	}
+
+	/**
+	 * Constructor
 	 *
 	 * @param theValidationSupport Can be null, in which case {@link #setValidationSupport(IValidationSupport)} should be called
 	 */
-	public VersionSpecificWorkerContextWrapper(@Nullable IValidationSupport theValidationSupport) {
+	public WorkerContextValidationSupportAdapter(@Nullable IValidationSupport theValidationSupport) {
 		if (theValidationSupport != null) {
 			setValidationSupport(theValidationSupport);
 		}
 	}
 
+	/**
+	 * Provides the {@link IValidationSupport} module that backs this adapter.
+	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		Validate.isTrue(
 				myValidationSupport == null, "Can not set the validation support after it has already been set");
@@ -865,7 +875,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
-					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
+					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
@@ -1113,8 +1123,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
+	public static WorkerContextValidationSupportAdapter newVersionSpecificWorkerContextWrapper(
 			IValidationSupport theValidationSupport) {
-		return new VersionSpecificWorkerContextWrapper(theValidationSupport);
+		return new WorkerContextValidationSupportAdapter(theValidationSupport);
 	}
 }

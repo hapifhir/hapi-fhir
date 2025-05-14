@@ -54,7 +54,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
@@ -80,7 +80,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
 	private final Supplier<GraphQLSchemaGenerator> myGenerator;
 	private final ISearchParamRegistry mySearchParamRegistry;
-	private final VersionSpecificWorkerContextWrapper myContext;
+	private final WorkerContextValidationSupportAdapter myContext;
 	private final IDaoRegistry myDaoRegistry;
 	private final Gson myGson;
 
@@ -98,7 +98,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 
-		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
+		myContext = WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(Collections.emptyList().getClass(), (JsonSerializer<Object>)

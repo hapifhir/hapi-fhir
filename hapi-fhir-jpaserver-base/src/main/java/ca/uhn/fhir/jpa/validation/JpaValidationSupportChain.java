@@ -32,14 +32,14 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	private final FhirContext myFhirContext;
-	private final VersionSpecificWorkerContextWrapper myVersionSpecificWorkerContextWrapper;
+	private final WorkerContextValidationSupportAdapter myWorkerContextValidationSupportAdapter;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
@@ -70,14 +70,14 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	public JpaValidationSupportChain(
 			FhirContext theFhirContext,
 			CacheConfiguration theCacheConfiguration,
-			VersionSpecificWorkerContextWrapper theVersionSpecificWorkerContextWrapper) {
+			WorkerContextValidationSupportAdapter theWorkerContextValidationSupportAdapter) {
 		super(theCacheConfiguration);
 
 		assert theFhirContext != null;
 		assert theCacheConfiguration != null;
 
 		myFhirContext = theFhirContext;
-		myVersionSpecificWorkerContextWrapper = theVersionSpecificWorkerContextWrapper;
+		myWorkerContextValidationSupportAdapter = theWorkerContextValidationSupportAdapter;
 	}
 
 	@Override
@@ -92,13 +92,13 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		myVersionSpecificWorkerContextWrapper.setValidationSupport(this);
+		myWorkerContextValidationSupportAdapter.setValidationSupport(this);
 
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(
-				new SnapshotGeneratingValidationSupport(myFhirContext, myVersionSpecificWorkerContextWrapper));
+				new SnapshotGeneratingValidationSupport(myFhirContext, myWorkerContextValidationSupportAdapter));
 		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));

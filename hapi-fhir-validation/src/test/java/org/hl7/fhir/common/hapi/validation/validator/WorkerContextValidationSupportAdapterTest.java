@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestWithInlineMocks {
+public class WorkerContextValidationSupportAdapterTest extends BaseValidationTestWithInlineMocks {
 
 	private static final byte[] EXPECTED_BINARY_CONTENT_1 = "dummyBinaryContent1".getBytes();
 	private static final byte[] EXPECTED_BINARY_CONTENT_2 = "dummyBinaryContent2".getBytes();
@@ -35,18 +35,18 @@ public class VersionSpecificWorkerContextWrapperTest extends BaseValidationTestW
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private IValidationSupport myValidationSupport;
 	private ValidationSupportContext myValidationSupportContext;
-	private VersionSpecificWorkerContextWrapper myWorkerContextWrapper;
+	private WorkerContextValidationSupportAdapter myWorkerContextWrapper;
 
 	public void setupValidationForBinary() {
 		myValidationSupport = mockValidationSupportWithTwoBinaries();
 		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
-		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
+		myWorkerContextWrapper = new WorkerContextValidationSupportAdapter(myValidationSupport);
 	}
 
 	public void setupValidation() {
 		myValidationSupport = mockValidationSupport();
 		myValidationSupportContext = mockValidationSupportContext(myValidationSupport);
-		myWorkerContextWrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
+		myWorkerContextWrapper = new WorkerContextValidationSupportAdapter(myValidationSupport);
 	}
 
 	private IValidationSupport mockValidationSupportWithTwoBinaries() {

@@ -34,7 +34,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noTerminologyChecks = false;
 	private boolean noExtensibleWarnings = false;
 	private boolean noBindingMsgSuppressed = false;
-	private VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
+	private WorkerContextValidationSupportAdapter myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles = true;
 
 	private boolean assumeValidRestReferences;
@@ -154,13 +154,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	/**
 	 * Sets the {@link IValidationSupport validation support} in use by this validator, as well
-	 * as a {@link VersionSpecificWorkerContextWrapper}. This is useful if a single instance of
+	 * as a {@link WorkerContextValidationSupportAdapter}. This is useful if a single instance of
 	 * the latter should be shared in multiple places.
 	 *
 	 * @since 8.4.0
 	 */
 	public void setWrappedWorkerContext(
-			IValidationSupport theValidationSupport, VersionSpecificWorkerContextWrapper theWrappedWorkerContext) {
+			IValidationSupport theValidationSupport, WorkerContextValidationSupportAdapter theWrappedWorkerContext) {
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = theWrappedWorkerContext;
 	}
@@ -239,7 +239,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
-		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
+		WorkerContextValidationSupportAdapter wrappedWorkerContext = provideWorkerContext();
 
 		return new ValidatorWrapper()
 				.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
@@ -257,18 +257,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	@Nonnull
-	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
-		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
+	protected WorkerContextValidationSupportAdapter provideWorkerContext() {
+		WorkerContextValidationSupportAdapter wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
 			wrappedWorkerContext =
-					VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+					WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
 	}
 
 	@VisibleForTesting
-	public VersionSpecificWorkerContextWrapper getWorkerContext() {
+	public WorkerContextValidationSupportAdapter getWorkerContext() {
 		return myWrappedWorkerContext;
 	}
 

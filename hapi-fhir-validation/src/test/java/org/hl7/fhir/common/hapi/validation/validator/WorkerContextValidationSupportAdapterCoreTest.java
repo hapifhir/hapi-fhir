@@ -95,9 +95,9 @@ import static org.mockito.Mockito.withSettings;
  * provide some guidance on how to derive similar debugging code from the org.hl7.fhir.core test cases.
  */
 @Disabled
-public class VersionSpecificWorkerContextWrapperCoreTest {
+public class WorkerContextValidationSupportAdapterCoreTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionSpecificWorkerContextWrapperCoreTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WorkerContextValidationSupportAdapterCoreTest.class);
 	private static final String VALIDATE_CODE_OPERATION = "validate-code";
 	private static final String VALIDATE_CODESYSTEM_OPERATION = "cs-validate-code";
 	private static final String EXPAND_OPERATION = "expand";
@@ -112,7 +112,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 	private Map<String, ValueSet.ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ValidationSupportChain myValidationSupport;
-	private VersionSpecificWorkerContextWrapper wrapper;
+	private WorkerContextValidationSupportAdapter wrapper;
 
 	@BeforeEach
 	public void before() {
@@ -171,7 +171,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				unknownCodeSystemWarningValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
-		wrapper = new VersionSpecificWorkerContextWrapper(myValidationSupport);
+		wrapper = new WorkerContextValidationSupportAdapter(myValidationSupport);
 		wrapper.setExpansionParameters(new Parameters());
 	}
 
@@ -257,7 +257,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 	}
 
 	public static Stream<Arguments> argumentSource() throws IOException {
-		TxTestData data = TxTestData.loadTestDataFromPackage(VersionSpecificWorkerContextWrapperCoreTest.class.getPackage().toString());
+		TxTestData data = TxTestData.loadTestDataFromPackage(WorkerContextValidationSupportAdapterCoreTest.class.getPackage().toString());
 
 		return data.getTestData().stream()
 			.filter(entry -> {

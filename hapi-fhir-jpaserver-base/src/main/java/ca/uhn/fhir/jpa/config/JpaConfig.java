@@ -198,7 +198,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -259,8 +259,11 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public VersionSpecificWorkerContextWrapper versionSpecificContextWrapper() {
-		return new VersionSpecificWorkerContextWrapper(null);
+	public WorkerContextValidationSupportAdapter versionSpecificContextWrapper() {
+		/*
+		 * Note, we pass in null here
+		 */
+		return new WorkerContextValidationSupportAdapter(null);
 	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)

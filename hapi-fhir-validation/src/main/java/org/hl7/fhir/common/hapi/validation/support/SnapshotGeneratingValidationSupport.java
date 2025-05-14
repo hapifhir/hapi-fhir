@@ -12,7 +12,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.ProfileKnowledgeWorkerR5;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
 import org.hl7.fhir.r5.conformance.profile.ProfileUtilities;
@@ -95,7 +95,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 				IWorkerContext workerContext = myWorkerContext;
 				if (workerContext == null) {
-					workerContext = new VersionSpecificWorkerContextWrapper(
+					workerContext = new WorkerContextValidationSupportAdapter(
 							theValidationSupportContext.getRootValidationSupport());
 				}
 
