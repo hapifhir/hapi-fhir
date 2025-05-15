@@ -21,18 +21,22 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -40,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -49,31 +54,30 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JpaPersistedResourceValidationSupportTest {
 
-	private FhirContext theFhirContext = FhirContext.forR4();
 
 	@Nested
 	class FetchStructureDefinitionTests {
-
-		@Mock
-		private DaoRegistry myDaoRegistry;
+		private final FhirContext theFhirContext = FhirContext.forR4Cached();
 
 		@InjectMocks
 		private final JpaPersistedResourceValidationSupport testClass = new JpaPersistedResourceValidationSupport(theFhirContext);
-
 		@Captor
 		ArgumentCaptor<SearchParameterMap> searchParameterMapCaptor;
+		@Mock
+		IFhirResourceDao<?> mockDao;
+		@Mock
+		private DaoRegistry myDaoRegistry;
 
 		@Test
 		@DisplayName("fetch StructureDefinition by version less url")
 		void fetchStructureDefinitionForUrl() {
 			final String profileUrl = "http://example.com/fhir/StructureDefinition/exampleProfile";
-			IFhirResourceDao mockDao = mock(IFhirResourceDao.class);
-			when(mockDao.search(any())).thenReturn(mock(IBundleProvider.class));
+			when(mockDao.search(any(), any())).thenReturn(mock(IBundleProvider.class));
 			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
 
 			testClass.fetchResource(StructureDefinition.class, profileUrl);
 
-			verify(mockDao).search(searchParameterMapCaptor.capture());
+			verify(mockDao).search(searchParameterMapCaptor.capture(), any());
 			SearchParameterMap searchParams = searchParameterMapCaptor.getValue();
 			String uriParam = searchParams.get(StructureDefinition.SP_URL)
 				.get(0)
@@ -89,13 +93,12 @@ class JpaPersistedResourceValidationSupportTest {
 		@DisplayName("fetch StructureDefinition by versioned url")
 		void fetchStructureDefinitionForVersionedUrl() {
 			final String profileUrl = "http://example.com/fhir/StructureDefinition/exampleProfile|1.1.0";
-			IFhirResourceDao mockDao = mock(IFhirResourceDao.class);
-			when(mockDao.search(any())).thenReturn(mock(IBundleProvider.class));
+			when(mockDao.search(any(), any())).thenReturn(mock(IBundleProvider.class));
 			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
 
 			testClass.fetchResource(StructureDefinition.class, profileUrl);
 
-			verify(mockDao).search(searchParameterMapCaptor.capture());
+			verify(mockDao).search(searchParameterMapCaptor.capture(), any());
 			SearchParameterMap searchParams = searchParameterMapCaptor.getValue();
 			String uriParam = searchParams.get(StructureDefinition.SP_URL)
 				.get(0)
@@ -116,4 +119,35 @@ class JpaPersistedResourceValidationSupportTest {
 			assertThat(versionParam).isEqualTo("1.1.0");
 		}
 	}
+
+	@Nested
+	class FetchResourceTests {
+
+		@Mock
+		private DaoRegistry myDaoRegistry;
+		@Mock
+		private IFhirResourceDao<?> myResourceDao;
+
+		@ParameterizedTest
+		@EnumSource(value = FhirVersionEnum.class, mode = EnumSource.Mode.EXCLUDE, names = {"DSTU2_1"})
+		public void testFetchResource_NotFound(FhirVersionEnum theFhirVersion) {
+			// Setup
+			FhirContext ctx = FhirContext.forCached(theFhirVersion);
+			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+			when(myResourceDao.search(any(), any())).thenReturn(new SimpleBundleProvider());
+
+			JpaPersistedResourceValidationSupport svc = new JpaPersistedResourceValidationSupport(ctx, myDaoRegistry);
+			svc.start();
+
+			// Test
+			IBaseResource result = svc.fetchResource(null, "http://foo/bar");
+
+			// Verify
+			assertNull(result);
+		}
+
+
+	}
+
+
 }
