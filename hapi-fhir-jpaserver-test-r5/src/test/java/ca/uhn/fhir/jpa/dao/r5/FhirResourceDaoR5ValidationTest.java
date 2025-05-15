@@ -20,13 +20,15 @@ public class FhirResourceDaoR5ValidationTest extends BaseJpaR5Test {
 
 	@Test
 	public void testInterlinkedReference() {
-
+		// Setup
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		MessageHeader mh = new MessageHeader();
 		mh.setId("http://example.com/MessageHeader/123");
 		mh.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		mh.getText().getDiv().setValue("<div>Hello</div>");
+		// The validator will try to resolve these URLs by fetching them
+		// using the IWorkerContext/IValidationSupport
 		mh.setEvent(new CanonicalType("http://example.com/event123"));
 		mh.getSource().setEndpoint(new UrlType("http://example.com/Endpoint/12345"));
 		bb.addCollectionEntry(mh);
@@ -34,7 +36,10 @@ public class FhirResourceDaoR5ValidationTest extends BaseJpaR5Test {
 		Bundle bundle = bb.getBundleTyped();
 		String serialized = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 
+		// Test
 		MethodOutcome outcome = myBundleDao.validate(bundle, null, serialized, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+
+		// Verify
 		ourLog.info(StringUtil.prependLineNumbers(serialized));
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
