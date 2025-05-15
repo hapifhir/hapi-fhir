@@ -992,7 +992,7 @@ public class ResponseHighlighterInterceptor {
 	 *    <ul>
 	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
 	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
-	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "{@code <div}", that will be rendered.</li>
 	 *    </ul>
 	 * </p>
 	 * <p>
@@ -1023,7 +1023,7 @@ public class ResponseHighlighterInterceptor {
 	 *    <ul>
 	 *       <li>if the resource is a DomainResource, the narrative in Resource.text will be rendered.</li>
 	 *       <li>If the resource is a document bundle, the narrative in the document Composition will be rendered.</li>
-	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "<div", that will be rendered.</li>
+	 *       <li>If the resource is a Parameters resource, and the first parameter has the name "Narrative" and a value consisting of a string starting with "{@code <div}", that will be rendered.</li>
 	 *    </ul>
 	 * </p>
 	 * <p>

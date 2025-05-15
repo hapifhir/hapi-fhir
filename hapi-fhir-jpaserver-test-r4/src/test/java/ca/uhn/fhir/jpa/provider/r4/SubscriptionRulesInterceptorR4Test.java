@@ -53,7 +53,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 		subsBad.getChannel().setEndpoint("http://localhost:8888");
 		subsBad.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		assertThatThrownBy(()-> mySubscriptionDao.update(subsBad, mySrd))
-			.hasMessage("Criteria is not permitted on this server: Observation?");
+			.hasMessageContaining("Criteria is not permitted on this server: Observation?");
 
 		// Verify
 		subsGood = mySubscriptionDao.read(new IdType("Subscription/GOOD"), mySrd);
@@ -92,7 +92,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 		subsBad.getChannel().setEndpoint("http://this-does-not-exist"); // can't reach
 		subsBad.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		assertThatThrownBy(() -> mySubscriptionDao.update(subsBad, mySrd))
-			.hasMessage("REST HOOK endpoint is not reachable: http://this-does-not-exist");
+			.hasMessageContaining("REST HOOK endpoint is not reachable: http://this-does-not-exist");
 
 		// Verify
 		subsGood = mySubscriptionDao.read(new IdType("Subscription/GOOD"), mySrd);
@@ -120,7 +120,7 @@ public class SubscriptionRulesInterceptorR4Test extends BaseSubscriptionsR4Test 
 
 		// Test and Verify
 		assertThatThrownBy(()->myBasicDao.create(subscriptionTopic, mySrd))
-			.hasMessage("Criteria is not permitted on this server: Encounter?");
+			.hasMessageContaining("Criteria is not permitted on this server: Encounter?");
 	}
 
 	@Test

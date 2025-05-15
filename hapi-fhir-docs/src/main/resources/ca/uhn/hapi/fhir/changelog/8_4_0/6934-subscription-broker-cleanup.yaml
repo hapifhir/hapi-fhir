@@ -1,0 +1,4 @@
+---
+type: change
+issue: 6934
+title: Subscription class API and logging has been improved. Also support for AutoClosable ChannelProducers has been added."

@@ -53,7 +53,7 @@ public final class SubscriptionTopicCanonicalizer {
 				return (SubscriptionTopic) theSubscriptionTopic;
 			default:
 				throw new UnsupportedOperationException(
-						Msg.code(2337) + "Subscription topics are not supported in FHIR version "
+						Msg.code(2651) + "Subscription topics are not supported in FHIR version "
 								+ theFhirContext.getVersion().getVersion());
 		}
 	}

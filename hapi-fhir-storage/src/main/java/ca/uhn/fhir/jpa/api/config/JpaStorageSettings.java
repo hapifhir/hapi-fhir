@@ -1310,10 +1310,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * CP | PI
 	 * -------
-	 *  F | F  <- PI=F is ignored
-	 *  F | T  <- PI=T is ignored
-	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
-	 *  T | T  <- placeholder reference targets can be updated : )
+	 *  F | F  {@code <-} PI=F is ignored
+	 *  F | T  {@code <-} PI=T is ignored
+	 *  T | F  {@code <-} resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  {@code <-} placeholder reference targets can be updated : )
 	 * </pre>
 	 * <p>
 	 * Where CP=T and PI=F, the following could happen:
@@ -1396,10 +1396,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * CP | PI
 	 * -------
-	 *  F | F  <- PI=F is ignored
-	 *  F | T  <- PI=T is ignored
-	 *  T | F  <- resources may reference placeholder reference targets that are never updated : (
-	 *  T | T  <- placeholder reference targets can be updated : )
+	 *  F | F  {@code <-} PI=F is ignored
+	 *  F | T  {@code <-} PI=T is ignored
+	 *  T | F  {@code <-} resources may reference placeholder reference targets that are never updated : (
+	 *  T | T  {@code <-} placeholder reference targets can be updated : )
 	 * </pre>
 	 * <p>
 	 * Where CP=T and PI=F, the following could happen:
