@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -47,11 +48,13 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -1080,6 +1083,50 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 				assertEquals(4, counts.get("Patient"), counts.toString());
 			});
 		}
+
+		@Test
+		public void testCreateAndRead_PartitionableQuestionnaire() {
+			// Remove "Questionnaire" from the list of non-partitionable types
+			myPartitionSettings.getNonPartitionableResourceTypes().remove("Questionnaire");
+
+			// Create Questionnaire in partition A
+			myTenantClientInterceptor.setTenantId(TENANT_A);
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setTitle("My Partitioned Questionnaire");
+			IIdType id = myClient.create().resource(questionnaire).execute().getId();
+
+			// Verify: Resource is stored in the correct partition
+			runInTransaction(() -> {
+				ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+				assertThat(table.getPartitionId().getPartitionId()).isEqualTo(TENANT_A_ID);
+			});
+
+			// Read it back
+			Questionnaire read = myClient.read().resource(Questionnaire.class).withId(id).execute();
+			assertThat(read.getTitle()).isEqualTo("My Partitioned Questionnaire");
+		}
+
+		@Test
+		public void testCreateAndRead_NonPartitionableQuestionnaire() {
+			// Ensure "Questionnaire" is in the non-partitionable resource list
+			myPartitionSettings.getNonPartitionableResourceTypes().add("Questionnaire");
+
+			// Try to create Questionnaire in tenant partition
+			myTenantClientInterceptor.setTenantId(TENANT_A);
+			Questionnaire questionnaire = new Questionnaire();
+			questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			questionnaire.setTitle("Invalid Partitioned Questionnaire");
+
+			try {
+				myClient.create().resource(questionnaire).execute();
+				fail("Expected UnprocessableEntityException");
+			} catch (UnprocessableEntityException e) {
+				// Expected exception: Resource type Questionnaire can not be partitioned
+				assertThat(e.getMessage()).contains("can not be partitioned");
+			}
+		}
+
 
 		private boolean executeTransactionOrThrow(SystemRequestDetails requestDetails, Bundle input) {
 			try {
