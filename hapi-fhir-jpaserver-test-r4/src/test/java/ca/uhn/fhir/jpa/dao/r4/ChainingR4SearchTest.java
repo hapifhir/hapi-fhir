@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -126,6 +128,26 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// validate
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
+	}
+
+	@Test void testChainedSearchWithTagReturnsResults() {
+		//Given: A patient with a tag
+		Patient patient = new Patient();
+		Meta meta = new Meta();
+		meta.addTag("http://bluecrossnc.com/fhir/lob", "test", "the display");
+		patient.setMeta(meta);
+
+		IIdType idType = myPatientDao.create(patient, mySrd).getId();
+		//Given: An ecounter that references the patient
+		Encounter encounter =  buildResource("Encounter", withReference("subject", idType));
+		myEncounterDao.create(encounter, mySrd);
+		String url = "/Encounter?subject._tag=http://bluecrossnc.com/fhir/lob|test";
+
+		// execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+
+		//Verify: Chained search with _tag returns results
+		assertEquals(1, encounters.size());
 	}
 
 	@Test
