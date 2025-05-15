@@ -28,6 +28,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -155,7 +156,8 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "RES_TYPE_ID",
-			foreignKey = @ForeignKey(name = "FK_RESVER_RES_TYPE"),
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 			insertable = false,
 			updatable = false,
 			nullable = true)

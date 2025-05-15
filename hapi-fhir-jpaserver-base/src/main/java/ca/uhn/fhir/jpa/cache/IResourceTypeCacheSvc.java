@@ -20,7 +20,21 @@
 package ca.uhn.fhir.jpa.cache;
 
 public interface IResourceTypeCacheSvc {
+	/**
+	 * Retrieves the resource type ID for the given resource type.
+	 * If the resource type does not exist, a new custom resource type will be created,
+	 * added to the database and cache, and its ID will be returned.
+	 *
+	 * @param theResType the resource type to retrieve or create
+	 * @return the resource type ID, or null if the resource type could not be created
+	 */
 	Short getResourceTypeId(String theResType);
 
+	/**
+	 * Adds the given resource type and its corresponding ID to the cache.
+	 *
+	 * @param theResType the resource type to be added to the cache
+	 * @param theResTypeId the ID of the resource type to be added to the cache
+	 */
 	void addToCache(String theResType, Short theResTypeId);
 }

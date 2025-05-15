@@ -33,6 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -400,7 +401,8 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "RES_TYPE_ID",
-			foreignKey = @ForeignKey(name = "FK_RESOURCE_RES_TYPE"),
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 			insertable = false,
 			updatable = false,
 			nullable = true)

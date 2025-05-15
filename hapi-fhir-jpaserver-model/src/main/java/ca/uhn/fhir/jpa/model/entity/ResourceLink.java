@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -168,7 +169,8 @@ public class ResourceLink extends BaseResourceIndex {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "SRC_RES_TYPE_ID",
-			foreignKey = @ForeignKey(name = "FK_RESLINK_SRC_RES_TYPE"),
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 			insertable = false,
 			updatable = false,
 			nullable = true)
@@ -180,7 +182,8 @@ public class ResourceLink extends BaseResourceIndex {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "TARGET_RES_TYPE_ID",
-			foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET_RES_TYPE"),
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 			insertable = false,
 			updatable = false,
 			nullable = true)

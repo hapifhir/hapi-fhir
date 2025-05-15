@@ -43,7 +43,7 @@ class ResourceTypeCacheSvcImplTest {
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
 
 	@Test
-	void testInitCache() {
+	void testInitResourceTypes() {
 		// setup
 		ResourceTypeEntity entity1 = new ResourceTypeEntity();
 		entity1.setResourceTypeId((short) 1);
@@ -61,7 +61,7 @@ class ResourceTypeCacheSvcImplTest {
 		when(myResourceTypeDao.findAll()).thenReturn(entities);
 
 		// execute
-		myResourceTypeCacheSvc.initCache();
+		myResourceTypeCacheSvc.initResourceTypes();
 
 		// verify
 		verify(myMemoryCacheService, times(3)).put(eq(CacheEnum.RES_TYPE_TO_RES_TYPE_ID), anyString(), anyShort());

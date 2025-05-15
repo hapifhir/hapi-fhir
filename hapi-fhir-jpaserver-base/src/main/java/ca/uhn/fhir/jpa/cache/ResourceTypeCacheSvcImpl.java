@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -54,7 +55,7 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 
 	@PostConstruct
 	public void start() {
-		initCache();
+		initResourceTypes();
 		ourLog.info(
 				"Resource type cache size: {}",
 				myMemoryCacheService.getEstimatedSize(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID));
@@ -78,14 +79,27 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 		myMemoryCacheService.put(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, theResTypeId);
 	}
 
-	protected void initCache() {
-		List<ResourceTypeEntity> resTypes = myTxTemplate.execute(t -> myResourceTypeDao.findAll());
-		if (CollectionUtils.isEmpty(resTypes)) {
-			ourLog.warn("No resource type found in database");
-			return;
-		}
-		ourLog.info("{} resource types found in database.", resTypes.size());
-		resTypes.forEach(resType -> addToCache(resType.getResourceType(), resType.getResourceTypeId()));
+	protected void initResourceTypes() {
+		myTxTemplate.execute(t -> {
+			List<ResourceTypeEntity> resTypeEntities = myResourceTypeDao.findAll();
+
+			if (CollectionUtils.isEmpty(resTypeEntities)) {
+				List<ResourceTypeEntity> newEntities = ResourceTypeUtil.generateResourceTypes().stream()
+						.map(r -> {
+							ResourceTypeEntity entity = new ResourceTypeEntity();
+							entity.setResourceType(r);
+							return entity;
+						})
+						.toList();
+
+				myResourceTypeDao.saveAll(newEntities);
+				ourLog.info("Populated HFJ_RESOURCE_TYPE table with {} entries", newEntities.size());
+				resTypeEntities = newEntities;
+			}
+
+			resTypeEntities.forEach(r -> addToCache(r.getResourceType(), r.getResourceTypeId()));
+			return null;
+		});
 	}
 
 	protected ResourceTypeEntity createResourceType(String theResourceType) {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -92,7 +93,8 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 			name = "RES_TYPE_ID",
-			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_RES_TYPE"),
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
 			insertable = false,
 			updatable = false,
 			nullable = true)
