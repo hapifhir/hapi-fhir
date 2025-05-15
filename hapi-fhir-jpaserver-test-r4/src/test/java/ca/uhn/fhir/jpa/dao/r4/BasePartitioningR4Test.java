@@ -57,7 +57,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected int myPartitionId4;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
 	@Autowired
-	private IPartitionLookupSvc myPartitionConfigSvc;
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 	private boolean myRegisteredSearchParamValidatingInterceptor;

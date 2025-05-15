@@ -2,7 +2,6 @@ package ca.uhn.fhir.tinder.ddl;
 
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
-import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
@@ -21,8 +20,6 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.SchemaToolingSettings;
-import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
@@ -35,7 +32,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -44,9 +40,6 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -88,7 +81,6 @@ public class DdlGeneratorHibernate61 {
 
 	public void generateDdl() throws MojoFailureException {
 		ClassLoader classLoader = getClassLoader(myProject);
-		FakeConnectionConnectionProvider connectionProvider = new FakeConnectionConnectionProvider();
 		Set<Class<?>> entityClasses = scanClasspathForEntityClasses(myPackages, classLoader);
 
 		BootstrapServiceRegistryBuilder bootstrapServiceRegistryBuilder = new BootstrapServiceRegistryBuilder();
@@ -103,8 +95,13 @@ public class DdlGeneratorHibernate61 {
 			StandardServiceRegistryBuilder registryBuilder =
 					new StandardServiceRegistryBuilder(bootstrapServiceRegistry);
 			registryBuilder.applySetting(SchemaToolingSettings.HBM2DDL_AUTO, "create");
+
+			// Setting this prevents Hibernate from attempting to make DB connections to a local instance to pull
+			// metadata.
+			// This will always fail during DDL generation anyhow, as we aren't operating against live DB instances.
+			registryBuilder.applySetting(JdbcSettings.ALLOW_METADATA_ON_BOOT, false);
+
 			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
-			registryBuilder.addService(ConnectionProvider.class, connectionProvider);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			registryBuilder.addService(
@@ -189,8 +186,6 @@ public class DdlGeneratorHibernate61 {
 				}
 			}
 		}
-
-		IoUtil.closeQuietly(connectionProvider);
 	}
 
 	public void setProject(MavenProject theProject) {
@@ -260,60 +255,6 @@ public class DdlGeneratorHibernate61 {
 				w.append(resource.getContentAsString(StandardCharsets.UTF_8));
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write to file " + outputFile + ": " + e.getMessage(), e);
-			}
-		}
-	}
-
-	/**
-	 * The hibernate bootstrap process insists on having a DB connection even
-	 * if it will never be used. So we just create a placeholder H2 connection
-	 * here. The schema export doesn't actually touch this DB, so it doesn't
-	 * matter that it doesn't correlate to the specified dialect.
-	 */
-	private static class FakeConnectionConnectionProvider extends UserSuppliedConnectionProviderImpl
-			implements Closeable {
-		private static final long serialVersionUID = 4147495169899817244L;
-		private Connection connection;
-
-		public FakeConnectionConnectionProvider() {
-			try {
-				connection = DriverManager.getConnection("jdbc:h2:mem:tmp", "sa", "sa");
-			} catch (SQLException e) {
-				connection = null;
-				return;
-			}
-
-			/*
-			 * The Oracle Dialect tries to query for any existing sequences, so we need to supply
-			 * a fake empty table to answer that query.
-			 */
-			try {
-				connection.setAutoCommit(true);
-				connection
-						.prepareStatement("create table all_sequences (PID bigint not null, primary key (PID))")
-						.execute();
-			} catch (SQLException e) {
-				ourLog.error("Failed to create sequences table", e);
-			}
-		}
-
-		@Override
-		public Connection getConnection() {
-			ourLog.trace("Using internal driver: {}", org.h2.Driver.class);
-			return connection;
-		}
-
-		@Override
-		public void closeConnection(Connection conn) {
-			// ignore
-		}
-
-		@Override
-		public void close() throws IOException {
-			try {
-				connection.close();
-			} catch (SQLException e) {
-				throw new IOException(e);
 			}
 		}
 	}

@@ -5,7 +5,7 @@
 	<parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>8.3.4-SNAPSHOT</version>
+		 <version>8.3.6-SNAPSHOT</version>
 
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
@@ -126,22 +126,9 @@
 							<report>javadoc</report>
 						</reports>
 						<configuration>
-							<links>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-dstu2</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-dstu3</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-r4</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-r5</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-client</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-server</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-jpaserver-base</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-converter</link>
-								<link>https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-structures-validation</link>
-								<link>https://docs.oracle.com/javaee/7/api/</link>
-							</links>
 							<additionalparam>-Xdoclint:none</additionalparam>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
-							<source>11</source>
+							<source>17</source>
 						</configuration>
 					</reportSet>
 				</reportSets>
@@ -165,7 +152,7 @@
 							<verbose>false</verbose>
 							<debug>false</debug>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
-							<source>11</source>
+							<source>17</source>
 						</configuration>
 						<executions>
 							<execution>

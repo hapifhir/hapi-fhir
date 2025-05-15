@@ -65,7 +65,10 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
 	 */
 	public UnprocessableEntityException(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome) {
-		super(STATUS_CODE, OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOperationOutcome), theOperationOutcome);
+		super(
+				STATUS_CODE,
+				OperationOutcomeUtil.getFirstIssueDiagnostics(theCtx, theOperationOutcome),
+				theOperationOutcome);
 	}
 
 	/**

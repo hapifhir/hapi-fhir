@@ -1544,7 +1544,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IOperationUntypedWithInput returnForStringOutcome() {
+		public IOperationUntypedWithInput returnStringOutcome() {
 			myReturnStringOutcome = true;
 			return this;
 		}

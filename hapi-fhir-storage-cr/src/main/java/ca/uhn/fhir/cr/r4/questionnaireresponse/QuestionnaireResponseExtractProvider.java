@@ -44,7 +44,7 @@ public class QuestionnaireResponseExtractProvider {
 	IQuestionnaireResponseProcessorFactory myQuestionnaireResponseProcessorFactory;
 
 	/**
-	 * Implements the <a href="http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>
+	 * Implements the <a href="http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html">$extract</a>
 	 * operation found in the
 	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
 	 *
