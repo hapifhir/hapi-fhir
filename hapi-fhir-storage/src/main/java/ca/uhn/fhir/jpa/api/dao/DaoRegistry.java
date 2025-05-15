@@ -188,7 +188,15 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		myResourceNameToResourceDao.put(resourceName, theResourceDao);
 	}
 
-	public <T extends IBaseResource> IFhirResourceDao<T> getDaoOrThrowException(Class<T> theClass) {
+	/**
+	 * @deprecated use getDaoOrThrow
+	 */
+	@Deprecated
+	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
+		return getDaoOrThrow(theClass);
+	}
+
+	public <T extends IBaseResource> IFhirResourceDao<T> getDaoOrThrow(Class<T> theClass) {
 		IFhirResourceDao<T> retVal = getResourceDao(theClass);
 		if (retVal == null) {
 			List<String> supportedResourceNames = myResourceNameToResourceDao.keySet().stream()
