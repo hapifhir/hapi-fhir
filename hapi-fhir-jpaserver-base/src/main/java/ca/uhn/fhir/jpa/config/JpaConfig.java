@@ -78,6 +78,7 @@ import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -599,10 +600,10 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceTypeCacheSvc resourceTypeCacheSvc(
+			@Autowired IHapiTransactionService theHapiTransactionService,
 			@Autowired IResourceTypeDao theResourceTypeDao,
-			@Autowired PlatformTransactionManager theTxManager,
 			@Autowired MemoryCacheService theMemoryCacheService) {
-		return new ResourceTypeCacheSvcImpl(theResourceTypeDao, theTxManager, theMemoryCacheService);
+		return new ResourceTypeCacheSvcImpl(theHapiTransactionService, theResourceTypeDao, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *

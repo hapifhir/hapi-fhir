@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.function.Function;
@@ -29,15 +31,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceTypeCacheSvcImplTest {
-
 	@InjectMocks
 	ResourceTypeCacheSvcImpl myResourceTypeCacheSvc;
 
 	@Mock
 	IResourceTypeDao myResourceTypeDao;
 
-	@Mock
-	PlatformTransactionManager myTxManager;
+	@Spy
+	IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@Spy
 	MemoryCacheService myMemoryCacheService = new MemoryCacheService(new JpaStorageSettings());
@@ -45,17 +46,9 @@ class ResourceTypeCacheSvcImplTest {
 	@Test
 	void testInitResourceTypes() {
 		// setup
-		ResourceTypeEntity entity1 = new ResourceTypeEntity();
-		entity1.setResourceTypeId((short) 1);
-		entity1.setResourceType("Encounter");
-
-		ResourceTypeEntity entity2 = new ResourceTypeEntity();
-		entity2.setResourceTypeId((short) 2);
-		entity2.setResourceType("Patient");
-
-		ResourceTypeEntity entity3 = new ResourceTypeEntity();
-		entity3.setResourceTypeId((short) 3);
-		entity3.setResourceType("ValueSet");
+		ResourceTypeEntity entity1 = createResourceTypeEntity((short) 1, "Encounter");
+		ResourceTypeEntity entity2 = createResourceTypeEntity((short) 2, "Patient");
+		ResourceTypeEntity entity3 = createResourceTypeEntity((short) 3, "ValueSet");
 
 		List<ResourceTypeEntity> entities = List.of(entity1, entity2, entity3);
 		when(myResourceTypeDao.findAll()).thenReturn(entities);
@@ -73,11 +66,13 @@ class ResourceTypeCacheSvcImplTest {
 	@Test
 	void testGetResourceTypeId_whenCacheFound_noDatabaseHit() {
 		// setup
-		doReturn((short) 100).when(myMemoryCacheService)
+		Short resTypeId = (short) 100;
+		String resType = "Encounter";
+		doReturn(resTypeId).when(myMemoryCacheService)
 			.get(eq(CacheEnum.RES_TYPE_TO_RES_TYPE_ID), anyString(), any(Function.class));
 
 		// execute
-		myResourceTypeCacheSvc.getResourceTypeId("Patient");
+		myResourceTypeCacheSvc.getResourceTypeId(resType);
 
 		// verify
 		verify(myResourceTypeDao, never()).findByResourceType(anyString());
@@ -89,28 +84,24 @@ class ResourceTypeCacheSvcImplTest {
 		// setup
 		Short resTypeId = (short) 100;
 		String resType = "Encounter";
-		ResourceTypeEntity entity = new ResourceTypeEntity();
-		entity.setResourceTypeId(resTypeId);
-		entity.setResourceType(resType);
 		when(myResourceTypeDao.findResourceIdByType(anyString())).thenReturn(resTypeId);
 
 		// execute
 		Short result = myResourceTypeCacheSvc.getResourceTypeId(resType);
 
 		// verify
-		assertThat(result).isEqualTo((short) 100);
 		verify(myResourceTypeDao, times(1)).findResourceIdByType(anyString());
 		verify(myResourceTypeDao, never()).save(any(ResourceTypeEntity.class));
+		assertThat(result).isEqualTo(resTypeId);
+		assertThat(getResourceTypeIdFromCache(resType)).isEqualTo(resTypeId);
 	}
-	
+
 	@Test
 	void testGetResourceTypeId_whenCacheMissAndNotInDb_createAndAddToCache() {
 		// setup
 		Short resTypeId = (short) 100;
 		String resType = "CustomType";
-		ResourceTypeEntity entity = new ResourceTypeEntity();
-		entity.setResourceTypeId(resTypeId);
-		entity.setResourceType(resType);
+		ResourceTypeEntity entity = createResourceTypeEntity(resTypeId, resType);
 
 		when(myResourceTypeDao.findResourceIdByType(resType)).thenReturn(null);
 		when(myResourceTypeDao.save(any(ResourceTypeEntity.class))).thenReturn(entity);
@@ -126,21 +117,46 @@ class ResourceTypeCacheSvcImplTest {
 	}
 
 	@Test
-	void testCreateResourceType() {
+	void testCreateResourceType_whenSaved_updateCache() {
 		// setup
 		Short resTypeId = (short) 100;
 		String resType = "CustomType";
-		ResourceTypeEntity entity = new ResourceTypeEntity();
-		entity.setResourceTypeId(resTypeId);
-		entity.setResourceType(resType);
+		ResourceTypeEntity entity = createResourceTypeEntity(resTypeId, resType);
+		when(myResourceTypeDao.save(any(ResourceTypeEntity.class))).thenReturn(entity);
 
 		// execute
-		when(myResourceTypeDao.save(any(ResourceTypeEntity.class))).thenReturn(entity);
 		myResourceTypeCacheSvc.createResourceType(resType);
 
 		// verify it is saved and added to cache
 		verify(myResourceTypeDao, times(1)).save(any(ResourceTypeEntity.class));
 		assertThat(resTypeId).isEqualTo(getResourceTypeIdFromCache(resType));
+	}
+
+	@Test
+	void testCreateResourceType_whenConstraintViolation_lookupInDbAndUpdateCache() {
+		// setup
+		Short resTypeId = (short) 100;
+		String resType = "CustomType";
+		ResourceTypeEntity entity = createResourceTypeEntity(resTypeId, resType);
+
+		when(myResourceTypeDao.save(any(ResourceTypeEntity.class)))
+			.thenThrow(new DataIntegrityViolationException("Resource type already exists"));
+		when(myResourceTypeDao.findByResourceType(resType)).thenReturn(entity);
+
+		// execute
+		myResourceTypeCacheSvc.createResourceType(resType);
+
+		// verify it is retrieved and added to cache
+		verify(myResourceTypeDao, times(1)).save(any(ResourceTypeEntity.class));
+		verify(myResourceTypeDao, times(1)).findByResourceType(anyString());
+		assertThat(resTypeId).isEqualTo(getResourceTypeIdFromCache(resType));
+	}
+
+	private ResourceTypeEntity createResourceTypeEntity(Short resourceTypeId, String resourceType) {
+		ResourceTypeEntity entity = new ResourceTypeEntity();
+		entity.setResourceTypeId(resourceTypeId);
+		entity.setResourceType(resourceType);
+		return entity;
 	}
 
 	private Short getResourceTypeIdFromCache(String key) {

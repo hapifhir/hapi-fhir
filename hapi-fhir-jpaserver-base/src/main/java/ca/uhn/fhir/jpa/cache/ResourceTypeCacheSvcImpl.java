@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import jakarta.annotation.PostConstruct;
@@ -28,8 +29,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -39,17 +38,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	private static final Logger ourLog = getLogger(ResourceTypeCacheSvcImpl.class);
 
+	private final IHapiTransactionService myTransactionService;
 	private final IResourceTypeDao myResourceTypeDao;
-	private final TransactionTemplate myTxTemplate;
 	private final MemoryCacheService myMemoryCacheService;
 
 	public ResourceTypeCacheSvcImpl(
+			IHapiTransactionService theTransactionService,
 			IResourceTypeDao theResourceTypeDao,
-			PlatformTransactionManager theTxManager,
 			MemoryCacheService theMemoryCacheService) {
+		myTransactionService = theTransactionService;
 		myResourceTypeDao = theResourceTypeDao;
-		myTxTemplate = new TransactionTemplate(theTxManager);
-		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		myMemoryCacheService = theMemoryCacheService;
 	}
 
@@ -80,9 +78,8 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	}
 
 	protected void initResourceTypes() {
-		myTxTemplate.execute(t -> {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
 			List<ResourceTypeEntity> resTypeEntities = myResourceTypeDao.findAll();
-
 			if (CollectionUtils.isEmpty(resTypeEntities)) {
 				List<ResourceTypeEntity> newEntities = ResourceTypeUtil.generateResourceTypes().stream()
 						.map(r -> {
@@ -93,32 +90,36 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 						.toList();
 
 				myResourceTypeDao.saveAll(newEntities);
-				ourLog.info("Populated HFJ_RESOURCE_TYPE table with {} entries", newEntities.size());
+				ourLog.info("Table HFJ_RESOURCE_TYPE is populated with {} entries.", newEntities.size());
 				resTypeEntities = newEntities;
 			}
 
+			// Populate the cache
 			resTypeEntities.forEach(r -> addToCache(r.getResourceType(), r.getResourceTypeId()));
 			return null;
 		});
 	}
 
 	protected ResourceTypeEntity createResourceType(String theResourceType) {
-		return myTxTemplate.execute(t -> {
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			ResourceTypeEntity resTypeEntity = new ResourceTypeEntity();
+			resTypeEntity.setResourceType(theResourceType);
 			try {
-				ResourceTypeEntity entity = new ResourceTypeEntity();
-				entity.setResourceType(theResourceType);
-				ResourceTypeEntity savedEntity = myResourceTypeDao.save(entity);
-				addToCache(savedEntity.getResourceType(), savedEntity.getResourceTypeId());
-				return savedEntity;
+				resTypeEntity = myResourceTypeDao.save(resTypeEntity);
 			} catch (DataIntegrityViolationException e) {
 				// This can happen if the resource type already exists in the database
 				ourLog.info("Resource type already exists: {}", theResourceType);
-				return myTxTemplate.execute(tx -> myResourceTypeDao.findByResourceType(theResourceType));
+				resTypeEntity = myResourceTypeDao.findByResourceType(theResourceType);
 			}
+
+			addToCache(resTypeEntity.getResourceType(), resTypeEntity.getResourceTypeId());
+			return resTypeEntity;
 		});
 	}
 
 	private Short lookupResourceTypeId(String theResourceType) {
-		return myTxTemplate.execute(t -> myResourceTypeDao.findResourceIdByType(theResourceType));
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myResourceTypeDao.findResourceIdByType(theResourceType));
 	}
 }
