@@ -72,6 +72,21 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			String theWebUrl,
 			String theProfileName) {
 
+		/*
+		 * We synchronize on the StructureDefinition instance because there is always
+		 * the possibility that multiple threads are trying to generate a snapshot
+		 * on the given resource at the same time. This could happen for example if
+		 * multiple threads are validating resources against the same profile/StructureDef
+		 * which is stored without a snapshot. We need to synchronize this because
+		 * we read and write the UserData map in the resource, and this isn't thread
+		 * safe.
+		 *
+		 * There shouldn't be any meaningful performance impacts to this synchronization
+		 * because we cache the results of snapshot generation after we're done, so this
+		 * lock is only hit during the first attempt by the validator to fetch
+		 * any given SD (and any other concurrent attempts at the same time, hence
+		 * needing this lock)
+		 */
 		synchronized (theInput) {
 
 			/*
