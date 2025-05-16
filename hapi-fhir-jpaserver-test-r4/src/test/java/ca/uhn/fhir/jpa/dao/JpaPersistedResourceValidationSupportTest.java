@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,19 +54,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JpaPersistedResourceValidationSupportTest {
 
+	@Mock
+	private DaoRegistry myDaoRegistry;
 
 	@Nested
 	class FetchStructureDefinitionTests {
 		private final FhirContext theFhirContext = FhirContext.forR4Cached();
+		private JpaPersistedResourceValidationSupport myTestClass;
 
-		@InjectMocks
-		private final JpaPersistedResourceValidationSupport testClass = new JpaPersistedResourceValidationSupport(theFhirContext);
 		@Captor
 		ArgumentCaptor<SearchParameterMap> searchParameterMapCaptor;
 		@Mock
 		IFhirResourceDao<?> mockDao;
-		@Mock
-		private DaoRegistry myDaoRegistry;
+
+		@BeforeEach
+		public void beforeEach() {
+			myTestClass = new JpaPersistedResourceValidationSupport(theFhirContext, myDaoRegistry);
+		}
 
 		@Test
 		@DisplayName("fetch StructureDefinition by version less url")
@@ -75,7 +79,7 @@ class JpaPersistedResourceValidationSupportTest {
 			when(mockDao.search(any(), any())).thenReturn(mock(IBundleProvider.class));
 			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
 
-			testClass.fetchResource(StructureDefinition.class, profileUrl);
+			myTestClass.fetchResource(StructureDefinition.class, profileUrl);
 
 			verify(mockDao).search(searchParameterMapCaptor.capture(), any());
 			SearchParameterMap searchParams = searchParameterMapCaptor.getValue();
@@ -96,7 +100,7 @@ class JpaPersistedResourceValidationSupportTest {
 			when(mockDao.search(any(), any())).thenReturn(mock(IBundleProvider.class));
 			when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
 
-			testClass.fetchResource(StructureDefinition.class, profileUrl);
+			myTestClass.fetchResource(StructureDefinition.class, profileUrl);
 
 			verify(mockDao).search(searchParameterMapCaptor.capture(), any());
 			SearchParameterMap searchParams = searchParameterMapCaptor.getValue();
@@ -123,8 +127,6 @@ class JpaPersistedResourceValidationSupportTest {
 	@Nested
 	class FetchResourceTests {
 
-		@Mock
-		private DaoRegistry myDaoRegistry;
 		@Mock
 		private IFhirResourceDao<?> myResourceDao;
 

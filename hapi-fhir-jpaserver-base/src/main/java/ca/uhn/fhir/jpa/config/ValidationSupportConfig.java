@@ -63,8 +63,8 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)
-	public IValidationSupport jpaValidationSupport(FhirContext theFhirContext) {
-		return new JpaPersistedResourceValidationSupport(theFhirContext);
+	public IValidationSupport jpaValidationSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new JpaPersistedResourceValidationSupport(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean(name = "myInstanceValidator")

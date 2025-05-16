@@ -47,7 +47,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Objects;
@@ -68,9 +67,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
@@ -79,16 +76,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	/**
 	 * Constructor
 	 */
-	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext) {
-		this(theFhirContext, null);
-	}
-
-	/**
-	 * Constructor
-	 */
 	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		super();
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 	}

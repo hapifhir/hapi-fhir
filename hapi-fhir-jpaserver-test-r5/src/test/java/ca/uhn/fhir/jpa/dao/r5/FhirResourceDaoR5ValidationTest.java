@@ -11,15 +11,20 @@ import org.hl7.fhir.r5.model.MessageHeader;
 import org.hl7.fhir.r5.model.Narrative;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.UrlType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR5ValidationTest extends BaseJpaR5Test {
 
+	/**
+	 * When validating message and document bundles, the validator tries to resolve
+	 * any URLs (such as the "example.com" ones in this test) from the
+	 * {@link ca.uhn.fhir.context.support.IValidationSupport} infrastructure.
+	 * Make sure we don't throw any errors when this happens.
+	 */
 	@Test
-	public void testInterlinkedReference() {
+	public void testValidate_withInterlinkedReference_returnsNoErrors() {
 		// Setup
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
