@@ -47,9 +47,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,9 +67,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
 	private final FhirContext myFhirContext;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
 	private Class<? extends IBaseResource> myCodeSystemType;
 	private Class<? extends IBaseResource> myStructureDefinitionType;
@@ -80,10 +76,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	/**
 	 * Constructor
 	 */
-	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext) {
+	public JpaPersistedResourceValidationSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		super();
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@Override
@@ -165,12 +163,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	private <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
 		if (theClass == null) {
-			Supplier<IBaseResource>[] fetchers = new Supplier[] {
-				() -> doFetchResource(ValueSet.class, theUri),
-				() -> doFetchResource(CodeSystem.class, theUri),
-				() -> doFetchResource(StructureDefinition.class, theUri)
-			};
-			return Arrays.stream(fetchers)
+			List<Supplier<IBaseResource>> fetchers = List.of(
+					() -> doFetchResource(myValueSetType, theUri),
+					() -> doFetchResource(myCodeSystemType, theUri),
+					() -> doFetchResource(myStructureDefinitionType, theUri));
+			return fetchers.stream()
 					.map(Supplier::get)
 					.filter(Objects::nonNull)
 					.findFirst()
@@ -188,12 +185,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
-					search = myDaoRegistry.getResourceDao(resourceName).search(params);
+					search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					if (search.isEmpty()) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
-						search = myDaoRegistry.getResourceDao(resourceName).search(params);
+						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
 				} else {
 					int versionSeparator = theUri.lastIndexOf('|');
@@ -206,7 +203,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 						params.add(ValueSet.SP_URL, new UriParam(theUri));
 					}
 					params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
-					search = myDaoRegistry.getResourceDao(resourceName).search(params);
+					search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 
 					if (search.isEmpty()
 							&& myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
@@ -221,7 +218,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 							params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(theUri));
 						}
 						params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
-						search = myDaoRegistry.getResourceDao(resourceName).search(params);
+						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
 				}
 				break;
@@ -242,7 +239,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				} else {
 					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
 				}
-				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
+				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params, new SystemRequestDetails());
 				break;
 			}
 			case "Questionnaire": {
@@ -253,7 +250,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				} else {
 					params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
 				}
-				search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
+				search = myDaoRegistry.getResourceDao("Questionnaire").search(params, new SystemRequestDetails());
 				break;
 			}
 			case "CodeSystem": {
@@ -267,7 +264,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 					params.add(CodeSystem.SP_URL, new UriParam(theUri));
 				}
 				params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
+				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 				break;
 			}
 			case "ImplementationGuide":
@@ -275,7 +272,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
+				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 				break;
 			}
 			default:
@@ -284,7 +281,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add("url", new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
+				search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 		}
 
 		Integer size = search.size();

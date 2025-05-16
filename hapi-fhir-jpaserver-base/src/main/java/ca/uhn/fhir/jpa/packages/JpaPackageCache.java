@@ -580,7 +580,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			try {
 				return loadPackageInner(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(1302) + e);
+				throw new InternalErrorException(Msg.code(1302) + e, e);
 			}
 		});
 	}
