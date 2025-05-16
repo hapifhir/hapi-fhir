@@ -452,7 +452,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public void validateTypeOrThrowException(Class<? extends IBaseResource> theType) {
-		myDaoRegistry.getDaoOrThrowException(theType);
+		myDaoRegistry.getDaoOrThrow(theType);
 	}
 
 	private static class ResourceLookupPersistentIdWrapper<P extends IResourcePersistentId> implements IResourceLookup {

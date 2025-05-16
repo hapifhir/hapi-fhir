@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6965
+title: "The Patient/$match operation has been changed so it now respects the EID system definition in the MDM rules
+following the same algorithm as MDM resource matching: EID matching is checked first and if no matches are found,
+then field-based matching is used."
