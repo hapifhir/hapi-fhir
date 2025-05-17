@@ -202,6 +202,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -261,10 +262,34 @@ public class JpaConfig {
 		return ValidationSupportChain.CacheConfiguration.defaultValues();
 	}
 
+	/**
+	 * Note, there is a circular dependency between {@link WorkerContextValidationSupportAdapter}
+	 * and {@link JpaValidationSupportChain}. The WorkerContextValidationSupportAdapter wraps
+	 * an instance of {@link IValidationSupport} (which is what JpaValidationSupportChain is)
+	 * but we also need to pass in the WorkerContextValidationSupportAdapter instance to the
+	 * snapshot generator which is created within the {@literal @PostConstruct} method within
+	 * JpaValidationSupportChain.
+	 * <p>
+	 * In order to allow the circular dependency to be created (since Spring doesn't like
+	 * these), JpaValidationSupportChain calls {@link WorkerContextValidationSupportAdapter#setValidationSupport(IValidationSupport)}
+	 * to pass itself in.
+	 * </p>
+	 * <p>
+	 * This is obviously not ideal, but is the best we can do since the corelib
+	 * tools all use {@link org.hl7.fhir.r5.context.IWorkerContext} interface as their
+	 * input. See {@link WorkerContextValidationSupportAdapter} for more info.
+	 * </p>
+	 */
+	@Bean
+	public WorkerContextValidationSupportAdapter workerContextValidationSupportAdapter() {
+		return new WorkerContextValidationSupportAdapter();
+	}
+
 	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	@Primary
 	public IValidationSupport jpaValidationSupportChain() {
-		return new JpaValidationSupportChain(myFhirContext, validationSupportChainCacheConfiguration());
+		return new JpaValidationSupportChain(
+				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
 	}
 
 	@Bean("myDaoRegistry")
