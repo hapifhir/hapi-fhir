@@ -41,6 +41,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 	public void before() throws Exception {
 		super.before();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override

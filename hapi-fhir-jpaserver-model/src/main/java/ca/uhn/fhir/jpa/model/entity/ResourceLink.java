@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -165,6 +166,31 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "TARGET_RES_PARTITION_DATE", nullable = true)
 	private LocalDate myTargetResourcePartitionDate;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "SRC_RES_TYPE_ID",
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+			insertable = false,
+			updatable = false,
+			nullable = true)
+	private ResourceTypeEntity mySourceResTypeEntity;
+
+	@Column(name = "SRC_RES_TYPE_ID", nullable = true)
+	private Short mySourceResourceTypeId;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "TARGET_RES_TYPE_ID",
+			referencedColumnName = "RES_TYPE_ID",
+			foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+			insertable = false,
+			updatable = false,
+			nullable = true)
+	private ResourceTypeEntity myTargetResTypeEntity;
+
+	@Column(name = "TARGET_RES_TYPE_ID", nullable = true)
+	private Short myTargetResourceTypeId;
 	/**
 	 * Constructor
 	 */
@@ -242,6 +268,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceId = source.getTargetResourceId();
 		myTargetResourcePid = source.getTargetResourcePid();
 		myTargetResourceType = source.getTargetResourceType();
+		myTargetResourceTypeId = source.getTargetResourceTypeId();
 		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
 		myTargetResourcePartitionId = source.getTargetResourcePartitionId();
@@ -273,6 +300,7 @@ public class ResourceLink extends BaseResourceIndex {
 		mySourceResource = theSourceResource;
 		mySourceResourcePid = theSourceResource.getId().getId();
 		mySourceResourceType = theSourceResource.getResourceType();
+		mySourceResourceTypeId = theSourceResource.getResourceTypeId();
 		setPartitionId(theSourceResource.getPartitionId());
 	}
 
@@ -352,6 +380,26 @@ public class ResourceLink extends BaseResourceIndex {
 		return this;
 	}
 
+	public Short getSourceResourceTypeId() {
+		return mySourceResourceTypeId;
+	}
+
+	public ResourceTypeEntity getSourceResTypeEntity() {
+		return mySourceResTypeEntity;
+	}
+
+	public Short getTargetResourceTypeId() {
+		return myTargetResourceTypeId;
+	}
+
+	public void setTargetResourceTypeId(Short theTargetResourceTypeId) {
+		myTargetResourceTypeId = theTargetResourceTypeId;
+	}
+
+	public ResourceTypeEntity getTargetResTypeEntity() {
+		return myTargetResTypeEntity;
+	}
+
 	@Override
 	public void clearHashes() {
 		// nothing right now
@@ -388,9 +436,11 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append("path=").append(mySourcePath);
 		b.append(", srcResId=").append(mySourceResourcePid);
 		b.append(", srcPartition=").append(myPartitionIdValue);
+		b.append(", srcResTypeId=").append(getSourceResourceTypeId());
 		b.append(", targetResId=").append(myTargetResourcePid);
 		b.append(", targetPartition=").append(myTargetResourcePartitionId);
 		b.append(", targetResType=").append(myTargetResourceType);
+		b.append(", targetResTypeId=").append(getTargetResourceTypeId());
 		b.append(", targetResVersion=").append(myTargetResourceVersion);
 		b.append(", targetResUrl=").append(myTargetResourceUrl);
 
@@ -411,14 +461,17 @@ public class ResourceLink extends BaseResourceIndex {
 		retVal.mySourceResource = mySourceResource;
 		retVal.mySourceResourcePid = mySourceResource.getId().getId();
 		retVal.mySourceResourceType = mySourceResource.getResourceType();
+		retVal.mySourceResourceTypeId = mySourceResource.getResourceTypeId();
 		retVal.myPartitionIdValue = mySourceResource.getPartitionId().getPartitionId();
 		retVal.mySourcePath = mySourcePath;
 		retVal.myUpdated = myUpdated;
 		retVal.myTargetResourceType = myTargetResourceType;
+		retVal.myTargetResourceTypeId = myTargetResourceTypeId;
 		if (myTargetResourceId != null) {
 			retVal.myTargetResourceId = myTargetResourceId;
 		} else if (getTargetResource() != null) {
 			retVal.myTargetResourceId = getTargetResource().getIdDt().getIdPart();
+			retVal.myTargetResourceTypeId = getTargetResource().getResourceTypeId();
 		}
 		retVal.myTargetResourceUrl = myTargetResourceUrl;
 		retVal.myTargetResourceVersion = myTargetResourceVersion;

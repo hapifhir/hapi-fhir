@@ -129,6 +129,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init760();
 		init780();
 		init820();
+		init840();
+	}
+
+	protected void init840() {
+		Builder version = forVersion(VersionEnum.V8_4_0);
+		{
+			// Add HFJ_RESOURCE_TYPE table
+			version.addIdGenerator("20250515.1", "SEQ_RESOURCE_TYPE", 1);
+			Builder.BuilderAddTableByColumns resourceType =
+					version.addTableByColumns("20250515.2", "HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resourceType.addColumn("RES_TYPE_ID").nonNullable().type(ColumnTypeEnum.SMALLINT);
+			resourceType.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+
+			resourceType
+					.addIndex("20250515.3", "IDX_RES_TYPE_NAME")
+					.unique(true)
+					.withColumns("RES_TYPE");
+
+			// Add column RES_TYPE_ID to HFJ_RESOURCE
+			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
+			resource.addColumn("20250515.101", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID and FK to HFJ_RES_VER
+			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
+			resVer.addColumn("20250515.201", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_TAG
+			Builder.BuilderWithTableName resTag = version.onTable("HFJ_RES_TAG");
+			resTag.addColumn("20250515.301", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_HISTORY_TAG
+			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
+			historyTag.addColumn("20250515.401", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_LINK
+			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
+			resLink.addColumn("20250515.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250515.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+		}
 	}
 
 	protected void init820() {
@@ -4339,6 +4379,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
 		hfjResVer.modifyColumn("20180115.3", "RES_ENCODING").nullable();
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
+	}
+
+	protected String getResourceTypeSqlData(DriverTypeEnum theDriverType, List<String> theResTypes) {
+		return switch (theDriverType) {
+			case H2_EMBEDDED, MSSQL_2012 -> theResTypes.stream()
+					.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
+					.collect(Collectors.joining(","));
+			case MARIADB_10_1, MYSQL_5_7 -> {
+				var data = new StringBuilder();
+				for (int i = 0; i < theResTypes.size(); i++) {
+					data.append("('%d','%s'),".formatted(i + 1, theResTypes.get(i)));
+				}
+				yield data.substring(0, data.length() - 1);
+			}
+			case POSTGRES_9_4 -> theResTypes.stream()
+					.map(t -> "(NEXTVAL('SEQ_RESOURCE_TYPE'),'" + t + "')")
+					.collect(Collectors.joining(","));
+			case ORACLE_12C -> "'" + String.join(",", theResTypes) + "'";
+			default -> throw new IllegalArgumentException("Unsupported driver type: " + theDriverType);
+		};
 	}
 
 	public Set<FlagEnum> getFlags() {

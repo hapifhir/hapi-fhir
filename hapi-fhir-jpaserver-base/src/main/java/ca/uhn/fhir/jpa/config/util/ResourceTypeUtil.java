@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Server - SQL Migration
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,28 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.migrate.taskdef;
+package ca.uhn.fhir.jpa.config.util;
 
-public enum ColumnTypeEnum {
-	LONG,
-	STRING,
-	DATE_ONLY,
-	DATE_TIMESTAMP,
-	BOOLEAN,
-	FLOAT,
-	INT,
-	SMALLINT,
-	TINYINT,
-	BLOB,
-	CLOB,
-	DOUBLE,
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
-	/**
-	 * Unlimited length text, with a column definition containing the annotation:
-	 * <code>@Column(length=Integer.MAX_VALUE)</code>
-	 */
-	TEXT,
-	/** Long inline binary */
-	BINARY,
-	BIG_DECIMAL;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public final class ResourceTypeUtil {
+
+	public static List<String> generateResourceTypes() {
+		return Stream.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5)
+				.map(FhirContext::forVersion)
+				.flatMap(c -> c.getResourceTypes().stream())
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
+	}
 }
