@@ -234,6 +234,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myValidationSupport.fetchAllStructureDefinitions();
 
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@ParameterizedTest

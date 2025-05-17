@@ -480,12 +480,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
-	@BeforeEach
-	public void beforeProcessResources() {
-		populateResourceTypeTable();
-		initResourceTypeCacheFromConfig();
-	}
-
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;

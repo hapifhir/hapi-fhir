@@ -55,9 +55,6 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 	@BeforeEach
 	void setUp() {
 		myStorageSettings.setAdvancedHSearchIndexing(true);
-
-		populateResourceTypeTable();
-		initResourceTypeCacheFromConfig();
 	}
 
 	@BeforeEach

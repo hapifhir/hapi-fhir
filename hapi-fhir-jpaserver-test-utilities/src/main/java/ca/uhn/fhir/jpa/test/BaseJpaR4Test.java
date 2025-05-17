@@ -637,12 +637,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
-	@BeforeEach
-	public void beforeProcessResources() {
-		populateResourceTypeTable();
-		initResourceTypeCacheFromConfig();
-	}
-
 	@AfterEach
 	public void afterPurgeDatabase() {
 		/*

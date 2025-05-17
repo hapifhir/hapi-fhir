@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.jpa.util.TestPartitionSelectorInterceptor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 
 /**
@@ -9,14 +8,6 @@ import org.junit.jupiter.api.Nested;
  * full legacy mode - No partitioning, no partition IDs in PKs.
  */
 public class DbpmDisabledPartitioningDisabledTest extends BaseDbpmJpaR5Test {
-
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-		populateResourceTypeTable();
-		initResourceTypeCacheFromConfig();
-	}
 
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {

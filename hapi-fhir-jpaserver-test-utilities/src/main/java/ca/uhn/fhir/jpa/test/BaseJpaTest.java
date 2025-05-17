@@ -1091,34 +1091,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	protected void populateResourceTypeTable() {
-		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
-		String sql = "INSERT INTO HFJ_RESOURCE_TYPE (RES_TYPE_ID, RES_TYPE) VALUES " +
-			resTypes.stream()
-				.map("(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'%s')"::formatted)
-				.collect(Collectors.joining(","));
-
-		ourLog.info("BaseJpaTest::Resource Types from config: {}", resTypes.size());
-
-		runInTransaction(() -> {
-			List<ResourceTypeEntity> entities = myResourceTypeDao.findAll();
-
-			if (CollectionUtils.isEmpty(entities)) {
-				try (Connection connection = dataSource.getConnection();
-					 Statement stmt = connection.createStatement()) {
-					stmt.executeUpdate("CREATE SEQUENCE IF NOT EXISTS SEQ_RESOURCE_TYPE START WITH 1 INCREMENT BY 1");
-					int row = stmt.executeUpdate(sql);
-					ourLog.info("BaseJpaTest::Resource Types inserted: {}", row);
-				} catch (SQLException e) {
-					ourLog.error("Failed to insert resource types", e);
-				}
-			}
-		});
-	}
-
 	/**
 	 * Initializes the resource type cache from the configuration instead of the database.
-	 * This is useful for some tests that validate the SELECT query counts. It will avoid an extra SELECT query
+	 * This is useful for some tests that validate the SELECT query counts. It prevents an extra SELECT query
 	 * being added to the count
 	 */
 	protected void initResourceTypeCacheFromConfig() {
@@ -1128,15 +1103,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		for (int i = 0; i < resTypes.size(); i++) {
 			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
 		}
-	}
-
-	protected void initResourceTypeCacheFromDatabase() {
-		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
-
-		List<ResourceTypeEntity> resTypes = myResourceTypeDao.findAll();
-		resTypes.forEach(t -> myResourceTypeCacheSvc.addToCache(t.getResourceType(), t.getResourceTypeId()));
-		ourLog.debug("Resource Type cache size: {}", myMemoryCacheService.getEstimatedSize(
-			MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID));
 	}
 
 }
