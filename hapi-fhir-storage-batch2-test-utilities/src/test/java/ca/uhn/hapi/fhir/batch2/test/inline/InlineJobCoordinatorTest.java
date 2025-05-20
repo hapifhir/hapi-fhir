@@ -143,7 +143,7 @@ class InlineJobCoordinatorTest {
 		testSubject.startInstance(requestDetails, jobInstanceStartRequest);
 
 		// The job has already been triggered, retrieve the results with the job instance ID we passed into the RequestDetails
-		final ListMultimap<String, IModelJson> actualBatchOutput = testSubject.retrieveJobRunResults(JOB_INSTANCE_ID);
+		final ListMultimap<String, IModelJson> actualBatchOutput = testSubject.runJobAndRetrieveJobRunResults(JOB_INSTANCE_ID);
 
         assertBatchSteps(expectedBatchOutput, actualBatchOutput);
 

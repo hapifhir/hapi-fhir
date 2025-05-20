@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * {@link IJobCoordinator} used for testing that tiggers a batch job without the heavy infrastructure of the
@@ -62,7 +63,7 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 	private final JobDefinition<T> myJobDefinition;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final Map<String, JobInstance> myJobInstanceMap = new HashMap<>();
-	private final Map<String, ListMultimap<String, IModelJson>> myJobRunResults = new HashMap<>();
+	private final Map<String, Supplier<ListMultimap<String, IModelJson>>> myJobRunExecutions = new HashMap<>();
 
     public InlineJobCoordinator(JobDefinition<T> theJobDefinition, JobDefinitionRegistry theJobDefinitionRegistry) {
         myInlineJobRunner = new InlineJobRunner<>(theJobDefinition);
@@ -95,17 +96,18 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 
 		myJobInstanceMap.put(jobInstance.getInstanceId(), jobInstance);
 
-		// Run the job and store the results
-		myJobRunResults.put(jobInstance.getInstanceId(), myInlineJobRunner.run(jobParameters));
+		// In at least one real batch testing use case, we'll get unexpected results if we invoke the job runner immediately,
+		// so delay it:
+		myJobRunExecutions.put(jobInstance.getInstanceId(), () -> myInlineJobRunner.run(jobParameters));
 
 		final Batch2JobStartResponse batch2JobStartResponse = new Batch2JobStartResponse();
         batch2JobStartResponse.setInstanceId(jobInstance.getInstanceId());
         return batch2JobStartResponse;
     }
 
-    public ListMultimap<String, IModelJson> retrieveJobRunResults(String theJobInstanceId) {
-        return myJobRunResults.get(theJobInstanceId);
-    }
+	public ListMultimap<String, IModelJson> runJobAndRetrieveJobRunResults(String theJobInstanceId) {
+		return myJobRunExecutions.get(theJobInstanceId).get();
+	}
 
     @Nonnull
     @Override
