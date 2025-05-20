@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.batch2.test.inline;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -37,97 +38,141 @@ import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * {@link IJobCoordinator} used for testing that tiggers a batch job without the heavy infrastructure of the
  * batch 2 framework.
+ * <p/>
+ * Note that this class currently runs jobs sequentially and as part of a single thread.
  * @param <T> the type of the job parameters
  */
 public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinator {
 
-    private final InlineJobRunner<T> myInlineJobRunner;
-	private final String myJobInstanceId;
-    private final Class<T> myClass;
+	// Test code must pass this header with the job instance ID per RequestDetails
+	public static final String JOB_INSTANCE_ID_FOR_TESTING = "jobInstanceIdForTesting";
 
-    private T myParameters;
+	private final InlineJobRunner<T> myInlineJobRunner;
+	private final JobDefinition<T> myJobDefinition;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final Map<String, JobInstance> myJobInstanceMap = new HashMap<>();
+	private final Map<String, ListMultimap<String, IModelJson>> myJobRunResults = new HashMap<>();
 
-    public InlineJobCoordinator(JobDefinition<T> theJobDefinition, String theJobInstanceId, Class<T> theClass) {
+    public InlineJobCoordinator(JobDefinition<T> theJobDefinition, JobDefinitionRegistry theJobDefinitionRegistry) {
         myInlineJobRunner = new InlineJobRunner<>(theJobDefinition);
-		myJobInstanceId = theJobInstanceId;
-		myClass = theClass;
-    }
+		myJobDefinition = theJobDefinition;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myJobDefinitionRegistry.addJobDefinition(theJobDefinition);
+	}
 
     @Override
     public Batch2JobStartResponse startInstance(
-            RequestDetails requestDetails, JobInstanceStartRequest jobInstanceStartRequest)
+            RequestDetails requestDetails, JobInstanceStartRequest theJobInstanceStartRequest)
             throws InvalidRequestException {
 
-        myParameters = jobInstanceStartRequest.getParameters(myClass);
+		final Optional<JobDefinition<?>> optJobDefinition = myJobDefinitionRegistry.getLatestJobDefinition(theJobInstanceStartRequest.getJobDefinitionId());
 
-        final Batch2JobStartResponse batch2JobStartResponse = new Batch2JobStartResponse();
-        batch2JobStartResponse.setInstanceId(myJobInstanceId);
+		// Don't bother with Msg codes and Exceptions since this is just test code.
+		if (optJobDefinition.isEmpty()) {
+			return null;
+		}
+
+		// Assume this is the correct type
+		final JobDefinition<T> jobDefinition = unsafeCast(optJobDefinition.get());
+		final T jobParameters = theJobInstanceStartRequest.getParameters(jobDefinition.getParametersType());
+
+		final JobInstance jobInstance = JobInstance.fromJobDefinition(myJobDefinition);
+		jobInstance.setParameters(jobParameters);
+		jobInstance.setStatus(StatusEnum.QUEUED);
+		// Allow the test code to pass its own job instance ID so that it may use it to retrieve the job execution results
+		jobInstance.setInstanceId(requestDetails.getHeader(JOB_INSTANCE_ID_FOR_TESTING));
+
+		myJobInstanceMap.put(jobInstance.getInstanceId(), jobInstance);
+
+		// Run the job and store the results
+		myJobRunResults.put(jobInstance.getInstanceId(), myInlineJobRunner.run(jobParameters));
+
+		final Batch2JobStartResponse batch2JobStartResponse = new Batch2JobStartResponse();
+        batch2JobStartResponse.setInstanceId(jobInstance.getInstanceId());
         return batch2JobStartResponse;
     }
 
-    public ListMultimap<String, IModelJson> triggerJobRunner() {
-        return myInlineJobRunner.run(myParameters);
+    public ListMultimap<String, IModelJson> retrieveJobRunResults(String theJobInstanceId) {
+        return myJobRunResults.get(theJobInstanceId);
     }
 
     @Nonnull
     @Override
-    public JobInstance getInstance(String s) throws ResourceNotFoundException {
-		final JobInstance jobInstance = new JobInstance();
-		jobInstance.setJobDefinitionId(myJobInstanceId);
-
-		return jobInstance;
+    public JobInstance getInstance(String theJobInstanceId) throws ResourceNotFoundException {
+		return myJobInstanceMap.get(theJobInstanceId);
     }
 
     @Override
-    public List<JobInstance> getInstances(int i, int i1) {
-        return List.of();
+    public List<JobInstance> getInstances(int thePageSize, int thePageIndex) {
+        return myJobInstanceMap.values().stream().toList();
     }
 
     @Override
-    public List<JobInstance> getRecentInstances(int i, int i1) {
-        return List.of();
+    public List<JobInstance> getRecentInstances(int theCount, int theStart) {
+		return myJobInstanceMap.values().stream().toList();
     }
 
     @Override
-    public JobOperationResultJson cancelInstance(String s) throws ResourceNotFoundException {
+    public JobOperationResultJson cancelInstance(String theJobInstanceId) throws ResourceNotFoundException {
         return null;
     }
 
     @Override
     public List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(
-            String s, @Nullable Boolean aBoolean, int i, int i1) {
-        return List.of();
+		String theJobDefinitionId, @Nullable Boolean aBoolean, int theCount, int theStart) {
+
+        return myJobInstanceMap.values()
+			.stream()
+			.filter(jobInstance -> theJobDefinitionId.equals(jobInstance.getInstanceId()))
+			.filter(jobInstance -> StatusEnum.getEndedStatuses().contains(jobInstance.getStatus()))
+			.toList();
     }
 
     @Override
     public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest jobInstanceFetchRequest) {
+        return new PageImpl<>(myJobInstanceMap.values().stream().toList());
+    }
+
+    @Override
+    public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		return myJobInstanceMap.values()
+			.stream()
+			.filter(jobInstance -> theJobDefinitionId.equals(jobInstance.getInstanceId()))
+			.filter(jobInstance -> theStatuses.contains(jobInstance.getStatus()))
+			.toList();
+    }
+
+    @Override
+    public List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int i1) {
+		return myJobInstanceMap.values()
+			.stream()
+			.filter(jobInstance -> theJobDefinitionId.equals(jobInstance.getInstanceId()))
+			.toList();
+    }
+
+    @Override
+    public List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String theJobInstanceId) {
+        return List.of();
+    }
+
+    @Override
+    public BatchInstanceStatusDTO getBatchInstanceStatus(String theJobInstanceId) {
         return null;
     }
 
-    @Override
-    public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String s, Set<StatusEnum> set, int i, int i1) {
-        return List.of();
-    }
-
-    @Override
-    public List<JobInstance> getJobInstancesByJobDefinitionId(String s, int i, int i1) {
-        return List.of();
-    }
-
-    @Override
-    public List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String s) {
-        return List.of();
-    }
-
-    @Override
-    public BatchInstanceStatusDTO getBatchInstanceStatus(String s) {
-        return null;
-    }
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T) theObject;
+	}
 }

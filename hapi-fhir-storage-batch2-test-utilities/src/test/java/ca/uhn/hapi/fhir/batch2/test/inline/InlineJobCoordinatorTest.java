@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -36,6 +37,7 @@ class InlineJobCoordinatorTest {
     private static final String STEP_2 = "evaluate-subject-chunk";
     private static final String STEP_3 = "aggregate-subject-chunks";
 	private static final String JOB_INSTANCE_ID = "jobInstanceId";
+	private static final String JOB_DEFINITION_ID = "job-definition-id";
 
 	@Test
     void testWithStubJobs() {
@@ -106,7 +108,7 @@ class InlineJobCoordinatorTest {
                 .build();
 
         final JobDefinition<InlineTestJobParams> jobDefinition = JobDefinition.newBuilder()
-                .setJobDefinitionId("job-definition-id")
+                .setJobDefinitionId(JOB_DEFINITION_ID)
                 .setJobDescription("FHIR Distributed Multi-Measure Evaluation")
                 .setJobDefinitionVersion(1)
                 .setParametersType(InlineTestJobParams.class)
@@ -130,15 +132,18 @@ class InlineJobCoordinatorTest {
                 .build();
 
 		final InlineJobCoordinator<InlineTestJobParams> testSubject =
-			new InlineJobCoordinator<>(jobDefinition, JOB_INSTANCE_ID, InlineTestJobParams.class);
+			new InlineJobCoordinator<>(jobDefinition, new JobDefinitionRegistry());
 
 		// Some sort of batch service would trigger this:
 		final InlineTestJobParams jobParams = new InlineTestJobParams(30);
-		final JobInstanceStartRequest jobInstanceStartRequest = new JobInstanceStartRequest().setParameters(jobParams);
-		testSubject.startInstance(new SystemRequestDetails(), jobInstanceStartRequest);
+		final JobInstanceStartRequest jobInstanceStartRequest = new JobInstanceStartRequest().setParameters(jobParams).setJobDefinitionId(JOB_DEFINITION_ID);
+		// This is the contract for the tests to pass their own job instance ID:
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.addHeader(InlineJobCoordinator.JOB_INSTANCE_ID_FOR_TESTING, JOB_INSTANCE_ID);
+		testSubject.startInstance(requestDetails, jobInstanceStartRequest);
 
-		// The batch framework would trigger this:
-		final ListMultimap<String, IModelJson> actualBatchOutput = testSubject.triggerJobRunner();
+		// The job has already been triggered, retrieve the results with the job instance ID we passed into the RequestDetails
+		final ListMultimap<String, IModelJson> actualBatchOutput = testSubject.retrieveJobRunResults(JOB_INSTANCE_ID);
 
         assertBatchSteps(expectedBatchOutput, actualBatchOutput);
 
