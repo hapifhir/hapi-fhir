@@ -19,7 +19,7 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
-		<spring-security-core.version>5.7.8</spring-security-core.version>
+		<spring-security-core.version>5.7.12</spring-security-core.version>
 	</properties>
 
 
