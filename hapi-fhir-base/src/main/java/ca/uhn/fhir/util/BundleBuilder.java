@@ -474,6 +474,16 @@ public class BundleBuilder {
 	}
 
 	/**
+	 * Adds an entry for a Message bundle type
+	 *
+	 * @since 8.4.0
+	 */
+	public void addMessageEntry(IBaseResource theResource) {
+		setType("message");
+		addEntryAndReturnRequest(theResource);
+	}
+
+	/**
 	 * Creates new entry and adds it to the bundle
 	 *
 	 * @return Returns the new entry.

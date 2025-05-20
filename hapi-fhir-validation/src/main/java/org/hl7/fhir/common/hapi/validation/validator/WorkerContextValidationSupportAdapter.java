@@ -14,8 +14,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -72,9 +70,55 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
-
+/**
+ * HAPI uses a bunch of utility classes from corelib (org.hl7.fhir.core). These include the
+ * {@link org.hl7.fhir.validation.instance.InstanceValidator} (FHIR resource validator),
+ * {@link FHIRPathEngine} (FHIRPath engine), and
+ * {@link org.hl7.fhir.r5.conformance.profile.ProfileUtilities} (used for snapshot generation).
+ * These tools use the {@link IWorkerContext} interface as their way of requesting
+ * StructureDefinitions, concept lookups/validations, and other infrastructural things that
+ * get supplied by the runtime environment.
+ * <p>
+ * HAPI FHIR uses {@link IValidationSupport} for this purpose, although the scopes and
+ * intended design of these two interfaces don't line up exactly. This class is a
+ * bridge between {@link IWorkerContext} and {@link IValidationSupport}. You can think
+ * of it mostly as a dumb passthrough, where the method flow looks like the following
+ * example:
+ * </p>
+ * <pre>
+ *    InstanceValidator (is validating and needs a StructureDefinition)
+ *           |
+ *           | IWorkerContext#fetchResource("StructureDefinition", url)
+ *           V
+ *    VersionSpecificWorkerContextWrapper (implements IWorkerContext)
+ *           |
+ *           | IValidationSupport#fetchResource("StructureDefinition", "url")
+ *           V
+ *    ValidationSupportChain (implements IValidationSupport)
+ * </pre>
+ * <p>
+ * It does also add a couple of important functions:
+ * </p>
+ * <ul>
+ * <li>
+ *     The {@link IWorkerContext} interface expects resources to be supplied using the
+ *     canonical FHIR version (currently R5), where {@link IValidationSupport} works with
+ *     whatever version the associated {@link FhirContext} uses. So for example if
+ *     we're validating in an R4 server, the InstanceValidator asks this class
+ *     for an R5 StructureDefinition, and this class asks the {@link IValidationSupport}
+ *     for an R4 StructureDefinition and then converts it before returning it.
+ * </li>
+ * <li>
+ *     The validator also needs snapshots to be generated on StructureDefinitions before
+ *     it can use them. It will generate a snapshot itself if a differential profile
+ *     is supplied, but this is inefficient since it will do this every time it gets
+ *     such a profile. So this class generates and caches the snapshot.
+ * </li>
+ * </ul>
+ */
+public class WorkerContextValidationSupportAdapter extends I18nBase implements IWorkerContext {
+	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
+	private static final Logger ourLog = LoggerFactory.getLogger(WorkerContextValidationSupportAdapter.class);
 	/**
 	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
 	 * they will be returned using whatever version of FHIR the underlying infrastructure is
@@ -86,21 +130,43 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	 * the converted version gets cached too.
 	 */
 	private static final String CANONICAL_USERDATA_KEY =
-			VersionSpecificWorkerContextWrapper.class.getName() + "_CANONICAL_USERDATA_KEY";
+			WorkerContextValidationSupportAdapter.class.getName() + "_CANONICAL_USERDATA_KEY";
 
-	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
-	private final ValidationSupportContext myValidationSupportContext;
-	private final VersionCanonicalizer myVersionCanonicalizer;
+	private IValidationSupport myValidationSupport;
+	private VersionCanonicalizer myVersionCanonicalizer;
 	private volatile List<StructureDefinition> myAllStructures;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 	private volatile FHIRPathEngine myFHIRPathEngine;
+	private FhirContext myFhirContext;
 
-	public VersionSpecificWorkerContextWrapper(
-			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
-		myValidationSupportContext = theValidationSupportContext;
-		myVersionCanonicalizer = theVersionCanonicalizer;
+	/**
+	 * Constructor
+	 */
+	public WorkerContextValidationSupportAdapter() {
+		this(null);
+	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theValidationSupport Can be null, in which case {@link #setValidationSupport(IValidationSupport)} should be called
+	 */
+	public WorkerContextValidationSupportAdapter(@Nullable IValidationSupport theValidationSupport) {
+		if (theValidationSupport != null) {
+			setValidationSupport(theValidationSupport);
+		}
+	}
+
+	/**
+	 * Provides the {@link IValidationSupport} module that backs this adapter.
+	 */
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		Validate.isTrue(
+				myValidationSupport == null, "Can not set the validation support after it has already been set");
+		myValidationSupport = theValidationSupport;
+		myFhirContext = theValidationSupport.getFhirContext();
+		myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
 		setValidationMessageLanguage(getLocale());
 	}
 
@@ -111,12 +177,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean hasBinaryKey(String s) {
-		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s) != null;
+		return myValidationSupport.fetchBinary(s) != null;
 	}
 
 	@Override
 	public byte[] getBinaryForKey(String s) {
-		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s);
+		return myValidationSupport.fetchBinary(s);
 	}
 
 	@Override
@@ -212,8 +278,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
-			List<IBaseResource> allStructureDefinitions =
-					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
+			List<IBaseResource> allStructureDefinitions = myValidationSupport.fetchAllStructureDefinitions();
 			assert allStructureDefinitions != null;
 
 			/*
@@ -238,6 +303,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			myAllStructures = retVal;
 
 			try {
+				retVal = new ArrayList<>();
 				for (IBaseResource next : allStructureDefinitions) {
 					Resource converted = convertToCanonicalVersionAndGenerateSnapshot(next, false);
 					retVal.add((StructureDefinition) converted);
@@ -343,9 +409,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(661) + e);
 		}
-		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupportContext
-				.getRootValidationSupport()
-				.expandValueSet(myValidationSupportContext, null, convertedSource);
+		IValidationSupport.ValueSetExpansionOutcome expanded =
+				myValidationSupport.expandValueSet(newValidationSupportContext(), null, convertedSource);
 
 		ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
@@ -395,11 +460,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Locale getLocale() {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.getFhirContext()
-				.getLocalizer()
-				.getLocale();
+		return myFhirContext.getLocalizer().getLocale();
 	}
 
 	@Override
@@ -409,8 +470,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system) {
-		IBaseResource fetched =
-				myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
@@ -423,8 +483,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String verison) {
-		IBaseResource fetched =
-				myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
 			return null;
 		}
@@ -541,10 +600,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<String> getResourceNames() {
-		return new ArrayList<>(myValidationSupportContext
-				.getRootValidationSupport()
-				.getFhirContext()
-				.getResourceTypes());
+		return new ArrayList<>(myFhirContext.getResourceTypes());
 	}
 
 	@Override
@@ -554,10 +610,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.getFhirContext()
-				.getResourceTypes();
+		return myFhirContext.getResourceTypes();
 	}
 
 	@Override
@@ -625,12 +678,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public String getVersion() {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.getFhirContext()
-				.getVersion()
-				.getVersion()
-				.getFhirVersionString();
+		return myFhirContext.getVersion().getVersion().getFhirVersionString();
 	}
 
 	@Override
@@ -641,13 +689,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		String resourceType = getResourceType(class_);
 		return fetchResource(resourceType, uri) != null;
-	}
-
-	private static <T extends Resource> String getResourceType(Class<T> theClass) {
-		if (theClass.getSimpleName().equals("Resource")) {
-			return "Resource";
-		}
-		return FHIR_CONTEXT_R5.getResourceType(theClass);
 	}
 
 	@Override
@@ -686,15 +727,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void setLogger(org.hl7.fhir.r5.context.ILoggingService logger) {
+	public void setLogger(@Nonnull org.hl7.fhir.r5.context.ILoggingService logger) {
 		throw new UnsupportedOperationException(Msg.code(687));
 	}
 
 	@Override
 	public boolean supportsSystem(String system) {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.isCodeSystemSupported(myValidationSupportContext, system);
+		return myValidationSupport.isCodeSystemSupported(newValidationSupportContext(), system);
 	}
 
 	@Override
@@ -826,10 +865,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			String theSystem,
 			String theCode,
 			String theDisplay) {
-		IValidationSupport.CodeValidationResult result = myValidationSupportContext
-				.getRootValidationSupport()
-				.validateCodeInValueSet(
-						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
+				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
@@ -838,7 +875,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
-					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
+					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
@@ -853,15 +890,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return result;
 	}
 
-	private static boolean hasInvalidDisplayDetailCode(IValidationSupport.CodeValidationIssue theIssue) {
-		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
+	@Nonnull
+	private ValidationSupportContext newValidationSupportContext() {
+		return new ValidationSupportContext(myValidationSupport);
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
 			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
-		return myValidationSupportContext
-				.getRootValidationSupport()
-				.validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+		return myValidationSupport.validateCode(
+				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, null);
 	}
 
 	@Override
@@ -886,19 +923,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			if (retVal.isOk()) {
 				validationResultsOk.add(retVal);
 			} else {
-				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
-					issues.add(issue);
-				}
+				issues.addAll(retVal.getIssues());
 			}
 		}
 
-		if (code.getCoding().size() > 0) {
-			if (!myValidationSupportContext.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()) {
+		if (!code.getCoding().isEmpty()) {
+			if (!myValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()) {
 				if (validationResultsOk.size() == code.getCoding().size()) {
 					return validationResultsOk.get(0);
 				}
 			} else {
-				if (validationResultsOk.size() > 0) {
+				if (!validationResultsOk.isEmpty()) {
 					return validationResultsOk.get(0);
 				}
 			}
@@ -907,22 +942,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
 	}
 
-	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
-			String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
-		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setDiagnostics(message);
-		issue.getDetails().setText(message);
-
-		issue.setCode(issueCode);
-		issue.getDetails().addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type", txIssueTypeCode, null);
-		return issue;
-	}
-
 	public void invalidateCaches() {
 		// nothing for now
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
@@ -977,68 +1001,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return fetchResource(class_, canonical, version);
 	}
 
-	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
-		ConceptValidationOptions retVal = new ConceptValidationOptions();
-		if (theOptions.isGuessSystem()) {
-			retVal = retVal.setInferSystem(true);
-		}
-		return retVal;
-	}
-
-	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(
-			IValidationSupport theValidationSupport) {
-		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
-		return new VersionSpecificWorkerContextWrapper(
-				new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
-	}
-
-	private static class ResourceKey {
-		private final int myHashCode;
-		private final String myResourceName;
-		private final String myUri;
-
-		private ResourceKey(String theResourceName, String theUri) {
-			myResourceName = theResourceName;
-			myUri = theUri;
-			myHashCode = new HashCodeBuilder(17, 37)
-					.append(myResourceName)
-					.append(myUri)
-					.toHashCode();
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-
-			ResourceKey that = (ResourceKey) theO;
-
-			return new EqualsBuilder()
-					.append(myResourceName, that.myResourceName)
-					.append(myUri, that.myUri)
-					.isEquals();
-		}
-
-		public String getResourceName() {
-			return myResourceName;
-		}
-
-		public String getUri() {
-			return myUri;
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
-		}
-	}
-
 	@Override
 	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
 		throw new UnsupportedOperationException(Msg.code(2489));
@@ -1051,12 +1013,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private IBaseResource fetchResource(String theResourceType, String theUrl) {
 		String fetchResourceName = theResourceType;
-		if (myValidationSupportContext
-						.getRootValidationSupport()
-						.getFhirContext()
-						.getVersion()
-						.getVersion()
-				== FhirVersionEnum.DSTU2) {
+		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
 			if ("CodeSystem".equals(fetchResourceName)) {
 				fetchResourceName = "ValueSet";
 			}
@@ -1066,15 +1023,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		if (fetchResourceName.equals("Resource")) {
 			fetchResourceType = null;
 		} else {
-			fetchResourceType = myValidationSupportContext
-					.getRootValidationSupport()
-					.getFhirContext()
-					.getResourceDefinition(fetchResourceName)
-					.getImplementingClass();
+			fetchResourceType =
+					myFhirContext.getResourceDefinition(fetchResourceName).getImplementingClass();
 		}
 
-		IBaseResource fetched =
-				myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, theUrl);
+		IBaseResource fetched = myValidationSupport.fetchResource(fetchResourceType, theUrl);
 
 		if (fetched == null) {
 			return null;
@@ -1083,6 +1036,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return convertToCanonicalVersionAndGenerateSnapshot(fetched, true);
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	private Resource convertToCanonicalVersionAndGenerateSnapshot(
 			@Nonnull IBaseResource theResource, boolean thePropagateSnapshotException) {
 		Resource canonical;
@@ -1092,20 +1046,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				boolean storeCanonical = true;
 				canonical = myVersionCanonicalizer.resourceToValidatorCanonical(theResource);
 
-				if (canonical instanceof StructureDefinition) {
-					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+				if (canonical instanceof StructureDefinition canonicalSd) {
 					if (canonicalSd.getSnapshot().isEmpty()) {
-						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 						IBaseResource resource = theResource;
 						try {
 
-							FhirContext fhirContext = myValidationSupportContext
-									.getRootValidationSupport()
-									.getFhirContext();
 							SnapshotGeneratingValidationSupport snapshotGenerator =
-									new SnapshotGeneratingValidationSupport(fhirContext, this, getFHIRPathEngine());
+									new SnapshotGeneratingValidationSupport(myFhirContext, this);
 							resource = snapshotGenerator.generateSnapshot(
-									myValidationSupportContext, resource, "", null, "");
+									newValidationSupportContext(), resource, "", null, "");
 							Validate.isTrue(
 									resource != null,
 									"StructureDefinition %s has no snapshot, and no snapshot generator is configured",
@@ -1152,5 +1101,30 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			myFHIRPathEngine = retVal;
 		}
 		return retVal;
+	}
+
+	private static <T extends Resource> String getResourceType(Class<T> theClass) {
+		if (theClass.getSimpleName().equals("Resource")) {
+			return "Resource";
+		}
+		return FHIR_CONTEXT_R5.getResourceType(theClass);
+	}
+
+	private static boolean hasInvalidDisplayDetailCode(IValidationSupport.CodeValidationIssue theIssue) {
+		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
+	}
+
+	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
+		ConceptValidationOptions retVal = new ConceptValidationOptions();
+		if (theOptions.isGuessSystem()) {
+			retVal = retVal.setInferSystem(true);
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	public static WorkerContextValidationSupportAdapter newVersionSpecificWorkerContextWrapper(
+			IValidationSupport theValidationSupport) {
+		return new WorkerContextValidationSupportAdapter(theValidationSupport);
 	}
 }

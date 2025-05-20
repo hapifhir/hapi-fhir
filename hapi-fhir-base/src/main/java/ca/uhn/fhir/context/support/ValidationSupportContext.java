@@ -21,13 +21,9 @@ package ca.uhn.fhir.context.support;
 
 import org.thymeleaf.util.Validate;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class ValidationSupportContext {
 
 	private final IValidationSupport myRootValidationSupport;
-	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
 		Validate.notNull(theRootValidationSupport, "theRootValidationSupport must not be null");
@@ -36,13 +32,5 @@ public class ValidationSupportContext {
 
 	public IValidationSupport getRootValidationSupport() {
 		return myRootValidationSupport;
-	}
-
-	public Set<String> getCurrentlyGeneratingSnapshots() {
-		return myCurrentlyGeneratingSnapshots;
-	}
-
-	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
-		return myRootValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid();
 	}
 }

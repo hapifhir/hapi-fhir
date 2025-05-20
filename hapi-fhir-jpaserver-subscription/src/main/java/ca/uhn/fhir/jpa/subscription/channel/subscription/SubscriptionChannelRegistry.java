@@ -36,19 +36,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 
 public class SubscriptionChannelRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	private final SubscriptionConsumerCache myDeliveryConsumerCache = new SubscriptionConsumerCache();
+	private final SubscriptionProducerCache myDeliveryProducerCache = new SubscriptionProducerCache();
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using
 	// it
 	// Key Channel Name, Value Subscription Id
@@ -65,8 +64,6 @@ public class SubscriptionChannelRegistry {
 	private ISubscriptionDeliveryValidator mySubscriptionDeliveryValidator;
 
 	public SubscriptionChannelRegistry() {}
-
-	private final Map<String, IChannelProducer<ResourceDeliveryMessage>> myChannelProducers = new ConcurrentHashMap<>();
 
 	public synchronized void add(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
@@ -109,7 +106,7 @@ public class SubscriptionChannelRegistry {
 		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
 
 		IChannelProducer<ResourceDeliveryMessage> producer = newProducer(producingChannelParameters);
-		myChannelProducers.put(channelName, producer);
+		myDeliveryProducerCache.put(channelName, producer);
 	}
 
 	/**
@@ -162,12 +159,8 @@ public class SubscriptionChannelRegistry {
 
 		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
-			SubscriptionResourceDeliveryMessageConsumer deliveryConsumer = myDeliveryConsumerCache.get(channelName);
-			if (deliveryConsumer != null) {
-				deliveryConsumer.close();
-			}
 			myDeliveryConsumerCache.closeAndRemove(channelName);
-			myChannelProducers.remove(channelName);
+			myDeliveryProducerCache.closeAndRemove(channelName);
 		}
 	}
 
@@ -177,7 +170,7 @@ public class SubscriptionChannelRegistry {
 	}
 
 	public synchronized IChannelProducer<ResourceDeliveryMessage> getDeliveryChannelProducer(String theChannelName) {
-		return myChannelProducers.get(theChannelName);
+		return myDeliveryProducerCache.get(theChannelName);
 	}
 
 	public synchronized int size() {

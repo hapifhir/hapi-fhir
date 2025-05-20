@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6900
+title: "If a resource was previously deleted, it was not possible to perform a FHIR transaction
+  which restored the resource if it also contained references to other resources. Thanks to
+  Fouad Sfarijlani for reporting the issue and providing reproduction steps, and thanks to
+  Michal Sevcik for designing a fix!"

@@ -118,10 +118,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
-
 			RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-					.determineReadPartitionForRequestForSearchType(
-							theRequestDetails, getResourceType().getTypeName());
+					.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
 
 			Set<IResourcePersistentId> match = getMatchResourceUrlService()
 					.processMatchUrl(
