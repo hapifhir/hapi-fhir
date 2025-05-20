@@ -4381,26 +4381,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		hfjResVer.modifyColumn("20180115.4", "RES_TEXT").nullable();
 	}
 
-	protected String getResourceTypeSqlData(DriverTypeEnum theDriverType, List<String> theResTypes) {
-		return switch (theDriverType) {
-			case H2_EMBEDDED, MSSQL_2012 -> theResTypes.stream()
-					.map(t -> "(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'" + t + "')")
-					.collect(Collectors.joining(","));
-			case MARIADB_10_1, MYSQL_5_7 -> {
-				var data = new StringBuilder();
-				for (int i = 0; i < theResTypes.size(); i++) {
-					data.append("('%d','%s'),".formatted(i + 1, theResTypes.get(i)));
-				}
-				yield data.substring(0, data.length() - 1);
-			}
-			case POSTGRES_9_4 -> theResTypes.stream()
-					.map(t -> "(NEXTVAL('SEQ_RESOURCE_TYPE'),'" + t + "')")
-					.collect(Collectors.joining(","));
-			case ORACLE_12C -> "'" + String.join(",", theResTypes) + "'";
-			default -> throw new IllegalArgumentException("Unsupported driver type: " + theDriverType);
-		};
-	}
-
 	public Set<FlagEnum> getFlags() {
 		return myFlags;
 	}

@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -165,38 +165,6 @@ public class HapiFhirJpaMigrationTasksTest {
 			assertEquals("AA", e.toString());
 		}
 
-	}
-
-	@Test
-	public void testGetResourceTypeData() {
-		// setup
-		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
-		List<String> resTypes = List.of("Encounter", "Patient", "Observation");
-
-		// execute/verify
-		String result = tasks.getResourceTypeSqlData(DriverTypeEnum.H2_EMBEDDED, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Encounter'),(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Patient'),(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Observation')");
-
-		result = tasks.getResourceTypeSqlData(DriverTypeEnum.MSSQL_2012, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Encounter'),(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Patient'),(NEXT VALUE FOR SEQ_RESOURCE_TYPE,'Observation')");
-
-		result = tasks.getResourceTypeSqlData(DriverTypeEnum.POSTGRES_9_4, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("(NEXTVAL('SEQ_RESOURCE_TYPE'),'Encounter'),(NEXTVAL('SEQ_RESOURCE_TYPE'),'Patient'),(NEXTVAL('SEQ_RESOURCE_TYPE'),'Observation')");
-
-		result = tasks.getResourceTypeSqlData(DriverTypeEnum.ORACLE_12C, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("'Encounter,Patient,Observation'");
-
-		result = tasks.getResourceTypeSqlData(DriverTypeEnum.MYSQL_5_7, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("('1','Encounter'),('2','Patient'),('3','Observation')");
-
-		result = tasks.getResourceTypeSqlData(DriverTypeEnum.MARIADB_10_1, resTypes);
-		ourLog.debug(result);
-		assertThat(result).isEqualTo("('1','Encounter'),('2','Patient'),('3','Observation')");
 	}
 
 	private void insertRow_ResourceIndexedComboStringUnique() {

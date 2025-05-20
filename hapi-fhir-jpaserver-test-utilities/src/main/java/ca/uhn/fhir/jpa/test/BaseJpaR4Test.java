@@ -569,7 +569,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
-	
+
 	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);

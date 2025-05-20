@@ -90,7 +90,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -125,7 +124,6 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -160,11 +158,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -327,8 +321,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceTypeDao myResourceTypeDao;
 	@Autowired
 	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
-	@Autowired
-	protected DataSource dataSource;
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
