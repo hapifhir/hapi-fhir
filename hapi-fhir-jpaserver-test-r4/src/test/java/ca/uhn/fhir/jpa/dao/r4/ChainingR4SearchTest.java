@@ -135,10 +135,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	public void testChainedSearchWithTagReturnsResults() {
+		Coding coding = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
 		//Given: A patient with a tag
 		Patient patient = new Patient();
 		Meta meta = new Meta();
-		meta.addTag("http://bluecrossnc.com/fhir/lob", "test", "the display");
+		meta.addTag(coding);
 		patient.setMeta(meta);
 		IIdType idType = myPatientDao.create(patient, mySrd).getId();
 
@@ -156,37 +157,108 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testChainedSearchWithTagUsingNotModifierReturnsNoResults() {
-		//Given: A patient with a tag
-		Patient patient = new Patient();
-		Meta meta = new Meta();
-		meta.addTag("http://bluecrossnc.com/fhir/lob", "test", "the display");
-		patient.setMeta(meta);
+	public void testChainedSearchWithTagUsingAndJoinsReturnsResults() {
+		Coding codingA = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
+		Coding codingB = new Coding("http://someSystem/path/fhir","aPath", "some text");
 
-		//Given: A group with a tag
+		//Given: A patient with two tags.
+		Patient patientA = new Patient();
+		Meta metaA = new Meta();
+		metaA.addTag(codingA);
+		metaA.addTag(codingB);
+		patientA.setMeta(metaA);
+
+		//Given: A patient with one tag (codingA)
+		Patient patientB = new Patient();
+		Meta metaB = new Meta();
+		metaB.addTag(codingA);
+		patientB.setMeta(metaB);
+
+		//Given: A patient with one tag (codingB)
+		Patient patientC = new Patient();
+		Meta metaC = new Meta();
+		metaC.addTag(codingB);
+		patientC.setMeta(metaC);
+
+		IIdType idTypeA = myPatientDao.create(patientA, mySrd).getId();
+		IIdType idTypeB = myPatientDao.create(patientB, mySrd).getId();
+		IIdType idTypeC = myPatientDao.create(patientC, mySrd).getId();
+
+		//Given: An encounterA that references patientA
+		Encounter encounterA =  buildResource("Encounter", withReference("subject", idTypeA));
+
+		//Given: An encounterB that references patientB
+		Encounter encounterB =  buildResource("Encounter", withReference("subject", idTypeB));
+
+		//Given: An encounterC that references patientC
+		Encounter encounterC =  buildResource("Encounter", withReference("subject", idTypeC));
+		IIdType encounterAiDtype = myEncounterDao.create(encounterA, mySrd).getId();
+		myEncounterDao.create(encounterB, mySrd);
+		myEncounterDao.create(encounterC, mySrd);
+
+		String url = "/Encounter?subject._tag=" + codingA.getSystem() + "|" + codingA.getCode() + "&subject._tag=" + codingB.getSystem() + "|" + codingB.getCode();
+
+		//execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+		Encounter actualEncounter = (Encounter) encounters.get(0);
+
+		//Verify that the chained search with AND joins returns the encounter (encounterA) that references the patient (patientA) with both tags.
+		assertEquals(1, encounters.size());
+		assertEquals(encounterAiDtype.getIdPart(), actualEncounter.getIdPart());
+	}
+
+	@Test
+	public void testChainedSearchWithTagUsingOrJoinsReturnsResults() {
+		Coding codingA = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
+		Coding codingB = new Coding("http://someSystem/path/fhir","aPath", "some text");
+
+		//Given: A patient with two tags.
+		Patient patientA = new Patient();
+		Meta metaA = new Meta();
+		metaA.addTag(codingA);
+		metaA.addTag(codingB);
+		patientA.setMeta(metaA);
+
+		//Given: A patient with one tag (codingA)
+		Patient patientB = new Patient();
+		Meta metaB = new Meta();
+		metaB.addTag(codingA);
+		patientB.setMeta(metaB);
+
+		//Given: A patient with one tag (codingB)
+		Patient patientC = new Patient();
+		Meta metaC = new Meta();
+		metaC.addTag(codingB);
+		patientC.setMeta(metaC);
+
+		//Given: A group with one tag (codingB)
 		Group group = new Group();
-		Meta metaForGroup = new Meta();
-		metaForGroup.addTag("http://deez/nuts/fhir", "mynutz", "the display");
+		Meta metaD = new Meta();
+		metaD.addTag(codingB);
+		group.setMeta(metaC);
 		group.setActual(true);
-		group.setMeta(meta);
 
-		IIdType idType = myPatientDao.create(patient, mySrd).getId();
-		//Given: An encounter that references the patient
-		Encounter encounter =  buildResource("Encounter", withReference("subject", idType));
+		IIdType idTypeA = myPatientDao.create(patientA, mySrd).getId();
+		IIdType idTypeB = myPatientDao.create(patientB, mySrd).getId();
+		IIdType idTypeC = myPatientDao.create(patientC, mySrd).getId();
+		IIdType idTypeD = myGroupDao.create(group, mySrd).getId();
 
-		IIdType groupIdType =  myGroupDao.create(group, mySrd).getId();
-		//Given: An encounter that references the group
-		Encounter secondEncounter = buildResource("Encounter", withReference("subject", groupIdType));
+		Encounter encounterA =  buildResource("Encounter", withReference("subject", idTypeA));
+		Encounter encounterB =  buildResource("Encounter", withReference("subject", idTypeB));
+		Encounter encounterC =  buildResource("Encounter", withReference("subject", idTypeC));
+		Encounter encounterD =  buildResource("Encounter", withReference("subject", idTypeD));
+		myEncounterDao.create(encounterA, mySrd);
+		myEncounterDao.create(encounterB, mySrd);
+		myEncounterDao.create(encounterC, mySrd);
+		myEncounterDao.create(encounterD, mySrd);
 
-		myEncounterDao.create(encounter, mySrd);
-		myEncounterDao.create(secondEncounter, mySrd);
-		String url = "/Encounter?subject._tag:not=http://bluecrossnc.com/fhir/lob|test,http://deez/nuts/fhir|mynutz";
+		String url = "/Encounter?subject._tag=" + codingA.getSystem() + "|" + codingA.getCode() + "," + codingB.getSystem() + "|" + codingB.getCode();
 
-		// execute
+		//execute
 		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
 
-		//Verify: Chained search with _tag returns results
-		assertEquals(0, encounters.size());
+		//Verify that the chained search with OR joins returns the encounters (all 4 encounters) that references the patients with either tags.
+		assertEquals(4, encounters.size());
 	}
 
 	@Test
