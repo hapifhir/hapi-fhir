@@ -156,6 +156,40 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testChainedSearchWithTagUsingNotModifierReturnsNoResults() {
+		//Given: A patient with a tag
+		Patient patient = new Patient();
+		Meta meta = new Meta();
+		meta.addTag("http://bluecrossnc.com/fhir/lob", "test", "the display");
+		patient.setMeta(meta);
+
+		//Given: A group with a tag
+		Group group = new Group();
+		Meta metaForGroup = new Meta();
+		metaForGroup.addTag("http://deez/nuts/fhir", "mynutz", "the display");
+		group.setActual(true);
+		group.setMeta(meta);
+
+		IIdType idType = myPatientDao.create(patient, mySrd).getId();
+		//Given: An encounter that references the patient
+		Encounter encounter =  buildResource("Encounter", withReference("subject", idType));
+
+		IIdType groupIdType =  myGroupDao.create(group, mySrd).getId();
+		//Given: An encounter that references the group
+		Encounter secondEncounter = buildResource("Encounter", withReference("subject", groupIdType));
+
+		myEncounterDao.create(encounter, mySrd);
+		myEncounterDao.create(secondEncounter, mySrd);
+		String url = "/Encounter?subject._tag:not=http://bluecrossnc.com/fhir/lob|test,http://deez/nuts/fhir|mynutz";
+
+		// execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+
+		//Verify: Chained search with _tag returns results
+		assertEquals(0, encounters.size());
+	}
+
+	@Test
 	public void testShouldResolveATwoLinkChainWithStandAloneResources() {
 
 		// setup
