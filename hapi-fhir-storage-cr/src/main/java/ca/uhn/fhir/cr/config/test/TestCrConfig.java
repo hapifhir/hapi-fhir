@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
+import ca.uhn.fhir.cr.r4.searchparameter.MeasureSearchParameterSeedingService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -177,5 +178,12 @@ public class TestCrConfig {
 	}
 
 
+//	// LUKETODO:  figure out if we should ever access this from unit tests at all or just make this a production only config?
+//	@Bean
+//	public MeasureSearchParameterSeedingService dqmSearchParameterSeedingService(
+//		DaoRegistry theDaoRegistry,
+//		ISearchParamRegistry theSearchParamRegistry) {
+//		return new MeasureSearchParameterSeedingService(theDaoRegistry, theSearchParamRegistry);
+//	}
 
 }
