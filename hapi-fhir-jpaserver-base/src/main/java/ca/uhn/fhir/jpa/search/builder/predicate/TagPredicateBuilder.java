@@ -47,7 +47,7 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myTagDefinitionColumnTagCode;
 	private final DbColumn myColumnTagId;
 	private final DbColumn myTagDefinitionColumnTagType;
-	private boolean tagDefinitionTableIsJoined = false;
+	private boolean myTagDefinitionTableIsJoined = false;
 
 	public TagPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_RES_TAG"));
@@ -67,11 +67,11 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 			List<Triple<String, String, String>> theTokens,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
-		if (!this.tagDefinitionTableIsJoined) {
+		if (!this.myTagDefinitionTableIsJoined) {
 			addJoin(getTable(), myTagDefinitionTable, new DbColumn[] {myColumnTagId}, new DbColumn[] {
 				myTagDefinitionColumnTagId
 			});
-			this.tagDefinitionTableIsJoined = true;
+			this.myTagDefinitionTableIsJoined = true;
 		}
 		return createPredicateTagList(theTagType, theTokens);
 	}
