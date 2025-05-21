@@ -46,15 +46,19 @@ public class ReplaceReferencesRequest {
 
 	public final RequestPartitionId partitionId;
 
+	public boolean createProvenance = true;
+
 	public ReplaceReferencesRequest(
 			@Nonnull IIdType theSourceId,
 			@Nonnull IIdType theTargetId,
 			int theResourceLimit,
-			RequestPartitionId thePartitionId) {
+			RequestPartitionId thePartitionId,
+			boolean theCreateProvenance) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		resourceLimit = theResourceLimit;
 		partitionId = thePartitionId;
+		createProvenance = theCreateProvenance;
 	}
 
 	public void validateOrThrowInvalidParameterException() {
