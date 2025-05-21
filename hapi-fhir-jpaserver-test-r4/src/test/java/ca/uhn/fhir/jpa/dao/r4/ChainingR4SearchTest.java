@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -36,6 +37,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -130,24 +132,38 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
-	@Test void testChainedSearchWithTagReturnsResults() {
+	@Test
+	public void testChainedSearchWithTagReturnsResults() {
 		//Given: A patient with a tag
 		Patient patient = new Patient();
 		Meta meta = new Meta();
 		meta.addTag("http://bluecrossnc.com/fhir/lob", "test", "the display");
 		patient.setMeta(meta);
 
+		//Given: A group with a tag
+		Group group = new Group();
+		Meta metaForGroup = new Meta();
+		metaForGroup.addTag("http://deez/nuts/fhir", "mynutz", "the display");
+		group.setActual(true);
+		group.setMeta(meta);
+
 		IIdType idType = myPatientDao.create(patient, mySrd).getId();
-		//Given: An ecounter that references the patient
+		//Given: An encounter that references the patient
 		Encounter encounter =  buildResource("Encounter", withReference("subject", idType));
+
+		IIdType groupIdType =  myGroupDao.create(group, mySrd).getId();
+		//Given: An encounter that references the group
+		Encounter secondEncounter = buildResource("Encounter", withReference("subject", groupIdType));
+
 		myEncounterDao.create(encounter, mySrd);
-		String url = "/Encounter?subject._tag=http://bluecrossnc.com/fhir/lob|test";
+		myEncounterDao.create(secondEncounter, mySrd);
+		String url = "/Encounter?subject._tag=http://bluecrossnc.com/fhir/lob|test,http://deez/nuts/fhir|mynutz";
 
 		// execute
 		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
 
 		//Verify: Chained search with _tag returns results
-		assertEquals(1, encounters.size());
+		assertEquals(2, encounters.size());
 	}
 
 	@Test
