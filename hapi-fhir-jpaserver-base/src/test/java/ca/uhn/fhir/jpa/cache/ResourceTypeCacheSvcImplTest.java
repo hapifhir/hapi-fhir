@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 
 import static ca.uhn.fhir.jpa.util.MemoryCacheService.CacheEnum;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -117,7 +119,7 @@ class ResourceTypeCacheSvcImplTest {
 	}
 
 	@Test
-	void testCreateResourceType_whenSaved_updateCache() {
+	void testCreateResourceType_saveSuccessfully() {
 		// setup
 		Short resTypeId = (short) 100;
 		String resType = "CustomType";
@@ -127,13 +129,12 @@ class ResourceTypeCacheSvcImplTest {
 		// execute
 		myResourceTypeCacheSvc.createResourceType(resType);
 
-		// verify it is saved and added to cache
+		// verify
 		verify(myResourceTypeDao, times(1)).save(any(ResourceTypeEntity.class));
-		assertThat(resTypeId).isEqualTo(getResourceTypeIdFromCache(resType));
 	}
 
 	@Test
-	void testCreateResourceType_whenConstraintViolation_lookupInDbAndUpdateCache() {
+	void testCreateResourceType_whenResourceTypeExists_lookupInDbAndUpdateCache() {
 		// setup
 		Short resTypeId = (short) 100;
 		String resType = "CustomType";
@@ -146,10 +147,26 @@ class ResourceTypeCacheSvcImplTest {
 		// execute
 		myResourceTypeCacheSvc.createResourceType(resType);
 
-		// verify it is retrieved and added to cache
+		// verify
 		verify(myResourceTypeDao, times(1)).save(any(ResourceTypeEntity.class));
 		verify(myResourceTypeDao, times(1)).findByResourceType(anyString());
-		assertThat(resTypeId).isEqualTo(getResourceTypeIdFromCache(resType));
+	}
+
+	@Test
+	void testCreateResourceType_whenResourceTypeInvalid_throwException() {
+		// setup
+		String resType = "VeryLongCustomResourceTypeVeryLongCustomResourceTypeVeryLongCustomResourceTypeVeryLongCustomResourceType";
+		when(myResourceTypeDao.save(any(ResourceTypeEntity.class)))
+			.thenThrow(new DataIntegrityViolationException("Value too long for column \"RES_TYPE CHARACTER VARYING(100)\""));
+
+		// execute
+		InternalErrorException ex = assertThrows(
+			InternalErrorException.class, () -> myResourceTypeCacheSvc.createResourceType(resType));
+
+		// verify
+		verify(myResourceTypeDao, times(1)).save(any(ResourceTypeEntity.class));
+		verify(myResourceTypeDao, never()).findByResourceType(anyString());
+		assertThat(ex.getMessage()).contains("Resource type name is too long");
 	}
 
 	private ResourceTypeEntity createResourceTypeEntity(Short resourceTypeId, String resourceType) {

@@ -107,10 +107,6 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
 				}
-				if (constraintName.contains(ResourceTypeEntity.IDX_RES_TYPE_NAME)) {
-					throw new ResourceVersionConflictException(
-							Msg.code(2704) + makeErrorMessage(messageToPrepend, "resourceTypeUniqueConstraintFailure"));
-				}
 			}
 		}
 

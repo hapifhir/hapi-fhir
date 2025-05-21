@@ -24,11 +24,13 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTypeEntity;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
 
@@ -60,61 +62,72 @@ public class ResourceTypeCacheSvcImpl implements IResourceTypeCacheSvc {
 	}
 
 	@Override
-	public Short getResourceTypeId(String theResType) {
+	public short getResourceTypeId(String theResType) {
 		Short resTypeId = myMemoryCacheService.get(
 				MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, this::lookupResourceTypeId);
 
 		if (resTypeId == null) {
 			ourLog.info("Creating a new Resource Type [{}]", theResType);
 			ResourceTypeEntity entity = createResourceType(theResType);
-			resTypeId = entity != null ? entity.getResourceTypeId() : null;
+			resTypeId = entity.getResourceTypeId();
+			addToCache(theResType, resTypeId);
 		}
 		return resTypeId;
 	}
 
 	@Override
 	public void addToCache(String theResType, Short theResTypeId) {
-		myMemoryCacheService.put(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, theResTypeId);
+		myMemoryCacheService.putAfterCommit(
+				MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID, theResType, theResTypeId);
 	}
 
 	protected void initResourceTypes() {
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			List<ResourceTypeEntity> resTypeEntities = myResourceTypeDao.findAll();
-			if (CollectionUtils.isEmpty(resTypeEntities)) {
-				List<ResourceTypeEntity> newEntities = ResourceTypeUtil.generateResourceTypes().stream()
-						.map(r -> {
-							ResourceTypeEntity entity = new ResourceTypeEntity();
-							entity.setResourceType(r);
-							return entity;
-						})
-						.toList();
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
+					List<ResourceTypeEntity> resTypeEntities = myResourceTypeDao.findAll();
+					if (CollectionUtils.isEmpty(resTypeEntities)) {
+						List<ResourceTypeEntity> newEntities = ResourceTypeUtil.generateResourceTypes().stream()
+								.map(r -> {
+									ResourceTypeEntity entity = new ResourceTypeEntity();
+									entity.setResourceType(r);
+									return entity;
+								})
+								.toList();
 
-				myResourceTypeDao.saveAll(newEntities);
-				ourLog.info("Table HFJ_RESOURCE_TYPE is populated with {} entries.", newEntities.size());
-				resTypeEntities = newEntities;
-			}
+						myResourceTypeDao.saveAll(newEntities);
+						ourLog.info("Table HFJ_RESOURCE_TYPE is populated with {} entries.", newEntities.size());
+						resTypeEntities = newEntities;
+					}
 
-			// Populate the cache
-			resTypeEntities.forEach(r -> addToCache(r.getResourceType(), r.getResourceTypeId()));
-			return null;
-		});
+					// Populate the cache
+					resTypeEntities.forEach(r -> addToCache(r.getResourceType(), r.getResourceTypeId()));
+					return null;
+				});
 	}
 
 	protected ResourceTypeEntity createResourceType(String theResourceType) {
-		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			ResourceTypeEntity resTypeEntity = new ResourceTypeEntity();
-			resTypeEntity.setResourceType(theResourceType);
-			try {
-				resTypeEntity = myResourceTypeDao.save(resTypeEntity);
-			} catch (DataIntegrityViolationException e) {
-				// This can happen if the resource type already exists in the database
-				ourLog.info("Resource type already exists: {}", theResourceType);
-				resTypeEntity = myResourceTypeDao.findByResourceType(theResourceType);
-			}
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
+					ResourceTypeEntity resTypeEntity = new ResourceTypeEntity();
+					resTypeEntity.setResourceType(theResourceType);
+					try {
+						resTypeEntity = myResourceTypeDao.save(resTypeEntity);
+						myResourceTypeDao.flush();
+					} catch (DataIntegrityViolationException e) {
+						if (e.getMessage().contains("Value too long for column")) {
+							throw new InternalErrorException("Resource type name is too long: " + theResourceType, e);
+						}
+						// This can happen if the resource type already exists in the database
+						ourLog.info("Resource type already exists: {}", theResourceType);
+						resTypeEntity = myResourceTypeDao.findByResourceType(theResourceType);
+					}
 
-			addToCache(resTypeEntity.getResourceType(), resTypeEntity.getResourceTypeId());
-			return resTypeEntity;
-		});
+					return resTypeEntity;
+				});
 	}
 
 	private Short lookupResourceTypeId(String theResourceType) {

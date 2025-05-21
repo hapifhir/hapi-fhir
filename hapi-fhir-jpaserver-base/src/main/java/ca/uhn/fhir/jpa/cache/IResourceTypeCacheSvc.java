@@ -26,9 +26,9 @@ public interface IResourceTypeCacheSvc {
 	 * added to the database and cache, and its ID will be returned.
 	 *
 	 * @param theResType the resource type to retrieve or create
-	 * @return the resource type ID, or null if the resource type could not be created
+	 * @return the resource type ID or throws an exception if the resource creation fails
 	 */
-	Short getResourceTypeId(String theResType);
+	short getResourceTypeId(String theResType);
 
 	/**
 	 * Adds the given resource type and its corresponding ID to the cache.

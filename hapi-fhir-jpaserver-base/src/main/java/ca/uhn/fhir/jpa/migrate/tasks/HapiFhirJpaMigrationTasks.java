@@ -152,7 +152,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
 			resource.addColumn("20250515.101", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			// Add column RES_TYPE_ID and FK to HFJ_RES_VER
+			// Add column RES_TYPE_ID to HFJ_RES_VER
 			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
 			resVer.addColumn("20250515.201", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
@@ -164,7 +164,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
 			historyTag.addColumn("20250515.401", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 
-			// Add column RES_TYPE_ID to HFJ_RES_LINK
+			// Add columns SRC_RES_TYPE_ID and TARGET_RES_TYPE_ID to HFJ_RES_LINK
 			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
 			resLink.addColumn("20250515.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
 			resLink.addColumn("20250515.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
