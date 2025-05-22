@@ -98,6 +98,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 
 	private List<MatchedTarget> matchBasedOnEid(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+
 		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
 		if (eidsFromResource.isEmpty()) {
 			return Collections.emptyList();
