@@ -239,7 +239,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 						.isPresent()) {
 					if (processedInstanceIds.add(instanceId)) {
 						myJobDefinitionRegistry.setJobDefinition(instance);
-						JobInstanceProcessor jobInstanceProcessor = createJobInstanceProcessor(instanceId, progressAccumulator);
+						JobInstanceProcessor jobInstanceProcessor =
+								createJobInstanceProcessor(instanceId, progressAccumulator);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,
@@ -261,14 +262,15 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myMaintenanceJobFinishedCallback.run();
 	}
 
-	private JobInstanceProcessor createJobInstanceProcessor(String theInstanceId, JobChunkProgressAccumulator theAccumulator) {
+	private JobInstanceProcessor createJobInstanceProcessor(
+			String theInstanceId, JobChunkProgressAccumulator theAccumulator) {
 		JobInstanceProcessor processor = new JobInstanceProcessor(
-			myJobPersistence,
-			myBatchJobSender,
-			theInstanceId,
-			theAccumulator,
-			myReductionStepExecutorService,
-			myJobDefinitionRegistry);
+				myJobPersistence,
+				myBatchJobSender,
+				theInstanceId,
+				theAccumulator,
+				myReductionStepExecutorService,
+				myJobDefinitionRegistry);
 		if (myFailedJobLifetimeOverride >= 0) {
 			processor.setPurgeThreshold(myFailedJobLifetimeOverride);
 		}
