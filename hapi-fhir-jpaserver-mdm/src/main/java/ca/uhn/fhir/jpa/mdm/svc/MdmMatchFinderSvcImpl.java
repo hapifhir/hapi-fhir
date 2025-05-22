@@ -76,7 +76,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Nonnull
 	@Transactional
 	public List<MatchedTarget> getMatchedTargets(
-		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
 		if (!retval.isEmpty()) {
@@ -84,37 +84,39 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		}
 
 		Collection<IAnyResource> targetCandidates =
-			myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
+				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
-			.map(candidate ->
-				new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
-			.collect(Collectors.toList());
+				.map(candidate ->
+						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+				.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
 		return matches;
 	}
 
 	private List<MatchedTarget> matchBasedOnEid(
-		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
 		return searchForResourceByEIDs(
-			theResource.getIdElement().toUnqualifiedVersionless(),
-			eidsFromResource,
-			theResourceType,
-			theRequestPartitionId);
+				theResource.getIdElement().toUnqualifiedVersionless(),
+				eidsFromResource,
+				theResourceType,
+				theRequestPartitionId);
 	}
 
 	private List<MatchedTarget> searchForResourceByEIDs(
-		IIdType theResourceIdToExclude,
-		List<CanonicalEID> theEids,
-		String theResourceType,
-		RequestPartitionId theRequestPartitionId) {
+			IIdType theResourceIdToExclude,
+			List<CanonicalEID> theEids,
+			String theResourceType,
+			RequestPartitionId theRequestPartitionId) {
 		final SearchParameterMap map = SearchParameterMap.newSynchronous();
 		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
-		final String eidSystemForResourceType = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
-		theEids.stream().map(CanonicalEID::getValue).forEach(eid ->
-			tokenOrListParam.addOr(new TokenParam(eidSystemForResourceType, eid)));
+		final String eidSystemForResourceType =
+				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
+		theEids.stream()
+				.map(CanonicalEID::getValue)
+				.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eidSystemForResourceType, eid)));
 
 		map.add(SP_IDENTIFIER, tokenOrListParam);
 
@@ -125,12 +127,12 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		List<MatchedTarget> retval = new ArrayList<>();
 		// We can't use toList() here since it returns an unmodifiable list and we will be sorting it later
 		search.getAllResources().stream()
-			.map(IAnyResource.class::cast)
-			// Exclude the incoming resource from the matched results
-			.filter(resource ->
-				!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
-			.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
-			.forEach(retval::add);
+				.map(IAnyResource.class::cast)
+				// Exclude the incoming resource from the matched results
+				.filter(resource ->
+						!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
+				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
+				.forEach(retval::add);
 		return retval;
 	}
 }
