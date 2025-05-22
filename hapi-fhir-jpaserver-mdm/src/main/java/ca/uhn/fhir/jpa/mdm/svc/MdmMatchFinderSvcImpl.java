@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -75,7 +76,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Nonnull
 	@Transactional
 	public List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
 		if (!retval.isEmpty()) {
@@ -83,52 +84,50 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		}
 
 		Collection<IAnyResource> targetCandidates =
-				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
+			myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
-				.map(candidate ->
-						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
-				.collect(Collectors.toList());
+			.map(candidate ->
+				new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+			.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
 		return matches;
 	}
 
 	private List<MatchedTarget> matchBasedOnEid(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theResource);
-		List<MatchedTarget> retval = new ArrayList<>();
-		for (CanonicalEID eid : eidFromResource) {
-			retval.addAll(searchForResourceByEID(
-					theResource.getIdElement().toUnqualifiedVersionless(),
-					eid.getValue(),
-					theResourceType,
-					theRequestPartitionId));
-		}
-		return retval;
+		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
+		return searchForResourceByEIDs(
+			theResource.getIdElement().toUnqualifiedVersionless(),
+			eidsFromResource,
+			theResourceType,
+			theRequestPartitionId);
 	}
 
-	private Collection<? extends MatchedTarget> searchForResourceByEID(
-			IIdType theResourceIdToExclude,
-			String theEid,
-			String theResourceType,
-			RequestPartitionId theRequestPartitionId) {
-		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add(
-				SP_IDENTIFIER,
-				new TokenParam(
-						myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+	private List<MatchedTarget> searchForResourceByEIDs(
+		IIdType theResourceIdToExclude,
+		List<CanonicalEID> theEids,
+		String theResourceType,
+		RequestPartitionId theRequestPartitionId) {
+		final SearchParameterMap map = SearchParameterMap.newSynchronous();
+		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
+		final String eidSystemForResourceType = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
+		theEids.stream().map(CanonicalEID::getValue).forEach(eid ->
+			tokenOrListParam.addOr(new TokenParam(eidSystemForResourceType, eid)));
+
+		map.add(SP_IDENTIFIER, tokenOrListParam);
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		return search.getAllResources().stream()
-				.map(IAnyResource.class::cast)
-				// Exclude the incoming resource from the matched results
-				.filter(resource ->
-						!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
-				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
-				.toList();
+			.map(IAnyResource.class::cast)
+			// Exclude the incoming resource from the matched results
+			.filter(resource ->
+				!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
+			.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
+			.toList();
 	}
 }
