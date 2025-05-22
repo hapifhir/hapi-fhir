@@ -34,7 +34,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -53,6 +55,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -176,7 +179,6 @@ import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -315,6 +317,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceTypeDao myResourceTypeDao;
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
@@ -1076,4 +1082,19 @@ public abstract class BaseJpaTest extends BaseTest {
 			);
 		}
 	}
+
+	/**
+	 * Initializes the resource type cache from the configuration instead of the database.
+	 * This is useful for some tests that validate the SELECT query counts. It prevents an extra SELECT query
+	 * being added to the count
+	 */
+	protected void initResourceTypeCacheFromConfig() {
+		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+
+		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
+		for (int i = 0; i < resTypes.size(); i++) {
+			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
+		}
+	}
+
 }

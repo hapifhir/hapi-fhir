@@ -37,6 +37,7 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
