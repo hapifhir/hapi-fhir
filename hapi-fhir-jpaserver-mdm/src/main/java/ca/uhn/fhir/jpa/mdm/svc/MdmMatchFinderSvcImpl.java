@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,6 +99,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	private List<MatchedTarget> matchBasedOnEid(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
+		if (eidsFromResource.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		return searchForResourceByEIDs(
 				theResource.getIdElement().toUnqualifiedVersionless(),
 				eidsFromResource,
