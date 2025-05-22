@@ -70,8 +70,9 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myJobDefinitionId;
 	}
 
-	public void setJobDefinitionId(String theJobDefinitionId) {
+	public JobInstanceStartRequest setJobDefinitionId(String theJobDefinitionId) {
 		myJobDefinitionId = theJobDefinitionId;
+		return this;
 	}
 
 	public String getParameters() {
