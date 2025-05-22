@@ -122,12 +122,15 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
-		return search.getAllResources().stream()
+		List<MatchedTarget> retval = new ArrayList<>();
+		// We can't use toList() here since it returns an unmodifiable list and we will be sorting it later
+		search.getAllResources().stream()
 			.map(IAnyResource.class::cast)
 			// Exclude the incoming resource from the matched results
 			.filter(resource ->
 				!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
 			.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
-			.toList();
+			.forEach(retval::add);
+		return retval;
 	}
 }
