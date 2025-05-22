@@ -52,7 +52,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -232,7 +231,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// create a job
 		// step 1
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
-			throw new RuntimeException("Hi i'm an error");
+			throw new RuntimeException("Hi, i'm an error.");
 		};
 		// final step
 		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> RunOutcome.SUCCESS;
@@ -281,9 +280,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			myJobInstanceRepository.updateInstanceStatusIfIn(instanceId, StatusEnum.FAILED, Set.of(StatusEnum.getIncompleteStatuses()));
 		});
 
-		// set the lifetime of failed jobs to 0;
-		// this allows the maintenance pass to clean up any "Failed"
-		// jobs if they have outlived  their lifetime (which we're setting to 0 here)
+		/*
+		 * set the lifetime of failed jobs to 0;
+		 * this allows the maintenance pass to clean up any "Failed"
+		 * jobs if they have outlived  their lifetime (which we're setting to 0 here).
+		 * Normally lifetime is 7 days (see JobInstanceProcessor.PURGE_THRESHOLD)
+		 */
 		assertTrue(myJobMaintenanceService instanceof JobMaintenanceServiceImpl);
 		((JobMaintenanceServiceImpl)myJobMaintenanceService).setFailedJobLifetime(0);
 
@@ -316,9 +318,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		} finally {
 			// reset
 			((JobMaintenanceServiceImpl) myJobMaintenanceService).setFailedJobLifetime(-1);
-			myJobDefinitionRegistry.removeJobDefinition(jd.getJobDefinitionId(), jd.getJobDefinitionVersion());
+			myJobPersistence.deleteInstanceAndChunks(instanceId);
 
 			myLogbackTestExtension.setLoggerToWatch(currentLogger);
+			myLogbackTestExtension.reRegister();
 		}
 	}
 

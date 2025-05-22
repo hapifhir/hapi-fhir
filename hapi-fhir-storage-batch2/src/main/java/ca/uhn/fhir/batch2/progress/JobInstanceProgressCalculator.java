@@ -83,7 +83,6 @@ public class JobInstanceProgressCalculator {
 			ourLog.debug(instanceProgress.toString());
 
 			if (instanceProgress.hasNewStatus()) {
-				ourLog.info("YYYYY " + instanceProgress.getNewStatus());
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
 
