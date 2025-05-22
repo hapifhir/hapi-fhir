@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 6870
+title: "Previously, the `ValidateCodeKey` was using a reference to `ConceptValidationOptions` which was later mutated
+ during validation causing cache misses. This has been corrected and now a copy of `ConceptValidationOptions` is 
+ used."
