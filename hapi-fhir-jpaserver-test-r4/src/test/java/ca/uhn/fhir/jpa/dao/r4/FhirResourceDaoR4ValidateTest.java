@@ -2494,4 +2494,110 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertHasNoErrors(oo);
 	}
 
+	@Test
+	void test_UnknownCodeSystemMessage_ShouldNotBeDuplicated() {
+
+		String medReqSdJson = """
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://med-req-submission",
+  "version": "4.0.0",
+  "name": "MedicationRequestPrescription",
+  "title": "MedicationRequest Prescription (Submission)",
+  "status": "draft",
+  "date": "2022-01-19T18:53:15.8800587Z",
+  "description": "Ordering of medication for patient",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "MedicationRequest",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/MedicationRequest",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "MedicationRequest.dosageInstruction.route",
+        "path": "MedicationRequest.dosageInstruction.route",
+        "mustSupport": true
+      },
+      {
+        "id": "MedicationRequest.dosageInstruction.route.coding",
+        "path": "MedicationRequest.dosageInstruction.route.coding",
+        "max": "1",
+        "mustSupport": true,
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://fhir.infoway-inforoute.ca/ValueSet/routeofadministration"
+        }
+      },
+      {
+        "id": "MedicationRequest.dosageInstruction.route.coding.system",
+        "path": "MedicationRequest.dosageInstruction.route.coding.system",
+        "fixedUri": "http://snomed.info/sct",
+        "mustSupport": true
+      },
+      {
+        "id": "MedicationRequest.dosageInstruction.route.coding.code",
+        "path": "MedicationRequest.dosageInstruction.route.coding.code",
+        "mustSupport": true
+      },
+      {
+        "id": "MedicationRequest.dosageInstruction.route.coding.display",
+        "path": "MedicationRequest.dosageInstruction.route.coding.display",
+        "mustSupport": true
+      },
+      {
+        "id": "MedicationRequest.dosageInstruction.route.text",
+        "path": "MedicationRequest.dosageInstruction.route.text",
+        "mustSupport": true
+      }
+    ]
+  }
+}
+""";
+
+
+		String medReqJson = """
+{
+  "resourceType": "MedicationRequest",
+  "meta": {
+    "profile": [
+      "http://med-req-submission"
+    ]
+  },
+  "dosageInstruction": [
+    {
+      "text": "Take 2 tablets by mouth 3 times a day",
+      "route": {
+        "coding": [
+          {
+            "system": "http://foo",
+            "code": "26643006",
+            "display": "Oral route"
+          }
+        ]
+      }
+    }
+  ]
+}
+""";
+
+
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+		IBaseResource resourceToValidate = myFhirContext.newJsonParser().parseResource(medReqJson);
+
+		StructureDefinition sdMedReq = (StructureDefinition) myFhirContext.newJsonParser().parseResource(medReqSdJson);
+
+		myStructureDefinitionDao.create(sdMedReq, new SystemRequestDetails());
+
+		OperationOutcome oo = validateAndReturnOutcome(resourceToValidate);
+
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo).replace("\"resourceType\"", "\"resType\""));
+
+		List<OperationOutcome.OperationOutcomeIssueComponent> unknownSystemIssues=
+			oo.getIssue().stream().filter(t -> t.getDiagnostics().startsWith("CodeSystem is unknown and can't be validated: http://foo")).toList();
+		assertThat(unknownSystemIssues).hasSize(1);
+	}
+
+
 }
