@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6987
+title: "Only using a Coding was supported. Using a url/code pair, 
+  or a codeabaleConcept was causing an error. Now url/code works, 
+  and codeableConcept fails gracefully."
