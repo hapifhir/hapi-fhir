@@ -15,13 +15,29 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.text.StringSubstitutor;
-import org.hl7.fhir.common.hapi.validation.support.*;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.junit.jupiter.api.*;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +48,10 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
@@ -119,7 +138,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 				assertInstanceOf(OperationOutcome.class, methodOutcome.getOperationOutcome());
 				assertHasInvalidCodeError((OperationOutcome) methodOutcome.getOperationOutcome());
 
-				if (runNumber > 1){
+				if (runNumber > 1) {
 					assertCorrectCaching(metrics);
 				}
 			}
@@ -175,7 +194,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 				logMetrics(run);
 				assertValidationErrors(validationResult);
-				if (runNumber > 1){
+				if (runNumber > 1) {
 					assertCorrectCaching(metrics);
 				}
 			}
@@ -208,7 +227,6 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			validator.registerValidatorModule(module);
 
 			validator.validateWithResult(new Patient().setActive(true));
-			module.getWorkerContext().setVersionCanonicalizer(ourVersionCanonicalizer);
 
 			return validator;
 		}
@@ -239,7 +257,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private void assertCorrectCaching(CanonicalizationMetrics theMetrics){
+	private void assertCorrectCaching(CanonicalizationMetrics theMetrics) {
 		assertEquals(0, theMetrics.getTotalInvocations());
 	}
 
@@ -247,7 +265,6 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		// initialize VersionSpecificWorkerContextWrapper
 		myClient.validate().resource(new Patient().setActive(true)).execute();
 
-		myInstanceValidator.getWorkerContext().setVersionCanonicalizer(ourVersionCanonicalizer);
 		setVersionCanonicalizer(myJpaValidationSupportChain.getValidationSupports());
 	}
 
@@ -259,13 +276,10 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			if (support instanceof CommonCodeSystemsTerminologyService commonCodeSystem) {
 				commonCodeSystem.setVersionCanonicalizer(ourVersionCanonicalizer);
 			}
-			if (support instanceof SnapshotGeneratingValidationSupport snapshotGenerating) {
-				snapshotGenerating.setVersionCanonicalizer(ourVersionCanonicalizer);
-			}
 		}
 	}
 
-	private String formatMessage(String theMessage, Map<String, String> theFormatValues){
+	private String formatMessage(String theMessage, Map<String, String> theFormatValues) {
 		return StringSubstitutor.replace(theMessage, theFormatValues);
 	}
 
@@ -282,17 +296,17 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		assertEquals(NUM_CONCEPTS, myValueSet1.getCompose().getInclude().get(0).getConcept().size());
 		ValueSet.ConceptReferenceComponent valueSet1LastConcept = myValueSet1.getCompose().getInclude().get(0).getConcept().get(lastConceptIndex);
 		procedure.getCode().addCoding()
-				.setSystem(myCodeSystem1.getUrl())
-				.setCode(valueSet1LastConcept.getCode())
-				.setDisplay(valueSet1LastConcept.getDisplay());
+			.setSystem(myCodeSystem1.getUrl())
+			.setCode(valueSet1LastConcept.getCode())
+			.setDisplay(valueSet1LastConcept.getDisplay());
 
 		// add code from ValueSet 2 (has no concepts included and must be expanded)
 		assertEquals(1, myValueSet2.getCompose().getInclude().size());
 		assertTrue(myValueSet2.getCompose().getInclude().get(0).getConcept().isEmpty());
 		procedure.getCode().addCoding()
-				.setSystem(myCodeSystem2.getUrl())
-				.setCode("codesystem-2-concept-" + NUM_CONCEPTS)
-				.setDisplay("Code System Two Concept " + NUM_CONCEPTS);
+			.setSystem(myCodeSystem2.getUrl())
+			.setCode("codesystem-2-concept-" + NUM_CONCEPTS)
+			.setDisplay("Code System Two Concept " + NUM_CONCEPTS);
 
 		// add invalid code to ensure validation is functioning properly
 		procedure.getCode().addCoding().setSystem("http://acme.org/invalid").setCode("invalid").setDisplay("Invalid");
@@ -310,9 +324,9 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 		long totalConversionTime = 0L;
 		long totalInvocations = 0L;
 
-		for (TestRun testRun : theTestRuns){
+		for (TestRun testRun : theTestRuns) {
 			long elapsedTime = testRun.getElapsedTime();
-			if (elapsedTime > max){
+			if (elapsedTime > max) {
 				max = elapsedTime;
 			}
 			totalTime += elapsedTime;
@@ -332,9 +346,9 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 
 	private StringBuilder formatRuns(List<TestRun> theTestRuns) {
 		StringBuilder retVal = new StringBuilder();
-		for (TestRun testRun : theTestRuns){
+		for (TestRun testRun : theTestRuns) {
 			retVal.append("\nRUN: %s | ELAPSED TIME: %sms, | TOTAL CANONICALIZATIONS: %s".formatted(
-					testRun.getNumber(), testRun.getElapsedTime(), testRun.getTotalInvocations())
+				testRun.getNumber(), testRun.getElapsedTime(), testRun.getTotalInvocations())
 			);
 		}
 		return retVal;
@@ -381,7 +395,7 @@ public class ValidationCanonicalizationTest extends BaseResourceProviderR4Test {
 			return myCanonicalizationMetrics.getTotalConversionTime();
 		}
 
-		public long getTotalInvocations(){
+		public long getTotalInvocations() {
 			return myCanonicalizationMetrics.getTotalInvocations();
 		}
 	}

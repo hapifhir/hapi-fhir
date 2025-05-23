@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -119,7 +118,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class WorkerContextValidationSupportAdapter extends I18nBase implements IWorkerContext {
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
-    private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
+	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	/**
 	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
 	 * they will be returned using whatever version of FHIR the underlying infrastructure is
@@ -131,14 +130,14 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	 * the converted version gets cached too.
 	 */
 	private static final String TO_CANONICAL_USERDATA_KEY =
-			VersionSpecificWorkerContextWrapper.class.getName() + "_TO_CANONICAL_USERDATA_KEY";
+			WorkerContextValidationSupportAdapter.class.getName() + "_TO_CANONICAL_USERDATA_KEY";
 
 	/**
 	 * This serves a similar purpose as TO_CANONICAL_USERDATA_KEY, expect this key stores
 	 * the conversion back from the canonical version.
 	 */
 	private static final String FROM_CANONICAL_USERDATA_KEY =
-			VersionSpecificWorkerContextWrapper.class.getName() + "_FROM_CANONICAL_USERDATA_KEY";
+			WorkerContextValidationSupportAdapter.class.getName() + "_FROM_CANONICAL_USERDATA_KEY";
 
 	private IValidationSupport myValidationSupport;
 	private VersionCanonicalizer myVersionCanonicalizer;
