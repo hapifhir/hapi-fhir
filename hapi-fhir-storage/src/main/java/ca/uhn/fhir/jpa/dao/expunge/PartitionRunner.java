@@ -92,12 +92,10 @@ public class PartitionRunner {
 		if (myTransactionService != null) {
 			// Wrap each Callable task in an invocation to HapiTransactionService#execute
 			runnableTasks = runnableTasks.stream()
-					.map(t -> (Callable<Void>) () -> {
-						return myTransactionService
-								.withRequest(myRequestDetails)
-								.execute(t);
-					})
-					.collect(Collectors.toList());
+					.map(t -> (Callable<Void>) () -> myTransactionService
+							.withRequest(myRequestDetails)
+							.execute(t))
+					.toList();
 		}
 
 		if (runnableTasks.size() == 1) {
@@ -115,7 +113,7 @@ public class PartitionRunner {
 		ExecutorService executorService = buildExecutor(runnableTasks.size());
 		try {
 			List<Future<?>> futures = runnableTasks.stream()
-					.map(t -> executorService.submit(() -> t.call()))
+					.map(executorService::submit)
 					.collect(Collectors.toList());
 			// wait for all the threads to finish
 			for (Future<?> future : futures) {
@@ -135,7 +133,7 @@ public class PartitionRunner {
 	private <T> List<Callable<Void>> buildCallableTasks(List<T> theResourceIds, Consumer<List<T>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		if (myBatchSize > theResourceIds.size()) {
+		if (theResourceIds.size() > myBatchSize) {
 			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.size(), myBatchSize);
 		} else {
 			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
