@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
@@ -140,6 +141,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired(required = false) // It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
+	@Autowired
+	private HapiTransactionService myTransactionService;
+
 	@Override
 	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
 		assert myPackageLoaderSvc != null;
@@ -246,8 +250,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	 * the bean is unavailable, fallback to assuming we are using an embedded base64 in the data element.
 	 * @param theBinary the Binary who's `data` blob you want to retrieve
 	 * @return a byte array containing the blob.
-	 *
-	 * @throws IOException
 	 */
 	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
 		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
@@ -343,7 +345,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			String dirName = "package";
 			NpmPackage.NpmPackageFolder packageFolder = npmPackage.getFolders().get(dirName);
-			Map<String, List<String>> packageFolderTypes = null;
+			Map<String, List<String>> packageFolderTypes;
 			try {
 				packageFolderTypes = packageFolder.getTypes();
 			} catch (IOException e) {
@@ -418,8 +420,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 							version = String.valueOf(myCtx.newFhirPath()
 									.evaluateFirst(resourceVersion.get(), "value", IPrimitiveType.class)
 									.orElse(null));
-						} else {
-							version = null;
 						}
 						resourceEntity.setCanonicalVersion(version);
 					}
@@ -652,7 +652,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						entity.getFhirVersion(),
 						entity.getPackageId(),
 						entity.getPackageVersion()))
-				.collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 	private List<NpmPackageVersionResourceEntity> loadPackageInfoByCanonicalUrl(
@@ -743,7 +743,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		NpmPackageMetadataJson retVal = new NpmPackageMetadataJson();
 
 		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
-		if (!pkg.isPresent()) {
+		if (pkg.isEmpty()) {
 			throw new ResourceNotFoundException(Msg.code(1306) + "Unknown package ID: " + thePackageId);
 		}
 
@@ -844,8 +844,15 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	@Transactional
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
+		SystemRequestDetails requestDetails =
+				new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
+		return myTransactionService
+				.withRequest(requestDetails)
+				.execute(() -> doUninstallPackage(thePackageId, theVersion));
+	}
+
+	private PackageDeleteOutcomeJson doUninstallPackage(String thePackageId, String theVersion) {
 		PackageDeleteOutcomeJson retVal = new PackageDeleteOutcomeJson();
 
 		Optional<NpmPackageVersionEntity> packageVersion =
@@ -888,7 +895,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				List<NpmPackageVersionEntity> versions = remainingVersions.stream()
 						.sorted((o1, o2) ->
 								PackageVersionComparator.INSTANCE.compare(o1.getVersionId(), o2.getVersionId()))
-						.collect(Collectors.toList());
+						.toList();
 				for (int i = 0; i < versions.size(); i++) {
 					boolean isCurrent = i == versions.size() - 1;
 					if (isCurrent != versions.get(i).isCurrentVersion()) {
@@ -916,7 +923,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
-		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails()).getEntity();
+		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails());
 		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, new SystemRequestDetails());
 	}
 
