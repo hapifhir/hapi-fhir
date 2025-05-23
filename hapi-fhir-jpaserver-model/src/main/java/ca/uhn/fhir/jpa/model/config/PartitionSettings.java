@@ -21,11 +21,42 @@ package ca.uhn.fhir.jpa.model.config;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * @since 5.0.0
  */
 public class PartitionSettings {
 
+	public static final Set<String> DEFAULT_NON_PARTITIONABLE_RESOURCE_TYPES;
+
+	static {
+		Set<String> defaults = new LinkedHashSet<>();
+
+		// Infrastructure
+		defaults.add("SearchParameter");
+
+		// Validation and Conformance
+		defaults.add("StructureDefinition");
+		defaults.add("Questionnaire");
+		defaults.add("CapabilityStatement");
+		defaults.add("CompartmentDefinition");
+		defaults.add("OperationDefinition");
+		defaults.add("Library");
+
+		// Terminology
+		defaults.add("ConceptMap");
+		defaults.add("CodeSystem");
+		defaults.add("ValueSet");
+		defaults.add("NamingSystem");
+		defaults.add("StructureMap");
+
+		DEFAULT_NON_PARTITIONABLE_RESOURCE_TYPES = Collections.unmodifiableSet(defaults);
+	}
+
+	private Set<String> myNonPartitionableResourceTypes = new LinkedHashSet<>(DEFAULT_NON_PARTITIONABLE_RESOURCE_TYPES);
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
 	private boolean myIncludePartitionInSearchHashes = false;
@@ -242,5 +273,34 @@ public class PartitionSettings {
 		 * will be managed by the database.
 		 */
 		ALLOWED_UNQUALIFIED,
+	}
+
+	/**
+	 * List of resource types that are considered non-partitionable.
+	 * Defaults to {@link #DEFAULT_NON_PARTITIONABLE_RESOURCE_TYPES}.
+	 *
+	 * @since 8.1.5
+	 */
+	public Set<String> getNonPartitionableResourceTypes() {
+		return myNonPartitionableResourceTypes;
+	}
+
+	/**
+	 * Overrides the list of resource types considered non-partitionable.
+	 * If you want to allow partitioning for types like {@code "Questionnaire"} remove them from this set.
+	 * <p>
+	 * <strong>Warning:</strong> Allowing partitioning of infrastructure or conformance resources (such as {@code StructureDefinition},
+	 * {@code CodeSystem}, {@code ValueSet}, etc.) may lead to unexpected behavior:
+	 * <ul>
+	 *   <li>Validation logic typically only accesses resources from the default partition.</li>
+	 *   <li>Terminology services (e.g., {@code expandValueSet}, {@code validateCode}) may fail or return incomplete results.</li>
+	 *   <li>Cross-partition references to these resources may not be resolved correctly.</li>
+	 * </ul>
+	 * Proceed with caution and test thoroughly if enabling partitioning for these resource types.
+	 *
+	 * @since 8.1.5
+	 */
+	public void setNonPartitionableResourceTypes(Set<String> theNonPartitionableResourceTypes) {
+		myNonPartitionableResourceTypes = new LinkedHashSet<>(theNonPartitionableResourceTypes);
 	}
 }
