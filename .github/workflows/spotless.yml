@@ -23,11 +23,9 @@ jobs:
          with:
             proxy-url: https://slack-bots.azure.smilecdr.com/robogary/github
             message-success: |
-                <!--spotless-->
-               Formatting check succeeded!
+                <!--spotless--> Formatting check succeeded!
             message-failure: |
-                <!--spotless-->
-               **This Pull Request has failed the formatting check**
+                <!--spotless--> **This Pull Request has failed the formatting check**
                
                Please run `mvn spotless:apply` or `mvn clean install -DskipTests` to fix the formatting issues. 
                
