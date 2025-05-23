@@ -772,7 +772,9 @@ public class SubscriptionCanonicalizer {
 						display = "SubscriptionTopic";
 
 
-					
+
+
+
 
 		} else {
 			throw new IllegalStateException(Msg.code(567) + "Unknown "
