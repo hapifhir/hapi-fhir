@@ -769,7 +769,11 @@ public class SubscriptionCanonicalizer {
 		} else if (theStrategy == SubscriptionMatchingStrategy.IN_MEMORY) {
 			display = "In-memory";
 		} else if (theStrategy == SubscriptionMatchingStrategy.TOPIC) {
-			display = "SubscriptionTopic";
+						display = "SubscriptionTopic";
+
+
+					
+
 		} else {
 			throw new IllegalStateException(Msg.code(567) + "Unknown "
 					+ SubscriptionMatchingStrategy.class.getSimpleName() + ": " + theStrategy);
