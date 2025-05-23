@@ -61,7 +61,7 @@ trigger_json = result.json()
 
 # Abort early if we have skipped the pipeline generation
 if trigger_json["skipped"] == True:
-    print(f"Job skipped, as we have detected that this pull request contains a pom.xml version bump. [status={status}, duration={(now - start_time).total_seconds()}s]")
+    print("Job skipped, as we have detected that this pull request contains a pom.xml version bump.")
     sys.exit(0)
 
 pipeline_id = trigger_json["pipeline_id"]
