@@ -15,16 +15,21 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener;
+import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.RetryPolicyProvider;
@@ -35,10 +40,14 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.test.concurrency.PointcutLatch;
 import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
@@ -73,10 +82,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
@@ -167,10 +178,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private IJobPersistence myJobPersistence;
 
 	@Autowired
+	private WorkChannelMessageListener myWorkChannelMessageListener;
+
+	@Autowired
 	private RetryPolicyProvider myRetryPolicyProvider;
 
 	@RegisterExtension
-	LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
+	private LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension();
 
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
@@ -205,6 +219,110 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
+	}
+
+	@Test
+	public void replayingWorkChunkNotificationMessages_forFailedJobs_shouldNotThrowNullPointers() throws Exception {
+		// setup
+		String currentLogger = myLogbackTestExtension.getCurrentLogger();
+		myLogbackTestExtension.setLoggerToWatch(Logs.CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING);
+		myLogbackTestExtension.reRegister();
+
+		// create a job
+		// step 1
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			throw new RuntimeException("Hi, i'm an error.");
+		};
+		// final step
+		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> RunOutcome.SUCCESS;
+
+		String jobId = getMethodNameForJobId();
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				last
+			)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+
+		// start a job
+		JobInstanceStartRequest request = buildRequest(jobId);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		String instanceId = response.getInstanceId();
+
+		// await the failure
+		myBatch2JobHelper.awaitJobFailure(instanceId);
+
+		// get the only chunk we have
+		Optional<Batch2WorkChunkEntity> firstOp = runInTransaction(() -> {
+			Stream<Batch2WorkChunkEntity> stream = myWorkChunkRepository.fetchChunksForStep(response.getInstanceId(), FIRST_STEP_ID);
+			return stream.findFirst();
+		});
+		assertTrue(firstOp.isPresent());
+		String chunkId = firstOp.get().getId();
+
+		// manually move the job to failed
+		// (`awaitJobFailure` will wait for job to reach ERROR or FAILED, so
+		// we want to make sure it's in FAILED)
+		runInTransaction(() -> {
+			myJobInstanceRepository.updateInstanceStatusIfIn(instanceId, StatusEnum.FAILED, Set.of(StatusEnum.getIncompleteStatuses()));
+		});
+
+		/*
+		 * set the lifetime of failed jobs to 0;
+		 * this allows the maintenance pass to clean up any "Failed"
+		 * jobs if they have outlived  their lifetime (which we're setting to 0 here).
+		 * Normally lifetime is 7 days (see JobInstanceProcessor.PURGE_THRESHOLD)
+		 */
+		assertTrue(myJobMaintenanceService instanceof JobMaintenanceServiceImpl);
+		((JobMaintenanceServiceImpl)myJobMaintenanceService).setFailedJobLifetime(0);
+
+		try {
+			// run maintenance pass -> cleans up failed jobs/workchunks
+			myBatch2JobHelper.runMaintenancePass();
+
+			// create a fake work notification
+			JobWorkNotification notification = new JobWorkNotification();
+			notification.setInstanceId(response.getInstanceId());
+			notification.setJobDefinitionId(jobId);
+			notification.setJobDefinitionVersion(TEST_JOB_VERSION);
+			notification.setTargetStepId(FIRST_STEP_ID);
+			notification.setChunkId(chunkId);
+
+			JobWorkNotificationJsonMessage msg = new JobWorkNotificationJsonMessage();
+			msg.setPayload(notification);
+			// default headers
+			HapiMessageHeaders headers = new HapiMessageHeaders();
+			headers.setRetryCount(0);
+			msg.setHeaders(headers);
+
+			// simulate a rollback and submit a job
+			ourLog.info("Attempting to replay work notification for job id {} and work chunk {}.", instanceId, chunkId);
+			myWorkChannelMessageListener.handleMessage(msg);
+
+			List<ILoggingEvent> events = myLogbackTestExtension.getLogEvents(e -> e.getLevel() == Level.WARN
+				&& e.getFormattedMessage().contains("Unknown chunk id " + chunkId));
+			assertFalse(events.isEmpty());
+		} finally {
+			// reset
+			((JobMaintenanceServiceImpl) myJobMaintenanceService).setFailedJobLifetime(-1);
+			myJobPersistence.deleteInstanceAndChunks(instanceId);
+
+			myLogbackTestExtension.setLoggerToWatch(currentLogger);
+			myLogbackTestExtension.reRegister();
+		}
 	}
 
 	@Test

@@ -83,19 +83,21 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
 	public static final int MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT = 5;
 
+	private long myFailedJobLifetimeOverride = -1;
+
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JpaStorageSettings myStorageSettings;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
 	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
-	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	private boolean myEnabledBool = true;
 
@@ -237,13 +239,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 						.isPresent()) {
 					if (processedInstanceIds.add(instanceId)) {
 						myJobDefinitionRegistry.setJobDefinition(instance);
-						JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(
-								myJobPersistence,
-								myBatchJobSender,
-								instanceId,
-								progressAccumulator,
-								myReductionStepExecutorService,
-								myJobDefinitionRegistry);
+						JobInstanceProcessor jobInstanceProcessor =
+								createJobInstanceProcessor(instanceId, progressAccumulator);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,
@@ -263,6 +260,26 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			}
 		}
 		myMaintenanceJobFinishedCallback.run();
+	}
+
+	private JobInstanceProcessor createJobInstanceProcessor(
+			String theInstanceId, JobChunkProgressAccumulator theAccumulator) {
+		JobInstanceProcessor processor = new JobInstanceProcessor(
+				myJobPersistence,
+				myBatchJobSender,
+				theInstanceId,
+				theAccumulator,
+				myReductionStepExecutorService,
+				myJobDefinitionRegistry);
+		if (myFailedJobLifetimeOverride >= 0) {
+			processor.setPurgeThreshold(myFailedJobLifetimeOverride);
+		}
+		return processor;
+	}
+
+	@VisibleForTesting
+	public void setFailedJobLifetime(long theFailedJobLifetime) {
+		myFailedJobLifetimeOverride = theFailedJobLifetime;
 	}
 
 	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {
