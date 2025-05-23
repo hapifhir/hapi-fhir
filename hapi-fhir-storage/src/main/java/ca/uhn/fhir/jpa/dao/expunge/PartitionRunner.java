@@ -92,9 +92,8 @@ public class PartitionRunner {
 		if (myTransactionService != null) {
 			// Wrap each Callable task in an invocation to HapiTransactionService#execute
 			runnableTasks = runnableTasks.stream()
-					.map(t -> (Callable<Void>) () -> myTransactionService
-							.withRequest(myRequestDetails)
-							.execute(t))
+					.map(t -> (Callable<Void>) () ->
+							myTransactionService.withRequest(myRequestDetails).execute(t))
 					.toList();
 		}
 
@@ -112,9 +111,8 @@ public class PartitionRunner {
 
 		ExecutorService executorService = buildExecutor(runnableTasks.size());
 		try {
-			List<Future<?>> futures = runnableTasks.stream()
-					.map(executorService::submit)
-					.collect(Collectors.toList());
+			List<Future<?>> futures =
+					runnableTasks.stream().map(executorService::submit).collect(Collectors.toList());
 			// wait for all the threads to finish
 			for (Future<?> future : futures) {
 				future.get();
