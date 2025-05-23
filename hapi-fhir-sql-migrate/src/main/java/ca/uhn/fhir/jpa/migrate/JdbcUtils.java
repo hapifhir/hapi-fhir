@@ -261,6 +261,8 @@ public class JdbcUtils {
 									return new ColumnType(ColumnTypeEnum.FLOAT, length);
 								case Types.TINYINT:
 									return new ColumnType(ColumnTypeEnum.TINYINT, length);
+								case Types.SMALLINT:
+									return new ColumnType(ColumnTypeEnum.SMALLINT, length);
 								default:
 									throw new IllegalArgumentException(
 											Msg.code(34) + "Don't know how to handle datatype " + dataType
