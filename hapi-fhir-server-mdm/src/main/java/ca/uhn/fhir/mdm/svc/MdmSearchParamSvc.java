@@ -73,7 +73,7 @@ public class MdmSearchParamSvc {
 	}
 
 	/**
-	 * Given a source type, and a criteria string of the shape name=x&birthDate=y, generate a {@link SearchParameterMap}
+	 * Given a source type, and a criteria string of the shape {@code name=x&birthDate=y}, generate a {@link SearchParameterMap}
 	 * that represents this query.
 	 *
 	 * @param theSourceType the resource type to execute the search on

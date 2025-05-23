@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -462,6 +463,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
 			when(myCanonicalSubscription.getSendDeleteMessages()).thenReturn(true);
 			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
+			when(mySubscriptionMatchDeliverer.deliverPayload(any(), any(), any(), any())).thenReturn(ISendResult.FAILURE);
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 

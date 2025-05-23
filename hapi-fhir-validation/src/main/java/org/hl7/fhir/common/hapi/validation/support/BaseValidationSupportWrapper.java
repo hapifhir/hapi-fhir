@@ -15,7 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.List;
 
 /**
- * This class is a wrapper for an existing {@link @IContextValidationSupport} object, intended to be
+ * This class is a wrapper for an existing {@link IValidationSupport} object, intended to be
  * subclassed in order to layer functionality on top of the existing validation support object.
  *
  * @since 5.0.0

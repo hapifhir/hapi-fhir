@@ -21,6 +21,7 @@ package ca.uhn.fhir.cache;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
@@ -74,6 +74,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final Object mySyncResourcesLock = new Object();
 
 	private Integer myMaxRetryCount = null;
+	private boolean myInitialized = false;
 
 	protected BaseResourceCacheSynchronizer(String theResourceName) {
 		myResourceName = theResourceName;
@@ -89,12 +90,15 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	/**
-	 * This method performs a search in the DB, so use the {@link ContextStartedEvent}
+	 * This method performs a search in the DB, so use the {@link ContextRefreshedEvent}
 	 * to ensure that it runs after the database initializer
 	 */
 	@EventListener(classes = ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void registerListener() {
+		if (myInitialized) {
+			return;
+		}
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
@@ -104,6 +108,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
+		myInitialized = true;
 	}
 
 	private SearchParameterMap provideSearchParameterMap() {
@@ -143,21 +148,23 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	@Override
 	public void forceRefresh() {
 		if (daoNotAvailable()) {
-			throw new ConfigurationException("Attempt to force refresh without a dao");
+			throw new ConfigurationException(Msg.code(2652) + "Attempt to force refresh without a dao");
 		}
 		try {
 			if (mySyncResourcesSemaphore.tryAcquire(FORCE_REFRESH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				doSyncResourcesWithRetry();
 			} else {
 				String errorMessage = String.format(
-						"Timed out waiting %s %s to refresh %s cache",
-						FORCE_REFRESH_TIMEOUT_SECONDS, "seconds", myResourceName);
+						Msg.code(2653) + "Timed out waiting %s %s to refresh %s cache",
+						FORCE_REFRESH_TIMEOUT_SECONDS,
+						"seconds",
+						myResourceName);
 				ourLog.error(errorMessage);
-				throw new ConfigurationException(errorMessage);
+				throw new ConfigurationException(Msg.code(2663) + errorMessage);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2654) + e);
 		} finally {
 			mySyncResourcesSemaphore.release();
 		}

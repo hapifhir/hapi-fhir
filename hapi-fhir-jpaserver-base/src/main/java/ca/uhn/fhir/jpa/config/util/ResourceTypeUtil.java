@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2025 Smile CDR, Inc.
  * %%
@@ -17,27 +17,23 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.jpa.config.util;
 
-import java.util.function.Supplier;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
-/**
- * This is used to allow lazy parameter initialization for SLF4j - Hopefully
- * a future version will allow lambda params
- */
-public class MessageSupplier {
-	private Supplier<?> supplier;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-	public MessageSupplier(Supplier<?> supplier) {
-		this.supplier = supplier;
-	}
+public final class ResourceTypeUtil {
 
-	@Override
-	public String toString() {
-		return supplier.get().toString();
-	}
-
-	public static MessageSupplier msg(Supplier<?> supplier) {
-		return new MessageSupplier(supplier);
+	public static List<String> generateResourceTypes() {
+		return Stream.of(FhirVersionEnum.DSTU2, FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5)
+				.map(FhirContext::forVersion)
+				.flatMap(c -> c.getResourceTypes().stream())
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
 	}
 }

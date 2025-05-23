@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -159,7 +160,7 @@ public class SubscriptionRulesInterceptor {
 			} catch (Exception e) {
 				String message = "REST HOOK endpoint is not reachable: " + endpointUrl;
 				ourLog.warn(message);
-				throw new PreconditionFailedException(message);
+				throw new PreconditionFailedException(Msg.code(2671) + message);
 			}
 		}
 	}
@@ -173,7 +174,7 @@ public class SubscriptionRulesInterceptor {
 			}
 			String message = "Criteria is not permitted on this server: " + theCriteriaString;
 			ourLog.warn(message);
-			throw new PreconditionFailedException(message);
+			throw new PreconditionFailedException(Msg.code(2672) + message);
 		}
 	}
 }

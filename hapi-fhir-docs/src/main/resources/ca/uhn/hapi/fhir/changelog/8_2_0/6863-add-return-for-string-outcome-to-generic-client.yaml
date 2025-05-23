@@ -1,4 +1,5 @@
 ---
 type: add
 issue: 6863
-title: "`returnForStringOutcome()` operation was added to `IGenericClient`."
+title: "A new method has been added to the generic client (IGenericClient) which instructs the client to return 
+    the raw string response body to the caller, as opposed to trying to parse the response as a FHIR resource."

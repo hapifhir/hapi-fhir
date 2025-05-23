@@ -73,6 +73,9 @@ public class MemoryCacheService {
 
 			Cache<Object, Object> nextCache;
 			switch (next) {
+				case RES_TYPE_TO_RES_TYPE_ID:
+					nextCache = CacheFactory.buildEternal(250, 500);
+					break;
 				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
 					nextCache = CacheFactory.buildEternal(5_000, 50_000);
 					break;
@@ -219,7 +222,8 @@ public class MemoryCacheService {
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
 		ID_TO_PARTITION(Integer.class),
-		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class);
+		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
+		RES_TYPE_TO_RES_TYPE_ID(String.class);
 
 		private final Class<?> myKeyType;
 

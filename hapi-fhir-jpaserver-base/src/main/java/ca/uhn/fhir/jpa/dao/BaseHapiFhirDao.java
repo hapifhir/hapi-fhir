@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -106,6 +107,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -235,6 +237,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected CacheTagDefinitionDao cacheTagDefinitionDao;
+
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
 
 	protected final CodingSpy myCodingSpy = new CodingSpy();
 
@@ -489,6 +494,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
+		}
+		if (theEntity.getResourceTypeId() == null && theResource != null) {
+			theEntity.setResourceTypeId(myResourceTypeCacheSvc.getResourceTypeId(toResourceName(theResource)));
 		}
 
 		byte[] resourceBinary;
@@ -993,6 +1001,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						existingParams,
 						theRequest,
 						thePerformIndexing);
+
+				if (CollectionUtils.isNotEmpty(newParams.myLinks)) {
+					setTargetResourceTypeIdForResourceLinks(newParams.myLinks);
+				}
 
 				// Actually persist the ResourceTable and ResourceHistoryTable entities
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1719,6 +1731,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
+	@VisibleForTesting
+	public void setResourceTypeCacheSvc(IResourceTypeCacheSvc theResourceTypeCacheSvc) {
+		myResourceTypeCacheSvc = theResourceTypeCacheSvc;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
 
@@ -1806,5 +1823,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private enum CreateOrUpdateByMatch {
 		CREATE,
 		UPDATE
+	}
+
+	private void setTargetResourceTypeIdForResourceLinks(Collection<ResourceLink> resourceLinks) {
+		resourceLinks.stream()
+				.filter(link -> link.getTargetResourceType() != null)
+				.forEach(link -> link.setTargetResourceTypeId(
+						myResourceTypeCacheSvc.getResourceTypeId(link.getTargetResourceType())));
 	}
 }
