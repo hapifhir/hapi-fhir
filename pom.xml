@@ -101,7 +101,6 @@
 		<module>hapi-fhir-storage-batch2</module>
 		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
-		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
 		<module>hapi-fhir-storage-test-utilities</module>
 		<module>hapi-fhir-jpaserver-model</module>
@@ -1109,9 +1108,6 @@
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.15.3</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
-
-		<!-- Clinical Reasoning & CQL Support -->
-		<clinical-reasoning.version>3.19.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
