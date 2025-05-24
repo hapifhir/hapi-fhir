@@ -1,5 +1,5 @@
 ---
 type: add
 issue: 6853
-title: "A new [filter hook pointcut](https://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html) (`BATCH2_CHUNK_PROCESS_FILTER`)
-has been added which will allow implementers to specify custom logic that will be executed around `WorkChunk` processing."
+title: "A new [filter hook pointcut](https://hapifhir.io/hapi-fhir/docs/interceptors/filter_hook_interceptors.html) named `BATCH2_CHUNK_PROCESS_FILTER`
+has been added, which will allow implementers to specify custom logic that will be executed around `WorkChunk` processing."

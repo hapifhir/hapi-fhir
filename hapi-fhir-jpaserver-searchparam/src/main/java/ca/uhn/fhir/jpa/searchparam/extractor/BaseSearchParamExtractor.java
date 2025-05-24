@@ -1296,95 +1296,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private void addDate_Period(
-			String theResourceType,
-			Set<ResourceIndexedSearchParamDate> theParams,
-			RuntimeSearchParam theSearchParam,
-			IBase theValue) {
-		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
-		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
-		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
-		String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
-
-		if (start != null || end != null) {
-
-			if (start == null) {
-				start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
-				startAsString = myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
-			}
-			if (end == null) {
-				end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
-				endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
-			}
-
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(
-					myPartitionSettings,
-					theResourceType,
-					theSearchParam.getName(),
-					start,
-					startAsString,
-					end,
-					endAsString,
-					startAsString);
-			theParams.add(nextEntity);
-		}
-	}
-
-	private void addDate_Timing(
-			String theResourceType,
-			Set<ResourceIndexedSearchParamDate> theParams,
-			RuntimeSearchParam theSearchParam,
-			IBase theValue) {
-		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
-
-		TreeSet<Date> dates = new TreeSet<>();
-		String firstValue = null;
-		String finalValue = null;
-		for (IPrimitiveType<Date> nextEvent : values) {
-			if (nextEvent.getValue() != null) {
-				dates.add(nextEvent.getValue());
-				if (firstValue == null) {
-					firstValue = nextEvent.getValueAsString();
-				}
-				finalValue = nextEvent.getValueAsString();
-			}
-		}
-
-		Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
-		if (repeat.isPresent()) {
-			Optional<IBase> bounds =
-					myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
-			if (bounds.isPresent()) {
-				String boundsType = toRootTypeName(bounds.get());
-				if ("Period".equals(boundsType)) {
-					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
-					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
-					String endString = extractValueAsString(myPeriodEndValueChild, bounds.get());
-					dates.add(start);
-					dates.add(end);
-					// TODO Check if this logic is valid. Does the start of the first period indicate a lower bound??
-					if (firstValue == null) {
-						firstValue = extractValueAsString(myPeriodStartValueChild, bounds.get());
-					}
-					finalValue = endString;
-				}
-			}
-		}
-
-		if (!dates.isEmpty()) {
-			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(
-					myPartitionSettings,
-					theResourceType,
-					theSearchParam.getName(),
-					dates.first(),
-					firstValue,
-					dates.last(),
-					finalValue,
-					firstValue);
-			theParams.add(nextEntity);
-		}
-	}
-
 	private void addNumber_Duration(
 			String theResourceType,
 			Set<ResourceIndexedSearchParamNumber> theParams,
@@ -2313,6 +2224,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
+		/**
+		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
+		 * to create an upper and lower bound Indexed Search Param.
+		 */
 		private void addDate_Timing(
 				String theResourceType,
 				Set<ResourceIndexedSearchParamDate> theParams,
@@ -2320,16 +2235,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				IBase theValue) {
 			List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
-			TreeSet<Date> dates = new TreeSet<>();
+			TreeSet<DateStringWrapper> dates = new TreeSet<>();
 			String firstValue = null;
-			String finalValue = null;
 			for (IPrimitiveType<Date> nextEvent : values) {
 				if (nextEvent.getValue() != null) {
-					dates.add(nextEvent.getValue());
+					dates.add(new DateStringWrapper(nextEvent.getValue(), nextEvent.getValueAsString()));
 					if (firstValue == null) {
 						firstValue = nextEvent.getValueAsString();
 					}
-					finalValue = nextEvent.getValueAsString();
 				}
 			}
 
@@ -2340,13 +2253,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
-						Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
-						Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+						IPrimitiveType<Date> start =
+								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
+										.findFirst()
+										.orElse(null);
+						IPrimitiveType<Date> end =
+								extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
+										.findFirst()
+										.orElse(null);
+
 						if (start != null) {
-							dates.add(start);
+							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
 						}
 						if (end != null) {
-							dates.add(end);
+							dates.add(new DateStringWrapper(end.getValue(), end.getValueAsString()));
 						}
 					}
 				}
@@ -2358,11 +2278,28 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						theResourceType,
 						theSearchParam.getName(),
 						dates.first(),
-						firstValue,
+						dates.first().getDateValueAsString(),
 						dates.last(),
-						finalValue,
+						dates.last().getDateValueAsString(),
 						firstValue);
 				theParams.add(myIndexedSearchParamDate);
+			}
+		}
+
+		/**
+		 * Wrapper class to store the DateTimeType String representation of the Date
+		 * This allows us to use the Date implementation of Comparable for TreeSet sorting
+		 */
+		private class DateStringWrapper extends Date {
+			String myDateString;
+
+			public DateStringWrapper(Date theDate, String theDateString) {
+				super(theDate.getTime());
+				myDateString = theDateString;
+			}
+
+			public String getDateValueAsString() {
+				return myDateString;
 			}
 		}
 

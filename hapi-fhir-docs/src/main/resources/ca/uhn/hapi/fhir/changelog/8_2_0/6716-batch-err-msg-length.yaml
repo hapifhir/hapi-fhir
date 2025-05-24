@@ -2,7 +2,4 @@
 type: fix
 issue: 6716
 jira: SMILE-9676
-title: "Fixed an issue that was caused by
-        batch jobs attempting to store error
-        messages exceeding 500 characters.
-"
+title: "Fixed an issue that was caused by batch jobs attempting to store error messages exceeding 500 characters. Now, the error message will be truncated to 500 characters if it exceeds that amount."

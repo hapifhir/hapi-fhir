@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 6907
-title: "Previously a request with only `_source` parameter was not considering partition.
+title: "Previously a request with only the `_source` parameter was not considering partitioning.
     This has been fixed."

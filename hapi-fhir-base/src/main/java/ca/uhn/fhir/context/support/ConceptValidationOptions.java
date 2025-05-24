@@ -29,6 +29,17 @@ public class ConceptValidationOptions {
 	private boolean myValidateDisplay;
 	private boolean myInferSystem;
 
+	public static ConceptValidationOptions copy(ConceptValidationOptions theOriginal) {
+		if (theOriginal == null) {
+			return null;
+		}
+
+		ConceptValidationOptions copy = new ConceptValidationOptions();
+		copy.setValidateDisplay(theOriginal.isValidateDisplay());
+		copy.setInferSystem(theOriginal.isInferSystem());
+		return copy;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -54,7 +65,9 @@ public class ConceptValidationOptions {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("myValidateDisplay", myValidateDisplay)
 				.append("inferSystem", myInferSystem)
+				.append("hashCode", hashCode())
 				.toString();
 	}
 

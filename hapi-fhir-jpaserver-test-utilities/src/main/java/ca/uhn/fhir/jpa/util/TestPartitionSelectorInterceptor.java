@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import jakarta.annotation.Nonnull;
@@ -43,6 +44,7 @@ public class TestPartitionSelectorInterceptor {
 	 */
 	public TestPartitionSelectorInterceptor() {
 		super();
+		myHelperSvc.setPartitionSettings(new PartitionSettings());
 	}
 
 	public TestPartitionSelectorInterceptor addNonPartitionableResource(@Nonnull String theResourceName) {
@@ -75,10 +77,10 @@ public class TestPartitionSelectorInterceptor {
 	private RequestPartitionId selectPartition(String theResourceType) {
 		if (theResourceType != null) {
 			if (!myHelperSvc.isResourcePartitionable(theResourceType)) {
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
 			}
 			if (myNonPartitionableResources.contains(theResourceType)) {
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.fromPartitionId(myHelperSvc.getDefaultPartitionId());
 			}
 		}
 

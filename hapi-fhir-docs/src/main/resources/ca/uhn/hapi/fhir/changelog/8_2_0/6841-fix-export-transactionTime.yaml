@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 6841
-title: "The bulk export status reported by $poll-export-status now correctly shows the start-time, not the end-time.
+title: "The bulk export status reported by `$poll-export-status` now correctly shows the start-time, not the end-time.
    This avoids missing changes or updates in subsequent $export calls which use this as the `_since` parameter."

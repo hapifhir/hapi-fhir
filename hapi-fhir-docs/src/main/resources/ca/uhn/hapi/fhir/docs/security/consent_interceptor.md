@@ -9,7 +9,7 @@ The consent interceptor may be used to examine client requests to apply consent 
 
 The consent interceptor has several primary purposes:
 
-** It can reject a resource from being disclosed to the user by examining it while calculating search results. This calculation is performed very early in the process of building search results, in order to ensure that in many cases the user is unaware that results have been removed.
+* It can reject a resource from being disclosed to the user by examining it while calculating search results. This calculation is performed very early in the process of building search results, in order to ensure that in many cases the user is unaware that results have been removed.
 
 * It can redact results, removing specific elements before they are returned to a client.
 
@@ -32,5 +32,24 @@ This is slower than the normal path, and will prevent the reuse of the results f
 The `willSeeResource()` operation supports reusing cached search results, but removed resources may be 'visible' as holes in returned bundles.
 Disabling `canSeeResource()` by returning `false` from `processCanSeeResource()` will enable the search cache.
 
+<a name="pre-authorizing-requests"/>
+
+## Pre-Authorizing Requests
+
+In some situations, it is useful to pre-authorize a request programmatically. This can be achieved by 
+overriding the `authorizeRequest(RequestDetails theRequestDetails)` method of the `ConsentInterceptor`. 
+
+The example below shows how this method could be overridden in a system that uses user data in the `RequestDetails`
+to indicate that a request should be pre-authorized.
+
+```java
+@Override
+public void authorizeRequest(RequestDetails theRequestDetails) {
+    String userDataValue = (String) theRequestDetails.getUserData().get("SOME_KEY");
+    if ("SOME_VALUE".equals(userDataValue)){
+        super.authorizeRequest(theRequestDetails);
+    }
+}
+```
 
 

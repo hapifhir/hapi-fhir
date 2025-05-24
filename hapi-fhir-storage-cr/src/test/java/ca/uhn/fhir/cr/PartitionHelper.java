@@ -29,6 +29,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 	public void beforeEach(ExtensionContext context) throws Exception {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myIInterceptorService.registerInterceptor(myInterceptor);
+		myInterceptor.setPartitionSettings(myPartitionSettings);
 	}
 
 	@Override
@@ -49,6 +50,12 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 	public static class MyTestInterceptor {
 		private boolean myCalled = false;
 
+		private PartitionSettings myPartitionSettings;
+
+		public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+			myPartitionSettings = thePartitionSettings;
+		}
+
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
 			myCalled = true;
@@ -56,7 +63,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 				ourLog.info("useful breakpoint :-)");
 			}
 			assertNotNull(theRequestDetails);
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 		}
 
 		public void clear() {

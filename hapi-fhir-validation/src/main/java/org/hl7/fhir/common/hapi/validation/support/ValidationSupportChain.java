@@ -1303,7 +1303,8 @@ public class ValidationSupportChain implements IValidationSupport {
 				String theCode,
 				String theDisplay,
 				String theValueSetUrl) {
-			myOptions = theOptions;
+			// copy ConceptValidationOptions because it is mutable
+			myOptions = ConceptValidationOptions.copy(theOptions);
 			mySystem = theSystem;
 			myCode = theCode;
 			myDisplay = theDisplay;
@@ -1326,6 +1327,17 @@ public class ValidationSupportChain implements IValidationSupport {
 		@Override
 		public int hashCode() {
 			return myHashCode;
+		}
+
+		@Override
+		public String toString() {
+			return "ValidateCodeKey{"
+					+ "mySystem='" + mySystem + '\''
+					+ ", myCode='" + myCode + '\''
+					+ ", myDisplay='" + myDisplay + '\''
+					+ ", myValueSetUrl='" + myValueSetUrl + '\''
+					+ ", myHashCode=" + myHashCode + '\''
+					+ ", myOptions=" + myOptions + '}';
 		}
 	}
 

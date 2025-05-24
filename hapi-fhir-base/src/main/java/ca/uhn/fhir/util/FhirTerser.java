@@ -703,16 +703,20 @@ public class FhirTerser {
 			}
 		} else {
 			for (IBase nextElement : values) {
-				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>)
-						myContext.getElementDefinition(nextElement.getClass());
-				List<T> foundValues = getValues(
-						nextChildDef,
-						nextElement,
-						theSubList.subList(1, theSubList.size()),
-						theWantedClass,
-						theCreate,
-						theAddExtension);
-				retVal.addAll(foundValues);
+				// We can only continue iterating if the current element is composite.
+				// If we haven't reached the end of the path, and we have already reached an element
+				// with a primitive data type, we did not find a match.
+				if (myContext.getElementDefinition(nextElement.getClass())
+						instanceof BaseRuntimeElementCompositeDefinition<?> nextChildDef) {
+					List<T> foundValues = getValues(
+							nextChildDef,
+							nextElement,
+							theSubList.subList(1, theSubList.size()),
+							theWantedClass,
+							theCreate,
+							theAddExtension);
+					retVal.addAll(foundValues);
+				}
 			}
 		}
 		return retVal;

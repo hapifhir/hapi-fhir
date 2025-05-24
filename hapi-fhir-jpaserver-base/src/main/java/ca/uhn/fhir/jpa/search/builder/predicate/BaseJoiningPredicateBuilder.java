@@ -72,14 +72,14 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 	@Nullable
 	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
-
 		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
 			Condition condition;
 
-			boolean defaultPartitionIsNull = getPartitionSettings().getDefaultPartitionId() == null;
-			if (theRequestPartitionId.isDefaultPartition() && defaultPartitionIsNull) {
+			Integer defaultPartitionId = getPartitionSettings().getDefaultPartitionId();
+			boolean defaultPartitionIsNull = defaultPartitionId == null;
+			if (theRequestPartitionId.isDefaultPartition(defaultPartitionId) && defaultPartitionIsNull) {
 				condition = UnaryCondition.isNull(getPartitionIdColumn());
-			} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
+			} else if (theRequestPartitionId.hasDefaultPartitionId(defaultPartitionId) && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
 				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
 				Condition partitionIdsPredicate =

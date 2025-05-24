@@ -975,7 +975,7 @@ public abstract class BaseTransactionProcessor {
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
 							myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-									theRequestDetails, resourceType);
+									requestDetailsForEntry, resourceType);
 					break;
 				}
 				case PUT: {

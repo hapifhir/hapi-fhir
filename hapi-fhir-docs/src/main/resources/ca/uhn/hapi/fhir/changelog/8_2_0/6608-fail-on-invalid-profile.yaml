@@ -2,4 +2,4 @@
 type: fix
 issue: 6608
 jira: SMILE-9129
-title: "Previously, attempting to validate a resource ($validate) with an invalid profile was not generating any error. This issue is fixed."
+title: "Previously, attempting to validate a resource using `$validate` with an invalid profile was not generating an error. This issue is fixed, and the validator will now throw an error if the profile does not exist."
