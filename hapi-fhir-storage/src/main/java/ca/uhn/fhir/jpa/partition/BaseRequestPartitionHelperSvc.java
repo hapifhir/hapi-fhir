@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,7 +52,6 @@ import java.util.stream.Collectors;
 public abstract class BaseRequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	public static final Logger ourLog = Logs.getPartitionTroubleshootingLog();
-	private final HashSet<Object> myNonPartitionableResourceNames;
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -63,29 +61,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Autowired
 	PartitionSettings myPartitionSettings;
-
-	protected BaseRequestPartitionHelperSvc() {
-		myNonPartitionableResourceNames = new HashSet<>();
-
-		// Infrastructure
-		myNonPartitionableResourceNames.add("SearchParameter");
-
-		// Validation and Conformance
-		myNonPartitionableResourceNames.add("StructureDefinition");
-		myNonPartitionableResourceNames.add("Questionnaire");
-		myNonPartitionableResourceNames.add("CapabilityStatement");
-		myNonPartitionableResourceNames.add("CompartmentDefinition");
-		myNonPartitionableResourceNames.add("OperationDefinition");
-
-		myNonPartitionableResourceNames.add("Library");
-
-		// Terminology
-		myNonPartitionableResourceNames.add("ConceptMap");
-		myNonPartitionableResourceNames.add("CodeSystem");
-		myNonPartitionableResourceNames.add("ValueSet");
-		myNonPartitionableResourceNames.add("NamingSystem");
-		myNonPartitionableResourceNames.add("StructureMap");
-	}
 
 	/**
 	 * Invoke the {@link Pointcut#STORAGE_PARTITION_IDENTIFY_READ} interceptor pointcut to determine the tenant for a read request.
@@ -414,7 +389,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Override
 	public boolean isResourcePartitionable(String theResourceType) {
-		return theResourceType != null && !myNonPartitionableResourceNames.contains(theResourceType);
+		return theResourceType != null
+				&& !myPartitionSettings.getNonPartitionableResourceTypes().contains(theResourceType);
 	}
 
 	@Override
@@ -424,7 +400,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	}
 
 	private boolean isResourceNonPartitionable(String theResourceType) {
-		return theResourceType != null && !isResourcePartitionable(theResourceType);
+		return !isResourcePartitionable(theResourceType);
 	}
 
 	private void validatePartitionForCreate(RequestPartitionId theRequestPartitionId, String theResourceName) {
