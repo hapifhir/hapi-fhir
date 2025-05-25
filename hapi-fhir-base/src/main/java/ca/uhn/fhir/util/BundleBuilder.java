@@ -473,6 +473,11 @@ public class BundleBuilder {
 		addEntryAndReturnRequest(theResource);
 	}
 
+	public void addDocumentEntry(IBaseResource theResource, String theFullUrl) {
+		setType("document");
+		addEntryAndReturnRequest(theResource, theFullUrl);
+	}
+
 	/**
 	 * Adds an entry for a Message bundle type
 	 *
