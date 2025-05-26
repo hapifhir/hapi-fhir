@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -38,12 +39,14 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private IHapiTransactionService myIHapiTransactionService ;
+	private IHapiTransactionService myIHapiTransactionService;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	private IBatch2DaoSvc mySvc;
 
 	@BeforeEach
 	void beforeEach() {
-		mySvc = new Batch2DaoSvcImpl(myResourceTableDao, myResourceLinkDao,  myMatchUrlService, myDaoRegistry, myFhirContext, myIHapiTransactionService);
+		mySvc = new Batch2DaoSvcImpl(myResourceTableDao, myResourceLinkDao,  myMatchUrlService, myDaoRegistry, myFhirContext, myIHapiTransactionService, myPartitionSettings);
 	}
 
 	@Test
