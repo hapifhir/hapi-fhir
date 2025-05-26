@@ -103,13 +103,19 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
 		}
-		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
+		initializeRequestDetails();
 
 		IResourceChangeListenerCache resourceCache =
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
 						myResourceName, provideSearchParameterMap(), this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
 		myInitialized = true;
+	}
+
+	private void initializeRequestDetails() {
+		if (mySystemRequestDetails == null) {
+			mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
+		}
 	}
 
 	private SearchParameterMap provideSearchParameterMap() {
@@ -185,6 +191,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	}
 
 	synchronized int doSyncResourcesWithRetry() {
+		initializeRequestDetails();
 		// retry runs MAX_RETRIES times
 		// and if errors result every time, it will fail
 		Retrier<Integer> syncResourceRetrier = new Retrier<>(this::doSyncResources, getMaxRetries());
