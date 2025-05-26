@@ -2,5 +2,12 @@
 type: fix
 issue: 6849
 jira: SMILE-9611
-title: "Previously, when performing a FHIR chained search with the `_count` parameter, the search would sometimes
-time out. This has now been fixed."
+title: "Previously, performing a FHIR chained search with the `_count` parameter could cause the search to time out 
+when several specific conditions were met:
+<ul>
+<li>the result contains multiple pages</li>
+<li>the result contains a mix of resources that have a single reference and have multiple references</li>
+<li>the total number of resource references exceeds internal pre-fetch thresholds</li>
+</ul>
+This has now been fixed. Please see the [Github issue](https://github.com/hapifhir/hapi-fhir/issues/6849) for more 
+details on the precise conditions that could cause timeouts."
