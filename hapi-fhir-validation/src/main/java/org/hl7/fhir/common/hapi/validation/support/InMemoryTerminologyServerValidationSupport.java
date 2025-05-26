@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -49,7 +50,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private final FhirContext myCtx;
-	private final VersionCanonicalizer myVersionCanonicalizer;
+	private VersionCanonicalizer myVersionCanonicalizer;
 	private IssueSeverity myIssueSeverityForCodeDisplayMismatch = IssueSeverity.WARNING;
 
 	/**
@@ -61,6 +62,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		Validate.notNull(theCtx, "theCtx must not be null");
 		myCtx = theCtx;
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
+	}
+
+	@VisibleForTesting
+	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
 	}
 
 	@Override

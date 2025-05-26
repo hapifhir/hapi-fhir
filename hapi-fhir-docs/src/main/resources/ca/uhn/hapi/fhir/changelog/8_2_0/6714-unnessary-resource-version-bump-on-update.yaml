@@ -2,5 +2,5 @@
 type: fix
 issue: 6714
 jira: SMILE-9691
-title: "Previously, it was possible for a persisted resource to get a version bump due to unnecessary updates to its 
-associated tags. This issue is fixed."
+title: "Previously, it was possible for a resource to change versions during a no-op update, due to a bug in tag selection. If a resource had tags, and was updated with no change, it was possible 
+for the history version to be changed (e.g. from `Patient/1/_history/1` to `Patient/1/_history/2`) due to a bug in tag uniqueness detection. This has been fixed"
