@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ParameterUtilTest {
 
 	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ParameterUtilTest.class);
-	private static final char BS = '\\';
+	//Adding a static to make the test data a bit more readable.  Multiple escaped backslashes were getting confusing.
+	private static final String BS = "\\";
 
 	@ParameterizedTest
 	@MethodSource("sourceRawVsEscaped")
@@ -49,46 +50,65 @@ public class ParameterUtilTest {
 
 
 	private static Stream<Arguments> sourceRawVsEscaped() {
-		// Just remember the backslash character needs to be escaped in double-quoted strings
 		// Arguments: raw,  escaped
 		return Stream.of(
+			//Regular strings with no characters needing escaping
 			Arguments.of("HelloWorld", "HelloWorld"),
 			Arguments.of("!@#%^*(()", "!@#%^*(()"),
-			//The base set of escapable characters in the middle of the string
-			Arguments.of("abc\\d", "abc\\\\d"),
-			Arguments.of("abc|d", "abc\\|d"),
-			Arguments.of("abc$d", "abc\\$d"),
-			Arguments.of("abc,d", "abc\\,d"),
-			//The base set of escapable characters at the end of the string
-			Arguments.of("abc\\", "abc\\\\"),
-			Arguments.of("abc|", "abc\\|"),
-			Arguments.of("abc$", "abc\\$"),
-			Arguments.of("abc,", "abc\\,"),
-			//The base set of escapable characters at the beginning of the string
-			Arguments.of("\\abc", "\\\\abc"),
-			Arguments.of("|abc", "\\|abc"),
-			Arguments.of("$abc", "\\$abc"),
-			Arguments.of(",abc", "\\,abc"),
+
+			//Single occurrence of escapable character
+			//   Leading
+			Arguments.of(BS + "abc", BS + BS + "abc"),
+			Arguments.of("|abc", BS + "|abc"),
+			Arguments.of("$abc", BS + "$abc"),
+			Arguments.of(",abc", BS + ",abc"),
+			//   Trailing
+			Arguments.of("abc" + BS, "abc" + BS + BS),
+			Arguments.of("abc|", "abc" + BS + "|"),
+			Arguments.of("abc$", "abc" + BS + "$"),
+			Arguments.of("abc,", "abc" + BS + ","),
+			//   In the middle
+			Arguments.of("abc"+ BS + "d", "abc" + BS + BS + "d"),
+			Arguments.of("abc|d", "abc" + BS + "|d"),
+			Arguments.of("abc$d", "abc" + BS + "$d"),
+			Arguments.of("abc,d", "abc" + BS + ",d"),
+
 			//More than one escapable character in a row
-			Arguments.of("abc\\\\d", "abc\\\\\\\\d"),
-			Arguments.of("abc"+ BS + BS +"d", "abc"+ BS + BS + BS + BS +"d"),
-			Arguments.of("abc"+ BS +"$d",   "abc"+ BS + BS + BS +"$d"),
-			Arguments.of("abcd"+ BS + BS,   "abcd"+ BS + BS + BS + BS),
-			Arguments.of("abc||d", "abc\\|\\|d")
+			//  Leading
+			Arguments.of(BS + BS + "abcd",  BS + BS + BS + BS + "abcd"),
+			Arguments.of("$" + BS + "abcd",  BS + "$" + BS + BS + "abcd"),
+			Arguments.of("," + BS + "abcd",  BS + "," + BS + BS + "abcd"),
+			Arguments.of("|" + BS + "abcd",  BS + "|" + BS + BS + "abcd"),
+			Arguments.of(BS + "$" +  "abcd",  BS + BS + BS + "$" + "abcd"),
+			Arguments.of(BS + "|" +  "abcd",  BS + BS + BS + "|" + "abcd"),
+			Arguments.of(BS + "," +  "abcd",  BS + BS + BS + "," + "abcd"),
+			Arguments.of(",," +  "abcd",  BS + "," + BS + "," + "abcd"),
+			//  Trailing
+			Arguments.of("abcd"+ BS + BS,  "abcd" + BS + BS + BS + BS),
+			Arguments.of("abcd"+ BS + "$",  "abcd" + BS + BS + BS + "$"),
+			Arguments.of("abcd$$",  "abcd" + BS + "$" + BS + "$"),
+			//  In the middle
+			Arguments.of("abc" + BS + BS + "d",  "abc" + BS + BS + BS + BS + "d"),
+			Arguments.of("abc" + BS + "$d",  "abc"+ BS + BS + BS + "$d"),
+			Arguments.of("abc" + BS + ",d",  "abc"+ BS + BS + BS + ",d"),
+			Arguments.of("abc||d", "abc" + BS + "|" + BS + "|d")
 		);
 	}
 
 	private static Stream<Arguments> illegalEscapedInputs() {
 		// A single backslash is technically illegal https://hl7.org/fhir/search.html#escaping
-		// The old implementation would just pass it through.
+		// The old implementation ParameterUtil.unescape() would just pass it through.
 		// Keeping this behaviour in order to avoid breaking changes
-		// Note: this breaks the reversability of the operation
+		// Note: this breaks the reversability of the operation, hence separate data set.
 
-		// Just remember the backslash character needs to be escaped in double-quoted strings
 		// Arguments: raw,  escaped
 		return Stream.of(
-			Arguments.of("abc\\d","abc\\d"),
-			Arguments.of("abc\\","abc\\")
+			//Leading
+			Arguments.of(BS + "abcd", BS + "abcd"),
+			//Trailing
+			Arguments.of("abcd" + BS, "abcd" + BS),
+			//In the middle
+			Arguments.of("abc" + BS + "d", "abc" + BS + "d")
 		);
 	}
 

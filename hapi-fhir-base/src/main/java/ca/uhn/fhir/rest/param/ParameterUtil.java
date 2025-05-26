@@ -301,7 +301,6 @@ public class ParameterUtil {
 		for (int i = 0; i < theValue.length(); i++) {
 			char next = theValue.charAt(i);
 			if (next == '\\') {
-				// TODO - need to consume two characters when encountering backslash
 				if (i == theValue.length() - 1) {
 					b.append(next);
 				} else {

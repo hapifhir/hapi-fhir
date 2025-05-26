@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6994
+title: "Fix incorrect behaviour of ParameterUtil.unescape(String).
+  The function would 'eat' multiple consecutive occurrences of backslash.
+  Adding a test class to cover ParameterUtil.unescape() and ParameterUtil.escape()"
