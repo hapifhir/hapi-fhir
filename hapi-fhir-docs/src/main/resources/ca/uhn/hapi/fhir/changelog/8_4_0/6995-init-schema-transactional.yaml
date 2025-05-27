@@ -1,5 +1,5 @@
 ---
 type: change
-issue: mb
+issue: 6995
 title: "The schema initialization task run during migrations now runs the statements without a transaction.
    This allows some statements to run that would otherwise fail in a transaction."
