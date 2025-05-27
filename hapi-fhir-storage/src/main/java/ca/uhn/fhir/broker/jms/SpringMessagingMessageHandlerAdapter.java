@@ -20,12 +20,15 @@
 package ca.uhn.fhir.broker.jms;
 
 import ca.uhn.fhir.broker.api.IMessageListener;
+import ca.uhn.fhir.broker.api.RawStringMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.converter.SimpleMessageConverter;
+import org.springframework.messaging.support.GenericMessage;
 
 /**
  * Adapt a {@link IMessageListener} to Spring Messaging (JMS)
@@ -45,17 +48,25 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
-		if (!IMessage.class.isAssignableFrom(theMessage.getClass())) {
+		IMessage<?> message;
+
+		if (theMessage instanceof GenericMessage genericMessage) {
+			// When receiving a message from an external queue, it will likely arrive as a GenericMessage
+			Object payload = genericMessage.getPayload();
+			message = new RawStringMessage(genericMessage.getPayload().toString(), genericMessage.getHeaders());
+		} else if (IMessage.class.isAssignableFrom(theMessage.getClass())) {
+			message = (IMessage<T>) theMessage;
+		} else {
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
-					"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
-					IMessage.class,
-					theMessage.getClass());
+				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
+				IMessage.class,
+				theMessage.getClass());
 			return;
 		}
 
-		if (!getMessageType().isAssignableFrom(theMessage.getClass())) {
+		if (!getMessageType().isAssignableFrom(message.getClass())) {
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
@@ -65,8 +76,7 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 			return;
 		}
 
-		IMessage<T> message = (IMessage<T>) theMessage;
-		myMessageListener.handleMessage(message);
+		myMessageListener.handleMessage((IMessage<T>) message);
 	}
 
 	private Class<? extends IMessage<T>> getMessageType() {
