@@ -53,6 +53,10 @@ public class SpringMessagingMessageHandlerAdapterTest {
         RawStringMessage receivedMessage = myRawMessageListener.getReceivedMessages().get(0);
         assertEquals(payload, receivedMessage.getPayload());
         assertEquals("testValue", receivedMessage.getHeaders().get("testHeader"));
+
+        // Verify no warning logs were generated
+        LogbackTestExtensionAssert.assertThat(myLogCaptor)
+            .doesNotHaveMessage("Received unexpected message type");
     }
 
     @Test
@@ -72,6 +76,10 @@ public class SpringMessagingMessageHandlerAdapterTest {
         RawStringMessage receivedMessage = myRawMessageListener.getReceivedMessages().get(0);
         assertEquals(payload, receivedMessage.getPayload());
         assertEquals("testValue", receivedMessage.getHeaders().get("testHeader"));
+
+        // Verify no warning logs were generated
+        LogbackTestExtensionAssert.assertThat(myLogCaptor)
+            .doesNotHaveMessage("Received unexpected message type");
     }
 
     @Test
@@ -236,6 +244,10 @@ public class SpringMessagingMessageHandlerAdapterTest {
 		CustomIMessageAndMessage receivedMessage = myCustomMessageListener.getReceivedMessages().get(0);
         assertEquals(payload, receivedMessage.getPayload());
         assertEquals("customValue", receivedMessage.getHeaders().get("customHeader"));
+
+        // Verify no warning logs were generated
+        LogbackTestExtensionAssert.assertThat(myLogCaptor)
+            .doesNotHaveMessage("Received unexpected message type");
     }
 
     @Test

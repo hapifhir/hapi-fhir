@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.support.GenericMessage;
 
 /**
@@ -60,9 +59,9 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 			// Wrong message types should never happen.  If it does, we should quietly fail so it doesn't
 			// clog up the channel.
 			ourLog.warn(
-				"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
-				IMessage.class,
-				theMessage.getClass());
+					"Received unexpected message type. Expecting message of type {}, but received message of type {}. Skipping message.",
+					IMessage.class,
+					theMessage.getClass());
 			return;
 		}
 
