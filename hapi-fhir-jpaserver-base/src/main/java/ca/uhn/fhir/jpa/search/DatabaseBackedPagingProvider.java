@@ -75,8 +75,14 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	protected PersistedJpaBundleProvider validateAndReturnBundleProvider(PersistedJpaBundleProvider theBundleProvider) {
 		if (!theBundleProvider.ensureSearchEntityLoaded()) {
 			return null;
-		}
-		return theBundleProvider;
+					}
+              
+
+
+
+
+
+		return     theBundleProvider;
 	}
 
 	@Override
