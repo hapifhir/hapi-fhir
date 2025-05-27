@@ -52,8 +52,6 @@ public class ResourceProviderCodeSystemTest {
 	@Captor
 	ArgumentCaptor<String> myValuestUrl;
 
-
-
 	@Test
 	public void testCodeValidationWhenInputIsCodeSystemUrlAndCode() {
 		StringDt expectedUrl = new StringDt("https://example.com/foo/bar");

@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -164,7 +165,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				String code;
 				String display;
 
-				String url = (theUrl != null && theUrl.hasValue()) ? theUrl.getValueAsString() : null;
+				String url = getStringFromPrimitiveType(theUrl);
 
 				if (theCoding != null && isNotBlank(theCoding.getSystem())) {
 					if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
@@ -176,8 +177,8 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 					code = theCoding.getCode();
 					display = theCoding.getDisplay();
 				} else {
-					code = theCode != null && theCode.hasValue() ? theCode.getValueAsString() : null;
-					display = theDisplay != null && theDisplay.hasValue() ? theDisplay.getValueAsString() : null;
+					code = getStringFromPrimitiveType(theCode);
+					display = getStringFromPrimitiveType(theDisplay);
 				}
 
 				result = validateCodeWithTerminologyService(url, code, display)
@@ -200,6 +201,11 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private static @Nullable String getStringFromPrimitiveType(IPrimitiveType<String> thePrimitiveString) {
+		return (thePrimitiveString != null && thePrimitiveString.hasValue()) ?
+			thePrimitiveString.getValueAsString() : null;
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
