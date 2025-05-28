@@ -528,7 +528,7 @@ public class ExpandResourceAndWriteBinaryStep
 				// Make sure we don't accidentally reuse an ID. This should be impossible given the
 				// amount of entropy in the IDs but might as well be sure.
 				try {
-					IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+					IBaseBinary output = binaryDao.read(binary.getIdElement(), srd, true);
 					if (output != null) {
 						continue;
 					}
