@@ -924,7 +924,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails()
-				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+				.setRequestPartitionId(HapiTransactionService.getRequestPartitionAssociatedWithThread());
 
 		getBinaryDao().delete(theResourceBinaryId, requestDetails);
 		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
