@@ -3,15 +3,19 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,4 +56,22 @@ class SearchParameterUtilTest {
 		final RuntimeSearchParam runtimeSearchParam = optRuntimeSearchParam.get();
 		assertEquals(theExpectedPath, runtimeSearchParam.getPath());
 	}
+
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+			"AuditEvent.encounter | CarePlan.encounter | ChargeItem.encounter | ",
+			"AuditEvent.encounter | CarePlan.encounter or ChargeItem.encounter | ",
+			"AuditEvent.encounter or CarePlan.encounter or ChargeItem.encounter or "
+		}
+	)
+	void testSplitSearchParameterExpressions(String input) {
+		String[] split = SearchParameterUtil.splitSearchParameterExpressions(input);
+		assertThat(Arrays.asList(split)).asList().contains(
+			"AuditEvent.encounter", "CarePlan.encounter", "ChargeItem.encounter"
+		);
+
+	}
+
 }
