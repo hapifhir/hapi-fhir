@@ -845,8 +845,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(
-			RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+		SystemRequestDetails requestDetails = new SystemRequestDetails()
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 		return myTransactionService
 				.withRequest(requestDetails)
 				.execute(() -> doUninstallPackage(thePackageId, theVersion));
@@ -923,8 +923,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(
-			RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+		SystemRequestDetails requestDetails = new SystemRequestDetails()
+				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
 
 		getBinaryDao().delete(theResourceBinaryId, requestDetails);
 		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
