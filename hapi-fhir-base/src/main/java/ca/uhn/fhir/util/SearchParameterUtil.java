@@ -28,6 +28,7 @@ import ca.uhn.fhir.i18n.Msg;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -257,5 +258,57 @@ public class SearchParameterUtil {
 			retval = theSearchParam.substring(0, colonIndex);
 		}
 		return retval;
+	}
+
+	/**
+	 * Many SearchParameters combine a series of potential expressions into a single concatenated
+	 * expression. For example, in FHIR R5 the "encounter" search parameter has an expression like:
+	 * <code>AuditEvent.encounter | CarePlan.encounter | ChargeItem.encounter | ......</code>.
+	 * This method takes such a FHIRPath expression and splits it into a series of separate
+	 * expressions. To achieve this, we iteratively splits a string on any <code> or </code> or <code>|</code> that
+	 * is <b>not</b> contained inside a set of parentheses. e.g.
+	 * <p>
+	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
+	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
+	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
+	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
+	 *
+	 * @param thePaths The FHIRPath expression to split
+	 * @return The split strings
+	 */
+	public static String[] splitSearchParameterExpressions(String thePaths) {
+		if (!StringUtils.containsAny(thePaths, " or ", " |")) {
+			return new String[] { thePaths };
+		}
+		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
+		return topLevelOrExpressions.stream()
+				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
+				.toArray(String[]::new);
+	}
+
+	private static List<String> splitOutOfParensToken(String thePath, String theToken) {
+		int tokenLength = theToken.length();
+		int index = thePath.indexOf(theToken);
+		int rightIndex = 0;
+		List<String> retVal = new ArrayList<>();
+		while (index > -1) {
+			String left = thePath.substring(rightIndex, index);
+			if (allParensHaveBeenClosed(left)) {
+				retVal.add(left.trim());
+				rightIndex = index + tokenLength;
+			}
+			index = thePath.indexOf(theToken, index + tokenLength);
+		}
+		String pathTrimmed = thePath.substring(rightIndex).trim();
+		if (!pathTrimmed.isEmpty()) {
+			retVal.add(pathTrimmed);
+		}
+		return retVal;
+	}
+
+	private static boolean allParensHaveBeenClosed(String thePaths) {
+		int open = StringUtils.countMatches(thePaths, "(");
+		int close = StringUtils.countMatches(thePaths, ")");
+		return open == close;
 	}
 }

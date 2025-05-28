@@ -77,6 +77,7 @@ import org.hl7.fhir.r5.model.AllergyIntolerance;
 import org.hl7.fhir.r5.model.Appointment;
 import org.hl7.fhir.r5.model.AuditEvent;
 import org.hl7.fhir.r5.model.Binary;
+import org.hl7.fhir.r5.model.BodyStructure;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
@@ -92,6 +93,7 @@ import org.hl7.fhir.r5.model.Coverage;
 import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.EpisodeOfCare;
 import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.HealthcareService;
 import org.hl7.fhir.r5.model.Immunization;
@@ -201,6 +203,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myCarePlanDaoR5")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
+	@Autowired
+	@Qualifier("myEpisodeOfCareDaoR5")
+	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
+	@Autowired
+	@Qualifier("myBodyStructureDaoR5")
+	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
