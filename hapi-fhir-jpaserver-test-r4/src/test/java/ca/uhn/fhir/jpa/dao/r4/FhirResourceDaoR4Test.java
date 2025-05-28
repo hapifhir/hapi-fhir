@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -10,6 +12,7 @@ import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.r4.suites.IPatchTests;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -162,7 +165,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
-public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
@@ -184,6 +187,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void beforeEach() {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setWriteToSearchParamIdentityTable(true);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	@Override
+	public DaoRegistry getDaoRegistry() {
+		return myDaoRegistry;
+	}
+
+	@Override
+	public JpaStorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
