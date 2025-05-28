@@ -5,6 +5,7 @@ import ca.uhn.fhir.broker.api.RawStringMessage;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -23,10 +24,10 @@ public class SpringMessagingMessageHandlerAdapterTest {
     @RegisterExtension
     private final LogbackTestExtension myLogCaptor = new LogbackTestExtension(SpringMessagingMessageHandlerAdapter.class);
 
-    private final TestMessageListenerWithLatch<RawStringMessage, String> myRawMessageListener = new TestMessageListenerWithLatch<>(RawStringMessage.class, String.class);;
+    private final TestMessageListenerWithLatch<RawStringMessage, String> myRawMessageListener = new TestMessageListenerWithLatch<>(RawStringMessage.class, String.class);
 	private final SpringMessagingMessageHandlerAdapter<String> myRawAdapter = new SpringMessagingMessageHandlerAdapter<>(RawStringMessage.class, myRawMessageListener);
 
-    private final TestMessageListenerWithLatch<CustomIMessageAndMessage, String> myCustomMessageListener = new TestMessageListenerWithLatch<>(CustomIMessageAndMessage.class, String.class);;
+    private final TestMessageListenerWithLatch<CustomIMessageAndMessage, String> myCustomMessageListener = new TestMessageListenerWithLatch<>(CustomIMessageAndMessage.class, String.class);
     private final SpringMessagingMessageHandlerAdapter<String> myCustomAdapter = new SpringMessagingMessageHandlerAdapter<>(CustomIMessageAndMessage.class, myCustomMessageListener);
 
     @AfterEach
@@ -106,12 +107,14 @@ public class SpringMessagingMessageHandlerAdapterTest {
         }
 
         @Override
+		@Nonnull
         public Object getPayload() {
             return myPayload;
         }
 
         @Override
-        public org.springframework.messaging.MessageHeaders getHeaders() {
+		@Nonnull
+		public org.springframework.messaging.MessageHeaders getHeaders() {
             return new org.springframework.messaging.MessageHeaders(new HashMap<>());
         }
     }
@@ -119,21 +122,21 @@ public class SpringMessagingMessageHandlerAdapterTest {
     // Custom message class that implements both Message and IMessage but is not a GenericMessage
     private static class CustomIMessageAndMessage implements Message<String>, IMessage<String> {
         private final String myPayload;
-        private final Map<String, Object> myHeadersMap;
-        private final org.springframework.messaging.MessageHeaders myHeaders;
+		private final org.springframework.messaging.MessageHeaders myHeaders;
 
         public CustomIMessageAndMessage(String payload, Map<String, Object> headers) {
             myPayload = payload;
-            myHeadersMap = headers;
-            myHeaders = new org.springframework.messaging.MessageHeaders(headers);
+			myHeaders = new org.springframework.messaging.MessageHeaders(headers);
         }
 
         @Override
-        public String getPayload() {
+		@Nonnull
+		public String getPayload() {
             return myPayload;
         }
 
 		@Override
+		@Nonnull
 		public MessageHeaders getHeaders() {
 			return myHeaders;
 		}
@@ -141,41 +144,11 @@ public class SpringMessagingMessageHandlerAdapterTest {
 
 	}
 
-    // Define a custom class that is both a Message and an IMessage but not a GenericMessage
-    private static class CustomMessageAndIMessage extends UnexpectedMessageType implements IMessage<Object> {
-        private final Map<String, Object> myHeadersMap;
-
-        public CustomMessageAndIMessage(Object payload, Map<String, Object> headers) {
-            super(payload);
-            myHeadersMap = headers;
-        }
-    }
-
-    // Define a custom class that implements Message and is also an IMessage
-    private static class MessageThatIsAlsoIMessage implements Message<String> {
-        private final String myPayload;
-        private final Map<String, Object> myHeaders;
-
-        public MessageThatIsAlsoIMessage(String payload, Map<String, Object> headers) {
-            myPayload = payload;
-            myHeaders = headers;
-        }
-
-        @Override
-        public String getPayload() {
-            return myPayload;
-        }
-
-        @Override
-        public MessageHeaders getHeaders() {
-            return new MessageHeaders(myHeaders);
-        }
-    }
-
-    // Define a custom IMessage class for testing
+	// Define a custom IMessage class for testing
     private static class DifferentMessageType implements IMessage<String> {
         @Override
-        public Map<String, Object> getHeaders() {
+		@Nonnull
+		public Map<String, Object> getHeaders() {
             return new HashMap<>();
         }
 
@@ -185,49 +158,7 @@ public class SpringMessagingMessageHandlerAdapterTest {
         }
     }
 
-    // Define a custom message class that implements both Message and IMessage interfaces
-    private static class CustomMessage implements Message<String>, IMessage<String> {
-        private final String myPayload;
-        private final Map<String, Object> myHeaders;
-
-        public CustomMessage(String payload, Map<String, Object> headers) {
-            myPayload = payload;
-            myHeaders = headers;
-        }
-
-        @Override
-        public String getPayload() {
-            return myPayload;
-        }
-
-        @Override
-        public org.springframework.messaging.MessageHeaders getHeaders() {
-            return new org.springframework.messaging.MessageHeaders(myHeaders);
-        }
-    }
-
-    // Define another custom IMessage implementation for testing the IMessage branch
-    private static class CustomIMessage implements IMessage<String> {
-        private final String myPayload;
-        private final Map<String, Object> myHeaders;
-
-        public CustomIMessage(String payload, Map<String, Object> headers) {
-            myPayload = payload;
-            myHeaders = headers;
-        }
-
-        @Override
-        public Map<String, Object> getHeaders() {
-            return myHeaders;
-        }
-
-        @Override
-        public String getPayload() {
-            return myPayload;
-        }
-    }
-
-    @Test
+	@Test
     public void testHandleCustomIMessageAndMessage() {
         // Setup
         String payload = "custom payload";
@@ -254,7 +185,7 @@ public class SpringMessagingMessageHandlerAdapterTest {
     public void testHandleIncorrectMessageType() {
         // Setup
         // Create a new adapter that expects a different message type
-        TestMessageListenerWithLatch<DifferentMessageType, String> differentMessageListener = 
+        TestMessageListenerWithLatch<DifferentMessageType, String> differentMessageListener =
             new TestMessageListenerWithLatch<>(DifferentMessageType.class, String.class);
         SpringMessagingMessageHandlerAdapter<String> differentAdapter = 
             new SpringMessagingMessageHandlerAdapter<>(DifferentMessageType.class, differentMessageListener);
