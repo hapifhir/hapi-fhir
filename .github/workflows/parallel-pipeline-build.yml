@@ -9,6 +9,8 @@ on:
     secrets:
       CODECOV_TOKEN:
         required: true
+      GIT_TOKEN:
+        required: true
 
 jobs:
   build-cache:
@@ -85,7 +87,7 @@ jobs:
       - name: Assemble Reports
         uses: ./.github/actions/assemble-test-reports
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GIT_TOKEN }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           modules: ${{ needs.generate-module-list.outputs.modules_list }}
 

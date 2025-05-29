@@ -35,3 +35,4 @@ jobs:
       ignored_modules: ${{ needs.load-config-and-run.outputs.ignored_modules }}
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
