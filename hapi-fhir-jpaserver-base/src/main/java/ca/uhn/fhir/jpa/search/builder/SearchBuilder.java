@@ -2250,7 +2250,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					return false;
 				}
 
-				// If the reference points to a Reference (ie not a canonical or CanonicalReference)
+				// If the path points to a FHIR Reference datatype (ie not a canonical or CanonicalReference)
 				// then it doesn't matter here anyhow. The logic here only works for elements at the
 				// root level of the document (e.g. QuestionnaireResponse.subject or
 				// QuestionnaireResponse.subject.where(...)) but this is just an optimization
@@ -2602,10 +2602,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * IncludesIterator, used to recursively fetch resources from the provided list of PIDs
 	 */
-	public class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
+	private class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
 
 		private final RequestDetails myRequest;
-
 		private final Set<JpaPid> myCurrentPids;
 		private Iterator<JpaPid> myCurrentIterator;
 		private JpaPid myNext;
@@ -3046,7 +3045,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private static ScrollableResults<?> toScrollableResults(Query theQuery) {
 		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) theQuery;
-		ScrollableResults<?> scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-		return scrollableResults;
+		return hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 	}
 }
