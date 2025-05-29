@@ -3,6 +3,6 @@ type: add
 issue: 6805
 title: "CDS Hooks now requires the `fhirServer` field to use HTTPS in requests when using 
 [CDS Hooks version 2.0](https://cds-hooks.hl7.org/2.0/), as per 
-the specification. You can configure the CDS Hooks version by providing a bean that returns a CDSHooksVersion enum, 
+the specification. The CDS Hooks version can be configured by providing a bean that returns a `CDSHooksVersion` enum value, 
 introduced in this update. By default, the version is set to 1.1 to maintain compatibility with existing 
 implementations."

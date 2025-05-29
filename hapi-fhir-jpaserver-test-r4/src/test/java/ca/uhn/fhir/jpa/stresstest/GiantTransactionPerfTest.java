@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
@@ -112,6 +113,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -157,6 +159,8 @@ public class GiantTransactionPerfTest {
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 	private final ResourceHistoryCalculator myResourceHistoryCalculator = new ResourceHistoryCalculator(FhirContext.forR4Cached(), false);
 	private IMetaTagSorter myMetaTagSorter;
+	@Mock
+	private IResourceTypeCacheSvc myResourceTypeCacheSvc;
 
 	@AfterEach
 	public void afterEach() {
@@ -281,9 +285,12 @@ public class GiantTransactionPerfTest {
 		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
+		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
+
+		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 	}
 
 	@Test

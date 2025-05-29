@@ -103,6 +103,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 //		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		myStorageSettings.setAdvancedHSearchIndexing(false);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach

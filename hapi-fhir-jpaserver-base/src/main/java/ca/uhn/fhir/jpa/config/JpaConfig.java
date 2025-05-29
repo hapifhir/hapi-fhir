@@ -43,8 +43,10 @@ import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
+import ca.uhn.fhir.jpa.cache.ResourceTypeCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
@@ -62,6 +64,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -75,6 +78,7 @@ import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -249,6 +253,9 @@ public class JpaConfig {
 
 	@Autowired
 	public JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -617,6 +624,14 @@ public class JpaConfig {
 			@Autowired MemoryCacheService theMemoryCacheService) {
 		return new SearchParamIdentityCacheSvcImpl(
 				myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
+	}
+
+	@Bean
+	public IResourceTypeCacheSvc resourceTypeCacheSvc(
+			@Autowired IHapiTransactionService theHapiTransactionService,
+			@Autowired IResourceTypeDao theResourceTypeDao,
+			@Autowired MemoryCacheService theMemoryCacheService) {
+		return new ResourceTypeCacheSvcImpl(theHapiTransactionService, theResourceTypeDao, theMemoryCacheService);
 	}
 
 	/* **************************************************************** *
