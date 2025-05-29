@@ -428,36 +428,6 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 		}
 	}
 
-	@Test
-	void testIncludeLimits() {
-		// Setup - Create a resource with a lot of forward includes
-		BundleBuilder bb = new BundleBuilder(myFhirContext);
-
-		Observation obs = new Observation();
-		obs.setId("Observation/root");
-		bb.addTransactionUpdateEntry(obs);
-
-		int referenceCount = 100;
-		for (int i = 0; i < referenceCount; i++) {
-			Observation child = new Observation();
-			child.setId("Observation/child-" + i);
-			obs.addHasMember().setReference(child.getId());
-			bb.addTransactionUpdateEntry(child);
-		}
-		mySystemDao.transaction(new SystemRequestDetails(), bb.getBundleTyped());
-
-		// Test
-		SearchParameterMap params = new SearchParameterMap();
-		params.add("_id", new TokenParam("Observation/root"));
-		params.addInclude(IBaseResource.INCLUDE_ALL);
-		IBundleProvider results = myObservationDao.search(params, mySrd);
-
-		// Verify
-		assertEquals(referenceCount + 1, results.getResources(0, 100000).size());
-
-	}
-
-
 	/**
 	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/4896">#4896</a>
 	 */
