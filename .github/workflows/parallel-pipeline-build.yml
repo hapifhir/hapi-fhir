@@ -9,8 +9,6 @@ on:
     secrets:
       CODECOV_TOKEN:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   build-cache:
