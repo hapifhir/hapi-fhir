@@ -1,0 +1,17 @@
+name: 'Get Maven Project Version'
+description: 'Extracts Maven project version using help:evaluate'
+inputs: {}
+outputs:
+    version:
+        description: 'The Maven project version'
+        value: ${{ steps.extract.outputs.version }}
+runs:
+    using: 'composite'
+    steps:
+        - name: Extract version from Maven
+          id: extract
+          shell: bash
+          run: |
+              VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+              echo "VERSION=$VERSION"
+              echo "version=$VERSION" >> "$GITHUB_OUTPUT"
