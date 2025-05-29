@@ -7,6 +7,9 @@ jobs:
   normalize-version:
     runs-on: ubuntu-latest
 
+    outputs:
+      normalized_version: ${{ steps.normalize.outputs.normalized_version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
