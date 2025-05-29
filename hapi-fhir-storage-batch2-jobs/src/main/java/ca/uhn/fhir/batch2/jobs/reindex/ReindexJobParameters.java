@@ -31,6 +31,7 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	public static final String OPTIMIZE_STORAGE = "optimizeStorage";
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
+	public static final String INCLUDE_DELETED_RESOURCES = "includeDeletedResources";
 
 	@JsonProperty(
 			value = OPTIMIZE_STORAGE,
@@ -52,6 +53,13 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 			required = false)
 	@Nullable
 	private Boolean myOptimisticLock;
+
+	@JsonProperty(
+		value = INCLUDE_DELETED_RESOURCES,
+		defaultValue = ReindexParameters.INCLUDE_DELETED_RESOURCES_DEFAULT + "",
+		required = false)
+	@Nullable
+	private Boolean myIncludeDeletedResources;
 
 	public boolean getOptimisticLock() {
 		return defaultIfNull(myOptimisticLock, ReindexParameters.OPTIMISTIC_LOCK_DEFAULT);
@@ -78,6 +86,15 @@ public class ReindexJobParameters extends PartitionedUrlJobParameters {
 	public ReindexJobParameters setReindexSearchParameters(
 			ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		this.myReindexSearchParameters = theReindexSearchParameters;
+		return this;
+	}
+
+	public boolean getIncludeDeletedResources() {
+		return defaultIfNull(myIncludeDeletedResources, ReindexParameters.INCLUDE_DELETED_RESOURCES_DEFAULT);
+	}
+
+	public ReindexJobParameters setIncludeDeletedResources(boolean theIncludeDeletedResources) {
+		myIncludeDeletedResources = theIncludeDeletedResources;
 		return this;
 	}
 }

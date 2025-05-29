@@ -23,11 +23,13 @@ public class ReindexParameters {
 	public static final ReindexSearchParametersEnum REINDEX_SEARCH_PARAMETERS_DEFAULT = ReindexSearchParametersEnum.ALL;
 	public static final String REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING = "ALL";
 	public static final boolean OPTIMISTIC_LOCK_DEFAULT = true;
+	public static final boolean INCLUDE_DELETED_RESOURCES_DEFAULT = false;
 	public static final OptimizeStorageModeEnum OPTIMIZE_STORAGE_DEFAULT = OptimizeStorageModeEnum.NONE;
 	public static final String OPTIMIZE_STORAGE_DEFAULT_STRING = "NONE";
 	private ReindexSearchParametersEnum myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;
 	private OptimizeStorageModeEnum myOptimizeStorage = OPTIMIZE_STORAGE_DEFAULT;
 	private boolean myOptimisticLock = OPTIMISTIC_LOCK_DEFAULT;
+	private boolean myIncludeDeleteResources = INCLUDE_DELETED_RESOURCES_DEFAULT;
 
 	public boolean isOptimisticLock() {
 		return myOptimisticLock;
@@ -35,6 +37,15 @@ public class ReindexParameters {
 
 	public ReindexParameters setOptimisticLock(boolean theOptimisticLock) {
 		myOptimisticLock = theOptimisticLock;
+		return this;
+	}
+
+	public boolean isIncludeDeleteResources() {
+		return myIncludeDeleteResources;
+	}
+
+	public ReindexParameters setIncludeDeleteResources(boolean theIncludeDeleteResources) {
+		myIncludeDeleteResources = theIncludeDeleteResources;
 		return this;
 	}
 

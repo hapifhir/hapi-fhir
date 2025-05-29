@@ -1697,6 +1697,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			reindexOptimizeStorage(entity, theReindexParameters.getOptimizeStorage());
 		}
 
+		if (theReindexParameters.isIncludeDeleteResources()) {
+			//fix me.
+		}
+
 		return retVal;
 	}
 
