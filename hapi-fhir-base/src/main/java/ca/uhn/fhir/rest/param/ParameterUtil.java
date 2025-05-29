@@ -304,12 +304,15 @@ public class ParameterUtil {
 				if (i == theValue.length() - 1) {
 					b.append(next);
 				} else {
-					switch (theValue.charAt(i + 1)) {
+					char nextPlusOne = theValue.charAt(i + 1);
+					switch (nextPlusOne) {
 						case '$':
 						case ',':
 						case '|':
 						case '\\':
-							continue;
+							b.append(nextPlusOne);
+							i++;
+							break;
 						default:
 							b.append(next);
 					}
