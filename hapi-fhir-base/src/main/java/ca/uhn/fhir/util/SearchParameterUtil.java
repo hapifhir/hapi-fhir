@@ -278,7 +278,7 @@ public class SearchParameterUtil {
 	 */
 	public static String[] splitSearchParameterExpressions(String thePaths) {
 		if (!StringUtils.containsAny(thePaths, " or ", " |")) {
-			return new String[] { thePaths };
+			return new String[] {thePaths};
 		}
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
 		return topLevelOrExpressions.stream()
