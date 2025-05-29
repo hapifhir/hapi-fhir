@@ -63,7 +63,7 @@ jobs:
 
   run-parallel-build:
     needs: load-config-and-run
-    uses: ./.github/workflows/pr-pipeline-core.yml
+    uses: ./.github/workflows/parallel-pipeline-build.yml
     with:
       ignored_modules: ${{ needs.load-config-and-run.outputs.ignored_modules }}
     secrets:
