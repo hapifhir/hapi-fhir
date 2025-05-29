@@ -1,6 +1,10 @@
 ---
 type: fix
 issue: 6994
-title: "Fix incorrect behaviour of ParameterUtil.unescape(String).
+title: "Fix incorrect behaviour of `ParameterUtil.unescape(String)`.
   The function would 'eat' multiple consecutive occurrences of backslash.
-  Adding a test class to cover ParameterUtil.unescape() and ParameterUtil.escape()"
+  Adding a test class to cover `ParameterUtil.unescape()` and `ParameterUtil.escape()`.  Perviously it would have been 
+  impossible to search for an identifier with a value containing two consecutive backslashes such as: `abc\\\\def`. 
+  This search requires the following search parameter `identifier=abcd\\\\\\\\def`.  
+  The two consecutive escaped occurrences of `\\` would have previously been inadvertently unescaped to just one occurrence. 
+  "
