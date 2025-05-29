@@ -18,8 +18,10 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,13 +38,18 @@ public interface IPatchTests {
 
 	JpaStorageSettings getStorageSettings();
 
-	@Test
-	default void patch_primitiveWithPath_shouldWork() {
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Appointment.participant.actor.reference.where(startsWith('Patient/')).first()",
+		"Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"
+	})
+	default void patch_primitiveWithPath_shouldWork(String theFhirPath) {
 		// setup
 		SystemRequestDetails rd = new SystemRequestDetails();
 		IParser parser = getFhirContext().newJsonParser();
 		DaoMethodOutcome outcome;
 
+		String replacementText = "FIND_ME";
 		String patient1Id = "Patient/p1";
 		String patient2Id = "Patient/p2";
 		String appointmentId = "a1";
@@ -132,7 +139,7 @@ public interface IPatchTests {
 						},
 						{
 						  "name": "path",
-						  "valueString": "Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"
+						  "valueString": "FIND_ME"
 						},
 						{
 						  "name": "value",
@@ -143,6 +150,7 @@ public interface IPatchTests {
 				  ]
 				}
 				""";
+			patchStr = patchStr.replace(replacementText, theFhirPath);
 			patch = parser.parseResource(Parameters.class, patchStr);
 		}
 
@@ -162,6 +170,7 @@ public interface IPatchTests {
 
 		// verify get works
 		{
+			ourLog.info("GET for fhirpath {}", theFhirPath);
 			SystemRequestDetails details = new SystemRequestDetails();
 			Appointment result = appointmentDao.read(new IdType(appointmentId),
 				details);
@@ -183,13 +192,21 @@ public interface IPatchTests {
 			assertEquals(1, readParameters.getParameter().size());
 			assertTrue(readParameters.getParameter().get(0)
 				.getPart().stream().anyMatch(p -> {
-					return p.getName().equals("result") && p.getValue().toString().equals("Patient/p1");
+					if (p.getName().equals("result")) {
+						if (p.getValue().isPrimitive()) {
+							return p.getValue().toString().equals(patient1Id);
+						} else if (p.getValue() instanceof Reference r) {
+							return r.getReference().equals(patient1Id);
+						} else {
+							ourLog.info("Fhirtype {}", p.getValue().fhirType());
+						}
+					}
+					return false;
 				}));
 		}
 
-		// patch
-		// replace patient at
-		// "Appointment.participant.actor.reference.where(startsWith(%22Patient%2F%22)).first()"
+		// test patch
+		ourLog.info("Test PATCH");
 		outcome = appointmentDao.patch(
 			new IdType(appointmentId),
 			null,

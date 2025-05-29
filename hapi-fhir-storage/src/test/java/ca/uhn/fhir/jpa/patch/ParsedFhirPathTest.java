@@ -1,0 +1,135 @@
+package ca.uhn.fhir.jpa.patch;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+public class ParsedFhirPathTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParsedFhirPathTest.class);
+
+	@Test
+	public void parseSimple() {
+		// setup
+		String path = "Patient.name.family";
+
+		// test
+		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedPath);
+		assertEquals(path, parsedPath.getRawPath());
+
+		validateList(parsedPath, List.of("Patient", "name", "family"), node -> {});
+	}
+
+	@Test
+	public void parseSimpleNestedExpression() {
+		// setup
+		String path = "Appointment.participant.actor.reference.where(startsWith('Patient')).first()";
+
+		// test
+		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedPath);
+		assertEquals(path, parsedPath.getRawPath());
+
+		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
+		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
+			List<String> subList;
+			if (node.getValue().equals("where")) {
+				subList = List.of("startsWith");
+			} else if (node.getValue().equals("first")) {
+				subList = List.of();
+			} else if (node.getValue().equals("startsWith")) {
+				subList = List.of("'Patient'");
+			} else {
+				subList = List.of();
+			}
+
+			if (!subList.isEmpty()) {
+				assertTrue(node instanceof ParsedFhirPath.FhirPathFunction);
+				ParsedFhirPath.FhirPathFunction fn = (ParsedFhirPath.FhirPathFunction) node;
+				assertNotNull(fn.getContainedExp());
+
+				validateList(fn.getContainedExp(), subList, atomicRef.get());
+			}
+		};
+		atomicRef.set(supplier);
+
+		validateList(parsedPath,
+			List.of("Appointment", "participant", "actor", "reference", "where", "first"),
+			supplier);
+	}
+
+	@Test
+	public void parseComplexNestedExpression() {
+		// setup
+		String path = "Appointment.participant.actor.where(reference.startsWith('Patient')).first()";
+
+		// test
+		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedPath);
+		assertEquals(path, parsedPath.getRawPath());
+
+		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
+		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
+			List<String> subList;
+			if (node.getValue().equals("where")) {
+				subList = List.of("reference", "startsWith");
+			} else if (node.getValue().equals("first")) {
+				subList = List.of();
+			} else if (node.getValue().equals("startsWith")) {
+				subList = List.of("'Patient'");
+			} else {
+				subList = List.of();
+			}
+
+			if (!subList.isEmpty()) {
+				assertTrue(node instanceof ParsedFhirPath.FhirPathFunction);
+				ParsedFhirPath.FhirPathFunction fn = (ParsedFhirPath.FhirPathFunction) node;
+				assertNotNull(fn.getContainedExp());
+
+				validateList(fn.getContainedExp(), subList, atomicRef.get());
+			}
+		};
+		atomicRef.set(supplier);
+
+		validateList(parsedPath,
+			List.of("Appointment", "participant", "actor", "where", "first"),
+			supplier);
+	}
+
+	private void validateList(ParsedFhirPath theParsedPath, List<String> theParts, Consumer<ParsedFhirPath.FhirPathNode> thePerNodeAction) {
+		ParsedFhirPath.FhirPathNode current = null;
+		ParsedFhirPath.FhirPathNode previous = null;
+
+		current = theParsedPath.getHead();
+		for (String part : theParts) {
+			assertNotNull(current, "Next value is null when expected " + part);
+			assertEquals(previous, current.getPrevious(), "Previous node does not match");
+			assertEquals(part, current.getValue());
+
+			// for additional validation on the element
+			thePerNodeAction.accept(current);
+
+			// update current to next
+			previous = current;
+			current = current.getNext();
+		}
+
+		// verify that there is no next
+		assertNull(current);
+	}
+
+}

@@ -26,7 +26,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -41,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -172,7 +170,6 @@ public class FhirPatch {
 	}
 
 	private void handleDeleteOperation(IBaseResource theResource, IBase theParameters) {
-
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
@@ -763,160 +760,5 @@ public class FhirPatch {
 			return ((IIdType) theOldPrimitive).getIdPart();
 		}
 		return theOldPrimitive.getValueAsString();
-	}
-
-	private static class ChildDefinition {
-		private final BaseRuntimeChildDefinition myChildDef;
-		private final BaseRuntimeElementDefinition<?> myChildElement;
-
-		private BaseRuntimeChildDefinition myParentDef;
-
-		public ChildDefinition(
-				BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
-			this.myChildDef = theChildDef;
-			this.myChildElement = theChildElement;
-		}
-
-		public BaseRuntimeChildDefinition getChildDef() {
-			return myChildDef;
-		}
-
-		public BaseRuntimeChildDefinition getUseableChildDef() {
-			if (hasParentDef()) {
-				return myParentDef;
-			}
-			return myChildDef;
-		}
-
-		public void setParentDef(BaseRuntimeChildDefinition theParentDef) {
-			myParentDef = theParentDef;
-		}
-
-		public boolean hasParentDef() {
-			return myParentDef != null;
-		}
-
-		public boolean hasChildDef() {
-			return myChildDef != null;
-		}
-
-		public boolean isPrimitive() {
-			return myChildDef == null;
-		}
-
-		public BaseRuntimeElementDefinition<?> getChildElement() {
-			return myChildElement;
-		}
-
-//		public List<IBase> getExistingValues(IBase theContainingElement) {
-//			List<IBase> existing = new ArrayList<>();
-//			if (hasChildDef()) {
-//					existing.addAll(
-//						getChildDef().getAccessor().getValues(theContainingElement)
-//					);
-//			} else {
-//				myChildElement.getChildType()
-//				existing.add()
-//			}
-//		}
-	}
-
-	/**
-	 * This class helps parse a FHIR path into its component parts for easier patch operation processing.
-	 * It has 3 components:
-	 *  - The last element name, which is the last element in the path (not including any list index or filter)
-	 *  - The containing path, which is the prefix of the path up to the last element
-	 *  - A flag indicating whether the path has a filter or index on the last element of the path, which indicates
-	 *  that the path we are dealing is probably for a list element.
-	 * Examples:
-	 * 1. For path "Patient.identifier[2].system",
-	 *   - the lastElementName is "system",
-	 *   - the containingPath is "Patient.identifier[2]",
-	 *   - and endsWithAFilterOrIndex flag is false
-	 *
-	 *  2. For path "Patient.identifier[2]" or for path "Patient.identifier.where('system'='sys1')"
-	 *  - the lastElementName is "identifier",
-	 *  - the containingPath is "Patient",
-	 *  - and the endsWithAFilterOrIndex is true
-	 */
-	protected static class ParsedPath {
-		private final String myLastElementName;
-		private final String myContainingPath;
-		private final boolean myEndsWithAFilterOrIndex;
-
-		public ParsedPath(String theLastElementName, String theContainingPath, boolean theEndsWithAFilterOrIndex) {
-			myLastElementName = theLastElementName;
-			myContainingPath = theContainingPath;
-			myEndsWithAFilterOrIndex = theEndsWithAFilterOrIndex;
-		}
-
-		/**
-		 * returns the last element of the path
-		 */
-		public String getLastElementName() {
-			return myLastElementName;
-		}
-
-		/**
-		 * Returns the prefix of the path up to the last FHIR resource element
-		 */
-		public String getContainingPath() {
-			return myContainingPath;
-		}
-
-		public String getFinalPathPart() {
-			if (myContainingPath.contains(".")) {
-				return myContainingPath.substring(myContainingPath.lastIndexOf(".") + 1);
-			}
-			return myContainingPath;
-		}
-
-		public String getParentPath() {
-			if (myContainingPath.contains(".")) {
-				return myContainingPath.substring(0, myContainingPath.lastIndexOf("."));
-			} else {
-				// no parent path
-				return myContainingPath;
-			}
-		}
-
-		/**
-		 * Returns whether the path has a filter or index on the last element of the path, which indicates
-		 * that the path we are dealing is probably a list element.
-		 */
-		public boolean getEndsWithAFilterOrIndex() {
-			return myEndsWithAFilterOrIndex;
-		}
-
-		public static ParsedPath parse(String path) {
-			String containingPath;
-			String elementName;
-			boolean endsWithAFilterOrIndex = false;
-
-			if (path.endsWith(")")) {
-				// This is probably a filter, so we're probably dealing with a list
-				endsWithAFilterOrIndex = true;
-				int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
-				int lastDotIndex = path.lastIndexOf(
-						'.',
-						filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
-				int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
-				containingPath = path.substring(0, secondLastDotIndex);
-				elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);
-			} else if (path.endsWith("]")) {
-				// This is almost definitely a list
-				endsWithAFilterOrIndex = true;
-				int openBracketIndex = path.lastIndexOf('[');
-				int lastDotIndex = path.lastIndexOf('.', openBracketIndex);
-				containingPath = path.substring(0, lastDotIndex);
-				elementName = path.substring(lastDotIndex + 1, openBracketIndex);
-			} else {
-				int lastDot = path.lastIndexOf(".");
-				containingPath = path.substring(0, lastDot);
-				elementName = path.substring(lastDot + 1);
-			}
-
-			return new ParsedPath(elementName, containingPath, endsWithAFilterOrIndex);
-		}
 	}
 }

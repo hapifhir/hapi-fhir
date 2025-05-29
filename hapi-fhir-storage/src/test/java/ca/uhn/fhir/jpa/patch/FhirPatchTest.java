@@ -6,7 +6,8 @@ import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Parameters;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.function.Predicate;
 
@@ -18,6 +19,8 @@ public class FhirPatchTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
+	private final IParser myParser = myFhirContext.newJsonParser();
+
 	private FhirPatch myPatch;
 
 	@BeforeEach
@@ -25,12 +28,17 @@ public class FhirPatchTest {
 		myPatch = new FhirPatch(myFhirContext);
 	}
 
-	@Test
-	public void patchApply_withPrimitiveTarget_shouldWork() {
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"Appointment.participant.actor.reference.where(startsWith('Patient/')).first()",
+		"Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"
+	})
+	public void patchApply_withPrimitiveTarget_shouldWork(String theFhirPath) {
 		// setup
 		IParser parser = myFhirContext.newJsonParser();
 		String originalPatientId = "Patient/p1";
 		String replacedPatientId = "Patient/p2";
+		String replacementText = "FIND_ME";
 
 		Appointment appointment;
 		Parameters parameters;
@@ -67,7 +75,7 @@ public class FhirPatchTest {
 						},
 						{
 						  "name": "path",
-						  "valueString": "Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"
+						  "valueString": "FIND_ME"
 						},
 						{
 						  "name": "value",
@@ -78,6 +86,7 @@ public class FhirPatchTest {
 				  ]
 				}
 				""";
+			patchStr = patchStr.replace(replacementText, theFhirPath);
 			parameters = parser.parseResource(Parameters.class, patchStr);
 		}
 
@@ -99,6 +108,7 @@ public class FhirPatchTest {
 		myPatch.apply(appointment, parameters);
 
 		// verify
+		ourLog.trace(myParser.encodeResourceToString(appointment));
 		// patch should replace original patient id with the replacement patient id
 		assertTrue(appointment.getParticipant()
 			.stream().anyMatch(newPatientPred));
