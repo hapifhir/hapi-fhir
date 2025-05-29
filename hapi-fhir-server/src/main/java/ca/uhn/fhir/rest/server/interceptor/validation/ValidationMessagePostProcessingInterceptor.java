@@ -86,16 +86,16 @@ public class ValidationMessagePostProcessingInterceptor {
 		return new ValidationResult(theResult.getContext(), newMessages);
 	}
 
-	private int logResult(SingleValidationMessage inputMessage,
-						  int msgIdx,
-						  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-						  Optional<Rule> firstMatchedDefinitionOpt) {
+	private int logResult(
+			SingleValidationMessage inputMessage,
+			int msgIdx,
+			@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<Rule> firstMatchedDefinitionOpt) {
 		ourLog.atDebug()
 				.setMessage("input message position: {} - matching result: {} - input messageId: {}")
 				.addArgument(++msgIdx)
 				.addArgument(firstMatchedDefinitionOpt
-					.map(theRule -> System.lineSeparator() + "   matched rule: " + theRule)
-					.orElse("no rule matched"))
+						.map(theRule -> System.lineSeparator() + "   matched rule: " + theRule)
+						.orElse("no rule matched"))
 				.addArgument(inputMessage.getMessageId())
 				.log();
 		return msgIdx;
