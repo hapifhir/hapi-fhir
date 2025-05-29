@@ -1,38 +1,68 @@
 name: HAPI Release
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-    normalize-version:
-        runs-on: ubuntu-latest
+  normalize-version:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            - name: Set up JDK
-              uses: actions/setup-java@v4
-              with:
-                  distribution: 'temurin'
-                  java-version: '17'
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-            - name: Get Maven version
-              id: get_version
-              uses: ./.github/actions/get-project-version
+      - name: Get Maven version
+        id: get_version
+        uses: ./.github/actions/get-project-version
 
-            - name: Normalize Maven version
-              id: normalize
-              uses: ./.github/actions/normalize-project-version
-              with:
-                  version: ${{ steps.get_version.outputs.version }}
+      - name: Normalize Maven version
+        id: normalize
+        uses: ./.github/actions/normalize-project-version
+        with:
+          version: ${{ steps.get_version.outputs.version }}
 
-            - name: Print versions
-              run: |
-                  echo "Original VERSION = ${{ steps.get_version.outputs.version }}"
-                  echo "Normalized VERSION = ${{ steps.normalize.outputs.normalized_version }}"
+      - name: Print versions
+        run: |
+          echo "Original VERSION = ${{ steps.get_version.outputs.version }}"
+          echo "Normalized VERSION = ${{ steps.normalize.outputs.normalized_version }}"
 
-            - name: Check if Git tag already exists
-              uses: ./.github/actions/check-git-tag-exists
-              with:
-                  version: ${{ steps.normalize.outputs.normalized_version }}
+      - name: Check if Git tag already exists
+        uses: ./.github/actions/check-git-tag-exists
+        with:
+          version: ${{ steps.normalize.outputs.normalized_version }}
+
+  load-config-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Load ignored modules from config
+        id: load_config
+        run: |
+          IGNORED=$(yq '.ignored_modules' .github/config/ignored-modules.yml | tr -d '"')
+          echo "ignored_modules=$IGNORED" >> $GITHUB_OUTPUT
+
+    outputs:
+      ignored_modules: ${{ steps.load_config.outputs.ignored_modules }}
+
+  run-parallel-build:
+    needs: load-config-and-run
+    uses: ./.github/workflows/internal/pr-pipeline-core.yml
+    with:
+      ignored_modules: ${{ needs.load-config-and-run.outputs.ignored_modules }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

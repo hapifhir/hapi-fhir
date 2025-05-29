@@ -1,33 +1,33 @@
 name: "Normalize Project Version"
 description: "Normalizes a Maven project version by stripping -PRE* and -SNAPSHOT"
 inputs:
-    version:
-        description: "The version from the pom.xml"
-        required: true
+  version:
+    description: "The version from the pom.xml"
+    required: true
 outputs:
-    normalized_version:
-        description: "The normalized release version"
-        value: ${{ steps.normalize.outputs.normalized_version }}
+  normalized_version:
+    description: "The normalized release version"
+    value: ${{ steps.normalize.outputs.normalized_version }}
 runs:
-    using: "composite"
-    steps:
-        - id: normalize
-          shell: bash
-          run: |
-              echo "Original project version: ${{ inputs.version }}"
-              VERSION_FROM_POM="${{ inputs.version }}"
-              BRANCH_NAME="${GITHUB_REF##*/}"
-              
-              # First, strip "-SNAPSHOT"
-              STRIPPED_VERSION="${VERSION_FROM_POM%-SNAPSHOT}"
-              
-              # Then, if on master, strip "-PRE*"
-              if [[ "$BRANCH_NAME" == "master" ]]; then
-                echo "On master branch. Stripping '-PRE*' from version..."
-                NORMALIZED_VERSION="${STRIPPED_VERSION%-PRE*}"
-              else
-                NORMALIZED_VERSION="$STRIPPED_VERSION"
-              fi
-              
-              echo "Normalized version: $NORMALIZED_VERSION"
-              echo "normalized_version=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
+  using: "composite"
+  steps:
+    - id: normalize
+      shell: bash
+      run: |
+        echo "Original project version: ${{ inputs.version }}"
+        VERSION_FROM_POM="${{ inputs.version }}"
+        BRANCH_NAME="${GITHUB_REF##*/}"
+        
+        # First, strip "-SNAPSHOT"
+        STRIPPED_VERSION="${VERSION_FROM_POM%-SNAPSHOT}"
+        
+        # Then, if on master, strip "-PRE*"
+        if [[ "$BRANCH_NAME" == "master" ]]; then
+          echo "On master branch. Stripping '-PRE*' from version..."
+          NORMALIZED_VERSION="${STRIPPED_VERSION%-PRE*}"
+        else
+          NORMALIZED_VERSION="$STRIPPED_VERSION"
+        fi
+        
+        echo "Normalized version: $NORMALIZED_VERSION"
+        echo "normalized_version=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
