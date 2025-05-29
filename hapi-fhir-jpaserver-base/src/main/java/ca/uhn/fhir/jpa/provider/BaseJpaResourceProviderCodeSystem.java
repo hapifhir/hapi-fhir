@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -144,7 +145,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 	public IBaseParameters validateCode(
 			HttpServletRequest theServletRequest,
 			@IdParam(optional = true) IIdType theId,
-			@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+			@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
 			@OperationParam(name = "version", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theVersion,
 			@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theCode,
 			@OperationParam(name = "display", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
@@ -160,31 +161,34 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			// entirely
 			// If a Remote Terminology Server has been configured, use it
 			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue())
-						? theCodeSystemUrl.getValueAsString()
-						: null;
 
-				if (theCoding != null) {
-					if (isNotBlank(theCoding.getSystem())) {
-						if (codeSystemUrl != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
-							throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
-									+ "' does not equal param url '" + theCodeSystemUrl
-									+ "'. Unable to validate-code.");
-						}
-						codeSystemUrl = theCoding.getSystem();
-						String code = theCoding.getCode();
-						String display = theCoding.getDisplay();
+				String code;
+				String display;
 
-						result = validateCodeWithTerminologyService(codeSystemUrl, code, display)
-								.orElseGet(supplyUnableToValidateResult(codeSystemUrl, code));
+				String url = getStringFromPrimitiveType(theUrl);
+
+				if (theCoding != null && isNotBlank(theCoding.getSystem())) {
+					if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
+						throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
+								+ "' does not equal param url '" + theUrl
+								+ "'. Unable to validate-code.");
 					}
+					url = theCoding.getSystem();
+					code = theCoding.getCode();
+					display = theCoding.getDisplay();
+				} else {
+					code = getStringFromPrimitiveType(theCode);
+					display = getStringFromPrimitiveType(theDisplay);
 				}
+
+				result = validateCodeWithTerminologyService(url, code, display)
+						.orElseGet(supplyUnableToValidateResult(url, code));
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 				result = dao.validateCode(
 						theId,
-						theCodeSystemUrl,
+						theUrl,
 						theVersion,
 						theCode,
 						theDisplay,
@@ -192,10 +196,16 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 						theCodeableConcept,
 						theRequestDetails);
 			}
+
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	private static @Nullable String getStringFromPrimitiveType(IPrimitiveType<String> thePrimitiveString) {
+		return (thePrimitiveString != null && thePrimitiveString.hasValue()) ?
+			thePrimitiveString.getValueAsString() : null;
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
