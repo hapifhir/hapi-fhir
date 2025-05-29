@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -18,12 +19,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ValidationPostProcessingRuleJson implements IModelJson {
 
+	@JsonCreator
 	public ValidationPostProcessingRuleJson(
-			String theMsgId,
-			String theMsgRegex,
-			Collection<ResultSeverityEnum> theOldSeverities,
-			Collection<String> theExtraMessageFragments,
-			ResultSeverityEnum theNewSeverity) {
+			@JsonProperty("msgId") String theMsgId,
+			@JsonProperty("msgRegex") String theMsgRegex,
+			@JsonProperty(value = "oldSeverities", required = true) Collection<ResultSeverityEnum> theOldSeverities,
+			@JsonProperty("messageFragments") Collection<String> theExtraMessageFragments,
+			@JsonProperty(value = "newSeverity", required = true) ResultSeverityEnum theNewSeverity) {
 
 		validateParams(theMsgId, theMsgRegex, theNewSeverity);
 

@@ -72,14 +72,10 @@ public class ValidationMessagePostProcessingInterceptor {
 		List<SingleValidationMessage> newMessages =
 				new ArrayList<>(theResult.getMessages().size());
 
+		int msgIdx = 0;
 		for (SingleValidationMessage inputMessage : theResult.getMessages()) {
 			Optional<Rule> firstMatchedDefinitionOpt = findFirstMatchedDefinition(inputMessage);
-			ourLog.atDebug()
-					.setMessage("matching result: {}")
-					.addArgument(firstMatchedDefinitionOpt
-							.map(theRule -> "matched rule: " + theRule)
-							.orElse("no rule matched"))
-					.log();
+			msgIdx = logResult(inputMessage, msgIdx, firstMatchedDefinitionOpt);
 
 			firstMatchedDefinitionOpt.ifPresent(
 					theMatchedRule -> inputMessage.setSeverity(theMatchedRule.newSeverity()));
@@ -88,6 +84,21 @@ public class ValidationMessagePostProcessingInterceptor {
 		}
 
 		return new ValidationResult(theResult.getContext(), newMessages);
+	}
+
+	private int logResult(SingleValidationMessage inputMessage,
+						  int msgIdx,
+						  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+						  Optional<Rule> firstMatchedDefinitionOpt) {
+		ourLog.atDebug()
+				.setMessage("input message position: {} - matching result: {} - input messageId: {}")
+				.addArgument(++msgIdx)
+				.addArgument(firstMatchedDefinitionOpt
+					.map(theRule -> System.lineSeparator() + "   matched rule: " + theRule)
+					.orElse("no rule matched"))
+				.addArgument(inputMessage.getMessageId())
+				.log();
+		return msgIdx;
 	}
 
 	private Optional<Rule> findFirstMatchedDefinition(SingleValidationMessage theMessage) {
