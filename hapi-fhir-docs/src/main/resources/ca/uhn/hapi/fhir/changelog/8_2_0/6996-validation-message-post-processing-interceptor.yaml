@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6996
+title: "A new `ValidationMessagePostProcessingInterceptor` has been added to allow modification of 
+    validation messages severity according to rules specified using `ValidationPostProcessingRuleJson`."
