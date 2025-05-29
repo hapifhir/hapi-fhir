@@ -1,0 +1,29 @@
+name: "Normalize Project Version"
+description: "Normalizes a Maven project version by stripping -PRE* if on master branch"
+inputs:
+    version:
+        description: "The version from the pom.xml"
+        required: true
+outputs:
+    normalized_version:
+        description: "The normalized release version"
+        value: ${{ steps.normalize.outputs.normalized_version }}
+runs:
+    using: "composite"
+    steps:
+        - id: normalize
+          shell: bash
+          run: |
+              echo "Current project version: ${{ inputs.version }}"
+              BRANCH_NAME="${GITHUB_REF##*/}"
+              VERSION_FROM_POM="${{ inputs.version }}"
+              
+              if [[ "$BRANCH_NAME" == "master" ]]; then
+                echo "On master branch. Stripping '-PRE*' from version..."
+                NORMALIZED_VERSION="${VERSION_FROM_POM%-PRE*}"
+              else
+                NORMALIZED_VERSION="$VERSION_FROM_POM"
+              fi
+              
+              echo "Normalized version: $NORMALIZED_VERSION"
+              echo "normalized_version=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
