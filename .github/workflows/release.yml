@@ -31,3 +31,8 @@ jobs:
               run: |
                   echo "Original VERSION = ${{ steps.get_version.outputs.version }}"
                   echo "Normalized VERSION = ${{ steps.normalize.outputs.normalized_version }}"
+
+            - name: Check if Git tag already exists
+              uses: ./.github/actions/check-git-tag-exists
+              with:
+                  version: ${{ steps.normalize.outputs.normalized_version }}
