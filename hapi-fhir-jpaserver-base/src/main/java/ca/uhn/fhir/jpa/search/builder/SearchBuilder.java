@@ -1832,7 +1832,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						pidsToInclude.add(pid);
 					}
 				}
-				myEntityManager.clear();
+				//				myEntityManager.clear();
 			}
 		}
 	}
@@ -1965,7 +1965,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 			}
-			myEntityManager.clear();
+			//			myEntityManager.clear();
 
 			if (canonicalUrls != null) {
 				String message =
