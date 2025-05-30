@@ -11,7 +11,7 @@ import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
 
 /**
  * This class creates and contains a parsed fhirpath.
- *
+ * -
  * It does not *validate* said fhir path (it might not be a valid path at all).
  * It is only used for parsing convenience.
  */
@@ -34,20 +34,21 @@ public class ParsedFhirPath {
 		/**
 		 * The value of this node.
 		 */
-		private final String myValue;
+		private String myValue;
 
 		private int myListIndex = -1;
 
 		public FhirPathNode(String theValue) {
 			myValue = theValue;
 
-			int open = myValue.indexOf("[");
+			int open = theValue.indexOf("[");
 			if (open != -1) {
 				int close = RandomTextUtils.findMatchingClosingBrace(open, myValue, '[', ']');
 				if (close != -1) {
-					String val = myValue.substring(open + 1, close);
+					String val = theValue.substring(open + 1, close);
 					try {
 						myListIndex = Integer.parseInt(val);
+						myValue = theValue.substring(0, open);
 					} catch (NumberFormatException ex) {
 						// TODO - not a number, but an expression
 						/*
@@ -62,16 +63,7 @@ public class ParsedFhirPath {
 		}
 
 		public String getValue() {
-			return getValue(false);
-		}
-
-		public String getValue(boolean theNodeNameOnly) {
-			String val = myValue;
-			if (theNodeNameOnly && hasListIndex()) {
-				int endIndex = val.indexOf("[");
-				val = val.substring(0, endIndex);
-			}
-			return val;
+			return myValue;
 		}
 
 		public boolean hasListIndex() {
@@ -279,7 +271,7 @@ public class ParsedFhirPath {
 			ourLog.error("No non-function nodes in path!");
 			return null;
 		}
-		return node.getValue(true);
+		return node.getValue();
 	}
 
 	/**

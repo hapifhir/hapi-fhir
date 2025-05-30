@@ -141,7 +141,7 @@ public class ParsedFhirPathTest {
 		for (String part : theParts) {
 			assertNotNull(current, "Next value is null when expected " + part);
 			assertEquals(previous, current.getPrevious(), "Previous node does not match");
-			assertEquals(part, current.getValue(true));
+			assertEquals(part, current.getValue());
 
 			// for additional validation on the element
 			thePerNodeAction.accept(current);
