@@ -138,7 +138,7 @@ public class ValidationMessagePostProcessingInterceptor {
 		public static Rule of(ValidationPostProcessingRuleJson theParamsDefinitionJson) {
 			return new Rule(
 					theParamsDefinitionJson.getMsgId(),
-					theParamsDefinitionJson.getMsgRegexPattern(),
+					theParamsDefinitionJson.getMsgIdRegexPattern(),
 					theParamsDefinitionJson.getOldSeverities(),
 					theParamsDefinitionJson.getMessageFragments(),
 					theParamsDefinitionJson.getNewSeverity());
