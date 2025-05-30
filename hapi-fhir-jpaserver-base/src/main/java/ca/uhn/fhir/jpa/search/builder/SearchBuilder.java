@@ -77,6 +77,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -104,6 +105,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -126,6 +128,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -136,6 +140,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1301,7 +1306,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return switch (myStorageSettings.getTagStorageMode()) {
 			case VERSIONED -> getPidToTagMapVersioned(theHistoryTables);
 			case NON_VERSIONED -> getPidToTagMapUnversioned(theHistoryTables);
-			default -> Map.of();
+			case INLINE -> Map.of();
 		};
 	}
 
@@ -1588,7 +1593,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							findPartitionIdFieldName,
 							findVersionFieldName,
 							searchPidFieldName,
-							searchPartitionIdFieldName,
 							reverseMode,
 							nextRoundMatches,
 							entityManager,
@@ -1665,7 +1669,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			String findPartitionFieldName,
 			String findVersionFieldName,
 			String searchPidFieldName,
-			String searchPartitionFieldName,
 			boolean reverseMode,
 			List<JpaPid> nextRoundMatches,
 			EntityManager entityManager,
@@ -1764,9 +1767,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Case 2:
 			Pair<String, Map<String, Object>> canonicalQuery =
-					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode, theRequest);
+					buildCanonicalUrlQuery(findVersionFieldName, targetResourceTypes, reverseMode, theRequest, param);
 
-			String sql = localReferenceQuery + "UNION " + canonicalQuery.getLeft();
+			String sql = localReferenceQuery.toString();
+			if (canonicalQuery != null) {
+				sql = localReferenceQuery + "UNION " + canonicalQuery.getLeft();
+			}
 
 			Map<String, Object> limitParams = new HashMap<>();
 			if (maxCount != null) {
@@ -1801,13 +1807,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							nextPartition.iterator().next().getPartitionId());
 				}
 				localReferenceQueryParams.forEach(q::setParameter);
-				canonicalQuery.getRight().forEach(q::setParameter);
+				if (canonicalQuery != null) {
+					canonicalQuery.getRight().forEach(q::setParameter);
+				}
 				limitParams.forEach(q::setParameter);
 
-				@SuppressWarnings("unchecked")
-				List<Tuple> results = q.getResultList();
-				for (Tuple result : results) {
-					if (result != null) {
+				try (ScrollableResultsIterator<Tuple> iter = new ScrollableResultsIterator<>(toScrollableResults(q))) {
+					Tuple result;
+					while (iter.hasNext()) {
+						result = iter.next();
 						Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
 						Long resourceVersion = null;
 						if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
@@ -1824,6 +1832,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						pidsToInclude.add(pid);
 					}
 				}
+				//				myEntityManager.clear();
 			}
 		}
 	}
@@ -1918,40 +1927,45 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (hasDesiredResourceTypes) {
 				q.setParameter("desired_target_resource_types", desiredResourceTypes);
 			}
-			List<?> results = q.getResultList();
 			Set<String> canonicalUrls = null;
-			for (Object nextRow : results) {
-				if (nextRow == null) {
-					// This can happen if there are outgoing references which are canonical or point to
-					// other servers
-					continue;
-				}
 
-				Long version = null;
-				Long resourceId = (Long) ((Object[]) nextRow)[0];
-				String resourceType = (String) ((Object[]) nextRow)[1];
-				String resourceCanonicalUrl = (String) ((Object[]) nextRow)[2];
-				Integer partitionId = null;
-				int offset = 0;
-				if (findVersionFieldName != null) {
-					version = (Long) ((Object[]) nextRow)[3];
-					offset++;
-				}
-				if (myPartitionSettings.isDatabasePartitionMode()) {
-					partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
-				}
-
-				if (resourceId != null) {
-					JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
-					pid.setPartitionId(partitionId);
-					pidsToInclude.add(pid);
-				} else if (resourceCanonicalUrl != null) {
-					if (canonicalUrls == null) {
-						canonicalUrls = new HashSet<>();
+			try (ScrollableResultsIterator<Object[]> iter = new ScrollableResultsIterator<>(toScrollableResults(q))) {
+				Object[] nextRow;
+				while (iter.hasNext()) {
+					nextRow = iter.next();
+					if (nextRow == null) {
+						// This can happen if there are outgoing references which are canonical or point to
+						// other servers
+						continue;
 					}
-					canonicalUrls.add(resourceCanonicalUrl);
+
+					Long version = null;
+					Long resourceId = (Long) ((Object[]) nextRow)[0];
+					String resourceType = (String) ((Object[]) nextRow)[1];
+					String resourceCanonicalUrl = (String) ((Object[]) nextRow)[2];
+					Integer partitionId = null;
+					int offset = 0;
+					if (findVersionFieldName != null) {
+						version = (Long) ((Object[]) nextRow)[3];
+						offset++;
+					}
+					if (myPartitionSettings.isDatabasePartitionMode()) {
+						partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
+					}
+
+					if (resourceId != null) {
+						JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
+						pid.setPartitionId(partitionId);
+						pidsToInclude.add(pid);
+					} else if (resourceCanonicalUrl != null) {
+						if (canonicalUrls == null) {
+							canonicalUrls = new HashSet<>();
+						}
+						canonicalUrls.add(resourceCanonicalUrl);
+					}
 				}
 			}
+			//			myEntityManager.clear();
 
 			if (canonicalUrls != null) {
 				String message =
@@ -1972,7 +1986,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		CanonicalUrlTargets canonicalUrlTargets =
 				calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
-				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.myHashIdentityValues.size());
+				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.hashIdentityValues.size());
 
 		sqlBuilder = new StringBuilder();
 		sqlBuilder.append("SELECT ");
@@ -1989,7 +2003,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		for (Collection<String> nextCanonicalUrlList : canonicalUrlPartitions) {
 			TypedQuery<Object[]> canonicalResIdQuery = theEntityManager.createQuery(canonicalResSql, Object[].class);
-			canonicalResIdQuery.setParameter("hash_identity", canonicalUrlTargets.myHashIdentityValues);
+			canonicalResIdQuery.setParameter("hash_identity", canonicalUrlTargets.hashIdentityValues);
 			canonicalResIdQuery.setParameter("uris", nextCanonicalUrlList);
 			List<Object[]> results = canonicalResIdQuery.getResultList();
 			for (var next : results) {
@@ -2042,12 +2056,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return targetResourceTypes;
 	}
 
-	@Nonnull
+	@Nullable
 	private Pair<String, Map<String, Object>> buildCanonicalUrlQuery(
 			String theVersionFieldName,
 			Set<String> theTargetResourceTypes,
 			boolean theReverse,
-			RequestDetails theRequest) {
+			RequestDetails theRequest,
+			RuntimeSearchParam theParam) {
+
+		String[] searchParameterPaths = SearchParameterUtil.splitSearchParameterExpressions(theParam.getPath());
+
+		// If we know for sure that none of the paths involved in this SearchParameter could
+		// be indexing a canonical
+		if (Arrays.stream(searchParameterPaths)
+				.noneMatch(t -> referencePathCouldPotentiallyReferenceCanonicalElement(t, theParam))) {
+			return null;
+		}
+
 		String fieldsToLoadFromSpidxUriTable = theReverse ? "r.src_resource_id" : "rUri.res_id";
 		if (theVersionFieldName != null) {
 			// canonical-uri references aren't versioned, but we need to match the column count for the UNION
@@ -2079,16 +2104,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		canonicalUrlQuery.append("JOIN hfj_spidx_uri rUri ON (");
 		if (myPartitionSettings.isDatabasePartitionMode()) {
 			canonicalUrlQuery.append("rUri.partition_id IN (:uri_partition_id) AND ");
-			canonicalUriQueryParams.put("uri_partition_id", canonicalUrlTargets.myPartitionIds);
+			canonicalUriQueryParams.put("uri_partition_id", canonicalUrlTargets.partitionIds);
 		}
-		if (canonicalUrlTargets.myHashIdentityValues.size() == 1) {
+		if (canonicalUrlTargets.hashIdentityValues.size() == 1) {
 			canonicalUrlQuery.append("rUri.hash_identity = :uri_identity_hash");
 			canonicalUriQueryParams.put(
 					"uri_identity_hash",
-					canonicalUrlTargets.myHashIdentityValues.iterator().next());
+					canonicalUrlTargets.hashIdentityValues.iterator().next());
 		} else {
 			canonicalUrlQuery.append("rUri.hash_identity in (:uri_identity_hashes)");
-			canonicalUriQueryParams.put("uri_identity_hashes", canonicalUrlTargets.myHashIdentityValues);
+			canonicalUriQueryParams.put("uri_identity_hashes", canonicalUrlTargets.hashIdentityValues);
 		}
 		canonicalUrlQuery.append(" AND r.target_resource_url = rUri.sp_uri");
 		canonicalUrlQuery.append(")");
@@ -2139,47 +2164,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						.values()
 						.stream()
 						.filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE))
-						.collect(Collectors.toList())) {
+						.toList()) {
 
-					// If the reference points to a Reference (ie not a canonical or CanonicalReference)
-					// then it doesn't matter here anyhow. The logic here only works for elements at the
-					// root level of the document (e.g. QuestionnaireResponse.subject or
-					// QuestionnaireResponse.subject.where(...)) but this is just an optimization
-					// anyhow.
-					if (next.getPath().startsWith(myResourceName + ".")) {
-						String elementName =
-								next.getPath().substring(next.getPath().indexOf('.') + 1);
-						int secondDotIndex = elementName.indexOf('.');
-						if (secondDotIndex != -1) {
-							elementName = elementName.substring(0, secondDotIndex);
+					String paths = next.getPath();
+					for (String path : SearchParameterUtil.splitSearchParameterExpressions(paths)) {
+
+						if (!referencePathCouldPotentiallyReferenceCanonicalElement(path, next)) {
+							continue;
 						}
-						BaseRuntimeChildDefinition child =
-								myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
-						if (child != null) {
-							BaseRuntimeElementDefinition<?> childDef = child.getChildByName(elementName);
-							if (childDef != null) {
-								if (childDef.getName().equals("Reference")) {
-									continue;
+
+						if (!next.getTargets().isEmpty()) {
+							// For each reference parameter on the resource type we're searching for,
+							// add all the potential target types to the list of possible target
+							// resource types we can look up.
+							for (var nextTarget : next.getTargets()) {
+								if (possibleTypes.contains(nextTarget)) {
+									targetResourceTypes.add(nextTarget);
 								}
 							}
+						} else {
+							// If we have any references that don't define any target types, then
+							// we need to assume that all enabled resource types are possible target
+							// types
+							targetResourceTypes.addAll(possibleTypes);
+							break;
 						}
-					}
-
-					if (!next.getTargets().isEmpty()) {
-						// For each reference parameter on the resource type we're searching for,
-						// add all the potential target types to the list of possible target
-						// resource types we can look up.
-						for (var nextTarget : next.getTargets()) {
-							if (possibleTypes.contains(nextTarget)) {
-								targetResourceTypes.add(nextTarget);
-							}
-						}
-					} else {
-						// If we have any references that don't define any target types, then
-						// we need to assume that all enabled resource types are possible target
-						// types
-						targetResourceTypes.addAll(possibleTypes);
-						break;
 					}
 				}
 			}
@@ -2209,19 +2218,65 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
 	}
 
-	static class CanonicalUrlTargets {
+	/**
+	 * Just because a SearchParameter is a Reference SP, doesn't necessarily mean that it
+	 * can reference a canonical. So first we try to rule out the SP based on the path it
+	 * contains. This matters because a SearchParameter of type Reference can point to
+	 * a canonical element (in which case we need to _include any canonical targets). Or it
+	 * can point to a Reference element (in which case we only need to _include actual
+	 * references by ID).
+	 * <p>
+	 * This isn't perfect because there's really no definitive and comprehensive
+	 * way of determining the datatype that a SearchParameter or a FHIRPath point to. But
+	 * we do our best if the path is simple enough to just manually check the type it
+	 * points to, or if it ends in an explicit type declaration.
+	 * </p>
+	 */
+	private boolean referencePathCouldPotentiallyReferenceCanonicalElement(
+			String thePath, RuntimeSearchParam theParam) {
 
-		@Nonnull
-		final Set<Long> myHashIdentityValues;
-
-		@Nonnull
-		final Set<Integer> myPartitionIds;
-
-		public CanonicalUrlTargets(@Nonnull Set<Long> theHashIdentityValues, @Nonnull Set<Integer> thePartitionIds) {
-			myHashIdentityValues = theHashIdentityValues;
-			myPartitionIds = thePartitionIds;
+		// If this path explicitly wants a reference and not a canonical, we can ignore it since we're
+		// only looking for canonicals here
+		if (thePath.endsWith(".ofType(Reference)")) {
+			return false;
 		}
+
+		int dotIdx = thePath.indexOf('.');
+		if (dotIdx >= 0) {
+			String resourceName = thePath.substring(0, dotIdx).trim();
+			if (!resourceName.isEmpty() && Character.isUpperCase(resourceName.charAt(0))) {
+
+				if (!theParam.getBase().isEmpty() && !theParam.getBase().contains(resourceName)) {
+					return false;
+				}
+
+				// If the path points to a FHIR Reference datatype (ie not a canonical or CanonicalReference)
+				// then it doesn't matter here anyhow. The logic here only works for elements at the
+				// root level of the document (e.g. QuestionnaireResponse.subject or
+				// QuestionnaireResponse.subject.where(...)) but this is just an optimization
+				// anyhow.
+				String elementName = thePath.substring(dotIdx + 1);
+				int secondDotIndex = elementName.indexOf('.');
+				if (secondDotIndex != -1) {
+					elementName = elementName.substring(0, secondDotIndex);
+				}
+				BaseRuntimeChildDefinition child =
+						myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
+				if (child != null) {
+					BaseRuntimeElementDefinition<?> childDef = child.getChildByName(elementName);
+					if (childDef != null) {
+						if (childDef.getName().equals("Reference")) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
 	}
+
+	record CanonicalUrlTargets(@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {}
 
 	/**
 	 * This method takes in a list of {@link JpaPid}'s and returns a series of sublists containing
@@ -2547,7 +2602,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * IncludesIterator, used to recursively fetch resources from the provided list of PIDs
 	 */
-	public class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
+	private class IncludesIterator extends BaseIterator<JpaPid> implements Iterator<JpaPid> {
 
 		private final RequestDetails myRequest;
 		private final Set<JpaPid> myCurrentPids;
@@ -2616,13 +2671,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			return retVal;
 		}
 	}
-
 	/**
 	 * Basic Query iterator, used to fetch the results of a query.
 	 */
 	private final class QueryIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
+
 		private final RequestDetails myRequest;
 		private final boolean myHaveRawSqlHooks;
 		private final boolean myHavePerfTraceFoundIdHook;
@@ -2643,6 +2698,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private ISearchQueryExecutor myResultsIterator;
 
 		private boolean myFetchIncludesForEverythingOperation;
+
 		/**
 		 * The count of resources skipped because they were seen in earlier results
 		 */
@@ -2652,7 +2708,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * (ie, not cached in previous searches)
 		 */
 		private int myNonSkipCount = 0;
-
 		/**
 		 * The list of queries to use to find all results.
 		 * Normal JPA queries will normally have a single entry.
@@ -2986,5 +3041,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	public static void setMaxPageSizeForTest(Integer theTestSize) {
 		myMaxPageSizeForTests = theTestSize;
+	}
+
+	private static ScrollableResults<?> toScrollableResults(Query theQuery) {
+		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) theQuery;
+		return hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 	}
 }

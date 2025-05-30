@@ -86,7 +86,7 @@ class SearchBuilderTest {
 
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_Include_Null() {
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, false).myHashIdentityValues;
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, false).hashIdentityValues();
 		// There are only 12 resource types that actually can be linked to by the QuestionnaireResponse
 		// resource via canonical references in any parameters
 		assertThat(types).hasSize(1);
@@ -95,14 +95,14 @@ class SearchBuilderTest {
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_Include_Nonnull() {
 		Set<String> inputTypes = Set.of("Questionnaire");
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), inputTypes, false).myHashIdentityValues;
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), inputTypes, false).hashIdentityValues();
 		// Just the one that we actually specified
 		assertThat(types).hasSize(1);
 	}
 
 	@Test
 	void testCalculateIndexUriIdentityHashesForResourceTypes_RevInclude_Null() {
-		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, true).myHashIdentityValues;
+		Set<Long> types = mySearchBuilder.calculateIndexUriIdentityHashesForResourceTypes(new SystemRequestDetails(), null, true).hashIdentityValues();
 		// Revincludes are really hard to figure out the potential resource types for, so we just need to
 		// use all active resource types
 		assertThat(types).hasSize(146);
