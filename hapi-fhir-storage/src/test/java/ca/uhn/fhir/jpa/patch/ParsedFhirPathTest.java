@@ -31,6 +31,27 @@ public class ParsedFhirPathTest {
 	}
 
 	@Test
+	public void parseWithIndex() {
+		// setup
+		String path = "Patient.name.given[1]";
+
+		// test
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedFhirPath);
+		assertEquals(path, parsedFhirPath.getRawPath());
+		assertTrue(parsedFhirPath.endsWithAnIndex());
+
+		validateList(parsedFhirPath, List.of("Patient", "name", "given"), node -> {
+			if (node.getValue().equals("given")) {
+				assertTrue(node.hasListIndex());
+				assertEquals(1, node.getListIndex());
+			}
+		});
+	}
+
+	@Test
 	public void parseSimpleNestedExpression() {
 		// setup
 		String path = "Appointment.participant.actor.reference.where(startsWith('Patient')).first()";
@@ -41,6 +62,7 @@ public class ParsedFhirPathTest {
 		// validate
 		assertNotNull(parsedPath);
 		assertEquals(path, parsedPath.getRawPath());
+		assertTrue(parsedPath.endsWithAFilter());
 
 		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
 		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
@@ -81,6 +103,7 @@ public class ParsedFhirPathTest {
 		// validate
 		assertNotNull(parsedPath);
 		assertEquals(path, parsedPath.getRawPath());
+		assertTrue(parsedPath.endsWithAFilter());
 
 		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
 		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
@@ -118,7 +141,7 @@ public class ParsedFhirPathTest {
 		for (String part : theParts) {
 			assertNotNull(current, "Next value is null when expected " + part);
 			assertEquals(previous, current.getPrevious(), "Previous node does not match");
-			assertEquals(part, current.getValue());
+			assertEquals(part, current.getValue(true));
 
 			// for additional validation on the element
 			thePerNodeAction.accept(current);

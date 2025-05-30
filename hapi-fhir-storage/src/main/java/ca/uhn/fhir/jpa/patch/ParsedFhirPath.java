@@ -3,8 +3,18 @@ package ca.uhn.fhir.jpa.patch;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
 import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
 
+/**
+ * This class creates and contains a parsed fhirpath.
+ *
+ * It does not *validate* said fhir path (it might not be a valid path at all).
+ * It is only used for parsing convenience.
+ */
 public class ParsedFhirPath {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ParsedFhirPath.class);
 
@@ -32,20 +42,39 @@ public class ParsedFhirPath {
 			myValue = theValue;
 
 			int open = myValue.indexOf("[");
-			int close = myValue.indexOf("]");
-			if (open > 0 && close > 0) {
-				// this is a list element
-				myListIndex = Integer.parseInt(
-					myValue.substring(open + 1, close)
-				);
+			if (open != -1) {
+				int close = RandomTextUtils.findMatchingClosingBrace(open, myValue, '[', ']');
+				if (close != -1) {
+					String val = myValue.substring(open + 1, close);
+					try {
+						myListIndex = Integer.parseInt(val);
+					} catch (NumberFormatException ex) {
+						// TODO - not a number, but an expression
+						/*
+						 * Our current implementation does not account for
+						 * expressions, but only indices.
+						 * so we'll just note this exception for now
+						 */
+						ourLog.warn("{} is not an integer", val);
+					}
+				}
 			}
 		}
 
 		public String getValue() {
-			return myValue;
+			return getValue(false);
 		}
 
-		public boolean isList() {
+		public String getValue(boolean theNodeNameOnly) {
+			String val = myValue;
+			if (theNodeNameOnly && hasListIndex()) {
+				int endIndex = val.indexOf("[");
+				val = val.substring(0, endIndex);
+			}
+			return val;
+		}
+
+		public boolean hasListIndex() {
 			return myListIndex > 0;
 		}
 
@@ -78,7 +107,10 @@ public class ParsedFhirPath {
 		}
 	}
 
-
+	/**
+	 * A fhirpath node that is actually a function
+	 * see http://hl7.org/fhirpath/N1/#literals
+	 */
 	public static class FhirPathFunction extends FhirPathNode {
 
 		/**
@@ -112,15 +144,30 @@ public class ParsedFhirPath {
 	 */
 	private final FhirPathNode myHead;
 
+	private FhirPathNode myTail;
+
 	/**
 	 * The full path, unaltered
 	 */
 	private final String myRawPath;
 
+	/**
+	 * Whether or not this fhirpath ends with a filter.
+	 * See http://hl7.org/fhirpath/N1/#filtering-and-projection for
+	 * filter definitions
+	 */
+	private boolean myEndsWithFilter;
+
+	/**
+	 * Whether or not this fhirpath ends with an
+	 * index (ie, a node with [n] where n is some number)
+	 */
+	private boolean myEndsWithAnIndex;
+
 	ParsedFhirPath(String theFullPath) {
 		myRawPath = theFullPath;
 
-		myHead = createNode(theFullPath);
+		myHead = createNode(this, theFullPath);
 	}
 
 	public String getRawPath() {
@@ -129,6 +176,110 @@ public class ParsedFhirPath {
 
 	public FhirPathNode getHead() {
 		return myHead;
+	}
+
+	public void setTail(FhirPathNode theTail) {
+		myTail = theTail;
+	}
+
+	public FhirPathNode getTail() {
+		return myTail;
+	}
+
+	public void setEndsWithFilter(boolean theEndsWithFilter) {
+		myEndsWithFilter = theEndsWithFilter;
+	}
+
+	public boolean endsWithAFilter() {
+		return myEndsWithFilter;
+	}
+
+	public void setEndsWithAnIndex(boolean theEndsWithAnIndex) {
+		myEndsWithAnIndex = theEndsWithAnIndex;
+	}
+
+	public boolean endsWithAnIndex() {
+		return myEndsWithAnIndex;
+	}
+
+	public boolean endsWithFilterOrIndex() {
+		return endsWithAFilter() || endsWithAnIndex();
+	}
+
+	/**
+	 * Returns the fhir path up to the last element.
+	 * If there is a filter, it will return the element before the last
+	 * (filtered) element.
+	 */
+	public String getContainingPath() {
+		StringBuilder sb = new StringBuilder();
+		FhirPathNode current = myHead;
+		while (current != null && current.getNext() != null && !current.getNext().isFunction()) {
+			if (!sb.isEmpty()) {
+				sb.append(".");
+			}
+			sb.append(current.getValue());
+
+			current = current.getNext();
+		}
+		return sb.toString();
+	}
+
+	public List<String> getPathAsList() {
+		List<String> parts = new ArrayList<>();
+		FhirPathNode node = myHead;
+
+		while (node != null) {
+			parts.add(node.getValue());
+			node = node.getNext();
+		}
+		return parts;
+	}
+
+	/**
+	 * Returns the path as a string up until the condition
+	 * (omitting the portion of the path that satisfies the condition).
+	 *
+	 * If the condition is never met, the entire path will be returned.
+	 *
+	 * @param theCondition the condition to evaluate at each node to determine
+	 *                     if it should be included in the path
+	 */
+	public String getPathUntilPreCondition(Function<FhirPathNode, Boolean> theCondition) {
+		FhirPathNode node = getHead();
+
+		StringBuilder sb = new StringBuilder();
+		while (node != null) {
+			// check condition first
+			if (theCondition.apply(node)) {
+				break;
+			}
+
+			if (!sb.isEmpty()) {
+				sb.append(".");
+			}
+			sb.append(node.getValue());
+
+			node = node.getNext();
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Returns the final non-function node value
+	 */
+	public String getLastElementName() {
+		FhirPathNode node = myTail;
+		while (node != null && node.isFunction()) {
+			node = node.getPrevious();
+		}
+
+		if (node == null) {
+			// this shouldn't ever happen
+			ourLog.error("No non-function nodes in path!");
+			return null;
+		}
+		return node.getValue(true);
 	}
 
 	/**
@@ -142,7 +293,7 @@ public class ParsedFhirPath {
 	 * Create a FhirPathNode, recursively constructing all
 	 * it's neighbours and/or children (if it's a function).
 	 */
-	private static FhirPathNode createNode(String thePath) {
+	private static FhirPathNode createNode(ParsedFhirPath theParsedFhirPath, String thePath) {
 		int dotIndex = thePath.indexOf(".");
 		int braceIndex = thePath.indexOf("(");
 
@@ -161,7 +312,21 @@ public class ParsedFhirPath {
 				next = new FhirPathFunction(funcType);
 				((FhirPathFunction)next).setContainedExpression(containedExp);
 
+				// TODO - this is not technically correct
+				/*
+				 * Our current implementations do not distinguish between
+				 * "filter" and "function", so we'll treat all functions as
+				 * filters
+				 */
+				theParsedFhirPath.setEndsWithFilter(true);
 			}
+
+			// if the last element is an index; eg: []
+			if (next.hasListIndex()) {
+				theParsedFhirPath.setEndsWithAnIndex(true);
+			}
+
+			theParsedFhirPath.setTail(next);
 		} else if (braceIndex  != -1 && braceIndex < dotIndex) {
 			// next part is a function
 			// could contain an expression or singular element
@@ -195,7 +360,7 @@ public class ParsedFhirPath {
 			next = func;
 
 			if (isNotEmpty(remaining)) {
-				next.setNext(createNode(remaining));
+				next.setNext(createNode(theParsedFhirPath, remaining));
 			}
 		} else {
 			// next element is a standard node element (not a function)
@@ -203,7 +368,7 @@ public class ParsedFhirPath {
 			String remaining = thePath.substring(dotIndex + 1);
 
 			next = new FhirPathNode(nextPart);
-			next.setNext(createNode(remaining));
+			next.setNext(createNode(theParsedFhirPath, remaining));
 		}
 
 		return next;

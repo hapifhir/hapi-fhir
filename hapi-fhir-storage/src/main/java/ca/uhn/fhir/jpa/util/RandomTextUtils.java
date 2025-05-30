@@ -46,6 +46,10 @@ public class RandomTextUtils {
 	 * @return the index of the matching closing brace, or -1 if none found
 	 */
 	public static int findMatchingClosingBrace(int theStartIndex, String theStr) {
+		return findMatchingClosingBrace(theStartIndex, theStr, '(', ')');
+	}
+
+	public static int findMatchingClosingBrace(int theStartIndex, String theStr, char theOpenBrace, char theClosingBrace) {
 		int len = theStr.length();
 		assert theStartIndex >= 0;
 		assert theStartIndex < len;
@@ -53,9 +57,9 @@ public class RandomTextUtils {
 		int balance = 0;
 		for (int i = theStartIndex; i < len; i++) {
 			char next = theStr.charAt(i);
-			if (next == ')') {
+			if (next == theClosingBrace) {
 				balance--;
-			} else if (next == '(') {
+			} else if (next == theOpenBrace) {
 				balance++;
 			}
 
