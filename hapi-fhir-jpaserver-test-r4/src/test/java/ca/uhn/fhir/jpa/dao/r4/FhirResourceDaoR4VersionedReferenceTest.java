@@ -83,6 +83,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		public void before() {
 			super.before();
 			beforeAutoVersionReferencesWithSetting();
+			initResourceTypeCacheFromConfig();
 		}
 	}
 
@@ -91,6 +92,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		@BeforeEach
 		public void before() {
 			beforeAutoVersionReferencesWithSetting();
+			initResourceTypeCacheFromConfig();
 		}
 	}
 
@@ -112,6 +114,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			observationAutoVersionExtension = createAutoVersionReferencesExtensions("subject");
 			explanationOfBenefitAutoVersionExtension = createAutoVersionReferencesExtensions("patient");
 			messageHeaderAutoVersionExtension = createAutoVersionReferencesExtensions("focus");
+			initResourceTypeCacheFromConfig();
 		}
 
 		@Nonnull

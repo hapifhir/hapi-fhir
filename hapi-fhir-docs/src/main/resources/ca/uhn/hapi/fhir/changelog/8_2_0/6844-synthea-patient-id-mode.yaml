@@ -2,4 +2,4 @@
 type: change
 issue: 6844
 title: "The Patient ID partitioning interceptor now has limited support for server-assigned ids when in UUID mode.
-   Synthea data can now be processed."
+   This allows Synthea data to be ingested while running in Patient ID partitioning mode."
