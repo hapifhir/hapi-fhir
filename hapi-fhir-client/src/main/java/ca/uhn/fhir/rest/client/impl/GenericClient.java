@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -246,7 +247,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		if (theIfVersionMatches != null) {
-			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
+			invocation.addHeader(HeaderConstants.IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
 
 		boolean allowHtmlResponse = SummaryEnum.TEXT.equals(theSummary);
@@ -2521,7 +2522,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					}
 					invocation = MethodUtil.createUpdateHistoryRewriteInvocation(
 							myResource, myResourceBody, myId, myContext);
-					invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+					invocation.addHeader(HeaderConstants.X_REWRITE_HISTORY, "true");
 				} else {
 					invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 				}
@@ -2719,7 +2720,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
 		if (thePrefer != null) {
 			theInvocation.addHeader(
-					Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
+					HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
 		}
 	}
 

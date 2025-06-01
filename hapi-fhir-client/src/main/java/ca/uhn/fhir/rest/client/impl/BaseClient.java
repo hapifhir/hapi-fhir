@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -312,8 +313,8 @@ public abstract class BaseClient implements IRestfulClient {
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
 
 			if (isNotBlank(theCustomAcceptHeader)) {
-				httpRequest.removeHeaders(Constants.HEADER_ACCEPT);
-				httpRequest.addHeader(Constants.HEADER_ACCEPT, theCustomAcceptHeader);
+				httpRequest.removeHeaders(HeaderConstants.ACCEPT);
+				httpRequest.addHeader(HeaderConstants.ACCEPT, theCustomAcceptHeader);
 			}
 
 			if (theCacheControlDirective != null) {
@@ -328,7 +329,7 @@ public abstract class BaseClient implements IRestfulClient {
 							true);
 				}
 				if (b.length() > 0) {
-					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
+					httpRequest.addHeader(HeaderConstants.CACHE_CONTROL, b.toString());
 				}
 			}
 
@@ -598,7 +599,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 			// Fetch the content type
 			String contentType = null;
-			List<String> contentTypeHeaders = theHeaders.get(Constants.HEADER_CONTENT_TYPE_LC);
+			List<String> contentTypeHeaders = theHeaders.get(HeaderConstants.CONTENT_TYPE.toLowerCase());
 			if (contentTypeHeaders != null && contentTypeHeaders.size() > 0) {
 				contentType = contentTypeHeaders.get(0);
 			}
