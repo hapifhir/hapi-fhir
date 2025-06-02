@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6969
+title: "Fixed an issue where reference chaining with the _tag search parameter resulted in an error."
