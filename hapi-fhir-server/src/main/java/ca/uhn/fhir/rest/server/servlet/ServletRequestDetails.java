@@ -238,7 +238,7 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletRequest = myServletRequest;
 
 		// TODO KHS move a bunch of other initialization from RestfulServer into this method
-		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
+		if ("true".equals(myServletRequest.getHeader(HeaderConstants.X_REWRITE_HISTORY))) {
 			setRewriteHistory(true);
 		}
 		setRetryFields(myServletRequest);
@@ -249,7 +249,7 @@ public class ServletRequestDetails extends RequestDetails {
 		if (theRequest == null) {
 			return;
 		}
-		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
+		Enumeration<String> headers = theRequest.getHeaders(HeaderConstants.X_RETRY_ON_VERSION_CONFLICT);
 		if (headers != null) {
 			Iterator<String> headerIterator = headers.asIterator();
 			while (headerIterator.hasNext()) {

@@ -234,12 +234,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 	}
 
 	private static void assertResponseIsNotFromCache(String theContext, IHttpResponse lastResponse) {
-		List<String> cacheOutcome= lastResponse.getHeaders(Constants.HEADER_X_CACHE);
+		List<String> cacheOutcome= lastResponse.getHeaders(HeaderConstants.X_CACHE);
 		assertThat(cacheOutcome).as(theContext + " - No cache response headers").isEmpty();
 	}
 
 	private static void assertResponseIsFromCache(String theContext, IHttpResponse lastResponse) {
-		List<String> cacheOutcome = lastResponse.getHeaders(Constants.HEADER_X_CACHE);
+		List<String> cacheOutcome = lastResponse.getHeaders(HeaderConstants.X_CACHE);
 		assertThat(cacheOutcome)
 			.as(theContext + " - Response came from cache")
 			.anyMatch(item -> item.matches("^HIT from .*"));

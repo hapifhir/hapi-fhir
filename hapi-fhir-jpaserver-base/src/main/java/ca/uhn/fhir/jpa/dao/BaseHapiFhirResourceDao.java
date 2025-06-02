@@ -2056,7 +2056,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
 					String value = "HIT from " + theRequest.getFhirServerBase();
-					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
+					theServletResponse.addHeader(HeaderConstants.X_CACHE, value);
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
@@ -112,7 +113,7 @@ public class RestfulServerUtilsTest {
 		}
 
 		if (isNotBlank(theCascadeHeader)) {
-			when(myRequestDetails.getHeader(Constants.HEADER_CASCADE)).thenReturn(theCascadeHeader);
+			when(myRequestDetails.getHeader(HeaderConstants.X_CASCADE)).thenReturn(theCascadeHeader);
 		}
 
 		if (theExpectedMaxRounds != null && theExpectedMaxRounds == -1) {

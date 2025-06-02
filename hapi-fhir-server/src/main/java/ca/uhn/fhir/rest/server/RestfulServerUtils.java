@@ -957,7 +957,7 @@ public class RestfulServerUtils {
 				String securityContextRef =
 						securityContext.getReferenceElement().getValue();
 				if (isNotBlank(securityContextRef)) {
-					response.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, securityContextRef);
+					response.addHeader(HeaderConstants.X_SECURITY_CONTEXT, securityContextRef);
 				}
 			}
 
@@ -1148,7 +1148,7 @@ public class RestfulServerUtils {
 			}
 
 			if (mode == null) {
-				String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
+				String cascadeHeader = theRequest.getHeader(HeaderConstants.X_CASCADE);
 				if (isNotBlank(cascadeHeader)) {
 					if (Constants.CASCADE_DELETE.equals(cascadeHeader)
 							|| cascadeHeader.startsWith(Constants.CASCADE_DELETE + ";")

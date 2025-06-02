@@ -265,7 +265,6 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";
 	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
-	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_REWRITE_HISTORY} instead
 	 */
@@ -286,7 +285,6 @@ public class Constants {
 	public static final String LINK_NEXT = "next";
 	public static final String LINK_PREVIOUS = "previous";
 	public static final String LINK_SELF = "self";
-	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_ASYNC = "async"; // Used in messaging
 	public static final String PARAM_AT = "_at";
 	public static final String PARAM_ID = "_id";

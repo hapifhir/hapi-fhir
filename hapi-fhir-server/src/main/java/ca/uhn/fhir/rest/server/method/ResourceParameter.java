@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -245,7 +244,7 @@ public class ResourceParameter implements IParameter {
 				 * DSTU3+
 				 */
 				if (ctx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-					String securityContext = theRequest.getHeader(Constants.HEADER_X_SECURITY_CONTEXT);
+					String securityContext = theRequest.getHeader(HeaderConstants.X_SECURITY_CONTEXT);
 					if (isNotBlank(securityContext)) {
 						BinaryUtil.setSecurityContext(ctx, binary, securityContext);
 					}

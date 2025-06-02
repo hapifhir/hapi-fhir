@@ -313,7 +313,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?_pretty=true");
-		delete.addHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE);
+		delete.addHeader(HeaderConstants.X_CASCADE, Constants.CASCADE_DELETE);
 		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());

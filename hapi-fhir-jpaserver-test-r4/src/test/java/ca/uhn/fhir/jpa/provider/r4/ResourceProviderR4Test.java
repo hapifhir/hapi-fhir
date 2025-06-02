@@ -5075,8 +5075,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("** Done searching in {}ms with count of 1", sw.getMillis());
 
 		ourLog.info(myCapturingInterceptor.getLastResponse().getAllHeaders().toString());
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase())).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE.toLowerCase())).isEmpty();
 
 		// When we've only got one DB connection available, we are forced to wait for the
 		// search to finish before returning
@@ -5140,8 +5140,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(1)
 			.execute();
 
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE.toLowerCase())).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE.toLowerCase())).isEmpty();
 
 		// WHen we've only got one DB connection available, we are forced to wait for the
 		// search to finish before returning

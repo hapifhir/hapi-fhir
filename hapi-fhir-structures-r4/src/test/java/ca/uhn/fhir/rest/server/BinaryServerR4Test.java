@@ -77,7 +77,7 @@ public class 	BinaryServerR4Test {
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/foo", status.getEntity().getContentType().getValue());
-			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals("Patient/1", status.getFirstHeader(HeaderConstants.X_SECURITY_CONTEXT).getValue());
 			assertEquals("W/\"222\"", status.getFirstHeader(HeaderConstants.ETAG).getValue());
 			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
@@ -106,7 +106,7 @@ public class 	BinaryServerR4Test {
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
-			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals("Patient/1", status.getFirstHeader(HeaderConstants.X_SECURITY_CONTEXT).getValue());
 			assertEquals("W/\"222\"", status.getFirstHeader(HeaderConstants.ETAG).getValue());
 			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
@@ -123,7 +123,7 @@ public class 	BinaryServerR4Test {
 		HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Binary");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
-		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
+		post.addHeader(HeaderConstants.X_SECURITY_CONTEXT, "Encounter/2");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastId);
@@ -218,7 +218,7 @@ public class 	BinaryServerR4Test {
 		HttpPut post = new HttpPut(ourServer.getBaseUrl() + "/Binary/A");
 		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
-		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
+		post.addHeader(HeaderConstants.X_SECURITY_CONTEXT, "Encounter/2");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("Binary/A", ourLastId.getValue());

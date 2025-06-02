@@ -740,7 +740,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient
 					.delete()
 					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
+					.withAdditionalHeader(HeaderConstants.X_CASCADE, Constants.CASCADE_DELETE)
 					.execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
@@ -784,7 +784,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient
 				.delete()
 				.resourceById(patientId)
-				.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
+				.withAdditionalHeader(HeaderConstants.X_CASCADE, Constants.CASCADE_DELETE)
 				.execute();
 
 		} finally {
@@ -825,7 +825,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient
 					.delete()
 					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
+					.withAdditionalHeader(HeaderConstants.X_CASCADE, Constants.CASCADE_DELETE)
 					.execute();
 				fail();
 			} catch (ForbiddenOperationException e) {

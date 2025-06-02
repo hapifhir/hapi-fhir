@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -71,7 +72,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertThat(results.getEntry()).hasSize(1);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -86,7 +87,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertThat(results.getEntry()).hasSize(2);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 
 	}
 
@@ -108,7 +109,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertThat(results.getEntry()).hasSize(5);
 		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 
 	}
 
@@ -139,7 +140,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertThat(results.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
@@ -154,7 +155,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();
 		assertThat(results.getEntry()).hasSize(2);
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 
 	}
 
@@ -175,7 +176,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		assertThat(results1.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE)).isEmpty();
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
 		assertThat(results1Date).isAfter(beforeFirst);
 		assertThat(results1Date).isBefore(new Date());
@@ -188,7 +189,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertThat(results2.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
+		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(HeaderConstants.X_CACHE).get(0));
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
 		assertEquals(results1.getId(), results2.getId());
 	}
