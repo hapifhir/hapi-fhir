@@ -31,6 +31,13 @@ package ca.uhn.fhir.model.api;
  */
 public final class HeaderConstants {
 
+
+	public static final String X_TRANSACTION_SEMANTICS_PART_RETRY_COUNT = "retryCount";
+	public static final String X_TRANSACTION_SEMANTICS_PART_MIN_DELAY = "minRetryDelay";
+	public static final String X_TRANSACTION_SEMANTICS_PART_MAX_DELAY = "maxRetryDelay";
+	public static final String X_TRANSACTION_SEMANTICS_PART_TRY_BATCH_AS_TRANSACTION_FIRST = "tryBatchAsTransactionFirst";
+	public static final String X_TRANSACTION_SEMANTICS = "X-Transaction-Semantics";
+
 	private HeaderConstants() {
 		// Utility class
 	}
@@ -344,4 +351,22 @@ public final class HeaderConstants {
 	 * @see ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc#QUERY_STRING
 	 */
 	public static final String USERDATA_MDM_QUERY_STRING = "ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc_QUERY_STRING";
+
+	// =================================================================================================================
+	// BROKER MESSAGING HEADERS
+	// =================================================================================================================
+
+	public static final String MESSAGE_RETRY_COUNT = "retryCount";
+
+	public static final String MESSAGE_FIRST_FAILURE = "firstFailureTimestamp";
+
+	public static final String MESSAGE_LAST_FAILURE = "lastFailureTimestamp";
+
+
+	/**
+	 * Kafka final failure exception header.
+	 */
+	public static final String FINAL_FAILURE_EXCEPTION = "finalFailureException";
+
+
 }

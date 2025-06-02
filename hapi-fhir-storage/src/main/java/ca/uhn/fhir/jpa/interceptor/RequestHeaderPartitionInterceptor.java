@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -47,7 +48,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class RequestHeaderPartitionInterceptor {
 
-	public static final String PARTITIONS_HEADER = "X-Request-Partition-IDs";
+	/**
+	 * @deprecated Use {@link HeaderConstants#X_REQUEST_PARTITION_IDS} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String PARTITIONS_HEADER = HeaderConstants.X_REQUEST_PARTITION_IDS;
 
 	/**
 	 * This method is called to identify the partition ID for create operations.

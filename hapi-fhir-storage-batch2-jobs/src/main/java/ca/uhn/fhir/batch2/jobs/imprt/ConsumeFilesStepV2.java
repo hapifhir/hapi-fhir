@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -121,7 +122,7 @@ public class ConsumeFilesStepV2
 				.withMinRetryDelay(500)
 				.withMaxRetryDelay(1000)
 				.build();
-		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, transactionSemantics.toHeaderValue());
+		requestDetails.addHeader(HeaderConstants.X_TRANSACTION_SEMANTICS, transactionSemantics.toHeaderValue());
 
 		BundleBuilder bb = new BundleBuilder(myCtx);
 		bb.setType("batch");

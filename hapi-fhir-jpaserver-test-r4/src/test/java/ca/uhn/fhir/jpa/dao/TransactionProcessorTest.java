@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -170,7 +171,7 @@ public class TransactionProcessorTest {
 			.build()
 			.toHeaderValue();
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, headerValue);
+		requestDetails.addHeader(HeaderConstants.X_TRANSACTION_SEMANTICS, headerValue);
 
 		when(myPatientDao.update(any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenAnswer(t -> {
 			throw new InternalErrorException("Expected error");

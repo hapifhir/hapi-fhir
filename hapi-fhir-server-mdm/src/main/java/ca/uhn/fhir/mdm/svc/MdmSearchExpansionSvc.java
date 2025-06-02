@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.BaseParam;
@@ -46,9 +47,21 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class MdmSearchExpansionSvc {
-	private static final String EXPANSION_RESULTS = MdmSearchExpansionSvc.class.getName() + "_EXPANSION_RESULTS";
-	private static final String RESOURCE_NAME = MdmSearchExpansionSvc.class.getName() + "_RESOURCE_NAME";
-	private static final String QUERY_STRING = MdmSearchExpansionSvc.class.getName() + "_QUERY_STRING";
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_MDM_EXPANSION_RESULTS} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String EXPANSION_RESULTS = HeaderConstants.USERDATA_MDM_EXPANSION_RESULTS;
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_MDM_RESOURCE_NAME} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String RESOURCE_NAME = HeaderConstants.USERDATA_MDM_RESOURCE_NAME;
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_MDM_QUERY_STRING} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String QUERY_STRING = HeaderConstants.USERDATA_MDM_QUERY_STRING;
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired

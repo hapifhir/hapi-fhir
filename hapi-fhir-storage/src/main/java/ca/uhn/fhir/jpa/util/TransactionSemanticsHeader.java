@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringTokenizer;
@@ -32,13 +33,7 @@ import org.apache.commons.text.StringTokenizer;
  * @since 8.2.0
  */
 public class TransactionSemanticsHeader {
-
-	public static final String RETRY_COUNT = "retryCount";
-	public static final String MIN_DELAY = "minRetryDelay";
-	public static final String MAX_DELAY = "maxRetryDelay";
-	public static final String TRY_BATCH_AS_TRANSACTION_FIRST = "tryBatchAsTransactionFirst";
 	public static final TransactionSemanticsHeader DEFAULT = newBuilder().build();
-	public static final String HEADER_NAME = "X-Transaction-Semantics";
 
 	private final Integer myRetryCount;
 	private final Integer myMinRetryDelay;
@@ -106,21 +101,21 @@ public class TransactionSemanticsHeader {
 		StringBuilder b = new StringBuilder();
 
 		if (myRetryCount != null) {
-			b.append(RETRY_COUNT).append('=').append(myRetryCount);
+			b.append(HeaderConstants.X_TRANSACTION_SEMANTICS_PART_RETRY_COUNT).append('=').append(myRetryCount);
 
 			// None of the following settings has any meaning unless a
 			// retry count is specified
 			if (myMinRetryDelay != null) {
 				b.append("; ");
-				b.append(MIN_DELAY).append('=').append(myMinRetryDelay);
+				b.append(HeaderConstants.X_TRANSACTION_SEMANTICS_PART_MIN_DELAY).append('=').append(myMinRetryDelay);
 			}
 			if (myMaxRetryDelay != null) {
 				b.append("; ");
-				b.append(MAX_DELAY).append('=').append(myMaxRetryDelay);
+				b.append(HeaderConstants.X_TRANSACTION_SEMANTICS_PART_MAX_DELAY).append('=').append(myMaxRetryDelay);
 			}
 			if (myTryBatchAsTransactionFirst) {
 				b.append("; ");
-				b.append(TRY_BATCH_AS_TRANSACTION_FIRST).append('=').append("true");
+				b.append(HeaderConstants.X_TRANSACTION_SEMANTICS_PART_TRY_BATCH_AS_TRANSACTION_FIRST).append('=').append("true");
 			}
 		}
 
@@ -150,16 +145,16 @@ public class TransactionSemanticsHeader {
 			String value = next.substring(equalsIdx + 1).trim();
 
 			switch (name) {
-				case RETRY_COUNT:
+				case HeaderConstants.X_TRANSACTION_SEMANTICS_PART_RETRY_COUNT:
 					retryCount = parsePositiveInteger(value);
 					break;
-				case MIN_DELAY:
+				case HeaderConstants.X_TRANSACTION_SEMANTICS_PART_MIN_DELAY:
 					minRetryDelay = parsePositiveInteger(value);
 					break;
-				case MAX_DELAY:
+				case HeaderConstants.X_TRANSACTION_SEMANTICS_PART_MAX_DELAY:
 					maxRetryDelay = parsePositiveInteger(value);
 					break;
-				case TRY_BATCH_AS_TRANSACTION_FIRST:
+				case HeaderConstants.X_TRANSACTION_SEMANTICS_PART_TRY_BATCH_AS_TRANSACTION_FIRST:
 					tryBatchAsTransactionFirst = parseBoolean(value);
 					break;
 			}

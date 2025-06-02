@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.MessageHeaders;
@@ -35,17 +36,14 @@ import static java.util.Objects.isNull;
  * they can also be accessed in standard map fashion with a `get` on the map.
  */
 public class HapiMessageHeaders implements IModelJson {
-	public static final String RETRY_COUNT_KEY = "retryCount";
-	public static final String FIRST_FAILURE_KEY = "firstFailureTimestamp";
-	public static final String LAST_FAILURE_KEY = "lastFailureTimestamp";
 
-	@JsonProperty(RETRY_COUNT_KEY)
+	@JsonProperty(HeaderConstants.MESSAGE_RETRY_COUNT)
 	private Integer myRetryCount = 0;
 
-	@JsonProperty(FIRST_FAILURE_KEY)
+	@JsonProperty(HeaderConstants.MESSAGE_FIRST_FAILURE)
 	private Long myFirstFailureTimestamp;
 
-	@JsonProperty(LAST_FAILURE_KEY)
+	@JsonProperty(HeaderConstants.LAST_FAILURE_KEY)
 	private Long myLastFailureTimestamp;
 
 	@JsonProperty("customHeaders")
@@ -96,13 +94,13 @@ public class HapiMessageHeaders implements IModelJson {
 	public MessageHeaders toMessageHeaders() {
 		Map<String, Object> returnedHeaders = new HashMap<>(this.headers);
 		if (myRetryCount != null) {
-			returnedHeaders.put(RETRY_COUNT_KEY, myRetryCount);
+			returnedHeaders.put(HeaderConstants.MESSAGE_RETRY_COUNT, myRetryCount);
 		}
 		if (myFirstFailureTimestamp != null) {
-			returnedHeaders.put(FIRST_FAILURE_KEY, myFirstFailureTimestamp);
+			returnedHeaders.put(HeaderConstants.MESSAGE_FIRST_FAILURE, myFirstFailureTimestamp);
 		}
 		if (myLastFailureTimestamp != null) {
-			returnedHeaders.put(LAST_FAILURE_KEY, myLastFailureTimestamp);
+			returnedHeaders.put(HeaderConstants.LAST_FAILURE_KEY, myLastFailureTimestamp);
 		}
 		return new MessageHeaders(returnedHeaders);
 	}

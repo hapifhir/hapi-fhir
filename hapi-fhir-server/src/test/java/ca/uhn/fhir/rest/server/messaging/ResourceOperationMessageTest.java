@@ -6,9 +6,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.FIRST_FAILURE_KEY;
-import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.LAST_FAILURE_KEY;
-import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.RETRY_COUNT_KEY;
+import static ca.uhn.fhir.model.api.HeaderConstants.MESSAGE_FIRST_FAILURE;
+import static ca.uhn.fhir.model.api.HeaderConstants.LAST_FAILURE_KEY;
+import static ca.uhn.fhir.model.api.HeaderConstants.MESSAGE_RETRY_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -28,8 +28,8 @@ class ResourceOperationMessageTest {
 		assertNull(jsonMessage.getHapiHeaders().getFirstFailureTimestamp());
 		assertNull(jsonMessage.getHapiHeaders().getLastFailureTimestamp());
 
-		assertEquals(0, jsonMessage.getHeaders().get(RETRY_COUNT_KEY));
-		assertNull(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY));
+		assertEquals(0, jsonMessage.getHeaders().get(MESSAGE_RETRY_COUNT));
+		assertNull(jsonMessage.getHeaders().get(MESSAGE_FIRST_FAILURE));
 		assertNull(jsonMessage.getHeaders().get(LAST_FAILURE_KEY));
 	}
 }

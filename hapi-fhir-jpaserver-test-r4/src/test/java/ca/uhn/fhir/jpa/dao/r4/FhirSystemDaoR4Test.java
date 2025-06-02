@@ -4,9 +4,8 @@ import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
-import org.hl7.fhir.r4.model.MessageHeader;
-import org.hl7.fhir.r4.model.RequestGroup;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.r4.SystemProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -131,7 +129,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -2925,7 +2922,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.withRetryCount(1)
 			.build()
 			.toHeaderValue();
-		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, header);
+		requestDetails.addHeader(HeaderConstants.X_TRANSACTION_SEMANTICS, header);
 
 		InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> mySystemDao.transaction(requestDetails, request));
 		assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDuplicateIds", e.getMessage());

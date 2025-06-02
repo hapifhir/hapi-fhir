@@ -33,6 +33,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -89,8 +90,11 @@ public class FhirTerser {
 	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 
-	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED =
-			FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_CONTAIN_RESOURCES_COMPLETED} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = HeaderConstants.USERDATA_CONTAIN_RESOURCES_COMPLETED;
 
 	private final FhirContext myContext;
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerser.class);

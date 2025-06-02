@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.server.messaging.IHasPayloadMessageKey;
 import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.Test;
@@ -68,9 +69,9 @@ class BaseJsonMessageTest {
 		
 		// Check Spring MessageHeaders conversion
 		MessageHeaders springHeaders = message.getHeaders();
-		assertEquals(5, springHeaders.get(HapiMessageHeaders.RETRY_COUNT_KEY));
-		assertEquals(1000L, springHeaders.get(HapiMessageHeaders.FIRST_FAILURE_KEY));
-		assertEquals(2000L, springHeaders.get(HapiMessageHeaders.LAST_FAILURE_KEY));
+		assertEquals(5, springHeaders.get(HeaderConstants.MESSAGE_RETRY_COUNT));
+		assertEquals(1000L, springHeaders.get(HeaderConstants.MESSAGE_FIRST_FAILURE));
+		assertEquals(2000L, springHeaders.get(HeaderConstants.LAST_FAILURE_KEY));
 	}
 	
 	@Test

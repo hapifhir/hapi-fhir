@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
@@ -69,10 +70,16 @@ import java.util.concurrent.Callable;
  */
 public class HapiTransactionService implements IHapiTransactionService {
 
-	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS =
-			HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
-	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS =
-			HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_RESOLVED_TAG_DEFINITIONS} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HeaderConstants.USERDATA_RESOLVED_TAG_DEFINITIONS;
+	/**
+	 * @deprecated Use {@link HeaderConstants#USERDATA_EXISTING_SEARCH_PARAMS} instead
+	 */
+	@Deprecated(since = "8.3.10")
+	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HeaderConstants.USERDATA_EXISTING_SEARCH_PARAMS;
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
 	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
 	private static final ThreadLocal<HapiTransactionService> ourExistingTransaction = new ThreadLocal<>();
