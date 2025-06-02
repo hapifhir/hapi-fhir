@@ -27,13 +27,10 @@ package ca.uhn.fhir.model.api;
  * organized by functional category. This replaces scattered header definitions
  * and provides a single source of truth for header naming conventions.
  *
- * @since 7.2.0
+ * @since 8.3.10
  */
 public final class HeaderConstants {
 
-	/**
-	 * Private constructor to prevent instantiation of utility class.
-	 */
 	private HeaderConstants() {
 		// Utility class
 	}
