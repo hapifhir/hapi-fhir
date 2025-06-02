@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
@@ -46,7 +47,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
@@ -421,7 +421,7 @@ public class ResponseHighlighterInterceptorTest {
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent).contains("<html");
 		assertThat(responseContent).contains(">{<");
-		assertThat(responseContent).contains(Constants.HEADER_REQUEST_ID);
+		assertThat(responseContent).contains(HeaderConstants.X_REQUEST_ID);
 
 	}
 
@@ -440,7 +440,7 @@ public class ResponseHighlighterInterceptorTest {
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent).contains("<html");
 		assertThat(responseContent).contains("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>");
-		assertThat(responseContent).contains(Constants.HEADER_REQUEST_ID);
+		assertThat(responseContent).contains(HeaderConstants.X_REQUEST_ID);
 
 	}
 

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -126,7 +127,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -192,7 +192,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myClient
 			.create()
 			.resource(p1)
-			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "11111")
+			.withAdditionalHeader(HeaderConstants.X_REQUEST_ID, "11111")
 			.execute();
 
 		Patient p2 = new Patient();
@@ -200,7 +200,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myClient
 			.create()
 			.resource(p2)
-			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "22222")
+			.withAdditionalHeader(HeaderConstants.X_REQUEST_ID, "22222")
 			.execute();
 
 		Bundle results = myClient

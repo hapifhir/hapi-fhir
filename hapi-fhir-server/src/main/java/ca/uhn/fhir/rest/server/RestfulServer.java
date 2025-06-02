@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
@@ -1342,9 +1343,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
-		String caseSensitiveRequestIdKey = Constants.HEADER_REQUEST_ID;
+		String caseSensitiveRequestIdKey = HeaderConstants.X_REQUEST_ID;
 		for (String key : theRequestDetails.getHeaders().keySet()) {
-			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)) {
+			if (HeaderConstants.X_REQUEST_ID.equalsIgnoreCase(key)) {
 				caseSensitiveRequestIdKey = key;
 				break;
 			}
@@ -1353,7 +1354,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Reads a request ID from the request headers via the {@link Constants#HEADER_REQUEST_ID}
+	 * Reads a request ID from the request headers via the {@link HeaderConstants#X_REQUEST_ID}
 	 * header, or generates one if none is supplied.
 	 * <p>
 	 * Note that the generated request ID is a random 64-bit long integer encoded as

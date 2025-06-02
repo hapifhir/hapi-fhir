@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletRequest;
@@ -33,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ServletRequestTracing {
 	private static final Logger ourLog = LoggerFactory.getLogger(ServletRequestTracing.class);
 	public static final String ATTRIBUTE_REQUEST_ID =
-			ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
+			ServletRequestTracing.class.getName() + '.' + HeaderConstants.X_REQUEST_ID;
 
 	ServletRequestTracing() {}
 
@@ -68,7 +69,7 @@ public class ServletRequestTracing {
 		if (requestId == null && theServletRequest instanceof HttpServletRequest) {
 			// Also applies to non-FHIR (e.g. admin-json) requests).
 			HttpServletRequest request = (HttpServletRequest) theServletRequest;
-			requestId = request.getHeader(Constants.HEADER_REQUEST_ID);
+			requestId = request.getHeader(HeaderConstants.X_REQUEST_ID);
 			if (isNotBlank(requestId)) {
 				for (char nextChar : requestId.toCharArray()) {
 					if (!Character.isLetterOrDigit(nextChar)) {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -421,7 +422,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HeaderConstants.X_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}
@@ -429,10 +430,10 @@ public class SearchR4Test {
 	@Test
 	public void testRequestIdSuppliedAndReturned() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
+		httpGet.addHeader(HeaderConstants.X_REQUEST_ID, "help im a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HeaderConstants.X_REQUEST_ID).getValue();
 			assertThat(requestId).matches("help im a bug");
 		}
 	}
@@ -440,10 +441,10 @@ public class SearchR4Test {
 	@Test
 	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
+		httpGet.addHeader(HeaderConstants.X_REQUEST_ID, "help i'm a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HeaderConstants.X_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}
