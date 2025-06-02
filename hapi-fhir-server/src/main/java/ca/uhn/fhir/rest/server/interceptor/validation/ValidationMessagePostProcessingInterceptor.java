@@ -44,7 +44,7 @@ public class ValidationMessagePostProcessingInterceptor {
 
 	/**
 	 * Supplies one or more message definitions to post-process.
-	 * Validation messages matching defined 'msgId' or 'msgRegex', 'oldSeverity' and (optionally) case-insensitive
+	 * Validation messages matching defined 'msgId' or 'msgIdRegex', 'oldSeverity' and (optionally) case-insensitive
 	 * 'diagnosticsFragments' matching fragments, will have their severity replaced by the defined 'newSeverity'.
 	 *
 	 * @param theJsonDefinitions ValidationPostProcessingRuleJson rules
@@ -56,7 +56,7 @@ public class ValidationMessagePostProcessingInterceptor {
 
 	/**
 	 * Supplies one or more message definitions to post-process.
-	 * Validation messages matching defined 'msgId' or 'msgRegex', 'oldSeverity' and (optionally) case-insensitive
+	 * Validation messages matching defined 'msgId' or 'msgIdRegex', 'oldSeverity' and (optionally) case-insensitive
 	 * 'diagnosticsFragments' matching fragments, will have their severity replaced by the defined 'newSeverity'.
 	 *
 	 * @param theJsonDefinitions list of ValidationPostProcessingRuleJson rules
