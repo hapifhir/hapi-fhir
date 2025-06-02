@@ -133,6 +133,29 @@ public class ParsedFhirPathTest {
 	}
 
 	@Test
+	public void parse_filterWithValue_works() {
+		// setup
+		String path = "Patient.name.given.skip(2)";
+
+		// test
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedFhirPath);
+		assertEquals(path, parsedFhirPath.getRawPath());
+		assertTrue(parsedFhirPath.endsWithFilterOrIndex());
+
+		validateList(parsedFhirPath, List.of("Patient", "name", "given", "skip"), n -> {
+			if (n.getValue().equals("skip")) {
+				assertTrue(n instanceof ParsedFhirPath.FhirPathFunction);
+				ParsedFhirPath.FhirPathFunction f = (ParsedFhirPath.FhirPathFunction) n;
+				assertEquals("2", f.getContainedExp().getRawPath());
+				assertEquals("2", f.getContainedExp().getHead().getValue());
+			}
+		});
+	}
+
+	@Test
 	public void parseComplexNestedExpression() {
 		// setup
 		String path = "Appointment.participant.actor.where(reference.startsWith('Patient')).first()";

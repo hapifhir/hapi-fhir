@@ -11,6 +11,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
@@ -37,12 +38,14 @@ public class FhirPatchTest {
 	/**
 	 * Returns a list of parameters for the
 	 * patchApply_withValidParams_works test.
-	 * This means:
-	 * * matches for Patient/p1 and replaces with Patient/p2
-	 * * only matches first patient
+	 *
+	 * All inputs should assume an Appointment with the following references:
+	 * * Patient/p1
+	 * * Location/l1
+	 * * Patient/p3
 	 */
-	static List<Parameters> patchParams() {
-		List<Parameters> params = new ArrayList<>();
+	static List<Arguments> patchParams() {
+		List<Arguments> params = new ArrayList<>();
 
 		// 1
 		{
@@ -53,7 +56,8 @@ public class FhirPatchTest {
 			comp.addPart().setName("type").setValue(new CodeType("replace"));
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"));
 			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
-			params.add(parameters);
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
 		// 2
@@ -65,7 +69,96 @@ public class FhirPatchTest {
 			comp.addPart().setName("type").setValue(new CodeType("replace"));
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"));
 			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
-			params.add(parameters);
+			params.add(Arguments.of(parameters, "Patient/P2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+		}
+
+		// 3
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			// should act like "first"
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+		}
+
+		// 4
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			// should act like "first"
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[2]"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 5
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).last()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 6
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
+		}
+
+		// 7
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// tail should be the same as replacing everything (that matches Patient/) except Patient/p1
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 8
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// skip should skip the first value that matches "Patient" and replace it (ie, skip Patient/p1 and replace Patient/p3)
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
+		}
+
+		// 9
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+
+			// take should grab the first value that matches "Patient" (ie, take should grab Patient/p1 and not Patient/p3)
+			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
 		}
 
 		return params;
@@ -73,10 +166,9 @@ public class FhirPatchTest {
 
 	@ParameterizedTest
 	@MethodSource("patchParams")
-	public void patchApply_withValidParams_works(Parameters thePatch) {
+	public void patchApply_withValidParams_works(Parameters thePatch, String theReplacedPatientId, List<String> theExpectedContainedResources) {
 		// setup
 		String originalPatientId = "Patient/p1";
-		String replacedPatientId = "Patient/p2";
 
 		Appointment appointment;
 		{
@@ -114,11 +206,11 @@ public class FhirPatchTest {
 			return p.getActor() != null && p.getActor().getReference().equals(originalPatientId);
 		};
 		Predicate<Appointment.AppointmentParticipantComponent> newPatientPred = p -> {
-			return p.getActor() != null && p.getActor().getReference().equals(replacedPatientId);
+			return p.getActor() != null && p.getActor().getReference().equals(theReplacedPatientId);
 		};
 
 		// precheck
-		// should be no replacement, but should have the original
+		// should be no replacement id, but should have the original
 		assertTrue(appointment.getParticipant()
 			.stream().anyMatch(originalPatientPred));
 		assertFalse(appointment.getParticipant()
@@ -129,22 +221,28 @@ public class FhirPatchTest {
 
 		// verify
 		ourLog.trace(myParser.encodeResourceToString(appointment));
-		// patch should replace original patient id with the replacement patient id
-		assertTrue(appointment.getParticipant()
-			.stream().anyMatch(newPatientPred));
-		assertFalse(appointment.getParticipant()
-			.stream().anyMatch(originalPatientPred));
 
-		// but not the location
-		assertTrue(appointment.getParticipant()
-			.stream().anyMatch(p -> {
-				return p.getActor() != null && p.getActor().getReference().equals("Location/l1");
-			}));
-		// or subsequent patient resources (because these use .first())
-		assertTrue(appointment.getParticipant()
-			.stream().anyMatch(p -> {
-				return p.getActor() != null && p.getActor().getReference().equals("Patient/p3");
-			}));
+		List<String> original = new ArrayList<>();
+		original.add("Patient/p1");
+		original.add("Location/l1");
+		original.add("Patient/p3");
+		for (String expectedParticipant : theExpectedContainedResources) {
+			original.remove(expectedParticipant);
+			assertTrue(
+				appointment.getParticipant().stream().anyMatch(p -> {
+						return p.getActor().getReference().equals(expectedParticipant);
+					}
+				), "Does not contain " + expectedParticipant
+			);
+		}
+		// and verify any original values that were replaced are not there
+		for (String orig : original) {
+			assertFalse(
+				appointment.getParticipant().stream().anyMatch(p -> {
+					return p.getActor().getReference().equals(orig);
+				}), "Contains " + orig + " when it shouldn't"
+			);
+		}
 	}
 
 	@Test

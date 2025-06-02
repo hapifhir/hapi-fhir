@@ -322,7 +322,7 @@ public class FhirPatch {
 					}
 					case "tail" -> {
 						if (theList.size() == 1) {
-							ourLog.info("List contins only a single element - no patching will occur");
+							ourLog.info("List contains only a single element - no patching will occur");
 							return List.of();
 						}
 						return theList.subList(1, theList.size());
@@ -335,15 +335,31 @@ public class FhirPatch {
 						// only one element
 						return theList;
 					}
-					case "skip" -> {
-						// TODO - obtain bracketed value
-						ourLog.error("Not supported");
-						return List.of();
-					}
-					case "take" -> {
-						// todo - obtain bracketed value
-						ourLog.error("not supported");
-						return List.of();
+					case "skip", "take" -> {
+						if (tail instanceof ParsedFhirPath.FhirPathFunction fn) {
+							String containedNum = fn.getContainedExp().getHead().getValue();
+							try {
+								int num = Integer.parseInt(containedNum);
+
+								if (tail.getValue().equals("skip")) {
+									if (num < theList.size()) {
+										return theList.subList(num, theList.size());
+									}
+								} else if (tail.getValue().equals("take")) {
+									if (num < theList.size()) {
+										return theList.subList(0, num);
+									} else {
+										// otherwise, return everything
+										return theList;
+									}
+								}
+
+								return List.of();
+							} catch (NumberFormatException ex) {
+								ourLog.error("{} is not a number", containedNum, ex);
+							}
+						}
+						throw new InvalidRequestException("Invalid fhir path element encountered: " + theParsed.getRawPath());
 					}
 					default -> {
 						// we shouldn't see this; it means we have not handled a filtering case
