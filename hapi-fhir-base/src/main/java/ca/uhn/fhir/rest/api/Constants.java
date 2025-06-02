@@ -39,12 +39,12 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_REQUEST_ID} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_REQUEST_ID = HeaderConstants.X_REQUEST_ID;
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_REQUEST_SOURCE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_REQUEST_SOURCE = HeaderConstants.X_REQUEST_SOURCE;
 
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
@@ -114,12 +114,12 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#ACCEPT} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ACCEPT = HeaderConstants.ACCEPT;
 	/**
 	 * @deprecated Use {@link HeaderConstants#ACCEPT_ENCODING} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ACCEPT_ENCODING = HeaderConstants.ACCEPT_ENCODING;
 
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY =
@@ -133,128 +133,128 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#ALLOW} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ALLOW = HeaderConstants.ALLOW;
 	/**
 	 * @deprecated Use {@link HeaderConstants#AUTHORIZATION} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_AUTHORIZATION = HeaderConstants.AUTHORIZATION;
 	/**
 	 * @deprecated Use {@link HeaderConstants#AUTHORIZATION_BASIC_PREFIX} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = HeaderConstants.AUTHORIZATION_BASIC_PREFIX;
 	/**
 	 * @deprecated Use {@link HeaderConstants#AUTHORIZATION_BEARER_PREFIX} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = HeaderConstants.AUTHORIZATION_BEARER_PREFIX;
 	/**
 	 * @deprecated Use {@link HeaderConstants#CACHE_CONTROL} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CACHE_CONTROL = HeaderConstants.CACHE_CONTROL;
 	/**
 	 * @deprecated Use {@link HeaderConstants#TIMEZONE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CLIENT_TIMEZONE = HeaderConstants.TIMEZONE;
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_DISPOSITION} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CONTENT_DISPOSITION = HeaderConstants.CONTENT_DISPOSITION;
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_ENCODING} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CONTENT_ENCODING = HeaderConstants.CONTENT_ENCODING;
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_LOCATION} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CONTENT_LOCATION = HeaderConstants.CONTENT_LOCATION;
 
 	public static final String HEADER_CONTENT_LOCATION_LC = HeaderConstants.CONTENT_LOCATION.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_TYPE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CONTENT_TYPE = HeaderConstants.CONTENT_TYPE;
 
 	public static final String HEADER_CONTENT_TYPE_LC = HeaderConstants.CONTENT_TYPE.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#COOKIE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_COOKIE = HeaderConstants.COOKIE;
 	/**
 	 * @deprecated Use {@link HeaderConstants#ACCESS_CONTROL_ALLOW_METHODS} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CORS_ALLOW_METHODS = HeaderConstants.ACCESS_CONTROL_ALLOW_METHODS;
 	/**
 	 * @deprecated Use {@link HeaderConstants#ACCESS_CONTROL_ALLOW_ORIGIN} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CORS_ALLOW_ORIGIN = HeaderConstants.ACCESS_CONTROL_ALLOW_ORIGIN;
 	/**
 	 * @deprecated Use {@link HeaderConstants#ACCESS_CONTROL_EXPOSE_HEADERS} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CORS_EXPOSE_HEADERS = HeaderConstants.ACCESS_CONTROL_EXPOSE_HEADERS;
 	/**
 	 * @deprecated Use {@link HeaderConstants#ETAG} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ETAG = HeaderConstants.ETAG;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MATCH} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_MATCH = HeaderConstants.IF_MATCH;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MODIFIED_SINCE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_MODIFIED_SINCE = HeaderConstants.IF_MODIFIED_SINCE;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_EXIST} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_NONE_EXIST = HeaderConstants.IF_NONE_EXIST;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_MATCH} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_NONE_MATCH = HeaderConstants.IF_NONE_MATCH;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#LAST_MODIFIED} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_LAST_MODIFIED = HeaderConstants.LAST_MODIFIED;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#LOCATION} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_LOCATION = HeaderConstants.LOCATION;
 
 	/**
 	 * @deprecated Use {@link HeaderConstants#ORIGIN} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ORIGIN = HeaderConstants.ORIGIN;
 	/**
 	 * @deprecated Use {@link HeaderConstants#PREFER} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_PREFER = HeaderConstants.PREFER;
 
 	public static final String HEADER_PREFER_HANDLING = "handling";
@@ -268,12 +268,12 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_REWRITE_HISTORY} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_REWRITE_HISTORY = HeaderConstants.X_REWRITE_HISTORY;
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_RETRY_ON_VERSION_CONFLICT} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = HeaderConstants.X_RETRY_ON_VERSION_CONFLICT;
 
 	public static final String HEADER_MAX_RETRIES = "max-retries";
@@ -384,17 +384,17 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_CACHE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_X_CACHE = HeaderConstants.X_CACHE;
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_SECURITY_CONTEXT} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_X_SECURITY_CONTEXT = HeaderConstants.X_SECURITY_CONTEXT;
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_POWERED_BY} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String POWERED_BY_HEADER = HeaderConstants.X_POWERED_BY;
 
 	public static final Charset CHARSET_US_ASCII;
@@ -408,7 +408,7 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_CASCADE} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CASCADE = HeaderConstants.X_CASCADE;
 
 	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
@@ -422,7 +422,7 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#PREFER_RESPOND_ASYNC} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_PREFER_RESPOND_ASYNC = HeaderConstants.PREFER_RESPOND_ASYNC;
 
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
@@ -436,14 +436,14 @@ public class Constants {
 	/**
 	 * @deprecated Use {@link HeaderConstants#X_PROGRESS} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_X_PROGRESS = HeaderConstants.X_PROGRESS;
 
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#RETRY_AFTER} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_RETRY_AFTER = HeaderConstants.RETRY_AFTER;
 	/**
 	 * Operation name for the $lastn operation
@@ -459,7 +459,7 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 * @deprecated Use {@link HeaderConstants#USERDATA_RESOURCE_PARTITION_ID} instead
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String RESOURCE_PARTITION_ID = HeaderConstants.USERDATA_RESOURCE_PARTITION_ID;
 
 	public static final String PARTITION_IDS = "partitionIds";

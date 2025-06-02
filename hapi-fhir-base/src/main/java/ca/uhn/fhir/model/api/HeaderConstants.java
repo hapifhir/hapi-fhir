@@ -356,83 +356,83 @@ public final class HeaderConstants {
 	 * @deprecated Use {@link #AUTHORIZATION} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_AUTHORIZATION
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_AUTHORIZATION = AUTHORIZATION;
 
 	/**
 	 * @deprecated Use {@link #ACCEPT} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_ACCEPT
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ACCEPT = ACCEPT;
 
 	/**
 	 * @deprecated Use {@link #CONTENT_TYPE} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_CONTENT_TYPE
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CONTENT_TYPE = CONTENT_TYPE;
 
 	/**
 	 * @deprecated Use {@link #ETAG} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_ETAG
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_ETAG = ETAG;
 
 	/**
 	 * @deprecated Use {@link #LAST_MODIFIED} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_LAST_MODIFIED
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_LAST_MODIFIED = LAST_MODIFIED;
 
 	/**
 	 * @deprecated Use {@link #LOCATION} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_LOCATION
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_LOCATION = LOCATION;
 
 	/**
 	 * @deprecated Use {@link #IF_MATCH} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_IF_MATCH
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_MATCH = IF_MATCH;
 
 	/**
 	 * @deprecated Use {@link #IF_NONE_MATCH} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_IF_NONE_MATCH
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_NONE_MATCH = IF_NONE_MATCH;
 
 	/**
 	 * @deprecated Use {@link #IF_MODIFIED_SINCE} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_IF_MODIFIED_SINCE
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_MODIFIED_SINCE = IF_MODIFIED_SINCE;
 
 	/**
 	 * @deprecated Use {@link #IF_NONE_EXIST} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_IF_NONE_EXIST
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_IF_NONE_EXIST = IF_NONE_EXIST;
 
 	/**
 	 * @deprecated Use {@link #PREFER} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_PREFER
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_PREFER = PREFER;
 
 	/**
 	 * @deprecated Use {@link #CACHE_CONTROL} instead
 	 * @see ca.uhn.fhir.rest.api.Constants#HEADER_CACHE_CONTROL
 	 */
-	@Deprecated(since = "7.2.0", forRemoval = false)
+	@Deprecated(since = "8.3.10")
 	public static final String HEADER_CACHE_CONTROL = CACHE_CONTROL;
 }
