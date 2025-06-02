@@ -34,8 +34,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,8 +54,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
-	private final ICdsCrServiceFactory myCdsCrServiceFactory;
-	private final ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
 	private final CDSHooksVersion myCdsHooksVersion;
 
 	public CdsServiceRegistryImpl(
@@ -82,44 +78,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
-		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
-		myCdsHooksVersion = theCDSHooksVersion;
-		myCdsCrServiceFactory = null;
-		myCrDiscoveryServiceFactory = null;
-	}
-
-	@Deprecated(since = "8.1.4", forRemoval = true)
-	public CdsServiceRegistryImpl(
-			CdsHooksContextBooter theCdsHooksContextBooter,
-			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
-			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer) {
-		this(
-				theCdsHooksContextBooter,
-				theCdsPrefetchSvc,
-				theObjectMapper,
-				theCdsCrServiceFactory,
-				theCrDiscoveryServiceFactory,
-				theCdsServiceRequestJsonDeserializer,
-				CDSHooksVersion.DEFAULT);
-	}
-
-	@Deprecated(since = "8.1.4", forRemoval = true)
-	public CdsServiceRegistryImpl(
-			CdsHooksContextBooter theCdsHooksContextBooter,
-			CdsPrefetchSvc theCdsPrefetchSvc,
-			ObjectMapper theObjectMapper,
-			ICdsCrServiceFactory theCdsCrServiceFactory,
-			ICrDiscoveryServiceFactory theCrDiscoveryServiceFactory,
-			CdsServiceRequestJsonDeserializer theCdsServiceRequestJsonDeserializer,
-			CDSHooksVersion theCDSHooksVersion) {
-		myCdsHooksContextBooter = theCdsHooksContextBooter;
-		myCdsPrefetchSvc = theCdsPrefetchSvc;
-		myObjectMapper = theObjectMapper;
-		myCdsCrServiceFactory = theCdsCrServiceFactory;
-		myCrDiscoveryServiceFactory = theCrDiscoveryServiceFactory;
 		myCdsServiceRequestJsonDeserializer = theCdsServiceRequestJsonDeserializer;
 		myCdsHooksVersion = theCDSHooksVersion;
 	}
@@ -168,18 +126,6 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		}
 		myServiceCache.registerDynamicService(
 				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theServiceGroupId);
-	}
-
-	@Deprecated(since = "8.1.4", forRemoval = true)
-	@Override
-	public boolean registerCrService(String theServiceId) {
-		try {
-			myServiceCache.registerCrService(theServiceId, myCrDiscoveryServiceFactory, myCdsCrServiceFactory);
-		} catch (Exception e) {
-			ourLog.error("Error received during CR CDS Service registration: {}", e.getMessage());
-			return false;
-		}
-		return true;
 	}
 
 	/**

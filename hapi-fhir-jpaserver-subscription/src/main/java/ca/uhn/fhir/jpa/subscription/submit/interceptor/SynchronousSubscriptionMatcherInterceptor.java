@@ -19,12 +19,14 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
+import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.broker.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
-import ca.uhn.fhir.jpa.subscription.channel.api.PayloadTooLargeException;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.util.Logs;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -36,6 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * for further details on asynchronous submissions.
  */
 public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatcherInterceptor {
+	private static final Logger ourLog = Logs.getSubscriptionTroubleshootingLog();
 
 	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
@@ -69,14 +72,25 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 	 * payload is too large, which is enough for now. However, for better practice we might want to consider splitting
 	 * this interceptor into two, each for tests with/without DB connection.
 	 * @param theResourceModifiedMessage
+	 * @return the outcome of sending the message to the broker
 	 */
-	private void doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
+	private ISendResult doSubmitResourceModified(ResourceModifiedMessage theResourceModifiedMessage) {
 		try {
-			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
-		} catch (MessageDeliveryException e) {
-			if (e.getCause() instanceof PayloadTooLargeException) {
+			ISendResult retval = myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+			if (!retval.isSuccessful()) {
+				ourLog.warn("Failed to send message to Delivery Channel.");
+			}
+			return retval;
+		} catch (Exception e) {
+			if (e instanceof PayloadTooLargeException || e.getCause() instanceof PayloadTooLargeException) {
+				ourLog.warn(
+						"Failed to send message to Subscription Matching Channel because the payload size is larger than broker "
+								+ "max message size. Retry is about to be performed without payload.");
 				theResourceModifiedMessage.setPayloadToNull();
-				myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+				return myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
+			} else {
+				ourLog.error("Failed to send message to Subscription Matching Channel", e);
+				throw e;
 			}
 		}
 	}

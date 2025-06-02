@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.RequestGroup;
 
@@ -28,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.r4.SystemProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -53,6 +56,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -112,7 +116,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -123,17 +126,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -424,6 +431,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Unknown search parameter");
+
+		// Verify that TransactionUtil parses the response correctly
+		TransactionUtil.TransactionResponse parsedOutcome = TransactionUtil.parseTransactionResponse(myFhirContext, request, response);
+		assertEquals(1, parsedOutcome.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE, parsedOutcome.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals(201, parsedOutcome.getStorageOutcomes().get(0).getStatusCode());
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getSourceId());
+		assertThat( parsedOutcome.getStorageOutcomes().get(0).getTargetId().getValue()).matches("Patient/[0-9]++/_history/1");
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getErrorMessage());
+
 	}
 
 	@Test
@@ -878,7 +895,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
-
 	@Test
 	public void testTransactionBatchWithFailingRead() {
 		String methodName = "testTransactionBatchWithFailingRead";
@@ -1214,6 +1230,15 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
 		assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
 		validate(outcome);
+
+		// Verify that TransactionUtil parses the response correctly
+		TransactionUtil.TransactionResponse parsedOutcome = TransactionUtil.parseTransactionResponse(myFhirContext, request, outcome);
+		assertEquals(1, parsedOutcome.getStorageOutcomes().size());
+		assertEquals(StorageResponseCodeEnum.FAILURE, parsedOutcome.getStorageOutcomes().get(0).getStorageResponseCode());
+		assertEquals(400, parsedOutcome.getStorageOutcomes().get(0).getStatusCode());
+		assertEquals("Patient/123", parsedOutcome.getStorageOutcomes().get(0).getSourceId().getValue());
+		assertNull(parsedOutcome.getStorageOutcomes().get(0).getTargetId());
+		assertEquals("HAPI-0543: Missing required resource in Bundle.entry[0].resource for operation PUT", parsedOutcome.getStorageOutcomes().get(0).getErrorMessage());
 	}
 
 	@Test

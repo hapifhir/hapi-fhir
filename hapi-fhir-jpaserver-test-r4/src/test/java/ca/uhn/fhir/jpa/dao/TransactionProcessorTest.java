@@ -2,10 +2,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.IPointcut;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
@@ -35,7 +31,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
 import org.hl7.fhir.r4.model.Meta;
@@ -57,7 +52,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -189,7 +183,7 @@ public class TransactionProcessorTest {
 		// Verify
 		verify(myPatientDao, times(3)).update(any(), any(), anyBoolean(), anyBoolean(), any(), any());
 
-		TransactionUtil.TransactionResponse resp = TransactionUtil.parseTransactionResponse(myFhirContext, outcome);
+		TransactionUtil.TransactionResponse resp = TransactionUtil.parseTransactionResponse(myFhirContext, input, outcome);
 		assertEquals("Expected error", resp.getStorageOutcomes().get(0).getErrorMessage());
 		assertEquals(500, resp.getStorageOutcomes().get(0).getStatusCode());
 

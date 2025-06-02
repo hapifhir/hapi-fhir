@@ -22,9 +22,10 @@ jobs:
       -  uses: mshick/add-pr-comment@v2
          if: always()
          with:
+            message-id: spotless
             proxy-url: https://slack-bots.azure.smilecdr.com/robogary/github
             message-success: |
-               Formatting check succeeded!
+                Formatting check succeeded!
             message-failure: |
                **This Pull Request has failed the formatting check**
                
