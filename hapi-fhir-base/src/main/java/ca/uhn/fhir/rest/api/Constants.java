@@ -439,7 +439,7 @@ public class Constants {
 	@Deprecated(since = "8.3.10")
 	public static final String HEADER_X_PROGRESS = HeaderConstants.X_PROGRESS;
 
-	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
+	public static final String HEADER_X_PROGRESS_LC = HeaderConstants.X_PROGRESS.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#RETRY_AFTER} instead
 	 */

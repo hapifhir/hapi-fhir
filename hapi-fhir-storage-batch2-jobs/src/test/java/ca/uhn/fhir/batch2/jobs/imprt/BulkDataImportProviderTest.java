@@ -264,8 +264,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at ");
+			assertEquals("120", response.getFirstHeader(HeaderConstants.RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(HeaderConstants.X_PROGRESS).getValue()).contains("Job was created at ");
 		}
 	}
 
@@ -287,8 +287,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at 2022-01");
+			assertEquals("120", response.getFirstHeader(HeaderConstants.RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(HeaderConstants.X_PROGRESS).getValue()).contains("Job was created at 2022-01");
 		}
 	}
 

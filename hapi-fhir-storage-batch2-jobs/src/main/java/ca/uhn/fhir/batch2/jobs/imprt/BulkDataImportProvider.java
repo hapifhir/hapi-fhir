@@ -256,8 +256,8 @@ public class BulkDataImportProvider {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 				String msg = "Job was created at " + renderTime(instance.getCreateTime()) + " and is in "
 						+ instance.getStatus() + " state.";
-				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
-				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				response.addHeader(HeaderConstants.X_PROGRESS, msg);
+				response.addHeader(HeaderConstants.RETRY_AFTER, "120");
 				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}
@@ -271,8 +271,8 @@ public class BulkDataImportProvider {
 						+ new DecimalFormat("0.0").format(100.0 * instance.getProgress())
 						+ "% and ETA is "
 						+ instance.getEstimatedTimeRemaining();
-				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
-				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				response.addHeader(HeaderConstants.X_PROGRESS, msg);
+				response.addHeader(HeaderConstants.RETRY_AFTER, "120");
 				streamOperationOutcomeResponse(response, "information", msg);
 				break;
 			}

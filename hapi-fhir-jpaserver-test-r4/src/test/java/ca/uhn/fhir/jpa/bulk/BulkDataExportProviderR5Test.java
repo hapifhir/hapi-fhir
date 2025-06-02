@@ -346,8 +346,8 @@ public class BulkDataExportProviderR5Test {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).
+			assertEquals("120", response.getFirstHeader(HeaderConstants.RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(HeaderConstants.X_PROGRESS).getValue()).
 				contains("Build in progress - Status set to " + info.getStatus() + " at 20");
 		}
 	}

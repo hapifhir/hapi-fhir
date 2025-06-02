@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -441,9 +442,9 @@ public class BulkDataExportProvider {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 					String dateString = getTransitionTimeOfJobInfo(info);
 					response.addHeader(
-							Constants.HEADER_X_PROGRESS,
+                            HeaderConstants.X_PROGRESS,
 							"Build in progress - Status set to " + info.getStatus() + " at " + dateString);
-					response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+					response.addHeader(HeaderConstants.RETRY_AFTER, "120");
 				}
 				break;
 		}
