@@ -69,6 +69,7 @@ public class FhirPatchTest {
 			comp.addPart().setName("type").setValue(new CodeType("replace"));
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"));
 			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
 			params.add(Arguments.of(parameters, "Patient/P2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
@@ -82,6 +83,7 @@ public class FhirPatchTest {
 			// should act like "first"
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]"));
 			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
@@ -95,6 +97,7 @@ public class FhirPatchTest {
 			// should act like "first"
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[2]"));
 			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
 		}
 

@@ -276,14 +276,7 @@ public class FhirPatch {
 			 * Not a subsetting node, so we can just apply the filter on
 			 * the list we currently have and return that
 			 */
-			String lastEl = theParsed.getLastElementName();
-			String path = theParsed.getRawPath().substring(theParsed.getRawPath().indexOf(lastEl));
-
-			return theList.stream().filter(item -> {
-				// apply the filter to determine if this item matches it
-				Optional<IBaseBooleanDatatype> matchedOp = theFhirPath.evaluateFirst(item, path, IBaseBooleanDatatype.class);
-				return matchedOp.isPresent() && matchedOp.get().getValue();
-			}).toList();
+			return applyFilter(theList, theFhirPath, theParsed);
 		} else {
 			// A subsetting node or index (so has to be evaluated on a list of elements)
 			ParsedFhirPath.FhirPathNode tail = theParsed.getTail();
@@ -298,16 +291,22 @@ public class FhirPatch {
 				return List.of(); // empty list so nothing is patched
 			}
 
+			// apply the filter
+			// to the path, minus the final node (which is used for filtering here)
+			String newPath = theParsed.getRawPath();
+			newPath = newPath.substring(0, newPath.lastIndexOf("."));
+			List<IBase> filtered = filterDown(theList, theFhirPath, ParsedFhirPath.parse(newPath));
+
 			if (tail.getListIndex() >= 0) {
 				// specific index
-				if (tail.getListIndex() < theList.size()) {
-					return List.of(theList.get(tail.getListIndex()));
+				if (tail.getListIndex() < filtered.size()) {
+					return List.of(filtered.get(tail.getListIndex()));
 				} else {
 					ourLog.info("Nothing matching index {}; nothing patched.", tail.getListIndex());
 					return List.of();
 				}
 			} else {
-				if (theList.isEmpty()) {
+				if (filtered.isEmpty()) {
 					// empty lists should match all filters, so we'll return it here
 					ourLog.info("List contains no elements; no patching will occur");
 					return List.of();
@@ -315,25 +314,25 @@ public class FhirPatch {
 
 				switch (tail.getValue()) {
 					case "first" -> {
-						return List.of(theList.get(0));
+						return List.of(filtered.get(0));
 					}
 					case "last" -> {
-						return List.of(theList.get(theList.size() - 1));
+						return List.of(filtered.get(filtered.size() - 1));
 					}
 					case "tail" -> {
-						if (theList.size() == 1) {
+						if (filtered.size() == 1) {
 							ourLog.info("List contains only a single element - no patching will occur");
 							return List.of();
 						}
-						return theList.subList(1, theList.size());
+						return filtered.subList(1, filtered.size());
 					}
 					case "single" -> {
-						if (theList.size() != 1) {
+						if (filtered.size() != 1) {
 							// TODO - update error codes
 							throw new InvalidRequestException("List contains more than a single element.");
 						}
 						// only one element
-						return theList;
+						return filtered;
 					}
 					case "skip", "take" -> {
 						if (tail instanceof ParsedFhirPath.FhirPathFunction fn) {
@@ -342,15 +341,15 @@ public class FhirPatch {
 								int num = Integer.parseInt(containedNum);
 
 								if (tail.getValue().equals("skip")) {
-									if (num < theList.size()) {
-										return theList.subList(num, theList.size());
+									if (num < filtered.size()) {
+										return filtered.subList(num, filtered.size());
 									}
 								} else if (tail.getValue().equals("take")) {
-									if (num < theList.size()) {
-										return theList.subList(0, num);
+									if (num < filtered.size()) {
+										return filtered.subList(0, num);
 									} else {
 										// otherwise, return everything
-										return theList;
+										return filtered;
 									}
 								}
 
@@ -369,6 +368,17 @@ public class FhirPatch {
 				}
 			}
 		}
+	}
+
+	private List<IBase> applyFilter(List<IBase> theList, IFhirPath theFhirPath, ParsedFhirPath theParsed) {
+		String lastEl = theParsed.getLastElementName();
+		String path = theParsed.getRawPath().substring(theParsed.getRawPath().indexOf(lastEl));
+
+		return theList.stream().filter(item -> {
+			// apply the filter to determine if this item matches it
+			Optional<IBase> matchedOp = theFhirPath.evaluateFirst(item, path, IBase.class);
+			return matchedOp.isPresent();
+		}).toList();
 	}
 
 	/**

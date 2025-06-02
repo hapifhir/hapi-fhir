@@ -369,7 +369,6 @@ public class ParsedFhirPath {
 		int dotIndex = thePath.indexOf(".");
 		int braceIndex = thePath.indexOf("(");
 
-
 		FhirPathNode next;
 		if (dotIndex == -1) {
 			int filterIndex = thePath.indexOf("[");
@@ -386,7 +385,9 @@ public class ParsedFhirPath {
 				String containedExp = thePath.substring(braceIndex + 1, thePath.length() - 1);
 				// the function has parameters -> a contained fhirpath
 				next = new FhirPathFunction(funcType);
-				((FhirPathFunction) next).setContainedExpression(containedExp);
+				if (isNotEmpty(containedExp)) {
+					((FhirPathFunction) next).setContainedExpression(containedExp);
+				}
 
 				// TODO - this is not technically correct
 				/*
@@ -394,7 +395,7 @@ public class ParsedFhirPath {
 				 * "filter" and "function", so we'll treat all functions as
 				 * filters
 				 */
-				theParsedFhirPath.setEndsWithFilter(next.isFilter());
+				theParsedFhirPath.setEndsWithFilter(true);
 			} else {
 				// base case 3 - path contains a filter ([]).. and potentially a functions
 				// ie, either path[n] or path()[n]
@@ -432,20 +433,15 @@ public class ParsedFhirPath {
 				}
 
 				// part3 - the part after the closing filter brace ]
-				if (closingFilter + 1 < thePath.length()) {
+				if (isNotEmpty(part3)) {
 					// todo - error code
 					throw new InvalidRequestException("Unexpected path after filter: " + thePath.substring(closingFilter + 1));
 				} else {
 					// the filter is the end node; nothing more to add
 					theParsedFhirPath.setTail(filterNode);
-					theParsedFhirPath.setEndsWithAnIndex(true);
 				}
 			}
-
-			// if the last element is an index; eg: []
-			if (next.hasListIndex()) {
-				theParsedFhirPath.setEndsWithAnIndex(true);
-			}
+			theParsedFhirPath.setEndsWithAnIndex(true);
 
 			theParsedFhirPath.setTail(next);
 		} else if (braceIndex != -1 && braceIndex < dotIndex) {
@@ -489,6 +485,8 @@ public class ParsedFhirPath {
 			if (isNotEmpty(remaining)) {
 				next.setNext(createNode(theParsedFhirPath, remaining));
 			}
+
+			theParsedFhirPath.setEndsWithFilter(true);
 		} else {
 			// recursive case 2
 			// next element is a standard node element (not a function)
