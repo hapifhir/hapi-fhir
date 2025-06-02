@@ -442,7 +442,7 @@ public class BulkDataExportProvider {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 					String dateString = getTransitionTimeOfJobInfo(info);
 					response.addHeader(
-                            HeaderConstants.X_PROGRESS,
+							HeaderConstants.X_PROGRESS,
 							"Build in progress - Status set to " + info.getStatus() + " at " + dateString);
 					response.addHeader(HeaderConstants.RETRY_AFTER, "120");
 				}

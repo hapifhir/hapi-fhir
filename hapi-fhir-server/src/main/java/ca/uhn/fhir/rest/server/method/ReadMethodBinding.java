@@ -216,7 +216,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 					if (ifNoneMatch.equals(versionIdPart)) {
 						ourLog.debug(
 								"Returning HTTP 304 because request specified {}={}",
-							HeaderConstants.IF_NONE_MATCH,
+								HeaderConstants.IF_NONE_MATCH,
 								ifNoneMatch);
 						throw new NotModifiedException(Msg.code(385) + "Not Modified");
 					}

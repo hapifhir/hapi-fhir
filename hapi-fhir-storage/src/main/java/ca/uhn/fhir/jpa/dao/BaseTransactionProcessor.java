@@ -809,11 +809,11 @@ public abstract class BaseTransactionProcessor {
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(theEntry))) {
 			subRequestDetails.addHeader(
-				HeaderConstants.IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
+					HeaderConstants.IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(theEntry))) {
 			subRequestDetails.addHeader(
-				HeaderConstants.IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
+					HeaderConstants.IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
 		}
 
 		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);

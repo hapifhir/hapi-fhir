@@ -70,8 +70,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(
-				HeaderConstants.AUTHORIZATION, (HeaderConstants.AUTHORIZATION_BEARER_PREFIX + myToken));
+		theRequest.addHeader(HeaderConstants.AUTHORIZATION, (HeaderConstants.AUTHORIZATION_BEARER_PREFIX + myToken));
 	}
 
 	@Override

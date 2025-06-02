@@ -137,7 +137,7 @@ public class BinaryAccessProvider {
 			theServletResponse.addHeader(HeaderConstants.CACHE_CONTROL, Constants.CACHE_CONTROL_PRIVATE);
 			theServletResponse.addHeader(HeaderConstants.ETAG, '"' + blobDetails.getHash() + '"');
 			theServletResponse.addHeader(
-				HeaderConstants.LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
+					HeaderConstants.LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
 
 			myBinaryStorageSvc.writeBinaryContent(theResourceId, blobId, theServletResponse.getOutputStream());
 			theServletResponse.getOutputStream().close();
