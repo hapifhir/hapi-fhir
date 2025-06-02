@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -145,7 +146,7 @@ public class HfqlRestClientTest {
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
 
-		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
+		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(HeaderConstants.AUTHORIZATION).get(0);
 		assertEquals(expectedAuthHeader, actual);
 		assertEquals(123, myLimitCaptor.getValue().intValue());
 	}

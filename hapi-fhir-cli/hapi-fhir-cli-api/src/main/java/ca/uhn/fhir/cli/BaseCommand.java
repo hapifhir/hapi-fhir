@@ -23,6 +23,7 @@ import ca.uhn.fhir.cli.client.HapiFhirCliRestfulClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
@@ -573,14 +574,14 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
 		if (isNotBlank(basicAuthHeaderValue)) {
 			retVal.registerInterceptor(
-					new SimpleRequestHeaderInterceptor(Constants.HEADER_AUTHORIZATION, basicAuthHeaderValue));
+					new SimpleRequestHeaderInterceptor(HeaderConstants.AUTHORIZATION, basicAuthHeaderValue));
 		}
 
 		if (isNotBlank(theBearerTokenOptionName)) {
 			String bearerToken = getAndParseBearerTokenAuthHeader(theCommandLine, theBearerTokenOptionName);
 			if (isNotBlank(bearerToken)) {
 				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(
-						Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
+                        HeaderConstants.AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
 			}
 		}
 
