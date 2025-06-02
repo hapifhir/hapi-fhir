@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
 
@@ -48,7 +51,7 @@ public class ParsedFhirPath {
 					String val = theValue.substring(open + 1, close);
 					try {
 						myListIndex = Integer.parseInt(val);
-						myValue = theValue.substring(0, open);
+//						myValue = theValue.substring(0, open);
 					} catch (NumberFormatException ex) {
 						// TODO - not a number, but an expression
 						/*
@@ -78,7 +81,15 @@ public class ParsedFhirPath {
 		 * If this node is actually a function node, this will return true.
 		 */
 		public boolean isFunction() {
-			return false;
+			return isFilter();
+		}
+
+		/**
+		 * Filters are any of the "end function" or index
+		 * as defined by http://hl7.org/fhirpath/N1/#subsetting
+		 */
+		public boolean isFilter() {
+			return myListIndex >= 0;
 		}
 
 		void setNext(FhirPathNode theNextNode) {
@@ -96,6 +107,14 @@ public class ParsedFhirPath {
 
 		public FhirPathNode getPrevious() {
 			return myPrevious;
+		}
+
+		public boolean hasPrevious() {
+			return myPrevious != null;
+		}
+
+		public boolean hasNext() {
+			return myNext != null;
 		}
 	}
 
@@ -128,6 +147,20 @@ public class ParsedFhirPath {
 		@Override
 		public boolean isFunction() {
 			return true;
+		}
+
+		@Override
+		public boolean isFilter() {
+			return super.isFilter() || isFilteredFunction();
+		}
+
+		private boolean isFilteredFunction() {
+			switch (getValue()) {
+				case "first", "last", "tail", "skip", "take", "intersect", "exclude", "single" -> {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
@@ -257,6 +290,31 @@ public class ParsedFhirPath {
 		return sb.toString();
 	}
 
+	public String getPathFromTo(Predicate<FhirPathNode> theFrom, Predicate<FhirPathNode> theTo) {
+		FhirPathNode node = getHead();
+		StringBuilder sb = new StringBuilder();
+		boolean started = false;
+		while (node != null) {
+			if (theFrom.test(node)) {
+				started = true;
+			}
+			if (started) {
+				if (theTo.test(node)) {
+					// reached the end
+					break;
+				}
+
+				if (!sb.isEmpty()) {
+					sb.append(".");
+				}
+				sb.append(node.getValue());
+			}
+
+			node = node.getNext();
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Returns the final non-function node value
 	 */
@@ -274,6 +332,28 @@ public class ParsedFhirPath {
 		return node.getValue();
 	}
 
+	public FhirPathNode getFirstNode(Predicate<FhirPathNode> thePred) {
+		FhirPathNode node = myHead;
+		while (node != null && !thePred.test(node)) {
+			node = node.getNext();
+		}
+		return node;
+	}
+
+	public List<FhirPathNode> getNodes(Predicate<FhirPathNode> thePred) {
+		List<FhirPathNode> nodes = new ArrayList<>();
+		FhirPathNode node = getHead();
+
+		while (node != null) {
+			if (thePred.test(node)) {
+				nodes.add(node);
+			}
+			node = node.getNext();
+		}
+
+		return nodes;
+	}
+
 	/**
 	 * Create a ParsedFhirPath from a raw string.
 	 */
@@ -289,20 +369,24 @@ public class ParsedFhirPath {
 		int dotIndex = thePath.indexOf(".");
 		int braceIndex = thePath.indexOf("(");
 
+
 		FhirPathNode next;
 		if (dotIndex == -1) {
-			// we're at the end; no more elements
-
-			if (braceIndex == -1) {
-				// ending is just a path element, not a function
+			int filterIndex = thePath.indexOf("[");
+			// base cases
+			if (braceIndex == -1 && filterIndex == -1) {
+				// base case 1 - a standard node (no braces () or dots . or filters [])
+				// ending is just a path element
 				next = new FhirPathNode(thePath);
-			} else {
+			} else if (filterIndex == -1) {
+				// base case 2 - a filter function (function ending in ())
 				// ending is a function
 				String funcType = thePath.substring(0, braceIndex);
 				// -1 because we don't care about the last bracket
 				String containedExp = thePath.substring(braceIndex + 1, thePath.length() - 1);
+				// the function has parameters -> a contained fhirpath
 				next = new FhirPathFunction(funcType);
-				((FhirPathFunction)next).setContainedExpression(containedExp);
+				((FhirPathFunction) next).setContainedExpression(containedExp);
 
 				// TODO - this is not technically correct
 				/*
@@ -310,7 +394,52 @@ public class ParsedFhirPath {
 				 * "filter" and "function", so we'll treat all functions as
 				 * filters
 				 */
-				theParsedFhirPath.setEndsWithFilter(true);
+				theParsedFhirPath.setEndsWithFilter(next.isFilter());
+			} else {
+				// base case 3 - path contains a filter ([]).. and potentially a functions
+				// ie, either path[n] or path()[n]
+				int closingFilter = RandomTextUtils.findMatchingClosingBrace(filterIndex, thePath, '[', ']');
+
+				// part1 -> part before the opening filter brace [
+				String part1 = thePath.substring(0, filterIndex);
+
+				// the filter value (a number)
+				String part2 = thePath.substring(filterIndex, closingFilter + 1);
+
+				// there are parts of a fhirpath past the [] filter
+				String part3 = thePath.substring(closingFilter + 1);
+
+				// create part2 first - the filter node
+				ParsedFhirPath.FhirPathNode filterNode = new ParsedFhirPath.FhirPathNode(part2);
+
+				// if there's a part1 - create the first node
+				if (isNotEmpty(part1)) {
+					// create node chain for first part;
+					ParsedFhirPath.FhirPathNode p1node = createNode(theParsedFhirPath, part1);
+
+					ParsedFhirPath.FhirPathNode node = p1node;
+					while (node.getNext() != null) {
+						node = node.getNext();
+					}
+					// set the filter node as the last in the chain
+					node.setNext(filterNode);
+					// and the first in the chain as the node to return
+					next = p1node;
+				} else {
+					// otherwise, our next node is the filter node
+					// (ie, there is no "first part")
+					next = filterNode;
+				}
+
+				// part3 - the part after the closing filter brace ]
+				if (closingFilter + 1 < thePath.length()) {
+					// todo - error code
+					throw new InvalidRequestException("Unexpected path after filter: " + thePath.substring(closingFilter + 1));
+				} else {
+					// the filter is the end node; nothing more to add
+					theParsedFhirPath.setTail(filterNode);
+					theParsedFhirPath.setEndsWithAnIndex(true);
+				}
 			}
 
 			// if the last element is an index; eg: []
@@ -319,7 +448,8 @@ public class ParsedFhirPath {
 			}
 
 			theParsedFhirPath.setTail(next);
-		} else if (braceIndex  != -1 && braceIndex < dotIndex) {
+		} else if (braceIndex != -1 && braceIndex < dotIndex) {
+			// recursive case 1
 			// next part is a function
 			// could contain an expression or singular element
 			int closingIndex = RandomTextUtils.findMatchingClosingBrace(braceIndex, thePath);
@@ -341,6 +471,11 @@ public class ParsedFhirPath {
 			if (closingIndex > dotIndex) {
 				// we want the first dot after the closing brace
 				remainingIndex = thePath.indexOf(".", closingIndex);
+
+				if (remainingIndex == -1) {
+					// there is no . after the closing brace...
+					remainingIndex = closingIndex;
+				}
 			}
 			String remaining = thePath.substring(remainingIndex + 1);
 
@@ -355,6 +490,7 @@ public class ParsedFhirPath {
 				next.setNext(createNode(theParsedFhirPath, remaining));
 			}
 		} else {
+			// recursive case 2
 			// next element is a standard node element (not a function)
 			String nextPart = thePath.substring(0, dotIndex);
 			String remaining = thePath.substring(dotIndex + 1);

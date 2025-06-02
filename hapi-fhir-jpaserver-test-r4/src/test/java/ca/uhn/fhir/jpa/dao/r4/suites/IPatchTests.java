@@ -13,15 +13,21 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,27 +44,79 @@ public interface IPatchTests {
 
 	JpaStorageSettings getStorageSettings();
 
+	/**
+	 * This is the same parameters as in FhirPatchTest
+	 */
+	static List<Parameters> patchParams() {
+		List<Parameters> params = new ArrayList<>();
+
+		// 1
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"));
+			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
+			params.add(parameters);
+		}
+
+		// 2
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+			params.add(parameters);
+		}
+
+		// 3
+		{
+			Parameters parameters = new Parameters();
+			Parameters.ParametersParameterComponent comp = parameters.addParameter()
+				.setName("operation");
+
+			comp.addPart().setName("type").setValue(new CodeType("replace"));
+			// should act like "first"
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]"));
+			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
+			params.add(parameters);
+		}
+
+		return params;
+	}
+
 	@ParameterizedTest
-	@ValueSource(strings = {
-		"Appointment.participant.actor.reference.where(startsWith('Patient/')).first()",
-		"Appointment.participant.actor.where(reference.startsWith('Patient/')).first()"
-	})
-	default void patch_primitiveWithPath_shouldWork(String theFhirPath) {
+	@MethodSource("patchParams")
+	default void patch_primitiveWithPath_shouldWork(Parameters thePatch) {
 		// setup
 		SystemRequestDetails rd = new SystemRequestDetails();
 		IParser parser = getFhirContext().newJsonParser();
 		DaoMethodOutcome outcome;
 
-		String replacementText = "FIND_ME";
+		ourLog.info("Parsing params:\n{}", parser.encodeResourceToString(thePatch));
+
+		assertFalse(thePatch.getParameter().isEmpty());
+		Parameters.ParametersParameterComponent param = thePatch.getParameter().get(0);
+		Optional<Parameters.ParametersParameterComponent> partOp = param.getPart().stream().filter(part -> part.getName().equals("path"))
+			.findFirst();
+		assertTrue(partOp.isPresent());
+		// we know it's a string type
+		String fhirPath = partOp.get().getValue().toString();
+
 		String patient1Id = "Patient/p1";
 		String patient2Id = "Patient/p2";
 		String appointmentId = "a1";
+		String locationId = "Location/l1";
 
 		Patient patient1;
 		Patient patient2;
 		Location location;
 		Appointment appointment;
-		Parameters patch;
 		{
 			@Language("JSON")
 			String patient1Str = """
@@ -119,39 +177,17 @@ public interface IPatchTests {
 						"reference": "Patient/p1"
 					  },
 					  "status": "accepted"
+					},
+					{
+					  "actor": {
+					    "reference": "Location/l1"
+					  },
+					  "status": "accepted"
 					}
 				  ]
 				}
 				""";
 			appointment = parser.parseResource(Appointment.class, appointmentStr);
-
-			@Language("JSON")
-			String patchStr = """
-				{
-				  "resourceType": "Parameters",
-				  "parameter": [
-					{
-					  "name": "operation",
-					  "part": [
-						{
-						  "name": "type",
-						  "valueCode": "replace"
-						},
-						{
-						  "name": "path",
-						  "valueString": "FIND_ME"
-						},
-						{
-						  "name": "value",
-						  "valueString": "Patient/p2"
-						}
-					  ]
-					}
-				  ]
-				}
-				""";
-			patchStr = patchStr.replace(replacementText, theFhirPath);
-			patch = parser.parseResource(Parameters.class, patchStr);
 		}
 
 		// create the resources
@@ -170,7 +206,7 @@ public interface IPatchTests {
 
 		// verify get works
 		{
-			ourLog.info("GET for fhirpath {}", theFhirPath);
+			ourLog.info("GET for fhirpath {}", fhirPath);
 			SystemRequestDetails details = new SystemRequestDetails();
 			Appointment result = appointmentDao.read(new IdType(appointmentId),
 				details);
@@ -178,7 +214,7 @@ public interface IPatchTests {
 
 			SystemRequestDetails newSrd = new SystemRequestDetails();
 			newSrd.addParameter(Constants.PARAM_FHIRPATH,
-				new String[] { "Appointment.participant.actor.reference.where(startsWith('Patient')).first()" });
+				new String[] { fhirPath });
 			newSrd.setFhirContext(getFhirContext());
 			ResponseDetails responseDetails = new ResponseDetails();
 			responseDetails.setResponseResource(result);
@@ -212,7 +248,7 @@ public interface IPatchTests {
 			null,
 			PatchTypeEnum.FHIR_PATCH_JSON,
 			null,
-			patch,
+			thePatch,
 			rd);
 
 		// verify successful patch
@@ -230,6 +266,10 @@ public interface IPatchTests {
 			.anyMatch(p -> p.getActor().getReference() != null && p.getActor().getReference().equals(patient2Id)));
 		assertFalse(patchedAppointment.getParticipant()
 			.stream().anyMatch(p -> p.getActor().getReference() != null && p.getActor().getReference().equals(patient1Id)));
+
+		// verify location has not been changed
+		assertTrue(patchedAppointment.getParticipant().stream()
+			.anyMatch(p -> p.getActor().getReference() != null && p.getActor().getReference().equals(locationId)));
 	}
 
 	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theClazz) {

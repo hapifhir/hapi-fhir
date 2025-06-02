@@ -34,6 +34,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,6 +54,7 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class FhirPatch {
+	org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPatch.class);
 
 	public static final String OPERATION_ADD = "add";
 	public static final String OPERATION_DELETE = "delete";
@@ -173,20 +175,17 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-//		ParsedPath parsedPath = ParsedPath.parse(path);
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
 		List<IBase> containingElements = myContext
 				.newFhirPath()
 				.evaluate(
 						theResource,
 						parsedFhirPath.endsWithFilterOrIndex() ? parsedFhirPath.getContainingPath() : path,
-//						parsedPath.getEndsWithAFilterOrIndex() ? parsedPath.getContainingPath() : path,
 						IBase.class);
 
 		for (IBase nextElement : containingElements) {
 			if (parsedFhirPath.endsWithFilterOrIndex()) {
 				// if the path ends with a filter or index, we must be dealing with a list
-//				deleteFromList(theResource, nextElement, parsedPath.getLastElementName(), path);
 				deleteFromList(theResource, nextElement, parsedFhirPath.getLastElementName(), path);
 			} else {
 				deleteSingleElement(nextElement);
@@ -217,18 +216,19 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 
-//		ParsedPath parsedPath = ParsedPath.parse(path);
 		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
 
 		IFhirPath fhirPath = myContext.newFhirPath();
+		String lastEl = parsedFhirPath.getLastElementName();
 
 		List<IBase> containingElements =
-			fhirPath.evaluate(theResource, parsedFhirPath.getContainingPath(), IBase.class);
+			getElementsToUpdate(theResource, parsedFhirPath, fhirPath);
+
 		for (IBase containingElement : containingElements) {
 			IBase elementToUse = containingElement;
 
 			// get current element's child definition so we can construct the new value
-			ChildDefinition childDefinition = findChildDefinition(containingElement, parsedFhirPath.getLastElementName());
+			ChildDefinition childDefinition = findChildDefinition(containingElement, lastEl);
 
 			// if there's no child def, it's because we've hit a primitive node
 			if (!childDefinition.hasChildDef()) {
@@ -245,6 +245,131 @@ public class FhirPatch {
 				childDefinition.getUseableChildDef().getMutator().setValue(elementToUse, newValue);
 			}
 		}
+	}
+
+	/**
+	 * Determines if the node is a subsetting node
+	 * as described by http://hl7.org/fhirpath/N1/#subsetting
+	 */
+	private boolean isSubsettingNode(ParsedFhirPath.FhirPathNode theNode) {
+		if (theNode.getListIndex() >= 0) {
+			return true;
+		}
+		if (theNode.isFunction()) {
+			String funName = theNode.getValue();
+			// TODO - handle the brackets
+			switch (funName) {
+				case "first", "last", "single", "tail", "skip", "take", "exclude", "intersect" -> {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private List<IBase> filterDown(List<IBase> theList, IFhirPath theFhirPath, ParsedFhirPath theParsed) {
+		if (!theParsed.endsWithFilterOrIndex()) {
+			// no filter, no index - just return the list as is
+			return theList;
+		} if (!isSubsettingNode(theParsed.getTail())) {
+			/*
+			 * Not a subsetting node, so we can just apply the filter on
+			 * the list we currently have and return that
+			 */
+			String lastEl = theParsed.getLastElementName();
+			String path = theParsed.getRawPath().substring(theParsed.getRawPath().indexOf(lastEl));
+
+			return theList.stream().filter(item -> {
+				// apply the filter to determine if this item matches it
+				Optional<IBaseBooleanDatatype> matchedOp = theFhirPath.evaluateFirst(item, path, IBaseBooleanDatatype.class);
+				return matchedOp.isPresent() && matchedOp.get().getValue();
+			}).toList();
+		} else {
+			// A subsetting node or index (so has to be evaluated on a list of elements)
+			ParsedFhirPath.FhirPathNode tail = theParsed.getTail();
+
+			if (tail.isFunction() && (tail.getValue().equals("intersect") || tail.getValue().equals("exclude"))) {
+				// TODO - need to support this
+				/*
+				 * We would have to further filter down these specific functions since their arguments
+				 * (the contained path of the final nodes) have to be evaluated first
+				 */
+				ourLog.error("The functions 'exclude' and 'intersect' are not supported for patching. No patching will be done");
+				return List.of(); // empty list so nothing is patched
+			}
+
+			if (tail.getListIndex() >= 0) {
+				// specific index
+				if (tail.getListIndex() < theList.size()) {
+					return List.of(theList.get(tail.getListIndex()));
+				} else {
+					ourLog.info("Nothing matching index {}; nothing patched.", tail.getListIndex());
+					return List.of();
+				}
+			} else {
+				if (theList.isEmpty()) {
+					// empty lists should match all filters, so we'll return it here
+					ourLog.info("List contains no elements; no patching will occur");
+					return List.of();
+				}
+
+				switch (tail.getValue()) {
+					case "first" -> {
+						return List.of(theList.get(0));
+					}
+					case "last" -> {
+						return List.of(theList.get(theList.size() - 1));
+					}
+					case "tail" -> {
+						if (theList.size() == 1) {
+							ourLog.info("List contins only a single element - no patching will occur");
+							return List.of();
+						}
+						return theList.subList(1, theList.size());
+					}
+					case "single" -> {
+						if (theList.size() != 1) {
+							// TODO - update error codes
+							throw new InvalidRequestException("List contains more than a single element.");
+						}
+						// only one element
+						return theList;
+					}
+					case "skip" -> {
+						// TODO - obtain bracketed value
+						ourLog.error("Not supported");
+						return List.of();
+					}
+					case "take" -> {
+						// todo - obtain bracketed value
+						ourLog.error("not supported");
+						return List.of();
+					}
+					default -> {
+						// we shouldn't see this; it means we have not handled a filtering case
+						// todo update error codes
+						throw new InvalidRequestException("Unrecognized filter of type " + tail.getValue());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns a list of IBase elements to be updated (ie, the ones that match the FhirPath).
+	 * @param theResource the parent resource
+	 * @param theParsedFhirPath the parsed fhir path
+	 * @param theFhirPath the fhirpath parser
+	 * @return a list of elements to update
+	 */
+	private List<IBase> getElementsToUpdate(IBaseResource theResource, ParsedFhirPath theParsedFhirPath, IFhirPath theFhirPath) {
+		String containedPath = theParsedFhirPath.getContainingPath();
+
+		// these are the parent elements at the highest possible level in the fhirpath
+		// ie, everything will be contained within these and we need to filter them down
+		List<IBase> conatinedEls = theFhirPath.evaluate(theResource, containedPath, IBase.class);
+
+		return filterDown(conatinedEls, theFhirPath, theParsedFhirPath);
 	}
 
 	/**
@@ -546,14 +671,11 @@ public class FhirPatch {
 		String newValueTypeName = myContext.getResourceDefinition(theNewValue).getName();
 
 		if (theOldValue == null) {
-
 			IBase operation = ParametersUtil.addParameterToParameters(myContext, retVal, PARAMETER_OPERATION);
 			ParametersUtil.addPartCode(myContext, operation, PARAMETER_TYPE, OPERATION_INSERT);
 			ParametersUtil.addPartString(myContext, operation, PARAMETER_PATH, newValueTypeName);
 			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, theNewValue);
-
 		} else {
-
 			String oldValueTypeName =
 					myContext.getResourceDefinition(theOldValue).getName();
 			Validate.isTrue(oldValueTypeName.equalsIgnoreCase(newValueTypeName), "Resources must be of same type");

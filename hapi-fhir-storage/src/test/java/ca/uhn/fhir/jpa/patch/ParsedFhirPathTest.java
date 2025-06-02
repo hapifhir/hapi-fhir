@@ -43,12 +43,52 @@ public class ParsedFhirPathTest {
 		assertEquals(path, parsedFhirPath.getRawPath());
 		assertTrue(parsedFhirPath.endsWithAnIndex());
 
-		validateList(parsedFhirPath, List.of("Patient", "name", "given"), node -> {
-			if (node.getValue().equals("given")) {
+		validateList(parsedFhirPath, List.of("Patient", "name", "given", "[1]"), node -> {
+			if (node.getValue().equals("[1]]")) {
 				assertTrue(node.hasListIndex());
 				assertEquals(1, node.getListIndex());
 			}
 		});
+	}
+
+	@Test
+	public void parseWithIndexOnFilter() {
+		// setup
+		String path = "Appointment.participant.actor.where(reference.startsWith('Patient'))[0]";
+
+		// test
+		ParsedFhirPath parsedPath = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsedPath);
+		assertEquals(path, parsedPath.getRawPath());
+		assertTrue(parsedPath.endsWithAnIndex());
+		assertEquals(0, parsedPath.getTail().getListIndex());
+
+		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
+		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
+			List<String> subList;
+			if (node.getValue().equals("where")) {
+				subList = List.of("reference", "startsWith");
+			} else if (node.getValue().equals("first")) {
+				subList = List.of();
+			} else if (node.getValue().equals("startsWith")) {
+				subList = List.of("'Patient'");
+			} else {
+				subList = List.of();
+			}
+
+			if (!subList.isEmpty()) {
+				assertTrue(node instanceof ParsedFhirPath.FhirPathFunction);
+				ParsedFhirPath.FhirPathFunction fn = (ParsedFhirPath.FhirPathFunction) node;
+				assertNotNull(fn.getContainedExp());
+
+				validateList(fn.getContainedExp(), subList, atomicRef.get());
+			}
+		};
+		atomicRef.set(supplier);
+
+		validateList(parsedPath, List.of("Appointment", "participant", "actor", "where", "[0]"), atomicRef.get());
 	}
 
 	@Test
