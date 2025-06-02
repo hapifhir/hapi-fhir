@@ -46,6 +46,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_REQUEST_SOURCE = HeaderConstants.X_REQUEST_SOURCE;
+
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
@@ -120,6 +121,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_ACCEPT_ENCODING = HeaderConstants.ACCEPT_ENCODING;
+
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY =
 			CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY =
@@ -173,12 +175,14 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_CONTENT_LOCATION = HeaderConstants.CONTENT_LOCATION;
+
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_TYPE} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_CONTENT_TYPE = HeaderConstants.CONTENT_TYPE;
+
 	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#COOKIE} instead
@@ -205,42 +209,49 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_ETAG = HeaderConstants.ETAG;
+
 	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MATCH} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_MATCH = HeaderConstants.IF_MATCH;
+
 	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MODIFIED_SINCE} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_MODIFIED_SINCE = HeaderConstants.IF_MODIFIED_SINCE;
+
 	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_EXIST} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_NONE_EXIST = HeaderConstants.IF_NONE_EXIST;
+
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_MATCH} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_NONE_MATCH = HeaderConstants.IF_NONE_MATCH;
+
 	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#LAST_MODIFIED} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_LAST_MODIFIED = HeaderConstants.LAST_MODIFIED;
+
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#LOCATION} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_LOCATION = HeaderConstants.LOCATION;
+
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#ORIGIN} instead
@@ -252,6 +263,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_PREFER = HeaderConstants.PREFER;
+
 	public static final String HEADER_PREFER_HANDLING = "handling";
 	public static final String HEADER_PREFER_HANDLING_STRICT = "strict";
 	public static final String HEADER_PREFER_HANDLING_LENIENT = "lenient";
@@ -271,6 +283,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = HeaderConstants.X_RETRY_ON_VERSION_CONFLICT;
+
 	public static final String HEADER_MAX_RETRIES = "max-retries";
 	public static final String HEADER_RETRY = "retry";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
@@ -392,6 +405,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String POWERED_BY_HEADER = HeaderConstants.X_POWERED_BY;
+
 	public static final Charset CHARSET_US_ASCII;
 	public static final String PARAM_PAGEID = "_pageId";
 	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
@@ -405,6 +419,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_CASCADE = HeaderConstants.X_CASCADE;
+
 	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
 	public static final String CASCADE_DELETE = "delete";
 	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
@@ -418,6 +433,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_PREFER_RESPOND_ASYNC = HeaderConstants.PREFER_RESPOND_ASYNC;
+
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
 	/**
@@ -431,6 +447,7 @@ public class Constants {
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_X_PROGRESS = HeaderConstants.X_PROGRESS;
+
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#RETRY_AFTER} instead

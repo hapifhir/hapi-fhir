@@ -22,11 +22,11 @@ package ca.uhn.fhir.model.api;
 // Created by Claude Sonnet 4
 /**
  * Centralized header constants for HAPI FHIR.
- * 
+ *
  * This class consolidates header keys used throughout the HAPI FHIR framework,
  * organized by functional category. This replaces scattered header definitions
  * and provides a single source of truth for header naming conventions.
- * 
+ *
  * @since 7.2.0
  */
 public final class HeaderConstants {
@@ -312,25 +312,29 @@ public final class HeaderConstants {
 	 * UserData key for FhirTerser contain resources completion flag.
 	 * @see ca.uhn.fhir.util.FhirTerser#USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED
 	 */
-	public static final String USERDATA_CONTAIN_RESOURCES_COMPLETED = "ca.uhn.fhir.util.FhirTerser_CONTAIN_RESOURCES_COMPLETED";
+	public static final String USERDATA_CONTAIN_RESOURCES_COMPLETED =
+			"ca.uhn.fhir.util.FhirTerser_CONTAIN_RESOURCES_COMPLETED";
 
 	/**
 	 * UserData key for resolved tag definitions in transactions.
 	 * @see ca.uhn.fhir.jpa.dao.tx.HapiTransactionService#XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS
 	 */
-	public static final String USERDATA_RESOLVED_TAG_DEFINITIONS = "ca.uhn.fhir.jpa.dao.tx.HapiTransactionService_RESOLVED_TAG_DEFINITIONS";
+	public static final String USERDATA_RESOLVED_TAG_DEFINITIONS =
+			"ca.uhn.fhir.jpa.dao.tx.HapiTransactionService_RESOLVED_TAG_DEFINITIONS";
 
 	/**
 	 * UserData key for existing search parameters in transactions.
 	 * @see ca.uhn.fhir.jpa.dao.tx.HapiTransactionService#XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS
 	 */
-	public static final String USERDATA_EXISTING_SEARCH_PARAMS = "ca.uhn.fhir.jpa.dao.tx.HapiTransactionService_EXISTING_SEARCH_PARAMS";
+	public static final String USERDATA_EXISTING_SEARCH_PARAMS =
+			"ca.uhn.fhir.jpa.dao.tx.HapiTransactionService_EXISTING_SEARCH_PARAMS";
 
 	/**
 	 * UserData key for MDM search expansion results.
 	 * @see ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc#EXPANSION_RESULTS
 	 */
-	public static final String USERDATA_MDM_EXPANSION_RESULTS = "ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc_EXPANSION_RESULTS";
+	public static final String USERDATA_MDM_EXPANSION_RESULTS =
+			"ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc_EXPANSION_RESULTS";
 
 	/**
 	 * UserData key for MDM resource name.

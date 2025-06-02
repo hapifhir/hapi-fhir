@@ -581,7 +581,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			String bearerToken = getAndParseBearerTokenAuthHeader(theCommandLine, theBearerTokenOptionName);
 			if (isNotBlank(bearerToken)) {
 				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(
-                        HeaderConstants.AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
+						HeaderConstants.AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
 			}
 		}
 
