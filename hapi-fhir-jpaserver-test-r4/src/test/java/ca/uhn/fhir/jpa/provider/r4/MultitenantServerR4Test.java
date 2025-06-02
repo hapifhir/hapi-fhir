@@ -17,8 +17,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -975,7 +975,7 @@ public class 	MultitenantServerR4Test extends BaseMultitenantResourceProviderR4T
 			// mocking
 			ServletRequestDetails servletRequestDetails = spy(new ServletRequestDetails());
 			MockHttpServletRequest reqDetails = new MockHttpServletRequest();
-			reqDetails.addHeader(Constants.HEADER_PREFER,
+			reqDetails.addHeader(HeaderConstants.PREFER,
 				"respond-async");
 			servletRequestDetails.setServletRequest(reqDetails);
 			when(servletRequestDetails.getServer())

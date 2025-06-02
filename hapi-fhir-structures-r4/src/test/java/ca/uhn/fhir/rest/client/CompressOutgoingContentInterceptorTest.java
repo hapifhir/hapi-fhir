@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
@@ -63,8 +63,8 @@ public class CompressOutgoingContentInterceptorTest {
 
 		@Create
 		public MethodOutcome create(HttpServletRequest theReq, @ResourceParam Patient thePatient) {
-			ourLastReq = theReq.getHeader(Constants.HEADER_CONTENT_ENCODING.toLowerCase());
-			ourLastResponseEncoding = theReq.getHeader(Constants.HEADER_ACCEPT_ENCODING.toLowerCase());
+			ourLastReq = theReq.getHeader(HeaderConstants.CONTENT_ENCODING.toLowerCase());
+			ourLastResponseEncoding = theReq.getHeader(HeaderConstants.ACCEPT_ENCODING.toLowerCase());
 			ourLastPatient = thePatient;
 			return new MethodOutcome(new IdDt("Patient", "1"));
 		}

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
@@ -157,14 +157,14 @@ public class OkHttpRestfulClient implements IHttpClient {
 		boolean shouldAddQuestionMark = !hasQuestionMark(sb);
 		sb.append(shouldAddQuestionMark ? '?' : '&');
 		sb.append(everythingAfterFirstQuestionMark(ifNoneExistString));
-		result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+		result.addHeader(HeaderConstants.IF_NONE_EXIST, sb.toString());
 	}
 
 	private void addIfNoneExistHeaderFromParams(IHttpRequest result, Map<String, List<String>> ifNoneExistParams) {
 		StringBuilder sb = newHeaderBuilder(myUrl);
 		boolean shouldAddInitialQuestionMark = !hasQuestionMark(sb);
 		BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(ifNoneExistParams, sb, shouldAddInitialQuestionMark);
-		result.addHeader(Constants.HEADER_IF_NONE_EXIST, sb.toString());
+		result.addHeader(HeaderConstants.IF_NONE_EXIST, sb.toString());
 	}
 
 	public static StringBuilder newHeaderBuilder(StringBuilder baseUrl) {

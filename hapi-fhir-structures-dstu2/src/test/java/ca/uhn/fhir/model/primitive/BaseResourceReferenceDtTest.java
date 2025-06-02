@@ -2,6 +2,7 @@ package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -68,7 +69,7 @@ public class BaseResourceReferenceDtTest {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(HeaderConstants.LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -87,7 +88,7 @@ public class BaseResourceReferenceDtTest {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(HeaderConstants.LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {

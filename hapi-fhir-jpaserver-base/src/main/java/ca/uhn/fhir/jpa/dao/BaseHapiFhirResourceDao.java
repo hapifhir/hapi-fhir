@@ -78,6 +78,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
@@ -2040,7 +2041,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		CacheControlDirective cacheControlDirective = new CacheControlDirective();
 		if (theRequest != null) {
-			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+			cacheControlDirective.parse(theRequest.getHeaders(HeaderConstants.CACHE_CONTROL));
 		}
 
 		RequestPartitionId requestPartitionId =

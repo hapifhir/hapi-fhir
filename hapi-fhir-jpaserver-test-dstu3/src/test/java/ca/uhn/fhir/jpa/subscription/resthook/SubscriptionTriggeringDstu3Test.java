@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.ForceSynchronousSearchInterceptor;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -594,7 +595,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
@@ -607,7 +608,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
@@ -619,7 +620,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		@Create
 		public MethodOutcome create(@ResourceParam Patient thePatient, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedPatients.add(thePatient);
 			return new MethodOutcome(new IdType("Patient/1"), true);
 		}
@@ -632,7 +633,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		@Update
 		public MethodOutcome update(@ResourceParam Patient thePatient, HttpServletRequest theRequest) {
 			ourUpdatedPatients.add(thePatient);
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedPatients.size());
 			return new MethodOutcome(new IdType("Patient/1"), false);
 		}

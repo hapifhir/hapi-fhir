@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jaxrs.server.util;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
@@ -99,12 +100,12 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 			if (myWriter != null) {
 				String charContentType = myContentType + "; charset="
 						+ StringUtils.defaultIfBlank(myCharset, Constants.CHARSET_NAME_UTF8);
-				builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
+				builder.header(HeaderConstants.CONTENT_TYPE, charContentType);
 				builder.entity(myWriter.toString());
 			} else {
 				byte[] byteArray = myOutputStream.toByteArray();
 				if (byteArray.length > 0) {
-					builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
+					builder.header(HeaderConstants.CONTENT_TYPE, myContentType);
 					builder.entity(byteArray);
 				}
 			}

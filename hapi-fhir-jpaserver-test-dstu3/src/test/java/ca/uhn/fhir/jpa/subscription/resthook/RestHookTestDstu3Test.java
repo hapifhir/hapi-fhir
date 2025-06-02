@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -660,7 +661,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
@@ -673,7 +674,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}

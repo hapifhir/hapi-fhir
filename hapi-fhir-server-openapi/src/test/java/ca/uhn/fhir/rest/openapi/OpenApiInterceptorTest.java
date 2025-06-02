@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -257,7 +258,7 @@ public class OpenApiInterceptorTest {
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+			get.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response: {}", response);
@@ -267,13 +268,13 @@ public class OpenApiInterceptorTest {
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+			get.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
 				assertEquals(400, response.getStatusLine().getStatusCode());
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
+			get.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
 				assertEquals(400, response.getStatusLine().getStatusCode());
 			}

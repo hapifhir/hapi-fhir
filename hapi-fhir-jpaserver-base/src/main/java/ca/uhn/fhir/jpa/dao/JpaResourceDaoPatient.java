@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -112,7 +113,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 				this,
 				paramMap,
 				getResourceName(),
-				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
+				new CacheControlDirective().parse(theRequest.getHeaders(HeaderConstants.CACHE_CONTROL)),
 				theRequest,
 				requestPartitionId);
 	}

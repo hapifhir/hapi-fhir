@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -66,7 +67,7 @@ public class ReadDstu2Test {
 		// thus it has changed before the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(304, status.getStatusLine().getStatusCode());
@@ -78,7 +79,7 @@ public class ReadDstu2Test {
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(304, status.getStatusLine().getStatusCode());
@@ -90,7 +91,7 @@ public class ReadDstu2Test {
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());

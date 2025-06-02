@@ -2,6 +2,7 @@ package ca.uhn.fhir.android.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -253,7 +254,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"), respString))
-				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.headers(Headers.of(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3"))
 				.message("")
 				.build();
 
@@ -281,7 +282,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON + "; charset=UTF-8"), respString))
-				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.headers(Headers.of(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3"))
 				.message("")
 				.build();
 

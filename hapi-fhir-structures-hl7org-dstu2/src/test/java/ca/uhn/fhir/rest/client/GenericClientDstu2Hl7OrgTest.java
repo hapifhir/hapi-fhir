@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -86,7 +87,7 @@ public class GenericClientDstu2Hl7OrgTest {
     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
     when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] {
-        new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
+        new BasicHeader(HeaderConstants.LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
     });
     when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
       @Override
@@ -276,8 +277,8 @@ public class GenericClientDstu2Hl7OrgTest {
         .execute();
 		assertEquals("http://example.com/fhir/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -291,8 +292,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		//@formatter:on		
 	assertEquals("http://example.com/fhir/Patient/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -306,8 +307,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		//@formatter:on		
 	assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -354,8 +355,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		//@formatter:on
 	assertEquals("http://example.com/fhir/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -369,8 +370,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		//@formatter:on		
 	assertEquals("http://example.com/fhir/Patient/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -384,8 +385,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		//@formatter:on		
 	assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
 		assertEquals(respString, p.encodeResourceToString(resp));
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
@@ -601,8 +602,8 @@ public class GenericClientDstu2Hl7OrgTest {
 				.withParameters(inParams).execute();
 		//@formatter:on
 	assertEquals("http://example.com/fhir/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals(extractBody(capt, idx), reqString);
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertThat(resp.getParameter()).hasSize(1);
@@ -759,20 +760,20 @@ public class GenericClientDstu2Hl7OrgTest {
     p.addName().addFamily("FOOFAMILY");
 
     client.create().resource(p).conditionalByUrl("Patient?name=foo").execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("{\"family\":[\"FOOFAMILY\"]}");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.IF_NONE_EXIST).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
 
     client.create().resource(p).conditional().where(new StringClientParam("name").matches().value("foo")).execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("{\"family\":[\"FOOFAMILY\"]}");
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.IF_NONE_EXIST).getValue());
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     idx++;
 
@@ -798,24 +799,24 @@ public class GenericClientDstu2Hl7OrgTest {
     p.addName().addFamily("FOOFAMILY");
 
     client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getURI().toString());
     idx++;
 
     client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo", capt.getAllValues().get(idx).getURI().toString());
     idx++;
 
     client.update().resource(p).conditional().where(new StringClientParam("name").matches().value("foo")).and(new StringClientParam("address").matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo&address=AAA%5C%7CBBB", capt.getAllValues().get(idx).getURI().toString());
@@ -823,8 +824,8 @@ public class GenericClientDstu2Hl7OrgTest {
 
     client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(new StringClientParam("name").matches().value("foo"))
         .and(new StringClientParam("address").matches().value("AAA|BBB")).encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx)).contains("<family value=\"FOOFAMILY\"/>");
 		assertEquals("PUT", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("http://example.com/fhir/Patient?name=foo&address=AAA%5C%7CBBB", capt.getAllValues().get(idx).getURI().toString());

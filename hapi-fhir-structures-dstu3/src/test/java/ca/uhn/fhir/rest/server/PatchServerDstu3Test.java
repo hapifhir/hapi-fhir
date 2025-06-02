@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Patch;
@@ -64,7 +65,7 @@ public class PatchServerDstu3Test {
 	public void testPatchValidJson() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch(ourServer.getBaseUrl() + "/Patient/123");
-		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -87,7 +88,7 @@ public class PatchServerDstu3Test {
 	public void testPatchUsingConditional() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch(ourServer.getBaseUrl() + "/Patient?_id=123");
-		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -111,7 +112,7 @@ public class PatchServerDstu3Test {
 	public void testPatchValidXml() throws Exception {
 		String requestContents = "<root/>";
 		HttpPatch httpPatch = new HttpPatch(ourServer.getBaseUrl() + "/Patient/123");
-		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_XML_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -113,7 +114,7 @@ public class BulkImportFileServlet extends HttpServlet {
 			}
 
 			theResponse.setStatus(responseCode);
-			theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_TEXT);
+			theResponse.addHeader(HeaderConstants.CONTENT_TYPE, Constants.CT_TEXT);
 			theResponse.getWriter().print("Failed to handle response. See server logs for details.");
 			theResponse.getWriter().close();
 		}
@@ -131,11 +132,11 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		myLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
 
-		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, getHeaderContentType());
+		theResponse.addHeader(HeaderConstants.CONTENT_TYPE, getHeaderContentType());
 
 		IFileSupplier supplier = myFileIds.get(indexParam);
 		if (supplier.isGzip()) {
-			theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+			theResponse.addHeader(HeaderConstants.CONTENT_ENCODING, Constants.ENCODING_GZIP);
 		}
 
 		if (myLog.isDebugEnabled()) {

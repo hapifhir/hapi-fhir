@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -44,7 +44,7 @@ public class GZipContentInterceptor implements IClientInterceptor {
 	public void interceptRequest(IHttpRequest theRequestInterface) {
 		HttpRequestBase theRequest = ((ApacheHttpRequest) theRequestInterface).getApacheRequest();
 		if (theRequest instanceof HttpEntityEnclosingRequest) {
-			Header[] encodingHeaders = theRequest.getHeaders(Constants.HEADER_CONTENT_ENCODING);
+			Header[] encodingHeaders = theRequest.getHeaders(HeaderConstants.CONTENT_ENCODING);
 			if (encodingHeaders == null || encodingHeaders.length == 0) {
 				HttpEntityEnclosingRequest req = (HttpEntityEnclosingRequest) theRequest;
 
@@ -62,7 +62,7 @@ public class GZipContentInterceptor implements IClientInterceptor {
 				byte[] byteArray = bos.toByteArray();
 				ByteArrayEntity newEntity = new ByteArrayEntity(byteArray);
 				req.setEntity(newEntity);
-				req.addHeader(Constants.HEADER_CONTENT_ENCODING, "gzip");
+				req.addHeader(HeaderConstants.CONTENT_ENCODING, "gzip");
 			}
 		}
 	}

@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -50,7 +50,7 @@ class PatchTypeParameter implements IParameter {
 	}
 
 	public static PatchTypeEnum getTypeForRequestOrThrowInvalidRequestException(RequestDetails theRequest) {
-		String contentTypeAll = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
+		String contentTypeAll = defaultString(theRequest.getHeader(HeaderConstants.CONTENT_TYPE));
 
 		int semicolonIndex = contentTypeAll.indexOf(';');
 		if (semicolonIndex > 0) {

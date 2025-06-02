@@ -15,10 +15,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperation;
@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleBuilder;
@@ -88,14 +87,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -854,7 +851,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		final IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -870,7 +867,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		response = ourHttpClient.execute(post);
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		} finally {
 			response.close();
@@ -1183,7 +1180,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Bundle resp = myClient
 			.transaction()
 			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.withAdditionalHeader(HeaderConstants.PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
@@ -1192,7 +1189,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		resp = myClient
 			.transaction()
 			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+			.withAdditionalHeader(HeaderConstants.PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
@@ -1202,7 +1199,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient
 				.transaction()
 				.withBundle(bundle)
-				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.withAdditionalHeader(HeaderConstants.PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 				.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
@@ -1295,7 +1292,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Bundle resp = myClient
 			.transaction()
 			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.withAdditionalHeader(HeaderConstants.PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		assertThat(resp.getEntry()).hasSize(3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));

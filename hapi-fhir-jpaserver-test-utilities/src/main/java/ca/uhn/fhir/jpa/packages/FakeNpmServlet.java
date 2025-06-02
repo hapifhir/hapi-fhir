@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,9 +46,9 @@ public class FakeNpmServlet extends HttpServlet {
 			resp.setStatus(200);
 
 			if (StringUtils.countMatches(requestUrl, "/") == 1) {
-				resp.setHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
+				resp.setHeader(HeaderConstants.CONTENT_TYPE, Constants.CT_JSON);
 			} else {
-				resp.setHeader(Constants.HEADER_CONTENT_TYPE, "application/gzip");
+				resp.setHeader(HeaderConstants.CONTENT_TYPE, "application/gzip");
 			}
 			resp.getOutputStream().write(responses.get(requestUrl));
 			resp.getOutputStream().close();

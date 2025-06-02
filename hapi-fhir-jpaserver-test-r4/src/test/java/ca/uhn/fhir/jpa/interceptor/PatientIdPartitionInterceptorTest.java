@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -553,7 +554,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Test
 	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
 			ourLog.info("Response: {}",postResponse);
@@ -565,7 +566,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Test
 	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
@@ -583,7 +584,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
@@ -594,7 +595,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 
-			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
+			Header locationHeader = postResponse.getFirstHeader(HeaderConstants.CONTENT_LOCATION);
 			assertNotNull(locationHeader);
 			locationUrl = locationHeader.getValue();
 		}
@@ -610,7 +611,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
 			ourLog.info("Response: {}",postResponse);

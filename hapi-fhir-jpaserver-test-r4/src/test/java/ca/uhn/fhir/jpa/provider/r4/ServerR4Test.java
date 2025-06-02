@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -399,7 +400,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			OperationOutcome createOutcome;
 
 			HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
-			post.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+			post.addHeader(HeaderConstants.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 			post.setEntity(entity);
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 				assertEquals(HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
@@ -408,7 +409,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			}
 
 			HttpPut put = new HttpPut(myServerBase + "/Patient/" + theId);
-			put.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+			put.addHeader(HeaderConstants.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 			put.setEntity(entity);
 			try (CloseableHttpResponse resp = ourHttpClient.execute(put)) {
 				assertEquals(HttpStatus.SC_PRECONDITION_FAILED, resp.getStatusLine().getStatusCode());

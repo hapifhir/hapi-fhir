@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -103,7 +104,7 @@ public class ConformanceMethodBindingTest {
 		TestResourceProvider provider = init(new TestResourceProvider());
 
 		RequestDetails requestDetails = mySrd;
-		when(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)).thenReturn(Lists.newArrayList(Constants.CACHE_CONTROL_NO_CACHE));
+		when(requestDetails.getHeaders(HeaderConstants.CACHE_CONTROL)).thenReturn(Lists.newArrayList(Constants.CACHE_CONTROL_NO_CACHE));
 		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
 		verify(provider, times(1)).getServerConformance(any(), any());
 		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});

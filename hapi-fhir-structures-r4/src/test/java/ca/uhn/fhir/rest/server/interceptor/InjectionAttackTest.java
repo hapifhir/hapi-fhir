@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -50,7 +51,7 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "application/<script>");
+		httpGet.addHeader(HeaderConstants.ACCEPT, "application/<script>");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -69,7 +70,7 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -81,7 +82,7 @@ public class InjectionAttackTest {
 
 		// JSON HTML
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -93,7 +94,7 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_XML_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -105,7 +106,7 @@ public class InjectionAttackTest {
 
 		// JSON Plain
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -124,7 +125,7 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -136,7 +137,7 @@ public class InjectionAttackTest {
 
 		// JSON HTML
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -148,7 +149,7 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_XML_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -160,7 +161,7 @@ public class InjectionAttackTest {
 
 		// JSON Plain
 		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
@@ -178,7 +179,7 @@ public class InjectionAttackTest {
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
 		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "application/<script>");
+		httpGet.addHeader(HeaderConstants.ACCEPT, "application/<script>");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);

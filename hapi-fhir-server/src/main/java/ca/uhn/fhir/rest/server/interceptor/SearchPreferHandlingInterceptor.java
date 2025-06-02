@@ -25,7 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -91,7 +91,7 @@ public class SearchPreferHandlingInterceptor {
 			return;
 		}
 
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		String preferHeader = theRequestDetails.getHeader(HeaderConstants.PREFER);
 		PreferHandlingEnum handling = null;
 		if (isNotBlank(preferHeader)) {
 			PreferHeader parsedPreferHeader = RestfulServerUtils.parsePreferHeader(

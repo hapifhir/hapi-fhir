@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -373,10 +374,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// Reject output
 		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
-			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String id = status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue();
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -387,10 +388,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
-			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String id = status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue();
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
@@ -420,10 +421,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL1");
 		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String idVal = status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue();
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -438,10 +439,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL2");
 		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String idVal = status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue();
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
@@ -464,7 +465,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String url = myServerBase + "/Observation?_pretty=true&_count=10";
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		get.addHeader(HeaderConstants.ACCEPT, Constants.CT_JSON);
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
@@ -492,7 +493,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		get.addHeader(HeaderConstants.ACCEPT, Constants.CT_JSON);
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
@@ -522,7 +523,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		get.addHeader(HeaderConstants.ACCEPT, Constants.CT_JSON);
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
@@ -562,7 +563,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		get.addHeader(HeaderConstants.ACCEPT, Constants.CT_JSON);
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
@@ -787,7 +788,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		get.addHeader(HeaderConstants.ACCEPT, Constants.CT_JSON);
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);

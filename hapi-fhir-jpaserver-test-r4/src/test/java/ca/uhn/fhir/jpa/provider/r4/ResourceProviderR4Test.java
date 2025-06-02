@@ -19,13 +19,13 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -68,7 +68,6 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -184,7 +183,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ch. qos. logback. classic.Level;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -943,7 +941,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			// good
 		}
 
-		List<String> locationHeader = captureInterceptor.getLastResponse().getHeaders(Constants.HEADER_LOCATION);
+		List<String> locationHeader = captureInterceptor.getLastResponse().getHeaders(HeaderConstants.LOCATION);
 		assertThat(locationHeader).hasSize(1);
 		assertThat(locationHeader.get(0)).contains(id.getValue() + "/_history/2");
 	}
@@ -1371,7 +1369,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		resp = ourHttpClient.execute(putRequest);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		} finally {
 			resp.close();
 		}
@@ -1436,7 +1434,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.registerInterceptor(new IClientInterceptor() {
 			@Override
 			public void interceptRequest(IHttpRequest theRequest) {
-				theRequest.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+				theRequest.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 			}
 
 			@Override
@@ -1580,7 +1578,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try (CloseableHttpResponse response = ourHttpClient.execute(procedurePost)) {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Procedure/");
 			id = new IdType(newIdString);
 		}
@@ -1640,13 +1638,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
+		post.addHeader(HeaderConstants.IF_NONE_EXIST, "Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -1655,11 +1653,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
+		post.addHeader(HeaderConstants.IF_NONE_EXIST, "Patient?name=" + methodName);
 		response = ourHttpClient.execute(post);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertEquals(id.getValue(), newIdString); // version should match for conditional create
 		} finally {
 			response.close();
@@ -1674,14 +1672,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.addHeader(HeaderConstants.IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		IdType id;
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -1692,7 +1690,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		response = ourHttpClient.execute(post);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdType(newIdString);
 		} finally {
@@ -1737,7 +1735,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -1991,7 +1989,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -2057,7 +2055,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -2896,7 +2894,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -2963,7 +2961,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", respString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -3414,7 +3412,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -3448,7 +3446,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		patch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
@@ -3504,7 +3502,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		patch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.addHeader("If-Match", "W/\"1\"");
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
@@ -3535,7 +3533,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		patch.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
@@ -6106,7 +6104,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -6136,14 +6134,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
+		post.addHeader(HeaderConstants.IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		IdType id;
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -6185,7 +6183,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
 		} finally {
@@ -6199,7 +6197,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
@@ -6353,7 +6351,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"44\"");
+		put.addHeader(HeaderConstants.IF_MATCH, "W/\"44\"");
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(put);
 		try {
@@ -6368,7 +6366,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Now a good one
 		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_IF_MATCH, "W/\"1\"");
+		put.addHeader(HeaderConstants.IF_MATCH, "W/\"1\"");
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -515,7 +516,7 @@ public class BaseController {
 					resultBody = IOUtils.toString(input, Constants.CHARSET_UTF8);
 				}
 
-				List<String> ctStrings = lastResponse.getHeaders(Constants.HEADER_CONTENT_TYPE);
+				List<String> ctStrings = lastResponse.getHeaders(HeaderConstants.CONTENT_TYPE);
 				if (ctStrings != null && ctStrings.isEmpty() == false) {
 					ct = ContentType.parse(ctStrings.get(0));
 					mimeType = ct.getMimeType();

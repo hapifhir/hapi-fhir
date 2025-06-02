@@ -29,11 +29,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -319,7 +319,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			params.setCount(pageSize);
 
 			CacheControlDirective cacheControlDirective = new CacheControlDirective();
-			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+			cacheControlDirective.parse(requestDetails.getHeaders(HeaderConstants.CACHE_CONTROL));
 
 			RequestPartitionId requestPartitionId =
 					myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetails, theType, params);

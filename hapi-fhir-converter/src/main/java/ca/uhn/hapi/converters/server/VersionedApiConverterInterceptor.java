@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -90,7 +91,7 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 			accept = formatParams[0];
 		}
 		if (isBlank(accept)) {
-			accept = defaultString(theServletRequest.getHeader(Constants.HEADER_ACCEPT));
+			accept = defaultString(theServletRequest.getHeader(HeaderConstants.ACCEPT));
 		}
 		StringTokenizer tok = new StringTokenizer(accept, ";");
 		String wantVersionString = null;

@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -337,7 +338,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		if (theRequestDetails != null) {
-			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+			String prefer = theRequestDetails.getHeader(HeaderConstants.PREFER);
 			PreferReturnEnum preferReturn =
 					RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 			if (preferReturn != null) {
@@ -804,15 +805,15 @@ public abstract class BaseTransactionProcessor {
 				ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, verb, theParamValues);
 
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(theEntry))) {
-			subRequestDetails.addHeader(Constants.HEADER_IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
+			subRequestDetails.addHeader(HeaderConstants.IF_MATCH, myVersionAdapter.getEntryRequestIfMatch(theEntry));
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneExist(theEntry))) {
 			subRequestDetails.addHeader(
-					Constants.HEADER_IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
+				HeaderConstants.IF_NONE_EXIST, myVersionAdapter.getEntryRequestIfNoneExist(theEntry));
 		}
 		if (isNotBlank(myVersionAdapter.getEntryRequestIfNoneMatch(theEntry))) {
 			subRequestDetails.addHeader(
-					Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
+				HeaderConstants.IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
 		}
 
 		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);

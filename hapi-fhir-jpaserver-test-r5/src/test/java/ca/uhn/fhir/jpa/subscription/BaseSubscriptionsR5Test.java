@@ -16,9 +16,9 @@ import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -341,7 +341,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {
 			ourLog.info("Received Transaction with {} entries", theBundle.getEntry().size());
 			count.incrementAndGet();
-			receivedContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			receivedContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			receivedBundles.add(theBundle);
 			extractHeaders(theRequest);
 			return theBundle;

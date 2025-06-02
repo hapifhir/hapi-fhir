@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -13,7 +14,6 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
-import com.helger.commons.io.stream.StringInputStream;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -128,7 +128,7 @@ public class ServerConcurrencyTest {
 
 	private void initRequestMocks(String theURL) {
 		myHeaders = new HashMap<>();
-		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+		myHeaders.put(HeaderConstants.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
 		String relativeUri;
 		int endOfUri = theURL.indexOf("?");

@@ -211,8 +211,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			MethodOutcome response,
 			String resourceName) {
 		if (response != null && response.getId() != null) {
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION, resourceName);
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION, resourceName);
+			addLocationHeader(theRequest, servletResponse, response, HeaderConstants.LOCATION, resourceName);
+			addLocationHeader(theRequest, servletResponse, response, HeaderConstants.CONTENT_LOCATION, resourceName);
 		}
 	}
 
@@ -1074,7 +1074,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				 * reason.... grr.....
 				 */
 				if (isIgnoreServerParsedRequestParameters()) {
-					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+					String contentType = theRequest.getHeader(HeaderConstants.CONTENT_TYPE);
 					if (theRequestType == RequestTypeEnum.POST
 							&& isNotBlank(contentType)
 							&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
@@ -1092,7 +1092,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 				// If the request is coming in with a content-encoding, don't try to
 				// load the params from the content.
-				if (isNotBlank(theRequest.getHeader(Constants.HEADER_CONTENT_ENCODING))) {
+				if (isNotBlank(theRequest.getHeader(HeaderConstants.CONTENT_ENCODING))) {
 					if (isNotBlank(theRequest.getQueryString())) {
 						params = UrlUtil.parseQueryString(theRequest.getQueryString());
 					} else {
@@ -1134,7 +1134,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			fhirServerBase = getServerBaseForRequest(requestDetails);
 
 			if (theRequestType == RequestTypeEnum.PUT) {
-				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
+				String contentLocation = theRequest.getHeader(HeaderConstants.CONTENT_LOCATION);
 				if (contentLocation != null) {
 					id = myFhirContext.getVersion().newIdType();
 					id.setValue(contentLocation);
@@ -1142,7 +1142,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			}
 
-			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
+			String acceptEncoding = theRequest.getHeader(HeaderConstants.ACCEPT_ENCODING);
 			boolean respondGzip = false;
 			if (acceptEncoding != null) {
 				String[] parts = acceptEncoding.trim().split("\\s*,\\s*");
@@ -1266,7 +1266,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					String baseUrl =
 							myServerAddressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
 					resourceId = resourceId.withServerBase(baseUrl, resourceId.getResourceType());
-					requestDetails.getResponse().addHeader(Constants.HEADER_LOCATION, resourceId.getValue());
+					requestDetails.getResponse().addHeader(HeaderConstants.LOCATION, resourceId.getValue());
 				}
 			}
 

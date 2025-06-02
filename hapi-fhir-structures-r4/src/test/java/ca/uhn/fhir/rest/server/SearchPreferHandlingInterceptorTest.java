@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -90,7 +91,7 @@ public class SearchPreferHandlingInterceptorTest {
 				.search()
 				.forResource(Patient.class)
 				.where(new StringClientParam("foo").matches().value("bar"))
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.encodedJson()
@@ -108,7 +109,7 @@ public class SearchPreferHandlingInterceptorTest {
 				.search()
 				.forResource(Patient.class)
 				.where(new StringClientParam("foo").matches().value("bar"))
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.encodedJson()
@@ -128,7 +129,7 @@ public class SearchPreferHandlingInterceptorTest {
 			.and(Patient.IDENTIFIER.exactly().codes("BLAH"))
 			.prettyPrint()
 			.returnBundle(Bundle.class)
-			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
+			.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
 		assertEquals(200, outcome.getTotal());

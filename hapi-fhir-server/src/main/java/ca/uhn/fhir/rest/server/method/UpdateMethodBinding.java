@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -58,7 +58,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	public static IIdType applyETagAsVersion(RequestDetails theRequest, IIdType theId) {
-		String ifMatchValue = theRequest.getHeader(Constants.HEADER_IF_MATCH);
+		String ifMatchValue = theRequest.getHeader(HeaderConstants.IF_MATCH);
 		return applyETagAsVersion(ifMatchValue, theId);
 	}
 

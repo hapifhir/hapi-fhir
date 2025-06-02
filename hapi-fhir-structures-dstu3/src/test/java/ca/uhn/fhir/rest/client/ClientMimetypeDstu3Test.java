@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -150,7 +151,7 @@ public class ClientMimetypeDstu3Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] { new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", requestCt + "; charset=UTF-8"));

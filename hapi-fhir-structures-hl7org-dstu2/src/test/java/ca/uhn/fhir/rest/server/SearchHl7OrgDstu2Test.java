@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -56,7 +56,7 @@ public class SearchHl7OrgDstu2Test {
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(status.getFirstHeader(HeaderConstants.CONTENT_LOCATION));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class SearchHl7OrgDstu2Test {
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(status.getFirstHeader(HeaderConstants.CONTENT_LOCATION));
   }
 
   @Test

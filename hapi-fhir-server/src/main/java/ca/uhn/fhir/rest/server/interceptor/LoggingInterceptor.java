@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -349,7 +350,7 @@ public class LoggingInterceptor {
 				case "requestId":
 					return myRequestDetails.getRequestId();
 				case "responseId":
-					String locationHeader = myResponse.getHeader(Constants.HEADER_LOCATION);
+					String locationHeader = myResponse.getHeader(HeaderConstants.LOCATION);
 					if (isNotBlank(locationHeader)) {
 						return new IdDt(locationHeader).toUnqualified().getValue();
 					}

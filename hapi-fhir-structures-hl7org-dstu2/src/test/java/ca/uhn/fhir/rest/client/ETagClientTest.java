@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -83,8 +84,8 @@ public class ETagClientTest {
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     //@formatter:off
     Header[] headers = new Header[]{
-      new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-      new BasicHeader(Constants.HEADER_ETAG, "\"9999\"")
+      new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+      new BasicHeader(HeaderConstants.ETAG, "\"9999\"")
     };
     //@formatter:on
     when(myHttpResponse.getAllHeaders()).thenReturn(headers);
@@ -134,7 +135,7 @@ public class ETagClientTest {
 		//@formatter:on
 		assertThat(response).isSameAs(expected);
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_NONE_MATCH_LC)[0].getValue());
+		assertEquals("\"9876\"", capt.getAllValues().get(count).getHeaders(HeaderConstants.IF_NONE_MATCH.toLowerCase())[0].getValue());
     count++;
 
   }
@@ -159,7 +160,7 @@ public class ETagClientTest {
       .execute();
 		//@formatter:on
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-		assertEquals(0, capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC).length);
+		assertEquals(0, capt.getAllValues().get(count).getHeaders(HeaderConstants.IF_MATCH.toLowerCase()).length);
     count++;
 
     //@formatter:off
@@ -171,7 +172,7 @@ public class ETagClientTest {
       .execute();
     //@formatter:on
     assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(HeaderConstants.IF_MATCH.toLowerCase())[0].getValue());
     count++;
 
   }
@@ -200,7 +201,7 @@ public class ETagClientTest {
     }
     //@formatter:on
     assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(HeaderConstants.IF_MATCH.toLowerCase())[0].getValue());
     count++;
 
     //@formatter:off
@@ -217,7 +218,7 @@ public class ETagClientTest {
     }
     //@formatter:on
     assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count).getURI().toString());
-    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(Constants.HEADER_IF_MATCH_LC)[0].getValue());
+    assertEquals("W/\"9876\"", capt.getAllValues().get(count).getHeaders(HeaderConstants.IF_MATCH.toLowerCase())[0].getValue());
     count++;
   }
 
@@ -232,8 +233,8 @@ public class ETagClientTest {
     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
     Header[] headers = new Header[]{
-      new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-      new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+      new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+      new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
     };
     when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 

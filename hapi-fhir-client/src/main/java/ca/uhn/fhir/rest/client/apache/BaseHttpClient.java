@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.client.apache;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -62,14 +63,14 @@ public abstract class BaseHttpClient implements IHttpClient {
 		if (myIfNoneExistParams != null) {
 			StringBuilder b = newHeaderBuilder(myUrl);
 			BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
-			result.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+			result.addHeader(HeaderConstants.IF_NONE_EXIST, b.toString());
 		}
 
 		if (myIfNoneExistString != null) {
 			StringBuilder b = newHeaderBuilder(myUrl);
 			b.append(b.indexOf("?") == -1 ? '?' : '&');
 			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
-			result.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+			result.addHeader(HeaderConstants.IF_NONE_EXIST, b.toString());
 		}
 	}
 
@@ -93,7 +94,7 @@ public abstract class BaseHttpClient implements IHttpClient {
 		byte[] content = theBinary.getContent();
 		IHttpRequest retVal = createHttpRequest(content);
 		addHeadersToRequest(retVal, null, theContext);
-		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theBinary.getContentType());
+		retVal.addHeader(HeaderConstants.CONTENT_TYPE, theBinary.getContentType());
 		return retVal;
 	}
 
@@ -102,7 +103,7 @@ public abstract class BaseHttpClient implements IHttpClient {
 			FhirContext theContext, String theContents, String theContentType, EncodingEnum theEncoding) {
 		IHttpRequest retVal = createHttpRequest(theContents);
 		addHeadersToRequest(retVal, theEncoding, theContext);
-		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
+		retVal.addHeader(HeaderConstants.CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return retVal;
 	}
 

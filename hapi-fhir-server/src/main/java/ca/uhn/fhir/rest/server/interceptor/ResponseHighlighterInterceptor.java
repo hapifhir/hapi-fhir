@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -569,7 +570,7 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(HeaderConstants.ORIGIN))) {
 			return true;
 		}
 
@@ -949,7 +950,7 @@ public class ResponseHighlighterInterceptor {
 					 * Let's pretend we're returning a FHIR content type even though we're
 					 * actually returning an HTML one
 					 */
-					if (nextHeaderName.equalsIgnoreCase(Constants.HEADER_CONTENT_TYPE)) {
+					if (nextHeaderName.equalsIgnoreCase(HeaderConstants.CONTENT_TYPE)) {
 						ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
 								theRequestDetails, theRequestDetails.getServer().getDefaultResponseEncoding());
 						if (responseEncoding != null && isNotBlank(responseEncoding.getResourceContentType())) {

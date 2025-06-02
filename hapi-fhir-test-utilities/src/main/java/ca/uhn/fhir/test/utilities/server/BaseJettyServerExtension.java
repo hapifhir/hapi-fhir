@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import jakarta.annotation.PreDestroy;
 import jakarta.servlet.DispatcherType;
@@ -330,7 +330,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		public void doFilter(ServletRequest theRequest, ServletResponse theResponse, FilterChain theChain) throws IOException, ServletException {
 			HttpServletRequest request = (HttpServletRequest) theRequest;
 
-			String header = request.getHeader(Constants.HEADER_CONTENT_TYPE);
+			String header = request.getHeader(HeaderConstants.CONTENT_TYPE);
 			if (isNotBlank(header)) {
 				myRequestContentTypes.add(header.replaceAll(";.*", ""));
 			} else {

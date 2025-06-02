@@ -222,8 +222,8 @@ public class ResponseHighlighterInterceptorTest {
 	@Test
 	public void testDontHighlightWhenOriginHeaderPresent() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
-		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeader(HeaderConstants.ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -581,7 +581,7 @@ public class ResponseHighlighterInterceptorTest {
 	@Test
 	public void testHighlightException() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -643,7 +643,7 @@ public class ResponseHighlighterInterceptorTest {
 	@Test
 	public void testHighlightForceHtmlCt() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -671,7 +671,7 @@ public class ResponseHighlighterInterceptorTest {
 	public void testHighlightForceHtmlFormat() throws Exception {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -695,7 +695,7 @@ public class ResponseHighlighterInterceptorTest {
 	@Test
 	public void testHighlightForceRaw() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -723,7 +723,7 @@ public class ResponseHighlighterInterceptorTest {
 	public void testHighlightNormalResponse() throws Exception {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -752,7 +752,7 @@ public class ResponseHighlighterInterceptorTest {
 	@Test
 	public void testHighlightNormalResponseForcePrettyPrint() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -786,7 +786,7 @@ public class ResponseHighlighterInterceptorTest {
 	public void testHighlightProducesDefaultJsonWithBrowserRequest() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -814,7 +814,7 @@ public class ResponseHighlighterInterceptorTest {
 	public void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html;q=0.8,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeaders(HeaderConstants.ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html;q=0.8,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
@@ -1039,7 +1039,7 @@ public class ResponseHighlighterInterceptorTest {
 		final Enumeration<String> headers = mock(Enumeration.class);
 		when(headers.hasMoreElements()).thenReturn(true).thenReturn(false);
 		when(headers.nextElement()).thenReturn("text/html");
-		when(servletRequest.getHeaders(Constants.HEADER_ACCEPT)).thenReturn(headers);
+		when(servletRequest.getHeaders(HeaderConstants.ACCEPT)).thenReturn(headers);
 
 		final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 

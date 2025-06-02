@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -195,7 +196,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
@@ -295,7 +296,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(HeaderConstants.LOCATION.toLowerCase()).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 

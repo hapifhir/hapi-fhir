@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -168,7 +168,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue().replaceAll(";.*", ""));
 			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		} finally {
 			IOUtils.closeQuietly(resp);

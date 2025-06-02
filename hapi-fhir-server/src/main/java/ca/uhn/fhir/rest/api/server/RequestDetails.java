@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.api.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -208,7 +208,7 @@ public abstract class RequestDetails {
 		}
 		switch (theOperationType) {
 			case CREATE:
-				String retVal = this.getHeader(Constants.HEADER_IF_NONE_EXIST);
+				String retVal = this.getHeader(HeaderConstants.IF_NONE_EXIST);
 				if (isBlank(retVal)) {
 					return null;
 				}
@@ -613,7 +613,7 @@ public abstract class RequestDetails {
 	}
 
 	public boolean isPreferAsync() {
-		String prefer = getHeader(Constants.HEADER_PREFER);
+		String prefer = getHeader(HeaderConstants.PREFER);
 		PreferHeader preferHeader = RestfulServerUtils.parsePreferHeader(prefer);
 		return preferHeader.getRespondAsync();
 	}

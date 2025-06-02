@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -34,23 +35,23 @@ class BulkDataExportUtilTest {
 	@EnumSource(value = PreferReturnEnum.class)
 	void validatePreferAsyncHeaderShouldThrowException(PreferReturnEnum thePreferReturnEnum) {
 		// Arrange
-		doReturn(thePreferReturnEnum.getHeaderValue()).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+		doReturn(thePreferReturnEnum.getHeaderValue()).when(theRequestDetails).getHeader(HeaderConstants.PREFER);
 		// Act
 		assertThatThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Must request async processing for " + OPERATION_NAME);
 		// Assert
-		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+		verify(theRequestDetails).getHeader(HeaderConstants.PREFER);
 	}
 
 	@Test
 	void validatePreferAsyncHeaderShouldNotThrowException() {
 		// Arrange
-		doReturn(Constants.HEADER_PREFER_RESPOND_ASYNC).when(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+		doReturn(Constants.HEADER_PREFER_RESPOND_ASYNC).when(theRequestDetails).getHeader(HeaderConstants.PREFER);
 		// Act
 		assertThatNoException().isThrownBy(() -> BulkDataExportUtil.validatePreferAsyncHeader(theRequestDetails, OPERATION_NAME));
 		// Assert
-		verify(theRequestDetails).getHeader(Constants.HEADER_PREFER);
+		verify(theRequestDetails).getHeader(HeaderConstants.PREFER);
 	}
 
 	@Test

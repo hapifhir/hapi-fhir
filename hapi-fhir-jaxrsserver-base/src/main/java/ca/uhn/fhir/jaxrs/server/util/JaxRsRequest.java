@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
@@ -282,7 +282,7 @@ public class JaxRsRequest extends RequestDetails {
 			}
 
 			if (myRestOperation == RestOperationTypeEnum.UPDATE) {
-				String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
+				String contentLocation = result.getHeader(HeaderConstants.CONTENT_LOCATION);
 				if (contentLocation != null) {
 					switch (fhirContextVersion) {
 						case R4:

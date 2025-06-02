@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -77,9 +78,9 @@ public class 	BinaryServerR4Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/foo", status.getEntity().getContentType().getValue());
 			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
-			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
+			assertEquals("W/\"222\"", status.getFirstHeader(HeaderConstants.ETAG).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
+			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
 			assertThat(content).containsExactly(new byte[]{0, 1, 2, 3, 4});
@@ -106,9 +107,9 @@ public class 	BinaryServerR4Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
 			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
-			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
+			assertEquals("W/\"222\"", status.getFirstHeader(HeaderConstants.ETAG).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
+			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}", content);

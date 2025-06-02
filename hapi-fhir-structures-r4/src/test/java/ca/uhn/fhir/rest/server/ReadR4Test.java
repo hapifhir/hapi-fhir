@@ -2,10 +2,10 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.DateUtils;
@@ -59,8 +59,8 @@ public class ReadR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
+			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 
 			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -83,8 +83,8 @@ public class ReadR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertNull(status.getFirstHeader(HeaderConstants.LOCATION));
+			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 
 			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -233,7 +233,7 @@ public class ReadR4Test {
 		// thus it hasn't changed after the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304 (Not Modified)
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(304, status.getStatusLine().getStatusCode());
 		}
@@ -242,7 +242,7 @@ public class ReadR4Test {
 		// thus it hasn't changed after the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304 (Not Modified)
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(304, status.getStatusLine().getStatusCode());
 		}
@@ -251,7 +251,7 @@ public class ReadR4Test {
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		httpGet.addHeader(HeaderConstants.IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 		}

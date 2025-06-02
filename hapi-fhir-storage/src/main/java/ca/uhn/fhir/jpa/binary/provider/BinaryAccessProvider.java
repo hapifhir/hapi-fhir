@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -133,10 +134,10 @@ public class BinaryAccessProvider {
 			RestfulServer server = theRequestDetails.getServer();
 			server.addHeadersToResponse(theServletResponse);
 
-			theServletResponse.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_PRIVATE);
-			theServletResponse.addHeader(Constants.HEADER_ETAG, '"' + blobDetails.getHash() + '"');
+			theServletResponse.addHeader(HeaderConstants.CACHE_CONTROL, Constants.CACHE_CONTROL_PRIVATE);
+			theServletResponse.addHeader(HeaderConstants.ETAG, '"' + blobDetails.getHash() + '"');
 			theServletResponse.addHeader(
-					Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
+				HeaderConstants.LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
 
 			myBinaryStorageSvc.writeBinaryContent(theResourceId, blobId, theServletResponse.getOutputStream());
 			theServletResponse.getOutputStream().close();

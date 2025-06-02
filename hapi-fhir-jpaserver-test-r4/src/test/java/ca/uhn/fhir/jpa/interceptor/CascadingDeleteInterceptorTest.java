@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -138,7 +139,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myEncounterId = myClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
 		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
@@ -207,7 +208,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -238,7 +239,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myServer.registerInterceptor(myDeleteInterceptor);
 
 			HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-			delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+			delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 				String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 				assertThat(response.getStatusLine().getStatusCode()).as(deleteResponse).isEqualTo(200);
@@ -277,7 +278,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		HttpDelete delete = new HttpDelete(myServerBase + "/Organization/" + o0id.getIdPart() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(response.getStatusLine().getStatusCode()).as(deleteResponse).isEqualTo(200);
@@ -313,7 +314,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?_pretty=true");
 		delete.addHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE);
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);

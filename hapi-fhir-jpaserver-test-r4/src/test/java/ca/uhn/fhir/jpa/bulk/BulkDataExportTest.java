@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -820,11 +821,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		HttpGet get = new HttpGet(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient");
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try(CloseableHttpResponse postResponse = mySender.execute(post)){
 			ourLog.info("Response: {}",postResponse);
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
@@ -834,7 +835,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				ourLog.info("Get Response: {}", getResponse);
 				assertEquals(202, getResponse.getStatusLine().getStatusCode());
 				assertEquals("Accepted", getResponse.getStatusLine().getReasonPhrase());
-				assertEquals(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+				assertEquals(postResponse.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 			}
 		}
 		myInterceptorRegistry.unregisterInterceptor(newInterceptor);

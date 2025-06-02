@@ -23,8 +23,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -110,9 +110,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 			/*
 			 * Add response location
 			 */
-			List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
+			List<String> locationHeaders = theResponse.getHeaders(HeaderConstants.LOCATION);
 			if (locationHeaders == null || locationHeaders.isEmpty()) {
-				locationHeaders = theResponse.getHeaders(Constants.HEADER_CONTENT_LOCATION);
+				locationHeaders = theResponse.getHeaders(HeaderConstants.CONTENT_LOCATION);
 			}
 			if (locationHeaders != null && locationHeaders.size() > 0) {
 				String locationValue = locationHeaders.get(0);

@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.client;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.At;
@@ -198,7 +199,7 @@ public class ClientR4Test {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("{\"resourceType\":\"Patient\"");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
@@ -549,8 +550,8 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		Header[] headers = new Header[]{
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333")
+			new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+			new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333")
 		};
 
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
@@ -589,7 +590,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "INTERNAL"));
 		Header[] headers = new Header[1];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
+		headers[0] = new BasicHeader(HeaderConstants.LAST_MODIFIED, "2011-01-02T22:01:02");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), StandardCharsets.UTF_8));
@@ -615,7 +616,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 404, "NOT FOUND"));
 		Header[] headers = new Header[1];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "2011-01-02T22:01:02");
+		headers[0] = new BasicHeader(HeaderConstants.LAST_MODIFIED, "2011-01-02T22:01:02");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
@@ -638,7 +639,7 @@ public class ClientR4Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		Header[] headers = new Header[1];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
+		headers[0] = new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
@@ -1230,7 +1231,7 @@ public class ClientR4Test {
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).contains("\"Patient");
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 	}
 
 	/**
@@ -1247,7 +1248,7 @@ public class ClientR4Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
-		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray(Constants.HEADER_LOCATION, "http://example.com/fhir/Patient/100/_history/200"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray(HeaderConstants.LOCATION, "http://example.com/fhir/Patient/100/_history/200"));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome resp = client.updatePatient(new IdType("Patient/100/_history/200"), patient);

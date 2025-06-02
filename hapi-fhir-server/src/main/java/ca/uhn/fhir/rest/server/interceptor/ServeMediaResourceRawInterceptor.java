@@ -24,7 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -135,7 +135,7 @@ public class ServeMediaResourceRawInterceptor {
 			rs.addHeadersToResponse(theServletResponse);
 		}
 
-		theServletResponse.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType);
+		theServletResponse.addHeader(HeaderConstants.CONTENT_TYPE, theContentType);
 
 		// Write the response
 		try {

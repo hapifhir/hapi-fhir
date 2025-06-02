@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -52,7 +53,7 @@ public class BulkExportJobServiceUtil {
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
 		// Successful 202 Accepted
-		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
+		response.addHeader(HeaderConstants.CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
 }

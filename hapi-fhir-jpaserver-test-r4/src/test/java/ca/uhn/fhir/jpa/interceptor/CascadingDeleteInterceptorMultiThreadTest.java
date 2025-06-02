@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.config.DelayListener;
 import ca.uhn.fhir.jpa.test.config.TestR4WithDelayConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -406,7 +407,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 	private boolean deletePractitioner(CloseableHttpClient theCloseableHttpClient) throws IOException {
 		ourLog.info("Starting deletePractitioner");
 		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPractitionerId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
 			if (response.getStatusLine().getStatusCode() != 200) {
 				ourLog.error("Unexpected status on practitioner delete = " + response.getStatusLine().getStatusCode());
@@ -442,7 +443,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 	private boolean deleteOrganization(CloseableHttpClient theCloseableHttpClient) throws IOException {
 		ourLog.info("Starting deleteOrganization");
 		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myOrganizationId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		delete.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		ourLog.info("HttpDelete : {}", delete);
 		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
 			if (response.getStatusLine().getStatusCode() != 200) {

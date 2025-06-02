@@ -23,11 +23,11 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingListenerTest;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -199,7 +199,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
@@ -211,7 +211,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(HeaderConstants.CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
 			updateLatch.invoke(null, new HookParams().add(Observation.class, theObservation));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());

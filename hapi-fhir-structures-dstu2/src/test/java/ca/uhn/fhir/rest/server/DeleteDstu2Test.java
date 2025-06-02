@@ -1,13 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -74,7 +74,7 @@ public class DeleteDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+		assertNull(status.getFirstHeader(HeaderConstants.CONTENT_TYPE));
 
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);

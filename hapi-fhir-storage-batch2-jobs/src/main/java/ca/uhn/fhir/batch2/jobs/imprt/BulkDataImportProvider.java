@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -320,7 +321,7 @@ public class BulkDataImportProvider {
 		// Add standard headers
 		theRequestDetails.getServer().addHeadersToResponse(response);
 		// Successful 202 Accepted
-		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
+		response.addHeader(HeaderConstants.CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
 

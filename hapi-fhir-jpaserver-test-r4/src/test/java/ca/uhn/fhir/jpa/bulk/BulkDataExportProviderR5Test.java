@@ -17,10 +17,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
@@ -201,7 +200,7 @@ public class BulkDataExportProviderR5Test {
 
 		// test
 		HttpPost post = new HttpPost(myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
@@ -222,7 +221,7 @@ public class BulkDataExportProviderR5Test {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
@@ -242,7 +241,7 @@ public class BulkDataExportProviderR5Test {
 
 		Parameters input = new Parameters();
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
@@ -276,14 +275,14 @@ public class BulkDataExportProviderR5Test {
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo");
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
@@ -305,14 +304,14 @@ public class BulkDataExportProviderR5Test {
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("EpisodeOfCare?patient=P999999990");
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
@@ -341,7 +340,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -373,7 +372,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -432,7 +431,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -501,7 +500,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -538,7 +537,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -564,7 +563,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -605,14 +604,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -642,14 +641,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -674,14 +673,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -722,7 +721,7 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse ignored = myClient.execute(get)) {
 			// verify
 			BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -739,7 +738,7 @@ public class BulkDataExportProviderR5Test {
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition,Observation");
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse execute = myClient.execute(get)) {
 			String responseBody = IOUtils.toString(execute.getEntity().getContent(), StandardCharsets.UTF_8);
 
@@ -759,7 +758,7 @@ public class BulkDataExportProviderR5Test {
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse execute = myClient.execute(get)) {
 
 			// verify
@@ -788,7 +787,7 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
@@ -796,7 +795,7 @@ public class BulkDataExportProviderR5Test {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -818,14 +817,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + mode);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -853,14 +852,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -887,15 +886,15 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -921,14 +920,14 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -1076,7 +1075,7 @@ public class BulkDataExportProviderR5Test {
 
 		// test
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
@@ -1096,13 +1095,13 @@ public class BulkDataExportProviderR5Test {
 		// call
 		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
 		httpGet.addHeader("_outputFormat", Constants.CT_FHIR_NDJSON);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 			assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty());
 		}
 
@@ -1118,13 +1117,13 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			assertAll(
 				() -> assertEquals(202, response.getStatusLine().getStatusCode()),
 				() -> assertEquals("Accepted", response.getStatusLine().getReasonPhrase()),
-				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
+				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue()),
 				() -> assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty())
 			);
 		}
@@ -1147,7 +1146,7 @@ public class BulkDataExportProviderR5Test {
 
 		// Initiate Export Poll Status
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 
@@ -1192,7 +1191,7 @@ public class BulkDataExportProviderR5Test {
 
 		// Initiate Export Poll Status
 		HttpPost post = new HttpPost(baseUrl + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
@@ -1211,7 +1210,7 @@ public class BulkDataExportProviderR5Test {
 
 		// Initiate Export Poll Status
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
@@ -1223,15 +1222,15 @@ public class BulkDataExportProviderR5Test {
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
 		HttpPost post;
 		post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(HeaderConstants.CONTENT_LOCATION).getValue());
 		}
 	}
 
@@ -1247,7 +1246,7 @@ public class BulkDataExportProviderR5Test {
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner");
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
@@ -1279,7 +1278,7 @@ public class BulkDataExportProviderR5Test {
 		String url = myServer.getBaseUrl() + "/Partition-B/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(403, response.getStatusLine().getStatusCode());

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -62,7 +63,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.search()
 				.forResource(Patient.class)
 				.where(new StringClientParam("foo").matches().value("bar"))
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.encodedJson()
@@ -81,7 +82,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.search()
 				.forResource(Patient.class)
 				.where(new StringClientParam("foo").matches().value("bar"))
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.encodedJson()
@@ -102,7 +103,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.and(Patient.IDENTIFIER.exactly().codes("BLAH"))
 			.prettyPrint()
 			.returnBundle(Bundle.class)
-			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
+			.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
 		assertEquals(0, outcome.getTotal());
@@ -117,7 +118,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 				.search()
 				.forResource(Patient.class)
 				.where(new StringClientParam("foo.bar").matches().value("bar"))
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.encodedJson()
@@ -135,7 +136,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.search()
 			.forResource(Patient.class)
 			.where(new StringClientParam("organization.name").matches().value("bar"))
-			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
+			.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.encodedJson()
@@ -150,7 +151,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.search()
 			.forResource(Patient.class)
 			.where(new StringClientParam("name").matchesExactly().value("bar"))
-			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
+			.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_STRICT)
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.encodedJson()

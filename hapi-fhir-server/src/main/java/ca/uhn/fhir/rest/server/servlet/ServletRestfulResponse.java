@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.servlet;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
@@ -81,7 +82,7 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		theHttpResponse.setStatus(theStatusCode);
 		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+			theHttpResponse.addHeader(HeaderConstants.CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			ServletOutputStream outputStream = theHttpResponse.getOutputStream();
 			myWriter = new OutputStreamWriter(new GZIPOutputStream(outputStream), StandardCharsets.UTF_8);
 			return myWriter;

@@ -24,10 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -96,21 +93,21 @@ public class MethodUtil {
 			EncodingEnum theEncoding, IHttpRequest theHttpRequest, FhirContext theContext) {
 		if (theEncoding == null) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON);
 			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 			}
 		} else if (theEncoding == EncodingEnum.XML) {
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2_1) == false) {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_XML);
 			} else {
-				theHttpRequest.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
+				theHttpRequest.addHeader(HeaderConstants.ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
 			}
 		}
 	}
@@ -230,7 +227,7 @@ public class MethodUtil {
 		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
-			retVal.addHeader(Constants.HEADER_IF_MATCH, "W/\"" + theId.getVersionIdPart() + '"');
+			retVal.addHeader(HeaderConstants.IF_MATCH, "W/\"" + theId.getVersionIdPart() + '"');
 		}
 
 		return retVal;
@@ -465,7 +462,7 @@ public class MethodUtil {
 
 	public static void parseClientRequestResourceHeaders(
 			IIdType theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
-		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
+		List<String> lmHeaders = theHeaders.get(HeaderConstants.LAST_MODIFIED.toLowerCase());
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
 			Date headerDateValue;
@@ -497,7 +494,7 @@ public class MethodUtil {
 			}
 		}
 
-		List<String> locationHeaders = theHeaders.get(Constants.HEADER_LOCATION_LC);
+		List<String> locationHeaders = theHeaders.get(HeaderConstants.LOCATION.toLowerCase());
 		if (locationHeaders != null && locationHeaders.size() > 0 && StringUtils.isNotBlank(locationHeaders.get(0))) {
 			String headerValue = locationHeaders.get(0);
 			if (isNotBlank(headerValue)) {
@@ -507,7 +504,7 @@ public class MethodUtil {
 
 		IdDt existing = IdDt.of(resource);
 
-		List<String> eTagHeaders = theHeaders.get(Constants.HEADER_ETAG_LC);
+		List<String> eTagHeaders = theHeaders.get(HeaderConstants.ETAG.toLowerCase());
 		String eTagVersion = null;
 		if (eTagHeaders != null && eTagHeaders.size() > 0) {
 			eTagVersion = ParameterUtil.parseETagValue(eTagHeaders.get(0));
@@ -534,7 +531,7 @@ public class MethodUtil {
 			InputStream theResponseReader,
 			Map<String, List<String>> theHeaders) {
 		List<String> locationHeaders = new ArrayList<>();
-		List<String> lh = theHeaders.get(Constants.HEADER_LOCATION_LC);
+		List<String> lh = theHeaders.get(HeaderConstants.LOCATION.toLowerCase());
 		if (lh != null) {
 			locationHeaders.addAll(lh);
 		}

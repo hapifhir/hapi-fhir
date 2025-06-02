@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -65,7 +66,7 @@ public class ETagServerTest {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
+		httpGet.addHeader(HeaderConstants.IF_NONE_MATCH, "\"222\"");
 		HttpResponse status = ourClient.execute(httpGet);
 		try {
 			assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
@@ -91,7 +92,7 @@ public class ETagServerTest {
 			assertEquals("2", dt.getSystemElement().getValueAsString());
 			assertEquals("3", dt.getValue());
 
-			Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
+			Header cl = status.getFirstHeader(HeaderConstants.ETAG.toLowerCase());
 			assertNotNull(cl);
 			assertEquals("W/\"222\"", cl.getValue());
 		} finally {
@@ -113,7 +114,7 @@ public class ETagServerTest {
 			assertEquals("2", dt.getSystemElement().getValueAsString());
 			assertEquals("3", dt.getValue());
 
-			Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
+			Header cl = status.getFirstHeader(HeaderConstants.LAST_MODIFIED.toLowerCase());
 			assertNotNull(cl);
 			assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
 		} finally {
@@ -133,7 +134,7 @@ public class ETagServerTest {
 		HttpPut http;
 		http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		http.addHeader(Constants.HEADER_IF_MATCH, "\"221\"");
+		http.addHeader(HeaderConstants.IF_MATCH, "\"221\"");
 		CloseableHttpResponse status = ourClient.execute(http);
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -155,7 +156,7 @@ public class ETagServerTest {
 		HttpPut http;
 		http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
 		http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		http.addHeader(Constants.HEADER_IF_MATCH, "\"222\"");
+		http.addHeader(HeaderConstants.IF_MATCH, "\"222\"");
 		CloseableHttpResponse status = ourClient.execute(http);
 		try {
 			assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());

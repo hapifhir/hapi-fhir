@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -116,7 +117,7 @@ public class OperationServerHl7OrgTest {
     String response = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
   }
 
@@ -240,7 +241,7 @@ public class OperationServerHl7OrgTest {
     String response = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("HTTP Method GET is not allowed");
   }
 

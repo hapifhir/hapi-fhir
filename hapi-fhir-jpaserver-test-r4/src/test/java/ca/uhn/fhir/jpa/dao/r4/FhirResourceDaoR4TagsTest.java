@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -130,7 +130,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	@Test
 	public void testDeleteResourceWithTags_NonVersionedTags_InTransaction() {
 		initializeNonVersioned();
-		when(mySrd.getHeader(eq(Constants.HEADER_PREFER))).thenReturn("return=representation");
+		when(mySrd.getHeader(eq(HeaderConstants.PREFER))).thenReturn("return=representation");
 		Bundle input, output;
 
 		// Delete
@@ -188,7 +188,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	@Test
 	public void testDeleteResourceWithTags_VersionedTags_InTransaction() {
 		initializeVersioned();
-		when(mySrd.getHeader(eq(Constants.HEADER_PREFER))).thenReturn("return=representation");
+		when(mySrd.getHeader(eq(HeaderConstants.PREFER))).thenReturn("return=representation");
 		Bundle input, output;
 
 		// Delete

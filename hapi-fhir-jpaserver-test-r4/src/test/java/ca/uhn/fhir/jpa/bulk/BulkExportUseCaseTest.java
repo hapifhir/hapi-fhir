@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -225,7 +226,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//And Given we start a bulk export job
 			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 			String pollingLocation;
 			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 				Header[] headers = status.getHeaders("Content-Location");
@@ -271,7 +272,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(encounter).execute();
 
 			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 			String pollingLocation;
 			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 				Header[] headers = status.getHeaders("Content-Location");
@@ -310,7 +311,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(binary).execute();
 
 			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 			String pollingLocation;
 			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 				Header[] headers = status.getHeaders("Content-Location");
@@ -349,7 +350,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		HttpGet httpGet = new HttpGet(uri);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		httpGet.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		String pollingLocation;
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 			Header[] headers = status.getHeaders("Content-Location");
@@ -389,7 +390,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
 				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
+				expandGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_NDJSON);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
 					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -400,7 +401,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
 				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
+				expandGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_OCTET_STREAM);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
 					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -411,7 +412,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
 				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+				expandGet.addHeader(HeaderConstants.ACCEPT, Constants.CT_FHIR_JSON);
 
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
@@ -1526,7 +1527,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 		} else if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && theGroupOrPatientId != null) {
 			//TODO add support for this actual processor.
@@ -1537,7 +1538,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 		} else {
 			// system request
@@ -1547,7 +1548,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.named(ProviderConstants.OPERATION_EXPORT)
 				.withParameters(parameters)
 				.returnMethodOutcome()
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 		}
 		assertNotNull(outcome);
@@ -1557,7 +1558,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			// headers are in lowercase
 			// constants are in Pascal Case
 			// :(
-			if (header.equalsIgnoreCase(Constants.HEADER_CONTENT_LOCATION)) {
+			if (header.equalsIgnoreCase(HeaderConstants.CONTENT_LOCATION)) {
 				pollLocation = outcome.getResponseHeaders().get(header).get(0);
 				break;
 			}

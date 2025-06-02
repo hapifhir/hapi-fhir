@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -164,7 +165,7 @@ public class ResourceParameter implements IParameter {
 
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		if (encoding == null) {
-			String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+			String ctValue = theRequest.getHeader(HeaderConstants.CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
 					String msg = theRequest
@@ -230,7 +231,7 @@ public class ResourceParameter implements IParameter {
 		IBaseResource retVal = null;
 
 		if (theResourceType != null && IBaseBinary.class.isAssignableFrom(theResourceType)) {
-			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+			String ct = theRequest.getHeader(HeaderConstants.CONTENT_TYPE);
 			if (EncodingEnum.forContentTypeStrict(ct) == null) {
 				FhirContext ctx = theRequest.getServer().getFhirContext();
 				IBaseBinary binary = BinaryUtil.newBinary(ctx);

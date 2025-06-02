@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -72,7 +73,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -377,7 +377,7 @@ public class ConsentInterceptorTest {
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(204, status.getStatusLine().getStatusCode());
 			assertNull(status.getEntity());
-			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+			assertNull(status.getFirstHeader(HeaderConstants.CONTENT_TYPE));
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -884,7 +884,7 @@ public class ConsentInterceptorTest {
 
 	private void initRequestMocks() {
 		myHeaders = new HashMap<>();
-		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+		myHeaders.put(HeaderConstants.CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
 		when(myRequest.getRequestURI()).thenReturn("/Patient");
 		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));

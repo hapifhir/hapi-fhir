@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -49,7 +50,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	@Test
 	public void testSystemBulkExport_withResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
@@ -63,7 +64,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	@Test
 	public void testSystemBulkExport_withResourceType_pollSuccessful() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
 
@@ -74,7 +75,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 
-			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
+			Header locationHeader = postResponse.getFirstHeader(HeaderConstants.CONTENT_LOCATION);
 			assertNotNull(locationHeader);
 			locationUrl = locationHeader.getValue();
 		}

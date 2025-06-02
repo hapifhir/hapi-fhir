@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -228,7 +229,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
 		JaxRsRequest requestDetails = request.build();
 		IRestfulResponse response = requestDetails.getResponse();
-		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
+		response.addHeader(HeaderConstants.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 
 		IBaseResource conformance;
 		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();

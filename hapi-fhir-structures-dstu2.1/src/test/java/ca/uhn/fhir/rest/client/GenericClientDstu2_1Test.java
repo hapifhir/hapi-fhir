@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -397,7 +398,7 @@ public class GenericClientDstu2_1Test {
 				.execute();
 
 		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.ACCEPT).getValue());
 		idx++;
 
 		client.setEncoding(EncodingEnum.XML);
@@ -407,7 +408,7 @@ public class GenericClientDstu2_1Test {
 				.execute();
 
 		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.ACCEPT).getValue());
 		idx++;
 
 	}
@@ -563,7 +564,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] { new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -612,7 +613,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] { new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -1705,7 +1706,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] { new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -1753,7 +1754,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] { new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));

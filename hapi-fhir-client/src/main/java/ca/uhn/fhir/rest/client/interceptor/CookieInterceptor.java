@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -40,7 +40,7 @@ public class CookieInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(Constants.HEADER_COOKIE, sessionCookie); // $NON-NLS-1$
+		theRequest.addHeader(HeaderConstants.COOKIE, sessionCookie); // $NON-NLS-1$
 	}
 
 	@Override

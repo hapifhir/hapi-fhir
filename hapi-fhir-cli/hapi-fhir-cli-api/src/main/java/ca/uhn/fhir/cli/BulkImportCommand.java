@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.imprt.BulkImportReportJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -177,7 +178,7 @@ public class BulkImportCommand extends BaseCommand {
 				.withParameters(request)
 				.returnResourceType(
 						myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
-				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.withAdditionalHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 
 		ourLog.debug(

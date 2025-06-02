@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomTypeR4Test;
@@ -122,7 +123,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.accept("application/json")
 			.execute();
 		assertEquals("http://example.com/fhir/Device", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/json", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals("application/json", capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.ACCEPT).getValue());
 		idx++;
 
 		// Empty accept value
@@ -134,7 +135,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.accept("")
 			.execute();
 		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.ACCEPT).getValue());
 		idx++;
 
 		// Null accept value
@@ -146,7 +147,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.accept(null)
 			.execute();
 		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(HeaderConstants.ACCEPT).getValue());
 	}
 
 	@Test
@@ -282,7 +283,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")});
+		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<ReaderInputStream>) theInvocation -> {
 			if (myAnswerCount++ == 0) {
@@ -323,7 +324,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")});
+		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<ReaderInputStream>) theInvocation -> {
 			myAnswerCount++;
@@ -357,7 +358,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")});
+		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<ReaderInputStream>) theInvocation -> {
 			myAnswerCount++;
@@ -1797,7 +1798,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")});
+		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<ReaderInputStream>) theInvocation -> {
 			if (myAnswerCount++ == 0) {
@@ -1837,7 +1838,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")});
+		when(myHttpResponse.getAllHeaders()).thenAnswer((Answer<Header[]>) theInvocation -> new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<ReaderInputStream>) theInvocation -> {
 			myAnswerCount++;
@@ -2106,7 +2107,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -2172,7 +2173,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -2180,8 +2181,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 		count++;
 
@@ -2191,8 +2192,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resource(resourceAsString)
 			.execute();
 
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
@@ -2201,14 +2202,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		 */
 
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
 		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 
 	}
@@ -2222,7 +2223,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -2236,8 +2237,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
 		assertEquals("POST", capt.getValue().getMethod());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 		count++;
 
@@ -2247,8 +2248,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 		client.create().resource(p1).execute();
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(1).getURI().toString());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		count++;
 
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
@@ -2256,8 +2257,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		client.create().resource(resourceText).execute();
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(2).getURI().toString());
 		assertEquals(resourceText, IOUtils.toString(((HttpPost) capt.getAllValues().get(2)).getEntity().getContent(), StandardCharsets.UTF_8));
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 	}
 
 	@Test
@@ -2269,7 +2270,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -2298,7 +2299,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -2306,8 +2307,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.create().resource(org).prettyPrint().encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("<name value=\"測試醫院\"/>");
 	}
 
@@ -2320,7 +2321,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(ooStr));
 
@@ -2350,7 +2351,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8("LKJHLKJGLKJKLL"));
 
@@ -2381,7 +2382,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(ooStr));
 
@@ -2528,7 +2529,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer((Answer<InputStream>) theInvocation -> getReaderInputStreamUtf8(getPatientFeedWithOneResult()));
 
@@ -2584,8 +2585,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(msg));
 		Header[] headers = new Header[]{
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+			new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+			new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
@@ -2618,8 +2619,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(msg));
 		Header[] headers = new Header[]{
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+			new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+			new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
@@ -2662,8 +2663,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(msg));
-		Header[] headers = new Header[]{new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		Header[] headers = new Header[]{new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+			new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
@@ -3546,7 +3547,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 
 	}
 
@@ -3572,7 +3573,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 
 	}
 
@@ -3586,7 +3587,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -3606,8 +3607,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		int count = 0;
 
 		assertThat(capt.getAllValues()).hasSize(1);
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 
 		MethodOutcome outcome = client.update().resource(p1).execute();
 		assertEquals("44", outcome.getId().getIdPart());
@@ -3645,7 +3646,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(HeaderConstants.LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(""));
 
@@ -3653,14 +3654,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
@@ -3669,14 +3670,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		 */
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(HeaderConstants.CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 	}
 
@@ -3691,8 +3692,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(getReaderInputStreamUtf8(msg));
 		Header[] headers = new Header[]{
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+			new BasicHeader(HeaderConstants.LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+			new BasicHeader(HeaderConstants.CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 

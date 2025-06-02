@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
@@ -59,7 +60,7 @@ public class ClientHeadersR4Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(HeaderConstants.ACCEPT).get(0));
 		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
@@ -73,7 +74,7 @@ public class ClientHeadersR4Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(HeaderConstants.ACCEPT).get(0));
 		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
@@ -86,7 +87,7 @@ public class ClientHeadersR4Test {
 			.encodedJson()
 			.execute();
 
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(HeaderConstants.ACCEPT).get(0));
 		assertEquals("json", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
@@ -100,7 +101,7 @@ public class ClientHeadersR4Test {
 			.encodedJson()
 			.execute();
 
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(HeaderConstants.ACCEPT).get(0));
 		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
@@ -113,7 +114,7 @@ public class ClientHeadersR4Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(HeaderConstants.ACCEPT).get(0));
 		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
@@ -126,8 +127,8 @@ public class ClientHeadersR4Test {
 		MethodOutcome resp = myClient.create().resource(resp1).execute();
 
 		assertNotNull(resp);
-		assertThat(ourHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
-		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
+		assertThat(ourHeaders.get(HeaderConstants.CONTENT_TYPE)).hasSize(1);
+		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(HeaderConstants.CONTENT_TYPE).get(0));
 	}
 
 	@BeforeEach

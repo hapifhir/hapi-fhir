@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -80,7 +80,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpGet get = new HttpGet(myReadUrl);
-		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
+		get.addHeader(HeaderConstants.ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("image/png", response.getEntity().getContentType().getValue());
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
@@ -94,7 +94,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpGet get = new HttpGet(myReadUrl);
-		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
+		get.addHeader(HeaderConstants.ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
 			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 		}

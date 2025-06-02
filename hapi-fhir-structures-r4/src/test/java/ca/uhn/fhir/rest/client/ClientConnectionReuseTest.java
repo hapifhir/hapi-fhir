@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -100,7 +101,7 @@ public class ClientConnectionReuseTest {
 		IGenericClient gzipClient = ctx.newRestfulGenericClient(ourServer.getBaseUrl());
 		gzipClient.registerInterceptor(new GZipContentInterceptor());
 		AdditionalRequestHeadersInterceptor additionalRequestHeadersInterceptor = new AdditionalRequestHeadersInterceptor();
-		additionalRequestHeadersInterceptor.addHeaderValue(Constants.HEADER_ACCEPT_ENCODING, Constants.ENCODING_GZIP);
+		additionalRequestHeadersInterceptor.addHeaderValue(HeaderConstants.ACCEPT_ENCODING, Constants.ENCODING_GZIP);
 		gzipClient.registerInterceptor(additionalRequestHeadersInterceptor);
 
 		return Lists.newArrayList(client, gzipClient);

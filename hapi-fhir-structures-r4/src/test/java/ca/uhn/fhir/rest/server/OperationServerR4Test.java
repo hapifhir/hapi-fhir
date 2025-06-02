@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -326,7 +327,7 @@ public class OperationServerR4Test {
 		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("HTTP Method GET is not allowed");
 	}
 
@@ -363,7 +364,7 @@ public class OperationServerR4Test {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 			assertEquals("RET1", resp.getParameter().get(0).getName());
-			assertNull(status.getFirstHeader(Constants.HEADER_ETAG));
+			assertNull(status.getFirstHeader(HeaderConstants.ETAG));
 		}
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -382,7 +383,7 @@ public class OperationServerR4Test {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_ETAG));
+			assertNull(status.getFirstHeader(HeaderConstants.ETAG));
 
 		}
 	}
@@ -567,7 +568,7 @@ public class OperationServerR4Test {
 		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
@@ -685,7 +686,7 @@ public class OperationServerR4Test {
 	@Test
 	public void testReturnBinaryWithAcceptFhir() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/$binaryop?_pretty=false" );
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+		httpGet.addHeader(HeaderConstants.ACCEPT, Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("$binaryop", ourLastMethod);
@@ -698,7 +699,7 @@ public class OperationServerR4Test {
 	@Test
 	public void testReturnBinaryWithAcceptHtml() throws Exception {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/$binaryop" );
-		httpGet.addHeader(Constants.HEADER_ACCEPT, TEXT_HTML);
+		httpGet.addHeader(HeaderConstants.ACCEPT, TEXT_HTML);
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("$binaryop", ourLastMethod);

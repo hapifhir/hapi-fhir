@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -79,8 +80,8 @@ public class UpdateDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));
 		assertEquals(ourServer.getBaseUrl() + "/Patient/123/_history/002", status.getFirstHeader("content-location").getValue());
-		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
-		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
+		assertEquals("W/\"002\"", status.getFirstHeader(HeaderConstants.ETAG.toLowerCase()).getValue());
+		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(HeaderConstants.LAST_MODIFIED.toLowerCase()).getValue());
 
 	}
 

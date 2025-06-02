@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -46,7 +47,7 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(contentType, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals(contentType, result.getHeaderString(HeaderConstants.CONTENT_TYPE));
 		assertThat((byte[]) result.getEntity()).containsExactly(content);
 	}
 
@@ -58,7 +59,7 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertNull(result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertNull(result.getHeaderString(HeaderConstants.CONTENT_TYPE));
 		assertNull(result.getEntity());
 	}
 
@@ -81,7 +82,7 @@ public class JaxRsResponseTest {
 		// Response result = response.returnResponse(outcome, operationStatus, allowPrefer, methodOutcome, resourceName);
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals("application/json+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/json+fhir; charset=UTF-8", result.getHeaderString(HeaderConstants.CONTENT_TYPE));
 		ourLog.info(result.getEntity().toString());
 		assertThat(result.getEntity().toString()).contains("resourceType\": \"Patient");
 		assertThat(result.getEntity().toString()).contains("15");
@@ -95,7 +96,7 @@ public class JaxRsResponseTest {
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(HeaderConstants.CONTENT_TYPE));
 		assertThat(result.getEntity().toString()).contains("<Patient");
 		assertThat(result.getEntity().toString()).contains("15");
 	}
@@ -107,7 +108,7 @@ public class JaxRsResponseTest {
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(HeaderConstants.CONTENT_TYPE));
 	}
 
 	@Test

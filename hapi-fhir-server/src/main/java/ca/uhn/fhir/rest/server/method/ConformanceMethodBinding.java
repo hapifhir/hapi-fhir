@@ -24,10 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -139,7 +139,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		IBaseConformance conf;
 
 		CacheControlDirective cacheControlDirective =
-				new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+				new CacheControlDirective().parse(theRequest.getHeaders(HeaderConstants.CACHE_CONTROL));
 
 		if (cacheControlDirective.isNoCache()) conf = null;
 		else {

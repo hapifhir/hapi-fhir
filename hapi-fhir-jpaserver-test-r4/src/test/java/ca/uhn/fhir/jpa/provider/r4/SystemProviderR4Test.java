@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.rp.r4.PractitionerRoleResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -392,7 +393,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
 		// Prefer return=minimal
-		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderName(HeaderConstants.PREFER);
 		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
@@ -402,7 +403,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
 		// Prefer return=representation
-		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderName(HeaderConstants.PREFER);
 		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);

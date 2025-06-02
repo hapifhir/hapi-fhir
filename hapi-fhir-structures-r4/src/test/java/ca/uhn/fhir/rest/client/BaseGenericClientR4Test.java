@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -109,7 +110,7 @@ public abstract class BaseGenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+				return new Header[]{new BasicHeader(HeaderConstants.LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {

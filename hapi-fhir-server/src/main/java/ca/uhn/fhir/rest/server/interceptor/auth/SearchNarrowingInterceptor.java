@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -237,12 +238,12 @@ public class SearchNarrowingInterceptor {
 
 	private void narrowIfNoneExistHeader(RequestDetails theRequestDetails) {
 		if (myNarrowConditionalUrls) {
-			String ifNoneExist = theRequestDetails.getHeader(Constants.HEADER_IF_NONE_EXIST);
+			String ifNoneExist = theRequestDetails.getHeader(HeaderConstants.IF_NONE_EXIST);
 			if (isNotBlank(ifNoneExist)) {
 				String newConditionalUrl = narrowConditionalUrlForCompartmentOnly(
 						theRequestDetails, ifNoneExist, true, theRequestDetails.getResourceName());
 				if (newConditionalUrl != null) {
-					theRequestDetails.setHeaders(Constants.HEADER_IF_NONE_EXIST, List.of(newConditionalUrl));
+					theRequestDetails.setHeaders(HeaderConstants.IF_NONE_EXIST, List.of(newConditionalUrl));
 				}
 			}
 		}

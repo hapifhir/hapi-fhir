@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.servlet;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -96,7 +97,7 @@ public class ServletRequestDetails extends RequestDetails {
 			byte[] requestContents = IOUtils.toByteArray(inputStream);
 
 			if (myServer.isUncompressIncomingContents()) {
-				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
+				String contentEncoding = myServletRequest.getHeader(HeaderConstants.CONTENT_ENCODING);
 				if ("gzip".equals(contentEncoding)) {
 					ourLog.debug("Uncompressing (GZip) incoming content");
 					if (requestContents.length > 0) {
@@ -293,7 +294,7 @@ public class ServletRequestDetails extends RequestDetails {
 	 * Returns true if the `Prefer` header contains a value of `respond-async`
 	 */
 	public boolean isPreferRespondAsync() {
-		String preferHeader = getHeader(Constants.HEADER_PREFER);
+		String preferHeader = getHeader(HeaderConstants.PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		return prefer.getRespondAsync();
 	}

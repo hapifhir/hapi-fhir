@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -423,7 +424,7 @@ public class RestfulServerUtils {
 	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(
 			RequestDetails theReq, boolean theStrict) {
 		ResponseEncoding retVal = null;
-		List<String> headers = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE);
+		List<String> headers = theReq.getHeaders(HeaderConstants.CONTENT_TYPE);
 		if (headers != null) {
 			Iterator<String> acceptValues = headers.iterator();
 			if (acceptValues != null) {
@@ -501,7 +502,7 @@ public class RestfulServerUtils {
 		 */
 		// text/xml, application/xml, application/xhtml+xml, text/html;q=0.9, text/plain;q=0.8, image/png, */*;q=0.5
 
-		List<String> acceptValues = theReq.getHeaders(Constants.HEADER_ACCEPT);
+		List<String> acceptValues = theReq.getHeaders(HeaderConstants.ACCEPT);
 		float bestQ = -1f;
 		ResponseEncoding retVal = null;
 		if (acceptValues != null) {
@@ -741,7 +742,7 @@ public class RestfulServerUtils {
 	public static Set<String> parseAcceptHeaderAndReturnHighestRankedOptions(HttpServletRequest theRequest) {
 		Set<String> retVal = new HashSet<String>();
 
-		Enumeration<String> acceptValues = theRequest.getHeaders(Constants.HEADER_ACCEPT);
+		Enumeration<String> acceptValues = theRequest.getHeaders(HeaderConstants.ACCEPT);
 		if (acceptValues != null) {
 			float bestQ = -1f;
 			while (acceptValues.hasMoreElements()) {
@@ -857,7 +858,7 @@ public class RestfulServerUtils {
 			prettyPrint = Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0]);
 		} else {
 			prettyPrint = theServer.isDefaultPrettyPrint();
-			List<String> acceptValues = theRequest.getHeaders(Constants.HEADER_ACCEPT);
+			List<String> acceptValues = theRequest.getHeaders(HeaderConstants.ACCEPT);
 			if (acceptValues != null) {
 				for (String nextAcceptHeaderValue : acceptValues) {
 					if (nextAcceptHeaderValue.contains("pretty=true")) {
@@ -920,9 +921,9 @@ public class RestfulServerUtils {
 
 		if (theAddContentLocationHeader && fullId != null) {
 			if (theRequestDetails.getRequestType() == RequestTypeEnum.POST) {
-				response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+				response.addHeader(HeaderConstants.LOCATION, fullId.getValue());
 			}
-			response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+			response.addHeader(HeaderConstants.CONTENT_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
@@ -934,12 +935,12 @@ public class RestfulServerUtils {
 					case VREAD:
 						if (fullId != null && fullId.hasVersionIdPart()) {
 							String versionIdPart = fullId.getVersionIdPart();
-							response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
+							response.addHeader(HeaderConstants.ETAG, createEtag(versionIdPart));
 						} else if (theResource != null
 								&& theResource.getMeta() != null
 								&& isNotBlank(theResource.getMeta().getVersionId())) {
 							String versionId = theResource.getMeta().getVersionId();
-							response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+							response.addHeader(HeaderConstants.ETAG, createEtag(versionId));
 						}
 				}
 			}
@@ -966,7 +967,7 @@ public class RestfulServerUtils {
 				// Force binary resources to download - This is a security measure to prevent
 				// malicious images or HTML blocks being served up as content.
 				contentType = getBinaryContentTypeOrDefault(bin);
-				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				response.addHeader(HeaderConstants.CONTENT_DISPOSITION, "Attachment;");
 
 				Integer contentLength = null;
 				if (bin.hasData()) {
@@ -1010,7 +1011,7 @@ public class RestfulServerUtils {
 			lastUpdated = extractLastUpdatedFromResource(theResource);
 		}
 		if (lastUpdated != null && lastUpdated.isEmpty() == false) {
-			response.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
+			response.addHeader(HeaderConstants.LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
 		}
 
 		/*

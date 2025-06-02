@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -205,7 +206,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 			// If-None-Match
 			if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-				String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+				String ifNoneMatch = theRequest.getHeader(HeaderConstants.IF_NONE_MATCH.toLowerCase());
 				if (StringUtils.isNotBlank(ifNoneMatch)) {
 					ifNoneMatch = ParameterUtil.parseETagValue(ifNoneMatch);
 					String versionIdPart = responseResource.getIdElement().getVersionIdPart();
@@ -215,7 +216,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 					if (ifNoneMatch.equals(versionIdPart)) {
 						ourLog.debug(
 								"Returning HTTP 304 because request specified {}={}",
-								Constants.HEADER_IF_NONE_MATCH,
+							HeaderConstants.IF_NONE_MATCH,
 								ifNoneMatch);
 						throw new NotModifiedException(Msg.code(385) + "Not Modified");
 					}
@@ -223,7 +224,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 
 			// If-Modified-Since
-			String ifModifiedSince = theRequest.getHeader(Constants.HEADER_IF_MODIFIED_SINCE_LC);
+			String ifModifiedSince = theRequest.getHeader(HeaderConstants.IF_MODIFIED_SINCE.toLowerCase());
 			if (isNotBlank(ifModifiedSince)) {
 				Date ifModifiedSinceDate = DateUtils.parseDate(ifModifiedSince);
 				Date lastModified = null;

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -1874,7 +1875,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         HttpGet get = new HttpGet(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json");
         CloseableHttpResponse resp = ourHttpClient.execute(get);
         try {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue().replaceAll(";.*", ""));
             bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
         } finally {
             IOUtils.closeQuietly(resp);

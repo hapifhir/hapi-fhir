@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -204,7 +205,7 @@ public class OperationServerDstu3Test {
 		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("HTTP Method GET is not allowed");
 	}
 
@@ -421,7 +422,7 @@ public class OperationServerDstu3Test {
 		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertEquals("POST", status.getFirstHeader(HeaderConstants.ALLOW).getValue());
 		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 

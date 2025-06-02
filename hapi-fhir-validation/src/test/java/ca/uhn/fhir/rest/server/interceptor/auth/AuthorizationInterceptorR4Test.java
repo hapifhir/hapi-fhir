@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -3845,7 +3846,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 		ourHitMethod = false;
 		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "foo=bar");
+		httpPost.addHeader(HeaderConstants.IF_NONE_EXIST, "foo=bar");
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		String response = extractResponseAndClose(status);

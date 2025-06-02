@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -113,7 +114,7 @@ public class CustomTypeServerDstu3 {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/2");
-		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
+		httpPost.addHeader(HeaderConstants.IF_NONE_EXIST, "Patient?identifier=system%7C001");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);

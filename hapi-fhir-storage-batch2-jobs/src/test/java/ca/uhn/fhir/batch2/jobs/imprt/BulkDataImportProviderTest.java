@@ -11,6 +11,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -130,7 +131,7 @@ public class BulkDataImportProviderTest {
 		}
 		String url = requestUrl + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		// Execute
@@ -201,7 +202,7 @@ public class BulkDataImportProviderTest {
 			.removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		// Execute
@@ -257,7 +258,7 @@ public class BulkDataImportProviderTest {
 		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -280,7 +281,7 @@ public class BulkDataImportProviderTest {
 		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -313,7 +314,7 @@ public class BulkDataImportProviderTest {
 		String url = requestUrl + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -337,7 +338,7 @@ public class BulkDataImportProviderTest {
 		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
@@ -359,7 +360,7 @@ public class BulkDataImportProviderTest {
 		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT;
 
 		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		ourLog.info("Request: {}", url);
@@ -393,7 +394,7 @@ public class BulkDataImportProviderTest {
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 
 		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		get.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 

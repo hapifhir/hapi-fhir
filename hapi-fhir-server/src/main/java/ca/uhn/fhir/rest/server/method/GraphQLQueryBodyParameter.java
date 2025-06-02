@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,7 +49,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	public Object translateQueryParametersIntoServerArgument(
 			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
 			throws InternalErrorException, InvalidRequestException {
-		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
+		String ctValue = defaultString(theRequest.getHeader(HeaderConstants.CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
 
 		// Trim off "; charset=FOO" from the content-type header

@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferHeader;
@@ -210,7 +211,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 		RestOperationTypeEnum restOperationType = getRestOperationType(theRequest);
 		boolean allowPrefer = RestfulServerUtils.respectPreferHeader(restOperationType);
 		if (allowPrefer) {
-			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
+			String prefer = theRequest.getHeader(HeaderConstants.PREFER);
 			PreferHeader preferReturn = RestfulServerUtils.parsePreferHeader(theServer, prefer);
 			PreferReturnEnum returnEnum = preferReturn.getReturn();
 			returnEnum = defaultIfNull(returnEnum, PreferReturnEnum.REPRESENTATION);

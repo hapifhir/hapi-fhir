@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.model.api.HeaderConstants;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.Lists;
@@ -116,7 +115,7 @@ public class JdbcDriverTest {
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
 		assertThat(outcome).hasSize(2);
 
-		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
+		String expectedAuthHeader = HeaderConstants.AUTHORIZATION_BASIC_PREFIX + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(HeaderConstants.AUTHORIZATION).get(0);
 		assertEquals(expectedAuthHeader, actual);
 	}

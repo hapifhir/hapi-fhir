@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -122,7 +123,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	}
 
 	private void updateAllowHeader() {
-		getResponseHeaders().remove(Constants.HEADER_ALLOW);
+		getResponseHeaders().remove(HeaderConstants.ALLOW);
 
 		StringBuilder b = new StringBuilder();
 		for (RequestTypeEnum next : myAllowedMethods) {
@@ -131,6 +132,6 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 			}
 			b.append(next.name());
 		}
-		addResponseHeader(Constants.HEADER_ALLOW, b.toString());
+		addResponseHeader(HeaderConstants.ALLOW, b.toString());
 	}
 }

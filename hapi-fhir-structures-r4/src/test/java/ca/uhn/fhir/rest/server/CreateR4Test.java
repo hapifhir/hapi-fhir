@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -130,7 +131,7 @@ public class CreateR4Test {
 
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPost.addHeader(HeaderConstants.PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -255,7 +256,7 @@ public class CreateR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
@@ -279,7 +280,7 @@ public class CreateR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(HeaderConstants.CONTENT_TYPE).getValue());
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
@@ -304,7 +305,7 @@ public class CreateR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+			assertNull(status.getFirstHeader(HeaderConstants.CONTENT_TYPE));
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseContent).isNullOrEmpty();

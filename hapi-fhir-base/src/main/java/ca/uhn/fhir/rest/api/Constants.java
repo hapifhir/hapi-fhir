@@ -176,14 +176,14 @@ public class Constants {
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_CONTENT_LOCATION = HeaderConstants.CONTENT_LOCATION;
 
-	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
+	public static final String HEADER_CONTENT_LOCATION_LC = HeaderConstants.CONTENT_LOCATION.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#CONTENT_TYPE} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_CONTENT_TYPE = HeaderConstants.CONTENT_TYPE;
 
-	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
+	public static final String HEADER_CONTENT_TYPE_LC = HeaderConstants.CONTENT_TYPE.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#COOKIE} instead
 	 */
@@ -210,49 +210,42 @@ public class Constants {
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_ETAG = HeaderConstants.ETAG;
 
-	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MATCH} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_MATCH = HeaderConstants.IF_MATCH;
 
-	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_MODIFIED_SINCE} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_MODIFIED_SINCE = HeaderConstants.IF_MODIFIED_SINCE;
 
-	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_EXIST} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_NONE_EXIST = HeaderConstants.IF_NONE_EXIST;
 
-	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#IF_NONE_MATCH} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_IF_NONE_MATCH = HeaderConstants.IF_NONE_MATCH;
 
-	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#LAST_MODIFIED} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_LAST_MODIFIED = HeaderConstants.LAST_MODIFIED;
 
-	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#LOCATION} instead
 	 */
 	@Deprecated(since = "7.2.0", forRemoval = false)
 	public static final String HEADER_LOCATION = HeaderConstants.LOCATION;
 
-	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	/**
 	 * @deprecated Use {@link HeaderConstants#ORIGIN} instead
 	 */

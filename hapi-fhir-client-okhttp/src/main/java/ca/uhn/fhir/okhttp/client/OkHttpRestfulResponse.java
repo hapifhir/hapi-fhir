@@ -20,7 +20,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -97,7 +97,7 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 
 	@Override
 	public String getMimeType() {
-		String contentType = myResponse.header(Constants.HEADER_CONTENT_TYPE);
+		String contentType = myResponse.header(HeaderConstants.CONTENT_TYPE);
 		MediaType mediaType = null;
 		if (contentType == null) {
 			if (myResponse.body() != null) {

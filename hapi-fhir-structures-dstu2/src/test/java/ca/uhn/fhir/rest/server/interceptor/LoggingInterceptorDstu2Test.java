@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -236,7 +237,7 @@ public class LoggingInterceptorDstu2Test {
 		interceptor.setLogger(logger);
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		httpGet.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
+		httpGet.addHeader(HeaderConstants.CONTENT_TYPE, Constants.CT_FHIR_XML);
 
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());

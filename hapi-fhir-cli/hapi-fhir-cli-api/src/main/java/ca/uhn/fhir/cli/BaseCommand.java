@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.HeaderConstants;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -365,7 +364,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 			byte[] basicAuth = optionValue.getBytes();
 			String base64EncodedBasicAuth = Base64Utils.encodeToString(basicAuth);
-			basicAuthHeaderValue = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + base64EncodedBasicAuth;
+			basicAuthHeaderValue = HeaderConstants.AUTHORIZATION_BASIC_PREFIX + base64EncodedBasicAuth;
 		}
 		return basicAuthHeaderValue;
 	}
@@ -581,7 +580,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			String bearerToken = getAndParseBearerTokenAuthHeader(theCommandLine, theBearerTokenOptionName);
 			if (isNotBlank(bearerToken)) {
 				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(
-						HeaderConstants.AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
+						HeaderConstants.AUTHORIZATION, HeaderConstants.AUTHORIZATION_BEARER_PREFIX + bearerToken));
 			}
 		}
 

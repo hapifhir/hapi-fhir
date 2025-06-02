@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -76,7 +77,7 @@ public class JaxRsHttpClient implements IHttpClient {
 		Entity<String> entity = Entity.entity(theContents, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		JaxRsHttpRequest retVal = createHttpRequest(entity);
 		addHeadersToRequest(retVal, theEncoding, theContext);
-		retVal.addHeader(Constants.HEADER_CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
+		retVal.addHeader(HeaderConstants.CONTENT_TYPE, theContentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		return retVal;
 	}
 
@@ -137,14 +138,14 @@ public class JaxRsHttpClient implements IHttpClient {
 		if (myIfNoneExistParams != null) {
 			StringBuilder b = newHeaderBuilder(myUrl);
 			BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
-			result.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+			result.addHeader(HeaderConstants.IF_NONE_EXIST, b.toString());
 		}
 
 		if (myIfNoneExistString != null) {
 			StringBuilder b = newHeaderBuilder(myUrl);
 			b.append(b.indexOf("?") == -1 ? '?' : '&');
 			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
-			result.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+			result.addHeader(HeaderConstants.IF_NONE_EXIST, b.toString());
 		}
 	}
 

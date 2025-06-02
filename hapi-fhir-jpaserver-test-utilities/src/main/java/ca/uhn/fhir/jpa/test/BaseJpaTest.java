@@ -104,6 +104,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.model.api.HeaderConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -178,7 +179,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.rest.api.Constants.HEADER_CACHE_CONTROL;
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -517,7 +517,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-		when(mySrd.getHeaders(eq(HEADER_CACHE_CONTROL))).thenReturn(new ArrayList<>());
+		when(mySrd.getHeaders(eq(HeaderConstants.CACHE_CONTROL))).thenReturn(new ArrayList<>());
 		// TODO enforce strict mocking everywhere
 		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
 		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
