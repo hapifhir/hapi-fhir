@@ -36,7 +36,10 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 public class Constants {
 
 	public static final String CT_TEXT_CSV = "text/csv";
-	public static final String HEADER_REQUEST_ID = "X-Request-ID";
+	/**
+	 * @deprecated Use {@link HapiHeaderConstants#REQUEST_ID} instead.
+	 */
+	public static final String HEADER_REQUEST_ID = HapiHeaderConstants.REQUEST_ID;
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";

@@ -9,10 +9,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -421,7 +418,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HapiHeaderConstants.REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}
@@ -429,10 +426,10 @@ public class SearchR4Test {
 	@Test
 	public void testRequestIdSuppliedAndReturned() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
+		httpGet.addHeader(HapiHeaderConstants.REQUEST_ID, "help im a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HapiHeaderConstants.REQUEST_ID).getValue();
 			assertThat(requestId).matches("help im a bug");
 		}
 	}
@@ -440,10 +437,10 @@ public class SearchR4Test {
 	@Test
 	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
+		httpGet.addHeader(HapiHeaderConstants.REQUEST_ID, "help i'm a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			String requestId = status.getFirstHeader(HapiHeaderConstants.REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
 	}

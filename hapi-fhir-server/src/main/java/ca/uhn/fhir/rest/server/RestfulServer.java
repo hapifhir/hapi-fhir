@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.util.HapiHeaderUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -1342,14 +1343,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
-		String caseSensitiveRequestIdKey = Constants.HEADER_REQUEST_ID;
-		for (String key : theRequestDetails.getHeaders().keySet()) {
-			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)) {
-				caseSensitiveRequestIdKey = key;
-				break;
-			}
-		}
-		theRequestDetails.getResponse().addHeader(caseSensitiveRequestIdKey, theRequestId);
+		Set<String> headerKeys = theRequestDetails.getHeaders().keySet();
+		String requestIdKey = HapiHeaderUtil.getRequestIdKey(headerKeys);
+		theRequestDetails.getResponse().addHeader(requestIdKey, theRequestId);
 	}
 
 	/**

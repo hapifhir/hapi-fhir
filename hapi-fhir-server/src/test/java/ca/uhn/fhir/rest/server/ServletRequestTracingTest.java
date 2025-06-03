@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -30,7 +30,7 @@ public class ServletRequestTracingTest {
 	@Test
 	public void requestWithCallerHapiIdUsesThat() {
 		// setup
-		myRequest.addHeader(Constants.HEADER_REQUEST_ID, "a_request_id");
+		myRequest.addHeader(HapiHeaderConstants.REQUEST_ID, "a_request_id");
 
 		run();
 

@@ -1,0 +1,10 @@
+package ca.uhn.fhir.rest.api;
+
+public class HapiHeaderConstants {
+	/**
+	 * @deprecated Use {@link #REQUEST_ID} instead.
+	 */
+	@Deprecated
+	public static final String DEPRECATED_REQUEST_ID = "X-Request-ID";
+	public static final String REQUEST_ID = "HAPI-Request-Id";
+}
