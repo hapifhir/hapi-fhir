@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -344,7 +345,7 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 
 	private RequestDetails createRequestDetailsWithPartitionHeader(String theCommaSeparatedPartitionIds) {
 		ServletRequestDetails requestDetails = createRequestDetails();
-		requestDetails.addHeader(RequestHeaderPartitionInterceptor.PARTITIONS_HEADER, theCommaSeparatedPartitionIds);
+		requestDetails.addHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS, theCommaSeparatedPartitionIds);
 		return requestDetails;
 	}
 }

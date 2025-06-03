@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -47,8 +48,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class RequestHeaderPartitionInterceptor {
 
-	public static final String PARTITIONS_HEADER = "X-Request-Partition-IDs";
-
 	/**
 	 * This method is called to identify the partition ID for create operations.
 	 * It reads the value of the X-Request-Partition-IDs header, and parses and returns the first partition ID
@@ -71,11 +70,11 @@ public class RequestHeaderPartitionInterceptor {
 	}
 
 	private String getPartitionHeaderOrThrowIfBlank(RequestDetails theRequestDetails) {
-		String partitionHeader = theRequestDetails.getHeader(PARTITIONS_HEADER);
+		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 		if (isBlank(partitionHeader)) {
 			String msg = String.format(
 					"%s header is missing or blank, it is required to identify the storage partition",
-					PARTITIONS_HEADER);
+				Constants.HEADER_X_REQUEST_PARTITION_IDS);
 			throw new InvalidRequestException(Msg.code(2642) + msg);
 		}
 		return partitionHeader;
@@ -102,7 +101,7 @@ public class RequestHeaderPartitionInterceptor {
 					partitionIds.add(partitionId);
 				} catch (NumberFormatException e) {
 					String msg = String.format(
-							"Invalid partition ID: '%s' provided in header: %s", trimmedPartitionId, PARTITIONS_HEADER);
+							"Invalid partition ID: '%s' provided in header: %s", trimmedPartitionId, Constants.HEADER_X_REQUEST_PARTITION_IDS);
 					throw new InvalidRequestException(Msg.code(2643) + msg);
 				}
 			}
@@ -116,7 +115,7 @@ public class RequestHeaderPartitionInterceptor {
 		if (partitionIds.isEmpty()) {
 			// this case happens only when the header contains nothing but commas
 			// since we already checked for blank header before calling this function
-			String msg = String.format("No partition IDs provided in header: %s", PARTITIONS_HEADER);
+			String msg = String.format("No partition IDs provided in header: %s", Constants.HEADER_X_REQUEST_PARTITION_IDS);
 			throw new InvalidRequestException(Msg.code(2645) + msg);
 		}
 

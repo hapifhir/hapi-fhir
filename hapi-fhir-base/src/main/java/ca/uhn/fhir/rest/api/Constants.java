@@ -114,7 +114,8 @@ public class Constants {
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	public static final String HEADER_X_FHIR_STARTER = "X-FHIR-Starter";
-
+	public static final String HEADER_X_REQUEST_PARTITION_IDS = "X-Request-Partition-IDs";
+	
 	// ==============================================================
 	// Other Constants
 	// ==============================================================
