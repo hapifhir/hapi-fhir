@@ -1,44 +1,58 @@
 package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.rest.api.HapiHeaderConstants;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import javax.annotation.Nullable;
+import java.util.Enumeration;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 public final class HapiHeaderUtil {
-	private HapiHeaderUtil() {}
+	private HapiHeaderUtil() {
+	}
 
-	public static String getRequestIdKey(Set<String> theHeaderKeys) {
+	public static final Map<String, String> ourHeaderToDeprecatedHeaderMap = Map.of(
+		HapiHeaderConstants.REQUEST_ID, HapiHeaderConstants.DEPRECATED_REQUEST_ID,
+		HapiHeaderConstants.RETRY_ON_VERSION_CONFLICT, HapiHeaderConstants.DEPRECATED_RETRY_ON_VERSION_CONFLICT
+	);
+
+	public static String getHeaderOrDeprecatedHeaderKey(Set<String> theHeaderKeys, String theHeaderKey) {
 		// First try the official key
 		for (String key : theHeaderKeys) {
-			if (HapiHeaderConstants.REQUEST_ID.equalsIgnoreCase(key)) {
+			if (theHeaderKey.equalsIgnoreCase(key)) {
 				return key;
 			}
 		}
 
 		// Then try the deprecated key
 		for (String key : theHeaderKeys) {
-			if (HapiHeaderConstants.DEPRECATED_REQUEST_ID.equalsIgnoreCase(key)) {
+			if (ourHeaderToDeprecatedHeaderMap.get(theHeaderKey).equalsIgnoreCase(key)) {
 				return key;
 			}
 		}
 
-		return HapiHeaderConstants.REQUEST_ID; // Default fallback
+		return theHeaderKey; // Default fallback
 	}
 
 	@Nullable
-	public static String getRequestId(Function<String, String> theGetHeaderFunction) {
-		String requestId = theGetHeaderFunction.apply(HapiHeaderConstants.REQUEST_ID);
+	public static String getHeaderOrDeprecatedHeader(Function<String, String> theGetHeaderFunction, String theHeaderKey) {
+		String requestId = theGetHeaderFunction.apply(theHeaderKey);
 		if (requestId == null) {
-			requestId = theGetHeaderFunction.apply(HapiHeaderConstants.DEPRECATED_REQUEST_ID);
+			requestId = theGetHeaderFunction.apply(ourHeaderToDeprecatedHeaderMap.get(theHeaderKey));
 		}
 		return requestId;
 	}
 
-	public static boolean hasRequestId(Function<String, Boolean> theHasHeaderFunction) {
-		return theHasHeaderFunction.apply(HapiHeaderConstants.REQUEST_ID) || theHasHeaderFunction.apply(HapiHeaderConstants.DEPRECATED_REQUEST_ID);
+	public static boolean hasHeaderOrDeprecatedHeader(Function<String, Boolean> theHasHeaderFunction, String theHeaderKey) {
+		return theHasHeaderFunction.apply(theHeaderKey) || theHasHeaderFunction.apply(ourHeaderToDeprecatedHeaderMap.get(theHeaderKey));
+	}
+
+	public static Enumeration<String> getHeadersOrDeprecatedHeaders(Function<String, Enumeration<String>> theGetHeadersFunction, String theHeaderKey) {
+		Enumeration<String> headers = theGetHeadersFunction.apply(theHeaderKey);
+		if (headers == null || !headers.hasMoreElements()) {
+			headers = theGetHeadersFunction.apply(ourHeaderToDeprecatedHeaderMap.get(theHeaderKey));
+		}
+		return headers;
 	}
 }

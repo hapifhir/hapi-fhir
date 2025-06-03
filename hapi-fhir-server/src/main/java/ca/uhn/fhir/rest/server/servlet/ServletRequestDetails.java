@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.HapiHeaderUtil;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
@@ -249,7 +250,7 @@ public class ServletRequestDetails extends RequestDetails {
 		if (theRequest == null) {
 			return;
 		}
-		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
+		Enumeration<String> headers = HapiHeaderUtil.getHeadersOrDeprecatedHeaders(theRequest::getHeaders, HapiHeaderConstants.RETRY_ON_VERSION_CONFLICT);
 		if (headers != null) {
 			Iterator<String> headerIterator = headers.asIterator();
 			while (headerIterator.hasNext()) {

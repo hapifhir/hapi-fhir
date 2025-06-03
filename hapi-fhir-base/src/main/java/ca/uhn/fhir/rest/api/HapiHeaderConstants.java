@@ -21,4 +21,11 @@ public class HapiHeaderConstants {
 	@Deprecated
 	public static final String DEPRECATED_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final String REWRITE_HISTORY = "HAPI-Rewrite-History";
+
+	/**
+	 * @deprecated Use {@link #RETRY_ON_VERSION_CONFLICT} instead.
+	 */
+	@Deprecated
+	public static final String DEPRECATED_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
+	public static final String RETRY_ON_VERSION_CONFLICT = "HAPI-Retry-On-Version-Conflict";
 }

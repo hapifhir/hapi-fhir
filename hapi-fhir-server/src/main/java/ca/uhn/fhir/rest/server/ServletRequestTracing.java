@@ -70,7 +70,7 @@ public class ServletRequestTracing {
 		if (requestId == null && theServletRequest instanceof HttpServletRequest) {
 			// Also applies to non-FHIR (e.g. admin-json) requests).
 			HttpServletRequest request = (HttpServletRequest) theServletRequest;
-			requestId = HapiHeaderUtil.getRequestId(request::getHeader);
+			requestId = HapiHeaderUtil.getHeaderOrDeprecatedHeader(request::getHeader, HapiHeaderConstants.REQUEST_ID);
 			if (isNotBlank(requestId)) {
 				for (char nextChar : requestId.toCharArray()) {
 					if (!Character.isLetterOrDigit(nextChar)) {

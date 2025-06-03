@@ -1345,7 +1345,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
 		Set<String> headerKeys = theRequestDetails.getHeaders().keySet();
-		String requestIdKey = HapiHeaderUtil.getRequestIdKey(headerKeys);
+		String requestIdKey = HapiHeaderUtil.getHeaderOrDeprecatedHeaderKey(headerKeys, HapiHeaderConstants.REQUEST_ID);
 		theRequestDetails.getResponse().addHeader(requestIdKey, theRequestId);
 	}
 
