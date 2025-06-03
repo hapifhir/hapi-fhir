@@ -82,6 +82,7 @@ public class Constants {
 	 * Standard CORS headers
 	 */
 	public static final String HEADER_CORS_ORIGIN = "Origin";
+	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
@@ -89,7 +90,6 @@ public class Constants {
 	public static final String HEADER_CORS_REQUEST_HEADERS = "Access-Control-Request-Headers";
 	public static final String HEADER_CORS_REQUEST_METHOD = "Access-Control-Request-Method";
 	public static final String HEADER_CORS_MAX_AGE = "Access-Control-Max-Age";
-	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
 	/**
 	 * Proprietary HAPI HTTP Headers
