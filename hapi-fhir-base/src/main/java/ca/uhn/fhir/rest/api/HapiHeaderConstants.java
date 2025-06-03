@@ -7,4 +7,11 @@ public class HapiHeaderConstants {
 	@Deprecated
 	public static final String DEPRECATED_REQUEST_ID = "X-Request-ID";
 	public static final String REQUEST_ID = "HAPI-Request-Id";
+
+	/**
+	 * @deprecated Use {@link #REQUEST_SOURCE} instead.
+	 */
+	@Deprecated
+	public static final String DEPRECATED_REQUEST_SOURCE = "X-Request-Source";
+	public static final String REQUEST_SOURCE = "HAPI-Request-Source";
 }

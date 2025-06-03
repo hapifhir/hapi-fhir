@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.MetaUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,11 +51,11 @@ public class CaptureResourceSourceFromHeaderInterceptor {
 
 	public CaptureResourceSourceFromHeaderInterceptor(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		setHeaderName(Constants.HEADER_REQUEST_SOURCE);
+		setHeaderName(HapiHeaderConstants.REQUEST_SOURCE);
 	}
 
 	/**
-	 * Provides the header name to examine in incoming requests. Default is {@link ca.uhn.fhir.rest.api.Constants#HEADER_REQUEST_SOURCE "X-Request-Source"}.
+	 * Provides the header name to examine in incoming requests. Default is {@link HapiHeaderConstants#REQUEST_SOURCE "X-Request-Source"}.
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public String getHeaderName() {
@@ -63,7 +63,7 @@ public class CaptureResourceSourceFromHeaderInterceptor {
 	}
 
 	/**
-	 * Provides the header name to examine in incoming requests. Default is {@link ca.uhn.fhir.rest.api.Constants#HEADER_REQUEST_SOURCE "X-Request-Source"}.
+	 * Provides the header name to examine in incoming requests. Default is {@link HapiHeaderConstants#REQUEST_SOURCE "X-Request-Source"}.
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public void setHeaderName(String theHeaderName) {

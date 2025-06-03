@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.r4.model.Bundle;
@@ -67,7 +67,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.getFhirClient()
 			.create()
 			.resource(resource)
-			.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
+			.withAdditionalHeader(HapiHeaderConstants.REQUEST_SOURCE, "http://header")
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
@@ -84,7 +84,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.getFhirClient()
 			.create()
 			.resource(resource)
-			.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
+			.withAdditionalHeader(HapiHeaderConstants.REQUEST_SOURCE, "http://header")
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);

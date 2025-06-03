@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import ca.uhn.fhir.rest.server.util.HapiHeaderUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -1349,7 +1350,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Reads a request ID from the request headers via the {@link Constants#HEADER_REQUEST_ID}
+	 * Reads a request ID from the request headers via the {@link HapiHeaderConstants#REQUEST_ID}
 	 * header, or generates one if none is supplied.
 	 * <p>
 	 * Note that the generated request ID is a random 64-bit long integer encoded as

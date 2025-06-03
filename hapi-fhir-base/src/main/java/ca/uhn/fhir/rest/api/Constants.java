@@ -40,7 +40,13 @@ public class Constants {
 	 * @deprecated Use {@link HapiHeaderConstants#REQUEST_ID} instead.
 	 */
 	public static final String HEADER_REQUEST_ID = HapiHeaderConstants.REQUEST_ID;
-	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
+
+	/**
+	 * @deprecated Use {@link HapiHeaderConstants#REQUEST_SOURCE} instead.
+	 */
+	@Deprecated
+	public static final String HEADER_REQUEST_SOURCE = HapiHeaderConstants.REQUEST_SOURCE;
+
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
