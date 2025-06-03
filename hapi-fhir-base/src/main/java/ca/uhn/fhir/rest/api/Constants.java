@@ -64,13 +64,13 @@ public class Constants {
 	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
 
 	/**
-	 * Standard FHIR headers
+	 * Standard FHIR Headers
 	 */
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 
 	/**
-	 * Common non-standard HTTP headers
+	 * Common non-standard HTTP Headers
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_COOKIE = "Cookie";
@@ -84,7 +84,7 @@ public class Constants {
 	public static final String HEADER_X_CACHE = "X-Cache";
 
 	/**
-	 * Proprietary HAPI HTTP headers
+	 * Proprietary HAPI HTTP Headers
 	 */
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
