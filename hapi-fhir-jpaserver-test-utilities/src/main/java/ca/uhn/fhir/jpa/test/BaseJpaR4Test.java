@@ -258,7 +258,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	protected IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;

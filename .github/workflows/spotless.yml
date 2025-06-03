@@ -22,11 +22,12 @@ jobs:
       -  uses: mshick/add-pr-comment@v2
          if: always()
          with:
+            message-id: spotless
             proxy-url: https://slack-bots.azure.smilecdr.com/robogary/github
             message-success: |
-               [spotless]: Formatting check succeeded!
+                Formatting check succeeded!
             message-failure: |
-               [spotless]: **This Pull Request has failed the formatting check**
+               **This Pull Request has failed the formatting check**
                
                Please run `mvn spotless:apply` or `mvn clean install -DskipTests` to fix the formatting issues. 
                
