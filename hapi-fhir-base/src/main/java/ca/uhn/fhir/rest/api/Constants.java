@@ -39,7 +39,6 @@ public class Constants {
 	 * Standard HTTP Headers
 	 */
 	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
-
 	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
 	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
 	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
