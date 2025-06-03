@@ -48,7 +48,7 @@ public class FhirPatchTest {
 	static List<Arguments> patchParams() {
 		List<Arguments> params = new ArrayList<>();
 
-		// 1
+		// 1 - Appointment.participant.actor.reference.where(startsWith('Patient/')).first()
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -61,7 +61,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
-		// 2
+		// 2 - Appointment.participant.actor.where(reference.startsWith('Patient/')).first()
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -74,7 +74,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/P2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
-		// 3
+		// 3 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[0]
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -88,7 +88,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
-		// 4
+		// 4 - Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -102,7 +102,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
 		}
 
-		// 5
+		// 5 - Appointment.participant.actor.reference.where(startsWith('Patient/')).last()
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -114,7 +114,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
 		}
 
-		// 6
+		// 6 - Appointment.participant.actor.reference.where(endsWith('Patient/p1')).single()
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -126,7 +126,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
 		}
 
-		// 7
+		// 7 - Appointment.participant.actor.reference.where(startsWith('Patient/')).tail()
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -139,7 +139,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
 		}
 
-		// 8
+		// 8 - Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()
@@ -152,7 +152,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
 		}
 
-		// 9
+		// 9 - Appointment.participant.actor.reference.where(startsWith('Patient/')).take(1)
 		{
 			Parameters parameters = new Parameters();
 			Parameters.ParametersParameterComponent comp = parameters.addParameter()

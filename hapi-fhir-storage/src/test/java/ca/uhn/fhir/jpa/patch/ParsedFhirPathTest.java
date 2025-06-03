@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.patch;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -209,6 +213,39 @@ public class ParsedFhirPathTest {
 		assertNotNull(parsed.getTail());
 	}
 
+	static Stream<Arguments> getLastElementNameParams() {
+		return Stream.of(
+			Arguments.of("Appointment.participant.actor.where(reference.startsWith('Patient'))", "actor"),
+			Arguments.of("Patient.name.given.first()", "given"),
+			Arguments.of("Patient.name.given[1]", "given")
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getLastElementNameParams")
+	public void getLastElementName_basicTest(String thePath, String theLastElement) {
+		// setup
+		ParsedFhirPath parsed = ParsedFhirPath.parse(thePath);
+
+		assertEquals(theLastElement, parsed.getLastElementName());
+	}
+
+	@Test
+	public void getPathUntilPreCondition_basicTest() {
+		// setup
+		String subpath;
+		String path = "Appointment.participant.actor.reference.startsWith('Patient')";
+
+		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
+
+		// tests
+		subpath = parsedFhirPath.getPathUntilPreCondition(ParsedFhirPath.FhirPathNode::isFunction);
+		assertEquals("Appointment.participant.actor.reference", subpath);
+
+		subpath = parsedFhirPath.getPathUntilPreCondition(n -> n.getNext() == parsedFhirPath.getTail());
+		assertEquals("Appointment.participant.actor", subpath);
+	}
+
 	private void validateList(ParsedFhirPath theParsedPath, List<String> theParts, Consumer<ParsedFhirPath.FhirPathNode> thePerNodeAction) {
 		ParsedFhirPath.FhirPathNode current = null;
 		ParsedFhirPath.FhirPathNode previous = null;
@@ -232,5 +269,18 @@ public class ParsedFhirPathTest {
 
 		// verify that there is no next
 		assertNull(current);
+	}
+
+	@Test
+	public void parse_withListPath_works() {
+		// setup
+		String path = "Patient.name.given[1]";
+
+		// test
+		ParsedFhirPath parsed = ParsedFhirPath.parse(path);
+
+		assertTrue(parsed.endsWithAnIndex());
+
+		assertTrue(parsed.getTail().hasListIndex());
 	}
 }

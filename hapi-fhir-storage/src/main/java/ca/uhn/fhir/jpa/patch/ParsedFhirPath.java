@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.patch;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
+import static net.sourceforge.plantuml.StringUtils.manageEscapedTabs;
 
 /**
  * This class creates and contains a parsed fhirpath.
@@ -37,8 +37,12 @@ public class ParsedFhirPath {
 		/**
 		 * The value of this node.
 		 */
-		private String myValue;
+		private final String myValue;
 
+		/**
+		 * If this node is a filter node (ie, ends with [x] where x is some
+		 * list index), this value will be an integer >= 0
+		 */
 		private int myListIndex = -1;
 
 		public FhirPathNode(String theValue) {
@@ -51,7 +55,6 @@ public class ParsedFhirPath {
 					String val = theValue.substring(open + 1, close);
 					try {
 						myListIndex = Integer.parseInt(val);
-//						myValue = theValue.substring(0, open);
 					} catch (NumberFormatException ex) {
 						// TODO - not a number, but an expression
 						/*
@@ -165,14 +168,17 @@ public class ParsedFhirPath {
 	}
 
 	/**
-	 * The head node
+	 * The head node. Should never be null.
 	 */
 	private final FhirPathNode myHead;
 
+	/**
+	 * The tail node. Should never be null.
+	 */
 	private FhirPathNode myTail;
 
 	/**
-	 * The full path, unaltered
+	 * The full path, unparsed, of this particular FhirPath
 	 */
 	private final String myRawPath;
 
@@ -250,33 +256,22 @@ public class ParsedFhirPath {
 		return sb.toString();
 	}
 
-	public List<String> getPathAsList() {
-		List<String> parts = new ArrayList<>();
-		FhirPathNode node = myHead;
-
-		while (node != null) {
-			parts.add(node.getValue());
-			node = node.getNext();
-		}
-		return parts;
-	}
-
 	/**
 	 * Returns the path as a string up until the condition
 	 * (omitting the portion of the path that satisfies the condition).
-	 *
+	 * -
 	 * If the condition is never met, the entire path will be returned.
 	 *
 	 * @param theCondition the condition to evaluate at each node to determine
 	 *                     if it should be included in the path
 	 */
-	public String getPathUntilPreCondition(Function<FhirPathNode, Boolean> theCondition) {
+	public String getPathUntilPreCondition(Predicate<FhirPathNode> theCondition) {
 		FhirPathNode node = getHead();
 
 		StringBuilder sb = new StringBuilder();
 		while (node != null) {
 			// check condition first
-			if (theCondition.apply(node)) {
+			if (theCondition.test(node)) {
 				break;
 			}
 
@@ -284,31 +279,6 @@ public class ParsedFhirPath {
 				sb.append(".");
 			}
 			sb.append(node.getValue());
-
-			node = node.getNext();
-		}
-		return sb.toString();
-	}
-
-	public String getPathFromTo(Predicate<FhirPathNode> theFrom, Predicate<FhirPathNode> theTo) {
-		FhirPathNode node = getHead();
-		StringBuilder sb = new StringBuilder();
-		boolean started = false;
-		while (node != null) {
-			if (theFrom.test(node)) {
-				started = true;
-			}
-			if (started) {
-				if (theTo.test(node)) {
-					// reached the end
-					break;
-				}
-
-				if (!sb.isEmpty()) {
-					sb.append(".");
-				}
-				sb.append(node.getValue());
-			}
 
 			node = node.getNext();
 		}
@@ -325,21 +295,19 @@ public class ParsedFhirPath {
 		}
 
 		if (node == null) {
-			// this shouldn't ever happen
+			// this shouldn't ever happen; but we'll return
+			// null instead of throwing
 			ourLog.error("No non-function nodes in path!");
 			return null;
 		}
 		return node.getValue();
 	}
 
-	public FhirPathNode getFirstNode(Predicate<FhirPathNode> thePred) {
-		FhirPathNode node = myHead;
-		while (node != null && !thePred.test(node)) {
-			node = node.getNext();
-		}
-		return node;
-	}
-
+	/**
+	 * Retrieve a list of nodes that meet the given predicate.
+	 * These nodes may or may not be siblings, but it will not
+	 * include children of nodes (ie, only top-level nodes).
+	 */
 	public List<FhirPathNode> getNodes(Predicate<FhirPathNode> thePred) {
 		List<FhirPathNode> nodes = new ArrayList<>();
 		FhirPathNode node = getHead();
@@ -372,11 +340,13 @@ public class ParsedFhirPath {
 		FhirPathNode next;
 		if (dotIndex == -1) {
 			int filterIndex = thePath.indexOf("[");
+			FhirPathNode tail;
 			// base cases
 			if (braceIndex == -1 && filterIndex == -1) {
 				// base case 1 - a standard node (no braces () or dots . or filters [])
 				// ending is just a path element
 				next = new FhirPathNode(thePath);
+				tail = next;
 			} else if (filterIndex == -1) {
 				// base case 2 - a filter function (function ending in ())
 				// ending is a function
@@ -396,6 +366,7 @@ public class ParsedFhirPath {
 				 * filters
 				 */
 				theParsedFhirPath.setEndsWithFilter(true);
+				tail = next;
 			} else {
 				// base case 3 - path contains a filter ([]).. and potentially a functions
 				// ie, either path[n] or path()[n]
@@ -434,16 +405,15 @@ public class ParsedFhirPath {
 
 				// part3 - the part after the closing filter brace ]
 				if (isNotEmpty(part3)) {
-					// todo - error code
-					throw new InvalidRequestException("Unexpected path after filter: " + thePath.substring(closingFilter + 1));
+					throw new InvalidRequestException(Msg.code(2713) + " Unexpected path after filter: " + thePath.substring(closingFilter + 1));
 				} else {
 					// the filter is the end node; nothing more to add
-					theParsedFhirPath.setTail(filterNode);
+					tail = filterNode;
 				}
 			}
 			theParsedFhirPath.setEndsWithAnIndex(true);
 
-			theParsedFhirPath.setTail(next);
+			theParsedFhirPath.setTail(tail);
 		} else if (braceIndex != -1 && braceIndex < dotIndex) {
 			// recursive case 1
 			// next part is a function
@@ -455,8 +425,7 @@ public class ParsedFhirPath {
 					thePath, braceIndex);
 				ourLog.error(msg);
 
-				// todo - error code
-				throw new InternalErrorException(msg);
+				throw new InternalErrorException(Msg.code(2714) + " " + msg);
 			}
 
 			String funcType = thePath.substring(0, braceIndex);
