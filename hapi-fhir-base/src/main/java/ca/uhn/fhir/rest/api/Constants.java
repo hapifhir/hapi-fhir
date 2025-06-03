@@ -100,6 +100,7 @@ public class Constants {
 	public static final String HEADER_X_FORWARDED_HOST = "X-Forwarded-Host";
 	public static final String HEADER_X_FORWARDED_PROTO = "X-Forwarded-Proto";
 	public static final String HEADER_X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
+	public static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
 
 	//==============================================================
 	// Proprietary HAPI HTTP headers

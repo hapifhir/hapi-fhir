@@ -24,7 +24,7 @@ public class RequestInterceptor implements WebRequestInterceptor {
 	@Override
 	public void preHandle(WebRequest theRequest) throws Exception {
 
-		String[] forwardedFors = theRequest.getHeaderValues("x-forwarded-for");
+		String[] forwardedFors = theRequest.getHeaderValues(Constants.HEADER_X_FORWARDED_FOR);
 		StringBuilder b = new StringBuilder();
 		if (forwardedFors != null) {
 			for (String enums : forwardedFors) {
