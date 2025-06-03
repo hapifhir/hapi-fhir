@@ -62,6 +62,7 @@ public class Constants {
 	public static final String HEADER_LOCATION = HttpHeaders.LOCATION;
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
+	public static final String HEADER_DATE = HttpHeaders.DATE;
 
 	/**
 	 * Standard FHIR Headers
@@ -74,13 +75,13 @@ public class Constants {
 	 * Common non-standard HTTP Headers
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_POWERED_BY = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String HEADER_X_CACHE = "X-Cache";
 	public static final String HEADER_X_REQUESTED_WITH = "X-Requested-With";
+	public static final String HEADER_X_CORRELATION_ID = "X-Correlation-ID";
 
 	/**
 	 * Standard CORS headers
