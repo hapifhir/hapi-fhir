@@ -77,6 +77,7 @@ public class Constants {
 	public static final String HEADER_POWERED_BY = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String HEADER_X_CACHE = "X-Cache";
+	public static final String HEADER_X_REQUESTED_WITH = "X-Requested-With";
 
 	/**
 	 * Standard CORS headers
@@ -92,6 +93,17 @@ public class Constants {
 	public static final String HEADER_CORS_MAX_AGE = "Access-Control-Max-Age";
 
 	/**
+	 * Contains a standard set of headers which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedHeader declarations
+	 */
+	public static final Set<String> CORS_ALLOWED_HEADERS;
+	/**
+	 * Contains a standard set of HTTP Methods which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedMethod declarations
+	 */
+	public static final Set<String> CORS_ALLOWED_METHODS;
+
+	/**
 	 * Proprietary HAPI HTTP Headers
 	 */
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
@@ -101,6 +113,7 @@ public class Constants {
 	public static final String HEADER_CASCADE = "X-Cascade";
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
+	public static final String HEADER_X_FHIR_STARTER = "X-FHIR-Starter";
 
 	/**
 	 * Other constants
@@ -113,16 +126,6 @@ public class Constants {
 	public static final String CHARSET_NAME_UTF8 = "UTF-8";
 	public static final Charset CHARSET_UTF8;
 	public static final String CHARSET_UTF8_CTSUFFIX = "; charset=" + CHARSET_NAME_UTF8;
-	/**
-	 * Contains a standard set of headers which are used by FHIR / HAPI FHIR, and therefore
-	 * would make a useful set for CORS AllowedHeader declarations
-	 */
-	public static final Set<String> CORS_ALLOWED_HEADERS;
-	/**
-	 * Contains a standard set of HTTP Methods which are used by FHIR / HAPI FHIR, and therefore
-	 * would make a useful set for CORS AllowedMethod declarations
-	 */
-	public static final Set<String> CORS_ALLWED_METHODS;
 
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_RDF_TURTLE = "application/x-turtle";
@@ -456,15 +459,15 @@ public class Constants {
 		// Update CorsInterceptor's constructor documentation if you change these:
 		// *********************************************************
 		HashSet<String> corsAllowedHeaders = new HashSet<>();
-		corsAllowedHeaders.add("Accept");
+		corsAllowedHeaders.add(HEADER_ACCEPT);
 		corsAllowedHeaders.add(Constants.HEADER_CORS_REQUEST_HEADERS);
 		corsAllowedHeaders.add(Constants.HEADER_CORS_REQUEST_METHOD);
-		corsAllowedHeaders.add("Cache-Control");
-		corsAllowedHeaders.add("Content-Type");
+		corsAllowedHeaders.add(HEADER_CACHE_CONTROL);
+		corsAllowedHeaders.add(HEADER_CONTENT_TYPE);
 		corsAllowedHeaders.add(Constants.HEADER_CORS_ORIGIN);
-		corsAllowedHeaders.add("Prefer");
-		corsAllowedHeaders.add("X-FHIR-Starter");
-		corsAllowedHeaders.add("X-Requested-With");
+		corsAllowedHeaders.add(HEADER_PREFER);
+		corsAllowedHeaders.add(Constants.HEADER_X_FHIR_STARTER);
+		corsAllowedHeaders.add(HEADER_X_REQUESTED_WITH);
 		CORS_ALLOWED_HEADERS = Collections.unmodifiableSet(corsAllowedHeaders);
 
 		// *********************************************************
@@ -472,7 +475,7 @@ public class Constants {
 		// *********************************************************
 		HashSet<String> corsAllowedMethods = new HashSet<>();
 		corsAllowedMethods.addAll(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-		CORS_ALLWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
+		CORS_ALLOWED_METHODS = Collections.unmodifiableSet(corsAllowedMethods);
 	}
 
 	public static String codeSystemWithDefaultDescription(String theSystem) {

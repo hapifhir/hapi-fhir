@@ -106,14 +106,14 @@ public class ResponseHighlighterInterceptorTest {
 		CorsConfiguration config = new CorsConfiguration();
 		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
 		config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader(Constants.HEADER_ACCEPT);
+		config.addAllowedHeader(Constants.HEADER_X_REQUESTED_WITH);
+		config.addAllowedHeader(Constants.HEADER_CONTENT_TYPE);
 		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
 		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
 		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
+		config.addExposedHeader(Constants.HEADER_LOCATION);
+		config.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		ourServer.registerInterceptor(corsInterceptor);
 

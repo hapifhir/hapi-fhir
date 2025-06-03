@@ -77,7 +77,7 @@ public class CorsInterceptorDstu3Test {
 		{
 			String uri = ourBaseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
 			HttpGet httpGet = new HttpGet(uri);
-			httpGet.addHeader("X-FHIR-Starter", "urn:fhir.starter");
+			httpGet.addHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter");
 			httpGet.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
 			HttpResponse status = ourClient.execute(httpGet);
 
@@ -180,18 +180,18 @@ public class CorsInterceptorDstu3Test {
 
 		CorsConfiguration config = new CorsConfiguration();
 		CorsInterceptor interceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("x-fhir-starter");
+		config.addAllowedHeader(Constants.HEADER_X_FHIR_STARTER);
 		config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader(Constants.HEADER_ACCEPT);
+		config.addAllowedHeader(Constants.HEADER_X_REQUESTED_WITH);
+		config.addAllowedHeader(Constants.HEADER_CONTENT_TYPE);
 		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
 		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
 		config.addAllowedOrigin("http://www.fhir-starter.com");
 		config.addAllowedOrigin("null");
 		config.addAllowedOrigin("file://");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
+		config.addExposedHeader(Constants.HEADER_LOCATION);
+		config.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
 		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
 		restServer.registerInterceptor(interceptor);
 		
