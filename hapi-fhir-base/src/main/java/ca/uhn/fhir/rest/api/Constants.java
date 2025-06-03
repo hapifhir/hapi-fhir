@@ -35,11 +35,11 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
-	/**
-	 * Standard HTTP Headers
-	 */
-	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
+	//==============================================================
+	// Standard HTTP headers
+	//==============================================================
 
+	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
 	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
 	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
 	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
@@ -64,30 +64,18 @@ public class Constants {
 	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
 	public static final String HEADER_DATE = HttpHeaders.DATE;
 
-	/**
-	 * Standard FHIR Headers
-	 */
-	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
+	//==============================================================
+	// Standard FHIR headers
+	//==============================================================
 
+	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 
-	/**
-	 * Common non-standard HTTP Headers
-	 */
-	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-	public static final String HEADER_COOKIE = "Cookie";
-	public static final String HEADER_PREFER = "Prefer";
-	public static final String HEADER_POWERED_BY = "X-Powered-By";
-	public static final String HEADER_REQUEST_ID = "X-Request-ID";
-	public static final String HEADER_X_CACHE = "X-Cache";
-	public static final String HEADER_X_REQUESTED_WITH = "X-Requested-With";
-	public static final String HEADER_X_CORRELATION_ID = "X-Correlation-ID";
+	//==============================================================
+	// Standard CORS headers
+	//==============================================================
 
-	/**
-	 * Standard CORS headers
-	 */
 	public static final String HEADER_CORS_ORIGIN = "Origin";
-
 	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
@@ -97,22 +85,24 @@ public class Constants {
 	public static final String HEADER_CORS_REQUEST_METHOD = "Access-Control-Request-Method";
 	public static final String HEADER_CORS_MAX_AGE = "Access-Control-Max-Age";
 
-	/**
-	 * Contains a standard set of headers which are used by FHIR / HAPI FHIR, and therefore
-	 * would make a useful set for CORS AllowedHeader declarations
-	 */
-	public static final Set<String> CORS_ALLOWED_HEADERS;
-	/**
-	 * Contains a standard set of HTTP Methods which are used by FHIR / HAPI FHIR, and therefore
-	 * would make a useful set for CORS AllowedMethod declarations
-	 */
-	public static final Set<String> CORS_ALLOWED_METHODS;
+	//==============================================================
+	// Common non-standard HTTP headers
+	//==============================================================
 
-	/**
-	 * Proprietary HAPI HTTP Headers
-	 */
+	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+	public static final String HEADER_COOKIE = "Cookie";
+	public static final String HEADER_PREFER = "Prefer";
+	public static final String HEADER_POWERED_BY = "X-Powered-By";
+	public static final String HEADER_REQUEST_ID = "X-Request-ID";
+	public static final String HEADER_X_CACHE = "X-Cache";
+	public static final String HEADER_X_REQUESTED_WITH = "X-Requested-With";
+	public static final String HEADER_X_CORRELATION_ID = "X-Correlation-ID";
+
+	//==============================================================
+	// Proprietary HAPI HTTP headers
+	//==============================================================
+
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
-
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
 	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
@@ -121,9 +111,10 @@ public class Constants {
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	public static final String HEADER_X_FHIR_STARTER = "X-FHIR-Starter";
 
-	/**
-	 * Other constants
-	 */
+	//==============================================================
+	// Other Constants
+	//==============================================================
+
 	public static final String CT_TEXT_CSV = "text/csv";
 
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
@@ -181,13 +172,13 @@ public class Constants {
 	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String FORMATS_HTML_TTL = "html/turtle";
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY =
-			CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
+		CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY =
-			CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
+		CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY =
-			CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
+		CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, "
-			+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
+		+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
 	public static final String HEADER_PREFER_HANDLING = "handling";
@@ -310,7 +301,7 @@ public class Constants {
 	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL =
-			"http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
+		"http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
 	public static final String PARAMETER_CASCADE_DELETE_MAX_ROUNDS = "_maxRounds";
 	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
@@ -352,7 +343,7 @@ public class Constants {
 	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
 	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
 	public static final String SUBSCRIPTION_STAR_CRITERIA =
-			SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
+		SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
 	public static final String INCLUDE_STAR = "*";
 	public static final String PARAMQUALIFIER_TOKEN_IN = ":in";
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
@@ -360,22 +351,22 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
 	public static final List<String> VALID_MODIFIERS = Collections.unmodifiableList(Arrays.asList(
-			PARAMQUALIFIER_STRING_CONTAINS,
-			PARAMQUALIFIER_STRING_EXACT,
-			PARAMQUALIFIER_TOKEN_IN,
-			PARAM_INCLUDE_QUALIFIER_ITERATE,
-			PARAMQUALIFIER_MISSING,
-			PARAMQUALIFIER_TOKEN_NOT_IN,
-			PARAMQUALIFIER_TOKEN_OF_TYPE,
-			PARAM_INCLUDE_QUALIFIER_RECURSE,
-			PARAMQUALIFIER_TOKEN_TEXT));
+		PARAMQUALIFIER_STRING_CONTAINS,
+		PARAMQUALIFIER_STRING_EXACT,
+		PARAMQUALIFIER_TOKEN_IN,
+		PARAM_INCLUDE_QUALIFIER_ITERATE,
+		PARAMQUALIFIER_MISSING,
+		PARAMQUALIFIER_TOKEN_NOT_IN,
+		PARAMQUALIFIER_TOKEN_OF_TYPE,
+		PARAM_INCLUDE_QUALIFIER_RECURSE,
+		PARAMQUALIFIER_TOKEN_TEXT));
 	/**
 	 * The number of characters in a UUID (36)
 	 */
 	public static final int UUID_LENGTH = 36;
 
 	public static final String BULK_DATA_ACCESS_IG_URL =
-			"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
+		"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 
 	/**
 	 * Application configuration key used to enable or disable Hibernate Envers.
@@ -383,6 +374,17 @@ public class Constants {
 	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
 
 	public static final String OPENTELEMETRY_BASE_NAME = "io.hapifhir";
+
+	/**
+	 * Contains a standard set of headers which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedHeader declarations
+	 */
+	public static final Set<String> CORS_ALLOWED_HEADERS;
+	/**
+	 * Contains a standard set of HTTP Methods which are used by FHIR / HAPI FHIR, and therefore
+	 * would make a useful set for CORS AllowedMethod declarations
+	 */
+	public static final Set<String> CORS_ALLOWED_METHODS;
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
