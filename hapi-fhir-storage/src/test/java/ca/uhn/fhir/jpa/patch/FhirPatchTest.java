@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -95,7 +96,7 @@ public class FhirPatchTest {
 
 			comp.addPart().setName("type").setValue(new CodeType("replace"));
 			// should act like "first"
-			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[2]"));
+			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.where(reference.startsWith('Patient/'))[1]"));
 			comp.addPart().setName("value").setValue(new Reference("Patient/p2"));
 
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p1", "Location/l1", "Patient/p2")));
@@ -172,6 +173,8 @@ public class FhirPatchTest {
 	public void patchApply_withValidParams_works(Parameters thePatch, String theReplacedPatientId, List<String> theExpectedContainedResources) {
 		// setup
 		String originalPatientId = "Patient/p1";
+
+		ourLog.info("\n" + thePatch.getParameter().get(0).getPart().stream().filter(f -> f.getName().equals("path")).findFirst().get().getValue());
 
 		Appointment appointment;
 		{
@@ -327,5 +330,71 @@ public class FhirPatchTest {
 			.stream().anyMatch(newPatientPred));
 		assertFalse(appointment.getParticipant()
 			.stream().anyMatch(originalPatientPred));
+	}
+
+	@Test
+	public void patchApply_singleThatIsntASingleTarget_throws() {
+		// setup
+		Appointment appointment;
+		Parameters parameters;
+		{
+			@Language("JSON")
+			String appointmentStr = """
+				{
+				  "resourceType": "Appointment",
+				  "id": "a1",
+				  "status": "booked",
+				  "participant": [
+					{
+					  "actor": {
+						"reference": "Patient/p1"
+					  },
+					  "status": "accepted"
+					},
+					{
+					  "actor": {
+					  	"reference": "Patient/p2"
+					  },
+					  "status": "accepted"
+					}
+				  ]
+				}
+				""";
+			appointment = myParser.parseResource(Appointment.class, appointmentStr);
+
+			@Language("JSON")
+			String patchStr = """
+				{
+				  "resourceType": "Parameters",
+				  "parameter": [
+					{
+					  "name": "operation",
+					  "part": [
+						{
+						  "name": "type",
+						  "valueCode": "replace"
+						},
+						{
+						  "name": "path",
+						  "valueString": "Appointment.participant.actor.reference.where(startsWith('Patient')).single()"
+						},
+						{
+						  "name": "value",
+						  "valueString": "Patient/p2"
+						}
+					  ]
+					}
+				  ]
+				}
+				""";
+			parameters = myParser.parseResource(Parameters.class, patchStr);
+		}
+
+		// test
+		try {
+			myPatch.apply(appointment, parameters);
+		} catch (InvalidRequestException ex) {
+			assertTrue(ex.getMessage().contains("List contains more than a single element"));
+		}
 	}
 }

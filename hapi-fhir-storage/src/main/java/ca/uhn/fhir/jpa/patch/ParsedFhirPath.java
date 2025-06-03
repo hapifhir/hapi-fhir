@@ -484,6 +484,8 @@ public class ParsedFhirPath {
 
 			if (isNotEmpty(remaining)) {
 				next.setNext(createNode(theParsedFhirPath, remaining));
+			} else {
+				theParsedFhirPath.setTail(next);
 			}
 
 			theParsedFhirPath.setEndsWithFilter(true);

@@ -196,9 +196,25 @@ public class ParsedFhirPathTest {
 			supplier);
 	}
 
+	@Test
+	public void testingHeadAndTail() {
+		// setup
+		String path = "Appointment.participant.actor.where(reference.startsWith('Patient/'))";
+
+		// test
+		ParsedFhirPath parsed = ParsedFhirPath.parse(path);
+
+		// validate
+		assertNotNull(parsed.getHead());
+		assertNotNull(parsed.getTail());
+	}
+
 	private void validateList(ParsedFhirPath theParsedPath, List<String> theParts, Consumer<ParsedFhirPath.FhirPathNode> thePerNodeAction) {
 		ParsedFhirPath.FhirPathNode current = null;
 		ParsedFhirPath.FhirPathNode previous = null;
+
+		assertNotNull(theParsedPath.getHead());
+		assertNotNull(theParsedPath.getTail());
 
 		current = theParsedPath.getHead();
 		for (String part : theParts) {
@@ -217,5 +233,4 @@ public class ParsedFhirPathTest {
 		// verify that there is no next
 		assertNull(current);
 	}
-
 }

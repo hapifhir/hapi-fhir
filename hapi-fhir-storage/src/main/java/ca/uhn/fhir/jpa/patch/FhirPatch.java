@@ -257,7 +257,6 @@ public class FhirPatch {
 		}
 		if (theNode.isFunction()) {
 			String funName = theNode.getValue();
-			// TODO - handle the brackets
 			switch (funName) {
 				case "first", "last", "single", "tail", "skip", "take", "exclude", "intersect" -> {
 					return true;
@@ -282,7 +281,7 @@ public class FhirPatch {
 			ParsedFhirPath.FhirPathNode tail = theParsed.getTail();
 
 			if (tail.isFunction() && (tail.getValue().equals("intersect") || tail.getValue().equals("exclude"))) {
-				// TODO - need to support this
+				// TODO - need to support this; but out of scope for now
 				/*
 				 * We would have to further filter down these specific functions since their arguments
 				 * (the contained path of the final nodes) have to be evaluated first
@@ -293,8 +292,13 @@ public class FhirPatch {
 
 			// apply the filter
 			// to the path, minus the final node (which is used for filtering here)
-			String newPath = theParsed.getRawPath();
-			newPath = newPath.substring(0, newPath.lastIndexOf("."));
+			String rawPath = theParsed.getRawPath();
+			String tailValue = tail.hasListIndex() ? "[" + tail.getListIndex() + "]" : tail.getValue();
+			int endIndex = rawPath.indexOf(tailValue);
+			String newPath = rawPath.substring(0, endIndex);
+			if (newPath.endsWith(".")) {
+				newPath = newPath.substring(0, newPath.length() - 1);
+			}
 			List<IBase> filtered = filterDown(theList, theFhirPath, ParsedFhirPath.parse(newPath));
 
 			if (tail.getListIndex() >= 0) {
@@ -328,8 +332,7 @@ public class FhirPatch {
 					}
 					case "single" -> {
 						if (filtered.size() != 1) {
-							// TODO - update error codes
-							throw new InvalidRequestException("List contains more than a single element.");
+							throw new InvalidRequestException(Msg.code(2710) + " List contains more than a single element.");
 						}
 						// only one element
 						return filtered;
@@ -358,12 +361,11 @@ public class FhirPatch {
 								ourLog.error("{} is not a number", containedNum, ex);
 							}
 						}
-						throw new InvalidRequestException("Invalid fhir path element encountered: " + theParsed.getRawPath());
+						throw new InvalidRequestException(Msg.code(2712) + " Invalid fhir path element encountered: " + theParsed.getRawPath());
 					}
 					default -> {
 						// we shouldn't see this; it means we have not handled a filtering case
-						// todo update error codes
-						throw new InvalidRequestException("Unrecognized filter of type " + tail.getValue());
+						throw new InvalidRequestException(Msg.code(2711) + " Unrecognized filter of type " + tail.getValue());
 					}
 				}
 			}

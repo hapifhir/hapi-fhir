@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7001
+title: "Fhir PATCH operations now support patching elements
+        that target primitive types (like string).
+"
