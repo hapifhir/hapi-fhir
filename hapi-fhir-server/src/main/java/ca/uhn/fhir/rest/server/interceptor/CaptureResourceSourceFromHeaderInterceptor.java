@@ -63,7 +63,7 @@ public class CaptureResourceSourceFromHeaderInterceptor {
 	}
 
 	/**
-	 * Provides the header name to examine in incoming requests. Default is {@link HapiHeaderConstants#REQUEST_SOURCE "X-Request-Source"}.
+	 * Provides the header name to examine in incoming requests. Default is {@link HapiHeaderConstants#REQUEST_SOURCE "HAPI-Request-Source"}.
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public void setHeaderName(String theHeaderName) {
