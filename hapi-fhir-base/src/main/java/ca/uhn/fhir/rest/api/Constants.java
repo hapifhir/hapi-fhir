@@ -35,6 +35,33 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
+	/**
+	 * Standard HTTP Headers
+	 */
+	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
+	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
+	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
+	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
+	public static final String HEADER_CACHE_CONTROL = HttpHeaders.CACHE_CONTROL;
+	public static final String HEADER_CONTENT_ENCODING = HttpHeaders.CONTENT_ENCODING;
+	public static final String HEADER_CONTENT_LOCATION = HttpHeaders.CONTENT_LOCATION;
+	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
+	public static final String HEADER_CONTENT_TYPE = HttpHeaders.CONTENT_TYPE;
+	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
+	public static final String HEADER_ETAG = HttpHeaders.ETAG;
+	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
+	public static final String HEADER_IF_MATCH = HttpHeaders.IF_MATCH;
+	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
+	public static final String HEADER_IF_MODIFIED_SINCE = HttpHeaders.IF_MODIFIED_SINCE;
+	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
+	public static final String HEADER_IF_NONE_MATCH = HttpHeaders.IF_NONE_MATCH;
+	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
+	public static final String HEADER_LAST_MODIFIED = HttpHeaders.LAST_MODIFIED;
+	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
+	public static final String HEADER_LOCATION = HttpHeaders.LOCATION;
+	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
+
 	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
@@ -102,8 +129,6 @@ public class Constants {
 	public static final String FORMATS_HTML_JSON = "html/json";
 	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String FORMATS_HTML_TTL = "html/turtle";
-	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
-	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY =
 			CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY =
@@ -112,35 +137,15 @@ public class Constants {
 			CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, "
 			+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
-	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
-	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
-	public static final String HEADER_CACHE_CONTROL = HttpHeaders.CACHE_CONTROL;
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-	public static final String HEADER_CONTENT_ENCODING = HttpHeaders.CONTENT_ENCODING;
-	public static final String HEADER_CONTENT_LOCATION = HttpHeaders.CONTENT_LOCATION;
-	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
-	public static final String HEADER_CONTENT_TYPE = HttpHeaders.CONTENT_TYPE;
-	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
-	public static final String HEADER_ETAG = HttpHeaders.ETAG;
-	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
-	public static final String HEADER_IF_MATCH = HttpHeaders.IF_MATCH;
-	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
-	public static final String HEADER_IF_MODIFIED_SINCE = HttpHeaders.IF_MODIFIED_SINCE;
-	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
-	public static final String HEADER_IF_NONE_MATCH = HttpHeaders.IF_NONE_MATCH;
-	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
-	public static final String HEADER_LAST_MODIFIED = HttpHeaders.LAST_MODIFIED;
-	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
-	public static final String HEADER_LOCATION = HttpHeaders.LOCATION;
-	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_PREFER_HANDLING = "handling";
@@ -291,7 +296,6 @@ public class Constants {
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
-	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
 	/**
 	 * Operation name for the $lastn operation
 	 */
