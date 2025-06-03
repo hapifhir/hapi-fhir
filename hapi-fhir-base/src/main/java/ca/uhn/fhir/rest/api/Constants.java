@@ -73,14 +73,20 @@ public class Constants {
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_COOKIE = "Cookie";
-	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
-	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String HEADER_X_CACHE = "X-Cache";
+
+	/**
+	 * Standard CORS headers
+	 */
+	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	public static final String HEADER_CORS_REQUEST_HEADERS = "Access-Control-Request-Headers";
 
 	/**
 	 * Proprietary HAPI HTTP Headers
