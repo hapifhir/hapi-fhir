@@ -1,6 +1,7 @@
 package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
