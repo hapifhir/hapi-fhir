@@ -74,7 +74,7 @@ public class Constants {
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_PREFER = "Prefer";
-	public static final String POWERED_BY_HEADER = "X-Powered-By";
+	public static final String HEADER_POWERED_BY = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String HEADER_X_CACHE = "X-Cache";
 
