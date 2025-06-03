@@ -47,16 +47,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
       - name: Load ignored modules from config
         id: load_config
-        run: |
-          IGNORED=$(yq '.ignored_modules' .github/config/ignored-modules.yml | tr -d '"')
-          echo "ignored_modules=$IGNORED" >> $GITHUB_OUTPUT
+        uses: mikefarah/yq@v4.40.5
+        with:
+          cmd: >
+            echo "ignored_modules=$(yq '.ignored_modules' .github/config/ignored-modules.yml | tr -d '"')" >> $GITHUB_OUTPUT
 
     outputs:
       ignored_modules: ${{ steps.load_config.outputs.ignored_modules }}
