@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -39,7 +39,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 	@AfterEach
 	public void tearDown() {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("");
+		when(mySrd.getHeader(eq(HapiHeaderConstants.REWRITE_HISTORY))).thenReturn("");
 	}
 
 	@Test

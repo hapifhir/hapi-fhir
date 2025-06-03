@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.servlet;
 
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ class ServletRequestDetailsTest {
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
 		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
 		servletRequestDetails.setServletRequest(httpRequest);
-		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("true");
+		when(httpRequest.getHeader(HapiHeaderConstants.REWRITE_HISTORY)).thenReturn("true");
 		servletRequestDetails.setServletRequest(httpRequest);
 		assertTrue(servletRequestDetails.isRewriteHistory());
 	}
@@ -39,7 +39,7 @@ class ServletRequestDetailsTest {
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
 		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
 		servletRequestDetails.setServletRequest(httpRequest);
-		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn(null);
+		when(httpRequest.getHeader(HapiHeaderConstants.REWRITE_HISTORY)).thenReturn(null);
 		servletRequestDetails.setServletRequest(httpRequest);
 		assertFalse(servletRequestDetails.isRewriteHistory());
 	}
@@ -49,7 +49,7 @@ class ServletRequestDetailsTest {
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
 		HttpServletRequest httpRequest = mock(HttpServletRequest.class);
 		servletRequestDetails.setServletRequest(httpRequest);
-		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("false");
+		when(httpRequest.getHeader(HapiHeaderConstants.REWRITE_HISTORY)).thenReturn("false");
 		servletRequestDetails.setServletRequest(httpRequest);
 		assertFalse(servletRequestDetails.isRewriteHistory());
 	}

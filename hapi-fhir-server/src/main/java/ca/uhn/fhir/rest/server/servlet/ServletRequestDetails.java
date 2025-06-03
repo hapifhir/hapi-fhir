@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.HapiHeaderConstants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -237,7 +238,7 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletRequest = myServletRequest;
 
 		// TODO KHS move a bunch of other initialization from RestfulServer into this method
-		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
+		if ("true".equals(myServletRequest.getHeader(HapiHeaderConstants.REWRITE_HISTORY))) {
 			setRewriteHistory(true);
 		}
 		setRetryFields(myServletRequest);

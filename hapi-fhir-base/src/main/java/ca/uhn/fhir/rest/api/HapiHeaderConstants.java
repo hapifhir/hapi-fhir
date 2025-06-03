@@ -14,4 +14,11 @@ public class HapiHeaderConstants {
 	@Deprecated
 	public static final String DEPRECATED_REQUEST_SOURCE = "X-Request-Source";
 	public static final String REQUEST_SOURCE = "HAPI-Request-Source";
+
+	/**
+	 * @deprecated Use {@link #REWRITE_HISTORY} instead.
+	 */
+	@Deprecated
+	public static final String DEPRECATED_REWRITE_HISTORY = "X-Rewrite-History";
+	public static final String REWRITE_HISTORY = "HAPI-Rewrite-History";
 }

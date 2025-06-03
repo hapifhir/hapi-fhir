@@ -36,21 +36,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.StringOutcome;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -2521,7 +2507,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					}
 					invocation = MethodUtil.createUpdateHistoryRewriteInvocation(
 							myResource, myResourceBody, myId, myContext);
-					invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+					invocation.addHeader(HapiHeaderConstants.REWRITE_HISTORY, "true");
 				} else {
 					invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 				}
