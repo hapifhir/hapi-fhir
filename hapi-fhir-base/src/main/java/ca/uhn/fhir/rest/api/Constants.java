@@ -39,6 +39,7 @@ public class Constants {
 	 * Standard HTTP Headers
 	 */
 	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
+
 	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
 	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
 	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
@@ -62,9 +63,42 @@ public class Constants {
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
 
-	public static final String CT_TEXT_CSV = "text/csv";
+	/**
+	 * Standard FHIR headers
+	 */
+	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
+	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
+
+	/**
+	 * Common non-standard HTTP headers
+	 */
+	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+	public static final String HEADER_COOKIE = "Cookie";
+	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	public static final String HEADER_ORIGIN = "Origin";
+	public static final String HEADER_PREFER = "Prefer";
+	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
+	public static final String HEADER_X_CACHE = "X-Cache";
+
+	/**
+	 * Proprietary HAPI HTTP headers
+	 */
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
+	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
+	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
+	public static final String HEADER_CASCADE = "X-Cascade";
+	public static final String HEADER_X_PROGRESS = "X-Progress";
+	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
+
+	/**
+	 * Other constants
+	 */
+	public static final String CT_TEXT_CSV = "text/csv";
+
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
@@ -139,15 +173,6 @@ public class Constants {
 			+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
-	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-	public static final String HEADER_COOKIE = "Cookie";
-	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
-	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
-	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
-	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
-	public static final String HEADER_ORIGIN = "Origin";
-	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_PREFER_HANDLING = "handling";
 	public static final String HEADER_PREFER_HANDLING_STRICT = "strict";
 	public static final String HEADER_PREFER_HANDLING_LENIENT = "lenient";
@@ -157,8 +182,6 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
-	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
-	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
 	public static final String HEADER_MAX_RETRIES = "max-retries";
 	public static final String HEADER_RETRY = "retry";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
@@ -265,9 +288,6 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String OO_INFOSTATUS_PROCESSING = "processing";
 	public static final String PARAM_GRAPHQL_QUERY = "query";
-	public static final String HEADER_X_CACHE = "X-Cache";
-	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
-	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final Charset CHARSET_US_ASCII;
 	public static final String PARAM_PAGEID = "_pageId";
 	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
@@ -276,7 +296,6 @@ public class Constants {
 			"http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
 	public static final String PARAMETER_CASCADE_DELETE_MAX_ROUNDS = "_maxRounds";
-	public static final String HEADER_CASCADE = "X-Cascade";
 	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
 	public static final String CASCADE_DELETE = "delete";
 	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
@@ -294,8 +313,6 @@ public class Constants {
 	public static final int REQUEST_ID_LENGTH = 16;
 
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
-	public static final String HEADER_X_PROGRESS = "X-Progress";
-	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	/**
 	 * Operation name for the $lastn operation
 	 */
