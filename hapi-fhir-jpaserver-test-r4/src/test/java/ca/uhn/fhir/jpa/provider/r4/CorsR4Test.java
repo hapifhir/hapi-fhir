@@ -18,7 +18,7 @@ public class CorsR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void saveLocalOrigin() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
-		get.addHeader("Origin", "file://");
+		get.addHeader(Constants.HEADER_CORS_ORIGIN, "file://");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		
 		ourLog.info(resp.toString());

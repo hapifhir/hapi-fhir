@@ -237,7 +237,7 @@ public class ServletExamples {
 			// to your specific needs
 			CorsConfiguration config = new CorsConfiguration();
 			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("Origin");
+			config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
 			config.addAllowedHeader("Accept");
 			config.addAllowedHeader("X-Requested-With");
 			config.addAllowedHeader("Content-Type");

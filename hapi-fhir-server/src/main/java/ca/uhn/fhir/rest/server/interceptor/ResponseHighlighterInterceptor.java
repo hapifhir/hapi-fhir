@@ -569,7 +569,7 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
-		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
+		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_CORS_ORIGIN))) {
 			return true;
 		}
 

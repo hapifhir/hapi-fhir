@@ -46,7 +46,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
@@ -106,12 +105,12 @@ public class ResponseHighlighterInterceptorTest {
 		 */
 		CorsConfiguration config = new CorsConfiguration();
 		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("Origin");
+		config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
 		config.addAllowedHeader("Accept");
 		config.addAllowedHeader("X-Requested-With");
 		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
+		config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
 		config.addAllowedOrigin("*");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");
@@ -223,7 +222,7 @@ public class ResponseHighlighterInterceptorTest {
 	public void testDontHighlightWhenOriginHeaderPresent() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
-		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
+		when(req.getHeader(Constants.HEADER_CORS_ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();

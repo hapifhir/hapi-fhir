@@ -179,12 +179,12 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			CorsConfiguration config = new CorsConfiguration();
 			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
 			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("Origin");
+			config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
 			config.addAllowedHeader("Accept");
 			config.addAllowedHeader("X-Requested-With");
 			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("Access-Control-Request-Method");
-			config.addAllowedHeader("Access-Control-Request-Headers");
+			config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
+			config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
 			config.addAllowedOrigin("*");
 			config.addExposedHeader("Location");
 			config.addExposedHeader("Content-Location");

@@ -73,7 +73,6 @@ public class Constants {
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_COOKIE = "Cookie";
-	public static final String HEADER_ORIGIN = "Origin";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
@@ -82,11 +81,15 @@ public class Constants {
 	/**
 	 * Standard CORS headers
 	 */
+	public static final String HEADER_CORS_ORIGIN = "Origin";
+	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	public static final String HEADER_CORS_REQUEST_HEADERS = "Access-Control-Request-Headers";
+	public static final String HEADER_CORS_REQUEST_METHOD = "Access-Control-Request-Method";
+	public static final String HEADER_CORS_MAX_AGE = "Access-Control-Max-Age";
+	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
 	/**
 	 * Proprietary HAPI HTTP Headers
@@ -454,11 +457,11 @@ public class Constants {
 		// *********************************************************
 		HashSet<String> corsAllowedHeaders = new HashSet<>();
 		corsAllowedHeaders.add("Accept");
-		corsAllowedHeaders.add("Access-Control-Request-Headers");
-		corsAllowedHeaders.add("Access-Control-Request-Method");
+		corsAllowedHeaders.add(Constants.HEADER_CORS_REQUEST_HEADERS);
+		corsAllowedHeaders.add(Constants.HEADER_CORS_REQUEST_METHOD);
 		corsAllowedHeaders.add("Cache-Control");
 		corsAllowedHeaders.add("Content-Type");
-		corsAllowedHeaders.add("Origin");
+		corsAllowedHeaders.add(Constants.HEADER_CORS_ORIGIN);
 		corsAllowedHeaders.add("Prefer");
 		corsAllowedHeaders.add("X-FHIR-Starter");
 		corsAllowedHeaders.add("X-Requested-With");

@@ -77,11 +77,11 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			CorsConfiguration config = new CorsConfiguration();
 			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
 			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("Access-Control-Request-Headers");
-			config.addAllowedHeader("Access-Control-Request-Method");
+			config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_HEADERS);
+			config.addAllowedHeader(Constants.HEADER_CORS_REQUEST_METHOD);
 			config.addAllowedHeader("Cache-Control");
 			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("Origin");
+			config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
 			config.addAllowedHeader("Prefer");
 			config.addAllowedHeader("x-fhir-starter");
 			config.addAllowedHeader("X-Requested-With");
