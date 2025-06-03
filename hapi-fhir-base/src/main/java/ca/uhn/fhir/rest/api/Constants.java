@@ -39,6 +39,7 @@ public class Constants {
 	 * Standard HTTP Headers
 	 */
 	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
+
 	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
 	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
 	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
@@ -66,12 +67,14 @@ public class Constants {
 	 * Standard FHIR Headers
 	 */
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
+
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 
 	/**
 	 * Common non-standard HTTP Headers
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_PREFER = "Prefer";
 	public static final String HEADER_POWERED_BY = "X-Powered-By";
@@ -83,6 +86,7 @@ public class Constants {
 	 * Standard CORS headers
 	 */
 	public static final String HEADER_CORS_ORIGIN = "Origin";
+
 	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	public static final String HEADER_CORS_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
@@ -107,6 +111,7 @@ public class Constants {
 	 * Proprietary HAPI HTTP Headers
 	 */
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
+
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
 	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
