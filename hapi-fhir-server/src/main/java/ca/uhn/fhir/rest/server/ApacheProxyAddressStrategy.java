@@ -102,7 +102,8 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	 * @param headers
 	 */
 	private void adjustSchemeWithDefault(UriComponentsBuilder uriBuilder, HttpHeaders headers) {
-		if (headers.getFirst(Constants.HEADER_X_FORWARDED_HOST) != null && headers.getFirst(Constants.HEADER_X_FORWARDED_PROTO) == null) {
+		if (headers.getFirst(Constants.HEADER_X_FORWARDED_HOST) != null
+				&& headers.getFirst(Constants.HEADER_X_FORWARDED_PROTO) == null) {
 			uriBuilder.scheme(useHttps ? "https" : "http");
 		}
 	}

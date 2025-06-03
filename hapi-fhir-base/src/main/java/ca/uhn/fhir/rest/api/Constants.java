@@ -35,9 +35,9 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class Constants {
 
-	//==============================================================
+	// ==============================================================
 	// Standard HTTP headers
-	//==============================================================
+	// ==============================================================
 
 	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
 	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
@@ -64,16 +64,16 @@ public class Constants {
 	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
 	public static final String HEADER_DATE = HttpHeaders.DATE;
 
-	//==============================================================
+	// ==============================================================
 	// Standard FHIR headers
-	//==============================================================
+	// ==============================================================
 
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 
-	//==============================================================
+	// ==============================================================
 	// Standard CORS headers
-	//==============================================================
+	// ==============================================================
 
 	public static final String HEADER_CORS_ORIGIN = "Origin";
 	public static final String HEADER_CORS_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
@@ -85,9 +85,9 @@ public class Constants {
 	public static final String HEADER_CORS_REQUEST_METHOD = "Access-Control-Request-Method";
 	public static final String HEADER_CORS_MAX_AGE = "Access-Control-Max-Age";
 
-	//==============================================================
+	// ==============================================================
 	// Common non-standard HTTP headers
-	//==============================================================
+	// ==============================================================
 
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_COOKIE = "Cookie";
@@ -102,9 +102,9 @@ public class Constants {
 	public static final String HEADER_X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
 	public static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
 
-	//==============================================================
+	// ==============================================================
 	// Proprietary HAPI HTTP headers
-	//==============================================================
+	// ==============================================================
 
 	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
@@ -115,9 +115,9 @@ public class Constants {
 	public static final String HEADER_X_PROGRESS_LC = HEADER_X_PROGRESS.toLowerCase();
 	public static final String HEADER_X_FHIR_STARTER = "X-FHIR-Starter";
 
-	//==============================================================
+	// ==============================================================
 	// Other Constants
-	//==============================================================
+	// ==============================================================
 
 	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
@@ -175,13 +175,13 @@ public class Constants {
 	public static final String FORMATS_HTML_XML = "html/xml";
 	public static final String FORMATS_HTML_TTL = "html/turtle";
 	public static final String HEADER_ACCEPT_VALUE_JSON_NON_LEGACY =
-		CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
+			CT_FHIR_JSON_NEW + ";q=1.0, " + CT_FHIR_JSON + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_NON_LEGACY =
-		CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
+			CT_FHIR_XML_NEW + ";q=1.0, " + CT_FHIR_XML + ";q=0.9";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY =
-		CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
+			CT_FHIR_XML + ";q=1.0, " + CT_FHIR_JSON + ";q=1.0";
 	public static final String HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY = CT_FHIR_XML_NEW + ";q=1.0, "
-		+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
+			+ CT_FHIR_JSON_NEW + ";q=1.0, " + HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY.replace("1.0", "0.9");
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
 	public static final String HEADER_PREFER_HANDLING = "handling";
@@ -304,7 +304,7 @@ public class Constants {
 	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL =
-		"http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
+			"http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
 	public static final String PARAMETER_CASCADE_DELETE_MAX_ROUNDS = "_maxRounds";
 	public static final String HEADER_CASCADE_MAX_ROUNDS = "max-rounds";
@@ -346,7 +346,7 @@ public class Constants {
 	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
 	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
 	public static final String SUBSCRIPTION_STAR_CRITERIA =
-		SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
+			SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
 	public static final String INCLUDE_STAR = "*";
 	public static final String PARAMQUALIFIER_TOKEN_IN = ":in";
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
@@ -354,22 +354,22 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
 	public static final List<String> VALID_MODIFIERS = Collections.unmodifiableList(Arrays.asList(
-		PARAMQUALIFIER_STRING_CONTAINS,
-		PARAMQUALIFIER_STRING_EXACT,
-		PARAMQUALIFIER_TOKEN_IN,
-		PARAM_INCLUDE_QUALIFIER_ITERATE,
-		PARAMQUALIFIER_MISSING,
-		PARAMQUALIFIER_TOKEN_NOT_IN,
-		PARAMQUALIFIER_TOKEN_OF_TYPE,
-		PARAM_INCLUDE_QUALIFIER_RECURSE,
-		PARAMQUALIFIER_TOKEN_TEXT));
+			PARAMQUALIFIER_STRING_CONTAINS,
+			PARAMQUALIFIER_STRING_EXACT,
+			PARAMQUALIFIER_TOKEN_IN,
+			PARAM_INCLUDE_QUALIFIER_ITERATE,
+			PARAMQUALIFIER_MISSING,
+			PARAMQUALIFIER_TOKEN_NOT_IN,
+			PARAMQUALIFIER_TOKEN_OF_TYPE,
+			PARAM_INCLUDE_QUALIFIER_RECURSE,
+			PARAMQUALIFIER_TOKEN_TEXT));
 	/**
 	 * The number of characters in a UUID (36)
 	 */
 	public static final int UUID_LENGTH = 36;
 
 	public static final String BULK_DATA_ACCESS_IG_URL =
-		"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
+			"http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data";
 
 	/**
 	 * Application configuration key used to enable or disable Hibernate Envers.
