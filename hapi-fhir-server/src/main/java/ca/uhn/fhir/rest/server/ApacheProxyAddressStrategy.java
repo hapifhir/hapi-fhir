@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.rest.api.Constants;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -70,10 +71,6 @@ import static java.util.Optional.ofNullable;
  *
  */
 public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
-	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
-	private static final String X_FORWARDED_PROTO = "x-forwarded-proto";
-	private static final String X_FORWARDED_HOST = "x-forwarded-host";
-
 	private static final Logger LOG = LoggerFactory.getLogger(ApacheProxyAddressStrategy.class);
 
 	private final boolean useHttps;
@@ -105,7 +102,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	 * @param headers
 	 */
 	private void adjustSchemeWithDefault(UriComponentsBuilder uriBuilder, HttpHeaders headers) {
-		if (headers.getFirst(X_FORWARDED_HOST) != null && headers.getFirst(X_FORWARDED_PROTO) == null) {
+		if (headers.getFirst(Constants.HEADER_X_FORWARDED_HOST) != null && headers.getFirst(Constants.HEADER_X_FORWARDED_PROTO) == null) {
 			uriBuilder.scheme(useHttps ? "https" : "http");
 		}
 	}
@@ -127,7 +124,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	}
 
 	private Optional<String> getForwardedPrefix(HttpHeaders headers) {
-		return ofNullable(headers.getFirst(X_FORWARDED_PREFIX));
+		return ofNullable(headers.getFirst(Constants.HEADER_X_FORWARDED_PREFIX));
 	}
 
 	/**

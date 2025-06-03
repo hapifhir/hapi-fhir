@@ -97,6 +97,9 @@ public class Constants {
 	public static final String HEADER_X_CACHE = "X-Cache";
 	public static final String HEADER_X_REQUESTED_WITH = "X-Requested-With";
 	public static final String HEADER_X_CORRELATION_ID = "X-Correlation-ID";
+	public static final String HEADER_X_FORWARDED_HOST = "X-Forwarded-Host";
+	public static final String HEADER_X_FORWARDED_PROTO = "X-Forwarded-Proto";
+	public static final String HEADER_X_FORWARDED_PREFIX = "X-Forwarded-Prefix";
 
 	//==============================================================
 	// Proprietary HAPI HTTP headers
