@@ -52,9 +52,9 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
-	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType) {
+	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType, RequestPartitionId theRequestPartitionId) {
 		super(theIdType, theOperationType);
-		setPartitionId(RequestPartitionId.defaultPartition());
+		setPartitionId(theRequestPartitionId);
 	}
 
 	public ResourceModifiedMessage(

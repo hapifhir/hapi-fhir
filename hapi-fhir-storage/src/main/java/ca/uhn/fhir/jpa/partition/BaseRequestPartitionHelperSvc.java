@@ -128,7 +128,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 
 		} else if ((requestDetails instanceof SystemRequestDetails) && nonPartitionableResource) {
-			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 			logSystemRequestDetailsResolution((SystemRequestDetails) requestDetails);
 			logNonPartitionableType(resourceType);
 		} else {
@@ -323,7 +323,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// to DEFAULT
 		if (nonPartitionableResource && requestPartitionId == null) {
 			logNonPartitionableType(theResourceType);
-			requestPartitionId = RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+			requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 		}
 
 		validateRequestPartitionNotNull(

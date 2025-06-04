@@ -154,7 +154,7 @@ public abstract class BaseSubscriptionDeliveryListener implements IMessageListen
 	protected Optional<ResourceModifiedMessage> inflateResourceModifiedMessageFromDeliveryMessage(
 			ResourceDeliveryMessage theMsg) {
 		ResourceModifiedMessage payloadLess =
-				new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType());
+				new ResourceModifiedMessage(theMsg.getPayloadId(myFhirContext), theMsg.getOperationType(), theMsg.getRequestPartitionId());
 		return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(payloadLess);
 	}
 

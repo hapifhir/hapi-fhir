@@ -456,7 +456,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
 			if (myPartitionSettings.isUnnamedPartitionMode() && myPartitionSettings.getDefaultPartitionId() != null) {
 				requestDetails.setRequestPartitionId(
-						RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+						myPartitionSettings.getDefaultRequestPartitionId());
 			} else {
 				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			}
@@ -846,7 +846,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails()
-				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+				.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 		return myTransactionService
 				.withRequest(requestDetails)
 				.execute(() -> doUninstallPackage(thePackageId, theVersion));

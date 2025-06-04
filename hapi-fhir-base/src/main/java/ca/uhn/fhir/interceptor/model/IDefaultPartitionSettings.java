@@ -36,4 +36,8 @@ public interface IDefaultPartitionSettings {
 	default boolean hasDefaultPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
 		return theRequestPartitionId.hasDefaultPartitionId(getDefaultPartitionId());
 	}
+
+	default RequestPartitionId getDefaultRequestPartitionId() {
+		return RequestPartitionId.fromPartitionId(getDefaultPartitionId());
+	}
 }

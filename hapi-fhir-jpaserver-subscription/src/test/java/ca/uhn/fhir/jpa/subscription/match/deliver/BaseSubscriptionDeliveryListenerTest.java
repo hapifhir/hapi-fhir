@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -102,6 +103,9 @@ public class BaseSubscriptionDeliveryListenerTest {
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	@Mock
+	IDefaultPartitionSettings myDefaultPartitionSettings;
+
+	@Mock
 	private IEmailSender myEmailSender;
 
 	@BeforeEach
@@ -111,7 +115,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 		mySubscriptionDeliveringRestHookListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySubscriptionDeliveringRestHookListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 
-		mySubscriptionDeliveringMessageListener = new SubscriptionDeliveringMessageListener(myBrokerClient);
+		mySubscriptionDeliveringMessageListener = new SubscriptionDeliveringMessageListener(myBrokerClient, myDefaultPartitionSettings);
 		mySubscriptionDeliveringMessageListener.setFhirContextForUnitTest(myCtx);
 		mySubscriptionDeliveringMessageListener.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySubscriptionDeliveringMessageListener.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);

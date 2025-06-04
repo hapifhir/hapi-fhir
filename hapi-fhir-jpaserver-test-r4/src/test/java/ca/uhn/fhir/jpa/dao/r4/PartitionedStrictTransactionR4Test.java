@@ -204,7 +204,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 					return RequestPartitionId.fromPartitionId(myPartitionId2);
 				case "SearchParameter":
 				case "Organization":
-					return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
+					return myPartitionSettings.getDefaultRequestPartitionId();
 				default:
 					throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 			}
