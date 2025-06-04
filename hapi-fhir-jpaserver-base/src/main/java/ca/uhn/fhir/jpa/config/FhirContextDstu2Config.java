@@ -20,13 +20,21 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 public class FhirContextDstu2Config {
 	@Primary
 	@Bean(name = "primaryFhirContext")
-	public FhirContext fhirContextDstu2() {
-		return FhirContext.forDstu2();
+	public FhirContext fhirContextDstu2(@Autowired(required = false) INarrativeGenerator theNarrativeGenerator) {
+		FhirContext fhirContext = FhirContext.forDstu2();
+
+		if (theNarrativeGenerator != null) {
+			fhirContext.setNarrativeGenerator(theNarrativeGenerator);
+		}
+
+		return fhirContext;
 	}
 }
