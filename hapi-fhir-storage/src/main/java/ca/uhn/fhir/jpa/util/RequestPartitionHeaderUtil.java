@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public final class RequestPartitionHeaderUtil {
 	private RequestPartitionHeaderUtil() {}
 
 	@Nullable
-	public static RequestPartitionId fromHeader(@Nullable String thePartitionHeaderValue, boolean theIncludeOnlyTheFirst) {
+	public static RequestPartitionId fromHeader(@Nullable String thePartitionHeaderValue, boolean theIncludeOnlyTheFirst, IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (thePartitionHeaderValue == null) {
 			return null;
 		}
@@ -33,7 +33,7 @@ public final class RequestPartitionHeaderUtil {
 			}
 
 			if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
-				partitionIds.add(RequestPartitionId.defaultPartition().getFirstPartitionIdOrNull());
+				partitionIds.add(theDefaultPartitionSettings.getDefaultPartitionId());
 			} else {
 				try {
 					int partitionId = Integer.parseInt(trimmedPartitionId);
@@ -62,7 +62,7 @@ public final class RequestPartitionHeaderUtil {
 	}
 
 	@Nullable
-	public static RequestPartitionId fromHeader(@Nullable String thePartitionHeaderValue) {
-		return fromHeader(thePartitionHeaderValue, false);
+	public static RequestPartitionId fromHeader(@Nullable String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return fromHeader(thePartitionHeaderValue, false, theDefaultPartitionSettings);
 	}
 }

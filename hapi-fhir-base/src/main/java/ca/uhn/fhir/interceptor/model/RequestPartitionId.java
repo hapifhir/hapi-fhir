@@ -243,7 +243,7 @@ public class RequestPartitionId implements IModelJson {
 	/**
 	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
 	 *
-	 * @deprecated use {@link #isDefaultPartition(Integer)} or {@link ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#isDefaultPartition(RequestPartitionId)}
+	 * @deprecated use {@link #isDefaultPartition(Integer)} or {@link IDefaultPartitionSettings#isDefaultPartition(RequestPartitionId)}
 	 * instead
 	 * .
 	 */
@@ -256,8 +256,8 @@ public class RequestPartitionId implements IModelJson {
 	 * Test whether this request partition is for a given default partition ID.
 	 *
 	 * This method can be directly invoked on a requestPartition object providing that <code>theDefaultPartitionId</code>
-	 * is known or through {@link  ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#isDefaultPartition} where the implementer of the interface
-	 * will provide the default partition id (see {@link  ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#getDefaultPartition}).
+	 * is known or through {@link IDefaultPartitionSettings#isDefaultPartition} where the implementer of the interface
+	 * will provide the default partition id (see {@link IDefaultPartitionSettings#isDefaultPartition}).
 	 *
 	 * @param theDefaultPartitionId is the ID that was given to the default partition.  The default partition ID can be
 	 *                              NULL as per default or specifically assigned another value.
@@ -293,7 +293,7 @@ public class RequestPartitionId implements IModelJson {
 	 *
 	 * @return true if one of the requested partition is the default partition(null).
 	 *
-	 * @deprecated use {@link #hasDefaultPartitionId(Integer)} or {@link ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#hasDefaultPartitionId}
+	 * @deprecated use {@link #hasDefaultPartitionId(Integer)} or {@link IDefaultPartitionSettings#hasDefaultPartitionId}
 	 * instead
 	 */
 	@Deprecated(since = "2025.02.R01")
@@ -305,8 +305,8 @@ public class RequestPartitionId implements IModelJson {
 	 * Test whether this request partition has the default partition as one of its targeted partitions.
 	 *
 	 * This method can be directly invoked on a requestPartition object providing that <code>theDefaultPartitionId</code>
-	 * is known or through {@link  ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#hasDefaultPartitionId} where the implementer of the interface
-	 * will provide the default partition id (see {@link  ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc#getDefaultPartition}).
+	 * is known or through {@link IDefaultPartitionSettings#hasDefaultPartitionId} where the implementer of the interface
+	 * will provide the default partition id (see {@link IDefaultPartitionSettings#getDefaultPartitionId}).
 	 *
 	 * @param theDefaultPartitionId is the ID that was given to the default partition.  The default partition ID can be
 	 *                              NULL as per default or specifically assigned another value.
@@ -355,13 +355,18 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	/**
-	 * @deprecated use RequestPartitionId.fromPartitionId(myRequestPartitionHelperSvc.getDefaultPartitionId()) instead
+	 * @deprecated use {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} instead
 	 */
 	@Deprecated
 	@Nonnull
 	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
 	public static RequestPartitionId defaultPartition() {
 		return fromPartitionIds(Collections.singletonList(null));
+	}
+
+	@Nonnull
+	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());
 	}
 
 	@Deprecated

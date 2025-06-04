@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.util.RequestPartitionHeaderUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -43,6 +44,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Interceptor
 public class RequestHeaderPartitionInterceptor {
+	private final IDefaultPartitionSettings myDefaultPartitionSettings;
+
+	public RequestHeaderPartitionInterceptor(IDefaultPartitionSettings theDefaultPartitionSettings) {
+		myDefaultPartitionSettings = theDefaultPartitionSettings;
+	}
 
 	/**
 	 * This method is called to identify the partition ID for create operations.
@@ -78,6 +84,6 @@ public class RequestHeaderPartitionInterceptor {
 
 	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(
 			String thePartitionIds, boolean theIncludeOnlyTheFirst) {
-		return RequestPartitionHeaderUtil.fromHeader(thePartitionIds, theIncludeOnlyTheFirst);
+		return RequestPartitionHeaderUtil.fromHeader(thePartitionIds, theIncludeOnlyTheFirst, myDefaultPartitionSettings);
 	}
 }

@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.model.config;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 
 /**
  * @since 5.0.0
  */
-public class PartitionSettings {
+public class PartitionSettings implements IDefaultPartitionSettings {
 
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
@@ -178,6 +179,7 @@ public class PartitionSettings {
 	 *
 	 * @since 5.5.0
 	 */
+	@Override
 	public Integer getDefaultPartitionId() {
 		return myDefaultPartitionId;
 	}

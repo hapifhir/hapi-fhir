@@ -52,7 +52,7 @@ public class RequestHeaderPartitionTest extends BaseJpaR4Test {
 	public void beforeEach() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myPartitionInterceptor = new RequestHeaderPartitionInterceptor();
+		myPartitionInterceptor = new RequestHeaderPartitionInterceptor(myPartitionSettings);
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
 		myPatientIdInPartition1 = createPatientInPartition(new Patient(), "1").getIdElement().toVersionless();
