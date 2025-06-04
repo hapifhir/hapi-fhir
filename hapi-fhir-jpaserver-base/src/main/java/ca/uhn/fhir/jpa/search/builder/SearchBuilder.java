@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search.builder;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -2069,7 +2067,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// If we know for sure that none of the paths involved in this SearchParameter could
 		// be indexing a canonical
 		if (Arrays.stream(searchParameterPaths)
-				.noneMatch(t -> referencePathCouldPotentiallyReferenceCanonicalElement(t, theParam))) {
+				.noneMatch(t -> SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myContext, myResourceName, t, theParam))) {
 			return null;
 		}
 
@@ -2169,7 +2167,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					String paths = next.getPath();
 					for (String path : SearchParameterUtil.splitSearchParameterExpressions(paths)) {
 
-						if (!referencePathCouldPotentiallyReferenceCanonicalElement(path, next)) {
+						if (!SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myContext, myResourceName, path, next)) {
 							continue;
 						}
 
@@ -2218,71 +2216,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
 	}
 
-	/**
-	 * Just because a SearchParameter is a Reference SP, doesn't necessarily mean that it
-	 * can reference a canonical. So first we try to rule out the SP based on the path it
-	 * contains. This matters because a SearchParameter of type Reference can point to
-	 * a canonical element (in which case we need to _include any canonical targets). Or it
-	 * can point to a Reference element (in which case we only need to _include actual
-	 * references by ID).
-	 * <p>
-	 * This isn't perfect because there's really no definitive and comprehensive
-	 * way of determining the datatype that a SearchParameter or a FHIRPath point to. But
-	 * we do our best if the path is simple enough to just manually check the type it
-	 * points to, or if it ends in an explicit type declaration.
-	 * </p>
-	 */
-	private boolean referencePathCouldPotentiallyReferenceCanonicalElement(
-			String thePath, RuntimeSearchParam theParam) {
-
-		// If this path explicitly wants a reference and not a canonical, we can ignore it since we're
-		// only looking for canonicals here
-		if (thePath.endsWith(".ofType(Reference)")) {
-			return false;
-		}
-
-		int dotIdx = thePath.indexOf('.');
-		if (dotIdx >= 0) {
-			String resourceName = thePath.substring(0, dotIdx).trim();
-			if (!resourceName.isEmpty() && Character.isUpperCase(resourceName.charAt(0))) {
-
-				if (!theParam.getBase().isEmpty() && !theParam.getBase().contains(resourceName)) {
-					return false;
-				}
-
-				// If the path points to a FHIR Reference datatype (ie not a canonical or CanonicalReference)
-				// then it doesn't matter here anyhow. The logic here only works for elements at the
-				// root level of the document (e.g. QuestionnaireResponse.subject or
-				// QuestionnaireResponse.subject.where(...)) but this is just an optimization
-				// anyhow.
-				String elementName = thePath.substring(dotIdx + 1);
-				int secondDotIndex = elementName.indexOf('.');
-				if (secondDotIndex != -1) {
-					elementName = elementName.substring(0, secondDotIndex);
-				}
-				BaseRuntimeChildDefinition child =
-						myContext.getResourceDefinition(myResourceName).getChildByName(elementName);
-				if (child != null) {
-					BaseRuntimeElementDefinition<?> childDef = child.getChildByName(elementName);
-					if (childDef != null) {
-						if (childDef.getName().equals("Reference")) {
-							return false;
-						}
-					}
-				}
-			}
-		}
-
-		return true;
-	}
-
 	record CanonicalUrlTargets(@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {}
 
 	/**
 	 * This method takes in a list of {@link JpaPid}'s and returns a series of sublists containing
 	 * those pids where:
 	 * <ul>
-	 *     <li>No single list is most than {@literal theMaxLoad} entries</li>
+	 *     <li>No single list is more than {@literal theMaxLoad} entries</li>
 	 *     <li>Each list only contains JpaPids with the same partition ID</li>
 	 * </ul>
 	 */
