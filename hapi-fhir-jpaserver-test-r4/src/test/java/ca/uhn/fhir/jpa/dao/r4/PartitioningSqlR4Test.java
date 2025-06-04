@@ -14,10 +14,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -32,7 +30,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -60,7 +57,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -94,6 +90,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
+import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -126,6 +125,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
@@ -137,8 +137,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
-		addCreateDefaultPartition();
-		addReadDefaultPartition(); // one for search param validation
+
+		addNextTargetPartitionForCreateDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -160,13 +161,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		// Create patient in partition 1
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
-		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 
@@ -195,13 +196,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreate_CrossPartitionReference_ByPid_NotAllowed() {
 
 		// Create patient in partition 1
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
-		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 
@@ -219,14 +220,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 
 		// Create patient in partition 1
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
-		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -244,14 +245,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreate_CrossPartitionReference_ByForcedId_NotAllowed() {
 
 		// Create patient in partition 1
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreateWithId(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
-		addCreatePartition(myPartitionId2, myPartitionDate2);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 
@@ -267,13 +268,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreate_SamePartitionReference_DefaultPartition_ByPid() {
 		// Create patient in partition NULL
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition NULL
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -290,14 +291,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreate_SamePartitionReference_DefaultPartition_ByForcedId() {
 		// Create patient in partition NULL
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(myPartitionDate);
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition NULL
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
@@ -313,8 +314,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
-		addCreateDefaultPartition(myPartitionDate);
-		addReadDefaultPartition(); // one for search param validation
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForReadDefaultPartition(); // one for search param validation
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
@@ -338,7 +339,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_NonDefaultPartition() {
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
@@ -359,24 +360,26 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreate_AutoCreatePlaceholderTargets() {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
-		addCreatePartition(1, null);
-		addCreatePartition(1, null);
+		addNextTargetPartitionForCreate(1, null); // the patient
+		addNextTargetPartitionForCreateWithId(1, null); // the Organization placeholder
 		IIdType patientId1 = createPatient(withOrganization(new IdType("Organization/FOO")));
 
 		assertNoRemainingPartitionIds();
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 		assertEquals(patientId1, gotId1);
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		IdType gotIdOrg = myOrganizationDao.read(new IdType("Organization/FOO"), mySrd).getIdElement().toUnqualifiedVersionless();
 		assertEquals("Organization/FOO", gotIdOrg.toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
 	public void testCreate_UnknownPartition() {
-		addCreatePartition(99, null);
+		RequestPartitionId requestPartitionId = fromPartitionId(99);
+		addNextInterceptorReadResult(requestPartitionId);
+		//addNextInterceptorCreateResult(requestPartitionId); // we fail before this
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("system").setValue("value");
@@ -392,7 +395,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ServerId_NoPartition() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateDefaultPartition();
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("system").setValue("value");
@@ -411,12 +414,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueComboSp();
 		createRequestId();
 
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
@@ -496,12 +499,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createUniqueComboSp();
 		createRequestId();
 
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Organization org = new Organization();
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "diisplay");
 		p.addName().setFamily("FAM");
@@ -576,13 +579,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_WithPartition() {
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreateWithId(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreateWithId(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -602,13 +605,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_NoPartition() {
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addCreateDefaultPartition();
+		addNextTargetPartitionForCreateWithIdDefaultPartition();
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -626,13 +629,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_ForcedId_DefaultPartition() {
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(myPartitionDate);
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
 		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
-		addCreateDefaultPartition(myPartitionDate);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
 		p.setId("pat");
 		p.getManagingOrganization().setReferenceElement(orgId);
@@ -655,17 +658,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueComboSp();
 		createRequestId();
-
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
+		assertNoRemainingPartitionIds();
 
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
 
+		// tx requires two calls for pre-fetch and tx boundary
+		myPartitionInterceptor.addNextIterceptorReadResult(fromPartitionId(myPartitionId, myPartitionDate));
+		myPartitionInterceptor.addNextIterceptorReadResult(fromPartitionId(myPartitionId, myPartitionDate));
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
 		org.setName("org");
@@ -674,6 +675,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			.setResource(org)
 			.getRequest().setUrl("Organization").setMethod(Bundle.HTTPVerb.POST);
 
+		myPartitionInterceptor.addNextIterceptorReadResult(fromPartitionId(myPartitionId, myPartitionDate));
+		myPartitionInterceptor.addNextIterceptorReadResult(fromPartitionId(myPartitionId, myPartitionDate));
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
 		p.getMeta().addTag("http://system", "code", "display");
 		p.addName().setFamily("FAM");
@@ -684,6 +688,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			.setFullUrl(p.getId())
 			.setResource(p)
 			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
+
 		Bundle output = mySystemDao.transaction(mySrd, input);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		JpaPid patientId = JpaPid.fromId(new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong());
@@ -696,25 +701,25 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testDeleteExpunge_Cascade() {
 		myPartitionSettings.setPartitioningEnabled(true);
 
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		IIdType p1 = createPatient(withActiveTrue());
 		IIdType o1 = createObservation(withSubject(p1));
 
-		addCreatePartition(myPartitionId2, myPartitionDate);
-		addCreatePartition(myPartitionId2, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId2, myPartitionDate);
 		IIdType p2 = createPatient(withActiveTrue());
 		IIdType o2 = createObservation(withSubject(p2));
 
 		assertNoRemainingPartitionIds();
 
 		// validate precondition
-		addReadAllPartitions();
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
-		addReadPartition(myPartitionId);
-		addReadPartition(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId);
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 
@@ -723,7 +728,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		PartitionedUrl partitionedUrl = new PartitionedUrl()
 				.setUrl("Patient?_id=" + p1.getIdPart() + "," + p2.getIdPart())
-				.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+				.setRequestPartitionId(fromPartitionId(myPartitionId));
 		jobParameters.addPartitionedUrl(partitionedUrl);
 		jobParameters.setCascade(true);
 
@@ -737,13 +742,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Validate
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
 		assertEquals(2, outcome.getCombinedRecordsProcessed());
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		assertDoesntExist(p1);
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		assertDoesntExist(o1);
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		assertNotGone(p2);
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		assertNotGone(o2);
 	}
 
@@ -761,19 +766,21 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		createRequestId();
 
 		// Create a resource
-		addCreatePartition(myPartitionId, myPartitionDate);
+		addNextTargetPartitionForCreate(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.getMeta().addTag("http://system", "code", "display");
 		patient.setActive(true);
 		JpaPid patientId = JpaPid.fromId(myPatientDao.create(patient, mySrd).getId().getIdPartAsLong());
 		assertPersistedPartitionIdMatches(patientId);
+		assertNoRemainingPartitionIds();
 
 		// Update that resource
-		addCreatePartition(myPartitionId);
+		addNextTargetPartitionForUpdate(myPartitionId);
 		patient = new Patient();
 		patient.setId("Patient/" + patientId.getId());
 		patient.setActive(false);
 		myPatientDao.update(patient, mySrd);
+		assertNoRemainingPartitionIds();
 
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
@@ -810,14 +817,16 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testUpdateConditionalInPartition() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		createRequestId();
+		assertNoRemainingPartitionIds();
 
 		// Create a resource
-		addCreatePartition(myPartitionId, myPartitionDate);
-		addReadPartition(myPartitionId);
+		addNextTargetPartitionForConditionalUpdateNotExist(fromPartitionId(myPartitionId, myPartitionDate));
 		Patient p = new Patient();
 		p.setActive(false);
 		p.addIdentifier().setValue("12345");
 		JpaPid patientId = JpaPid.fromId(myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong());
+		assertNoRemainingPartitionIds();
+
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			assertEquals(1, myResourceTableDao.count());
@@ -833,12 +842,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		});
 
 		// Update that resource
-		addReadPartition(myPartitionId);
-		addCreatePartition(myPartitionId);
+		addNextTargetPartitionForConditionalUpdateExist(fromPartitionId(myPartitionId));
 		p = new Patient();
 		p.setActive(true);
 		p.addIdentifier().setValue("12345");
 		JpaPid patientId2 = JpaPid.fromId(myPatientDao.update(p, "Patient?identifier=12345", mySrd).getId().getIdPartAsLong());
+		assertNoRemainingPartitionIds();
 
 		assertEquals(patientId.getId(), patientId2.getId());
 
@@ -867,11 +876,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_AllPartitions() {
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			myCaptureQueriesListener.clear();
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
@@ -884,7 +893,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
 		}
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId2, gotId2);
 
@@ -899,14 +908,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
@@ -920,7 +929,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			try {
 				myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
@@ -931,7 +940,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			try {
 				myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
@@ -943,10 +952,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_MultiplePartitionNames() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		createPatient(withPartition(2), withActiveTrue());
-		IIdType patientId3 = createPatient(withPartition(3), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		createPatient(withCreatePartition(2), withActiveTrue());
+		IIdType patientId3 = createPatient(withCreatePartition(3), withActiveTrue());
 
 		logAllResources();
 
@@ -954,7 +963,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			assertNoRemainingPartitionIds();
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
@@ -968,7 +977,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Two partitions including default - Found
 		{
 			myCaptureQueriesListener.clear();
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, JpaConstants.DEFAULT_PARTITION_NAME));
 			IdType gotId1;
 			try {
 				gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
@@ -987,7 +996,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Two partitions - Not Found
 		{
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientId3, mySrd);
 				fail();
@@ -995,7 +1004,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				// good
 			}
 
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();
@@ -1008,15 +1017,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_MultiplePartitionIds() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		createPatient(withPartition(2), withActiveTrue());
-		IIdType patientId3 = createPatient(withPartition(3), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		createPatient(withCreatePartition(2), withActiveTrue());
+		IIdType patientId3 = createPatient(withCreatePartition(3), withActiveTrue());
 
 		// Two partitions - Found
 		{
 			myCaptureQueriesListener.clear();
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionIds(1, 2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionIds(1, 2));
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
@@ -1035,7 +1044,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			myPartitionInterceptor.assertNoRemainingIds();
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionIds(1, null));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionIds(1, null));
 			IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientIdNull, gotId1);
 
@@ -1047,7 +1056,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Two partitions - Not Found
 		{
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientId3, mySrd);
 				fail();
@@ -1055,7 +1064,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				// good
 			}
 
-			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
+			myPartitionInterceptor.addNextIterceptorReadResult(RequestPartitionId.fromPartitionNames(PARTITION_1, PARTITION_2));
 			try {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();
@@ -1068,14 +1077,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_DefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		createPatient(withCreatePartition(2), withActiveTrue());
 
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientIdNull, gotId1);
 
@@ -1089,7 +1098,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			try {
 				myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
@@ -1104,7 +1113,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testRead_PidId_UnknownResourceId() {
 		// Read in specific Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			try {
 				myPatientDao.read(new IdType("Patient/1"), mySrd);
 				fail();
@@ -1115,7 +1124,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			try {
 				myPatientDao.read(new IdType("Patient/1"), mySrd);
 				fail();
@@ -1127,10 +1136,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_PidId_ResourceIdOnlyExistsInDifferentPartition() {
-		IIdType id = createPatient(withPartition(2), withActiveTrue());
+		IIdType id = createPatient(withCreatePartition(2), withActiveTrue());
 		// Read in specific Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			try {
 				myPatientDao.read(id, mySrd);
 				fail();
@@ -1141,7 +1150,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			try {
 				myPatientDao.read(id, mySrd);
 				fail();
@@ -1153,17 +1162,17 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_ForcedId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withActiveTrue(), withId("ONE"));
+		IIdType patientId2 = createPatient(withUpdatePartition(2), withActiveTrue(), withId("TWO"));
 
 		// Read in correct Partition
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 		assertEquals(patientId1, gotId1);
 
 		// Read in null Partition
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		try {
 			myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
@@ -1172,7 +1181,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		}
 
 		// Read in wrong Partition
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		try {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
@@ -1181,7 +1190,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		}
 
 		// Read in wrong Partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		try {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
@@ -1190,7 +1199,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		}
 
 		// Read in correct Partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 		assertEquals(patientId2, gotId2);
 
@@ -1198,17 +1207,17 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_ForcedId_DefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withActiveTrue(), withId("ONE"));
+		IIdType patientId2 = createPatient(withUpdatePartition(2), withActiveTrue(), withId("TWO"));
 
 		// Read in correct Partition
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 		assertEquals(patientIdNull, gotId1);
 
 		// Read in null Partition
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		try {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
@@ -1217,7 +1226,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		}
 
 		// Read in wrong Partition
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		try {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
@@ -1228,16 +1237,16 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testRead_ForcedId_AllPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("NULL"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("ONE"));
-		createPatient(withPartition(2), withActiveTrue(), withId("TWO"));
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withActiveTrue(), withId("NULL"));
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withActiveTrue(), withId("ONE"));
+		createPatient(withUpdatePartition(2), withActiveTrue(), withId("TWO"));
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			IdType gotId1 = myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientIdNull, gotId1);
 		}
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 		}
@@ -1246,14 +1255,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testRead_ForcedId_AllPartition_WithDuplicate() {
 		dropForcedIdUniqueConstraint();
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withId("FOO"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withId("FOO"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withId("FOO"));
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withActiveTrue(), withId("FOO"));
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withActiveTrue(), withId("FOO"));
+		IIdType patientId2 = createPatient(withUpdatePartition(2), withActiveTrue(), withId("FOO"));
 		assertEquals(patientIdNull, patientId1);
 		assertEquals(patientIdNull, patientId2);
 
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			try {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();
@@ -1265,9 +1274,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamOnly_PidId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
 		/* *******************************
 		 * _id param is only parameter
@@ -1276,7 +1285,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1295,7 +1304,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1304,7 +1313,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1316,9 +1325,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_PidId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
 		/* *******************************
 		 * _id param is second parameter
@@ -1327,7 +1336,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1348,7 +1357,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1359,7 +1368,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1373,9 +1382,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamOnly_ForcedId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withId("PT-NULL"), withActiveTrue());
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withId("PT-1"), withActiveTrue());
+		IIdType patientId2 = createPatient(withUpdatePartition(2), withId("PT-2"), withActiveTrue());
 
 		/* *******************************
 		 * _id param is only parameter
@@ -1384,7 +1393,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1403,7 +1412,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1412,7 +1421,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
@@ -1424,9 +1433,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
-		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+		IIdType patientId1 = createPatient(withUpdatePartition(1), withId("PT-1"), withActiveTrue());
+		IIdType patientIdNull = createPatient(withUpdatePartition(null), withId("PT-NULL"), withActiveTrue());
+		IIdType patientId2 = createPatient(withUpdatePartition(2), withId("PT-2"), withActiveTrue());
 
 		logAllTokenIndexes();
 
@@ -1437,7 +1446,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Read in correct Partition
 		{
 			myCaptureQueriesListener.clear();
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1457,7 +1466,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in null Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1468,7 +1477,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Read in wrong Partition
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
@@ -1482,13 +1491,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_MissingParamString_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		IIdType patientId2 = createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
@@ -1505,7 +1514,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// :missing=false
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
@@ -1524,13 +1533,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_MissingParamString_SearchOnePartition() {
-		createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
@@ -1547,7 +1556,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// :missing=false
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
@@ -1565,13 +1574,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_MissingParamString_SearchDefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
@@ -1588,7 +1597,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// :missing=false
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
@@ -1608,13 +1617,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_MissingParamReference_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		IIdType patientId2 = createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadAllPartitions();
+			addNextTargetPartitionForReadAllPartitions();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
@@ -1635,13 +1644,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_MissingParamReference_SearchOnePartition_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
@@ -1663,13 +1672,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_MissingParamReference_SearchOnePartition_DontIncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadPartition(1);
+			addNextTargetPartitionsForRead(1);
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
@@ -1689,13 +1698,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_MissingParamReference_SearchDefaultPartition() {
-		IIdType patientIdDefault = createPatient(withPartition(null), withFamily("FAMILY"));
-		createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdDefault = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		// :missing=true
 		{
-			addReadDefaultPartition();
+			addNextTargetPartitionForReadDefaultPartition();
 			myCaptureQueriesListener.clear();
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
@@ -1716,11 +1725,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_NoParams_SearchAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -1736,11 +1745,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_NoParams_SearchOnePartition() {
-		createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		createPatient(withPartition(2), withActiveTrue());
+		createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		createPatient(withCreatePartition(2), withActiveTrue());
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -1756,12 +1765,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_NoParams_SearchMultiplePartitionsByName_NoDefault() {
-		createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
-		createPatient(withPartition(3), withActiveTrue());
+		createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
+		createPatient(withCreatePartition(3), withActiveTrue());
 
-		addReadPartitions(PARTITION_1, PARTITION_2);
+		addNextTargetPartitionsForRead(PARTITION_1, PARTITION_2);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -1777,12 +1786,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_NoParams_SearchMultiplePartitionsByName_WithDefault() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
-		createPatient(withPartition(3), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		createPatient(withCreatePartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue());
+		createPatient(withCreatePartition(3), withActiveTrue());
 
-		addReadPartitions(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_2);
+		addNextTargetPartitionsForRead(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_2);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -1801,16 +1810,16 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_DateParam_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withBirthdate("2020-04-20"));
-		IIdType patientId1 = createPatient(withPartition(1), withBirthdate("2020-04-20"));
-		IIdType patientId2 = createPatient(withPartition(2), withBirthdate("2020-04-20"));
-		createPatient(withPartition(null), withBirthdate("2021-04-20"));
-		createPatient(withPartition(1), withBirthdate("2021-04-20"));
-		createPatient(withPartition(2), withBirthdate("2021-04-20"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withBirthdate("2020-04-20"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withBirthdate("2020-04-20"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(null), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2021-04-20"));
 
 		// Date param
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
@@ -1826,7 +1835,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date OR param
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
@@ -1842,7 +1851,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date AND param
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
@@ -1858,7 +1867,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// DateRangeParam
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
@@ -1879,19 +1888,19 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_DateParam_SearchSpecificPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		createPatient(withPartition(null), withBirthdate("2020-04-20"));
-		IIdType patientId1 = createPatient(withPartition(1), withBirthdate("2020-04-20"));
-		createPatient(withPartition(2), withBirthdate("2020-04-20"));
-		createPatient(withPartition(null), withBirthdate("2021-04-20"));
-		createPatient(withPartition(1), withBirthdate("2021-04-20"));
-		createPatient(withPartition(2), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(null), withBirthdate("2020-04-20"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(null), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2021-04-20"));
 
 		// Date param
 
 		runInTransaction(() -> {
 			ourLog.info("Date indexes:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(ResourceIndexedSearchParamDate::toString).collect(Collectors.joining("\n * ")));
 		});
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
@@ -1909,7 +1918,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date OR param
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
@@ -1925,7 +1934,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date AND param
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
@@ -1941,7 +1950,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// DateRangeParam
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
@@ -1964,16 +1973,16 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_DateParam_SearchDefaultPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withBirthdate("2020-04-20"));
-		createPatient(withPartition(1), withBirthdate("2020-04-20"));
-		createPatient(withPartition(2), withBirthdate("2020-04-20"));
-		createPatient(withPartition(null), withBirthdate("2021-04-20"));
-		createPatient(withPartition(1), withBirthdate("2021-04-20"));
-		createPatient(withPartition(2), withBirthdate("2021-04-20"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(null), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2021-04-20"));
 
 		// Date param
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
@@ -1989,7 +1998,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date OR param
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
@@ -2005,7 +2014,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Date AND param
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
@@ -2021,7 +2030,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// DateRangeParam
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
@@ -2044,15 +2053,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 		myPartitionSettings.setDefaultPartitionId(-1);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withBirthdate("2020-04-20"));
-		createPatient(withPartition(1), withBirthdate("2020-04-20"));
-		createPatient(withPartition(2), withBirthdate("2020-04-20"));
-		createPatient(withPartition(null), withBirthdate("2021-04-20"));
-		createPatient(withPartition(1), withBirthdate("2021-04-20"));
-		createPatient(withPartition(2), withBirthdate("2021-04-20"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-04-20"));
+		createPatient(withCreatePartition(null), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(1), withBirthdate("2021-04-20"));
+		createPatient(withCreatePartition(2), withBirthdate("2021-04-20"));
 
 		// Date param
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
@@ -2070,26 +2079,26 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_HasParam_SearchOnePartition() {
-		addCreatePartition(1, null);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(1, null);
 		Organization org = new Organization();
 		org.setId("ORG");
 		org.setName("ORG");
 		myOrganizationDao.update(org, mySrd);
 
-		addCreatePartition(1, null);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(1, null);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId("PRACT");
 		practitioner.addName().setFamily("PRACT");
 		myPractitionerDao.update(practitioner, mySrd);
 
-		addCreatePartition(1, null);
+		addNextTargetPartitionForCreateWithIdDefaultPartition(1, null);
 		PractitionerRole role = new PractitionerRole();
 		role.setId("ROLE");
 		role.getPractitioner().setReference("Practitioner/PRACT");
 		role.getOrganization().setReference("Organization/ORG");
 		myPractitionerRoleDao.update(role, mySrd);
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		HasAndListParam value = new HasAndListParam();
 		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "_id", "ROLE")));
@@ -2110,11 +2119,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		IIdType patientId2 = createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2132,11 +2141,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_StringParam_SearchDefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2156,11 +2165,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_StringParam_SearchOnePartition() {
-		createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2179,15 +2188,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_StringParam_SearchMultiplePartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		IIdType patientId2 = createPatient(withPartition(2), withFamily("FAMILY"));
-		createPatient(withPartition(3), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(3), withFamily("FAMILY"));
 
-		createPatient(withPartition(null), withFamily("BLAH"));
-		createPatient(withPartition(1), withFamily("BLAH"));
-		createPatient(withPartition(2), withFamily("BLAH"));
-		createPatient(withPartition(3), withFamily("BLAH"));
+		createPatient(withCreatePartition(null), withFamily("BLAH"));
+		createPatient(withCreatePartition(1), withFamily("BLAH"));
+		createPatient(withCreatePartition(2), withFamily("BLAH"));
+		createPatient(withCreatePartition(3), withFamily("BLAH"));
 
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -2196,7 +2205,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Match two partitions
 		{
-			addReadPartition(1, 2);
+			addNextTargetPartitionsForRead(1, 2);
 
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = myPatientDao.search(map, mySrd);
@@ -2211,7 +2220,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Match two partitions including null
 		{
-			addReadPartition(1, null);
+			addNextTargetPartitionsForRead(1, null);
 
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = myPatientDao.search(map, mySrd);
@@ -2235,7 +2244,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
 
-		addReadPartition(1, 2);
+		addNextTargetPartitionsForRead(1, 2);
 		try {
 			myPatientDao.search(map, mySrd);
 			fail();
@@ -2248,7 +2257,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchAllPartitions_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2267,11 +2276,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchDefaultPartition_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		IIdType patientIdNull = createPatient(withPartition(null), withFamily("FAMILY"));
-		createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2293,13 +2302,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchOnePartition_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		createPatient(withPartition(null), withFamily("FAMILY"));
-		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withCreatePartition(null), withFamily("FAMILY"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withFamily("FAMILY"));
+		createPatient(withCreatePartition(2), withFamily("FAMILY"));
 
 		logAllStringIndexes();
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2322,21 +2331,21 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	@Disabled
 	public void testSearch_StringParam_SearchOnePartition_AddRevIncludes() {
-		addReadPartition(1);
-		addCreatePartition(1, null);
+		addNextTargetPartitionsForRead(1);
+		addNextTargetPartitionForCreate(1, null);
 		Organization org = new Organization();
 		org.setName("FOO");
 		org.setId("FOO-ORG");
 		myOrganizationDao.update(org, mySrd);
 
 		for (int i = 0; i < 50; i++) {
-			addCreatePartition(1, null);
+			addNextTargetPartitionForCreate(1, null);
 			PractitionerRole pr = new PractitionerRole();
 			pr.getOrganization().setReference("Organization/FOO-ORG");
 			myPractitionerRoleDao.create(pr, mySrd);
 		}
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2351,14 +2360,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagNotParam_SearchAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code2"));
-		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code2"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code2"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"), withIdentifier("http://foo", "bar"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code2"));
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
@@ -2374,7 +2383,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// And with another param
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
@@ -2395,11 +2404,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagNotParam_SearchDefaultPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2419,14 +2428,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagNotParam_SearchOnePartition() {
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code2"));
-		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code2"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code2"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2444,11 +2453,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagParam_SearchAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2466,11 +2475,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagParam_SearchOnePartition() {
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2492,14 +2501,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagParamNot_SearchAllPartitions() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
-		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId2 = createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2517,14 +2526,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_TagParamNot_SearchOnePartition() {
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"));
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"));
-		createPatient(withPartition(null), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
-		createPatient(withPartition(1), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
-		createPatient(withPartition(2), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"));
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"));
+		createPatient(withCreatePartition(null), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(1), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
+		createPatient(withCreatePartition(2), withActiveTrue(), withTag("http://system", "code"), withTag("http://system", "code2"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 
 		logAllResources();
 		logAllResourceVersions();
@@ -2659,9 +2668,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_UniqueParam_SearchAllPartitions() {
 		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withGender("male"), withFamily("FAM"));
+		IIdType id = createPatient(withCreatePartition(1), withGender("male"), withFamily("FAM"));
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2685,9 +2694,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_UniqueParam_SearchOnePartition() {
 		createUniqueComboSp();
 
-		IIdType id = createPatient(withPartition(1), withGender("male"), withFamily("FAM"));
+		IIdType id = createPatient(withCreatePartition(1), withGender("male"), withFamily("FAM"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAM"));
@@ -2704,7 +2713,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=male'");
 
 		// Same query, different partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Patient.SP_GENDER, new TokenParam(null, "male"));
@@ -2724,26 +2733,26 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		assertNoRemainingPartitionIds();
 
-		IIdType orgId = createOrganization(withId("A"), withPartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
-		IIdType orgId2 = createOrganization(withId("B"), withPartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
+		IIdType orgId = createOrganization(withId("A"), withUpdatePartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(withId("B"), withUpdatePartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
 		// Matching
-		IIdType patientId = createPatient(withPartition(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
+		IIdType patientId = createPatient(withCreatePartition(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
 		// Non matching
-		createPatient(withPartition(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
-		createPatient(withPartition(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
+		createPatient(withCreatePartition(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
+		createPatient(withCreatePartition(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
 
 		assertNoRemainingPartitionIds();
 		logAllNonUniqueIndexes();
 
 		switch (theReadPartitions) {
 			case "ALL":
-				addReadAllPartitions();
+				addNextTargetPartitionForReadAllPartitions();
 				break;
 			case "ONE":
-				addReadPartition(myPartitionId);
+				addNextTargetPartitionsForRead(myPartitionId);
 				break;
 			case "MANY":
-				addReadPartition(myPartitionId, myPartitionId4);
+				addNextTargetPartitionsForRead(myPartitionId, myPartitionId4);
 				break;
 			default:
 				throw new IllegalStateException();
@@ -2784,10 +2793,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetPid_SearchOnePartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(myPartitionId), withGender("male"));
-		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
+		IIdType patientId = createPatient(withCreatePartition(myPartitionId), withGender("male"));
+		IIdType observationId = createObservation(withCreatePartition(myPartitionId), withSubject(patientId));
 
-		addReadPartition(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -2805,7 +2814,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2);
 
 		// Same query, different partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -2821,10 +2830,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetPid_SearchDefaultPartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(null), withGender("male"));
-		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
+		IIdType patientId = createPatient(withCreatePartition(null), withGender("male"));
+		IIdType observationId = createObservation(withCreatePartition(null), withSubject(patientId));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2842,7 +2851,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		// Same query, different partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -2858,10 +2867,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetForcedId_SearchOnePartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(myPartitionId), withId("ONE"), withGender("male"));
-		IIdType observationId = createObservation(withPartition(myPartitionId), withSubject(patientId));
+		IIdType patientId = createPatient(withUpdatePartition(myPartitionId), withId("ONE"), withGender("male"));
+		IIdType observationId = createObservation(withCreatePartition(myPartitionId), withSubject(patientId));
 
-		addReadPartition(myPartitionId);
+		addNextTargetPartitionsForRead(myPartitionId);
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -2877,7 +2886,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2);
 
 		// Same query, different partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -2907,14 +2916,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		vs.getCompose().addInclude().setSystem("http://cs");
 		myValueSetDao.create(vs, new SystemRequestDetails());
 
-		createObservation(withPartition(1), withId("OBS1"), withObservationCode("http://cs", "A"));
-		createObservation(withPartition(1), withId("OBS2"), withObservationCode("http://cs", "B"));
-		createObservation(withPartition(1), withId("OBS3"), withObservationCode("http://cs", "C"));
+		createObservation(withUpdatePartition(1), withId("OBS1"), withObservationCode("http://cs", "A"));
+		createObservation(withUpdatePartition(1), withId("OBS2"), withObservationCode("http://cs", "B"));
+		createObservation(withUpdatePartition(1), withId("OBS3"), withObservationCode("http://cs", "C"));
 
 		logAllTokenIndexes();
 
 		myCaptureQueriesListener.clear();
-		addReadPartitions(PARTITION_1);
+		addNextTargetPartitionsForRead(PARTITION_1);
 		SearchParameterMap map = SearchParameterMap.newSynchronous("code", new TokenParam("http://vs").setModifier(TokenParamModifier.IN));
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
@@ -2928,10 +2937,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_RefParam_TargetForcedId_SearchDefaultPartition() {
 		createUniqueComboSp();
 
-		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withGender("male"));
-		IIdType observationId = createObservation(withPartition(null), withSubject(patientId));
+		IIdType patientId = createPatient(withUpdatePartition(null), withId("ONE"), withGender("male"));
+		IIdType observationId = createObservation(withCreatePartition(null), withSubject(patientId));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
@@ -2947,7 +2956,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2);
 
 		// Same query, different partition
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		myCaptureQueriesListener.clear();
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
@@ -3009,15 +3018,21 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("About to start transaction");
 
-		for (int i = 0; i < 60; i++) {
-			addCreatePartition(1, null);
-		}
-
 		// Pre-fetch the partition ID from the partition lookup table
-		createPatient(withPartition(1), withActiveTrue());
+		createPatient(withCreatePartition(1), withActiveTrue());
+		assertNoRemainingPartitionIds();
+
+		// we are running 5 entries, 4 times.  1 conditional create, and 4 conditional update.
+		// on first run, none will match.
+		// Each PUT in tx needs extra creates
+		// the Patient POST needs 2 reads for tx overhead + the search for match
+		runTimes(3, () -> addNextInterceptorReadResult(fromPartitionId(1)));
+		runTimes(1 /* the Patient write */ + 4*4 /* 4 each for PUTs */, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
+		assertNoRemainingPartitionIds();
+		
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -3033,8 +3048,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		 * Run a second time
 		 */
 
+		// After the first run, the conditions all match.
+		runTimes(3, () -> addNextInterceptorReadResult(fromPartitionId(1)));
+		runTimes(13, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
+
+
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
+		assertNoRemainingPartitionIds();
+
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -3051,6 +3073,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myStorageSettings.setMatchUrlCache(true);
 
 		myCaptureQueriesListener.clear();
+		// After the first run, the conditions all match.
+		runTimes(3, () -> addNextInterceptorReadResult(fromPartitionId(1)));
+		runTimes(13, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -3067,6 +3092,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		 */
 
 		myCaptureQueriesListener.clear();
+		// After the first run, the conditions all match.
+		runTimes(3, () -> addNextInterceptorReadResult(fromPartitionId(1)));
+		runTimes(13, () -> addNextInterceptorCreateResult(fromPartitionId(1)));
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -3085,7 +3113,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+		requestDetails.setRequestPartitionId(fromPartitionId(myPartitionId));
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
@@ -3112,7 +3140,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		 */
 
 		requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+		requestDetails.setRequestPartitionId(fromPartitionId(myPartitionId));
 
 		input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
@@ -3143,9 +3171,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	@Disabled
 	public void testUpdate_ResourcePreExistsInWrongPartition() {
-		IIdType patientId = createPatient(withPartition(null), withId("ONE"), withBirthdate("2020-01-01"));
+		IIdType patientId = createPatient(withUpdatePartition(null), withId("ONE"), withBirthdate("2020-01-01"));
 
-		addCreatePartition(1);
+		addNextTargetPartitionForCreate(1);
 
 		Patient patient = new Patient();
 		patient.setId(patientId.toUnqualifiedVersionless());
@@ -3155,16 +3183,18 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Instance_CorrectPartition() {
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+		assertNoRemainingPartitionIds();
 
 		// Update the patient
-		addCreatePartition(myPartitionId);
+		addNextTargetPartitionForUpdate(fromPartitionId(myPartitionId));
 		Patient patient = new Patient();
 		patient.setActive(false);
 		patient.setId(id);
 		myPatientDao.update(patient, mySrd);
+		assertNoRemainingPartitionIds();
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
@@ -3191,16 +3221,18 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Instance_WrongPartition() {
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+		assertNoRemainingPartitionIds();
 
 		// Update the patient
-		addCreatePartition(myPartitionId);
+		addNextTargetPartitionForUpdate(myPartitionId);
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
 		myPatientDao.update(p, mySrd);
+		assertNoRemainingPartitionIds();
 
-		addReadPartition(2);
+		addNextTargetPartitionsForRead(2);
 		try {
 			myPatientDao.history(id, null, null, null, mySrd);
 			fail();
@@ -3211,20 +3243,24 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Instance_DefaultPartition() {
-		IIdType id = createPatient(withPartition(null), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withCreatePartition(null), withBirthdate("2020-01-01"));
+		assertNoRemainingPartitionIds();
 
 		// Update the patient
-		addCreateDefaultPartition();
+		addNextTargetPartitionForUpdate(defaultPartition());
 		Patient patient = new Patient();
 		patient.setActive(false);
 		patient.setId(id);
 		myPatientDao.update(patient, mySrd);
+		assertNoRemainingPartitionIds();
 
 		logAllResourceVersions();
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
+		assertNoRemainingPartitionIds();
+
 		int size = results.sizeOrThrowNpe();
 		List<String> ids = toUnqualifiedIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
@@ -3251,18 +3287,22 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Instance_AllPartitions() {
-		IIdType id = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+		assertNoRemainingPartitionIds();
 
 		// Update the patient
-		addCreatePartition(myPartitionId);
+		addNextTargetPartitionForUpdate(fromPartitionId(myPartitionId));
 		Patient patient = new Patient();
 		patient.setActive(false);
 		patient.setId(id);
 		myPatientDao.update(patient, mySrd);
+		assertNoRemainingPartitionIds();
 
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(id, null, null, null, mySrd);
+
+		assertNoRemainingPartitionIds();
 		assertEquals(2, results.sizeOrThrowNpe());
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
@@ -3270,7 +3310,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Server() {
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		try {
 			mySystemDao.history(null, null, null, mySrd).size();
 			fail();
@@ -3281,15 +3321,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Server_SpecificPartition() {
-		IIdType id1A = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id1A = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		IIdType id1B = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id1B = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
@@ -3313,15 +3353,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Server_DefaultPartition() {
-		IIdType id1A = createPatient(withPartition(null), withBirthdate("2020-01-01"));
+		IIdType id1A = createPatient(withCreatePartition(null), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		IIdType id1B = createPatient(withPartition(null), withBirthdate("2020-01-01"));
+		IIdType id1B = createPatient(withCreatePartition(null), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
@@ -3344,21 +3384,21 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Server_MultiplePartitions() {
-		String idNull1 = createPatient(withPartition(null), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String idNull1 = createPatient(withCreatePartition(null), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 		sleepAtLeast(10);
-		String idNull2 = createPatient(withPartition(null), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String idNull2 = createPatient(withCreatePartition(null), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 		sleepAtLeast(10);
-		String id21 = createPatient(withPartition(2), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String id21 = createPatient(withCreatePartition(2), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 		sleepAtLeast(10);
-		String id31 = createPatient(withPartition(3), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String id31 = createPatient(withCreatePartition(3), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 		sleepAtLeast(10);
-		String id22 = createPatient(withPartition(2), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String id22 = createPatient(withCreatePartition(2), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 		sleepAtLeast(10);
-		String id32 = createPatient(withPartition(3), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
+		String id32 = createPatient(withCreatePartition(3), withBirthdate("2020-01-01")).toUnqualifiedVersionless().getValue();
 
 		// Multiple Partitions
 		{
-			addReadPartition(2, null);
+			addNextTargetPartitionsForRead(2, null);
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
@@ -3368,7 +3408,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Multiple Partitions With Null
 		{
-			addReadPartition(2, 3);
+			addNextTargetPartitionsForRead(2, 3);
 			myCaptureQueriesListener.clear();
 			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
 			assertEquals(4, results.sizeOrThrowNpe());
@@ -3380,7 +3420,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Type_AllPartitions() {
-		addReadAllPartitions();
+		addNextTargetPartitionForReadAllPartitions();
 		try {
 			myPatientDao.history(null, null, null, mySrd).size();
 			fail();
@@ -3391,15 +3431,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Type_SpecificPartition() {
-		IIdType id1A = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id1A = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		IIdType id1B = createPatient(withPartition(1), withBirthdate("2020-01-01"));
+		IIdType id1B = createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 
-		addReadPartition(1);
+		addNextTargetPartitionsForRead(1);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
@@ -3423,15 +3463,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testHistory_Type_DefaultPartition() {
-		IIdType id1A = createPatient(withPartition(null), withBirthdate("2020-01-01"));
+		IIdType id1A = createPatient(withCreatePartition(null), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		IIdType id1B = createPatient(withPartition(null), withBirthdate("2020-01-01"));
+		IIdType id1B = createPatient(withCreatePartition(null), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 		sleepAtLeast(10);
-		createPatient(withPartition(2), withBirthdate("2020-01-01"));
+		createPatient(withCreatePartition(2), withBirthdate("2020-01-01"));
 
-		addReadDefaultPartition();
+		addNextTargetPartitionForReadDefaultPartition();
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(2, results.sizeOrThrowNpe());
@@ -3454,15 +3494,15 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testReindexPartitionedServer() {
-		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientIdNull = createPatient(withCreatePartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withCreatePartition(1), withActiveTrue());
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
 		runInTransaction(() -> {
-			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).get().getIndexStatus());
-			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).get().getIndexStatus());
+			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientIdNull.getIdPartAsLong()).orElseThrow().getIndexStatus());
+			assertNotEquals(EntityIndexStatusEnum.INDEXING_FAILED, myResourceTableDao.findById(patientId1.getIdPartAsLong()).orElseThrow().getIndexStatus());
 		});
 	}
 
@@ -3471,10 +3511,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
 		try {
-			createPatient(withPartition(1), withBirthdate("2020-01-01"));
+			createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
 
 			ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
-			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
+			verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
 
 			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
 			assertEquals(1, partitionId.getPartitionIds().get(0).intValue());

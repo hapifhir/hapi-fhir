@@ -128,6 +128,85 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init740();
 		init760();
 		init780();
+		init820();
+		init840();
+	}
+
+	protected void init840() {
+		Builder version = forVersion(VersionEnum.V8_4_0);
+		{
+			// Add HFJ_RESOURCE_TYPE table
+			version.addIdGenerator("20250515.1", "SEQ_RESOURCE_TYPE", 1);
+			Builder.BuilderAddTableByColumns resourceType =
+					version.addTableByColumns("20250515.2", "HFJ_RESOURCE_TYPE", "RES_TYPE_ID");
+
+			resourceType.addColumn("RES_TYPE_ID").nonNullable().type(ColumnTypeEnum.SMALLINT);
+			resourceType.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+
+			resourceType
+					.addIndex("20250515.3", "IDX_RES_TYPE_NAME")
+					.unique(true)
+					.withColumns("RES_TYPE");
+
+			// Add column RES_TYPE_ID to HFJ_RESOURCE
+			Builder.BuilderWithTableName resource = version.onTable("HFJ_RESOURCE");
+			resource.addColumn("20250515.101", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_VER
+			Builder.BuilderWithTableName resVer = version.onTable("HFJ_RES_VER");
+			resVer.addColumn("20250515.201", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_RES_TAG
+			Builder.BuilderWithTableName resTag = version.onTable("HFJ_RES_TAG");
+			resTag.addColumn("20250515.301", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add column RES_TYPE_ID to HFJ_HISTORY_TAG
+			Builder.BuilderWithTableName historyTag = version.onTable("HFJ_HISTORY_TAG");
+			historyTag.addColumn("20250515.401", "RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+
+			// Add columns SRC_RES_TYPE_ID and TARGET_RES_TYPE_ID to HFJ_RES_LINK
+			Builder.BuilderWithTableName resLink = version.onTable("HFJ_RES_LINK");
+			resLink.addColumn("20250515.501", "SRC_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+			resLink.addColumn("20250515.502", "TARGET_RES_TYPE_ID").nullable().type(ColumnTypeEnum.SMALLINT);
+		}
+	}
+
+	protected void init820() {
+		Builder version = forVersion(VersionEnum.V8_2_0);
+		// Add HFJ_SPIDX_IDENTITY table
+		{
+			version.addIdGenerator("20250324.1", "SEQ_SPIDX_IDENTITY", 1);
+			Builder.BuilderAddTableByColumns spidxIdentity =
+					version.addTableByColumns("20250324.2", "HFJ_SPIDX_IDENTITY", "SP_IDENTITY_ID");
+
+			spidxIdentity.addColumn("SP_IDENTITY_ID").nonNullable().type(ColumnTypeEnum.INT);
+			spidxIdentity.addColumn("HASH_IDENTITY").nonNullable().type(ColumnTypeEnum.LONG);
+			spidxIdentity.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+			spidxIdentity.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 256);
+
+			spidxIdentity
+					.addIndex("20250324.3", "IDX_HASH_IDENTITY")
+					.unique(true)
+					.withColumns("HASH_IDENTITY");
+		}
+
+		{
+			version.executeRawSqls(
+					"20250404.10",
+					Map.of(
+							DriverTypeEnum.ORACLE_12C,
+							List.of(
+									"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_EXACT varchar2(768 char) )",
+									"alter table HFJ_SPIDX_STRING modify ( SP_VALUE_NORMALIZED varchar2(768 char) )")));
+		}
+
+		// Add USER_DATA_JSON column to BT2_JOB_INSTANCE
+		{
+			version.onTable("BT2_JOB_INSTANCE")
+					.addColumn("20250408.1", "USER_DATA_JSON")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+		}
 	}
 
 	protected void init780() {

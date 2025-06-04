@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -33,6 +34,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,6 +46,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -54,6 +57,12 @@ import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
+	@Override
+	@BeforeEach
+	public void before() {
+		initResourceTypeCacheFromConfig();
+	}
+
 	@AfterEach
 	public void after() {
 		{
@@ -61,7 +70,6 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			myStorageSettings.setIndexMissingFields(defaults.getIndexMissingFields());
 			myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 			myStorageSettings.setDeleteEnabled(defaults.isDeleteEnabled());
-			myStorageSettings.setInlineResourceTextBelowSize(defaults.getInlineResourceTextBelowSize());
 			myStorageSettings.setAllowExternalReferences(defaults.isAllowExternalReferences());
 		}
 		{
@@ -421,11 +429,11 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		myCaptureQueriesListener.logSelectQueries();
 		if (theTargetAlreadyExists) {
 			if (theResourceChanges) {
-				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			} else {
-				assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 			}
@@ -760,6 +768,80 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertFalse(patient.getActive());
 		assertEquals("3", patient.getIdElement().getVersionIdPart());
 	}
+
+
+	@Test
+	public void testDeleteThenRestoreResource_NoReferencesToOtherResource() {
+		// Setup
+		createPatient(withId("A"), withActiveTrue());
+
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(false);
+		bb.addTransactionUpdateEntry(p);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		Patient actual = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertFalse(actual.isDeleted());
+		assertFalse(actual.getActive());
+	}
+
+	@Test
+	public void testDeleteThenRestoreResource_ReferencesDeletedResource() {
+		// Setup
+		createOrganization(withId("O"), withName("Org"));
+		createPatient(withId("A"), withActiveTrue(), withReference("managingOrganization", new IdType("Organization/O")));
+
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+		myOrganizationDao.delete(new IdType("Organization/O"), mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(false);
+		p.setManagingOrganization(new Reference("Organization/O"));
+		bb.addTransactionUpdateEntry(p);
+
+		// Test / Verify
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isExactlyInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Resource Organization/O is deleted");
+
+	}
+
+	@Test
+	public void testDeleteThenRestoreResource_ReferencesOtherResource() {
+		// Setup
+		createOrganization(withId("O"), withName("Org"));
+		createPatient(withId("A"), withActiveTrue(), withReference("managingOrganization", new IdType("Organization/O")));
+
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient p = new Patient();
+		p.setId("A");
+		p.setActive(false);
+		p.setManagingOrganization(new Reference("Organization/O"));
+		bb.addTransactionUpdateEntry(p);
+
+		// Test
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Verify
+		Patient actual = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertEquals("3", actual.getIdElement().getVersionIdPart());
+		assertFalse(actual.isDeleted());
+		assertFalse(actual.getActive());
+	}
+
+
 
 
 	/**

@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.StringOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -179,7 +180,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private static final String I18N_INCOMPLETE_URI_FOR_READ = GenericClient.class.getName() + ".incompleteUriForRead";
 	private static final String I18N_NO_VERSION_ID_FOR_VREAD = GenericClient.class.getName() + ".noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
-	private FhirContext myContext;
+	private final FhirContext myContext;
 	private IHttpRequest myLastRequest;
 	private boolean myLogRequestAndResponse;
 
@@ -421,8 +422,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler();
-		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
+		return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 	}
 
 	@Override
@@ -446,8 +446,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler();
-		MethodOutcome resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
+		return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 	}
 
 	@Override
@@ -582,7 +581,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(
+			return invokeClient(
 					myContext,
 					theHandler,
 					theInvocation,
@@ -594,7 +593,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					myCacheControlDirective,
 					myCustomAcceptHeaderValue,
 					myCustomHeaderValues);
-			return resp;
 		}
 
 		protected IBaseResource parseResourceBody(String theResourceBody) {
@@ -643,7 +641,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					EXEC extends IClientExecutable<?, OUTPUT>, QUERY extends IBaseQuery<QUERY>, OUTPUT>
 			extends BaseClientExecutable<EXEC, OUTPUT> implements IBaseQuery<QUERY> {
 
-		private Map<String, List<String>> myParams = new LinkedHashMap<>();
+		private final Map<String, List<String>> myParams = new LinkedHashMap<>();
 
 		@Override
 		public QUERY and(ICriterion<?> theCriterion) {
@@ -912,8 +910,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object>
 			implements IGetPageTyped<Object> {
 
-		private Class<? extends IBaseBundle> myBundleType;
-		private String myUrl;
+		private final Class<? extends IBaseBundle> myBundleType;
+		private final String myUrl;
 
 		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
 
@@ -946,6 +944,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IPrimitiveType mySince;
 		private Class<? extends IBaseResource> myType;
 		private DateRangeParam myAt;
+		private Integer myOffset;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -972,6 +971,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IHistoryTyped offset(Integer theOffset) {
+			myOffset = theOffset;
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
@@ -988,8 +993,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpGetClientInvocation invocation =
-					HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt);
+			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(
+					myContext, resourceName, id, mySince, myCount, myAt, myOffset);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
@@ -1240,7 +1245,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class MetaParametersResponseHandler<T extends IBaseMetaType> implements IClientResponseHandler<T> {
 
-		private Class<T> myType;
+		private final Class<T> myType;
 
 		public MetaParametersResponseHandler(Class<T> theMetaType) {
 			myType = theMetaType;
@@ -1302,6 +1307,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
 		private boolean myReturnMethodOutcome;
+		private boolean myReturnStringOutcome;
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1376,14 +1382,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myOperationName != null
 					&& myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE)
 					&& myMsgBundle != null) {
-				Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
+				Map<String, List<String>> urlParams = new LinkedHashMap<>();
 				// Set Url parameter Async and Response-Url
 				if (myIsAsync != null) {
-					urlParams.put(Constants.PARAM_ASYNC, Arrays.asList(String.valueOf(myIsAsync)));
+					urlParams.put(Constants.PARAM_ASYNC, Collections.singletonList(String.valueOf(myIsAsync)));
 				}
 
-				if (myResponseUrl != null && isNotBlank(myResponseUrl)) {
-					urlParams.put(Constants.PARAM_RESPONSE_URL, Arrays.asList(String.valueOf(myResponseUrl)));
+				if (isNotBlank(myResponseUrl)) {
+					urlParams.put(
+							Constants.PARAM_RESPONSE_URL, Collections.singletonList(String.valueOf(myResponseUrl)));
 				}
 				// If is $process-message operation
 				BaseHttpClientInvocation invocation = OperationMethodBinding.createProcessMsgInvocation(
@@ -1392,8 +1399,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				ResourceResponseHandler handler = new ResourceResponseHandler();
 				handler.setPreferResponseTypes(getPreferResponseTypes(myType));
 
-				Object retVal = invoke(null, handler, invocation);
-				return retVal;
+				return invoke(null, handler, invocation);
 			}
 
 			String resourceName;
@@ -1421,6 +1427,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(
 					myContext, resourceName, id, version, myOperationName, myParameters, myUseHttpGet);
 
+			if (myReturnStringOutcome) {
+				return handleForStringOutcome(invocation);
+			}
+
 			if (myReturnResourceType != null) {
 				ResourceResponseHandler handler;
 				if (IBaseBinary.class.isAssignableFrom(myReturnResourceType)) {
@@ -1428,8 +1438,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				} else {
 					handler = new ResourceResponseHandler(myReturnResourceType);
 				}
-				Object retVal = invoke(null, handler, invocation);
-				return retVal;
+				return invoke(null, handler, invocation);
 			}
 			IClientResponseHandler handler =
 					new ResourceOrBinaryResponseHandler().setPreferResponseTypes(getPreferResponseTypes(myType));
@@ -1437,9 +1446,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myReturnMethodOutcome) {
 				handler = new MethodOutcomeResponseHandler(handler);
 			}
-
 			Object retVal = invoke(null, handler, invocation);
-
 			if (myReturnMethodOutcome) {
 				return retVal;
 			}
@@ -1463,6 +1470,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			resourceElem.getMutator().addValue(parameter, (IBase) retVal);
 
 			return parameters;
+		}
+
+		private StringOutcome handleForStringOutcome(BaseHttpClientInvocation theInvocation) {
+			IClientResponseHandler handler = new StringOutcomeResponseHandler();
+			return (StringOutcome) invoke(null, handler, theInvocation);
 		}
 
 		@Override
@@ -1528,6 +1540,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IOperationUntypedWithInput returnMethodOutcome() {
 			myReturnMethodOutcome = true;
+			return this;
+		}
+
+		@Override
+		public IOperationUntypedWithInput returnStringOutcome() {
+			myReturnStringOutcome = true;
 			return this;
 		}
 
@@ -1637,7 +1655,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private final class MethodOutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
+	private static final class MethodOutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
 		private final IClientResponseHandler<? extends IBaseResource> myWrap;
 
 		private MethodOutcomeResponseHandler(IClientResponseHandler<? extends IBaseResource> theWrap) {
@@ -1763,7 +1781,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createPatchInvocation(
 						myContext, myPatchType, myPatchBody, myResourceType, getParamMap());
 			} else {
-				if (myId == null || myId.hasIdPart() == false) {
+				if (myId == null || !myId.hasIdPart()) {
 					throw new InvalidRequestException(
 							Msg.code(1385) + "No ID supplied for resource to patch, can not invoke server");
 				}
@@ -1882,23 +1900,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 				@Override
 				public IReadExecutable returnNull() {
-					myNotModifiedHandler = new ICallable() {
-						@Override
-						public Object call() {
-							return null;
-						}
-					};
+					myNotModifiedHandler = () -> null;
 					return ReadInternal.this;
 				}
 
 				@Override
 				public IReadExecutable returnResource(final IBaseResource theInstance) {
-					myNotModifiedHandler = new ICallable() {
-						@Override
-						public Object call() {
-							return theInstance;
-						}
-					};
+					myNotModifiedHandler = () -> theInstance;
 					return ReadInternal.this;
 				}
 
@@ -2021,21 +2029,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			implements IQuery<OUTPUT>, IUntypedQuery<IQuery<OUTPUT>> {
 
 		private String myCompartmentName;
-		private List<Include> myInclude = new ArrayList<>();
+		private final List<Include> myInclude = new ArrayList<>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
 		private Integer myParamOffset;
-		private List<Collection<String>> myProfiles = new ArrayList<>();
+		private final List<Collection<String>> myProfiles = new ArrayList<>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
 		private Class<? extends IBaseBundle> myReturnBundleType;
-		private List<Include> myRevInclude = new ArrayList<>();
+		private final List<Include> myRevInclude = new ArrayList<>();
 		private SearchStyleEnum mySearchStyle;
 		private String mySearchUrl;
-		private List<TokenParam> mySecurity = new ArrayList<>();
-		private List<SortInternal> mySort = new ArrayList<>();
-		private List<TokenParam> myTags = new ArrayList<>();
+		private final List<TokenParam> mySecurity = new ArrayList<>();
+		private final List<SortInternal> mySort = new ArrayList<>();
+		private final List<TokenParam> myTags = new ArrayList<>();
 		private SearchTotalModeEnum myTotalMode;
 
 		public SearchInternal() {
@@ -2327,7 +2335,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private final class StringResponseHandler implements IClientResponseHandler<String> {
+	private static final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
 		public String invokeClient(
@@ -2337,6 +2345,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Map<String, List<String>> theHeaders)
 				throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
+		}
+	}
+
+	private static final class StringOutcomeResponseHandler implements IClientResponseHandler<StringOutcome> {
+
+		@Override
+		public StringOutcome invokeClient(
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders)
+				throws IOException, BaseServerResponseException {
+
+			String payload = IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
+			return new StringOutcome(theResponseStatusCode, payload, theHeaders);
 		}
 	}
 
@@ -2368,7 +2391,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		@Override
 		public T execute() {
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new HashMap<>();
 			if (myResources != null) {
 				ResourceListResponseHandler binding = new ResourceListResponseHandler();
 				BaseHttpClientInvocation invocation =
@@ -2405,13 +2428,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public ITransactionTyped<String> withBundle(String theBundle) {
 			Validate.notBlank(theBundle, "theBundle must not be null");
-			return new TransactionExecutable<String>(theBundle);
+			return new TransactionExecutable<>(theBundle);
 		}
 
 		@Override
 		public <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundle) {
 			Validate.notNull(theBundle, "theBundle must not be null");
-			return new TransactionExecutable<T>(theBundle);
+			return new TransactionExecutable<>(theBundle);
 		}
 
 		@Override
@@ -2486,7 +2509,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					myId = myResource.getIdElement();
 				}
 
-				if (myId == null || myId.hasIdPart() == false) {
+				if (myId == null || !myId.hasIdPart()) {
 					throw new InvalidRequestException(
 							Msg.code(1396) + "No ID supplied for resource to update, can not invoke server");
 				}
@@ -2537,7 +2560,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (theId == null) {
 				throw new NullPointerException(Msg.code(1397) + "theId can not be null");
 			}
-			if (theId.hasIdPart() == false) {
+			if (!theId.hasIdPart()) {
 				throw new NullPointerException(
 						Msg.code(1398) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
 			}

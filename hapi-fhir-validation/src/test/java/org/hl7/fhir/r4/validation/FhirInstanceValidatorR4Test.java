@@ -3,7 +3,6 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -15,7 +14,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -26,7 +24,7 @@ import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
+import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -99,6 +97,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1236,32 +1235,36 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		myMockSupport.addValidConcept("http://acme.org", "12345");
 
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_VALID);
+		when(policyAdvisor.policyForReference(any(), any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_VALID);
 		when(policyAdvisor.policyForElement(any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
 		when(policyAdvisor.policyForCodedContent(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 
 		when(resourceFetcher.fetch(any(), any(), any())).thenAnswer(t -> {
-			return new JsonParser(new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), new VersionCanonicalizer(ourCtx)))
+			return new JsonParser(new WorkerContextValidationSupportAdapter(myValidationSupport))
 				.parse(ourCtx.newJsonParser().encodeResourceToString(patient), "Patient");
 		});
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		myInstanceVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+		myInstanceVal.setAllowExamples(true);
 
+		// Test
 		ValidationResult output = myFhirValidator.validateWithResult(input);
+
+		// Validate
 		OperationOutcome oo = (OperationOutcome) output.toOperationOutcome();
 		ourLog.info("Outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssue()).hasSize(1);
 		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
 		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssue().get(0).getSeverity());
-		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Observation.subject->Patient.text: Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
 		assertThat(oo.getIssue().get(0).getLocation().stream().map(PrimitiveType::getValue).collect(Collectors.toList())).containsExactly("Observation.subject", "Line[1] Col[238]");
 	}
 
 	@Test
-	public void testValidateResourceWithExampleBindingCodeValidationFailingNonLoinc() {
+	public void testValidateResourceWithExampleBindingCodeVAbstractIJobPersistenceSpecificationTestalidationFailingNonLoinc() {
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
@@ -1423,7 +1426,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
+		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 

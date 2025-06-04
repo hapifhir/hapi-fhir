@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -66,6 +68,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 
 	@Autowired
 	private IIdHelperService<T> myIdHelperService;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@Override
 	public void extractInlineReferences(
@@ -116,8 +121,15 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				if (resolvedMatch != null && !IResourcePersistentId.NOT_FOUND.equals(resolvedMatch)) {
 					matches = Set.of(resolvedMatch);
 				} else {
+					RequestPartitionId theRequestPartitionId =
+							myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+									theRequestDetails, resourceTypeString);
 					matches = myMatchResourceUrlService.processMatchUrl(
-							nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
+							nextIdText,
+							matchResourceType,
+							theTransactionDetails,
+							theRequestDetails,
+							theRequestPartitionId);
 				}
 
 				T match;
@@ -154,6 +166,10 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {
+					// TODO - performance
+					//  this line breaks testCrossPartitionReference_CreateWithConditionalUrl since we don't call
+					// JPA_RESOLVE_CROSS_PARTITION_REFERENCE on this path
+					//					theTransactionDetails.addResolvedResourceId(newId, match);
 					String previousReference = nextRef.getReferenceElement().getValue();
 					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
 				}

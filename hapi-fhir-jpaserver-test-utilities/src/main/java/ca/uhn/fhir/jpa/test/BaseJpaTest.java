@@ -34,7 +34,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -44,6 +46,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamIdentityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
@@ -52,6 +55,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -85,6 +89,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -92,6 +97,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -116,6 +122,7 @@ import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -139,7 +146,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
@@ -151,9 +160,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -185,6 +197,7 @@ import static org.mockito.Mockito.when;
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
+@Import(BaseJpaTest.TestSearchParamConfig.class)
 @TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
@@ -261,6 +274,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedComboStringUniqueDao;
+	@Autowired
+	protected IResourceIndexedSearchParamIdentityDao myResourceIndexedSearchParamIdentityDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
@@ -300,12 +315,44 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
+	@Autowired
+	protected IResourceSearchUrlDao mySearchUrlDao;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	protected IResourceTypeDao myResourceTypeDao;
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
+
+	@TestConfiguration
+	public static class TestSearchParamConfig {
+
+		@Autowired(required = false)
+		private SearchParamRegistryImpl mySearchParamRegistry;
+
+		@Autowired(required = false)
+		protected JpaStorageSettings myStorageSettings;
+
+		@PostConstruct
+		public void preConfigure() {
+			if (myStorageSettings != null) {
+				myStorageSettings.setWriteToSearchParamIdentityTable(false);
+			}
+
+			if (mySearchParamRegistry != null) {
+				mySearchParamRegistry.setPopulateSearchParamIdentities(false);
+			}
+		}
+	}
+
+	@BeforeEach
+	public void beforeInitSearchParams() {
+		myStorageSettings.setWriteToSearchParamIdentityTable(false);
+	}
 
 	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
@@ -626,6 +673,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+    protected void logAllSearchUrls() {
+        runInTransaction(() -> {
+            ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+    
 	protected void logAllTokenIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
@@ -639,10 +692,11 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	protected List<ResourceIndexedSearchParamToken> getAllTokenIndexes(String... theParamNames) {
-		return runInTransaction(()->myResourceIndexedSearchParamTokenDao
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return runInTransaction(() -> myResourceIndexedSearchParamTokenDao
 			.findAll()
 			.stream()
-			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
 			.toList());
 	}
 
@@ -677,13 +731,26 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Nonnull
 	protected List<ResourceIndexedSearchParamString> getAllStringIndexes(String... theParamNames) {
-		return runInTransaction(()->myResourceIndexedSearchParamStringDao
+		List<Long> searchParamHashIdentities = getSearchParamHashIdentities(theParamNames);
+		return myResourceIndexedSearchParamStringDao
 			.findAll()
 			.stream()
-			.filter(t -> theParamNames.length == 0 || Arrays.asList(theParamNames).contains(t.getParamName()))
-			.toList());
+			.filter(t -> theParamNames.length == 0 || searchParamHashIdentities.contains(t.getHashIdentity()))
+			.toList();
 	}
 
+	protected List<Long> getSearchParamHashIdentities(String[] theParamNames) {
+		List<Long> searchParamHashIdentities = new ArrayList<>(theParamNames.length);
+		if (theParamNames.length != 0) {
+			searchParamHashIdentities.addAll(myResourceIndexedSearchParamIdentityDao
+				.findAll()
+				.stream()
+				.filter(t -> Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(IndexedSearchParamIdentity::getHashIdentity)
+				.toList());
+		}
+		return searchParamHashIdentities;
+	}
 
 	protected void logAllResourceTags() {
 		runInTransaction(() -> {
@@ -981,6 +1048,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void afterResetInterceptors() {
 		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
 		myRegisteredInterceptors.clear();
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 	}
 
 	/**
@@ -1016,5 +1084,23 @@ public abstract class BaseJpaTest extends BaseTest {
 				Msg.code(2001) + "Resource " + theId.toUnqualifiedVersionless().getValue() + " is not known"
 			);
 		}
+	}
+
+	/**
+	 * Initializes the resource type cache from the configuration instead of the database.
+	 * This is useful for some tests that validate the SELECT query counts. It prevents an extra SELECT query
+	 * being added to the count
+	 */
+	protected void initResourceTypeCacheFromConfig() {
+		myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.RES_TYPE_TO_RES_TYPE_ID);
+
+		List<String> resTypes = ResourceTypeUtil.generateResourceTypes();
+		for (int i = 0; i < resTypes.size(); i++) {
+			myResourceTypeCacheSvc.addToCache(resTypes.get(i), (short) (i+1));
+		}
+	}
+
+	public static Date fromLocalDate(LocalDate theLocalDate) {
+		return Date.from(theLocalDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 	}
 }

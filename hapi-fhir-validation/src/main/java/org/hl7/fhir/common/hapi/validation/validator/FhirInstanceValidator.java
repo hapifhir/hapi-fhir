@@ -34,13 +34,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noTerminologyChecks = false;
 	private boolean noExtensibleWarnings = false;
 	private boolean noBindingMsgSuppressed = false;
-	private VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
+	private WorkerContextValidationSupportAdapter myWrappedWorkerContext;
 	private boolean errorForUnknownProfiles = true;
 
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor = new FhirDefaultPolicyAdvisor();
+	private boolean myAllowExamples;
 
 	/**
 	 * Constructor
@@ -152,6 +153,19 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	}
 
 	/**
+	 * Sets the {@link IValidationSupport validation support} in use by this validator, as well
+	 * as a {@link WorkerContextValidationSupportAdapter}. This is useful if a single instance of
+	 * the latter should be shared in multiple places.
+	 *
+	 * @since 8.4.0
+	 */
+	public void setWrappedWorkerContext(
+			IValidationSupport theValidationSupport, WorkerContextValidationSupportAdapter theWrappedWorkerContext) {
+		myValidationSupport = theValidationSupport;
+		myWrappedWorkerContext = theWrappedWorkerContext;
+	}
+
+	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
 	 * validator (e.g. because they have not been explicitly declared in a profile) will
 	 * be validated but will not cause an error.
@@ -225,7 +239,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
-		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
+		WorkerContextValidationSupportAdapter wrappedWorkerContext = provideWorkerContext();
 
 		return new ValidatorWrapper()
 				.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
@@ -238,22 +252,23 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 				.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
 				.setValidatorResourceFetcher(getValidatorResourceFetcher())
 				.setAssumeValidRestReferences(isAssumeValidRestReferences())
+				.setAllowExamples(isAllowExamples())
 				.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
 	@Nonnull
-	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
-		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
+	protected WorkerContextValidationSupportAdapter provideWorkerContext() {
+		WorkerContextValidationSupportAdapter wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
 			wrappedWorkerContext =
-					VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+					WorkerContextValidationSupportAdapter.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
 	}
 
 	@VisibleForTesting
-	public VersionSpecificWorkerContextWrapper getWorkerContext() {
+	public WorkerContextValidationSupportAdapter getWorkerContext() {
 		return myWrappedWorkerContext;
 	}
 
@@ -290,6 +305,20 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		if (myWrappedWorkerContext != null) {
 			myWrappedWorkerContext.invalidateCaches();
 		}
+	}
+
+	/**
+	 * Should the validator disallow URLs with common example names, such as {@literal http://acme.org}
+	 * and {@literal http://example.com}.
+	 *
+	 * @since 8.2.0
+	 */
+	public void setAllowExamples(boolean theAllowExamples) {
+		myAllowExamples = theAllowExamples;
+	}
+
+	public boolean isAllowExamples() {
+		return myAllowExamples;
 	}
 
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {

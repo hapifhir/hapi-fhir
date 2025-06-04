@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -29,10 +30,18 @@ import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+
+import static org.mockito.Mockito.never;
+
+import static org.mockito.Mockito.reset;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
@@ -58,10 +67,14 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 	private IHapiTransactionService myTransactionService;
 	@Autowired
 	private IResourceLinkResolver myResourceLinkResolver;
+	@SpyBean
+	protected MemoryCacheService myMemoryCacheService;
 	@Mock
 	private ICrossPartitionReferenceDetectedHandler myCrossPartitionReferencesDetectedInterceptor;
 	@Captor
 	private ArgumentCaptor<CrossPartitionReferenceDetails> myCrossPartitionReferenceDetailsCaptor;
+	@Captor
+	private ArgumentCaptor<JpaPid> myMatchUrlCacheValueCaptor;
 
 	@Override
 	@BeforeEach
@@ -77,6 +90,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		myInterceptorRegistry.registerInterceptor(myCrossPartitionReferencesDetectedInterceptor);
 
 		myTransactionSvc.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@AfterEach
@@ -187,6 +201,74 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
 		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
 		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testCrossPartitionReference_CreateWithConditionalUrl(boolean theMatchUrlCacheEnabled) {
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+
+		// Setup
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		ourLog.info("Patient ID: {}", patientId);
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
+		});
+
+		initializeCrossReferencesInterceptor();
+
+		// Test
+		Observation o = new Observation();
+		o.setStatus(Enumerations.ObservationStatus.FINAL);
+		String thePatientMatchUrl = "Patient/?_id=" + patientId.getIdPart();
+		o.setSubject(new Reference(thePatientMatchUrl));
+		myCaptureQueriesListener.clear();
+		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// Verify
+		// 3 queries: Search to resolve PID from Match URL, search to resolve reference, create the resource
+		assertEquals(3, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
+			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+		});
+
+		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
+		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
+		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
+		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
+
+		if (theMatchUrlCacheEnabled) {
+			// Verify that the entry is put into cache
+			verify(myMemoryCacheService).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), myMatchUrlCacheValueCaptor.capture());
+			JpaPid actualCachedPid = myMatchUrlCacheValueCaptor.getValue();
+			assertThat(actualCachedPid.getId()).isEqualTo(patientId.getIdPartAsLong());
+			assertThat(actualCachedPid.getPartitionId()).isEqualTo(PARTITION_PATIENT.getFirstPartitionIdOrNull());
+		}
+
+		// Test again (the match URL should be in cache now)
+		myCaptureQueriesListener.clear();
+		reset(myMemoryCacheService);
+		IIdType observationId2 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// Verify
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(observationId2.getIdPartAsLong()).orElseThrow();
+			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+		});
+
+		if (theMatchUrlCacheEnabled) {
+			verify(myMemoryCacheService, never()).putAfterCommit(eq(MemoryCacheService.CacheEnum.MATCH_URL), eq(thePatientMatchUrl), any());
+		}
+
 	}
 
 	private void initializeCrossReferencesInterceptor() {

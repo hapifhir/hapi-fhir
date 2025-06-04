@@ -1,0 +1,4 @@
+---
+type: change
+issue: 6868
+title: "HAPI FHIR now targets Android API 34."

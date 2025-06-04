@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -38,7 +39,7 @@ import java.util.function.Predicate;
  * The empty constructor will capture all log events, or you can name a log root to limit the noise.
  */
 public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallback {
-	private final Logger myLogger;
+	private Logger myLogger;
 	private final Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
 	private Level mySavedLevel;
@@ -84,6 +85,18 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 		this(org.slf4j.Logger.ROOT_LOGGER_NAME, theLevel);
 	}
 
+	public void setLoggerToWatch(String theLoggerName) {
+		setLoggerToWatch((Logger)LoggerFactory.getLogger(theLoggerName));
+	}
+
+	public void setLoggerToWatch(Logger theLogger) {
+		myLogger = theLogger;
+	}
+
+	public String getCurrentLogger() {
+		return myLogger.getName();
+	}
+
 	/**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
@@ -102,6 +115,10 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
+		attachAppender();
+	}
+
+	private void attachAppender() {
 		assert myListAppender == null;
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
@@ -139,6 +156,10 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
+		detachCurrentAppender();
+	}
+
+	private void detachCurrentAppender() {
 		if (myListAppender != null) {
 			myLogger.detachAppender(myListAppender);
 			myListAppender.stop();
@@ -159,11 +180,25 @@ public class LogbackTestExtension implements BeforeEachCallback, AfterEachCallba
 	}
 
 	public void reRegister() throws Exception {
-		afterEach(null);
-		beforeEach(null);
+		detachCurrentAppender();
+		attachAppender();
 	}
 
 	/**
+	 * Returns the first logged message where the formatted text (i.e. including placeholder {} substitutions) contains
+	 * the substring of {@literal theText}.
+	 */
+	public Optional<ILoggingEvent> findLogEventWithFormattedMessage(String theText) {
+		for (ILoggingEvent t : getLogEvents()) {
+			String formattedMessage = t.getFormattedMessage();
+			if (formattedMessage.contains(theText)) {
+				return Optional.of(t);
+			}
+		}
+		return Optional.empty();
+	}
+
+    /**
 	 * Predicate for passing to {@link #getLogEvents(Predicate)}
 	 */
 	public static Predicate<ILoggingEvent> atLeastLevel(Level theLevel) {

@@ -53,6 +53,14 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 				.build());
 	}
 
+	@Override
+	public Cache<K, V> createEternal(int minimumSize, long maximumSize) {
+		return new CacheDelegator<>(CacheBuilder.newBuilder()
+				.initialCapacity(minimumSize)
+				.maximumSize(maximumSize)
+				.build());
+	}
+
 	public LoadingCache<K, V> create(long timeoutMillis, long maximumSize, CacheLoader<K, V> loading) {
 		return new LoadingCacheDelegator<K, V>(CacheBuilder.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)

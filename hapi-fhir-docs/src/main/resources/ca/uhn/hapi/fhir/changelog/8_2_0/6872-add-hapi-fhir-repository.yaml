@@ -1,0 +1,5 @@
+---
+type: add
+issue: 6872
+title: "Added the IRepositoryFactory interface and HapiFhirRepository implementation from the Clinical Reasoning module to the base HAPI packages.
+  This will allow for broader usage without having a dependency on the Clinical Reasoning module."

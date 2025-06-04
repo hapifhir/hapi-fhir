@@ -1,15 +1,18 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.hapi.fhir.cdshooks.api.CDSHooksVersion;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CdsServiceRegistryImplTest {
@@ -28,10 +36,6 @@ class CdsServiceRegistryImplTest {
 	@Mock
 	private CdsPrefetchSvc myCdsPrefetchSvc;
 	@Mock
-	private ICdsCrServiceFactory myCdsCrServiceFactory;
-	@Mock
-	private ICrDiscoveryServiceFactory myCrDiscoveryServiceFactory;
-	@Mock
 	private CdsServiceCache myCdsServiceCache;
 	@Mock
 	private CdsServiceRequestJsonDeserializer myCdsServiceRequestJsonDeserializer;
@@ -40,7 +44,7 @@ class CdsServiceRegistryImplTest {
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsCrServiceFactory, myCrDiscoveryServiceFactory, myCdsServiceRequestJsonDeserializer);
+		myFixture = new CdsServiceRegistryImpl(myCdsHooksContextBooter, myCdsPrefetchSvc, myObjectMapper, myCdsServiceRequestJsonDeserializer);
 	}
 
 	@Test
@@ -177,4 +181,66 @@ class CdsServiceRegistryImplTest {
 			myFixture.getCdsServiceJson(serviceId);
 		}).withMessage("HAPI-2536: No service with " + serviceId +  " is registered.");
 	}
+
+	@Test
+	void testCallService_doesNotEnforceFhirServerIsHttpsForCDSHooksV1() {
+		String fhirServer = "http://localhost:8000/remote_fhir";
+		String response = "{\"cards\": []}";
+		CdsServiceRegistryImpl serviceRegistryImpl = createAndSetupCdsServiceRegistryImplForCallService(CDSHooksVersion.V_1_1, fhirServer, response);
+		CdsServiceResponseJson responseJson = serviceRegistryImpl.callService(SERVICE_ID, "");
+		assertThat(responseJson).isNotNull();
+	}
+
+	@Test
+	void testCallService_noValidationIfFhirServerIsNullForCDSHooksV2() {
+		String response = "{\"cards\": []}";
+		CdsServiceRegistryImpl serviceRegistryImpl = createAndSetupCdsServiceRegistryImplForCallService(CDSHooksVersion.V_2_0, null, response);
+		CdsServiceResponseJson responseJson = serviceRegistryImpl.callService(SERVICE_ID, "");
+		assertThat(responseJson).isNotNull();
+	}
+
+	@Test
+	void testCallService_enforcesFhirServerIsHttpsForCDSHooksV2_InvalidInput() {
+		String fhirServer = "http://localhost:8000/remote_fhir";
+		CdsServiceRegistryImpl serviceRegistryImpl = createAndSetupCdsServiceRegistryImplForCallService(CDSHooksVersion.V_2_0, fhirServer, null);
+		InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> serviceRegistryImpl.callService(SERVICE_ID, ""));
+		assertThat(ex.getMessage()).isEqualTo("HAPI-2632: The scheme for the fhirServer must be https");
+	}
+
+	@Test
+	void testCallService_enforcesFhirServerIsHttpsForCDSHooksV2_ValidInput() {
+		String fhirServer = "https://localhost:8000/remote_fhir";
+		String response = "{\"cards\": []}";
+		CdsServiceRegistryImpl serviceRegistryImpl = createAndSetupCdsServiceRegistryImplForCallService(CDSHooksVersion.V_2_0, fhirServer, response);
+		CdsServiceResponseJson responseJson = serviceRegistryImpl.callService(SERVICE_ID, "");
+		assertThat(responseJson).isNotNull();
+	}
+
+	private CdsServiceRegistryImpl createAndSetupCdsServiceRegistryImplForCallService(CDSHooksVersion theCdsHooksVersion, @Nullable String theFhirServer, @Nullable String theSuccessResponse) {
+		CdsServiceRegistryImpl serviceRegistryImpl = new CdsServiceRegistryImpl(
+			myCdsHooksContextBooter,
+			myCdsPrefetchSvc,
+			myObjectMapper,
+			myCdsServiceRequestJsonDeserializer,
+			theCdsHooksVersion);
+
+		final CdsServiceJson cdsService = new CdsServiceJson();
+		cdsService.setId(SERVICE_ID);
+		serviceRegistryImpl.setServiceCache(myCdsServiceCache);
+		doReturn(cdsService).when(myCdsServiceCache).getCdsServiceJson(SERVICE_ID);
+
+		CdsServiceRequestJson requestJson = new CdsServiceRequestJson();
+		requestJson.setFhirServer(theFhirServer);
+		doReturn(requestJson).when(myCdsServiceRequestJsonDeserializer).deserialize(eq(cdsService), anyString());
+
+		if (theSuccessResponse != null) {
+			ICdsServiceMethod theMethodMock= mock(ICdsServiceMethod.class);
+			when(theMethodMock.invoke(myObjectMapper, requestJson, SERVICE_ID)).thenReturn(theSuccessResponse);
+			when(myCdsServiceCache.getServiceMethod(SERVICE_ID)).thenReturn(theMethodMock);
+		}
+
+
+		return serviceRegistryImpl;
+	}
+
 }

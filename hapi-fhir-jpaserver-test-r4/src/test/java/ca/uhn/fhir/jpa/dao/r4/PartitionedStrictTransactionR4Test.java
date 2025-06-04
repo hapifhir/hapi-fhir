@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -41,6 +42,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 	public void before() throws Exception {
 		super.before();
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+		initResourceTypeCacheFromConfig();
 	}
 
 	@Override
@@ -179,6 +181,9 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 
 	public class MyPartitionSelectorInterceptor {
 
+		@Autowired
+		private PartitionSettings myPartitionSettings;
+
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId selectPartitionCreate(IBaseResource theResource) {
 			String resourceType = myFhirContext.getResourceType(theResource);
@@ -199,7 +204,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 					return RequestPartitionId.fromPartitionId(myPartitionId2);
 				case "SearchParameter":
 				case "Organization":
-					return RequestPartitionId.defaultPartition();
+					return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 				default:
 					throw new InternalErrorException("Don't know how to handle resource type: " + theResourceType);
 			}

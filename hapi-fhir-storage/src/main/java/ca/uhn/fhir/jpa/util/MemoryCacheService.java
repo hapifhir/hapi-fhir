@@ -71,7 +71,14 @@ public class MemoryCacheService {
 			long timeoutSeconds;
 			int maximumSize;
 
+			Cache<Object, Object> nextCache;
 			switch (next) {
+				case RES_TYPE_TO_RES_TYPE_ID:
+					nextCache = CacheFactory.buildEternal(250, 500);
+					break;
+				case HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY:
+					nextCache = CacheFactory.buildEternal(5_000, 50_000);
+					break;
 				case NAME_TO_PARTITION:
 				case ID_TO_PARTITION:
 				case PID_TO_FORCED_ID:
@@ -88,10 +95,9 @@ public class MemoryCacheService {
 						timeoutSeconds = SECONDS.convert(50, MINUTES);
 						maximumSize = 100000;
 					}
+					nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 					break;
 			}
-
-			Cache<Object, Object> nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 
 			myCaches.put(next, nextCache);
 		}
@@ -212,10 +218,12 @@ public class MemoryCacheService {
 		 */
 		PID_TO_FORCED_ID(JpaPid.class),
 		MATCH_URL(String.class),
-		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
+		RESOURCE_CONDITIONAL_CREATE_VERSION(JpaPid.class),
 		HISTORY_COUNT(HistoryCountKey.class),
 		NAME_TO_PARTITION(String.class),
-		ID_TO_PARTITION(Integer.class);
+		ID_TO_PARTITION(Integer.class),
+		HASH_IDENTITY_TO_SEARCH_PARAM_IDENTITY(Long.class),
+		RES_TYPE_TO_RES_TYPE_ID(String.class);
 
 		private final Class<?> myKeyType;
 

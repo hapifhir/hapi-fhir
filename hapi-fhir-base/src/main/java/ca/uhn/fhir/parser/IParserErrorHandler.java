@@ -114,7 +114,7 @@ public interface IParserErrorHandler {
 	/**
 	 * An extension contains both a value and at least one nested extension
 	 *
-	 * @param theLoc The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change.
+	 * @param theLocation location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change.
 	 */
 	void extensionContainsValueAndNestedExtensions(IParseLocation theLocation);
 

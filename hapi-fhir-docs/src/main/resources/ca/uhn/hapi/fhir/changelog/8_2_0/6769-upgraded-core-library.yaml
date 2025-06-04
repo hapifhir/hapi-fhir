@@ -1,0 +1,5 @@
+---
+type: change
+issue: 6769
+title: "The org.hl7.fhir.core has been updated to the 6.5.15 version. This new version includes
+  a number of bug fixes and improvements, as well as some changes in the validator API."

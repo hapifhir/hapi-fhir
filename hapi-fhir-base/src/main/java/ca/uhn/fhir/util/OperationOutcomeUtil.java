@@ -47,10 +47,11 @@ public class OperationOutcomeUtil {
 
 	/**
 	 * Add an issue to an OperationOutcome
-	 *  @param theCtx              The fhir context
+	 *
+	 * @param theCtx              The fhir context
 	 * @param theOperationOutcome The OO resource to add to
 	 * @param theSeverity         The severity (fatal | error | warning | information)
-	 * @param theDetails          The details string
+	 * @param theDiagnostics      The diagnostics string (this was called "details" in FHIR DSTU2 but was renamed to diagnostics in DSTU3)
 	 * @param theCode
 	 * @return Returns the newly added issue
 	 */
@@ -58,17 +59,18 @@ public class OperationOutcomeUtil {
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode) {
-		return addIssue(theCtx, theOperationOutcome, theSeverity, theDetails, theLocation, theCode, null, null, null);
+		return addIssue(
+				theCtx, theOperationOutcome, theSeverity, theDiagnostics, theLocation, theCode, null, null, null);
 	}
 
 	public static IBase addIssue(
 			FhirContext theCtx,
 			IBaseOperationOutcome theOperationOutcome,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			@Nullable String theDetailSystem,
@@ -79,7 +81,7 @@ public class OperationOutcomeUtil {
 				theCtx,
 				issue,
 				theSeverity,
-				theDetails,
+				theDiagnostics,
 				theLocation,
 				theCode,
 				theDetailSystem,
@@ -99,15 +101,29 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
+	/**
+	 * @deprecated Use {@link #getFirstIssueDiagnostics(FhirContext, IBaseOperationOutcome)} instead. This
+	 * 	method has always been misnamed for historical reasons.
+	 */
+	@Deprecated(forRemoval = true, since = "8.2.0")
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
+		return getFirstIssueDiagnostics(theCtx, theOutcome);
+	}
+
+	public static String getFirstIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", 0);
+	}
+
+	public static String getIssueDiagnostics(FhirContext theCtx, IBaseOperationOutcome theOutcome, int theIndex) {
+		return getIssueStringPart(theCtx, theOutcome, "diagnostics", theIndex);
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "location");
+		return getIssueStringPart(theCtx, theOutcome, "location", 0);
 	}
 
-	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
+	private static String getIssueStringPart(
+			FhirContext theCtx, IBaseOperationOutcome theOutcome, String theName, int theIndex) {
 		if (theOutcome == null) {
 			return null;
 		}
@@ -116,14 +132,14 @@ public class OperationOutcomeUtil {
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 
 		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
-		if (issues.isEmpty()) {
+		if (issues.size() <= theIndex) {
 			return null;
 		}
 
-		IBase issue = issues.get(0);
+		IBase issue = issues.get(theIndex);
 		BaseRuntimeElementCompositeDefinition<?> issueElement =
 				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(theName);
 
 		List<IBase> details = detailsChild.getAccessor().getValues(issue);
 		if (details.isEmpty()) {
@@ -185,7 +201,7 @@ public class OperationOutcomeUtil {
 			FhirContext theCtx,
 			IBase theIssue,
 			String theSeverity,
-			String theDetails,
+			String theDiagnostics,
 			String theLocation,
 			String theCode,
 			String theDetailSystem,
@@ -211,7 +227,7 @@ public class OperationOutcomeUtil {
 		severityChild.getMutator().addValue(theIssue, severityElem);
 
 		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
-		string.setValueAsString(theDetails);
+		string.setValueAsString(theDiagnostics);
 		diagnosticsChild.getMutator().setValue(theIssue, string);
 
 		addLocationToIssue(theCtx, theIssue, theLocation);

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.1.2-SNAPSHOT</version>
+		<version>8.3.9-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -64,39 +64,6 @@
 
 	<build>
 		<plugins>
-			<!-- Generate the DDL schema files -->
-			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions><execution><id>generate-ddl</id>
-				<phase>generate-resources</phase>
-						<goals>
-							<goal>generate-ddl</goal>
-						</goals>
-				</execution></executions>
-						<configuration>
-							<databasePartitionMode>true</databasePartitionMode>
-							<outputDirectory>${project.build.directory}/classes/schema</outputDirectory>
-							<packageNames>
-								<packageName>ca.uhn.fhir.jpa.entity</packageName>
-								<packageName>ca.uhn.fhir.jpa.model.entity</packageName>
-							</packageNames>
-							<dialects>
-								<dialect>
-									<className>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect</className>
-									<targetFileName>postgres.sql</targetFileName>
-								</dialect>
-							</dialects>
-						</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-jpaserver-base</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>

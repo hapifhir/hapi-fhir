@@ -19,31 +19,36 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
+import ca.uhn.fhir.broker.api.IBrokerClient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryHandlerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryListenerFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryValidator;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
-import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
-import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailListener;
+import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageListener;
+import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscriberLoader;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingListener;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringListener;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -60,23 +65,23 @@ import org.springframework.context.annotation.Scope;
 public class SubscriptionProcessorConfig {
 
 	@Bean
-	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
-		return new SubscriptionMatchingSubscriber();
+	public SubscriptionMatchingListener SubscriptionMatchingListener() {
+		return new SubscriptionMatchingListener();
 	}
 
 	@Bean
-	public SubscriptionActivatingSubscriber subscriptionActivatingSubscriber() {
-		return new SubscriptionActivatingSubscriber();
+	public SubscriptionActivatingListener subscriptionActivatingSubscriber() {
+		return new SubscriptionActivatingListener();
 	}
 
 	@Bean
-	public MatchingQueueSubscriberLoader subscriptionMatchingSubscriberLoader() {
+	public MatchingQueueSubscriberLoader SubscriptionMatchingListenerLoader() {
 		return new MatchingQueueSubscriberLoader();
 	}
 
 	@Bean
-	public SubscriptionRegisteringSubscriber subscriptionRegisteringSubscriber() {
-		return new SubscriptionRegisteringSubscriber();
+	public SubscriptionRegisteringListener subscriptionRegisteringSubscriber() {
+		return new SubscriptionRegisteringListener();
 	}
 
 	@Bean
@@ -95,14 +100,20 @@ public class SubscriptionProcessorConfig {
 	}
 
 	@Bean
+	public SubscriptionDeliveryValidator subscriptionDeliveryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionCanonicalizer theSubscriptionCanonicalizer) {
+		return new SubscriptionDeliveryValidator(theDaoRegistry, theSubscriptionCanonicalizer);
+	}
+
+	@Bean
 	public SubscriptionChannelRegistry subscriptionChannelRegistry() {
 		return new SubscriptionChannelRegistry();
 	}
 
 	@Bean
-	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(
+	public SubscriptionDeliveryListenerFactory SubscriptionDeliveryListenerFactory(
 			ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
-		return new SubscriptionDeliveryHandlerFactory(theApplicationContext, theEmailSender);
+		return new SubscriptionDeliveryListenerFactory(theApplicationContext, theEmailSender);
 	}
 
 	@Bean
@@ -116,21 +127,21 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
-		return new SubscriptionDeliveringRestHookSubscriber();
+	public SubscriptionDeliveringRestHookListener SubscriptionDeliveringRestHookListener() {
+		return new SubscriptionDeliveringRestHookListener();
 	}
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringMessageSubscriber subscriptionDeliveringMessageSubscriber(
-			IChannelFactory theChannelFactory) {
-		return new SubscriptionDeliveringMessageSubscriber(theChannelFactory);
+	public SubscriptionDeliveringMessageListener subscriptionDeliveringMessageSubscriber(
+			IBrokerClient theBrokerClient) {
+		return new SubscriptionDeliveringMessageListener(theBrokerClient);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringEmailSubscriber subscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
-		return new SubscriptionDeliveringEmailSubscriber(theEmailSender);
+	public SubscriptionDeliveringEmailListener SubscriptionDeliveringEmailListener(IEmailSender theEmailSender) {
+		return new SubscriptionDeliveringEmailListener(theEmailSender);
 	}
 
 	@Bean
@@ -153,12 +164,17 @@ public class SubscriptionProcessorConfig {
 
 	@Lazy
 	@Bean
-	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
+	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			SubscriptionTopicRegistry theSubscriptionTopicRegistry,
+			MatchUrlService theMatchUrlService) {
 		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
 			case R4B:
 			case R5:
-				return new SubscriptionTopicPayloadBuilder(theFhirContext);
+				return new SubscriptionTopicPayloadBuilder(
+						theFhirContext, theDaoRegistry, theSubscriptionTopicRegistry, theMatchUrlService);
 			default:
 				return null;
 		}

@@ -30,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class ValidateUtil {
 
 	/**
-	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 * Throws {@link IllegalArgumentException} if theValue is less than or equal to theMinimum
 	 */
 	public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
 		if (theValue <= theMinimum) {
@@ -39,7 +39,7 @@ public class ValidateUtil {
 	}
 
 	/**
-	 * Throws {@link IllegalArgumentException} if theValue is < theMinimum
+	 * Throws {@link IllegalArgumentException} if theValue is less than theMinimum
 	 */
 	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
 		if (theValue < theMinimum) {

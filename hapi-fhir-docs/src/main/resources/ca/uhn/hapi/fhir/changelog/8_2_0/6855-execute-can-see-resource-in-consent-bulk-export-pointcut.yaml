@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 6855
+title: "The `IConsentService#canSeeResource()` method is now executed in the `STORAGE_BULK_EXPORT_RESOURCE_INCLUSION` 
+pointcut of the `ConsentInterceptor`. This allows Consent Services to be able to prevent resources from being exported by bulk export."

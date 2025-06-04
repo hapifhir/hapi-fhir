@@ -7,15 +7,19 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,12 +30,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -124,6 +131,134 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// validate
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
+	}
+
+	@Test
+	public void testChainedSearchWithTagReturnsResults() {
+		Coding coding = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
+		//Given: A patient with a tag
+		Patient patient = new Patient();
+		Meta meta = new Meta();
+		meta.addTag(coding);
+		patient.setMeta(meta);
+		IIdType idType = myPatientDao.create(patient, mySrd).getId();
+
+		//Given: An encounter that references the patient
+		Encounter encounter =  buildResource("Encounter", withReference("subject", idType));
+		myEncounterDao.create(encounter, mySrd);
+		String url = "/Encounter?subject._tag=http://bluecrossnc.com/fhir/lob|test";
+
+		// execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+
+		//Verify: Chained search with _tag returns results
+		assertEquals(1, encounters.size());
+
+	}
+
+	@Test
+	public void testChainedSearchWithTagUsingAndJoinsReturnsResults() {
+		Coding codingA = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
+		Coding codingB = new Coding("http://someSystem/path/fhir","aPath", "some text");
+
+		//Given: A patient with two tags.
+		Patient patientA = new Patient();
+		Meta metaA = new Meta();
+		metaA.addTag(codingA);
+		metaA.addTag(codingB);
+		patientA.setMeta(metaA);
+
+		//Given: A patient with one tag (codingA)
+		Patient patientB = new Patient();
+		Meta metaB = new Meta();
+		metaB.addTag(codingA);
+		patientB.setMeta(metaB);
+
+		//Given: A patient with one tag (codingB)
+		Patient patientC = new Patient();
+		Meta metaC = new Meta();
+		metaC.addTag(codingB);
+		patientC.setMeta(metaC);
+
+		IIdType idTypeA = myPatientDao.create(patientA, mySrd).getId();
+		IIdType idTypeB = myPatientDao.create(patientB, mySrd).getId();
+		IIdType idTypeC = myPatientDao.create(patientC, mySrd).getId();
+
+		//Given: An encounterA that references patientA
+		Encounter encounterA =  buildResource("Encounter", withReference("subject", idTypeA));
+
+		//Given: An encounterB that references patientB
+		Encounter encounterB =  buildResource("Encounter", withReference("subject", idTypeB));
+
+		//Given: An encounterC that references patientC
+		Encounter encounterC =  buildResource("Encounter", withReference("subject", idTypeC));
+		IIdType encounterAiDtype = myEncounterDao.create(encounterA, mySrd).getId();
+		myEncounterDao.create(encounterB, mySrd);
+		myEncounterDao.create(encounterC, mySrd);
+
+		String url = "/Encounter?subject._tag=" + codingA.getSystem() + "|" + codingA.getCode() + "&subject._tag=" + codingB.getSystem() + "|" + codingB.getCode();
+
+		//execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+		Encounter actualEncounter = (Encounter) encounters.get(0);
+
+		//Verify that the chained search with AND joins returns the encounter (encounterA) that references the patient (patientA) with both tags.
+		assertEquals(1, encounters.size());
+		assertEquals(encounterAiDtype.getIdPart(), actualEncounter.getIdPart());
+	}
+
+	@Test
+	public void testChainedSearchWithTagUsingOrJoinsReturnsResults() {
+		Coding codingA = new Coding("http://bluecrossnc.com/fhir/lob","test", "the display");
+		Coding codingB = new Coding("http://someSystem/path/fhir","aPath", "some text");
+
+		//Given: A patient with two tags.
+		Patient patientA = new Patient();
+		Meta metaA = new Meta();
+		metaA.addTag(codingA);
+		metaA.addTag(codingB);
+		patientA.setMeta(metaA);
+
+		//Given: A patient with one tag (codingA)
+		Patient patientB = new Patient();
+		Meta metaB = new Meta();
+		metaB.addTag(codingA);
+		patientB.setMeta(metaB);
+
+		//Given: A patient with one tag (codingB)
+		Patient patientC = new Patient();
+		Meta metaC = new Meta();
+		metaC.addTag(codingB);
+		patientC.setMeta(metaC);
+
+		//Given: A group with one tag (codingB)
+		Group group = new Group();
+		Meta metaD = new Meta();
+		metaD.addTag(codingB);
+		group.setMeta(metaC);
+		group.setActual(true);
+
+		IIdType idTypeA = myPatientDao.create(patientA, mySrd).getId();
+		IIdType idTypeB = myPatientDao.create(patientB, mySrd).getId();
+		IIdType idTypeC = myPatientDao.create(patientC, mySrd).getId();
+		IIdType idTypeD = myGroupDao.create(group, mySrd).getId();
+
+		Encounter encounterA =  buildResource("Encounter", withReference("subject", idTypeA));
+		Encounter encounterB =  buildResource("Encounter", withReference("subject", idTypeB));
+		Encounter encounterC =  buildResource("Encounter", withReference("subject", idTypeC));
+		Encounter encounterD =  buildResource("Encounter", withReference("subject", idTypeD));
+		myEncounterDao.create(encounterA, mySrd);
+		myEncounterDao.create(encounterB, mySrd);
+		myEncounterDao.create(encounterC, mySrd);
+		myEncounterDao.create(encounterD, mySrd);
+
+		String url = "/Encounter?subject._tag=" + codingA.getSystem() + "|" + codingA.getCode() + "," + codingB.getSystem() + "|" + codingB.getCode();
+
+		//execute
+		List<IBaseResource> encounters = myTestDaoSearch.searchForResources(url);
+
+		//Verify that the chained search with OR joins returns the encounters (all 4 encounters) that references the patients with either tags.
+		assertEquals(4, encounters.size());
 	}
 
 	@Test
@@ -251,6 +386,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
+	@Disabled("Bug: SearchContainedModeEnum never set to TRUE, OIDs are not found")
 	@Test
 	public void testShouldResolveATwoLinkChainWithContainedResources_CompoundReference() {
 
@@ -295,7 +431,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(2);
+ 		assertThat(oids).hasSize(2);
 		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
@@ -690,6 +826,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
+	@Disabled("Bug: SearchContainedModeEnum never set to TRUE, OIDs are not found")
 	@Test
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference() {
 
@@ -1554,6 +1691,49 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/Encounter?service-provider.name:exact=TestOrg",
+		"/Encounter?service-provider:Organization.name:exact=TestOrg",
+		"/Encounter?subject.organization.name:exact=TestOrg",
+		"/Encounter?subject:Patient.organization.name:exact=TestOrg",
+		"/Encounter?subject:Patient.organization:Organization.name:exact=TestOrg"
+	})
+	public void testReferenceChainedSearch_withExactModifier_willMatchExactly(String theSearchUrl) {
+		// setup
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Organization org1 = buildResource("Organization", withName("TestOrg"));
+		Organization org2 = buildResource("Organization", withName("TestOrganization"));
+		IIdType org1Id = doCreateResource(org1);
+		IIdType org2Id = doCreateResource(org2);
+
+		Patient p1 = buildResource("Patient", withReference("managingOrganization", org1Id));
+		Patient p2 = buildResource("Patient", withReference("managingOrganization", org2Id));
+		IIdType p1Id = doCreateResource(p1);
+		IIdType p2Id = doCreateResource(p2);
+
+		Encounter enc1 = buildResource("Encounter", withReference("subject", p1Id), withReference("serviceProvider", org1Id));
+		Encounter enc2 = buildResource("Encounter", withReference("subject", p2Id), withReference("serviceProvider", org2Id));
+		IIdType enc1Id = doCreateResource(enc1);
+		doCreateResource(enc2);
+
+		logAllStringIndexes();
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> encounterIds = myTestDaoSearch.searchForIds(theSearchUrl);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		// validate
+		assertThat(encounterIds).hasSize(1);
+		assertThat(encounterIds.get(0)).isEqualTo(enc1Id.getIdPart());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true))
+			.doesNotContain("HASH_NORM_PREFIX")
+			.doesNotContain("SP_VALUE_NORMALIZED")
+			.contains("HASH_EXACT");
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6799
+title: "Fixed an issue where bundles containing an operation outcome from a search could not be accessed without explicit
+ read permissions given for the OperationOutcome resource. Now, if an OperationOutcome is returned as part of an otherwise authorized search or page query, the OperationOutcomes 
+ are implicitly permitted to be returned."

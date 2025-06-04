@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 6937
+title: "The algorithm used to calculate geographic bounding boxes (e.g. for
+  `Location?near=` queries) has been redesigned to ensure greater accuracy. The
+  previous algorithm was not always accurate at large scales and could miss entries
+  located exactly on the center point."

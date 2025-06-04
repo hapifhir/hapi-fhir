@@ -160,6 +160,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		// take a lock on the chunk id to ensure that the maintenance run isn't doing anything.
 		Batch2WorkChunkEntity chunkLock =
 				myEntityManager.find(Batch2WorkChunkEntity.class, theChunkId, LockModeType.PESSIMISTIC_WRITE);
+
+		if (chunkLock == null) {
+			ourLog.warn("Unknown chunk id {} encountered. Message will be discarded.", theChunkId);
+			return Optional.empty();
+		}
+
 		// remove from the current state to avoid stale data.
 		myEntityManager.detach(chunkLock);
 
@@ -199,6 +205,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setReport(theInstance.getReport());
 		entity.setTriggeringUsername(theInstance.getTriggeringUsername());
 		entity.setTriggeringClientId(theInstance.getTriggeringClientId());
+		entity.setUserDataJson(theInstance.getUserDataAsString());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();

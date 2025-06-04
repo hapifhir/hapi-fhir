@@ -318,11 +318,6 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public void requestRefresh() {
-			// nothing
-		}
-
-		@Override
 		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
 			// nothing
 		}

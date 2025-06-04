@@ -68,10 +68,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -1983,6 +1985,45 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			}
 			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 			return toCodesContains(outcome.getExpansion().getContains());
+		}
+
+	}
+
+	@Nested
+	public class TestValueSetExpansion{
+		@Test
+		public void testValueSetConceptDisplay_expandsWithoutOverwritingCodeSystemConceptDisplay(){
+			String code = "ParentWithNoChildrenA";
+
+			// given a code system declaring a termConcept with 'ParentWithNoChildrenA' as code and not display
+			createCodeSystem();
+			TermConcept termConcept = readTermConcept( CS_URL, code);
+			assertThat(termConcept.getCode()).isEqualTo(code);
+			assertThat(termConcept.getDisplay()).isNull();
+
+			// given a ValueSet including the codeSystem concept and overwriting the display value with a more suiting
+			// description.
+			ValueSet vs = new ValueSet();
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include.addConcept().setCode(code).setDisplay("valueSetDisplay");
+
+			// when
+			myTermSvc.expandValueSet(null, vs);
+
+			// then codeSystem concept.display was not overwritten
+			termConcept = readTermConcept( CS_URL, code);
+			assertThat(termConcept.getCode()).isEqualTo(code);
+			assertThat(termConcept.getDisplay()).isNull();
+		}
+
+		public TermConcept readTermConcept(String theUrl, String theCode) {
+			TransactionTemplate transactionTemplate = new TransactionTemplate(getTxManager());
+
+			Optional<TermConcept> optionalTermConcept =
+				transactionTemplate.execute(x -> myTermSvc.findCode( theUrl, theCode));
+			assertThat(optionalTermConcept).isNotNull();
+			return optionalTermConcept.orElseThrow();
 		}
 
 	}

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -106,10 +107,10 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -236,6 +237,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected CacheTagDefinitionDao cacheTagDefinitionDao;
 
+	@Autowired
+	protected IResourceTypeCacheSvc myResourceTypeCacheSvc;
+
 	protected final CodingSpy myCodingSpy = new CodingSpy();
 
 	@VisibleForTesting
@@ -292,7 +296,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -311,7 +315,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersionElement().getValue(),
 						next.getUserSelectedElement().getValue());
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -324,7 +328,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -349,7 +353,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -368,7 +372,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						next.getVersion(),
 						myCodingSpy.getBooleanObject(next));
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -381,7 +385,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition def = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null, null);
 				if (def != null) {
-					ResourceTag tag = maybeAddTagToEntity(theEntity, def);
+					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -401,40 +405,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition profileDef = cacheTagDefinitionDao.getTagOrNull(
 						theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null, null);
 
-				ResourceTag tag = maybeAddTagToEntity(theEntity, profileDef);
+				ResourceTag tag = theEntity.addTag(profileDef);
 				theAllTags.add(tag);
 				theEntity.setHasTags(true);
 			}
 		}
-	}
-
-	/**
-	 * Utility method adding <code>theTagDefToAdd</code> to <code>theEntity</code>. Since the database may contain
-	 * duplicate tagDefinitions, we perform a logical comparison, i.e. we don't care about the tagDefiniton.id, and add
-	 * the tag to the entity only if the entity does not already have that tag.
-	 *
-	 * @param theEntity receiving the tagDefinition
-	 * @param theTagDefToAdd to theEntity
-	 * @return <code>theTagDefToAdd</code> wrapped in a resourceTag if it was added to <code>theEntity</code> or <code>theEntity</code>'s
-	 * resourceTag encapsulating a tagDefinition that is logically equal to theTagDefToAdd.
-	 */
-	private ResourceTag maybeAddTagToEntity(ResourceTable theEntity, TagDefinition theTagDefToAdd) {
-		for (ResourceTag resourceTagFromEntity : theEntity.getTags()) {
-			TagDefinition tag = resourceTagFromEntity.getTag();
-			EqualsBuilder equalsBuilder = new EqualsBuilder();
-			equalsBuilder.append(tag.getSystem(), theTagDefToAdd.getSystem());
-			equalsBuilder.append(tag.getCode(), theTagDefToAdd.getCode());
-			equalsBuilder.append(tag.getDisplay(), theTagDefToAdd.getDisplay());
-			equalsBuilder.append(tag.getVersion(), theTagDefToAdd.getVersion());
-			equalsBuilder.append(tag.getUserSelected(), theTagDefToAdd.getUserSelected());
-			equalsBuilder.append(tag.getTagType(), theTagDefToAdd.getTagType());
-
-			if (equalsBuilder.isEquals()) {
-				return resourceTagFromEntity;
-			}
-		}
-
-		return theEntity.addTag(theTagDefToAdd);
 	}
 
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
@@ -489,6 +464,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
+		}
+		if (theEntity.getResourceTypeId() == null && theResource != null) {
+			theEntity.setResourceTypeId(myResourceTypeCacheSvc.getResourceTypeId(toResourceName(theResource)));
 		}
 
 		byte[] resourceBinary;
@@ -979,7 +957,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				} else if (entity.getPartitionId() != null) {
 					requestPartitionId = entity.getPartitionId().toPartitionId();
 				} else {
-					requestPartitionId = RequestPartitionId.defaultPartition();
+					requestPartitionId =
+							RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 				}
 
 				// Extract search params for resource
@@ -992,6 +971,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						existingParams,
 						theRequest,
 						thePerformIndexing);
+
+				if (CollectionUtils.isNotEmpty(newParams.myLinks)) {
+					setTargetResourceTypeIdForResourceLinks(newParams.myLinks);
+				}
 
 				// Actually persist the ResourceTable and ResourceHistoryTable entities
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1718,6 +1701,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
+	@VisibleForTesting
+	public void setResourceTypeCacheSvc(IResourceTypeCacheSvc theResourceTypeCacheSvc) {
+		myResourceTypeCacheSvc = theResourceTypeCacheSvc;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
 
@@ -1805,5 +1793,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private enum CreateOrUpdateByMatch {
 		CREATE,
 		UPDATE
+	}
+
+	private void setTargetResourceTypeIdForResourceLinks(Collection<ResourceLink> resourceLinks) {
+		resourceLinks.stream()
+				.filter(link -> link.getTargetResourceType() != null)
+				.forEach(link -> link.setTargetResourceTypeId(
+						myResourceTypeCacheSvc.getResourceTypeId(link.getTargetResourceType())));
 	}
 }

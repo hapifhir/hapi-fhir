@@ -20,10 +20,12 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.ValidatorSession;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
 import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.hl7.fhir.validation.ValidatorSettings;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
@@ -52,6 +54,7 @@ class ValidatorWrapper {
 	private Collection<? extends String> myExtensionDomains;
 	private IValidatorResourceFetcher myValidatorResourceFetcher;
 	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
+	private boolean myAllowExamples;
 
 	/**
 	 * Constructor
@@ -66,6 +69,11 @@ class ValidatorWrapper {
 
 	public ValidatorWrapper setAssumeValidRestReferences(boolean assumeValidRestReferences) {
 		this.myAssumeValidRestReferences = assumeValidRestReferences;
+		return this;
+	}
+
+	public ValidatorWrapper setAllowExamples(boolean theAllowExamples) {
+		myAllowExamples = theAllowExamples;
 		return this;
 	}
 
@@ -120,7 +128,8 @@ class ValidatorWrapper {
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
+			v = new InstanceValidator(
+					theWorkerContext, evaluationCtx, xverManager, new ValidatorSession(), new ValidatorSettings());
 		} catch (Exception e) {
 			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
@@ -138,6 +147,7 @@ class ValidatorWrapper {
 		v.setPolicyAdvisor(myValidationPolicyAdvisor);
 		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
+		v.setAllowExamples(myAllowExamples);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();

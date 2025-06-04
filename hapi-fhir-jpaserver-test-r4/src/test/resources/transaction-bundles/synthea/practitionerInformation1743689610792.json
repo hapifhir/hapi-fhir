@@ -1,0 +1,326 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch",
+  "entry": [ {
+    "fullUrl": "urn:uuid:0408f304-790b-39b5-8a8a-ae58a74f76dd",
+    "resource": {
+      "resourceType": "Practitioner",
+      "id": "0408f304-790b-39b5-8a8a-ae58a74f76dd",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 40
+      } ],
+      "identifier": [ {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999967695"
+      } ],
+      "active": true,
+      "name": [ {
+        "family": "Hartmann983",
+        "given": [ "Alica364" ],
+        "prefix": [ "Dr." ]
+      } ],
+      "telecom": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Alica364.Hartmann983@example.com",
+        "use": "work"
+      } ],
+      "address": [ {
+        "line": [ "27 CENTENNIAL DR" ],
+        "city": "PEABODY",
+        "state": "MA",
+        "postalCode": "01960",
+        "country": "US"
+      } ],
+      "gender": "female"
+    },
+    "request": {
+      "method": "POST",
+      "url": "Practitioner",
+      "ifNoneExist": "identifier=http://hl7.org/fhir/sid/us-npi|9999967695"
+    }
+  }, {
+    "fullUrl": "urn:uuid:2c5383e8-39ba-1266-823c-61c9a5f6d188",
+    "resource": {
+      "resourceType": "PractitionerRole",
+      "id": "2c5383e8-39ba-1266-823c-61c9a5f6d188",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole" ]
+      },
+      "practitioner": {
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-npi",
+          "value": "9999967695"
+        },
+        "display": "Dr. Alica364 Hartmann983"
+      },
+      "organization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "9043e647-568d-3e87-9fc0-756a416392d3"
+        },
+        "display": "INTERNAL MEDICINE PHYSICIANS OF THE NORTH SHORE"
+      },
+      "code": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "specialty": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "location": [ {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "b6bdd4bc-4675-3537-8229-83d2b83bb394"
+        },
+        "display": "INTERNAL MEDICINE PHYSICIANS OF THE NORTH SHORE"
+      } ],
+      "telecom": [ {
+        "system": "phone",
+        "value": "9785317677"
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Alica364.Hartmann983@example.com",
+        "use": "work"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "PractitionerRole"
+    }
+  }, {
+    "fullUrl": "urn:uuid:97f41bd7-26ba-37b5-a614-4e0f90b6b964",
+    "resource": {
+      "resourceType": "Practitioner",
+      "id": "97f41bd7-26ba-37b5-a614-4e0f90b6b964",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 5
+      } ],
+      "identifier": [ {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999900498"
+      } ],
+      "active": true,
+      "name": [ {
+        "family": "Nicolas769",
+        "given": [ "Del587" ],
+        "prefix": [ "Dr." ]
+      } ],
+      "telecom": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Del587.Nicolas769@example.com",
+        "use": "work"
+      } ],
+      "address": [ {
+        "line": [ "111 BIRCH STREET" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019021574",
+        "country": "US"
+      } ],
+      "gender": "male"
+    },
+    "request": {
+      "method": "POST",
+      "url": "Practitioner",
+      "ifNoneExist": "identifier=http://hl7.org/fhir/sid/us-npi|9999900498"
+    }
+  }, {
+    "fullUrl": "urn:uuid:aacb7a63-123f-0d76-a7a7-f3c34a241c94",
+    "resource": {
+      "resourceType": "PractitionerRole",
+      "id": "aacb7a63-123f-0d76-a7a7-f3c34a241c94",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole" ]
+      },
+      "practitioner": {
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-npi",
+          "value": "9999900498"
+        },
+        "display": "Dr. Del587 Nicolas769"
+      },
+      "organization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "0a8a4b11-d0b8-3cd2-92cd-983de5189cfa"
+        },
+        "display": "LIFE CARE CENTER OF THE NORTH SHORE"
+      },
+      "code": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "specialty": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "location": [ {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "e26d82f8-b2b4-3002-8237-536a91460a81"
+        },
+        "display": "LIFE CARE CENTER OF THE NORTH SHORE"
+      } ],
+      "telecom": [ {
+        "system": "phone",
+        "value": "7815929667"
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Del587.Nicolas769@example.com",
+        "use": "work"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "PractitionerRole"
+    }
+  }, {
+    "fullUrl": "urn:uuid:f7699c94-7a18-3cf8-8df0-63e0bd36142a",
+    "resource": {
+      "resourceType": "Practitioner",
+      "id": "f7699c94-7a18-3cf8-8df0-63e0bd36142a",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ]
+      },
+      "extension": [ {
+        "url": "http://synthetichealth.github.io/synthea/utilization-encounters-extension",
+        "valueInteger": 64
+      } ],
+      "identifier": [ {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999988295"
+      } ],
+      "active": true,
+      "name": [ {
+        "family": "Alonzo487",
+        "given": [ "Marcela739" ],
+        "prefix": [ "Dr." ]
+      } ],
+      "telecom": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Marcela739.Alonzo487@example.com",
+        "use": "work"
+      } ],
+      "address": [ {
+        "line": [ "150 FLANDERS ROAD" ],
+        "city": "LYNN",
+        "state": "MA",
+        "postalCode": "019042915",
+        "country": "US"
+      } ],
+      "gender": "female"
+    },
+    "request": {
+      "method": "POST",
+      "url": "Practitioner",
+      "ifNoneExist": "identifier=http://hl7.org/fhir/sid/us-npi|9999988295"
+    }
+  }, {
+    "fullUrl": "urn:uuid:1c0e2fdf-0953-6be7-af99-6bad2be0427e",
+    "resource": {
+      "resourceType": "PractitionerRole",
+      "id": "1c0e2fdf-0953-6be7-af99-6bad2be0427e",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole" ]
+      },
+      "practitioner": {
+        "identifier": {
+          "system": "http://hl7.org/fhir/sid/us-npi",
+          "value": "9999988295"
+        },
+        "display": "Dr. Marcela739 Alonzo487"
+      },
+      "organization": {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "89171335-b9c0-3326-98d6-a837d432b9fd"
+        },
+        "display": "WHITTIER REHABILTATION HOSPITAL"
+      },
+      "code": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "specialty": [ {
+        "coding": [ {
+          "system": "http://nucc.org/provider-taxonomy",
+          "code": "208D00000X",
+          "display": "General Practice Physician"
+        } ],
+        "text": "General Practice Physician"
+      } ],
+      "location": [ {
+        "identifier": {
+          "system": "https://github.com/synthetichealth/synthea",
+          "value": "ec828444-a329-332a-af8e-df648ced7a7a"
+        },
+        "display": "WHITTIER REHABILTATION HOSPITAL"
+      } ],
+      "telecom": [ {
+        "system": "phone",
+        "value": "5088712063"
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-direct",
+          "valueBoolean": true
+        } ],
+        "system": "email",
+        "value": "Marcela739.Alonzo487@example.com",
+        "use": "work"
+      } ]
+    },
+    "request": {
+      "method": "POST",
+      "url": "PractitionerRole"
+    }
+  } ]
+}

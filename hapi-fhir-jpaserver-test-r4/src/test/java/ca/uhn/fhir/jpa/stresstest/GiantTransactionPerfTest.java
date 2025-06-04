@@ -10,7 +10,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
@@ -43,6 +45,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -110,6 +113,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -124,6 +128,8 @@ public class GiantTransactionPerfTest {
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
 	private JpaStorageSettings myStorageSettings;
+	@Mock
+	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 	private HapiTransactionService myHapiTransactionService;
 	private DaoRegistry myDaoRegistry;
 	private JpaResourceDao<ExplanationOfBenefit> myEobDao;
@@ -148,11 +154,13 @@ public class GiantTransactionPerfTest {
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 	private final ResourceHistoryCalculator myResourceHistoryCalculator = new ResourceHistoryCalculator(FhirContext.forR4Cached(), false);
 	private IMetaTagSorter myMetaTagSorter;
+	@Mock
+	private IResourceTypeCacheSvc myResourceTypeCacheSvc;
 
 	@AfterEach
 	public void afterEach() {
@@ -228,6 +236,7 @@ public class GiantTransactionPerfTest {
 		myResourceChangeListenerCacheRefresher.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
+		mySearchParamRegistry.setPopulateSearchParamIdentities(false);
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
@@ -250,6 +259,7 @@ public class GiantTransactionPerfTest {
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
 		myDaoSearchParamSynchronizer.setStorageSettings(myStorageSettings);
+		myDaoSearchParamSynchronizer.setSearchParamIdentityCacheSvc(mySearchParamIdentityCacheSvc);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);
@@ -275,9 +285,12 @@ public class GiantTransactionPerfTest {
 		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
 		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
+		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
+
+		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 	}
 
 	@Test
@@ -288,6 +301,7 @@ public class GiantTransactionPerfTest {
 		}
 
 		ServletRequestDetails requestDetails = new ServletRequestDetails(myInterceptorSvc);
+		requestDetails.setServer(new RestfulServer());
 		requestDetails.setServletRequest(new MockServletRequest());
 
 		mySystemDao.transaction(requestDetails, input);
