@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,50 @@ public final class RequestPartitionHeaderUtil {
 
 	/**
 	 * Parses the X-Request-Partition-IDs header value and converts it to a {@link RequestPartitionId} object.
+	 *
+	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
+	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
+	 * @return A {@link RequestPartitionId} object representing the partition(s) specified in the header, or null if the header is null
+	 * @throws InvalidRequestException If the header value is invalid
+	 */
+	@Nullable
+	public static RequestPartitionId fromHeader(
+		@Nullable String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return fromHeader(thePartitionHeaderValue, false, theDefaultPartitionSettings);
+	}
+
+	/**
+	 * Parses the X-Request-Partition-IDs header value and converts it to a {@link RequestPartitionId} object,
+	 * including only the first partition ID from the header. This useful when using the RequestPartitionId for
+	 * a write operation.
+	 *
+	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
+	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
+	 * @return A {@link RequestPartitionId} object representing the first partition specified in the header, or null if the header is null
+	 * @throws InvalidRequestException If the header value is invalid
+	 */
+	@Nullable
+	public static RequestPartitionId fromHeaderFirstPartitionOnly(String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
+		return fromHeader(thePartitionHeaderValue, true, theDefaultPartitionSettings);
+	}
+
+	/**
+	 * Validates the syntax of the X-Request-Partition-IDs header value.
+	 * <p>
+	 * This method checks if the header value can be successfully parsed into a {@link RequestPartitionId} object.
+	 * It does not validate whether the partition IDs actually exist in the system.
+	 * </p>
+	 *
+	 * @param thePartitionHeaderValue The value of the X-Request-Partition-IDs header to validate
+	 * @throws InvalidRequestException If the header value is invalid
+	 */
+	public static void validateHeader(String thePartitionHeaderValue) {
+		// We're only validating syntax, so it doesn't matter what the default partition id is
+		fromHeader(thePartitionHeaderValue, new PartitionSettings());
+	}
+
+	/**
+	 * Parses the X-Request-Partition-IDs header value and converts it to a {@link RequestPartitionId} object.
 	 * <p>
 	 * The header value can be:
 	 * <ul>
@@ -45,7 +88,7 @@ public final class RequestPartitionHeaderUtil {
 	 * @throws InvalidRequestException If the header value is invalid
 	 */
 	@Nullable
-	public static RequestPartitionId fromHeader(
+	private static RequestPartitionId fromHeader(
 			@Nullable String thePartitionHeaderValue,
 			boolean theIncludeOnlyTheFirst,
 			IDefaultPartitionSettings theDefaultPartitionSettings) {
@@ -112,38 +155,5 @@ public final class RequestPartitionHeaderUtil {
 			}
 		}
 		return partitionId;
-	}
-
-	/**
-	 * Parses the X-Request-Partition-IDs header value and converts it to a {@link RequestPartitionId} object.
-	 * <p>
-	 * This is a convenience method that calls {@link #fromHeader(String, boolean, IDefaultPartitionSettings)}
-	 * with theIncludeOnlyTheFirst set to false, meaning all partition IDs in the header will be included.
-	 * </p>
-	 *
-	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
-	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
-	 * @return A {@link RequestPartitionId} object representing the partition(s) specified in the header, or null if the header is null
-	 * @throws InvalidRequestException If the header value is invalid
-	 */
-	@Nullable
-	public static RequestPartitionId fromHeader(
-			@Nullable String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
-		return fromHeader(thePartitionHeaderValue, false, theDefaultPartitionSettings);
-	}
-
-	/**
-	 * Validates the syntax of the X-Request-Partition-IDs header value.
-	 * <p>
-	 * This method checks if the header value can be successfully parsed into a {@link RequestPartitionId} object.
-	 * It does not validate whether the partition IDs actually exist in the system.
-	 * </p>
-	 *
-	 * @param thePartitionHeaderValue The value of the X-Request-Partition-IDs header to validate
-	 * @throws InvalidRequestException If the header value is invalid
-	 */
-	public static void validateHeader(String thePartitionHeaderValue) {
-		// We're only validating syntax, so it doesn't matter what the default partition id is
-		fromHeader(thePartitionHeaderValue, new PartitionSettings());
 	}
 }

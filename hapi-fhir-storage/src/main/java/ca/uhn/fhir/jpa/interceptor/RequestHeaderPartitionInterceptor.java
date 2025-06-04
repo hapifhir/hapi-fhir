@@ -58,7 +58,7 @@ public class RequestHeaderPartitionInterceptor {
 	@Hook(STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyPartitionForCreate(RequestDetails theRequestDetails) {
 		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return parseRequestPartitionIdsFromCommaSeparatedString(partitionHeader, true);
+		return RequestPartitionHeaderUtil.fromHeaderFirstPartitionOnly(partitionHeader, myDefaultPartitionSettings);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class RequestHeaderPartitionInterceptor {
 	@Hook(STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyPartitionForRead(RequestDetails theRequestDetails) {
 		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return parseRequestPartitionIdsFromCommaSeparatedString(partitionHeader, false);
+		return RequestPartitionHeaderUtil.fromHeader(partitionHeader, myDefaultPartitionSettings);
 	}
 
 	private String getPartitionHeaderOrThrowIfBlank(RequestDetails theRequestDetails) {
@@ -80,11 +80,5 @@ public class RequestHeaderPartitionInterceptor {
 			throw new InvalidRequestException(Msg.code(2642) + msg);
 		}
 		return partitionHeader;
-	}
-
-	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(
-			String thePartitionIds, boolean theIncludeOnlyTheFirst) {
-		return RequestPartitionHeaderUtil.fromHeader(
-				thePartitionIds, theIncludeOnlyTheFirst, myDefaultPartitionSettings);
 	}
 }
