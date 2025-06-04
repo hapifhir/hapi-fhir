@@ -313,8 +313,8 @@ public class ParametersUtil {
 	public static IPrimitiveType<?> createString(FhirContext theContext, String theValue) {
 		IPrimitiveType<?> value;
 		if (theContext.getVersion().getVersion().isRi()) {
-			value = (IPrimitiveType<?>)
-					Objects.requireNonNull(theContext.getElementDefinition("string")).newInstance(theValue);
+			value = (IPrimitiveType<?>) Objects.requireNonNull(theContext.getElementDefinition("string"))
+					.newInstance(theValue);
 		} else {
 			value = new StringDt(theValue);
 		}
@@ -322,11 +322,13 @@ public class ParametersUtil {
 	}
 
 	public static IPrimitiveType<?> createUri(FhirContext theContext, String theValue) {
-		return (IPrimitiveType<?>) Objects.requireNonNull(theContext.getElementDefinition("uri")).newInstance(theValue);
+		return (IPrimitiveType<?>)
+				Objects.requireNonNull(theContext.getElementDefinition("uri")).newInstance(theValue);
 	}
 
 	public static IPrimitiveType<?> createCode(FhirContext theContext, String theValue) {
-		return (IPrimitiveType<?>) Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance(theValue);
+		return (IPrimitiveType<?>)
+				Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance(theValue);
 	}
 
 	public static IBaseParameters newInstance(FhirContext theContext) {
@@ -342,8 +344,8 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersCode(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value =
-				(IPrimitiveType<String>) Objects.requireNonNull(theCtx.getElementDefinition("code")).newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				Objects.requireNonNull(theCtx.getElementDefinition("code")).newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
@@ -351,8 +353,8 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersInteger(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, int theValue) {
-		IPrimitiveType<Integer> count =
-				(IPrimitiveType<Integer>) Objects.requireNonNull(theCtx.getElementDefinition("integer")).newInstance();
+		IPrimitiveType<Integer> count = (IPrimitiveType<Integer>)
+				Objects.requireNonNull(theCtx.getElementDefinition("integer")).newInstance();
 		count.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, count);
 	}
@@ -372,8 +374,8 @@ public class ParametersUtil {
 
 	public static void addParameterToParametersReference(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, String theReference) {
-		IBaseReference target =
-				(IBaseReference) Objects.requireNonNull(theCtx.getElementDefinition("reference")).newInstance();
+		IBaseReference target = (IBaseReference)
+				Objects.requireNonNull(theCtx.getElementDefinition("reference")).newInstance();
 		target.setReference(theReference);
 		addParameterToParameters(theCtx, theParameters, theName, target);
 	}
@@ -381,8 +383,8 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersString(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value =
-				(IPrimitiveType<String>) Objects.requireNonNull(theCtx.getElementDefinition("string")).newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				Objects.requireNonNull(theCtx.getElementDefinition("string")).newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
@@ -390,8 +392,8 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersUri(
 			FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
-		IPrimitiveType<String> value =
-				(IPrimitiveType<String>) Objects.requireNonNull(theCtx.getElementDefinition("uri")).newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				Objects.requireNonNull(theCtx.getElementDefinition("uri")).newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 	}
@@ -410,32 +412,34 @@ public class ParametersUtil {
 	}
 
 	public static void addPartCode(FhirContext theContext, IBase theParameter, String theName, String theCode) {
-		IPrimitiveType<String> value =
-				(IPrimitiveType<String>) Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				Objects.requireNonNull(theContext.getElementDefinition("code")).newInstance();
 		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartInteger(FhirContext theContext, IBase theParameter, String theName, Integer theInteger) {
-		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>)
-				Objects.requireNonNull(theContext.getElementDefinition("integer")).newInstance();
+		IPrimitiveType<Integer> value =
+				(IPrimitiveType<Integer>) Objects.requireNonNull(theContext.getElementDefinition("integer"))
+						.newInstance();
 		value.setValue(theInteger);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartString(FhirContext theContext, IBase theParameter, String theName, String theValue) {
-		IPrimitiveType<String> value = (IPrimitiveType<String>)
-				Objects.requireNonNull(theContext.getElementDefinition("string")).newInstance();
+		IPrimitiveType<String> value =
+				(IPrimitiveType<String>) Objects.requireNonNull(theContext.getElementDefinition("string"))
+						.newInstance();
 		value.setValue(theValue);
 
 		addPart(theContext, theParameter, theName, value);
 	}
 
 	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
-		IPrimitiveType<String> value =
-				(IPrimitiveType<String>) Objects.requireNonNull(theContext.getElementDefinition("url")).newInstance();
+		IPrimitiveType<String> value = (IPrimitiveType<String>)
+				Objects.requireNonNull(theContext.getElementDefinition("url")).newInstance();
 		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
@@ -467,7 +471,8 @@ public class ParametersUtil {
 			String theSystem,
 			String theCode,
 			String theDisplay) {
-		IBase coding = Objects.requireNonNull(theContext.getElementDefinition("coding")).newInstance();
+		IBase coding = Objects.requireNonNull(theContext.getElementDefinition("coding"))
+				.newInstance();
 
 		BaseRuntimeElementCompositeDefinition<?> codingDef =
 				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(coding.getClass());
