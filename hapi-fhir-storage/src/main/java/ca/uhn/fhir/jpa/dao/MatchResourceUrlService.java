@@ -49,6 +49,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -145,13 +147,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			}
 			paramMap.setLoadSynchronousUpTo(2);
 
-			try {
-				theRequest.getUserData().put(MATCH_URL_QUERY_USER_DATA_KEY, MATCH_URL_QUERY_USER_DATA_KEY);
-
-				retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
-			} finally {
-				theRequest.getUserData().remove(MATCH_URL_QUERY_USER_DATA_KEY);
-			}
+			retVal = callWithSpanMarker(
+					theRequest,
+					() -> search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull));
 		}
 
 		/*
@@ -178,6 +176,16 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 		}
 
 		return retVal;
+	}
+
+	<R> R callWithSpanMarker(@NotNull RequestDetails theRequest, Supplier<R> theSupplier) {
+		try {
+			theRequest.getUserData().put(MATCH_URL_QUERY_USER_DATA_KEY, MATCH_URL_QUERY_USER_DATA_KEY);
+
+			return theSupplier.get();
+		} finally {
+			theRequest.getUserData().remove(MATCH_URL_QUERY_USER_DATA_KEY);
+		}
 	}
 
 	/**
@@ -299,7 +307,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			String theMatchUrl,
 			T theResourcePersistentId) {
 		Validate.notBlank(theMatchUrl);
-		Validate.notNull(theResourcePersistentId);
+		Objects.requireNonNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 		theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, theResourcePersistentId);
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {

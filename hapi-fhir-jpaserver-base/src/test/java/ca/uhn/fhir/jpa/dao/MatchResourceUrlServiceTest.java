@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -9,33 +8,29 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.hl7.fhir.r4.model.Patient;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
 import static org.mockito.Mockito.when;
-
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MatchResourceUrlServiceTest {
@@ -47,23 +42,19 @@ class MatchResourceUrlServiceTest {
 	@Mock
 	private TransactionDetails myTransactionDetails;
 
-	@Mock
-	private RequestDetails myRequestDetails;
+	final private RequestDetails myRequestDetails = new SystemRequestDetails();
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
 	@Mock
-	private IFhirResourceDao myFhirResourceDao;
-
-	@Mock
-	private FhirContext myCtx = FhirContext.forR4();
+	private IFhirResourceDao<Patient> myFhirResourceDao;
 
 	@Mock
 	private MatchUrlService myMatchUrlSvc;
 
 	@InjectMocks
-	private MatchResourceUrlService<JpaPid> myMatchResourceUrlSvc = new MatchResourceUrlService();
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlSvc = new MatchResourceUrlService<>();
 
 	@BeforeEach
 	public void beforeEach() {
@@ -120,4 +111,27 @@ class MatchResourceUrlServiceTest {
 		assertThat(pid.getPartitionId()).isEqualTo(partitionId);
 		assertThat(pid.getId()).isEqualTo(1L);
 	}
+
+	/**
+	 * This test verifies that the match URL service can correctly identify if a request is within a span
+	 * for match URL queries.
+	 */
+	@Test
+	void testSpanMarker() {
+	    // given
+
+	    // when
+		assertFalse(MatchResourceUrlService.isDuringMatchUrlQuerySpan(myRequestDetails));
+
+		var result = myMatchResourceUrlSvc.callWithSpanMarker(myRequestDetails, ()-> {
+			assertTrue(MatchResourceUrlService.isDuringMatchUrlQuerySpan(myRequestDetails));
+			return "foo";
+		});
+
+		assertFalse(MatchResourceUrlService.isDuringMatchUrlQuerySpan(myRequestDetails));
+
+	    // then
+	    assertEquals("foo", result);
+	}
+
 }
