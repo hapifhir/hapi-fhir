@@ -989,6 +989,11 @@
 			<name>Berkant Karduman</name>
 			<organization>TigaHealth</organization>
 		</developer>
+		<developer>
+			<id>qligier</id>
+			<name>Quentin Ligier</name>
+			<organization>ahdis</organization>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -3,4 +3,4 @@ type: fix
 issue: 6630
 title: "When reading a Binary resource from the server that contains a FHIR resource, while accepting the same FHIR 
 content type, the server did stream the Binary content instead of returning the Binary itself, contrary to the FHIR 
-specification. This is fixed now."
+specification. This is fixed now. Thanks to Quentin Ligier for the pull request!"
