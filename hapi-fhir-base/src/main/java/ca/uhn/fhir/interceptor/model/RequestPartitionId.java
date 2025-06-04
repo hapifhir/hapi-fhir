@@ -354,6 +354,9 @@ public class RequestPartitionId implements IModelJson {
 		return ALL_PARTITIONS;
 	}
 
+	/**
+	 * @deprecated use RequestPartitionId.fromPartitionId(myRequestPartitionHelperSvc.getDefaultPartitionId()) instead
+	 */
 	@Deprecated
 	@Nonnull
 	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
