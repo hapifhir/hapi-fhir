@@ -1649,8 +1649,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			BooleanPredicateClausesStep<?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
-		
-		if(theFilter.getOp() == ValueSet.FilterOperator.EQUAL){
+
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 			ourLog.debug(
 					" * Filtering on specific code and codes with a parent of {}/{}/{}",
 					code.getId(),
