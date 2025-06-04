@@ -957,8 +957,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				} else if (entity.getPartitionId() != null) {
 					requestPartitionId = entity.getPartitionId().toPartitionId();
 				} else {
-					requestPartitionId =
-							myPartitionSettings.getDefaultRequestPartitionId();
+					requestPartitionId = myPartitionSettings.getDefaultRequestPartitionId();
 				}
 
 				// Extract search params for resource

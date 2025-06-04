@@ -56,7 +56,8 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageListener(IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
+	public SubscriptionDeliveringMessageListener(
+			IBrokerClient theBrokerClient, IDefaultPartitionSettings theDefaultPartitionSettings) {
 		super();
 		myBrokerClient = theBrokerClient;
 		myDefaultPartitionSettings = theDefaultPartitionSettings;
@@ -94,8 +95,11 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedJsonMessage(
 			ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
-		ResourceModifiedMessage payload =
-				new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType(), myDefaultPartitionSettings.getDefaultRequestPartitionId());
+		ResourceModifiedMessage payload = new ResourceModifiedMessage(
+				myFhirContext,
+				thePayloadResource,
+				theMsg.getOperationType(),
+				myDefaultPartitionSettings.getDefaultRequestPartitionId());
 		payload.setPayloadMessageKey(theMsg.getPayloadMessageKey());
 		payload.setTransactionId(theMsg.getTransactionId());
 		payload.setPartitionId(theMsg.getRequestPartitionId());

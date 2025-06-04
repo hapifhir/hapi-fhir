@@ -52,7 +52,8 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
-	public ResourceModifiedMessage(IIdType theIdType, OperationTypeEnum theOperationType, RequestPartitionId theRequestPartitionId) {
+	public ResourceModifiedMessage(
+			IIdType theIdType, OperationTypeEnum theOperationType, RequestPartitionId theRequestPartitionId) {
 		super(theIdType, theOperationType);
 		setPartitionId(theRequestPartitionId);
 	}
@@ -74,15 +75,6 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 			RequestPartitionId theRequestPartitionId) {
 		super(theFhirContext, theResource, theOperationType);
 		setPartitionId(theRequestPartitionId);
-	}
-
-	public ResourceModifiedMessage(
-			FhirContext theFhirContext,
-			IBaseResource theNewResource,
-			OperationTypeEnum theOperationType,
-			RequestDetails theRequest) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	public ResourceModifiedMessage(

@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;

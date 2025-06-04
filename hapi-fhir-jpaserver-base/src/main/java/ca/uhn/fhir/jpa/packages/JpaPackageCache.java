@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -455,8 +454,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
 			if (myPartitionSettings.isUnnamedPartitionMode() && myPartitionSettings.getDefaultPartitionId() != null) {
-				requestDetails.setRequestPartitionId(
-						myPartitionSettings.getDefaultRequestPartitionId());
+				requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 			} else {
 				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 			}
@@ -845,8 +843,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	public PackageDeleteOutcomeJson uninstallPackage(String thePackageId, String theVersion) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails()
-				.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		SystemRequestDetails requestDetails =
+				new SystemRequestDetails().setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 		return myTransactionService
 				.withRequest(requestDetails)
 				.execute(() -> doUninstallPackage(thePackageId, theVersion));

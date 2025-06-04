@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.util.RequestPartitionHeaderUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -76,7 +76,7 @@ public class RequestHeaderPartitionInterceptor {
 		if (isBlank(partitionHeader)) {
 			String msg = String.format(
 					"%s header is missing or blank, it is required to identify the storage partition",
-				Constants.HEADER_X_REQUEST_PARTITION_IDS);
+					Constants.HEADER_X_REQUEST_PARTITION_IDS);
 			throw new InvalidRequestException(Msg.code(2642) + msg);
 		}
 		return partitionHeader;
@@ -84,6 +84,7 @@ public class RequestHeaderPartitionInterceptor {
 
 	private RequestPartitionId parseRequestPartitionIdsFromCommaSeparatedString(
 			String thePartitionIds, boolean theIncludeOnlyTheFirst) {
-		return RequestPartitionHeaderUtil.fromHeader(thePartitionIds, theIncludeOnlyTheFirst, myDefaultPartitionSettings);
+		return RequestPartitionHeaderUtil.fromHeader(
+				thePartitionIds, theIncludeOnlyTheFirst, myDefaultPartitionSettings);
 	}
 }
