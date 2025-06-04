@@ -68,6 +68,7 @@ public class ParsedFhirPathTest {
 		assertEquals(path, parsedPath.getRawPath());
 		assertTrue(parsedPath.endsWithAnIndex());
 		assertEquals(0, parsedPath.getTail().getListIndex());
+		assertEquals("reference", parsedPath.getFinalPathNode().getValue());
 
 		AtomicReference<Consumer<ParsedFhirPath.FhirPathNode>> atomicRef = new AtomicReference<>();
 		Consumer<ParsedFhirPath.FhirPathNode> supplier = node -> {
@@ -217,7 +218,8 @@ public class ParsedFhirPathTest {
 		return Stream.of(
 			Arguments.of("Appointment.participant.actor.where(reference.startsWith('Patient'))", "reference"),
 			Arguments.of("Patient.name.given.first()", "given"),
-			Arguments.of("Patient.name.given[1]", "given")
+			Arguments.of("Patient.name.given[1]", "given"),
+			Arguments.of("Appointment.participant.actor.reference.where(startsWith('Patient/')).skip(1)", "reference")
 		);
 	}
 
@@ -229,7 +231,6 @@ public class ParsedFhirPathTest {
 
 		ParsedFhirPath.FhirPathNode n = parsed.getFinalPathNode();
 		assertEquals(theLastElement, parsed.getLastElementName());
-
 	}
 
 	@Test

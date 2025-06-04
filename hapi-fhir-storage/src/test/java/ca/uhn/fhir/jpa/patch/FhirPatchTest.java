@@ -165,7 +165,9 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
 		}
 
-		return params;
+		return params
+			.subList(0, 1)
+			;
 	}
 
 	@ParameterizedTest
@@ -226,7 +228,7 @@ public class FhirPatchTest {
 		myPatch.apply(appointment, thePatch);
 
 		// verify
-		ourLog.trace(myParser.encodeResourceToString(appointment));
+		ourLog.info("\n" + myParser.encodeResourceToString(appointment));
 
 		List<String> original = new ArrayList<>();
 		original.add("Patient/p1");

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
-import static net.sourceforge.plantuml.StringUtils.manageEscapedTabs;
 
 /**
  * This class creates and contains a parsed fhirpath.
@@ -45,6 +44,8 @@ public class ParsedFhirPath {
 		 */
 		private int myListIndex = -1;
 
+		private boolean myIsValueNode = false;
+
 		public FhirPathNode(String theValue) {
 			myValue = theValue;
 
@@ -76,11 +77,16 @@ public class ParsedFhirPath {
 		 * Returns true if this is a value node (ie, non-function, non-path node)
 		 */
 		public boolean isValueNode() {
-			return !isFunction() && !isFilter() && myValue.contains("'");
+//			return !isFunction() && !isFilter() && myValue.contains("'");
+			return myIsValueNode;
+		}
+
+		public void setAsValueNode(boolean theBool) {
+			myIsValueNode = theBool;
 		}
 
 		public boolean hasListIndex() {
-			return myListIndex > 0;
+			return myListIndex >= 0;
 		}
 
 		public int getListIndex() {
@@ -392,6 +398,9 @@ public class ParsedFhirPath {
 				// base case 1 - a standard node (no braces () or dots . or filters [])
 				// ending is just a path element
 				next = new FhirPathNode(thePath);
+				if (!next.isFilter() && !next.isFunction() && isValueNode(thePath)) {
+					next.setAsValueNode(true);
+				}
 				tail = next;
 			} else if (filterIndex == -1) {
 				// base case 2 - a filter function (function ending in ())
@@ -519,5 +528,17 @@ public class ParsedFhirPath {
 		}
 
 		return next;
+	}
+
+	private static boolean isValueNode(String theValue) {
+		if (theValue.contains("'")) {
+			return true;
+		}
+		try {
+			Integer.parseInt(theValue);
+			return true;
+		} catch (NumberFormatException ex) {
+			return false;
+		}
 	}
 }
