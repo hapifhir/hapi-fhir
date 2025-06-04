@@ -57,6 +57,10 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		setPartitionId(theRequestPartitionId);
 	}
 
+	/**
+	 * @deprecated use {@link ResourceModifiedMessage#ResourceModifiedMessage(FhirContext, IBaseResource, OperationTypeEnum, RequestDetails, RequestPartitionId)} instead
+	 */
+	@Deprecated
 	public ResourceModifiedMessage(
 			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
