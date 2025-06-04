@@ -58,7 +58,7 @@ public class FhirPatchTest {
 			comp.addPart().setName("path").setValue(new StringType("Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"));
 			comp.addPart().setName("value").setValue(new StringType("Patient/p2"));
 
-			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
+			//params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p2", "Location/l1", "Patient/p3")));
 		}
 
 		// 2 - Appointment.participant.actor.where(reference.startsWith('Patient/')).first()

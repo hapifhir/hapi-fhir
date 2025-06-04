@@ -72,6 +72,13 @@ public class ParsedFhirPath {
 			return myValue;
 		}
 
+		/**
+		 * Returns true if this is a value node (ie, non-function, non-path node)
+		 */
+		public boolean isValueNode() {
+			return !isFunction() && !isFilter() && myValue.contains("'");
+		}
+
 		public boolean hasListIndex() {
 			return myListIndex > 0;
 		}
@@ -141,6 +148,13 @@ public class ParsedFhirPath {
 
 		public void setContainedExpression(String theContainedExpression) {
 			myContainedExp = ParsedFhirPath.parse(theContainedExpression);
+		}
+
+		/**
+		 * Whether or not this node contains a sub-fhir-path
+		 */
+		public boolean hasContainedExp() {
+			return myContainedExp != null;
 		}
 
 		public ParsedFhirPath getContainedExp() {
@@ -245,7 +259,8 @@ public class ParsedFhirPath {
 	public String getContainingPath() {
 		StringBuilder sb = new StringBuilder();
 		FhirPathNode current = myHead;
-		while (current != null && current.getNext() != null && !current.getNext().isFunction()) {
+//		while (current != null && current.getNext() != null && !current.getNext().isFunction()) {
+		while (current != null && !current.isFunction()) {
 			if (!sb.isEmpty()) {
 				sb.append(".");
 			}
@@ -286,21 +301,51 @@ public class ParsedFhirPath {
 	}
 
 	/**
-	 * Returns the final non-function node value
+	 * Returns the last non-function, non-value node
 	 */
-	public String getLastElementName() {
+	public FhirPathNode getFinalPathNode() {
 		FhirPathNode node = myTail;
-		while (node != null && node.isFunction()) {
-			node = node.getPrevious();
+		while (node != null) {
+			if (node.isFunction()) {
+				if (node.hasListIndex()) {
+					node = node.getPrevious();
+				} else {
+					FhirPathFunction fn = (FhirPathFunction) node;
+					if (!fn.hasContainedExp()) {
+						node = node.getPrevious();
+					} else {
+						// recurse
+						FhirPathNode subNode = fn.getContainedExp().getFinalPathNode();
+						if (subNode == null || subNode.isValueNode()) {
+							node = node.getPrevious();
+						} else {
+							return subNode;
+						}
+					}
+				}
+			} else if (!node.isValueNode()) {
+				return node;
+			} else {
+				node = node.getPrevious();
+			}
 		}
 
-		if (node == null) {
-			// this shouldn't ever happen; but we'll return
-			// null instead of throwing
-			ourLog.error("No non-function nodes in path!");
+		return null;
+	}
+
+	/**
+	 * Returns the final non-function node value in the expression.
+	 * Eg:
+	 * Patient.name.given -> returns "given"
+	 * Patient.name.where(given.startsWith("John")) -> returns "given"
+	 */
+	public String getLastElementName() {
+		FhirPathNode finalNode = getFinalPathNode();
+		if (finalNode == null) {
+			ourLog.error("No path nodes is fhirpath");
 			return null;
 		}
-		return node.getValue();
+		return finalNode.getValue();
 	}
 
 	/**
@@ -341,6 +386,7 @@ public class ParsedFhirPath {
 		if (dotIndex == -1) {
 			int filterIndex = thePath.indexOf("[");
 			FhirPathNode tail;
+			boolean endsInFilter = false;
 			// base cases
 			if (braceIndex == -1 && filterIndex == -1) {
 				// base case 1 - a standard node (no braces () or dots . or filters [])
@@ -365,12 +411,13 @@ public class ParsedFhirPath {
 				 * "filter" and "function", so we'll treat all functions as
 				 * filters
 				 */
-				theParsedFhirPath.setEndsWithFilter(true);
+				endsInFilter = true;
 				tail = next;
 			} else {
 				// base case 3 - path contains a filter ([]).. and potentially a functions
 				// ie, either path[n] or path()[n]
 				int closingFilter = RandomTextUtils.findMatchingClosingBrace(filterIndex, thePath, '[', ']');
+				endsInFilter = true;
 
 				// part1 -> part before the opening filter brace [
 				String part1 = thePath.substring(0, filterIndex);
@@ -410,8 +457,9 @@ public class ParsedFhirPath {
 					// the filter is the end node; nothing more to add
 					tail = filterNode;
 				}
+				theParsedFhirPath.setEndsWithAnIndex(true);
 			}
-			theParsedFhirPath.setEndsWithAnIndex(true);
+			theParsedFhirPath.setEndsWithFilter(endsInFilter);
 
 			theParsedFhirPath.setTail(tail);
 		} else if (braceIndex != -1 && braceIndex < dotIndex) {
@@ -457,6 +505,8 @@ public class ParsedFhirPath {
 				theParsedFhirPath.setTail(next);
 			}
 
+			// not technically true; but our code treats anything with a function
+			// as having a filter
 			theParsedFhirPath.setEndsWithFilter(true);
 		} else {
 			// recursive case 2

@@ -215,7 +215,7 @@ public class ParsedFhirPathTest {
 
 	static Stream<Arguments> getLastElementNameParams() {
 		return Stream.of(
-			Arguments.of("Appointment.participant.actor.where(reference.startsWith('Patient'))", "actor"),
+			Arguments.of("Appointment.participant.actor.where(reference.startsWith('Patient'))", "reference"),
 			Arguments.of("Patient.name.given.first()", "given"),
 			Arguments.of("Patient.name.given[1]", "given")
 		);
@@ -227,7 +227,9 @@ public class ParsedFhirPathTest {
 		// setup
 		ParsedFhirPath parsed = ParsedFhirPath.parse(thePath);
 
+		ParsedFhirPath.FhirPathNode n = parsed.getFinalPathNode();
 		assertEquals(theLastElement, parsed.getLastElementName());
+
 	}
 
 	@Test
