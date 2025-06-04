@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTablePk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -121,6 +122,10 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -152,6 +157,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -1851,19 +1857,33 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			List<String> desiredResourceTypes,
 			HashSet<JpaPid> pidsToInclude,
 			RequestDetails request) {
-		StringBuilder sqlBuilder = new StringBuilder();
-		sqlBuilder.append("SELECT r.").append(findPidFieldName);
-		sqlBuilder.append(", r.").append(findResourceTypeFieldName);
-		sqlBuilder.append(", r.myTargetResourceUrl");
+
+		record IncludesRecord(Long resourceId, String resourceType, String resourceCanonicalUrl, Long version, Integer partitionId) {}
+
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<IncludesRecord> query = cb.createQuery(IncludesRecord.class);
+		Root<ResourceLink> root = query.from(ResourceLink.class);
+
+		List<Selection<?>> selectionList = new ArrayList<>();
+		selectionList.add(root.get(findPidFieldName));
+		selectionList.add(root.get(findResourceTypeFieldName));
+		selectionList.add(root.get("myTargetResourceUrl"));
 		if (findVersionFieldName != null) {
-			sqlBuilder.append(", r.").append(findVersionFieldName);
+			selectionList.add(root.get(findVersionFieldName));
+		} else {
+			selectionList.add(cb.nullLiteral(Long.class));
 		}
 		if (myPartitionSettings.isDatabasePartitionMode()) {
-			sqlBuilder.append(", r.").append(findPartitionFieldName);
+			selectionList.add(root.get(findPartitionFieldName));
+		} else {
+			selectionList.add(cb.nullLiteral(Integer.class));
 		}
-		sqlBuilder.append(" FROM ResourceLink r WHERE ");
+		query.multiselect(selectionList);
+
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (myPartitionSettings.isDatabasePartitionMode()) {
+			predicates.add(cb.equal(root.get("searchPartitionFieldName"))
 			sqlBuilder.append("r.").append(searchPartitionFieldName);
 			sqlBuilder.append(" = :target_partition_id AND ");
 		}
@@ -1907,10 +1927,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			sqlBuilder.append(" AND r.myTargetResourceType IN (:desired_target_resource_types)");
 		}
 
+		query.where(cb.and(predicates.toArray(new Predicate[0])));
+
 		String sql = sqlBuilder.toString();
 		List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 		for (Collection<JpaPid> nextPartition : partitions) {
-			TypedQuery<?> q = entityManager.createQuery(sql, Object[].class);
+
+			TypedQuery<IncludesRecord> q = entityManager.createQuery(sql, IncludesRecord.class);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 			if (myPartitionSettings.isDatabasePartitionMode()) {
 				q.setParameter(
@@ -1925,10 +1948,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (hasDesiredResourceTypes) {
 				q.setParameter("desired_target_resource_types", desiredResourceTypes);
 			}
+
 			Set<String> canonicalUrls = null;
 
-			try (ScrollableResultsIterator<Object[]> iter = new ScrollableResultsIterator<>(toScrollableResults(q))) {
-				Object[] nextRow;
+			try (ScrollableResultsIterator<IncludesRecord> iter = new ScrollableResultsIterator<>(toScrollableResults(q))) {
+				IncludesRecord nextRow;
 				while (iter.hasNext()) {
 					nextRow = iter.next();
 					if (nextRow == null) {
@@ -1937,19 +1961,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						continue;
 					}
 
-					Long version = null;
-					Long resourceId = (Long) ((Object[]) nextRow)[0];
-					String resourceType = (String) ((Object[]) nextRow)[1];
-					String resourceCanonicalUrl = (String) ((Object[]) nextRow)[2];
-					Integer partitionId = null;
-					int offset = 0;
-					if (findVersionFieldName != null) {
-						version = (Long) ((Object[]) nextRow)[3];
-						offset++;
-					}
-					if (myPartitionSettings.isDatabasePartitionMode()) {
-						partitionId = ((Integer) ((Object[]) nextRow)[3 + offset]);
-					}
+					Long version = nextRow.version;
+					Long resourceId = nextRow.resourceId;
+					String resourceType = nextRow.resourceType;
+					String resourceCanonicalUrl = nextRow.resourceCanonicalUrl;
+					Integer partitionId = nextRow.partitionId;
 
 					if (resourceId != null) {
 						JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceId, version, resourceType);
@@ -1963,7 +1979,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					}
 				}
 			}
-			//			myEntityManager.clear();
 
 			if (canonicalUrls != null) {
 				String message =
@@ -2983,6 +2998,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myMaxPageSizeForTests = theTestSize;
 	}
 
+	// FIXME: can be a TypedQuery param?
 	private static ScrollableResults<?> toScrollableResults(Query theQuery) {
 		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) theQuery;
 		return hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
