@@ -46,6 +46,8 @@ public class InitializeSchemaTask extends BaseTask {
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
 		addFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION);
+		// Some schema initialization statements (e.g. system settings) may not support transactions
+		setTransactional(false);
 	}
 
 	@Override
