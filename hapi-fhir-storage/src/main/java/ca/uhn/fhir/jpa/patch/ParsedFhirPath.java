@@ -108,6 +108,10 @@ public class ParsedFhirPath {
 			return myListIndex >= 0;
 		}
 
+		public boolean isNormalPathNode() {
+			return !isFunction() && !isFilter() && !isValueNode() && !hasListIndex();
+		}
+
 		void setNext(FhirPathNode theNextNode) {
 			myNext = theNextNode;
 			theNextNode.setPrevious(this);
@@ -265,7 +269,6 @@ public class ParsedFhirPath {
 	public String getContainingPath() {
 		StringBuilder sb = new StringBuilder();
 		FhirPathNode current = myHead;
-//		while (current != null && current.getNext() != null && !current.getNext().isFunction()) {
 		while (current != null && !current.isFunction()) {
 			if (!sb.isEmpty()) {
 				sb.append(".");
@@ -278,32 +281,20 @@ public class ParsedFhirPath {
 	}
 
 	/**
-	 * Returns the path as a string up until the condition
-	 * (omitting the portion of the path that satisfies the condition).
-	 * -
-	 * If the condition is never met, the entire path will be returned.
-	 *
-	 * @param theCondition the condition to evaluate at each node to determine
-	 *                     if it should be included in the path
+	 * Returns all nodes, ordered, filtering by the provided predicate
 	 */
-	public String getPathUntilPreCondition(Predicate<FhirPathNode> theCondition) {
+	public void getAllNodesWithPred(List<FhirPathNode> theNodes, Predicate<FhirPathNode> thePred) {
 		FhirPathNode node = getHead();
-
-		StringBuilder sb = new StringBuilder();
 		while (node != null) {
-			// check condition first
-			if (theCondition.test(node)) {
-				break;
+			if (thePred.test(node)) {
+				theNodes.add(node);
 			}
 
-			if (!sb.isEmpty()) {
-				sb.append(".");
+			if (node instanceof FhirPathFunction fn && fn.hasContainedExp()) {
+				fn.getContainedExp().getAllNodesWithPred(theNodes, thePred);
 			}
-			sb.append(node.getValue());
-
 			node = node.getNext();
 		}
-		return sb.toString();
 	}
 
 	/**
@@ -519,12 +510,30 @@ public class ParsedFhirPath {
 			theParsedFhirPath.setEndsWithFilter(true);
 		} else {
 			// recursive case 2
-			// next element is a standard node element (not a function)
-			String nextPart = thePath.substring(0, dotIndex);
-			String remaining = thePath.substring(dotIndex + 1);
+			int filterIndex = thePath.indexOf("[");
 
-			next = new FhirPathNode(nextPart);
-			next.setNext(createNode(theParsedFhirPath, remaining));
+			if (filterIndex == -1 || filterIndex > dotIndex) {
+				// next element is a standard node element (not a function)
+				String nextPart = thePath.substring(0, dotIndex);
+				String remaining = thePath.substring(dotIndex + 1);
+
+				next = new FhirPathNode(nextPart);
+				next.setNext(createNode(theParsedFhirPath, remaining));
+			} else {
+				// next element has a filter on it
+				int closingFilter = RandomTextUtils.findMatchingClosingBrace(filterIndex, thePath, '[', ']');
+
+				String nextPart = thePath.substring(0, filterIndex);
+				next = new FhirPathNode(nextPart);
+
+				// the filter value (a number)
+				String filterPart = thePath.substring(filterIndex, closingFilter + 1);
+				FhirPathNode filterNode = new FhirPathNode(filterPart);
+				next.setNext(filterNode);
+
+				String remaining = thePath.substring(dotIndex + 1);
+				filterNode.setNext(createNode(theParsedFhirPath, remaining));
+			}
 		}
 
 		return next;

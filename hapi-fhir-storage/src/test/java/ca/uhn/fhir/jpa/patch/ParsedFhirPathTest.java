@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -233,22 +234,6 @@ public class ParsedFhirPathTest {
 		assertEquals(theLastElement, parsed.getLastElementName());
 	}
 
-	@Test
-	public void getPathUntilPreCondition_basicTest() {
-		// setup
-		String subpath;
-		String path = "Appointment.participant.actor.reference.startsWith('Patient')";
-
-		ParsedFhirPath parsedFhirPath = ParsedFhirPath.parse(path);
-
-		// tests
-		subpath = parsedFhirPath.getPathUntilPreCondition(ParsedFhirPath.FhirPathNode::isFunction);
-		assertEquals("Appointment.participant.actor.reference", subpath);
-
-		subpath = parsedFhirPath.getPathUntilPreCondition(n -> n.getNext() == parsedFhirPath.getTail());
-		assertEquals("Appointment.participant.actor", subpath);
-	}
-
 	private void validateList(ParsedFhirPath theParsedPath, List<String> theParts, Consumer<ParsedFhirPath.FhirPathNode> thePerNodeAction) {
 		ParsedFhirPath.FhirPathNode current = null;
 		ParsedFhirPath.FhirPathNode previous = null;
@@ -285,5 +270,74 @@ public class ParsedFhirPathTest {
 		assertTrue(parsed.endsWithAnIndex());
 
 		assertTrue(parsed.getTail().hasListIndex());
+	}
+
+	static List<String> getAllValueNodesInput() {
+		List<String> list = new ArrayList<>();
+
+		list.add("");
+		list.add("Appointment.participant[0].actor.reference.startsWith('Patient'");
+
+		return list
+			.subList(1,2)
+			;
+	}
+
+	@Test
+	public void getAllValueNodes_test2() {
+		// setup
+		String path = "Appointment.participant[0].actor.reference.startsWith('Patient')";
+
+		ParsedFhirPath parsed = ParsedFhirPath.parse(path);
+
+		// test
+		List<ParsedFhirPath.FhirPathNode> ordered = new ArrayList<>();
+
+		parsed.getAllNodesWithPred(ordered, n -> true);
+		List<String> expected = new ArrayList<>(List.of("Appointment", "participant", "[0]", "actor", "reference", "startsWith", "'Patient'"));
+		assertEquals(expected.size(), ordered.size());
+		for (ParsedFhirPath.FhirPathNode node : ordered) {
+			assertEquals(expected.remove(0), node.getValue());
+		}
+
+		// test 2
+		ordered = new ArrayList<>();
+		parsed.getAllNodesWithPred(ordered, n -> n.isNormalPathNode());
+		expected = new ArrayList<>(
+			List.of("Appointment", "participant", "actor", "reference")
+		);
+		assertEquals(expected.size(), ordered.size());
+		for (ParsedFhirPath.FhirPathNode node : ordered) {
+			assertEquals(expected.remove(0), node.getValue());
+		}
+	}
+
+	@Test
+	public void getAllValueNodes() {
+		// setup
+		String path = "Appointment.participant.actor.where(reference.startsWith('Patient/')).first()";
+
+		ParsedFhirPath parsed = ParsedFhirPath.parse(path);
+
+		// test
+		List<ParsedFhirPath.FhirPathNode> nodes = new ArrayList<>();
+		parsed.getAllNodesWithPred(nodes, node -> node.isNormalPathNode());
+
+		// validate
+		List<String> expected = List.of("Appointment", "participant", "actor", "reference");
+		for (ParsedFhirPath.FhirPathNode node : nodes) {
+			assertTrue(expected.contains(node.getValue()));
+		}
+
+		// test 2
+		List<ParsedFhirPath.FhirPathNode> all = new ArrayList<>();
+		parsed.getAllNodesWithPred(all, n -> true);
+		expected = new ArrayList<>(List.of("Appointment", "participant", "actor", "where", "reference", "startsWith", "'Patient/'", "first"));
+		assertEquals(expected.size(), all.size());
+		for (int i = 0; i < all.size(); i++) {
+			String exp = expected.get(i);
+			ParsedFhirPath.FhirPathNode node = all.get(i);
+			assertEquals(exp, node.getValue());
+		}
 	}
 }

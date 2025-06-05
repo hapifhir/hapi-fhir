@@ -530,16 +530,52 @@ public class FhirPatch {
 
 	private ChildDefinition.ParentDefinition getParentDefinition(IBase theParentResource, ParsedFhirPath theParsedPath, IFhirPath theFhirPath, String theChildName) {
 		// the type we have is not an
-		String parentPath = theParsedPath.getPathUntilPreCondition(n -> n.getValue().equals(theChildName));
+		String lastNode = theParsedPath.getLastElementName();
+		List<ParsedFhirPath.FhirPathNode> allPathNodes = new ArrayList<>();
+		theParsedPath.getAllNodesWithPred(allPathNodes, ParsedFhirPath.FhirPathNode::isNormalPathNode);
+		StringBuilder sb = new StringBuilder();
+		ParsedFhirPath.FhirPathNode lastChild = theParsedPath.getHead();
+		for (ParsedFhirPath.FhirPathNode node : allPathNodes) {
+			if (node.getValue().equals(lastNode)) {
+				break;
+			}
+			if (!sb.isEmpty()) {
+				sb.append(".");
+			}
+			lastChild = node;
+			sb.append(node.getValue());
+		}
+		String parentPath = sb.toString();
 
 		List<IBase> elements = filterDown(List.of(theParentResource), theFhirPath, ParsedFhirPath.parse(parentPath));
 
 		String subPath = theParsedPath.getRawPath().substring(theParsedPath.getRawPath().indexOf(theChildName));
 
 		ParsedFhirPath parsedSubpath = ParsedFhirPath.parse(subPath);
-		if (isSubsettingNode(parsedSubpath.getTail())) {
-			subPath = truncatePath(parsedSubpath, parsedSubpath.getTail());
+		// 2 ways we can have a filter
+		// either the parent of this child is filtered;
+		// or the end child of this subpath is a filter
+		ParsedFhirPath.FhirPathNode filterNode = null;
+		if (isSubsettingNode(lastChild.getNext())) {
+			filterNode = lastChild.getNext();
+		} else if (isSubsettingNode(parsedSubpath.getTail())) {
+			filterNode = parsedSubpath.getTail();
+			subPath = subPath.substring(0, subPath.indexOf(filterNode.getValue()));
+			while (subPath.endsWith(".")) {
+				subPath = subPath.substring(0, subPath.length() - 1);
+			}
+
+			/*
+			 * if the filter is on the first child of the top level resource
+			 * (ie, Patient.name[1])
+			 * we do not need to filter, because there can only be 1 parent.
+			 * The filter is for the child only
+			 */
+			if (filterNode.getPrevious().getValue().equals(theParsedPath.getHead().getNext().getValue())) {
+				filterNode = null;
+			}
 		}
+
 		AtomicReference<String> subpathref = new AtomicReference<>();
 		subpathref.set(subPath);
 		elements = elements.stream()
@@ -547,7 +583,10 @@ public class FhirPatch {
 				Optional<IBase> matchedOp = theFhirPath.evaluateFirst(n, subpathref.get(), IBase.class);
 				return matchedOp.isPresent();
 			}).toList();
-		elements = applySubsettingFilter(parsedSubpath, parsedSubpath.getTail(), elements);
+
+		if (filterNode != null) {
+			elements = applySubsettingFilter(parsedSubpath, filterNode, elements);
+		}
 		if (elements.isEmpty()) {
 			// todo - handle
 			throw new InvalidRequestException("Should not get here");
@@ -576,6 +615,10 @@ public class FhirPatch {
 					childDefinition.setContainingElement(theElement);
 				} else {
 					childDefinition = generateChildDefinition(childName, elementDef);
+
+					ChildDefinition.ParentDefinition parentDefinition = getParentDefinition(theParentResource, theParsedPath, theFhirPath, childName);
+					childDefinition.setParentDefinition(parentDefinition);
+
 					childDefinition.setContainingElement(theElement);
 				}
 			}
