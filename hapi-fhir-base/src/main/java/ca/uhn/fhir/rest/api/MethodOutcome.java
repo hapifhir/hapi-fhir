@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
+import com.sun.net.httpserver.Headers;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public class MethodOutcome implements IHasHeaders {
 	private IIdType myId;
 	private IBaseOperationOutcome myOperationOutcome;
 	private IBaseResource myResource;
-	private Map<String, List<String>> myResponseHeaders;
+	private Headers myResponseHeaders; // HTTP Headers are case-insensitive.
 	private Collection<Runnable> myResourceViewCallbacks;
 	private Integer myResponseStatusCode;
 
@@ -192,7 +192,7 @@ public class MethodOutcome implements IHasHeaders {
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new HashMap<>();
+			myResponseHeaders = new Headers();
 		}
 		return myResponseHeaders;
 	}
@@ -201,7 +201,8 @@ public class MethodOutcome implements IHasHeaders {
 	 * Sets the headers for the HTTP response
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
-		myResponseHeaders = theResponseHeaders;
+		myResponseHeaders = new Headers();
+		myResponseHeaders.putAll(theResponseHeaders);
 	}
 
 	public Optional<String> getFirstResponseHeader(String theHeader) {
