@@ -114,7 +114,9 @@ public class ParsedFhirPath {
 
 		void setNext(FhirPathNode theNextNode) {
 			myNext = theNextNode;
-			theNextNode.setPrevious(this);
+			if (theNextNode != null) {
+				theNextNode.setPrevious(this);
+			}
 		}
 
 		public FhirPathNode getNext() {
@@ -259,6 +261,89 @@ public class ParsedFhirPath {
 
 	public boolean endsWithFilterOrIndex() {
 		return endsWithAFilter() || endsWithAnIndex();
+	}
+
+	public void sliceAt(FhirPathNode theNode) {
+		FhirPathNode node = getHead();
+		while (node != null) {
+			if (node.getValue().equals(theNode.getValue())) {
+				break;
+			}
+			node = node.getNext();
+		}
+
+		if (node == null) {
+			ourLog.error("Cannot slice");
+		} else {
+			setTail(node);
+			node.setNext(null);
+			setEndsWithFilter(node.isFilter());
+			setEndsWithAnIndex(node.hasListIndex());
+		}
+	}
+
+	public FhirPathNode getFirstNode(Predicate<FhirPathNode> thePred) {
+		ParsedFhirPath.FhirPathNode node = getHead();
+		while (node != null) {
+			if (thePred.test(node)) {
+				return node;
+			}
+			if (node instanceof FhirPathFunction fn && fn.hasContainedExp()) {
+				FhirPathNode subNode = fn.getContainedExp().getFirstNode(thePred);
+				if (subNode != null) {
+					return subNode;
+				}
+			}
+			node = node.getNext();
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the top level path from the provided from predicate to the provided to predicate
+	 *
+	 * Top level means it will not delve into subpaths.
+	 * So, given the example Patient.name.where(given.startsWith('homer')).first()
+	 * you cannot construct a path from "Patient" to "given"
+	 * @param theFromPred the inclusive beginning predicate
+	 * @param theToPred the exclusive ending predicate
+	 * @return
+	 */
+	public String getTopLevelPathFromTo(Predicate<FhirPathNode> theFromPred, Predicate<FhirPathNode> theToPred) {
+		FhirPathNode node = getHead();
+		StringBuilder sb = new StringBuilder();
+		boolean hasStarted = false;
+		while (node != null) {
+			if (!hasStarted) {
+				hasStarted = theFromPred.test(node);
+			}
+
+			if (hasStarted) {
+				if (theToPred.test(node)) {
+					break;
+				}
+
+				String nextVal = node.getValue();
+				if (!sb.isEmpty() && !nextVal.startsWith("[")) {
+					sb.append(".");
+				}
+
+				sb.append(nextVal);
+
+				if (node instanceof FhirPathFunction fn) {
+					sb.append("(");
+
+					// it is invalid to request a subpath until a nested value
+					if (fn.hasContainedExp()) {
+						sb.append(fn.getContainedExp().getRawPath());
+					}
+
+					sb.append(")");
+				}
+			}
+			node = node.getNext();
+		}
+		return sb.toString();
 	}
 
 	/**

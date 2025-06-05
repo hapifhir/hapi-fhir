@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -53,6 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * FhirPatch handler.
@@ -248,7 +250,14 @@ public class FhirPatch {
 		}
 		IBase elementToUse = containingElements.get(0);
 
+//		boolean isAList = parsedFhirPath.endsWithFilterOrIndex();
+//		ParsedFhirPath.FhirPathNode tail = parsedFhirPath.getTail();
+//		if (isAList) {
+//			parsedFhirPath.sliceAt(tail);
+//		}
+
 		ChildDefinition childDefinition = findChildDefinition(theResource, elementToUse, parsedFhirPath, fhirPath);
+//		childDefinition.getUsableChildElement().getChildType()
 
 		GetNewValueParameters params = new GetNewValueParameters();
 		params.ChildDefinition = childDefinition;
@@ -528,6 +537,34 @@ public class FhirPatch {
 		}
 	}
 
+	/**
+	 * Turns an invalid FhirPath into a valid one
+	 *
+	 * Do not use this for user input; but it can be used for internally parsed paths
+	 */
+	private String cleansePath(String thePath) {
+		String path = thePath;
+
+		// remove trailing .
+		while (path.endsWith(".")) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		// balance brackets
+		int openBrace = path.indexOf("(");
+		String remainder = "";
+		int endingIndex = path.length() - 1; // -1 because we add 1 on later, accounting for the exclusion of the ending index
+		while (openBrace != -1) {
+			int closing = RandomTextUtils.findMatchingClosingBrace(openBrace, path);
+			endingIndex = closing;
+			remainder = path.substring(closing + 1);
+			openBrace = remainder.indexOf("(");
+		}
+		path = path.substring(0, endingIndex + 1);
+
+		return path;
+	}
+
 	private ChildDefinition.ParentDefinition getParentDefinition(IBase theParentResource, ParsedFhirPath theParsedPath, IFhirPath theFhirPath, String theChildName) {
 		// the type we have is not an
 		String lastNode = theParsedPath.getLastElementName();
@@ -560,10 +597,9 @@ public class FhirPatch {
 			filterNode = lastChild.getNext();
 		} else if (isSubsettingNode(parsedSubpath.getTail())) {
 			filterNode = parsedSubpath.getTail();
+			// subpath from childName to filterNode
 			subPath = subPath.substring(0, subPath.indexOf(filterNode.getValue()));
-			while (subPath.endsWith(".")) {
-				subPath = subPath.substring(0, subPath.length() - 1);
-			}
+			subPath = cleansePath(subPath);
 
 			/*
 			 * if the filter is on the first child of the top level resource
@@ -606,6 +642,7 @@ public class FhirPatch {
 		ChildDefinition childDefinition = null;
 		switch (elementDef.getChildType()) {
 			case PRIMITIVE_DATATYPE, COMPOSITE_DATATYPE -> {
+				// if it's a primitive, we should get the parent as the 'child' and set the parent as the parent of the parent
 				BaseRuntimeChildDefinition childDef = elementDef.getChildByName(childName);
 
 				if (childDef == null) {

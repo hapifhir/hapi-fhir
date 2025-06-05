@@ -284,6 +284,18 @@ public class ParsedFhirPathTest {
 	}
 
 	@Test
+	public void subpath() {
+		// setup
+		String path = "Appointment.participant[0].actor.reference.startsWith('Patient').first()";
+
+		ParsedFhirPath parsed = ParsedFhirPath.parse(path);
+
+		// test
+		String subPath = parsed.getTopLevelPathFromTo(n -> n.getValue().equals("participant"), n -> n.getValue().equals("first"));
+		assertEquals("participant[0].actor.reference.startsWith('Patient')", subPath);
+	}
+
+	@Test
 	public void getAllValueNodes_test2() {
 		// setup
 		String path = "Appointment.participant[0].actor.reference.startsWith('Patient')";
