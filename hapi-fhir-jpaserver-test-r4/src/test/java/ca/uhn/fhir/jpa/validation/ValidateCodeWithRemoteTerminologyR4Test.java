@@ -8,12 +8,14 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
@@ -24,6 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -225,6 +232,46 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
 			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]");
+	}
+
+	@Test
+	public void validateCode_withValidCodeAndSystem_returnsIsValid() {
+
+		Parameters params = new Parameters().addParameter("result", true).addParameter("display", DISPLAY);
+		setupCodeSystemValidateCode(CODE_SYSTEM_V2_0247_URI, CODE_BODY_MASS_INDEX, params);
+
+		Parameters inputParam = new Parameters()
+			.addParameter("code", CODE_BODY_MASS_INDEX)
+			.addParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI));
+
+		Parameters respParam = myClient.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameters(inputParam)
+			.execute();
+
+		assertThat(respParam.getParameterBool("result")).isTrue();
+	}
+
+	@Test
+	void validateCode_withCodeableConcept_returnsNotSupported() {
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding()
+			.setSystem(CODE_SYSTEM_V2_0247_URI)
+			.setCode(CODE_BODY_MASS_INDEX);
+
+		Parameters inParams = new Parameters()
+			.addParameter("codeableConcept", cc);
+
+		Parameters respParam = myClient.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameters(inParams)
+			.execute();
+
+		assertThat(respParam.getParameterBool("result")).isFalse();
+		assertThat(respParam.getParameterValue("message"))
+			.hasToString("Terminology service does not yet support codeable concepts.");
 	}
 
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, IBaseParameters theResponseParams) {
