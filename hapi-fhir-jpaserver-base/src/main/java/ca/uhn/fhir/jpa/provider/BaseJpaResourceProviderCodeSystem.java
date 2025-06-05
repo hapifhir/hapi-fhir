@@ -32,6 +32,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -39,7 +41,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -166,7 +167,6 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				String display;
 
 				String url = getStringFromPrimitiveType(theUrl);
-
 				if (theCoding != null && isNotBlank(theCoding.getSystem())) {
 					if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
 						throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
@@ -176,13 +176,23 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 					url = theCoding.getSystem();
 					code = theCoding.getCode();
 					display = theCoding.getDisplay();
+					result = validateCodeWithTerminologyService(url, code, display)
+							.orElseGet(supplyUnableToValidateResult(url, code));
+				} else if (theCodeableConcept != null && !theCodeableConcept.isEmpty()) {
+					result = new CodeValidationResult()
+							.setMessage("Terminology service does not yet support codeable concepts.");
 				} else {
 					code = getStringFromPrimitiveType(theCode);
 					display = getStringFromPrimitiveType(theDisplay);
+					if (Strings.isNullOrEmpty(code) || Strings.isNullOrEmpty(url)) {
+						result = new CodeValidationResult()
+								.setMessage("When specifying systemUrl and code, neither can be empty");
+					} else {
+						result = validateCodeWithTerminologyService(url, code, display)
+								.orElseGet(supplyUnableToValidateResult(url, code));
+					}
 				}
 
-				result = validateCodeWithTerminologyService(url, code, display)
-						.orElseGet(supplyUnableToValidateResult(url, code));
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
@@ -204,8 +214,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 	}
 
 	private static @Nullable String getStringFromPrimitiveType(IPrimitiveType<String> thePrimitiveString) {
-		return (thePrimitiveString != null && thePrimitiveString.hasValue()) ?
-			thePrimitiveString.getValueAsString() : null;
+		return (thePrimitiveString != null && thePrimitiveString.hasValue())
+				? thePrimitiveString.getValueAsString()
+				: null;
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
