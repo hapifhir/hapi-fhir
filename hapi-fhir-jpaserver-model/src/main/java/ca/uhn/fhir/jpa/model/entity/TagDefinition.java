@@ -192,17 +192,11 @@ public class TagDefinition implements Serializable {
 		TagDefinition other = (TagDefinition) obj;
 
 		EqualsBuilder b = new EqualsBuilder();
-
-		if (myId != null && other.myId != null) {
-			b.append(myId, other.myId);
-		} else {
-			b.append(myTagType, other.myTagType);
-			b.append(mySystem, other.mySystem);
-			b.append(myCode, other.myCode);
-			b.append(myVersion, other.myVersion);
-			b.append(myUserSelected, other.myUserSelected);
-		}
-
+		b.append(myTagType, other.myTagType);
+		b.append(mySystem, other.mySystem);
+		b.append(myCode, other.myCode);
+		b.append(myVersion, other.myVersion);
+		b.append(myUserSelected, other.myUserSelected);
 		return b.isEquals();
 	}
 

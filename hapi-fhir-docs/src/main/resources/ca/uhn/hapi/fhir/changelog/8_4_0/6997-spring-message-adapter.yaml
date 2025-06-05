@@ -1,0 +1,6 @@
+---
+type: change
+issue: 6997
+title: "Updated SpringMessagingMessageHandlerAdapter to handle receiving a GenericMessage
+(this can happen when receiving a message over JMS from outside the system when there
+is no message converter configured on the JMS Template."
