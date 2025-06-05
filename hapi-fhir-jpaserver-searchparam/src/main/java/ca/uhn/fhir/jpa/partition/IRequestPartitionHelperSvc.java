@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
-import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -31,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
-public interface IRequestPartitionHelperSvc extends IDefaultPartitionSettings {
+public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	RequestPartitionId determineReadPartitionForRequest(
@@ -183,4 +182,37 @@ public interface IRequestPartitionHelperSvc extends IDefaultPartitionSettings {
 	 * @return - A {@link RequestPartitionId} with a normalized list of partition ids and partition names.
 	 */
 	RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
+
+	/**
+	 * This method returns the default partition ID. Implementers of this interface should overwrite this method to provide
+	 * a default partition ID that is different than the default value of null.
+	 *
+	 * @return the default partition ID
+	 */
+	@Nullable
+	default Integer getDefaultPartitionId() {
+		return null;
+	}
+
+	/**
+	 * Test whether <code>theRequestPartitionId</code> is only targeting the default partition where the ID of the default
+	 * partition is provided by {@link #getDefaultPartitionId()}.
+	 *
+	 * @param theRequestPartitionId to perform the evaluation upon.
+	 * @return true if the <code>theRequestPartitionId</code> is for the default partition only.
+	 */
+	default boolean isDefaultPartition(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId.isDefaultPartition(getDefaultPartitionId());
+	}
+
+	/**
+	 * Test whether <code>theRequestPartitionId</code> has one of its targeted partitions matching the default partition
+	 * where the ID of the default partition is provided by {@link #getDefaultPartitionId()}.
+	 *
+	 * @param theRequestPartitionId to perform the evaluation upon.
+	 * @return true if the <code>theRequestPartitionId</code> is targeting the default partition.
+	 */
+	default boolean hasDefaultPartitionId(@Nonnull RequestPartitionId theRequestPartitionId) {
+		return theRequestPartitionId.hasDefaultPartitionId(getDefaultPartitionId());
+	}
 }
