@@ -19,17 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
-import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.util.Optional;
 
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
 

@@ -151,7 +151,8 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 *
 	 * @since 5.0.0
 	 */
-	public PartitionSettings setAllowReferencesAcrossPartitions(CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
+	public PartitionSettings setAllowReferencesAcrossPartitions(
+			CrossPartitionReferenceMode theAllowReferencesAcrossPartitions) {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
 		return this;
 	}
