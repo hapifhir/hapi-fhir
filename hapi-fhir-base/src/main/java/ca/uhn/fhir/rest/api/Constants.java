@@ -69,7 +69,6 @@ public class Constants {
 	// ==============================================================
 
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
-	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
 
 	// ==============================================================
 	// Standard CORS headers
