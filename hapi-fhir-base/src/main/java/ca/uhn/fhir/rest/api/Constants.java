@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import org.apache.http.HttpHeaders;
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -39,30 +37,30 @@ public class Constants {
 	// Standard HTTP headers
 	// ==============================================================
 
-	public static final String HEADER_ACCEPT = HttpHeaders.ACCEPT;
-	public static final String HEADER_ACCEPT_ENCODING = HttpHeaders.ACCEPT_ENCODING;
-	public static final String HEADER_ALLOW = HttpHeaders.ALLOW;
-	public static final String HEADER_AUTHORIZATION = HttpHeaders.AUTHORIZATION;
-	public static final String HEADER_CACHE_CONTROL = HttpHeaders.CACHE_CONTROL;
-	public static final String HEADER_CONTENT_ENCODING = HttpHeaders.CONTENT_ENCODING;
-	public static final String HEADER_CONTENT_LOCATION = HttpHeaders.CONTENT_LOCATION;
+	public static final String HEADER_ACCEPT = "Accept";
+	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String HEADER_ALLOW = "Allow";
+	public static final String HEADER_AUTHORIZATION = "Authorization";
+	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
+	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
-	public static final String HEADER_CONTENT_TYPE = HttpHeaders.CONTENT_TYPE;
+	public static final String HEADER_CONTENT_TYPE = "Content-Type";
 	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
-	public static final String HEADER_ETAG = HttpHeaders.ETAG;
+	public static final String HEADER_ETAG = "ETag";
 	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
-	public static final String HEADER_IF_MATCH = HttpHeaders.IF_MATCH;
+	public static final String HEADER_IF_MATCH = "If-Match";
 	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
-	public static final String HEADER_IF_MODIFIED_SINCE = HttpHeaders.IF_MODIFIED_SINCE;
+	public static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
 	public static final String HEADER_IF_MODIFIED_SINCE_LC = HEADER_IF_MODIFIED_SINCE.toLowerCase();
-	public static final String HEADER_IF_NONE_MATCH = HttpHeaders.IF_NONE_MATCH;
+	public static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
-	public static final String HEADER_LAST_MODIFIED = HttpHeaders.LAST_MODIFIED;
+	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
-	public static final String HEADER_LOCATION = HttpHeaders.LOCATION;
+	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
-	public static final String HEADER_RETRY_AFTER = HttpHeaders.RETRY_AFTER;
-	public static final String HEADER_DATE = HttpHeaders.DATE;
+	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	public static final String HEADER_DATE = "Date";
 
 	// ==============================================================
 	// Standard FHIR headers

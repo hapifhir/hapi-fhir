@@ -70,10 +70,6 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-		</dependency>
 
 		<!-- JENA Dependencies - Used for Turtle encoding -->
 		<dependency>
