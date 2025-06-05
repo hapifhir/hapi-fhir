@@ -130,16 +130,19 @@ public class TestMessageListenerWithLatch<M extends IMessage<P>, P>
 	}
 
 	public P getLastReceivedMessagePayload() {
-		if (myReceivedMessages.isEmpty()) {
-			return null;
-		}
-		return myReceivedMessages.get(myReceivedMessages.size() - 1).getPayload();
+		M lastMessage = getLastReceivedMessage();
+		return lastMessage != null ? lastMessage.getPayload() : null;
 	}
 
 	public Map<String, Object> getLastReceivedMessageHeaders() {
+		M lastMessage = getLastReceivedMessage();
+		return lastMessage != null ? lastMessage.getHeaders() : null;
+	}
+
+	public M getLastReceivedMessage() {
 		if (myReceivedMessages.isEmpty()) {
 			return null;
 		}
-		return myReceivedMessages.get(myReceivedMessages.size() - 1).getHeaders();
+		return myReceivedMessages.get(myReceivedMessages.size() - 1);
 	}
 }

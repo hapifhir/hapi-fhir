@@ -1,15 +1,16 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.ALL_PARTITIONS_TENANT_NAME;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DEFAULT_PARTITION_NAME;
@@ -23,19 +24,20 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DEFAULT_PARTITI
  * </p>
  */
 public final class RequestPartitionHeaderUtil {
-	private RequestPartitionHeaderUtil() {}
+	private RequestPartitionHeaderUtil() {
+	}
 
 	/**
 	 * Parses the X-Request-Partition-IDs header value and converts it to a {@link RequestPartitionId} object.
 	 *
-	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
-	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
+	 * @param thePartitionHeaderValue     The value of the X-Request-Partition-IDs header, may be null
+	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
 	 * @return A {@link RequestPartitionId} object representing the partition(s) specified in the header, or null if the header is null
 	 * @throws InvalidRequestException If the header value is invalid
 	 */
 	@Nullable
 	public static RequestPartitionId fromHeader(
-		@Nullable String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
+		@Nullable String thePartitionHeaderValue, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(thePartitionHeaderValue, false, theDefaultPartitionSettings);
 	}
 
@@ -44,13 +46,13 @@ public final class RequestPartitionHeaderUtil {
 	 * including only the first partition ID from the header. This useful when using the RequestPartitionId for
 	 * a write operation.
 	 *
-	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
-	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
+	 * @param thePartitionHeaderValue     The value of the X-Request-Partition-IDs header, may be null
+	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
 	 * @return A {@link RequestPartitionId} object representing the first partition specified in the header, or null if the header is null
 	 * @throws InvalidRequestException If the header value is invalid
 	 */
 	@Nullable
-	public static RequestPartitionId fromHeaderFirstPartitionOnly(String thePartitionHeaderValue, IDefaultPartitionSettings theDefaultPartitionSettings) {
+	public static RequestPartitionId fromHeaderFirstPartitionOnly(String thePartitionHeaderValue, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(thePartitionHeaderValue, true, theDefaultPartitionSettings);
 	}
 
@@ -66,7 +68,8 @@ public final class RequestPartitionHeaderUtil {
 	 */
 	public static void validateHeader(String thePartitionHeaderValue) {
 		// We're only validating syntax, so it doesn't matter what the default partition id is
-		fromHeader(thePartitionHeaderValue, new PartitionSettings());
+		fromHeader(thePartitionHeaderValue, new IDefaultPartitionSettings() {
+		});
 	}
 
 	/**
@@ -81,17 +84,17 @@ public final class RequestPartitionHeaderUtil {
 	 * </ul>
 	 * </p>
 	 *
-	 * @param thePartitionHeaderValue      The value of the X-Request-Partition-IDs header, may be null
-	 * @param theIncludeOnlyTheFirst       If true, only the first partition ID in the header will be included in the result
-	 * @param theDefaultPartitionSettings  Settings that provide the default partition ID
+	 * @param thePartitionHeaderValue     The value of the X-Request-Partition-IDs header, may be null
+	 * @param theIncludeOnlyTheFirst      If true, only the first partition ID in the header will be included in the result
+	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
 	 * @return A {@link RequestPartitionId} object representing the partition(s) specified in the header, or null if the header is null
 	 * @throws InvalidRequestException If the header value is invalid
 	 */
 	@Nullable
 	private static RequestPartitionId fromHeader(
-			@Nullable String thePartitionHeaderValue,
-			boolean theIncludeOnlyTheFirst,
-			IDefaultPartitionSettings theDefaultPartitionSettings) {
+		@Nullable String thePartitionHeaderValue,
+		boolean theIncludeOnlyTheFirst,
+		@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (thePartitionHeaderValue == null) {
 			return null;
 		}
@@ -119,7 +122,7 @@ public final class RequestPartitionHeaderUtil {
 			// this case happens only when the header contains nothing but commas
 			// since we already checked for blank header before calling this function
 			String msg =
-					String.format("No partition IDs provided in header: %s", Constants.HEADER_X_REQUEST_PARTITION_IDS);
+				String.format("No partition IDs provided in header: %s", Constants.HEADER_X_REQUEST_PARTITION_IDS);
 			throw new InvalidRequestException(Msg.code(2645) + msg);
 		}
 
@@ -134,12 +137,12 @@ public final class RequestPartitionHeaderUtil {
 	 * </p>
 	 *
 	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
-	 * @param trimmedPartitionId The partition ID string to convert, already trimmed of whitespace
+	 * @param trimmedPartitionId          The partition ID string to convert, already trimmed of whitespace
 	 * @return The partition ID as an Integer, or null if the default partition ID is null
 	 * @throws InvalidRequestException If the partition ID string is not "DEFAULT" and cannot be parsed as an integer
 	 */
 	@Nullable
-	private static Integer getPartitionId(IDefaultPartitionSettings theDefaultPartitionSettings, String trimmedPartitionId) {
+	private static Integer getPartitionId(@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings, String trimmedPartitionId) {
 		Integer partitionId;
 
 		if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
@@ -149,11 +152,34 @@ public final class RequestPartitionHeaderUtil {
 				partitionId = Integer.parseInt(trimmedPartitionId);
 			} catch (NumberFormatException e) {
 				String msg = String.format(
-						"Invalid partition ID: '%s' provided in header: %s",
+					"Invalid partition ID: '%s' provided in header: %s",
 					trimmedPartitionId, Constants.HEADER_X_REQUEST_PARTITION_IDS);
 				throw new InvalidRequestException(Msg.code(2643) + msg);
 			}
 		}
 		return partitionId;
+	}
+
+	/**
+	 * Sets the partition ID on a message payload from the X-Request-Partition-IDs header if it's not already set.
+	 *
+	 * @param <T>                         The type of the payload, which must have methods for getting and setting a partition ID
+	 * @param theMessage                  The message containing the payload and headers
+	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
+	 */
+	public static <T> void setRequestPartitionIdFromHeaderIfNotAlreadySet(@Nonnull IMessage<T> theMessage, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+		if (theMessage.getPayload() instanceof BaseResourceMessage baseResourceMessage) {
+			if (baseResourceMessage.getPartitionId() != null) {
+				return;
+			}
+
+			Optional<Object> oHeader = theMessage.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
+			if (oHeader.isEmpty()) {
+				return;
+			}
+
+			RequestPartitionId headerPartitionId = RequestPartitionHeaderUtil.fromHeader((String) oHeader.get(), theDefaultPartitionSettings);
+			baseResourceMessage.setPartitionId(headerPartitionId);
+		}
 	}
 }

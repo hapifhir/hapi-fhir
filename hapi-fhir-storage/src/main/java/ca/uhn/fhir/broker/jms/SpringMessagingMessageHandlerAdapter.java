@@ -79,6 +79,7 @@ public class SpringMessagingMessageHandlerAdapter<T> implements MessageHandler {
 			return;
 		}
 
+
 		myMessageListener.handleMessage((IMessage<T>) message);
 	}
 

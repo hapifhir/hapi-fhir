@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import jakarta.annotation.Nonnull;
 

@@ -102,7 +102,7 @@ public class SubscriptionDeliveringMessageListener extends BaseSubscriptionDeliv
 				myDefaultPartitionSettings.getDefaultRequestPartitionId());
 		payload.setPayloadMessageKey(theMsg.getPayloadMessageKey());
 		payload.setTransactionId(theMsg.getTransactionId());
-		payload.setPartitionId(theMsg.getRequestPartitionId());
+		payload.setPartitionId(theMsg.getPartitionId());
 		return new ResourceModifiedJsonMessage(payload);
 	}
 
