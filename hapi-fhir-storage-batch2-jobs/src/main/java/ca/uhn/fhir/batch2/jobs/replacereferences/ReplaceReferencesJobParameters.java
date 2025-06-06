@@ -62,11 +62,12 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 
 	public ReplaceReferencesJobParameters() {}
 
-	public ReplaceReferencesJobParameters(ReplaceReferencesRequest theReplaceReferencesRequest,
-										  int theBatchSize,
-										  String theCurrentSourceVersion,
-										  String theCurrentTargetVersion,
-										  ProvenanceAgentJson theProvenanceAgent) {
+	public ReplaceReferencesJobParameters(
+			ReplaceReferencesRequest theReplaceReferencesRequest,
+			int theBatchSize,
+			String theCurrentSourceVersion,
+			String theCurrentTargetVersion,
+			ProvenanceAgentJson theProvenanceAgent) {
 
 		mySourceId = new FhirIdJson(theReplaceReferencesRequest.sourceId);
 		myTargetId = new FhirIdJson(theReplaceReferencesRequest.targetId);
@@ -117,7 +118,12 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 
 	public ReplaceReferencesRequest asReplaceReferencesRequest(FhirContext theFhirContext) {
 		return new ReplaceReferencesRequest(
-				mySourceId.asIdDt(), myTargetId.asIdDt(), myBatchSize, myPartitionId, myCreateProvenance, ProvenanceAgentJson.asIProvenanceAgent(myProvenanceAgent, theFhirContext));
+				mySourceId.asIdDt(),
+				myTargetId.asIdDt(),
+				myBatchSize,
+				myPartitionId,
+				myCreateProvenance,
+				ProvenanceAgentJson.asIProvenanceAgent(myProvenanceAgent, theFhirContext));
 	}
 
 	public String getCurrentSourceVersion() {
@@ -136,7 +142,7 @@ public class ReplaceReferencesJobParameters extends BatchJobParametersWithTaskId
 		this.myCurrentTargetVersion = theCurrentTargetVersion;
 	}
 
-	public ProvenanceAgentJson getProvenanceAgent(){
+	public ProvenanceAgentJson getProvenanceAgent() {
 		return myProvenanceAgent;
 	}
 

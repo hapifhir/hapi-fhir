@@ -3170,13 +3170,7 @@ public enum Pointcut implements IPointcut {
 	BATCH2_CHUNK_PROCESS_FILTER(
 			IInterceptorFilterHook.class, "ca.uhn.fhir.batch2.model.JobInstance", "ca.uhn.fhir.batch2.model.WorkChunk"),
 
-
-
-	PROVENANCE_AGENT(
-		IProvenanceAgent.class,
-		"ca.uhn.fhir.rest.api.server.RequestDetails"
-	),
-
+	PROVENANCE_AGENT(IProvenanceAgent.class, "ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

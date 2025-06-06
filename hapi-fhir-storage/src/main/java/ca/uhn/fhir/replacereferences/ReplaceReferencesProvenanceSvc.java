@@ -53,7 +53,6 @@ public class ReplaceReferencesProvenanceSvc {
 	private final IFhirResourceDao<Provenance> myProvenanceDao;
 	private final FhirContext myFhirContext;
 
-
 	public ReplaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
 		myProvenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
 		myFhirContext = theDaoRegistry.getFhirContext();
@@ -67,17 +66,17 @@ public class ReplaceReferencesProvenanceSvc {
 	}
 
 	protected Provenance createProvenanceObject(
-		Reference theTargetReference,
-		@Nullable Reference theSourceReference,
-		List<Reference> theUpdatedReferencingResources,
-		Date theStartTime,
-		IProvenanceAgent theProvenanceAgent) {
+			Reference theTargetReference,
+			@Nullable Reference theSourceReference,
+			List<Reference> theUpdatedReferencingResources,
+			Date theStartTime,
+			IProvenanceAgent theProvenanceAgent) {
 		Provenance provenance = new Provenance();
 
 		Date now = new Date();
 		provenance.setOccurred(new Period()
-			.setStart(theStartTime, TemporalPrecisionEnum.MILLI)
-			.setEnd(now, TemporalPrecisionEnum.MILLI));
+				.setStart(theStartTime, TemporalPrecisionEnum.MILLI)
+				.setEnd(now, TemporalPrecisionEnum.MILLI));
 		provenance.setRecorded(now);
 
 		if (theProvenanceAgent != null) {
@@ -91,12 +90,11 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 		CodeableConcept activityReasonCodeableConcept = new CodeableConcept();
 		activityReasonCodeableConcept
-			.addCoding()
-			.setSystem(ACT_REASON_CODE_SYSTEM)
-			.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
+				.addCoding()
+				.setSystem(ACT_REASON_CODE_SYSTEM)
+				.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
 
 		provenance.addReason(activityReasonCodeableConcept);
-
 
 		provenance.addTarget(theTargetReference);
 		if (theSourceReference != null) {
@@ -106,8 +104,6 @@ public class ReplaceReferencesProvenanceSvc {
 		theUpdatedReferencingResources.forEach(provenance::addTarget);
 		return provenance;
 	}
-
-
 
 	/**
 	 * Creates a Provenance resource for the $replace-references and $merge operations.
@@ -119,19 +115,20 @@ public class ReplaceReferencesProvenanceSvc {
 	 * @param theRequestDetails     the request details
 	 */
 	public void createProvenance(
-		IIdType theTargetId,
-		@Nullable IIdType theSourceId,
-		List<Bundle> thePatchResultBundles,
-		Date theStartTime,
-		RequestDetails theRequestDetails,
-		IProvenanceAgent theProvenanceAgent) {
+			IIdType theTargetId,
+			@Nullable IIdType theSourceId,
+			List<Bundle> thePatchResultBundles,
+			Date theStartTime,
+			RequestDetails theRequestDetails,
+			IProvenanceAgent theProvenanceAgent) {
 		Reference targetReference = new Reference(theTargetId);
 		Reference sourceReference = null;
 		if (theSourceId != null) {
 			sourceReference = new Reference(theSourceId);
 		}
 		List<Reference> references = extractUpdatedResourceReferences(thePatchResultBundles);
-		Provenance provenance = createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgent);
+		Provenance provenance =
+				createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgent);
 		myProvenanceDao.create(provenance, theRequestDetails);
 	}
 
@@ -151,7 +148,6 @@ public class ReplaceReferencesProvenanceSvc {
 		return patchedResourceReferences;
 	}
 
-
 	private Provenance.ProvenanceAgentComponent createR4ProvenanceAgent(IProvenanceAgent theProvenanceAgent) {
 		Provenance.ProvenanceAgentComponent agent = new Provenance.ProvenanceAgentComponent();
 		Reference whoRef = convertToR4Reference(theProvenanceAgent.getWho());
@@ -170,6 +166,4 @@ public class ReplaceReferencesProvenanceSvc {
 		terser.cloneInto(sourceRef, targetRef, false);
 		return targetRef;
 	}
-
-
 }

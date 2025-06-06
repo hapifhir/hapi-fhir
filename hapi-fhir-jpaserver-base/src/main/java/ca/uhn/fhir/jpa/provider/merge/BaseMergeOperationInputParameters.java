@@ -48,7 +48,6 @@ public abstract class BaseMergeOperationInputParameters {
 	private final int myResourceLimit;
 	private IProvenanceAgent myProvenanceAgent;
 
-
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
 	}

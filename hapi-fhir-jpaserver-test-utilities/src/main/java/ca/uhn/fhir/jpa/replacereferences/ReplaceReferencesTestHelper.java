@@ -125,6 +125,7 @@ public class ReplaceReferencesTestHelper {
 	private final FhirContext myFhirContext;
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
 	private final IParser myJsonParser;
+
 	public ReplaceReferencesTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myPatientDao = (IFhirResourceDaoPatient<Patient>) theDaoRegistry.getResourceDao(Patient.class);
@@ -229,9 +230,10 @@ public class ReplaceReferencesTestHelper {
 		return searchBundle.getAllResources();
 	}
 
-	public void assertReplaceReferencesProvenance(String theExpectedSourcePatientVersion,
-												  String theExpectedTargetPatientVersion,
-												  @Nullable IProvenanceAgent theExpectedAgent) {
+	public void assertReplaceReferencesProvenance(
+			String theExpectedSourcePatientVersion,
+			String theExpectedTargetPatientVersion,
+			@Nullable IProvenanceAgent theExpectedAgent) {
 		List<IBaseResource> provenances =
 				searchProvenance(myTargetPatientId.toVersionless().getIdPart());
 		assertThat(provenances).hasSize(1);
@@ -243,20 +245,26 @@ public class ReplaceReferencesTestHelper {
 		// the first target reference should be the target patient
 		String targetPatientReferenceInProvenance =
 				provenance.getTarget().get(0).getReference();
-		assertThat(targetPatientReferenceInProvenance).isEqualTo(myTargetPatientId.withVersion(theExpectedTargetPatientVersion).toString());
+		assertThat(targetPatientReferenceInProvenance)
+				.isEqualTo(myTargetPatientId
+						.withVersion(theExpectedTargetPatientVersion)
+						.toString());
 		// the second target reference should be the source patient
 		String sourcePatientReference = provenance.getTarget().get(1).getReference();
-		assertThat(sourcePatientReference).isEqualTo(mySourcePatientId.withVersion(theExpectedSourcePatientVersion).toString());
+		assertThat(sourcePatientReference)
+				.isEqualTo(mySourcePatientId
+						.withVersion(theExpectedSourcePatientVersion)
+						.toString());
 
 		Set<String> allActualTargets = extractResourceIdsFromProvenanceTarget(provenance.getTarget());
 		assertThat(allActualTargets).containsAll(getExpectedProvenanceTargetsForPatchedResources());
 
 		if (theExpectedAgent != null) {
 			assertThat(provenance.getAgent()).hasSize(1);
-			Provenance.ProvenanceAgentComponent actualAgent = provenance.getAgent().get(0);
+			Provenance.ProvenanceAgentComponent actualAgent =
+					provenance.getAgent().get(0);
 			assertEqualAgents(theExpectedAgent, actualAgent);
 		}
-
 
 		Instant now = Instant.now();
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
@@ -292,12 +300,12 @@ public class ReplaceReferencesTestHelper {
 	}
 
 	public void assertMergeProvenance(
-		boolean theDeleteSource,
-		IIdType theSourcePatientIdWithExpectedVersion,
-		IIdType theTargetPatientIdWithExpectedVersion,
-		int theExpectedPatches,
-		Set<String> theExpectedProvenanceTargetsForPatchedResources,
-		ProvenanceAgent theExpectedProvenanceAgent) {
+			boolean theDeleteSource,
+			IIdType theSourcePatientIdWithExpectedVersion,
+			IIdType theTargetPatientIdWithExpectedVersion,
+			int theExpectedPatches,
+			Set<String> theExpectedProvenanceTargetsForPatchedResources,
+			ProvenanceAgent theExpectedProvenanceAgent) {
 
 		List<IBaseResource> provenances = searchProvenance(
 				theTargetPatientIdWithExpectedVersion.toVersionless().getIdPart());
@@ -653,7 +661,6 @@ public class ReplaceReferencesTestHelper {
 			Identifier actualIdentifier = theActualIdentifiers.get(i);
 			assertThat(expectedIdentifier.equalsDeep(actualIdentifier)).isTrue();
 		}
-
 	}
 
 	private static Set<String> extractResourceIdsFromProvenanceTarget(List<Reference> theTargets) {
@@ -664,23 +671,24 @@ public class ReplaceReferencesTestHelper {
 				.collect(Collectors.toSet());
 	}
 
-	private void assertEqualReferences(IBaseReference theRef1, IBaseReference theRef2)
-	{
+	private void assertEqualReferences(IBaseReference theRef1, IBaseReference theRef2) {
 		// xor checks if one is null and the other is not
 		if (theRef1 == null ^ theRef2 == null) {
-			Assertions.fail("One of the references is null but the other is not - ref1: " + theRef1 + ", ref2: " + theRef2);
+			Assertions.fail(
+					"One of the references is null but the other is not - ref1: " + theRef1 + ", ref2: " + theRef2);
 		}
 		if (theRef1 == theRef2) {
-			//handles the case where both are null as well
+			// handles the case where both are null as well
 			return;
 		}
 		assertThat(myJsonParser.encodeToString(theRef1)).isEqualTo(myJsonParser.encodeToString(theRef2));
 	}
 
-	private void assertEqualAgents(IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
+	private void assertEqualAgents(
+			IProvenanceAgent theExpectedAgent, Provenance.ProvenanceAgentComponent theActualAgent) {
 		Reference theActualWho = theActualAgent.hasWho() ? theActualAgent.getWho() : null;
 		Reference theActualOnBehalfOf = theActualAgent.hasOnBehalfOf() ? theActualAgent.getOnBehalfOf() : null;
 		assertEqualReferences(theActualWho, theExpectedAgent.getWho());
-	    assertEqualReferences(theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
+		assertEqualReferences(theActualOnBehalfOf, theExpectedAgent.getOnBehalfOf());
 	}
 }

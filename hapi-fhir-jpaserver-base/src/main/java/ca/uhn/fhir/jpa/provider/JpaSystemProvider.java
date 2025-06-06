@@ -199,11 +199,10 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
 
-
-			IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theServletRequest);
-			IProvenanceAgent provenanceAgent = (IProvenanceAgent) compositeBroadcaster
-				.ifHasCallHooksAndReturnObject(Pointcut.PROVENANCE_AGENT, () -> new HookParams().add(RequestDetails.class, theServletRequest));
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					myInterceptorBroadcaster, theServletRequest);
+			IProvenanceAgent provenanceAgent = (IProvenanceAgent) compositeBroadcaster.ifHasCallHooksAndReturnObject(
+					Pointcut.PROVENANCE_AGENT, () -> new HookParams().add(RequestDetails.class, theServletRequest));
 
 			ReplaceReferencesRequest replaceReferencesRequest =
 					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId, true, provenanceAgent);

@@ -21,11 +21,11 @@ package ca.uhn.fhir.replacereferences;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import ca.uhn.fhir.model.api.IProvenanceAgent;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_SOURCE_REFERENCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_REPLACE_REFERENCES_PARAM_TARGET_REFERENCE_ID;
@@ -53,12 +53,12 @@ public class ReplaceReferencesRequest {
 	public final IProvenanceAgent provenanceAgent;
 
 	public ReplaceReferencesRequest(
-		@Nonnull IIdType theSourceId,
-		@Nonnull IIdType theTargetId,
-		int theResourceLimit,
-		RequestPartitionId thePartitionId,
-		boolean theCreateProvenance,
-		@Nullable IProvenanceAgent theProvenanceAgent) {
+			@Nonnull IIdType theSourceId,
+			@Nonnull IIdType theTargetId,
+			int theResourceLimit,
+			RequestPartitionId thePartitionId,
+			boolean theCreateProvenance,
+			@Nullable IProvenanceAgent theProvenanceAgent) {
 		sourceId = theSourceId.toUnqualifiedVersionless();
 		targetId = theTargetId.toUnqualifiedVersionless();
 		resourceLimit = theResourceLimit;

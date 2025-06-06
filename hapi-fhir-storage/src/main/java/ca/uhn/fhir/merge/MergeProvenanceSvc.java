@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.merge;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import org.hl7.fhir.r4.model.CodeableConcept;
 
 /**

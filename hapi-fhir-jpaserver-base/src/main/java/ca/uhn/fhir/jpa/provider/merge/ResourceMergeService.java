@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
-import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -33,6 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;

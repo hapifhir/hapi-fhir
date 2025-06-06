@@ -22,17 +22,17 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ProvenanceAgentJson;
 import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -67,6 +67,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final JpaStorageSettings myStorageSettings;
 	private final ReplaceReferencesProvenanceSvc myReplaceReferencesProvenanceSvc;
 	private final FhirContext myFhirContext;
+
 	public ReplaceReferencesSvcImpl(
 			DaoRegistry theDaoRegistry,
 			HapiTransactionService theHapiTransactionService,
@@ -74,8 +75,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			IJobCoordinator theJobCoordinator,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
 			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings
-	) {
+			JpaStorageSettings theStorageSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myResourceLinkDao = theResourceLinkDao;
@@ -96,9 +96,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		IBaseResource targetResource = readResource(theReplaceReferencesRequest.targetId, theRequestDetails);
 
 		if (theRequestDetails.isPreferAsync()) {
-			return replaceReferencesPreferAsync(theReplaceReferencesRequest, theRequestDetails, sourceResource, targetResource);
+			return replaceReferencesPreferAsync(
+					theReplaceReferencesRequest, theRequestDetails, sourceResource, targetResource);
 		} else {
-			return replaceReferencesPreferSync(theReplaceReferencesRequest, theRequestDetails, sourceResource, targetResource);
+			return replaceReferencesPreferSync(
+					theReplaceReferencesRequest, theRequestDetails, sourceResource, targetResource);
 		}
 	}
 
@@ -111,18 +113,17 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	}
 
 	private IBaseParameters replaceReferencesPreferAsync(
-		ReplaceReferencesRequest theReplaceReferencesRequest,
-		RequestDetails theRequestDetails,
-		IBaseResource theSourceResource,
-		IBaseResource theTargetResource) {
+			ReplaceReferencesRequest theReplaceReferencesRequest,
+			RequestDetails theRequestDetails,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource) {
 
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters(
-			theReplaceReferencesRequest,
-			myStorageSettings.getDefaultTransactionEntriesForWrite(),
-			theSourceResource.getIdElement().getVersionIdPart(),
-			theTargetResource.getIdElement().getVersionIdPart(),
-			ProvenanceAgentJson.from(theReplaceReferencesRequest.provenanceAgent, myFhirContext)
-		);
+				theReplaceReferencesRequest,
+				myStorageSettings.getDefaultTransactionEntriesForWrite(),
+				theSourceResource.getIdElement().getVersionIdPart(),
+				theTargetResource.getIdElement().getVersionIdPart(),
+				ProvenanceAgentJson.from(theReplaceReferencesRequest.provenanceAgent, myFhirContext));
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myDaoRegistry.getResourceDao(Task.class),
@@ -145,13 +146,12 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	 */
 	@Nonnull
 	private IBaseParameters replaceReferencesPreferSync(
-		ReplaceReferencesRequest theReplaceReferencesRequest,
-		RequestDetails theRequestDetails,
-		IBaseResource theSourceResource,
-		IBaseResource theTargetResource) {
+			ReplaceReferencesRequest theReplaceReferencesRequest,
+			RequestDetails theRequestDetails,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource) {
 
 		Date startTime = new Date();
-
 
 		StopLimitAccumulator<IdDt> accumulator = myHapiTransactionService
 				.withRequest(theRequestDetails)
@@ -171,13 +171,13 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 
 		if (theReplaceReferencesRequest.createProvenance) {
 			myReplaceReferencesProvenanceSvc.createProvenance(
-				//we need to use versioned ids for the Provenance resource
-				theTargetResource.getIdElement().toUnqualified(),
-				theSourceResource.getIdElement().toUnqualified(),
-				List.of(result),
-				startTime,
-				theRequestDetails,
-				theReplaceReferencesRequest.provenanceAgent);
+					// we need to use versioned ids for the Provenance resource
+					theTargetResource.getIdElement().toUnqualified(),
+					theSourceResource.getIdElement().toUnqualified(),
+					List.of(result),
+					startTime,
+					theRequestDetails,
+					theReplaceReferencesRequest.provenanceAgent);
 		}
 
 		Parameters retval = new Parameters();
@@ -204,5 +204,3 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		return resourceDao.read(theId, theRequestDetails);
 	}
 }
-
-

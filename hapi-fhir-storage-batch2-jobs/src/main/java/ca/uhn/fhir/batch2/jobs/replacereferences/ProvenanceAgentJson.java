@@ -13,7 +13,6 @@ public class ProvenanceAgentJson {
 	@JsonProperty("who")
 	private String myWho;
 
-
 	@JsonProperty("onBehalfOf")
 	private String myOnBehalfOf;
 
@@ -39,7 +38,7 @@ public class ProvenanceAgentJson {
 		}
 		IParser parser = theFhirContext.newJsonParser();
 		ProvenanceAgentJson retVal = new ProvenanceAgentJson();
-		if( theProvenanceAgent.getWho() != null ) {
+		if (theProvenanceAgent.getWho() != null) {
 			retVal.myWho = parser.encodeToString(theProvenanceAgent.getWho());
 		}
 		if (theProvenanceAgent.getOnBehalfOf() != null) {
@@ -48,7 +47,8 @@ public class ProvenanceAgentJson {
 		return retVal;
 	}
 
-	public static IProvenanceAgent asIProvenanceAgent(@Nullable ProvenanceAgentJson theProvenanceAgentJson, FhirContext theFhirContext) {
+	public static IProvenanceAgent asIProvenanceAgent(
+			@Nullable ProvenanceAgentJson theProvenanceAgentJson, FhirContext theFhirContext) {
 		if (theProvenanceAgentJson == null) {
 			return null;
 		}
@@ -65,5 +65,4 @@ public class ProvenanceAgentJson {
 		}
 		return provAgent;
 	}
-
 }

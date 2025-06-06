@@ -6,5 +6,6 @@ import java.io.Serializable;
 
 public interface IProvenanceAgent extends Serializable {
 	IBaseReference getWho();
+
 	IBaseReference getOnBehalfOf();
 }

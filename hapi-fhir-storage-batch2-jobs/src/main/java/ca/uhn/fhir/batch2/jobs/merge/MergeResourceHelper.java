@@ -93,15 +93,15 @@ public class MergeResourceHelper {
 	}
 
 	public Patient updateMergedResourcesAndCreateProvenance(
-		IHapiTransactionService myHapiTransactionService,
-		Patient theSourceResource,
-		Patient theTargetResource,
-		List<Bundle> thePatchResultBundles,
-		@Nullable Patient theResultResource,
-		boolean theDeleteSource,
-		RequestDetails theRequestDetails,
-		Date theStartTime,
-		IProvenanceAgent theProvenanceAgent) {
+			IHapiTransactionService myHapiTransactionService,
+			Patient theSourceResource,
+			Patient theTargetResource,
+			List<Bundle> thePatchResultBundles,
+			@Nullable Patient theResultResource,
+			boolean theDeleteSource,
+			RequestDetails theRequestDetails,
+			Date theStartTime,
+			IProvenanceAgent theProvenanceAgent) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -120,7 +120,7 @@ public class MergeResourceHelper {
 			myProvenanceSvc.createProvenance(
 					targetPatientAfterUpdate.get().getIdElement(),
 					theDeleteSource ? null : sourcePatientAfterUpdate.getIdElement(),
-				    thePatchResultBundles,
+					thePatchResultBundles,
 					theStartTime,
 					theRequestDetails,
 					theProvenanceAgent);
