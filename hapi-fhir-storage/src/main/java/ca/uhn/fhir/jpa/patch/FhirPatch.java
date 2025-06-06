@@ -1001,6 +1001,24 @@ public class FhirPatch {
 			if (filterPath.startsWith(newHead.getValue()) && !filterPath.equalsIgnoreCase(newHead.getValue())) {
 				filterPath = filterPath.substring(newHead.getValue().length());
 				filterPath = cleansePath(filterPath);
+
+				if (newPath.getHead().getNext() != null && isSubsettingNode(newPath.getHead().getNext())) {
+					// yet another filter node
+					ParsedFhirPath.FhirPathNode filterNode = newPath.getHead().getNext();
+					filteringNodes.push(filterNode);
+
+					String newRaw = newPath.getRawPath();
+					String updated = "";
+					if (filterNode.hasNext()) {
+						updated = newRaw.substring(
+							newRaw.indexOf(filterNode.getNext().getValue())
+						);
+						updated = cleansePath(updated);
+					}
+					filterPath = updated;
+					updated = newPath.getHead().getValue() + "." + updated;
+					newPath = ParsedFhirPath.parse(updated);
+				}
 			}
 
 			if (isNotBlank(filterPath)) {
