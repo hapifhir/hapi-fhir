@@ -192,7 +192,7 @@ public class MethodOutcome implements IHasHeaders {
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);  // HTTP Headers are case-insensitive.
+			myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
 		}
 		return myResponseHeaders;
 	}
@@ -201,7 +201,7 @@ public class MethodOutcome implements IHasHeaders {
 	 * Sets the headers for the HTTP response
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
-		myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);  // HTTP Headers are case-insensitive.
+		myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
 		myResponseHeaders.putAll(theResponseHeaders);
 	}
 
