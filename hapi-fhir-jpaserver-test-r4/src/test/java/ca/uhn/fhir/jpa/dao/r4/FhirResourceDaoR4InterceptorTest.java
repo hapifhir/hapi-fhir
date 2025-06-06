@@ -637,9 +637,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.addName().setFamily("2");
 		myPatientDao.update(p);
 
-		verify(interceptor, times(1)).resourceCreated(any(), any());
-		verify(interceptor, times(1)).resourceUpdated(any(), any());
-		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
+		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
+		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any());
+		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any(), any());
 	}
 
 	private class MyOneResourceAnswer implements Answer {

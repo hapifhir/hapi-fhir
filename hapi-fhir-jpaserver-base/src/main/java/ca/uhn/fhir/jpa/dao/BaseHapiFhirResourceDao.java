@@ -712,10 +712,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private boolean isSystemRequest(RequestDetails theRequest) {
-		if (theRequest instanceof SystemRequestDetails) {
-			return theRequest.getCompleteUrl() != null;
-		}
-		return false;
+		return theRequest instanceof SystemRequestDetails;
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {
@@ -2418,9 +2415,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId) {
 		DaoMethodOutcome outcome = null;
-		if (theRequest == null) {
-			theRequest = new SystemRequestDetails();
-		}
 		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 

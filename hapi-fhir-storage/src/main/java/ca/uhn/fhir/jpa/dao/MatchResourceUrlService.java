@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -95,12 +94,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			String theMatchUrl,
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
-			// todo push non-null higher up here.
-			@Nullable RequestDetails theRequest,
+			RequestDetails theRequest,
 			RequestPartitionId thePartitionId) {
-		if (theRequest == null) {
-			theRequest = new SystemRequestDetails();
-		}
 		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null, thePartitionId);
 	}
 
@@ -111,7 +106,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			String theMatchUrl,
 			Class<R> theResourceType,
 			TransactionDetails theTransactionDetails,
-			@Nonnull RequestDetails theRequest,
+			RequestDetails theRequest,
 			IBaseResource theConditionalOperationTargetOrNull,
 			RequestPartitionId thePartitionId) {
 		Set<T> retVal = null;
@@ -307,7 +302,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 			String theMatchUrl,
 			T theResourcePersistentId) {
 		Validate.notBlank(theMatchUrl);
-		Objects.requireNonNull(theResourcePersistentId);
+		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 		theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, theResourcePersistentId);
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
