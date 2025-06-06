@@ -94,8 +94,10 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 
 	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, ?> theCustomHeaders) {
 		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
-			theCustomHeaders.forEach(
-					(key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
+			baseJsonMessage.getHapiHeaders().getCustomHeaders().putAll(theCustomHeaders);
+			// FIXME KHS
+//			theCustomHeaders.forEach(
+//					(key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
 		}
 	}
 }
