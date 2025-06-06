@@ -2384,8 +2384,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled()
 				&& theRequest != null
 				&& theRequest.isRewriteHistory()) {
-			updateCallback = () ->
-					doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
+			updateCallback = () -> doUpdateWithHistoryRewrite(
+					theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
 			updateCallback = () -> doUpdate(
 					theResource,
@@ -2666,10 +2666,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				&& Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
 		IBasePersistedResource<?> savedEntity = updateHistoryEntity(
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
-		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequest, savedEntity, theResource, null, theRestOperationType)
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource, null, theRestOperationType)
 				.setCreated(wasDeleted);
-		//todo jdjd this might be a bug, i don't think you have to setcreated because you updated it so it should be undeleted?
+		// todo jdjd this might be a bug, i don't think you have to setcreated because you updated it so it should be
+		// undeleted?
 		// if it is current version is deleted, rewrite current version --> should it be undeleted?
 		// does patch count as an "update" in the non-rewrite case
 

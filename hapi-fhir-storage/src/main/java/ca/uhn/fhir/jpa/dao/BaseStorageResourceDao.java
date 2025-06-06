@@ -89,17 +89,17 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		return getTransactionService()
-			.withRequest(theRequestDetails)
-			.withTransactionDetails(transactionDetails)
-			.execute(tx -> patchInTransaction(
-				theId,
-				theConditionalUrl,
-				true,
-				thePatchType,
-				thePatchBody,
-				theFhirPatchBody,
-				theRequestDetails,
-				transactionDetails));
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(transactionDetails)
+				.execute(tx -> patchInTransaction(
+						theId,
+						theConditionalUrl,
+						true,
+						thePatchType,
+						thePatchBody,
+						theFhirPatchBody,
+						theRequestDetails,
+						transactionDetails));
 	}
 
 	@Override
@@ -115,21 +115,22 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		boolean isHistoryRewrite = myStorageSettings.isUpdateWithHistoryRewriteEnabled()
-			&& theRequestDetails != null
-			&& theRequestDetails.isRewriteHistory();
+				&& theRequestDetails != null
+				&& theRequestDetails.isRewriteHistory();
 
 		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-			.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
+				.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName());
 
 		if (isHistoryRewrite && !theId.hasVersionIdPart()) {
 			throw new InvalidRequestException(
-				Msg.code(2717) + "Invalid resource ID for rewrite history: ID must contain a history version");
+					Msg.code(2717) + "Invalid resource ID for rewrite history: ID must contain a history version");
 		}
 
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
-			entityToUpdate = getEntityToPatchWithMatchUrlCache(theConditionalUrl, theRequestDetails, theTransactionDetails);
+			entityToUpdate =
+					getEntityToPatchWithMatchUrlCache(theConditionalUrl, theRequestDetails, theTransactionDetails);
 			resourceId = entityToUpdate.getIdDt();
 		} else {
 			resourceId = theId;
@@ -153,7 +154,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			resourceToUpdate = theTransactionDetails.getResolvedResource(resourceId);
 		}
 
-		IBaseResource destination = applyPatchToResource(thePatchType, thePatchBody, theFhirPatchBody, resourceToUpdate);
+		IBaseResource destination =
+				applyPatchToResource(thePatchType, thePatchBody, theFhirPatchBody, resourceToUpdate);
 		@SuppressWarnings("unchecked")
 		T destinationCasted = (T) destination;
 
@@ -161,10 +163,14 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		if (isHistoryRewrite) {
 			return getTransactionService()
-				.withRequest(theRequestDetails)
-				.withTransactionDetails(theTransactionDetails)
-				.execute(
-					tx -> doUpdateWithHistoryRewrite(destinationCasted, theRequestDetails, theTransactionDetails, theRequestPartitionId, RestOperationTypeEnum.PATCH));
+					.withRequest(theRequestDetails)
+					.withTransactionDetails(theTransactionDetails)
+					.execute(tx -> doUpdateWithHistoryRewrite(
+							destinationCasted,
+							theRequestDetails,
+							theTransactionDetails,
+							theRequestPartitionId,
+							RestOperationTypeEnum.PATCH));
 		}
 
 		UpdateParameters updateParameters = new UpdateParameters<>()
@@ -185,16 +191,16 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	private static void validateIsCurrentVersionOrThrow(IIdType theId, IBasePersistedResource theEntityToUpdate) {
 		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong() != theEntityToUpdate.getVersion()) {
 			throw new ResourceVersionConflictException(Msg.code(974) + "Version " + theId.getVersionIdPart()
-				+ " is not the most recent version of this resource, unable to apply patch");
+					+ " is not the most recent version of this resource, unable to apply patch");
 		}
 	}
 
 	DaoMethodOutcome doUpdateWithHistoryRewrite(
-		T theResource,
-		RequestDetails theRequest,
-		TransactionDetails theTransactionDetails,
-		RequestPartitionId theRequestPartitionId,
-		RestOperationTypeEnum theRestOperationType) {
+			T theResource,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId,
+			RestOperationTypeEnum theRestOperationType) {
 
 		throw new UnsupportedOperationException(Msg.code(2718) + "Patch with history rewrite is unsupported.");
 	}
@@ -205,7 +211,11 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 	}
 
-	private IBaseResource applyPatchToResource(PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, IBaseResource theResourceToUpdate) {
+	private IBaseResource applyPatchToResource(
+			PatchTypeEnum thePatchType,
+			String thePatchBody,
+			IBaseParameters theFhirPatchBody,
+			IBaseResource theResourceToUpdate) {
 		IBaseResource destination;
 		switch (thePatchType) {
 			case JSON_PATCH:
@@ -225,18 +235,19 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		return destination;
 	}
 
-	private IBasePersistedResource getEntityToPatchWithMatchUrlCache(String theConditionalUrl, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	private IBasePersistedResource getEntityToPatchWithMatchUrlCache(
+			String theConditionalUrl, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		IBasePersistedResource theEntityToUpdate;
 		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
 				.determineReadPartitionForRequestForSearchType(
-					theRequestDetails, getResourceType().getTypeName());
+						theRequestDetails, getResourceType().getTypeName());
 
 		Set<IResourcePersistentId> match = getMatchResourceUrlService()
 				.processMatchUrl(
-					theConditionalUrl,
+						theConditionalUrl,
 						getResourceType(),
-					theTransactionDetails,
-					theRequestDetails,
+						theTransactionDetails,
+						theRequestDetails,
 						theRequestPartitionId);
 		if (match.size() > 1) {
 			String msg = getContext()
@@ -246,7 +257,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 							"transactionOperationWithMultipleMatchFailure",
 							"PATCH",
 							getResourceName(),
-						theConditionalUrl,
+							theConditionalUrl,
 							match.size());
 			throw new PreconditionFailedException(Msg.code(972) + msg);
 		} else if (match.size() == 1) {
