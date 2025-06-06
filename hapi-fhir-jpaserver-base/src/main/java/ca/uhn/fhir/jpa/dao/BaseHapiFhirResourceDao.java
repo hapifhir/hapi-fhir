@@ -712,7 +712,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private boolean isSystemRequest(RequestDetails theRequest) {
-		return theRequest instanceof SystemRequestDetails;
+		if (theRequest instanceof SystemRequestDetails) {
+			return theRequest.getCompleteUrl() != null;
+		}
+		return false;
 	}
 
 	private IInstanceValidatorModule getInstanceValidator() {
