@@ -20,7 +20,6 @@
 package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public class MethodOutcome implements IHasHeaders {
 
@@ -38,7 +38,7 @@ public class MethodOutcome implements IHasHeaders {
 	private IIdType myId;
 	private IBaseOperationOutcome myOperationOutcome;
 	private IBaseResource myResource;
-	private CaseInsensitiveMap<String, List<String>> myResponseHeaders; // HTTP Headers are case-insensitive.
+	private Map<String, List<String>> myResponseHeaders;
 	private Collection<Runnable> myResourceViewCallbacks;
 	private Integer myResponseStatusCode;
 
@@ -192,7 +192,7 @@ public class MethodOutcome implements IHasHeaders {
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new CaseInsensitiveMap<>();
+			myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);  // HTTP Headers are case-insensitive.
 		}
 		return myResponseHeaders;
 	}
@@ -201,7 +201,7 @@ public class MethodOutcome implements IHasHeaders {
 	 * Sets the headers for the HTTP response
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
-		myResponseHeaders = new CaseInsensitiveMap<>();
+		myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);  // HTTP Headers are case-insensitive.
 		myResponseHeaders.putAll(theResponseHeaders);
 	}
 
