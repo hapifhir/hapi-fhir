@@ -20,7 +20,6 @@
 package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
-import com.sun.net.httpserver.Headers;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
