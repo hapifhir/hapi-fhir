@@ -2668,10 +2668,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource, null, theRestOperationType)
 				.setCreated(wasDeleted);
-		// todo jdjd this might be a bug, i don't think you have to setcreated because you updated it so it should be
-		// undeleted?
-		// if it is current version is deleted, rewrite current version --> should it be undeleted?
-		// does patch count as an "update" in the non-rewrite case
 
 		populateOperationOutcomeForUpdate(w, outcome, null, theRestOperationType, theTransactionDetails);
 
