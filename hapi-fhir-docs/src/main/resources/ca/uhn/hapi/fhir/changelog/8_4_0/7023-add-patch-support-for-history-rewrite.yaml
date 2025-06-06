@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7023
+jira: SMILE-8730
+title: "The HTTP Patch operation now supports the `X-Rewrite-History` header. This enables a specific version of a resource 
+to be rewritten in-place without the resource version being incremented by using the PATCH operation."
