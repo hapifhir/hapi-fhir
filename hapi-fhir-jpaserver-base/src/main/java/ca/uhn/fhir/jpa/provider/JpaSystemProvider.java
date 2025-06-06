@@ -21,11 +21,15 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
@@ -37,6 +41,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -59,6 +64,9 @@ import static software.amazon.awssdk.utils.StringUtils.isBlank;
 public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT> {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Description(
 			"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
@@ -190,8 +198,14 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			IdDt targetId = new IdDt(theTargetId.getValue());
 			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
 					theServletRequest, ReadPartitionIdRequestDetails.forRead(targetId));
+
+			IInterceptorBroadcaster compositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					myInterceptorBroadcaster, theServletRequest);
+			IProvenanceAgent provenanceAgent = (IProvenanceAgent) compositeBroadcaster.ifHasCallHooksAndReturnObject(
+					Pointcut.PROVENANCE_AGENT, () -> new HookParams().add(RequestDetails.class, theServletRequest));
+
 			ReplaceReferencesRequest replaceReferencesRequest =
-					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId);
+					new ReplaceReferencesRequest(sourceId, targetId, resourceLimit, partitionId, true, provenanceAgent);
 			IBaseParameters retval =
 					getReplaceReferencesSvc().replaceReferences(replaceReferencesRequest, theServletRequest);
 			if (ParametersUtil.getNamedParameter(getContext(), retval, OPERATION_REPLACE_REFERENCES_OUTPUT_PARAM_TASK)

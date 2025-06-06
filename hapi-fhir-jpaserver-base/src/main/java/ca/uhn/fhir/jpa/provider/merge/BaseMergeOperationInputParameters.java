@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.FhirIdJson;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
+import ca.uhn.fhir.batch2.jobs.replacereferences.ProvenanceAgentJson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,6 +46,7 @@ public abstract class BaseMergeOperationInputParameters {
 	private boolean myDeleteSource;
 	private IBaseResource myResultResource;
 	private final int myResourceLimit;
+	private IProvenanceAgent myProvenanceAgent;
 
 	protected BaseMergeOperationInputParameters(int theResourceLimit) {
 		myResourceLimit = theResourceLimit;
@@ -142,6 +145,17 @@ public abstract class BaseMergeOperationInputParameters {
 		retval.setSourceId(new FhirIdJson(theSourceResource.getIdElement().toVersionless()));
 		retval.setTargetId(new FhirIdJson(theTargetResource.getIdElement().toVersionless()));
 		retval.setPartitionId(thePartitionId);
+		if (myProvenanceAgent != null) {
+			retval.setProvenanceAgent(ProvenanceAgentJson.from(myProvenanceAgent, theFhirContext));
+		}
 		return retval;
+	}
+
+	public IProvenanceAgent getProvenanceAgent() {
+		return myProvenanceAgent;
+	}
+
+	public void setProvenanceAgent(IProvenanceAgent theProvenanceAgent) {
+		this.myProvenanceAgent = theProvenanceAgent;
 	}
 }

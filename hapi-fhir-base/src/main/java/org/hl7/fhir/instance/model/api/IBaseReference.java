@@ -29,11 +29,19 @@ public interface IBaseReference extends ICompositeType {
 
 	IBaseReference setReference(String theReference);
 
-	IBase setDisplay(String theValue);
+	IBaseReference setDisplay(String theValue);
 
 	IPrimitiveType<String> getDisplayElement();
 
 	default boolean hasIdentifier() {
 		return false;
+	}
+
+	default IBaseReference setIdentifier(ICompositeType theIdentifier) {
+		throw new UnsupportedOperationException("This reference does not support identifiers");
+	}
+
+	default ICompositeType getIdentifier() {
+		return null;
 	}
 }
