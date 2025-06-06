@@ -30,6 +30,9 @@ import jakarta.annotation.Nonnull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import java.util.Map;
+import java.util.function.Supplier;
+
 import static java.util.Objects.isNull;
 
 public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IModelJson, IMessageDeliveryContext {
@@ -88,5 +91,11 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 	public T getPayloadWithRequestPartitionIdSetFromHeader(IDefaultPartitionSettings theDefaultPartitionSettings) {
 		RequestPartitionHeaderUtil.setRequestPartitionIdFromHeaderIfNotAlreadySet(this, theDefaultPartitionSettings);
 		return getPayload();
+	}
+
+	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, Object> theCustomHeaders) {
+		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
+			theCustomHeaders.forEach((key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
+		}
 	}
 }
