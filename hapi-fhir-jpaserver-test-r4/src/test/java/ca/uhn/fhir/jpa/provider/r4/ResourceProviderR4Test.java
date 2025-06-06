@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -68,7 +67,6 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
@@ -184,7 +182,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ch. qos. logback. classic.Level;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -6840,7 +6837,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		IIdType id = createNewPatientWithHistory();
+		IIdType id = createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -6876,7 +6873,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		createNewPatientWithHistory();
+		createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -6911,7 +6908,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String testFamilyNameModified = "Jackson";
 
 		// setup
-		createNewPatientWithHistory();
+		createNewPatientWithHistoryTwoVersions();
 
 		// execute updates
 		Patient p = new Patient();
@@ -7442,7 +7439,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Nonnull
-	private IIdType createNewPatientWithHistory() {
+	private IIdType createNewPatientWithHistoryTwoVersions() {
 		String TEST_SYSTEM_NAME = "testHistoryRewrite";
 		String TEST_FAMILY_NAME = "Johnson";
 		Patient p = new Patient();

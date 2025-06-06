@@ -1741,6 +1741,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private PreferReturnEnum myPrefer;
 		private String myResourceType;
 		private String mySearchUrl;
+		private boolean myIsHistoryRewrite;
 
 		@Override
 		public IPatchWithQuery conditional(Class<? extends IBaseResource> theClass) {
@@ -1775,7 +1776,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			BaseHttpClientInvocation invocation;
-			if (isNotBlank(mySearchUrl)) {
+			if (myIsHistoryRewrite) {
+				if (!myId.hasVersionIdPart()) {
+					throw new InvalidRequestException(Msg.code(2716) + "Invalid resource ID for rewrite history: ID must contain a history version");
+				}
+				invocation = MethodUtil.createPatchInvocation(myContext, myId.getValue(), myPatchType, myPatchBody);
+				invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+			} else if (isNotBlank(mySearchUrl)) {
 				invocation = MethodUtil.createPatchInvocation(myContext, mySearchUrl, myPatchType, myPatchBody);
 			} else if (myConditional) {
 				invocation = MethodUtil.createPatchInvocation(
@@ -1853,6 +1860,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new NullPointerException(Msg.code(1388) + "theId can not be null");
 			}
 			return withId(new IdDt(theId));
+		}
+
+		@Override
+		public IPatchWithBody historyRewrite() {
+			myIsHistoryRewrite = true;
+			return this;
 		}
 	}
 

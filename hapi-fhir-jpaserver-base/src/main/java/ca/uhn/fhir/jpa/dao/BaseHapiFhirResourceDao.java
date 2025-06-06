@@ -2385,7 +2385,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				&& theRequest != null
 				&& theRequest.isRewriteHistory()) {
 			updateCallback = () ->
-					doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId);
+					doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId, RestOperationTypeEnum.UPDATE);
 		} else {
 			updateCallback = () -> doUpdate(
 					theResource,
@@ -2618,11 +2618,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theTransactionDetails details of the transaction
 	 * @return the outcome of the operation
 	 */
-	private DaoMethodOutcome doUpdateWithHistoryRewrite(
+	DaoMethodOutcome doUpdateWithHistoryRewrite(
 			T theResource,
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			RestOperationTypeEnum theRestOperationType) {
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
@@ -2666,10 +2667,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBasePersistedResource<?> savedEntity = updateHistoryEntity(
 				theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
 		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE)
+						theRequest, savedEntity, theResource, null, theRestOperationType)
 				.setCreated(wasDeleted);
+		//todo jdjd this might be a bug, i don't think you have to setcreated because you updated it so it should be undeleted?
+		// if it is current version is deleted, rewrite current version --> should it be undeleted?
+		// does patch count as an "update" in the non-rewrite case
 
-		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE, theTransactionDetails);
+		populateOperationOutcomeForUpdate(w, outcome, null, theRestOperationType, theTransactionDetails);
 
 		return outcome;
 	}
