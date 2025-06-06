@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +24,14 @@ public class CorsInterceptorTest {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.applyPermitDefaultValues();
 		corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
-		corsConfiguration.setExposedHeaders(Arrays.asList("Content-Location",
-			"Date",
-			"ETag",
-			"Location",
-			"X-Request-Id",
-			"X-Correlation-Id"));
+		corsConfiguration.setExposedHeaders(Arrays.asList(
+			Constants.HEADER_CONTENT_LOCATION,
+			Constants.HEADER_DATE,
+			Constants.HEADER_ETAG,
+			Constants.HEADER_LOCATION,
+			Constants.HEADER_REQUEST_ID,
+			Constants.HEADER_X_CORRELATION_ID
+		));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
 		assertThat(corsInterceptor.getConfig()).isSameAs(corsConfiguration);

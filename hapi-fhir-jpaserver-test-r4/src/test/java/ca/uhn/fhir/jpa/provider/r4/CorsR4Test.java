@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -18,7 +19,7 @@ public class CorsR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void saveLocalOrigin() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
-		get.addHeader("Origin", "file://");
+		get.addHeader(Constants.HEADER_CORS_ORIGIN, "file://");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		
 		ourLog.info(resp.toString());

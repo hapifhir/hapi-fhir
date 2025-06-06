@@ -110,10 +110,10 @@ public class CorsInterceptor extends InterceptorAdapter {
 		CorsConfiguration retVal = new CorsConfiguration();
 
 		retVal.setAllowedHeaders(new ArrayList<>(Constants.CORS_ALLOWED_HEADERS));
-		retVal.setAllowedMethods(new ArrayList<>(Constants.CORS_ALLWED_METHODS));
+		retVal.setAllowedMethods(new ArrayList<>(Constants.CORS_ALLOWED_METHODS));
 
-		retVal.addExposedHeader("Content-Location");
-		retVal.addExposedHeader("Location");
+		retVal.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
+		retVal.addExposedHeader(Constants.HEADER_LOCATION);
 
 		retVal.addAllowedOrigin("*");
 

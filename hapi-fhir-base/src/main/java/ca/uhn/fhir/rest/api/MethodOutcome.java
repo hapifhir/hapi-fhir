@@ -27,10 +27,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public class MethodOutcome implements IHasHeaders {
 
@@ -192,7 +192,7 @@ public class MethodOutcome implements IHasHeaders {
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new HashMap<>();
+			myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
 		}
 		return myResponseHeaders;
 	}
@@ -201,7 +201,8 @@ public class MethodOutcome implements IHasHeaders {
 	 * Sets the headers for the HTTP response
 	 */
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
-		myResponseHeaders = theResponseHeaders;
+		myResponseHeaders = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // HTTP Headers are case-insensitive.
+		myResponseHeaders.putAll(theResponseHeaders);
 	}
 
 	public Optional<String> getFirstResponseHeader(String theHeader) {

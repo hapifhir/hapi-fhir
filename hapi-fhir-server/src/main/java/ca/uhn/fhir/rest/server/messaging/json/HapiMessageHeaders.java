@@ -106,4 +106,8 @@ public class HapiMessageHeaders implements IModelJson {
 		}
 		return new MessageHeaders(returnedHeaders);
 	}
+
+	public void addCustomHeader(String theKey, Object theValue) {
+		getCustomHeaders().put(theKey, theValue);
+	}
 }

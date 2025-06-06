@@ -163,7 +163,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		assertThat(mySrdInterceptorService.getAllRegisteredInterceptors()).hasSize(1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription,
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId())));
+			new SystemRequestDetails().setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId()));
 
 		waitForActivatedSubscriptionCount(1);
 

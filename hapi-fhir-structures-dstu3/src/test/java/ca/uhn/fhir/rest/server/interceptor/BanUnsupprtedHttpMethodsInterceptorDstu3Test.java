@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -66,7 +67,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
  		ourLog.info(status.toString());
 
 		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
+		assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI");
 	}
 	
 	@Test	
@@ -77,7 +78,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
  		ourLog.info(status.toString());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
+		assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI");
 	}
 	
 	@Test

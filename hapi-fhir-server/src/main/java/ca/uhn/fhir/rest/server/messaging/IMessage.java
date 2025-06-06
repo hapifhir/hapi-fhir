@@ -71,7 +71,13 @@ public interface IMessage<T> {
 	 * @return headers as a String to String map where all values are replaced with their toString() value
 	 */
 	default Map<String, String> getHeadersAsStrings() {
-		return getHeaders().entrySet().stream()
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+		return convertHeaderValuesToStrings(getHeaders());
 	}
+
+	static Map<String, String> convertHeaderValuesToStrings(Map<String, Object> theHeaders) {
+		return theHeaders.entrySet().stream()
+			.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+	}
+
+
 }

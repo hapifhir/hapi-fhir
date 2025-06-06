@@ -227,7 +227,7 @@ public class SubscriptionDeliveringRestHookListener extends BaseSubscriptionDeli
 				if (payloadId != null) {
 					boolean deletedOK =
 							theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
-					thePayloadResource = getResource(payloadId, theMsg.getRequestPartitionId(), deletedOK);
+					thePayloadResource = getResource(payloadId, theMsg.getPartitionId(), deletedOK);
 				} else {
 					return null;
 				}

@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -236,16 +237,16 @@ public class ServletExamples {
 			// showing a typical setup. You should customize this
 			// to your specific needs
 			CorsConfiguration config = new CorsConfiguration();
-			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("Origin");
-			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("X-Requested-With");
-			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader(Constants.HEADER_X_FHIR_STARTER);
+			config.addAllowedHeader(Constants.HEADER_CORS_ORIGIN);
+			config.addAllowedHeader(Constants.HEADER_ACCEPT);
+			config.addAllowedHeader(Constants.HEADER_X_REQUESTED_WITH);
+			config.addAllowedHeader(Constants.HEADER_CONTENT_TYPE);
 
 			config.addAllowedOrigin("*");
 
-			config.addExposedHeader("Location");
-			config.addExposedHeader("Content-Location");
+			config.addExposedHeader(Constants.HEADER_LOCATION);
+			config.addExposedHeader(Constants.HEADER_CONTENT_LOCATION);
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
 			// Create the interceptor and register it
