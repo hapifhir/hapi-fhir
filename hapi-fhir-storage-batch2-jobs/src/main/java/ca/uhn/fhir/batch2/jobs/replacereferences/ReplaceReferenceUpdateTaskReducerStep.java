@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
@@ -98,11 +99,12 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 			if (theCreateProvenance) {
 				myProvenanceSvc.createProvenance(
-						params.getTargetId().asIdDt(),
-						params.getSourceId().asIdDt(),
+						params.getTargetId().asIdDt().withVersion(params.getCurrentTargetVersion()),
+						params.getSourceId().asIdDt().withVersion(params.getCurrentSourceVersion()),
 						myPatchOutputBundles,
 						theStepExecutionDetails.getInstance().getStartTime(),
-						requestDetails);
+						requestDetails,
+						ProvenanceAgentJson.asIProvenanceAgent(params.getProvenanceAgent(), myFhirContext));
 			}
 
 			ReplaceReferenceResultsJson result = new ReplaceReferenceResultsJson();

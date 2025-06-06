@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -73,7 +75,8 @@ public class MergeResourceHelper {
 			@Nullable Patient theResultResource,
 			boolean theDeleteSource,
 			RequestDetails theRequestDetails,
-			Date theStartTime) {
+			Date theStartTime,
+			IProvenanceAgent theProvenanceAgent) {
 		Patient sourceResource = myPatientDao.read(theSourceResourceId, theRequestDetails);
 		Patient targetResource = myPatientDao.read(theTargetResourceId, theRequestDetails);
 
@@ -85,18 +88,20 @@ public class MergeResourceHelper {
 				theResultResource,
 				theDeleteSource,
 				theRequestDetails,
-				theStartTime);
+				theStartTime,
+				theProvenanceAgent);
 	}
 
 	public Patient updateMergedResourcesAndCreateProvenance(
-			IHapiTransactionService myHapiTransactionService,
-			Patient theSourceResource,
-			Patient theTargetResource,
-			List<Bundle> thePatchResultBundles,
-			@Nullable Patient theResultResource,
-			boolean theDeleteSource,
-			RequestDetails theRequestDetails,
-			Date theStartTime) {
+		IHapiTransactionService myHapiTransactionService,
+		Patient theSourceResource,
+		Patient theTargetResource,
+		List<Bundle> thePatchResultBundles,
+		@Nullable Patient theResultResource,
+		boolean theDeleteSource,
+		RequestDetails theRequestDetails,
+		Date theStartTime,
+		IProvenanceAgent theProvenanceAgent) {
 
 		AtomicReference<Patient> targetPatientAfterUpdate = new AtomicReference<>();
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
@@ -115,9 +120,10 @@ public class MergeResourceHelper {
 			myProvenanceSvc.createProvenance(
 					targetPatientAfterUpdate.get().getIdElement(),
 					theDeleteSource ? null : sourcePatientAfterUpdate.getIdElement(),
-					thePatchResultBundles,
+				    thePatchResultBundles,
 					theStartTime,
-					theRequestDetails);
+					theRequestDetails,
+					theProvenanceAgent);
 		});
 
 		return targetPatientAfterUpdate.get();

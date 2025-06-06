@@ -90,7 +90,7 @@ public class MergeBatchTest extends BaseJpaR4Test {
 		myTestHelper.assertTargetPatientUpdated(theDeleteSource,
 			myTestHelper.getExpectedIdentifiersForTargetAfterMerge(theWithResultResource));
 
-		myTestHelper.assertMergeProvenance(theDeleteSource);
+		myTestHelper.assertMergeProvenance(theDeleteSource, null);
 	}
 
 	@Test

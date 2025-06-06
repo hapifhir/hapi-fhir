@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.merge.MergeJobParameters;
-import ca.uhn.fhir.batch2.jobs.merge.MergeProvenanceSvc;
+import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.batch2.jobs.merge.MergeResourceHelper;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
@@ -233,7 +233,8 @@ public class ResourceMergeService {
 				partitionId,
 				// don't create provenance as part of replace-references,
 				// we create it after updating source and target for merge
-				false);
+				false,
+				null);
 
 		IBaseParameters outParams =
 				myReplaceReferencesSvc.replaceReferences(replaceReferencesRequest, theRequestDetails);
@@ -250,7 +251,8 @@ public class ResourceMergeService {
 				(Patient) theMergeOperationParameters.getResultResource(),
 				theMergeOperationParameters.getDeleteSource(),
 				theRequestDetails,
-				startTime);
+				startTime,
+				theMergeOperationParameters.getProvenanceAgent());
 
 		theMergeOutcome.setUpdatedTargetResource(updatedTarget);
 

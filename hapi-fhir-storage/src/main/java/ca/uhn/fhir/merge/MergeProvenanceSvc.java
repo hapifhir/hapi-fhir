@@ -17,15 +17,18 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.merge;
+package ca.uhn.fhir.merge;
 
-import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesProvenanceSvc;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.hl7.fhir.r4.model.CodeableConcept;
 
+/**
+ *  Handles Provenance resources for the $merge operation.
+ */
 public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
-	private static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
 	private static final String ACTIVITY_CODE_MERGE = "merge";
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {

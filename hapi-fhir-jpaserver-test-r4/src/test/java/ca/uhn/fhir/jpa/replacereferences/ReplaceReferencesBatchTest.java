@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
@@ -52,6 +54,8 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		mySrd.setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
+
+
 	@Test
 	public void testHappyPath() {
 		IIdType taskId = createReplaceReferencesTask();
@@ -59,6 +63,8 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		ReplaceReferencesJobParameters jobParams = new ReplaceReferencesJobParameters();
 		jobParams.setSourceId(new FhirIdJson(myTestHelper.getSourcePatientId()));
 		jobParams.setTargetId(new FhirIdJson(myTestHelper.getTargetPatientId()));
+		jobParams.setCurrentSourceVersion("1");
+		jobParams.setCurrentTargetVersion("1");
 		jobParams.setTaskId(taskId);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest(JOB_REPLACE_REFERENCES, jobParams);
@@ -70,7 +76,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 			"Observation", "Encounter", "CarePlan"));
 
 		myTestHelper.assertAllReferencesUpdated();
-		myTestHelper.assertReplaceReferencesProvenance();
+		myTestHelper.assertReplaceReferencesProvenance("1", "1", null);
 	}
 
 

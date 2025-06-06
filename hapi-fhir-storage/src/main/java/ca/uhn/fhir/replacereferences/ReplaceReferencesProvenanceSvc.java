@@ -17,13 +17,17 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.replacereferences;
+package ca.uhn.fhir.replacereferences;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -35,36 +39,51 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This service is used to create a Provenance resource for the $replace-references operation
+ * and also used as a base class for {@link ca.uhn.fhir.merge.MergeProvenanceSvc} used in $merge operations.
+ * The two operations use different activity codes.
+ */
 public class ReplaceReferencesProvenanceSvc {
 
 	private static final String ACT_REASON_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActReason";
 	private static final String ACT_REASON_PATIENT_ADMINISTRATION_CODE = "PATADMIN";
+	protected static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
+	private static final String ACTIVITY_CODE_LINK = "link";
 	private final IFhirResourceDao<Provenance> myProvenanceDao;
+	private final FhirContext myFhirContext;
+
 
 	public ReplaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
 		myProvenanceDao = theDaoRegistry.getResourceDao(Provenance.class);
+		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
 	@Nullable
 	protected CodeableConcept getActivityCodeableConcept() {
-		// FIXME KHS: return a codeable concepp suitable for replace-references
-		return null;
+		CodeableConcept retVal = new CodeableConcept();
+		retVal.addCoding().setSystem(ACTIVITY_CODE_SYSTEM).setCode(ACTIVITY_CODE_LINK);
+		return retVal;
 	}
 
 	protected Provenance createProvenanceObject(
-			Reference theTargetReference,
-			@Nullable Reference theSourceReference,
-			List<Reference> theUpdatedReferencingResources,
-			Date theStartTime) {
+		Reference theTargetReference,
+		@Nullable Reference theSourceReference,
+		List<Reference> theUpdatedReferencingResources,
+		Date theStartTime,
+		IProvenanceAgent theProvenanceAgent) {
 		Provenance provenance = new Provenance();
-
-		// FIXME KHS: add agent to the provenance
 
 		Date now = new Date();
 		provenance.setOccurred(new Period()
-				.setStart(theStartTime, TemporalPrecisionEnum.MILLI)
-				.setEnd(now, TemporalPrecisionEnum.MILLI));
+			.setStart(theStartTime, TemporalPrecisionEnum.MILLI)
+			.setEnd(now, TemporalPrecisionEnum.MILLI));
 		provenance.setRecorded(now);
+
+		if (theProvenanceAgent != null) {
+			Provenance.ProvenanceAgentComponent agent = createR4ProvenanceAgent(theProvenanceAgent);
+			provenance.addAgent(agent);
+		}
 
 		CodeableConcept activityCodeableConcept = getActivityCodeableConcept();
 		if (activityCodeableConcept != null) {
@@ -72,11 +91,12 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 		CodeableConcept activityReasonCodeableConcept = new CodeableConcept();
 		activityReasonCodeableConcept
-				.addCoding()
-				.setSystem(ACT_REASON_CODE_SYSTEM)
-				.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
+			.addCoding()
+			.setSystem(ACT_REASON_CODE_SYSTEM)
+			.setCode(ACT_REASON_PATIENT_ADMINISTRATION_CODE);
 
 		provenance.addReason(activityReasonCodeableConcept);
+
 
 		provenance.addTarget(theTargetReference);
 		if (theSourceReference != null) {
@@ -87,23 +107,31 @@ public class ReplaceReferencesProvenanceSvc {
 		return provenance;
 	}
 
-	public void createProvenance(
-			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
-			List<Bundle> thePatchResultBundles,
-			Date theStartTime,
-			RequestDetails theRequestDetails) {
 
-		// FIXME KHS: should we be using the version specific source and target ID if the source and target ids
-		//  passed in are not version specific? Currently the source and target ids passed in are not version specific
-		//  for the replace-references current, but they are version specific for merge
+
+	/**
+	 * Creates a Provenance resource for the $replace-references and $merge operations.
+	 *
+	 * @param theTargetId           the versioned id of the target resource of the operation.
+	 * @param theSourceId           the versioned id of the source resource of the operation. Can be null if the operation is $merge and the source resource is deleted.
+	 * @param thePatchResultBundles the list of patch result bundles that contain the updated resources.
+	 * @param theStartTime          the start time of the operation.
+	 * @param theRequestDetails     the request details
+	 */
+	public void createProvenance(
+		IIdType theTargetId,
+		@Nullable IIdType theSourceId,
+		List<Bundle> thePatchResultBundles,
+		Date theStartTime,
+		RequestDetails theRequestDetails,
+		IProvenanceAgent theProvenanceAgent) {
 		Reference targetReference = new Reference(theTargetId);
 		Reference sourceReference = null;
 		if (theSourceId != null) {
 			sourceReference = new Reference(theSourceId);
 		}
 		List<Reference> references = extractUpdatedResourceReferences(thePatchResultBundles);
-		Provenance provenance = createProvenanceObject(targetReference, sourceReference, references, theStartTime);
+		Provenance provenance = createProvenanceObject(targetReference, sourceReference, references, theStartTime, theProvenanceAgent);
 		myProvenanceDao.create(provenance, theRequestDetails);
 	}
 
@@ -122,4 +150,26 @@ public class ReplaceReferencesProvenanceSvc {
 		});
 		return patchedResourceReferences;
 	}
+
+
+	private Provenance.ProvenanceAgentComponent createR4ProvenanceAgent(IProvenanceAgent theProvenanceAgent) {
+		Provenance.ProvenanceAgentComponent agent = new Provenance.ProvenanceAgentComponent();
+		Reference whoRef = convertToR4Reference(theProvenanceAgent.getWho());
+		agent.setWho(whoRef);
+		Reference onBehalfOfRef = convertToR4Reference(theProvenanceAgent.getOnBehalfOf());
+		agent.setOnBehalfOf(onBehalfOfRef);
+		return agent;
+	}
+
+	private Reference convertToR4Reference(IBaseReference sourceRef) {
+		if (sourceRef == null) {
+			return null;
+		}
+		FhirTerser terser = myFhirContext.newTerser();
+		Reference targetRef = new Reference();
+		terser.cloneInto(sourceRef, targetRef, false);
+		return targetRef;
+	}
+
+
 }
