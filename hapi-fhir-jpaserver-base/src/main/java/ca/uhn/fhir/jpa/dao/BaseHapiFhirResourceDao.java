@@ -2415,6 +2415,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			TransactionDetails theTransactionDetails,
 			RequestPartitionId theRequestPartitionId) {
 		DaoMethodOutcome outcome = null;
+		if (theRequest == null) {
+			theRequest = new SystemRequestDetails();
+		}
 		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
