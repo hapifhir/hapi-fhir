@@ -263,25 +263,6 @@ public class ParsedFhirPath {
 		return endsWithAFilter() || endsWithAnIndex();
 	}
 
-	public void sliceAt(FhirPathNode theNode) {
-		FhirPathNode node = getHead();
-		while (node != null) {
-			if (node.getValue().equals(theNode.getValue())) {
-				break;
-			}
-			node = node.getNext();
-		}
-
-		if (node == null) {
-			ourLog.error("Cannot slice");
-		} else {
-			setTail(node);
-			node.setNext(null);
-			setEndsWithFilter(node.isFilter());
-			setEndsWithAnIndex(node.hasListIndex());
-		}
-	}
-
 	public FhirPathNode getFirstNode(Predicate<FhirPathNode> thePred) {
 		ParsedFhirPath.FhirPathNode node = getHead();
 		while (node != null) {

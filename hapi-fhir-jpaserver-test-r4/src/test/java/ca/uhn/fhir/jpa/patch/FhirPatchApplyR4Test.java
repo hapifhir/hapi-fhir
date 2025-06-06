@@ -465,7 +465,6 @@ public class FhirPatchApplyR4Test {
 		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
 
-
 	@Test
 	public void testReplaceAnElementInHighCardinalityFieldByIndex() {
 		FhirPatch svc = new FhirPatch(ourCtx);

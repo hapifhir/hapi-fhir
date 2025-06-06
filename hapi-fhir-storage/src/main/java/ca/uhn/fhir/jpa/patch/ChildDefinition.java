@@ -25,10 +25,14 @@ public class ChildDefinition {
 		private final BaseRuntimeChildDefinition myParentDef;
 		private final BaseRuntimeElementDefinition<?> myParentElement;
 
-		public ParentDefinition(IBase theParentField, BaseRuntimeElementDefinition<?> theParentElement, BaseRuntimeChildDefinition theParentDef) {
+		private final String myFhirPath;
+
+		public ParentDefinition(IBase theParentField, BaseRuntimeElementDefinition<?> theParentElement, BaseRuntimeChildDefinition theParentDef, String theFhirPath) {
 			myParentField = theParentField;
 			myParentElement = theParentElement;
 			myParentDef = theParentDef;
+
+			myFhirPath = theFhirPath;
 		}
 
 		public IBase getParentField() {
@@ -41,6 +45,10 @@ public class ChildDefinition {
 
 		public BaseRuntimeElementDefinition<?> getParentElement() {
 			return myParentElement;
+		}
+
+		public String getFhirPath() {
+			return myFhirPath;
 		}
 	}
 
