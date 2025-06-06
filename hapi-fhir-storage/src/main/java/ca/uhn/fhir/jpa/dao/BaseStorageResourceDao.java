@@ -129,8 +129,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
-			entityToUpdate =
-					getEntityToPatchWithMatchUrlCache(theConditionalUrl, theRequestDetails, theTransactionDetails);
+			entityToUpdate = getEntityToPatchWithMatchUrlCache(
+					theConditionalUrl, theRequestDetails, theTransactionDetails, theRequestPartitionId);
 			resourceId = entityToUpdate.getIdDt();
 		} else {
 			resourceId = theId;
@@ -236,11 +236,11 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	}
 
 	private IBasePersistedResource getEntityToPatchWithMatchUrlCache(
-			String theConditionalUrl, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+			String theConditionalUrl,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			RequestPartitionId theRequestPartitionId) {
 		IBasePersistedResource theEntityToUpdate;
-		RequestPartitionId theRequestPartitionId = getRequestPartitionHelperService()
-				.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, getResourceType().getTypeName());
 
 		Set<IResourcePersistentId> match = getMatchResourceUrlService()
 				.processMatchUrl(
