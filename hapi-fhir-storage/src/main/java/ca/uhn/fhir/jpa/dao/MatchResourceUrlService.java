@@ -44,9 +44,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,12 +59,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
-public class MatchResourceUrlService<T extends IResourcePersistentId> {
+public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MatchResourceUrlService.class);
+	private static final String MATCH_URL_QUERY_USER_DATA_KEY =
+			MatchResourceUrlService.class.getName() + ".MATCH_URL_QUERY";
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -109,6 +114,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		String resourceType = myContext.getResourceType(theResourceType);
 		String matchUrl = massageForStorage(resourceType, theMatchUrl);
 
+		@SuppressWarnings("unchecked")
 		T resolvedInTransaction =
 				(T) theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
@@ -136,7 +142,9 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			}
 			paramMap.setLoadSynchronousUpTo(2);
 
-			retVal = search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull);
+			retVal = callWithSpanMarker(
+					theRequest,
+					() -> search(paramMap, theResourceType, theRequest, theConditionalOperationTargetOrNull));
 		}
 
 		/*
@@ -163,6 +171,25 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		return retVal;
+	}
+
+	<R> R callWithSpanMarker(@NotNull RequestDetails theRequest, Supplier<R> theSupplier) {
+		try {
+			theRequest.getUserData().put(MATCH_URL_QUERY_USER_DATA_KEY, MATCH_URL_QUERY_USER_DATA_KEY);
+
+			return theSupplier.get();
+		} finally {
+			theRequest.getUserData().remove(MATCH_URL_QUERY_USER_DATA_KEY);
+		}
+	}
+
+	/**
+	 * Are we currently processing a match URL query?
+	 * @param theRequest holds our private flag
+	 * @return true if we are currently processing a match URL query, false otherwise
+	 */
+	public static boolean isDuringMatchUrlQuerySpan(@Nonnull RequestDetails theRequest) {
+		return theRequest.getUserData().containsKey(MATCH_URL_QUERY_USER_DATA_KEY);
 	}
 
 	private <R extends IBaseResource> Set<T> invokePreShowInterceptorForMatchUrlResults(

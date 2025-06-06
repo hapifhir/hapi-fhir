@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7186
+title: "We now mark the match URL query span using userData on the RequestDetails 
+  so interceptors can distinguish match URL queries from other queries.
+  This can be tested by calling MatchResourceUrlService.isDuringMatchUrlQuerySpan()."
