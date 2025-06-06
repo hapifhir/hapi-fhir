@@ -41,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +50,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -242,110 +245,181 @@ public class FhirPatch {
 
 		FhirPathChildDefinition cd = childDefinition(parentDef, parts, theResource, fhirPath, parsedFhirPath);
 
-		replaceValue(cd, theParameters, fhirPath, parsedFhirPath);
+		replaceValuesByPath(cd, theParameters, fhirPath, parsedFhirPath);
 	}
 
-	private void replaceValue(
+	private void replaceValuesByPath(
 		FhirPathChildDefinition theChildDefinition,
 		IBase theParameters,
 		IFhirPath theFhirPath,
 		ParsedFhirPath theParsedFhirPath
 	) {
-		Optional<IBase> valuePart = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
-		Optional<IBase> valuePartValue =
+		Optional<IBase> singleValuePart =
 			ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
+		if (singleValuePart.isPresent()) {
+			IBase replacementValue = singleValuePart.get();
 
-		if (valuePartValue.isPresent()) {
-			IBase replacementValue = valuePartValue.get();
+			FhirPathChildDefinition childDefinitionToUse = findChildDefinitionByReplacementType(theChildDefinition, replacementValue);
 
-			String fhirTypeOfValue = replacementValue.fhirType();
-			FhirPathChildDefinition next = theChildDefinition;
-			while (next != null) {
-				if (next.getBase().fhirType().equalsIgnoreCase(fhirTypeOfValue)) {
-					break;
-				}
-				next = next.getChild();
-			}
-
-			if (next == null || next.getParent() == null) {
-				throw new RuntimeException("REPLACE ME");
-			}
-
-			IBase containingElement = next.getParent().getBase();
-			if (next.getBaseRuntimeDefinition().isMultipleCardinality()) {
-				// a list
-				List<IBase> existing = new ArrayList<>(
-					next.getBaseRuntimeDefinition().getAccessor().getValues(
-						containingElement
-					)
-				);
-				if (existing.isEmpty()) {
-					// no elements to replace - we shouldn't see this here though
-					String msg = myContext
-						.getLocalizer()
-						.getMessage(FhirPatch.class, "noMatchingElementForPath", theChildDefinition.getFhirPath());
-					throw new InvalidRequestException(Msg.code(2617) + msg);
-				}
-
-
-
-				List<IBase> replaceables;
-				if (isSubsettingNode(theParsedFhirPath.getTail())) {
-					replaceables = applySubsettingFilter(theParsedFhirPath, theParsedFhirPath.getTail(), existing);
-				} else {
-					String raw = theParsedFhirPath.getRawPath();
-					String finalNode = theParsedFhirPath.getLastElementName();
-					String subpath = raw.substring(raw.indexOf(finalNode));
-					if (subpath.startsWith(finalNode)) {
-						subpath = subpath.substring(finalNode.length() + 1); // + 1 for the "."
-					}
-
-					AtomicReference<String> subpathRef = new AtomicReference<>();
-					subpathRef.set(subpath);
-					replaceables = existing.stream()
-						.filter(item -> {
-							Optional<IBase> matched = theFhirPath.evaluateFirst(item, subpathRef.get(), IBase.class);
-							return matched.isPresent();
-						}).toList();
-				}
-
-				if (replaceables.size() != 1) {
-					throw new RuntimeException("Somehow got wrong size");
-				}
-				IBase valueToReplace = replaceables.get(0);
-
-				BaseRuntimeChildDefinition.IMutator listMutator =
-					next.getBaseRuntimeDefinition().getMutator();
-				// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
-				// replaced
-				listMutator.setValue(containingElement, null);
-				for (IBase existingValue : existing) {
-					if (valueToReplace.equals(existingValue)) {
-						listMutator.addValue(containingElement, replacementValue);
-					} else {
-						listMutator.addValue(containingElement, existingValue);
-					}
-				}
-			} else {
-				// a single element
-				next.getBaseRuntimeDefinition().getMutator().setValue(
-					containingElement,
-					valuePartValue.get()
-				);
-			}
-		} else {
-			throw new RuntimeException("NO VALUES");
+			// only a single replacement value (ie, not a replacement CompositeValue or anything)
+			replaceSingleValue(theFhirPath, theParsedFhirPath, childDefinitionToUse, replacementValue);
+			return; // guard
 		}
 
-//		if (valuePartValue.isPresent()) {
-//			newValue = maybeMassageToEnumeration(valuePartValue.get(), theChildDefinition);
-//
-//		} else {
-//			List<IBase> partParts = valuePart.map(this::extractPartsFromPart).orElse(Collections.emptyList());
-//
-//			newValue = createAndPopulateNewElement(theParams, theChildDefinition, partParts);
-//		}
+		Optional<IBase> valueParts = ParametersUtil.getParameterPart(myContext, theParameters, PARAMETER_VALUE);
+		if (valueParts.isPresent()) {
+			// multiple replacement values provided via parts
+			List<IBase> partParts = valueParts.map(this::extractPartsFromPart).orElse(Collections.emptyList());
 
+			for (IBase nextValuePartPart : partParts) {
+				String name = myContext
+					.newTerser()
+					.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
+					.map(IPrimitiveType::getValueAsString)
+					.orElse(null);
+
+				if (StringUtils.isBlank(name)) {
+					continue;
+				}
+
+				Optional<IBase> optionalValue =
+					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+				if (optionalValue.isPresent()) {
+					FhirPathChildDefinition childDefinitionToUse = findChildDefinitionToUse(theChildDefinition, nextValuePartPart);
+
+					BaseRuntimeChildDefinition subChild = childDefinitionToUse.getElementDefinition()
+						.getChildByName(name);
+
+					subChild.getMutator()
+						.setValue(childDefinitionToUse.getBase(), optionalValue.get());
+				}
+			}
+
+			return; // guard
+		}
+
+		// fall through to error state
+		throw new RuntimeException("NO VALUES?");
+	}
+
+	private FhirPathChildDefinition findChildDefinitionByReplacementType(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
+		boolean isPrimitive = replacementValue instanceof IPrimitiveType<?>;
+		Predicate<FhirPathChildDefinition> predicate = def -> {
+			if (isPrimitive) {
+				// primitives will be at the very bottom (ie, no children underneath)
+				return def.getBase() instanceof IPrimitiveType<?>;
+			} else if (def.getBase().fhirType().equalsIgnoreCase(replacementValue.fhirType())) {
+				return true;
+			}
+			return false;
+		};
+
+		FhirPathChildDefinition childDefinitionToUse = theChildDefinition;
+		while (childDefinitionToUse != null) {
+			if (predicate.test(childDefinitionToUse)) {
+				break;
+			}
+			childDefinitionToUse = childDefinitionToUse.getChild();
+		}
+
+		if (childDefinitionToUse == null || childDefinitionToUse.getParent() == null) {
+			throw new RuntimeException("REPLACE ME");
+		}
+		return childDefinitionToUse;
+	}
+
+	private FhirPathChildDefinition findChildDefinitionToUse(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
+		FhirPathChildDefinition childDefinitionToUse = theChildDefinition;
+		while (childDefinitionToUse != null && childDefinitionToUse.getChild() != null) {
+			childDefinitionToUse = childDefinitionToUse.getChild();
+		}
+		if (childDefinitionToUse == null || childDefinitionToUse.getParent() == null) {
+			throw new RuntimeException("REPLACE ME");
+		}
+		return childDefinitionToUse;
+	}
+
+	private void replaceSingleValue(
+		IFhirPath theFhirPath,
+		ParsedFhirPath theParsedFhirPath,
+		FhirPathChildDefinition theTargetChildDefinition,
+		IBase theReplacementValue
+	) {
+		if (theTargetChildDefinition.getElementDefinition().getChildType() == BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE) {
+			if (theTargetChildDefinition.getBase() instanceof IPrimitiveType<?> target
+				&& theReplacementValue instanceof IPrimitiveType<?> source) {
+				target.setValueAsString(source.getValueAsString());
+			}
+			return;
+		}
+
+		IBase containingElement = theTargetChildDefinition.getParent().getBase();
+		BaseRuntimeChildDefinition runtimeDef = theTargetChildDefinition.getBaseRuntimeDefinition();
+		if (runtimeDef == null) {
+			runtimeDef = theTargetChildDefinition.getParent().getBaseRuntimeDefinition();
+		}
+
+		if (runtimeDef.isMultipleCardinality()) {
+			// a list
+			List<IBase> existing = new ArrayList<>(
+				runtimeDef.getAccessor().getValues(
+					containingElement
+				)
+			);
+			if (existing.isEmpty()) {
+				// no elements to replace - we shouldn't see this here though
+				String msg = myContext
+					.getLocalizer()
+					.getMessage(FhirPatch.class, "noMatchingElementForPath", theParsedFhirPath.getRawPath());
+				throw new InvalidRequestException(Msg.code(2617) + msg);
+			}
+
+			List<IBase> replaceables;
+			if (isSubsettingNode(theParsedFhirPath.getTail())) {
+				replaceables = applySubsettingFilter(theParsedFhirPath, theParsedFhirPath.getTail(), existing);
+			} else if (existing.size() == 1) {
+				replaceables = existing;
+			} else {
+				String raw = theParsedFhirPath.getRawPath();
+				String finalNode = theParsedFhirPath.getLastElementName();
+				String subpath = raw.substring(raw.indexOf(finalNode));
+				if (subpath.startsWith(finalNode) && subpath.length() > finalNode.length()) {
+					subpath = subpath.substring(finalNode.length() + 1); // + 1 for the "."
+				}
+
+				AtomicReference<String> subpathRef = new AtomicReference<>();
+				subpathRef.set(subpath);
+				replaceables = existing.stream()
+					.filter(item -> {
+						Optional<IBase> matched = theFhirPath.evaluateFirst(item, subpathRef.get(), IBase.class);
+						return matched.isPresent();
+					}).toList();
+			}
+
+			if (replaceables.size() != 1) {
+				throw new RuntimeException("Somehow got wrong size");
+			}
+			IBase valueToReplace = replaceables.get(0);
+
+			BaseRuntimeChildDefinition.IMutator listMutator =
+				runtimeDef.getMutator();
+			// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
+			// replaced
+			listMutator.setValue(containingElement, null);
+			for (IBase existingValue : existing) {
+				if (valueToReplace.equals(existingValue)) {
+					listMutator.addValue(containingElement, theReplacementValue);
+				} else {
+					listMutator.addValue(containingElement, existingValue);
+				}
+			}
+		} else {
+			// a single element
+			runtimeDef.getMutator().setValue(
+				containingElement,
+				theReplacementValue
+			);
+		}
 	}
 
 	private void handleReplaceOperation2(IBaseResource theResource, IBase theParameters) {
@@ -685,17 +759,22 @@ public class FhirPatch {
 			path = path.substring(0, path.length() - 1);
 		}
 
+		// remove preceding .
+		while (path.startsWith(".")) {
+			path = path.substring(1);
+		}
+
 		// balance brackets
 		int openBrace = path.indexOf("(");
-		String remainder = "";
-		int endingIndex = path.length() - 1; // -1 because we add 1 on later, accounting for the exclusion of the ending index
+		String remainder = path;
+		int endingIndex = openBrace == -1 ? path.length() : 0;
 		while (openBrace != -1) {
-			int closing = RandomTextUtils.findMatchingClosingBrace(openBrace, path);
-			endingIndex = closing;
-			remainder = path.substring(closing + 1);
+			int closing = RandomTextUtils.findMatchingClosingBrace(openBrace, remainder);
+			endingIndex += closing + 1; // +1 because substring ending is exclusive
+			remainder = remainder.substring(closing + 1);
 			openBrace = remainder.indexOf("(");
 		}
-		path = path.substring(0, endingIndex + 1);
+		path = path.substring(0, endingIndex);
 
 		return path;
 	}
@@ -825,7 +904,6 @@ public class FhirPatch {
 		return null;
 	}
 
-
 	private FhirPathChildDefinition childDefinition(
 		FhirPathChildDefinition theParent,
 		List<String> theFhirPathParts,
@@ -856,52 +934,106 @@ public class FhirPatch {
 		}
 
 		// detach the head
-		String pathBeneathParent = rawPath.substring(head.length() + 1); // + 1 for the .
-		theFhirPathParts.remove(0);
+		String headVal = theFhirPathParts.remove(0);
+		String pathBeneathParent = rawPath.substring(headVal.length());
+		pathBeneathParent = cleansePath(pathBeneathParent);
 
 		if (isNotBlank(pathBeneathParent) && !theFhirPathParts.isEmpty()) {
-			ParsedFhirPath.FhirPathNode filteringNode = null;
+			Stack<ParsedFhirPath.FhirPathNode> filteringNodes = new Stack<>();
+
+			String childFilteringPath = pathBeneathParent;
+			String nextPath = pathBeneathParent;
+
 			if (isSubsettingNode(theParsedFhirPath.getTail())) {
-				filteringNode = theParsedFhirPath.getTail();
-				// detach the tail
-				pathBeneathParent = pathBeneathParent.substring(0, pathBeneathParent.indexOf(filteringNode.getValue()));
-				pathBeneathParent = cleansePath(pathBeneathParent);
+				// the final node in this path is .first() or [0]... etc
+				ParsedFhirPath.FhirPathNode filteringNode = theParsedFhirPath.getTail();
+				filteringNodes.push(filteringNode);
+				/*
+				 * the fild filtering path will be the path - tail value.
+				 * This will also be nextPath (the one we recurse on)
+				 */
+				childFilteringPath = pathBeneathParent.substring(0, pathBeneathParent.indexOf(filteringNode.getValue()));
+				childFilteringPath = cleansePath(childFilteringPath);
+				nextPath = childFilteringPath;
 			}
-			ParsedFhirPath newPath = ParsedFhirPath.parse(pathBeneathParent);
+
+			String directChildName = theFhirPathParts.get(0);
+
+			ParsedFhirPath newPath = ParsedFhirPath.parse(nextPath);
+
+			// yet another filtering node
+			// this is if the head node has a filter applied immediately upon it
+			// we need to remove it because it'll artificially filter down our children if we don't
+//			if (newPath.getHead().getNext() != null && isSubsettingNode(newPath.getHead().getNext())) {
+//				ParsedFhirPath.FhirPathNode filteringNode = newPath.getHead().getNext();
+//
+//				filteringNodes.push(filteringNode);
+//
+//				// we have to remove it from our path because we'll be handling it here
+//				String omission = directChildName;
+//				if (filteringNode.hasListIndex()) {
+//					omission += filteringNode.getValue();
+//				} else if (filteringNode instanceof ParsedFhirPath.FhirPathFunction fn) {
+//					if (!fn.hasContainedExp()) {
+//						omission += "." + filteringNode.getValue() + "()";
+//					} else {
+//						throw new RuntimeException("HAS AN EXPRESION");
+//					}
+//				}
+//				nextPath = nextPath.substring(omission.length());
+//				nextPath = cleansePath(nextPath);
+//				newPath = ParsedFhirPath.parse(nextPath);
+//				childFilteringPath = directChildName;
+//			}
 
 			if (newPath.getHead() instanceof ParsedFhirPath.FhirPathFunction fn && fn.hasContainedExp()) {
 				newPath = fn.getContainedExp();
 			}
 
-			// get all the direct children
+			// get all direct children
 			ParsedFhirPath.FhirPathNode newHead = newPath.getHead();
-			List<IBase> allChildren = theFhirPath.evaluate(theBase, theFhirPathParts.get(0), IBase.class);
+			List<IBase> allChildren = theFhirPath.evaluate(theBase, directChildName, IBase.class);
 
 			// go through the children and take only the ones that match the path we have
-			String filterPath = newPath.getRawPath();
+			String filterPath = childFilteringPath;
 
 			List<IBase> childs;
-			if (!filterPath.equalsIgnoreCase(newHead.getValue())) {
-				filterPath = filterPath.substring(newHead.getValue().length() + 1);
+			if (filterPath.startsWith(newHead.getValue()) && !filterPath.equalsIgnoreCase(newHead.getValue())) {
+				filterPath = filterPath.substring(newHead.getValue().length());
+				filterPath = cleansePath(filterPath);
+			}
 
-
-				AtomicReference<String> ref = new AtomicReference<>();
-				ref.set(filterPath);
-				if (allChildren.size() > 1) {
-					childs = allChildren.stream()
-						.filter(el -> {
-							Optional<IBase> match = theFhirPath.evaluateFirst(el, ref.get(), IBase.class);
-							return match.isPresent();
-						}).toList();
-				} else {
-					// there is only 1 child (probably a top level element)
+			if (isNotBlank(filterPath)) {
+				if (theFhirPathParts.contains(filterPath)) {
+					/*
+					 * We're filtering on just a fhirpath node for some reason (ie, "identifier" or "reference" or "string").
+					 *
+					 * We don't need to apply the filter;
+					 * all children should be the same as this filtered type
+					 * (likely we have a subsetting filter to apply)
+					 */
 					childs = allChildren;
+				} else {
+					AtomicReference<String> ref = new AtomicReference<>();
+					ref.set(filterPath);
+					if (allChildren.size() > 1) {
+						childs = allChildren.stream()
+							.filter(el -> {
+								Optional<IBase> match = theFhirPath.evaluateFirst(el, ref.get(), IBase.class);
+								return match.isPresent();
+							}).toList();
+					} else {
+						// there is only 1 child (probably a top level element)
+						childs = allChildren;
+					}
 				}
 			} else {
 				childs = allChildren;
 			}
 
-			if (filteringNode != null) {
+//			String newRaw = newPath.getRawPath();
+			while (!filteringNodes.empty()) {
+				ParsedFhirPath.FhirPathNode filteringNode = filteringNodes.pop();
 				childs = applySubsettingFilter(newPath, filteringNode, childs);
 			}
 
