@@ -31,7 +31,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static java.util.Objects.isNull;
 
@@ -93,9 +92,10 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 		return getPayload();
 	}
 
-	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, Object> theCustomHeaders) {
+	public static <P> void addCustomHeaders(IMessage<P> theMessage, Map<String, ?> theCustomHeaders) {
 		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
-			theCustomHeaders.forEach((key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
+			theCustomHeaders.forEach(
+					(key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
 		}
 	}
 }
