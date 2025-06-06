@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -636,9 +637,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.addName().setFamily("2");
 		myPatientDao.update(p);
 
-		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
-		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any());
-		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any(), any());
+		verify(interceptor, times(1)).resourceCreated(any(), any());
+		verify(interceptor, times(1)).resourceUpdated(any(), any());
+		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
 	}
 
 	private class MyOneResourceAnswer implements Answer {
