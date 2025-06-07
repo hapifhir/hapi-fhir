@@ -157,7 +157,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -1858,7 +1857,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			HashSet<JpaPid> pidsToInclude,
 			RequestDetails request) {
 
-		record IncludesRecord(Long resourceId, String resourceType, String resourceCanonicalUrl, Long version, Integer partitionId) {}
+		record IncludesRecord(
+				Long resourceId, String resourceType, String resourceCanonicalUrl, Long version, Integer partitionId) {}
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<IncludesRecord> query = cb.createQuery(IncludesRecord.class);
@@ -1883,7 +1883,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (myPartitionSettings.isDatabasePartitionMode()) {
-			predicates.add(cb.equal(root.get(searchPartitionFieldName), cb.parameter(Integer.class, "target_partition_id")));
+			predicates.add(
+					cb.equal(root.get(searchPartitionFieldName), cb.parameter(Integer.class, "target_partition_id")));
 		}
 
 		predicates.add(root.get(searchPidFieldName).in(cb.parameter(List.class, "target_pids")));
@@ -1906,7 +1907,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// because mySourceResourceType is not part of the HFJ_RES_LINK
 			// index, this might not be the most optimal performance.
 			// but it is for an $everything operation (and maybe we should update the index)
-			predicates.add(cb.equal(root.get("mySourceResourceType"), cb.parameter(Integer.class, "want_resource_type")));
+			predicates.add(
+					cb.equal(root.get("mySourceResourceType"), cb.parameter(Integer.class, "want_resource_type")));
 		} else {
 			wantResourceType = null;
 		}
@@ -1917,11 +1919,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams != null
 				&& myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
 			predicates.add(cb.notEqual(root.get("myTargetResourceType"), "Patient"));
-			predicates.add(cb.not(root.get("mySourceResourceType").in(UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE)));
+			predicates.add(cb.not(root.get("mySourceResourceType")
+					.in(UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE)));
 		}
 
 		if (hasDesiredResourceTypes) {
-			predicates.add(root.get("myTargetResourceType").in(cb.parameter(List.class, "desired_target_resource_types")));
+			predicates.add(
+					root.get("myTargetResourceType").in(cb.parameter(List.class, "desired_target_resource_types")));
 		}
 
 		query.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -1947,7 +1951,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			Set<String> canonicalUrls = null;
 
-			try (ScrollableResultsIterator<IncludesRecord> iter = new ScrollableResultsIterator<>(toScrollableResults(q))) {
+			try (ScrollableResultsIterator<IncludesRecord> iter =
+					new ScrollableResultsIterator<>(toScrollableResults(q))) {
 				IncludesRecord nextRow;
 				while (iter.hasNext()) {
 					nextRow = iter.next();
@@ -2078,7 +2083,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// If we know for sure that none of the paths involved in this SearchParameter could
 		// be indexing a canonical
 		if (Arrays.stream(searchParameterPaths)
-				.noneMatch(t -> SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myContext, myResourceName, t, theParam))) {
+				.noneMatch(t -> SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(
+						myContext, myResourceName, t, theReverse))) {
 			return null;
 		}
 
@@ -2178,7 +2184,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					String paths = next.getPath();
 					for (String path : SearchParameterUtil.splitSearchParameterExpressions(paths)) {
 
-						if (!SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myContext, myResourceName, path, next)) {
+						if (!SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(
+								myContext, myResourceName, path, theReverse)) {
 							continue;
 						}
 

@@ -101,7 +101,7 @@ class SearchParameterUtilTest {
 		RuntimeSearchParam param = myCtx.getResourceDefinition(resourceType).getSearchParam(paramName);
 
 		// Test
-		boolean actual = SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myCtx, resourceType, path, param);
+		boolean actual = SearchParameterUtil.referencePathCouldPotentiallyReferenceCanonicalElement(myCtx, resourceType, path, false);
 
 		// Verify
 		assertEquals(expected, actual);
