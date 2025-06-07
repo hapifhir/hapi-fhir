@@ -118,7 +118,7 @@ public class ValidationResult {
 	}
 
 	/**
-	 * Create an OperationOutcome resource which contains all of the messages found as a result of this validation
+	 * Create an OperationOutcome resource which contains all the messages found as a result of this validation
 	 */
 	public IBaseOperationOutcome toOperationOutcome() {
 		IBaseOperationOutcome oo = (IBaseOperationOutcome)
@@ -171,18 +171,16 @@ public class ValidationResult {
 
 	private void addIssueToOperationOutcome(
 			IBaseOperationOutcome theOperationOutcome,
-			String location,
+			String theLocationExpression,
 			Integer locationLine,
 			Integer locationCol,
 			ResultSeverityEnum issueSeverity,
 			String message,
 			String messageId) {
-		if (isBlank(location) && locationLine != null && locationCol != null) {
-			location = "Line[" + locationLine + "] Col[" + locationCol + "]";
-		}
+
 		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
 		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-				myCtx, theOperationOutcome, severity, message, messageId, location, Constants.OO_INFOSTATUS_PROCESSING);
+				myCtx, theOperationOutcome, severity, message, messageId, theLocationExpression, Constants.OO_INFOSTATUS_PROCESSING);
 
 		if (locationLine != null || locationCol != null) {
 			String unknown = UNKNOWN;
@@ -200,6 +198,10 @@ public class ValidationResult {
 				String locationString = "Line[" + line + "] Col[" + col + "]";
 				OperationOutcomeUtil.addLocationToIssue(myCtx, issue, locationString);
 			}
+		}
+
+		if (isNotBlank(theLocationExpression)) {
+			OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, theLocationExpression);
 		}
 
 		if (isNotBlank(messageId)) {

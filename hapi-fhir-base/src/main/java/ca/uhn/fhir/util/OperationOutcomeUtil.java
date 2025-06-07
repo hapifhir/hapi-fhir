@@ -264,6 +264,19 @@ public class OperationOutcomeUtil {
 		}
 	}
 
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theLocationExpression) {
+		if (isNotBlank(theLocationExpression) && theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+				(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("expression");
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
+				.getChildByName("expression")
+				.newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocationExpression);
+			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
 	public static IBase addIssueWithMessageId(
 			FhirContext myCtx,
 			IBaseOperationOutcome theOperationOutcome,
@@ -358,4 +371,5 @@ public class OperationOutcomeUtil {
 					theMessageId);
 		}
 	}
+
 }
