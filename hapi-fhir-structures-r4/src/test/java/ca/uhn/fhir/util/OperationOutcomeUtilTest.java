@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,15 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, null);
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "line 3");
-		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}", myCtx.newJsonParser().encodeResourceToString(oo));
+
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, null);
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, "");
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, "line 3");
+
+		System.out.println(myCtx.newJsonParser().encodeResourceToString(oo));
+
+		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"],\"expression\":[\"/Patient\",\"line 3\"]}]}",
+			 myCtx.newJsonParser().encodeResourceToString(oo));
 	}
 
 	@Test
@@ -95,5 +104,25 @@ public class OperationOutcomeUtilTest {
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
 
 		assertTrue(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
+	}
+
+	@Test
+	public void testAddExpressionToIssue() {
+		OperationOutcome oo = new OperationOutcome();
+		IBase issue = OperationOutcomeUtil.addIssue(myCtx, oo, "warning", "should have narrative", "Patient", "processing");
+
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, null);
+		assertThat(myCtx.newJsonParser().encodeResourceToString(oo)).endsWith("\"expression\":[\"Patient\"]}]}");
+
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, StringUtils.EMPTY);
+		assertThat(myCtx.newJsonParser().encodeResourceToString(oo)).endsWith("\"expression\":[\"Patient\"]}]}");
+
+		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, "Line[1] Col[2]");
+		assertThat(myCtx.newJsonParser().encodeResourceToString(oo)).endsWith("\"expression\":[\"Patient\",\"Line[1] Col[2]\"]}]}");
+	}
+
+	@Test
+	public void testIsExpressionSupported() {
+		assertTrue(OperationOutcomeUtil.isIssueExpressionSupported(myCtx));
 	}
 }

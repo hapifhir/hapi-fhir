@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -1125,7 +1127,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(errors.stream())
 			.anyMatch(r ->
 				(r.getSeverity() == ResultSeverityEnum.ERROR) &&
-					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")) );
+					(r.getMessage().equals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found")));
 	}
 
 	@Test
@@ -1716,6 +1718,38 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).isEmpty();
+	}
+
+	@Test
+	public void testValidationError_invalidDate_operationOutcomeContainsExpressionElement() {
+		// setup
+		Patient patient = new Patient();
+		patient.addName().setFamily("Charm").addGiven("May");
+		patient.getText().setDivAsString("<div>Test Narrative</div>");
+		patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		patient.setBirthDateElement(new DateType("2001-02-28"));
+
+		// change birthdate to an invalid date
+		IParser parser = ourCtx.newJsonParser();
+		String encoded = parser.setPrettyPrint(true).encodeResourceToString(patient).replace("2001-02-28", "2001-02-29");
+		assertThat(encoded).contains("2001-02-29");
+
+		// execute
+		ValidationResult result = myFhirValidator.validateWithResult(encoded);
+		OperationOutcome outcome = (OperationOutcome) result.toOperationOutcome();
+
+		String jsonString = parser.setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(jsonString);
+
+		// validate
+		assertThat(outcome.getIssue()).hasSize(1);
+
+		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssue().get(0);
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getDiagnostics()).isEqualTo("Not a valid date (Invalid date/time format: \"2001-02-29\")");
+		assertThat(issue.getExpression()).hasSize(2);
+		assertThat(issue.getExpression().get(0).getValue()).contains("Patient.birthDate");
+		assertThat(issue.getExpression().get(1).getValue()).contains("Line");
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
