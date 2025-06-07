@@ -98,8 +98,8 @@ public class RestfulServerUtils {
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS =
 			new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
-	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
+	private static final Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
+	private static final EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
 			EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -1093,13 +1093,15 @@ public class RestfulServerUtils {
 			return true;
 		} else if (isBlank(binaryContentType)) {
 			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
-		} else if (EncodingEnum.forContentTypeStrict(theResponseEncoding.getContentType()) != null) {
+		}
+
+		EncodingEnum fhirContentType = EncodingEnum.forContentTypeStrict(theResponseEncoding.getContentType());
+		if (fhirContentType != null && fhirContentType != EncodingEnum.NDJSON) {
 			// If a FHIR content-type is explicitly requested, the Binary resource shall be returned
 			return false;
-		} else if (binaryContentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
-			return true;
 		}
-		return false;
+
+		return binaryContentType.equalsIgnoreCase(theResponseEncoding.getContentType());
 	}
 
 	public static String createEtag(String theVersionId) {
