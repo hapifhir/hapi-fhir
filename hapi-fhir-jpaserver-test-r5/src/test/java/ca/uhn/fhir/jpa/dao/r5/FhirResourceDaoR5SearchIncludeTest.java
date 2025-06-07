@@ -183,9 +183,9 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 			myCaptureQueriesListener.logSelectQueries();
 			SqlQuery searchForCanonicalReferencesQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2);
 			// Make sure we have the right query - If this ever fails, maybe we have optimized the queries
-			// (or somehow made things worse) and the search for the canonical target is no longer the 4th
+			// (or somehow made things worse) and the search for the canonical target is no longer the 3rd
 			// SQL query
-			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).contains("rispu1_0.HASH_IDENTITY in ('-600769180185160063')");
+			assertThat(searchForCanonicalReferencesQuery.getSql(true, false)).matches(".*rispu1_0\\.HASH_IDENTITY in \\([^)]*'-600769180185160063'[^)]*\\).*");
 			assertTrue(
 				searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo')")
 					|| searchForCanonicalReferencesQuery.getSql(true, false).contains("rispu1_0.SP_URI in ('http://foo','http://foo|1.0')"),

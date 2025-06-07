@@ -76,7 +76,7 @@ public class SearchParameterUtil {
 	 * otherwise, fall to 3.3
 	 */
 	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(
-		FhirContext theFhirContext, String theResourceType) {
+			FhirContext theFhirContext, String theResourceType) {
 		RuntimeSearchParam myPatientSearchParam = null;
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 		myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
@@ -84,20 +84,20 @@ public class SearchParameterUtil {
 			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("subject");
 			if (myPatientSearchParam == null) {
 				final List<RuntimeSearchParam> searchParamsForCurrentVersion =
-					runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+						runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
 				final List<RuntimeSearchParam> searchParamsToUse;
 				// We want to handle a narrow code path in which attempting to process SearchParameters for a non-R4
 				// resource would have failed, and instead make another attempt to process them with the R4-equivalent
 				// FHIR path.
 				if (FhirVersionEnum.R4 == theFhirContext.getVersion().getVersion()
-					|| searchParamsForCurrentVersion.size() == 1) {
+						|| searchParamsForCurrentVersion.size() == 1) {
 					searchParamsToUse = searchParamsForCurrentVersion;
 				} else {
 					searchParamsToUse =
-						checkR4PatientCompartmentForMatchingSearchParam(runtimeResourceDefinition, theResourceType);
+							checkR4PatientCompartmentForMatchingSearchParam(runtimeResourceDefinition, theResourceType);
 				}
 				myPatientSearchParam =
-					validateSearchParamsAndReturnOnlyOne(runtimeResourceDefinition, searchParamsToUse);
+						validateSearchParamsAndReturnOnlyOne(runtimeResourceDefinition, searchParamsToUse);
 			}
 		}
 		return Optional.of(myPatientSearchParam);
@@ -105,29 +105,29 @@ public class SearchParameterUtil {
 
 	@Nonnull
 	private static List<RuntimeSearchParam> checkR4PatientCompartmentForMatchingSearchParam(
-		RuntimeResourceDefinition theRuntimeResourceDefinition, String theResourceType) {
+			RuntimeResourceDefinition theRuntimeResourceDefinition, String theResourceType) {
 		final RuntimeSearchParam patientSearchParamForR4 =
-			FhirContext.forR4Cached().getResourceDefinition(theResourceType).getSearchParam("patient");
+				FhirContext.forR4Cached().getResourceDefinition(theResourceType).getSearchParam("patient");
 
 		return Optional.ofNullable(patientSearchParamForR4)
-			.map(patientSearchParamForR4NonNull ->
-				theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient").stream()
-					.filter(searchParam -> searchParam.getPath() != null)
-					.filter(searchParam ->
-						searchParam.getPath().equals(patientSearchParamForR4NonNull.getPath()))
-					.collect(Collectors.toList()))
-			.orElse(Collections.emptyList());
+				.map(patientSearchParamForR4NonNull ->
+						theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient").stream()
+								.filter(searchParam -> searchParam.getPath() != null)
+								.filter(searchParam ->
+										searchParam.getPath().equals(patientSearchParamForR4NonNull.getPath()))
+								.collect(Collectors.toList()))
+				.orElse(Collections.emptyList());
 	}
 
 	/**
 	 * Given the resource type, fetch all its patient-based search parameter name that's available
 	 */
 	public static Set<String> getPatientSearchParamsForResourceType(
-		FhirContext theFhirContext, String theResourceType) {
+			FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 
 		List<RuntimeSearchParam> searchParams =
-			new ArrayList<>(runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
+				new ArrayList<>(runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
 		// add patient search parameter for resources that's not in the compartment
 		RuntimeSearchParam myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
 		if (myPatientSearchParam != null) {
@@ -139,8 +139,8 @@ public class SearchParameterUtil {
 		}
 		if (CollectionUtils.isEmpty(searchParams)) {
 			String errorMessage = String.format(
-				"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
-				runtimeResourceDefinition.getId());
+					"Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
+					runtimeResourceDefinition.getId());
 			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
 		}
 		// deduplicate list of searchParams and get their names
@@ -151,68 +151,68 @@ public class SearchParameterUtil {
 	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
 	 */
 	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(
-		FhirContext theFhirContext, String theResourceType) {
+			FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 		return getOnlyPatientCompartmentRuntimeSearchParam(resourceDefinition);
 	}
 
 	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(
-		RuntimeResourceDefinition runtimeResourceDefinition) {
+			RuntimeResourceDefinition runtimeResourceDefinition) {
 		return validateSearchParamsAndReturnOnlyOne(
-			runtimeResourceDefinition, runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
+				runtimeResourceDefinition, runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
 	}
 
 	public static RuntimeSearchParam getOnlyPatientCompartmentRuntimeSearchParam(
-		RuntimeResourceDefinition runtimeResourceDefinition, List<RuntimeSearchParam> theSearchParams) {
+			RuntimeResourceDefinition runtimeResourceDefinition, List<RuntimeSearchParam> theSearchParams) {
 		return validateSearchParamsAndReturnOnlyOne(runtimeResourceDefinition, theSearchParams);
 	}
 
 	@Nonnull
 	private static RuntimeSearchParam validateSearchParamsAndReturnOnlyOne(
-		RuntimeResourceDefinition theRuntimeResourceDefinition, List<RuntimeSearchParam> theSearchParams) {
+			RuntimeResourceDefinition theRuntimeResourceDefinition, List<RuntimeSearchParam> theSearchParams) {
 		final RuntimeSearchParam patientSearchParam;
 		if (CollectionUtils.isEmpty(theSearchParams)) {
 			String errorMessage = String.format(
-				"Resource type [%s] for ID [%s] and version: [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
-				theRuntimeResourceDefinition.getName(),
-				theRuntimeResourceDefinition.getId(),
-				theRuntimeResourceDefinition.getStructureVersion());
+					"Resource type [%s] for ID [%s] and version: [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter",
+					theRuntimeResourceDefinition.getName(),
+					theRuntimeResourceDefinition.getId(),
+					theRuntimeResourceDefinition.getStructureVersion());
 			throw new IllegalArgumentException(Msg.code(1774) + errorMessage);
 		} else if (theSearchParams.size() == 1) {
 			patientSearchParam = theSearchParams.get(0);
 		} else {
 			String errorMessage = String.format(
-				"Resource type [%s] for ID [%s] and version: [%s] has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.",
-				theRuntimeResourceDefinition.getName(),
-				theRuntimeResourceDefinition.getId(),
-				theRuntimeResourceDefinition.getStructureVersion());
+					"Resource type [%s] for ID [%s] and version: [%s] has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.",
+					theRuntimeResourceDefinition.getName(),
+					theRuntimeResourceDefinition.getId(),
+					theRuntimeResourceDefinition.getStructureVersion());
 			throw new IllegalArgumentException(Msg.code(1775) + errorMessage);
 		}
 		return patientSearchParam;
 	}
 
 	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParamsForResourceType(
-		FhirContext theFhirContext, String theResourceType) {
+			FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
 	}
 
 	public static List<RuntimeSearchParam> getAllPatientCompartmenRuntimeSearchParams(FhirContext theFhirContext) {
 		return theFhirContext.getResourceTypes().stream()
-			.flatMap(type ->
-				getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).stream())
-			.collect(Collectors.toList());
+				.flatMap(type ->
+						getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).stream())
+				.collect(Collectors.toList());
 	}
 
 	public static Set<String> getAllResourceTypesThatAreInPatientCompartment(FhirContext theFhirContext) {
 		return theFhirContext.getResourceTypes().stream()
-			.filter(type -> CollectionUtils.isNotEmpty(
-				getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type)))
-			.collect(Collectors.toSet());
+				.filter(type -> CollectionUtils.isNotEmpty(
+						getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type)))
+				.collect(Collectors.toSet());
 	}
 
 	private static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(
-		RuntimeResourceDefinition theRuntimeResourceDefinition) {
+			RuntimeResourceDefinition theRuntimeResourceDefinition) {
 		List<RuntimeSearchParam> patient = theRuntimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
 		return patient;
 	}
@@ -247,10 +247,10 @@ public class SearchParameterUtil {
 
 		BaseRuntimeChildDefinition base = def.getChildByName(theChildName);
 		return base.getAccessor()
-			.getFirstValueOrNull(theResource)
-			.map(t -> ((IPrimitiveType<?>) t))
-			.map(t -> t.getValueAsString())
-			.orElse(null);
+				.getFirstValueOrNull(theResource)
+				.map(t -> ((IPrimitiveType<?>) t))
+				.map(t -> t.getValueAsString())
+				.orElse(null);
 	}
 
 	public static String stripModifier(String theSearchParam) {
@@ -282,12 +282,12 @@ public class SearchParameterUtil {
 	 */
 	public static String[] splitSearchParameterExpressions(String thePaths) {
 		if (!StringUtils.containsAny(thePaths, " or ", " |")) {
-			return new String[]{thePaths};
+			return new String[] {thePaths};
 		}
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
 		return topLevelOrExpressions.stream()
-			.flatMap(s -> splitOutOfParensToken(s, " |").stream())
-			.toArray(String[]::new);
+				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
+				.toArray(String[]::new);
 	}
 
 	private static List<String> splitOutOfParensToken(String thePath, String theToken) {
@@ -344,7 +344,7 @@ public class SearchParameterUtil {
 	 * @return Returns {@literal true} if the path could return a {@literal canonical} or {@literal CanonicalReference}, or returns {@literal false} if the path could only return a {@literal Reference}.
 	 */
 	public static boolean referencePathCouldPotentiallyReferenceCanonicalElement(
-		FhirContext theContext, String theResourceType, String thePath, RuntimeSearchParam theParam) {
+			FhirContext theContext, String theResourceType, String thePath, boolean theReverse) {
 
 		// If this path explicitly wants a reference and not a canonical, we can ignore it since we're
 		// only looking for canonicals here
@@ -376,6 +376,9 @@ public class SearchParameterUtil {
 				firstSegment = false;
 				if (Character.isUpperCase(currentSegment.charAt(0))) {
 					// This is just the resource name
+					if (!theReverse && !theResourceType.equals(currentSegment)) {
+						return false;
+					}
 					continue;
 				}
 			}
