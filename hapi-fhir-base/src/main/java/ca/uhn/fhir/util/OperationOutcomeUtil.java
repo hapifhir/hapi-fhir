@@ -231,6 +231,7 @@ public class OperationOutcomeUtil {
 		diagnosticsChild.getMutator().setValue(theIssue, string);
 
 		addLocationToIssue(theCtx, theIssue, theLocation);
+		addExpressionToIssue(theCtx, theIssue, theLocation);
 
 		if (isNotBlank(theDetailSystem)) {
 			BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName("details");
@@ -251,6 +252,9 @@ public class OperationOutcomeUtil {
 		}
 	}
 
+	/**
+	 * The FHIR element {@literal OperationOutcome.location} has been deprecated since FHIR version R4.
+	 */
 	public static void addLocationToIssue(FhirContext theContext, IBase theIssue, String theLocation) {
 		if (isNotBlank(theLocation)) {
 			BaseRuntimeElementCompositeDefinition<?> issueElement =
@@ -261,6 +265,24 @@ public class OperationOutcomeUtil {
 					.newInstance(locationChild.getInstanceConstructorArguments());
 			locationElem.setValueAsString(theLocation);
 			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
+	/**
+	 * The FHIR element {@literal OperationOutcome.expression} is the recommended replacement for
+	 * {@literal OperationOutcome.location}.
+	 */
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theExpression) {
+		if (isNotBlank(theExpression) && isIssueExpressionSupported(theContext)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition expressionChild = issueElement.getChildByName("expression");
+
+			IPrimitiveType<?> expressionElm = (IPrimitiveType<?>) expressionChild
+					.getChildByName("expression")
+					.newInstance(expressionChild.getInstanceConstructorArguments());
+			expressionElm.setValueAsString(theExpression);
+			expressionChild.getMutator().addValue(theIssue, expressionElm);
 		}
 	}
 
@@ -357,5 +379,13 @@ public class OperationOutcomeUtil {
 					"string",
 					theMessageId);
 		}
+	}
+
+	public static boolean isIssueExpressionSupported(FhirContext theCtx) {
+		FhirVersionEnum fhirVersion = theCtx.getVersion().getVersion();
+		return fhirVersion == FhirVersionEnum.DSTU3
+				|| fhirVersion == FhirVersionEnum.R4
+				|| fhirVersion == FhirVersionEnum.R4B
+				|| fhirVersion == FhirVersionEnum.R5;
 	}
 }

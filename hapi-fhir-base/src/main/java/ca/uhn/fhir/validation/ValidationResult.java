@@ -199,6 +199,7 @@ public class ValidationResult {
 				OperationOutcomeUtil.addIssueColExtensionToIssue(myCtx, issue, col);
 				String locationString = "Line[" + line + "] Col[" + col + "]";
 				OperationOutcomeUtil.addLocationToIssue(myCtx, issue, locationString);
+				OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, locationString);
 			}
 		}
 
