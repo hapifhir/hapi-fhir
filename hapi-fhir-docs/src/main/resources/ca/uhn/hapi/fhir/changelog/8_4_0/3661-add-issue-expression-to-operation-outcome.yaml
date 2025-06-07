@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 3661
-title: "Added support of `issue.expression` element to validation `OperationOutcome` for FHIR version DSTU3, R4, R4B and R5."
+title: "Populated `issue.expression` element in resource validation result `OperationOutcome` for FHIR version DSTU3, R4, R4B and R5."

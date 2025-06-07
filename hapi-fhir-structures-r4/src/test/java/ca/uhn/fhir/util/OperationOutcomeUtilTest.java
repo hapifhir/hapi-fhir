@@ -42,8 +42,6 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, "line 3");
 
-		System.out.println(myCtx.newJsonParser().encodeResourceToString(oo));
-
 		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"],\"expression\":[\"/Patient\",\"line 3\"]}]}",
 			 myCtx.newJsonParser().encodeResourceToString(oo));
 	}
