@@ -1883,13 +1883,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (myPartitionSettings.isDatabasePartitionMode()) {
-			predicates.add(cb.equal(root.get("searchPartitionFieldName"))
-			sqlBuilder.append("r.").append(searchPartitionFieldName);
-			sqlBuilder.append(" = :target_partition_id AND ");
+			predicates.add(cb.equal(root.get(searchPartitionFieldName), cb.parameter(Integer.class, "target_partition_id")));
 		}
 
-		sqlBuilder.append("r.").append(searchPidFieldName);
-		sqlBuilder.append(" IN (:target_pids)");
+		predicates.add(root.get(searchPidFieldName).in(cb.parameter(List.class, "target_pids")));
 
 		/*
 		 * We need to set the resource type in 2 cases only:
@@ -1909,7 +1906,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// because mySourceResourceType is not part of the HFJ_RES_LINK
 			// index, this might not be the most optimal performance.
 			// but it is for an $everything operation (and maybe we should update the index)
-			sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
+			predicates.add(cb.equal(root.get("mySourceResourceType"), cb.parameter(Integer.class, "want_resource_type")));
 		} else {
 			wantResourceType = null;
 		}
@@ -1919,21 +1916,20 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// (e.g. via Provenance, List, or Group) when in an $everything operation
 		if (myParams != null
 				&& myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
-			sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
-			sqlBuilder.append(UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE.stream()
-					.collect(Collectors.joining("', '", " AND r.mySourceResourceType NOT IN ('", "')")));
+			predicates.add(cb.notEqual(root.get("myTargetResourceType"), "Patient"));
+			predicates.add(cb.not(root.get("mySourceResourceType").in(UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE)));
 		}
+
 		if (hasDesiredResourceTypes) {
-			sqlBuilder.append(" AND r.myTargetResourceType IN (:desired_target_resource_types)");
+			predicates.add(root.get("myTargetResourceType").in(cb.parameter(List.class, "desired_target_resource_types")));
 		}
 
 		query.where(cb.and(predicates.toArray(new Predicate[0])));
 
-		String sql = sqlBuilder.toString();
 		List<Collection<JpaPid>> partitions = partitionBySizeAndPartitionId(nextRoundMatches, getMaximumPageSize());
 		for (Collection<JpaPid> nextPartition : partitions) {
 
-			TypedQuery<IncludesRecord> q = entityManager.createQuery(sql, IncludesRecord.class);
+			TypedQuery<IncludesRecord> q = myEntityManager.createQuery(query);
 			q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 			if (myPartitionSettings.isDatabasePartitionMode()) {
 				q.setParameter(
