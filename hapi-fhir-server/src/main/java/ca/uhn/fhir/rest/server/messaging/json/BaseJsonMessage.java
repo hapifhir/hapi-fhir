@@ -96,8 +96,8 @@ public abstract class BaseJsonMessage<T> implements IMessage<T>, Message<T>, IMo
 		if (theMessage instanceof BaseJsonMessage<P> baseJsonMessage) {
 			baseJsonMessage.getHapiHeaders().getCustomHeaders().putAll(theCustomHeaders);
 			// FIXME KHS
-//			theCustomHeaders.forEach(
-//					(key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
+			//			theCustomHeaders.forEach(
+			//					(key, value) -> baseJsonMessage.getHapiHeaders().addCustomHeader(key, value));
 		}
 	}
 }

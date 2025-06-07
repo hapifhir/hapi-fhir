@@ -76,8 +76,6 @@ public interface IMessage<T> {
 
 	static Map<String, String> convertHeaderValuesToStrings(Map<String, Object> theHeaders) {
 		return theHeaders.entrySet().stream()
-			.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
 	}
-
-
 }
