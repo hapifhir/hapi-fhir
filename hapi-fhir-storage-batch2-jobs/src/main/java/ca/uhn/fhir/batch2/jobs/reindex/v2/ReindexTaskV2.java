@@ -179,8 +179,7 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 		ReindexParameters parameters = new ReindexParameters()
 				.setReindexSearchParameters(myJobParameters.getReindexSearchParameters())
 				.setOptimizeStorage(myJobParameters.getOptimizeStorage())
-				.setOptimisticLock(myJobParameters.getOptimisticLock())
-			    .setIncludeDeleteResources(myJobParameters.getIncludeDeletedResources());
+				.setOptimisticLock(myJobParameters.getOptimisticLock());
 
 		// Reindex
 

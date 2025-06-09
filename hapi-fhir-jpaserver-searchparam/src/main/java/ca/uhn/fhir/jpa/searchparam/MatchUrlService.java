@@ -95,6 +95,12 @@ public class MatchUrlService {
 				}
 			}
 
+			// fixme:
+			//  1- handle SP _includeDeleted
+			// 2-  validate that _includeDeleted is not used in conjunction with any other SP other than _id and
+			// _lastUpdated;
+			//
+
 			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (!paramList.isEmpty()) {
 					if (paramList.size() > 2) {

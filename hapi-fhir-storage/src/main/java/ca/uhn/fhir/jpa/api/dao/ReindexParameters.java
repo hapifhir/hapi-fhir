@@ -29,7 +29,6 @@ public class ReindexParameters {
 	private ReindexSearchParametersEnum myReindexSearchParameters = REINDEX_SEARCH_PARAMETERS_DEFAULT;
 	private OptimizeStorageModeEnum myOptimizeStorage = OPTIMIZE_STORAGE_DEFAULT;
 	private boolean myOptimisticLock = OPTIMISTIC_LOCK_DEFAULT;
-	private boolean myIncludeDeleteResources = INCLUDE_DELETED_RESOURCES_DEFAULT;
 
 	public boolean isOptimisticLock() {
 		return myOptimisticLock;
@@ -37,15 +36,6 @@ public class ReindexParameters {
 
 	public ReindexParameters setOptimisticLock(boolean theOptimisticLock) {
 		myOptimisticLock = theOptimisticLock;
-		return this;
-	}
-
-	public boolean isIncludeDeleteResources() {
-		return myIncludeDeleteResources;
-	}
-
-	public ReindexParameters setIncludeDeleteResources(boolean theIncludeDeleteResources) {
-		myIncludeDeleteResources = theIncludeDeleteResources;
 		return this;
 	}
 

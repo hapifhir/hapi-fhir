@@ -98,7 +98,6 @@ public class ReindexProviderTest {
 		input.addParameter(ReindexJobParameters.REINDEX_SEARCH_PARAMETERS, new CodeType("none"));
 		input.addParameter(ReindexJobParameters.OPTIMISTIC_LOCK, new BooleanType(false));
 		input.addParameter(ReindexJobParameters.OPTIMIZE_STORAGE, new CodeType("current_version"));
-		input.addParameter(ReindexJobParameters.INCLUDE_DELETED_RESOURCES, new BooleanType(true));
 
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
 		final PartitionedUrl partitionedUrl = new PartitionedUrl().setUrl(theUrl).setRequestPartitionId(partitionId);
@@ -129,7 +128,6 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
-		assertTrue(params.getIncludeDeletedResources());
 	}
 
 	@Test
@@ -159,6 +157,5 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
-		assertFalse(params.getIncludeDeletedResources());
 	}
 }

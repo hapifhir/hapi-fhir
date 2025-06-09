@@ -4240,7 +4240,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
 		return theDateSearchResponse.getAllResources().stream()
-			.filter(res -> res instanceof ServiceRequest)
+			.filter(ServiceRequest.class::isInstance)
 			.map(resource -> {
 				ServiceRequest serviceRequest = (ServiceRequest) resource;
 				return serviceRequest.getOccurrenceTiming().getEvent().stream().findFirst().orElse(null);
@@ -4446,7 +4446,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(actualNameList).containsExactly(namesInAlpha);
 	}
 
-
 	@Test
 	void testSearchForStream_carriesTxContext() {
 		// given
@@ -4468,6 +4467,33 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				.collect(Collectors.toSet()));
 
 		assertEquals(ids, createdIds);
+	}
+
+	@Test
+	void testSearchForStream_withIncludeDeletedResources_resultIncludesDeletedResources() {
+		// given
+		IIdType deletedObservationId = createObservation();
+		IIdType observationId = createObservation();
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		deleteResource(deletedObservationId);
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		// fixme: make the param name a constant and the value an enum to allow extension beyond (only/yes)
+		searchParameterMap.add("_includeDeleted", new StringParam("yes"));
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(searchParameterMap, request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertThat(ids).containsExactly(observationId.getIdPart());
 	}
 
 	@Test

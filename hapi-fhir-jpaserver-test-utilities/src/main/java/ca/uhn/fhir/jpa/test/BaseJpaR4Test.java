@@ -701,6 +701,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	@Override
+	public void doDeleteResource(IIdType theIIdType){
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theIIdType.getResourceType());
+		dao.delete(theIIdType);
+	}
+
 	protected String encode(IBaseResource theResource) {
 		return myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
 	}

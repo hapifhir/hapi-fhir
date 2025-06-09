@@ -120,6 +120,29 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		assertEquals(SearchTotalModeEnum.NONE, map.getSearchTotalMode());
 	}
 
+	@Test
+	void testIncludeDeleted_combinedWithInvalidSP_throwsException(){
+		String url = "Patient?_includeDeleted=both&name=acme";
+
+		try {
+			myMatchUrlService.translateMatchUrl(url, ourCtx.getResourceDefinition("Patient"));
+			fail();
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
+
+	@Test
+	void testIncludeDeleted_combinedWithWhiteListedSP_isParsed(){
+
+		String url = "Patient?_includeDeleted=both&lastUpdated=gt2020-01-01&_id=123";
+		var map = myMatchUrlService.translateMatchUrl(url, ourCtx.getResourceDefinition("Patient"));
+
+//		assertThat(map.getIncludeDeleted()).isEqualTo(BOTH);
+		assertThat(map.getLastUpdated()).isNotNull();
+		assertThat(map.containsKey("_id")).isTrue();
+	}
+
 	@Override
 	protected FhirContext getFhirContext() {
 		return ourCtx;

@@ -746,11 +746,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Normal search
+		// fixme:  we will create a resourceTablePredicate if and only if we have
+		// an _id SP.  no modifications requried here since the search will included
+		// deleted already
 		searchForIdsWithAndOr(sqlBuilder, queryStack3, myParams, theRequest);
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
 		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+			// fixme: the current implementation will generate sql that exclude deleted due to the invocation
+			// of method getOrCreateResourceTablePredicateBuilder without parameters.  it need to be modified
+			// to account for the concept of 'includeDeleted' that is passed in as SP
 			Condition partitionIdPredicate = sqlBuilder
 					.getOrCreateResourceTablePredicateBuilder()
 					.createPartitionIdPredicate(myRequestPartitionId);

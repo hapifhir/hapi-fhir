@@ -49,6 +49,7 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 			@Nonnull IJobDataSink<ChunkRangeJson> theDataSink)
 			throws JobExecutionFailedException {
 		PT params = theStepExecutionDetails.getParameters();
+		// fixme:  extract includedDeleted
 
 		Date start = BATCH_START_DATE;
 		Date end = new Date();
@@ -66,6 +67,7 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlJobParameters>
 		}
 
 		ChunkRangeJson chunkRangeJson = new ChunkRangeJson(start, end);
+		// fixme:  configure chunkRangeJson with the flag extracted above
 		sendChunk(chunkRangeJson, theDataSink);
 		return RunOutcome.SUCCESS;
 	}

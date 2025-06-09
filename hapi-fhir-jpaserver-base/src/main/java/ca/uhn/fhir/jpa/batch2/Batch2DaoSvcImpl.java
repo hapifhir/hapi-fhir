@@ -97,10 +97,23 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	@Override
 	public IResourcePidStream fetchResourceIdStream(
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
+		// fixme:  there is 3 scenarios that needs support for includeDeleted
+		// 1- $reindex
+		// 2- $reindex/Patient
+		// 3- $reindex/Patient?[withUrlParam]
+
+		// the third scenario is easy because we will be creating this new url SP called '_includeDeleted'
+		// wich will be parsed into the searchParameterMap (see streamResourceIdsWithUrl).
+		// first and second scenario could/will use the parameter "icludeDeletedResources" as per the ticket
+		// and provided to this method.  then, we take the value and add it to the searchParameterMap.
+		// to be confirmed.
+
 		if (StringUtils.isBlank(theUrl)) {
+			// first scenario
 			return makeStreamResult(
 					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
 		} else {
+			// second scenario
 			return makeStreamResult(
 					theRequestPartitionId,
 					() -> streamResourceIdsWithUrl(theStart, theEnd, theUrl, theRequestPartitionId));
@@ -155,6 +168,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
 		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
 		Stream<Object[]> rowStream;
+
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
 			ourLog.debug("Search for resources - all partitions");
 			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
