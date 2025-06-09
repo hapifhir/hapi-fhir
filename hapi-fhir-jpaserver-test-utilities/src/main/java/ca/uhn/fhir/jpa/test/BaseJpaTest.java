@@ -160,9 +160,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1097,4 +1100,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
+	public static Date fromLocalDate(LocalDate theLocalDate) {
+		return Date.from(theLocalDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+	}
 }

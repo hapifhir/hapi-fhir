@@ -1,0 +1,25 @@
+name: "Check Git Tag Does Not Exist"
+description: "Fails if a git tag for the given normalized version already exists"
+inputs:
+  version:
+    description: "Normalized release version"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Check if git tag exists
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        TAG_LABEL="v$VERSION"
+        echo "🔍 Checking if Git tag '$TAG_LABEL' already exists..."
+        
+        git fetch --tags
+        
+        if git rev-parse "$TAG_LABEL" >/dev/null 2>&1; then
+          echo "❌ ERROR: Git tag '$TAG_LABEL' already exists in the repository."
+          echo "➡️  Please update your pom.xml version to a new, unused version and try again."
+          exit 1
+        else
+          echo "✅ Tag '$TAG_LABEL' does not exist. Proceeding with release."
+        fi
