@@ -989,6 +989,11 @@
 			<organization>TigaHealth</organization>
 		</developer>
 		<developer>
+			<id>qligier</id>
+			<name>Quentin Ligier</name>
+			<organization>ahdis</organization>
+		</developer>
+		<developer>
 			<id>xytis</id>
 			<name>Vytis Valentinavičius</name>
 		</developer>
