@@ -1908,7 +1908,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			// index, this might not be the most optimal performance.
 			// but it is for an $everything operation (and maybe we should update the index)
 			predicates.add(
-					cb.equal(root.get("mySourceResourceType"), cb.parameter(Integer.class, "want_resource_type")));
+					cb.equal(root.get("mySourceResourceType"), cb.parameter(String.class, "want_resource_type")));
 		} else {
 			wantResourceType = null;
 		}
