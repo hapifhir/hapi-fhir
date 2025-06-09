@@ -108,8 +108,8 @@ public class ValidationResult {
 
 	/**
 	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
-	 * {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
-	 * will be removed at some point.
+	 *    {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
+	 * 	will be removed at some point.
 	 */
 	@Deprecated
 	public IBaseOperationOutcome getOperationOutcome() {
@@ -168,34 +168,46 @@ public class ValidationResult {
 		}
 	}
 
+	/**
+	 * Adds a repetition of <code>OperationOutcome.issue</code> to an
+	 * <code>OperationOutcome</code> instance.
+	 *
+	 * @param theOperationOutcome   The OperationOutcome to add to
+	 * @param theLocationExpression The FHIRPath expression describing where the issue was found
+	 * @param theLocationLine       The line number in the source where the issue was found
+	 * @param theLocationCol        The column number in the source where the issue was found
+	 * @param theIssueSeverity      The severity code (must be a valid value for <code>OperationOutcome.issue.severity</code>
+	 * @param theMessage            The validation message
+	 * @param theMessageId          The java validator message ID
+	 */
 	private void addIssueToOperationOutcome(
 			IBaseOperationOutcome theOperationOutcome,
 			String theLocationExpression,
-			Integer locationLine,
-			Integer locationCol,
-			ResultSeverityEnum issueSeverity,
-			String message,
-			String messageId) {
+			Integer theLocationLine,
+			Integer theLocationCol,
+			ResultSeverityEnum theIssueSeverity,
+			String theMessage,
+			String theMessageId) {
 
-		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
+		String severity = theIssueSeverity != null ? theIssueSeverity.getCode() : null;
 		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
 				myCtx,
 				theOperationOutcome,
 				severity,
-				message,
-				messageId,
+				theMessage,
+				theMessageId,
 				theLocationExpression,
 				Constants.OO_INFOSTATUS_PROCESSING);
 
-		if (locationLine != null || locationCol != null) {
+		if (theLocationLine != null || theLocationCol != null) {
 			String unknown = UNKNOWN;
 			String line = unknown;
-			if (locationLine != null && locationLine != -1) {
-				line = locationLine.toString();
+			if (theLocationLine != null && theLocationLine != -1) {
+				line = theLocationLine.toString();
 			}
 			String col = unknown;
-			if (locationCol != null && locationCol != -1) {
-				col = locationCol.toString();
+			if (theLocationCol != null && theLocationCol != -1) {
+				col = theLocationCol.toString();
 			}
 			if (!unknown.equals(line) || !unknown.equals(col)) {
 				OperationOutcomeUtil.addIssueLineExtensionToIssue(myCtx, issue, line);
@@ -209,8 +221,8 @@ public class ValidationResult {
 			OperationOutcomeUtil.addExpressionToIssue(myCtx, issue, theLocationExpression);
 		}
 
-		if (isNotBlank(messageId)) {
-			OperationOutcomeUtil.addMessageIdExtensionToIssue(myCtx, issue, messageId);
+		if (isNotBlank(theMessageId)) {
+			OperationOutcomeUtil.addMessageIdExtensionToIssue(myCtx, issue, theMessageId);
 		}
 	}
 
