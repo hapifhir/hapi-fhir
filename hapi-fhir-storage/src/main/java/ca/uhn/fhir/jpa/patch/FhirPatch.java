@@ -315,7 +315,7 @@ public class FhirPatch {
 
 	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
 		return findChildDefinition(theChildDefinition, childDefinition -> {
-			return childDefinition.getChild() != null;
+			return childDefinition.getChild() == null;
 		});
 	}
 
