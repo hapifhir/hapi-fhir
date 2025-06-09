@@ -2,6 +2,13 @@ package ca.uhn.fhir.jpa.searchparam.fulltext;
 
 import javax.annotation.Nullable;
 
+/**
+ * This is a response object containing the FullText index data which should be stored during
+ * indexing, or an instruction to skip FullText indexing for the given resource.
+ *
+ * @see ca.uhn.fhir.interceptor.api.Pointcut#JPA_INDEX_EXTRACT_FULLTEXT for a description of how this should be used.
+ * @since 8.4.0
+ */
 public class FullTextExtractionResponse {
 
 	private final boolean myDoNotIndex;
