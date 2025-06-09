@@ -98,7 +98,8 @@ public class RestfulServerUtils {
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS =
 			new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
-	private static final Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
+	private static final Map<FhirVersionEnum, FhirContext> myFhirContextMap =
+			Collections.synchronizedMap(new HashMap<>());
 	private static final EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
 			EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
