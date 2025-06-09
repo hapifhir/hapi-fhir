@@ -751,7 +751,6 @@ public class FhirPatchApplyR4Test {
 
 		logResource(patch);
 
-		// TODO - fix
 		svc.apply(encounter, patch);
 		logResource(encounter);
 		EncounterLocationComponent locationComponent = encounter.getLocationFirstRep();

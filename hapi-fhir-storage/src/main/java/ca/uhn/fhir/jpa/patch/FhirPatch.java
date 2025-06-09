@@ -56,7 +56,6 @@ import java.util.function.Predicate;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
  * FhirPatch handler.

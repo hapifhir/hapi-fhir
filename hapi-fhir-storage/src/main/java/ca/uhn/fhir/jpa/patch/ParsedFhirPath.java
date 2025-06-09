@@ -77,7 +77,6 @@ public class ParsedFhirPath {
 		 * Returns true if this is a value node (ie, non-function, non-path node)
 		 */
 		public boolean isValueNode() {
-//			return !isFunction() && !isFilter() && myValue.contains("'");
 			return myIsValueNode;
 		}
 
@@ -405,7 +404,7 @@ public class ParsedFhirPath {
 	public String getLastElementName() {
 		FhirPathNode finalNode = getFinalPathNode();
 		if (finalNode == null) {
-			ourLog.error("No path nodes is fhirpath");
+			ourLog.error("No path nodes in fhirpath");
 			return null;
 		}
 		return finalNode.getValue();
