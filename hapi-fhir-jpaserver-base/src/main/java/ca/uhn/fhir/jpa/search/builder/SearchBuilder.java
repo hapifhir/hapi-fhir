@@ -1982,9 +1982,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (canonicalUrls != null) {
-				String message =
-						"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
-				firePerformanceWarning(request, message);
 				loadCanonicalUrls(request, canonicalUrls, entityManager, pidsToInclude, reverseMode);
 			}
 		}
@@ -1999,6 +1996,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		StringBuilder sqlBuilder;
 		CanonicalUrlTargets canonicalUrlTargets =
 				calculateIndexUriIdentityHashesForResourceTypes(theRequestDetails, null, theReverse);
+		if (canonicalUrlTargets.isEmpty()) {
+			return;
+		}
+
+		String message =
+				"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
+		firePerformanceWarning(theRequestDetails, message);
+
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
 				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.hashIdentityValues.size());
 
@@ -2106,6 +2111,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// But sp_name isn't indexed, so we use hash_identity instead.
 		CanonicalUrlTargets canonicalUrlTargets =
 				calculateIndexUriIdentityHashesForResourceTypes(theRequest, theTargetResourceTypes, theReverse);
+		if (canonicalUrlTargets.isEmpty()) {
+			return null;
+		}
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();
 		StringBuilder canonicalUrlQuery = new StringBuilder();
@@ -2174,12 +2182,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// in this context, so let's just assume it could be anything.
 				targetResourceTypes = possibleTypes;
 			} else {
-				for (var next : mySearchParamRegistry
+				List<RuntimeSearchParam> params = mySearchParamRegistry
 						.getActiveSearchParams(myResourceName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH)
 						.values()
 						.stream()
 						.filter(t -> t.getParamType().equals(RestSearchParameterTypeEnum.REFERENCE))
-						.toList()) {
+						.toList();
+				for (var next : params) {
 
 					String paths = next.getPath();
 					for (String path : SearchParameterUtil.splitSearchParameterExpressions(paths)) {
@@ -2209,7 +2218,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 		}
-		assert !targetResourceTypes.isEmpty();
+
+		if (targetResourceTypes.isEmpty()) {
+			return new CanonicalUrlTargets(Set.of(), Set.of());
+		}
 
 		Set<Long> hashIdentityValues = new HashSet<>();
 		Set<Integer> partitionIds = new HashSet<>();
@@ -2234,7 +2246,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		return new CanonicalUrlTargets(hashIdentityValues, partitionIds);
 	}
 
-	record CanonicalUrlTargets(@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {}
+	record CanonicalUrlTargets(@Nonnull Set<Long> hashIdentityValues, @Nonnull Set<Integer> partitionIds) {
+		public boolean isEmpty() {
+			return hashIdentityValues.isEmpty();
+		}
+	}
 
 	/**
 	 * This method takes in a list of {@link JpaPid}'s and returns a series of sublists containing
@@ -3001,7 +3017,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myMaxPageSizeForTests = theTestSize;
 	}
 
-	// FIXME: can be a TypedQuery param?
 	private static ScrollableResults<?> toScrollableResults(Query theQuery) {
 		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) theQuery;
 		return hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
