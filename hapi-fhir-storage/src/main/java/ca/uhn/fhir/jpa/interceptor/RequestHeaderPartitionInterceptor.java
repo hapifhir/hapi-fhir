@@ -26,8 +26,11 @@ import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
+
+import java.util.function.BiFunction;
 
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE;
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_READ;
@@ -38,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * It reads the value of the X-Request-Partition-IDs header, which is expected to be a comma separated partition ids.
  * For the read operations it uses all the partitions specified in the header.
  * The create operations it uses the first partition ID from the header.
- *
+ * <p>
  * The tests for the functionality of this interceptor can be found in the
  * ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionTest class.
  */
@@ -51,34 +54,38 @@ public class RequestHeaderPartitionInterceptor {
 	}
 
 	/**
-	 * This method is called to identify the partition ID for create operations.
-	 * It reads the value of the X-Request-Partition-IDs header, and parses and returns the first partition ID
-	 * from the header value.
+	 * Identifies the partition ID for create operations by parsing the first ID from the X-Request-Partition-IDs header.
 	 */
 	@Hook(STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyPartitionForCreate(RequestDetails theRequestDetails) {
-		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return RequestPartitionHeaderUtil.fromHeaderFirstPartitionOnly(partitionHeader, myDefaultPartitionSettings);
+		return identifyPartitionOrThrowException(theRequestDetails, RequestPartitionHeaderUtil::fromHeaderFirstPartitionOnly);
 	}
 
 	/**
-	 * This method is called to identify the partition ID for read operations.
-	 * Parses all the partition IDs from the header into a RequestPartitionId object.
+	 * Identifies partition IDs for read operations by parsing all IDs from the X-Request-Partition-IDs header.
 	 */
 	@Hook(STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyPartitionForRead(RequestDetails theRequestDetails) {
-		String partitionHeader = getPartitionHeaderOrThrowIfBlank(theRequestDetails);
-		return RequestPartitionHeaderUtil.fromHeader(partitionHeader, myDefaultPartitionSettings);
+		return identifyPartitionOrThrowException(theRequestDetails, RequestPartitionHeaderUtil::fromHeader);
 	}
 
-	private String getPartitionHeaderOrThrowIfBlank(RequestDetails theRequestDetails) {
+	/**
+	 * Core logic to identify a request's storage partition. It retrieves the partition header,
+	 * and if the header is blank for a system request, it returns the default partition.
+	 * Otherwise, it uses the provided parsing function to interpret the header.
+	 */
+	private RequestPartitionId identifyPartitionOrThrowException(RequestDetails theRequestDetails, BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
 		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
+
 		if (isBlank(partitionHeader)) {
-			String msg = String.format(
-					"%s header is missing or blank, it is required to identify the storage partition",
-					Constants.HEADER_X_REQUEST_PARTITION_IDS);
-			throw new InvalidRequestException(Msg.code(2642) + msg);
+			if (theRequestDetails instanceof SystemRequestDetails) {
+				return myDefaultPartitionSettings.getDefaultRequestPartitionId();
+			}
+			throw new InvalidRequestException(Msg.code(2642) + String.format(
+				"%s header is missing or blank, it is required to identify the storage partition",
+				Constants.HEADER_X_REQUEST_PARTITION_IDS));
 		}
-		return partitionHeader;
+
+		return aHeaderParser.apply(partitionHeader, myDefaultPartitionSettings);
 	}
 }
