@@ -70,6 +70,8 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest;
+import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -139,6 +141,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -869,7 +872,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			TransactionDetails theTransactionDetails,
 			boolean theForceUpdate,
 			boolean theCreateNewHistoryEntry) {
-		Validate.notNull(theEntity);
+		Validate.notNull(theEntity, "entity must not be null");
 		Validate.isTrue(
 				theDeletedTimestampOrNull != null || theResource != null,
 				"Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]",
@@ -998,7 +1001,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (thePerformIndexing && changed != null && changed.isChanged()) {
-			populateFullTextFields(myContext, theResource, entity, newParams);
+			populateFullTextFieldsAndSetEntityStatus(theRequest, myContext, theResource, entity, newParams);
 		}
 
 		if (thePerformIndexing
@@ -1645,7 +1648,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myStorageSettings = theStorageSettings;
 	}
 
-	public void populateFullTextFields(
+	// FIXME: document and add comments
+	private void populateFullTextFieldsAndSetEntityStatus(
+		RequestDetails theRequestDetails,
 			final FhirContext theContext,
 			final IBaseResource theResource,
 			ResourceTable theEntity,
@@ -1655,24 +1660,61 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return;
 		}
 
-		if (theEntity.getDeleted() != null) {
-			if (myStorageSettings.isHibernateSearchIndexFullText()) {
-				theEntity.setNarrativeText(null);
-				theEntity.setContentText(null);
+		Supplier<String> contentSupplier = () -> parseContentTextIntoWords(theContext, theResource);
+		Supplier<String> narrativeSupplier = () -> parseNarrativeTextIntoWords(theResource);
+
+		boolean shouldIndexFullText = false;
+
+		if (myStorageSettings.isHibernateSearchIndexFullText()) {
+			IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+			FullTextExtractionResponse contentOutcome = null;
+			FullTextExtractionResponse narrativeOutcome = null;
+			if (compositeBroadcaster.hasHooks(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT)) {
+
+				FullTextExtractionRequest contentRequest = new FullTextExtractionRequest(FullTextExtractionRequest.IndexTypeEnum.CONTENT, theEntity.getIdType(myContext), theResource, getResourceName(), contentSupplier);
+				HookParams contentParams = new HookParams()
+					.add(FullTextExtractionRequest.class, contentRequest);
+				Object tmp = compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, contentParams);
+				contentOutcome = (FullTextExtractionResponse) tmp;
+
+				FullTextExtractionRequest narrativeRequest = new FullTextExtractionRequest(FullTextExtractionRequest.IndexTypeEnum.TEXT, theEntity.getIdType(myContext), theResource, getResourceName(), narrativeSupplier);
+				HookParams narrativeParams = new HookParams()
+					.add(FullTextExtractionRequest.class, narrativeRequest);
+				narrativeOutcome = (FullTextExtractionResponse) compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, narrativeParams);
+
 			}
-		} else {
-			if (myStorageSettings.isHibernateSearchIndexFullText()) {
-				theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
-				theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+
+			if (contentOutcome == null) {
+				theEntity.setContentText(contentSupplier.get());
+				shouldIndexFullText = true;
+			} else if (!contentOutcome.isDoNotIndex()) {
+				theEntity.setContentText(contentOutcome.getPayload());
+				shouldIndexFullText = true;
 			}
-			if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
-				ExtendedHSearchIndexData hSearchIndexData =
-						myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
-				theEntity.setLuceneIndexData(hSearchIndexData);
+
+			if (narrativeOutcome == null) {
+				theEntity.setNarrativeText(narrativeSupplier.get());
+				shouldIndexFullText = true;
+			} else if (!narrativeOutcome.isDoNotIndex()) {
+				theEntity.setNarrativeText(narrativeOutcome.getPayload());
+				shouldIndexFullText = true;
 			}
+
 		}
 
-		theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
+		if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
+			ExtendedHSearchIndexData hSearchIndexData =
+					myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
+			theEntity.setLuceneIndexData(hSearchIndexData);
+			shouldIndexFullText = true;
+		}
+
+		if (shouldIndexFullText) {
+			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
+		} else {
+			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY);
+		}
 	}
 
 	@VisibleForTesting
@@ -1693,8 +1735,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myResourceTypeCacheSvc = theResourceTypeCacheSvc;
 	}
 
+	@Nullable
 	@SuppressWarnings("unchecked")
-	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
+	public static String parseContentTextIntoWords(@Nonnull FhirContext theContext, @Nullable IBaseResource theResource) {
+		if (theResource == null) {
+			return null;
+		}
 
 		Class<IPrimitiveType<String>> stringType = (Class<IPrimitiveType<String>>)
 				theContext.getElementDefinition("string").getImplementingClass();
@@ -1730,8 +1776,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceText;
 	}
 
-	private static String parseNarrativeTextIntoWords(IBaseResource theResource) {
-
+	@Nullable
+	private static String parseNarrativeTextIntoWords(@Nullable IBaseResource theResource) {
+		if (theResource == null) {
+			return null;
+		}
 		StringBuilder b = new StringBuilder();
 		if (theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
