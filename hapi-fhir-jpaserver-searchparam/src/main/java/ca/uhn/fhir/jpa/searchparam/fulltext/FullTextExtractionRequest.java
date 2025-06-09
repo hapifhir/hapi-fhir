@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.fulltext;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -21,6 +22,7 @@ public class FullTextExtractionRequest {
 	private final IBaseResource myResource;
 	private final String myResourceType;
 	private final IndexTypeEnum myIndexType;
+	private final Supplier<String> myDefaultSupplier;
 
 	/**
 	 * Constructor
@@ -30,6 +32,7 @@ public class FullTextExtractionRequest {
 		myResourceId = theResourceId;
 		myResource = theResource;
 		myResourceType = theResourceType;
+		myDefaultSupplier = theDefaultSupplier;
 	}
 
 	/**
@@ -59,6 +62,7 @@ public class FullTextExtractionRequest {
 	/**
 	 * @return Returns the resource type being indexed.
 	 */
+	@Nonnull
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -66,8 +70,16 @@ public class FullTextExtractionRequest {
 	/**
 	 * @return Returns the type of index being generated. For any resource being stored, registered intercepors will be invoked once for each index type.
 	 */
+	@Nonnull
 	public IndexTypeEnum getIndexType() {
 		return myIndexType;
+	}
+
+	/**
+	 * @return Returns the extracted content/text string that is automatically extracted from the resource
+	 */
+	public String getDefaultString() {
+		return myDefaultSupplier.get();
 	}
 
 	public enum IndexTypeEnum {
