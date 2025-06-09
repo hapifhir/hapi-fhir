@@ -914,9 +914,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			entity.setDeleted(theDeletedTimestampOrNull);
 			entity.setUpdated(theDeletedTimestampOrNull);
-			entity.setNarrativeText(null);
-			entity.setContentText(null);
-			entity.setIndexStatus(getEntityIndexedStatusEnum());
 			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 		} else {
@@ -990,20 +987,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						entity.setUpdated(theTransactionDetails.getTransactionDate());
 					}
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
-					entity.setIndexStatus(getEntityIndexedStatusEnum());
-				}
-
-				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
-					populateFullTextFields(myContext, theResource, entity, newParams);
 				}
 
 			} else {
 
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
-				entity.setIndexStatus(null);
-
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
+
 			}
+		}
+
+		if (thePerformIndexing && changed != null && changed.isChanged()) {
+			populateFullTextFields(myContext, theResource, entity, newParams);
 		}
 
 		if (thePerformIndexing
@@ -1138,22 +1133,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			TransactionDetails theTransactionDetails) {
 		return theTransactionDetails.getOrCreateUserData(
 				HapiTransactionService.XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS, IdentityHashMap::new);
-	}
-
-	/**
-	 * This methor returns the {@link EntityIndexStatusEnum} value that should be
-	 * used for a successfully fully indexed resource. This method will return
-	 * {@link EntityIndexStatusEnum#INDEXED_ALL} or {@link EntityIndexStatusEnum#INDEXED_RDBMS_ONLY}
-	 * depending on configuration.
-	 */
-	@Nonnull
-	private EntityIndexStatusEnum getEntityIndexedStatusEnum() {
-		if (myStorageSettings.isHibernateSearchIndexFullText()
-				|| myStorageSettings.isHibernateSearchIndexSearchParams()) {
-			return EntityIndexStatusEnum.INDEXED_ALL;
-		} else {
-			return EntityIndexStatusEnum.INDEXED_RDBMS_ONLY;
-		}
 	}
 
 	/**
@@ -1671,9 +1650,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			final IBaseResource theResource,
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams theNewParams) {
+		if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
+			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY);
+			return;
+		}
+
 		if (theEntity.getDeleted() != null) {
-			theEntity.setNarrativeText(null);
-			theEntity.setContentText(null);
+			if (myStorageSettings.isHibernateSearchIndexFullText()) {
+				theEntity.setNarrativeText(null);
+				theEntity.setContentText(null);
+			}
 		} else {
 			if (myStorageSettings.isHibernateSearchIndexFullText()) {
 				theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
@@ -1685,6 +1671,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}
+
+		theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 	}
 
 	@VisibleForTesting
