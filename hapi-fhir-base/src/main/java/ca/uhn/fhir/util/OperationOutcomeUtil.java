@@ -264,6 +264,28 @@ public class OperationOutcomeUtil {
 		}
 	}
 
+	/**
+	 * Given an instance of <code>OperationOutcome.issue</code>, adds a new instance of
+	 * <code>OperationOutcome.issue.expression</code> with the given string value.
+	 *
+	 * @param theContext            The FhirContext for the appropriate FHIR version
+	 * @param theIssue              The <code>OperationOutcome.issue</code> to add to
+	 * @param theLocationExpression The string to use as content
+	 */
+	public static void addExpressionToIssue(FhirContext theContext, IBase theIssue, String theLocationExpression) {
+		if (isNotBlank(theLocationExpression)
+				&& theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			BaseRuntimeElementCompositeDefinition<?> issueElement =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("expression");
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
+					.getChildByName("expression")
+					.newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocationExpression);
+			locationChild.getMutator().addValue(theIssue, locationElem);
+		}
+	}
+
 	public static IBase addIssueWithMessageId(
 			FhirContext myCtx,
 			IBaseOperationOutcome theOperationOutcome,

@@ -68,7 +68,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private DaoRegistry myDaoRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
-	private SystemRequestDetails mySystemRequestDetails;
+	private final SystemRequestDetails mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 	private boolean myStopping;
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
@@ -103,7 +103,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
 		}
-		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache resourceCache =
 				myResourceChangeListenerRegistry.registerResourceResourceChangeListener(

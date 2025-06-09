@@ -49,7 +49,6 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 	@Test
 	public void testAddSortStringNoNullOrder() {
 		GeneratedSql generatedSql = buildSqlWithStringSort(true,null);
-//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
 		assertThat(generatedSql.getSql()).endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?");
 
 		generatedSql = buildSqlWithStringSort(false,null);
