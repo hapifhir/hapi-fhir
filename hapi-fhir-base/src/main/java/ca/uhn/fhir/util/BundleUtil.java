@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -593,6 +594,16 @@ public class BundleUtil {
 			retVal.add(parts);
 		}
 		return retVal;
+	}
+
+	public static void setSearchModeMetadata(FhirContext theContext, IBaseBundle theBundle) {
+		List<SearchBundleEntryParts> searchBundleEntryParts = getSearchBundleEntryParts(theContext, theBundle);
+		searchBundleEntryParts.forEach(searchBundleEntryPart -> {
+			IBaseResource resource = searchBundleEntryPart.getResource();
+			if (resource != null) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, searchBundleEntryPart.getSearchMode());
+			}
+		});
 	}
 
 	private static SearchBundleEntryParts getSearchBundleEntryParts(
