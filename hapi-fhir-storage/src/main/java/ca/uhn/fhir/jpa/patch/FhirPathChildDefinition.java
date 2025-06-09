@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 
+/**
+ * A helper object to hold the child definitions along a provided fhir path
+ */
 public class FhirPathChildDefinition {
 	// our parent element; if null, this is the top level element
 	private IBase myBase;

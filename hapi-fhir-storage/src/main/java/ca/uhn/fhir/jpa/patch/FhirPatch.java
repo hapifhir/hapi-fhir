@@ -56,6 +56,7 @@ import java.util.function.Predicate;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
  * FhirPatch handler.
@@ -236,8 +237,10 @@ public class FhirPatch {
 			parts.add(node.getValue());
 		}
 
-		FhirPathChildDefinition cd = childDefinition(parentDef, parts, theResource, fhirPath, parsedFhirPath);
+		// fetch all runtime definitions along fhirpath
+		FhirPathChildDefinition cd = childDefinition(parentDef, parts, theResource, fhirPath, parsedFhirPath, path);
 
+		// replace the value
 		replaceValuesByPath(cd, theParameters, fhirPath, parsedFhirPath);
 	}
 
@@ -278,7 +281,7 @@ public class FhirPatch {
 				Optional<IBase> optionalValue =
 					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 				if (optionalValue.isPresent()) {
-					FhirPathChildDefinition childDefinitionToUse = findChildDefinitionToUse(theChildDefinition, nextValuePartPart);
+					FhirPathChildDefinition childDefinitionToUse = findChildDefinitionAtEndOfPath(theChildDefinition, nextValuePartPart);
 
 					BaseRuntimeChildDefinition subChild = childDefinitionToUse.getElementDefinition()
 						.getChildByName(name);
@@ -292,7 +295,7 @@ public class FhirPatch {
 		}
 
 		// fall through to error state
-		throw new RuntimeException("NO VALUES? WE SHOULDNT SEE THIS");
+		throw new InvalidRequestException(Msg.code(2720) + " No valid replacement value for patch operation.");
 	}
 
 	private FhirPathChildDefinition findChildDefinitionByReplacementType(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
@@ -307,29 +310,25 @@ public class FhirPatch {
 			return false;
 		};
 
+		return findChildDefinition(theChildDefinition, predicate);
+	}
+
+	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
+		return findChildDefinition(theChildDefinition, childDefinition -> {
+			return childDefinition.getChild() != null;
+		});
+	}
+
+	private FhirPathChildDefinition findChildDefinition(FhirPathChildDefinition theChildDefinition, Predicate<FhirPathChildDefinition> thePredicate) {
 		FhirPathChildDefinition childDefinitionToUse = theChildDefinition;
 		while (childDefinitionToUse != null) {
-			if (predicate.test(childDefinitionToUse)) {
-				break;
+			if (thePredicate.test(childDefinitionToUse)) {
+				return childDefinitionToUse;
 			}
 			childDefinitionToUse = childDefinitionToUse.getChild();
 		}
 
-		if (childDefinitionToUse == null || childDefinitionToUse.getParent() == null) {
-			throw new RuntimeException("NO VALID CHILD DEF");
-		}
-		return childDefinitionToUse;
-	}
-
-	private FhirPathChildDefinition findChildDefinitionToUse(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
-		FhirPathChildDefinition childDefinitionToUse = theChildDefinition;
-		while (childDefinitionToUse != null && childDefinitionToUse.getChild() != null) {
-			childDefinitionToUse = childDefinitionToUse.getChild();
-		}
-		if (childDefinitionToUse == null || childDefinitionToUse.getParent() == null) {
-			throw new RuntimeException("NO VALDI CHILD DEF");
-		}
-		return childDefinitionToUse;
+		throw new InvalidRequestException(Msg.code(2719) + " No runtime definition found for patch operation.");
 	}
 
 	private void replaceSingleValue(
@@ -390,7 +389,7 @@ public class FhirPatch {
 			}
 
 			if (replaceables.size() != 1) {
-				throw new RuntimeException("WE SHOULD FIND ONLY 1");
+				throw new InvalidRequestException(Msg.code(2715) + " Expected to find a single element, but provided FhirPath returned " + replaceables.size() + " elements.");
 			}
 			IBase valueToReplace = replaceables.get(0);
 
@@ -547,7 +546,8 @@ public class FhirPatch {
 		List<String> theFhirPathParts,
 		IBase theBase,
 		IFhirPath theFhirPath,
-		ParsedFhirPath theParsedFhirPath
+		ParsedFhirPath theParsedFhirPath,
+		String theOriginalPath
 	) {
 		FhirPathChildDefinition definition = new FhirPathChildDefinition();
 		definition.setBase(theBase); // set this IBase value
@@ -587,10 +587,14 @@ public class FhirPatch {
 				ParsedFhirPath.FhirPathNode filteringNode = theParsedFhirPath.getTail();
 				filteringNodes.push(filteringNode);
 				/*
-				 * the fild filtering path will be the path - tail value.
+				 * the field filtering path will be the path - tail value.
 				 * This will also be nextPath (the one we recurse on)
 				 */
-				childFilteringPath = pathBeneathParent.substring(0, pathBeneathParent.indexOf(filteringNode.getValue()));
+				int endInd = pathBeneathParent.indexOf(filteringNode.getValue());
+				if (endInd == -1) {
+					endInd = pathBeneathParent.length();
+				}
+				childFilteringPath = pathBeneathParent.substring(0, endInd);
 				childFilteringPath = FhirPathUtils.cleansePath(childFilteringPath);
 				nextPath = childFilteringPath;
 			}
@@ -670,10 +674,9 @@ public class FhirPatch {
 			// should only be one
 			if (childs.size() != 1) {
 				if (childs.isEmpty()) {
-					// TODO - this path might be incorrect; we should store the real one
-					throwNoElementsError(theParsedFhirPath.getRawPath());
+					throwNoElementsError(theOriginalPath);
 				}
-				throw new RuntimeException("INCORRECT ELEMENT COUNT! CANNOT DO PATCH");
+				throw new InvalidRequestException(Msg.code(2704) + " FhirPath returns more than 1 element. Patch cannot be done. " + theOriginalPath);
 			}
 			IBase child = childs.get(0);
 
@@ -682,7 +685,8 @@ public class FhirPatch {
 				theFhirPathParts,
 				child,
 				theFhirPath,
-				newPath
+				newPath,
+				theOriginalPath
 			));
 		}
 

@@ -61,7 +61,7 @@ public class ParsedFhirPath {
 						/*
 						 * Our current implementation does not account for
 						 * expressions, but only indices.
-						 * so we'll just note this exception for now
+						 * so we'll just note this for now
 						 */
 						ourLog.warn("{} is not an integer", val);
 					}

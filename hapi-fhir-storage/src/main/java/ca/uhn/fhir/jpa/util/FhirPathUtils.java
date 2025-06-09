@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.patch.ParsedFhirPath;
 public class FhirPathUtils {
 	/**
 	 * Turns an invalid FhirPath into a valid one
-	 *
+	 * -
 	 * Do not use this for user input; but it can be used for internally parsed paths
 	 */
 	public static String cleansePath(String thePath) {
