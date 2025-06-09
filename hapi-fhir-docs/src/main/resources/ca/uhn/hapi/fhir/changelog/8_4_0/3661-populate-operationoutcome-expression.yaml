@@ -1,0 +1,11 @@
+---
+type: add
+issue: 3661
+title: "When performing a resource validation on R4+ servers, the generated
+   OperationOutcome resource containing the validation results will now have
+   the `OperationOutcome.issue.expression` element populated. This element
+   contains a FHIRPath expression to the element containing the issue. The
+   FHIR specification has deprecated the `OperationOutcome.issue.location`
+   element. At this time, no change to the values placed in that element have
+   been made, although it may no longer be populated in a future release of
+   HAPI FHIR."
