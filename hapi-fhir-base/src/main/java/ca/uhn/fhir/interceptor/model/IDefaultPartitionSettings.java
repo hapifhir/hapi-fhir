@@ -37,6 +37,13 @@ public interface IDefaultPartitionSettings {
 		return theRequestPartitionId.hasDefaultPartitionId(getDefaultPartitionId());
 	}
 
+	/**
+	 * Returns a RequestPartitionId instance for the default partition.
+	 * This is a convenience method that creates a RequestPartitionId using the default partition ID
+	 * from {@link #getDefaultPartitionId()}.
+	 *
+	 * @return a RequestPartitionId for the default partition
+	 */
 	default RequestPartitionId getDefaultRequestPartitionId() {
 		return RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 	}

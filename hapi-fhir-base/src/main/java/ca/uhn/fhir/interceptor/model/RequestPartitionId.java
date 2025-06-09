@@ -364,6 +364,13 @@ public class RequestPartitionId implements IModelJson {
 		return fromPartitionIds(Collections.singletonList(null));
 	}
 
+	/**
+	 * Creates a RequestPartitionId for the default partition using the provided partition settings.
+	 * This method uses the default partition ID from the given settings to create the RequestPartitionId.
+	 *
+	 * @param theDefaultPartitionSettings the partition settings containing the default partition ID
+	 * @return a RequestPartitionId for the default partition
+	 */
 	@Nonnull
 	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());

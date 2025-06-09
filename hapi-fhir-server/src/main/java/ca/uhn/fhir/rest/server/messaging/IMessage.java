@@ -74,6 +74,13 @@ public interface IMessage<T> {
 		return convertHeaderValuesToStrings(getHeaders());
 	}
 
+	/**
+	 * Converts a map of headers with Object values to a map with String values.
+	 * This utility method converts all header values to their string representation using toString().
+	 *
+	 * @param theHeaders the headers map with Object values to convert
+	 * @return a new map with the same keys but all values converted to strings
+	 */
 	static Map<String, String> convertHeaderValuesToStrings(Map<String, Object> theHeaders) {
 		return theHeaders.entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));

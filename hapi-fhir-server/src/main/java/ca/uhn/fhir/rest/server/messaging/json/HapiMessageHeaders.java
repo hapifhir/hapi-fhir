@@ -107,6 +107,13 @@ public class HapiMessageHeaders implements IModelJson {
 		return new MessageHeaders(returnedHeaders);
 	}
 
+	/**
+	 * Adds a custom header to the message headers.
+	 * This method allows adding arbitrary key-value pairs to the custom headers map.
+	 *
+	 * @param theKey the header key/name
+	 * @param theValue the header value
+	 */
 	public void addCustomHeader(String theKey, Object theValue) {
 		getCustomHeaders().put(theKey, theValue);
 	}
