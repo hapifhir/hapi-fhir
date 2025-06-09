@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -180,7 +179,13 @@ public class ValidationResult {
 
 		String severity = issueSeverity != null ? issueSeverity.getCode() : null;
 		IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-				myCtx, theOperationOutcome, severity, message, messageId, theLocationExpression, Constants.OO_INFOSTATUS_PROCESSING);
+				myCtx,
+				theOperationOutcome,
+				severity,
+				message,
+				messageId,
+				theLocationExpression,
+				Constants.OO_INFOSTATUS_PROCESSING);
 
 		if (locationLine != null || locationCol != null) {
 			String unknown = UNKNOWN;
