@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -10,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 
