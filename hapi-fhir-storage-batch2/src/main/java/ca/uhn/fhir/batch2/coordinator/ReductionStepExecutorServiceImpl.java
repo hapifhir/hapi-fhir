@@ -274,8 +274,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator =
 						myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator.forEach(chunk ->
-							processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
+					chunkIterator.forEach(chunk -> executeInNoTransaction(() -> processChunk(
+							chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor)));
 				}
 				return null;
 			});
@@ -294,8 +294,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				if (response.isSuccessful()) {
 					try {
-						reductionStepWorker.run(chunkDetails, dataSink);
-
+						executeInNoTransaction(() -> reductionStepWorker.run(chunkDetails, dataSink));
 						// the ReductionStepDataSink will update the job status to COMPLETED
 						// we should update instance here to keep it consistent with the newest version in persistence
 						instance.setStatus(COMPLETED);
@@ -348,6 +347,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				return null;
 			});
 		}
+	}
+
+	private void executeInNoTransaction(Runnable theRunnable) {
+		myTransactionService
+				.withRequest(null)
+				.withPropagation(Propagation.NOT_SUPPORTED)
+				.execute(theRunnable);
 	}
 
 	private <T> T executeInTransactionWithSynchronization(Callable<T> runnable) {
