@@ -58,7 +58,8 @@ public class RequestHeaderPartitionInterceptor {
 	 */
 	@Hook(STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyPartitionForCreate(RequestDetails theRequestDetails) {
-		return identifyPartitionOrThrowException(theRequestDetails, RequestPartitionHeaderUtil::fromHeaderFirstPartitionOnly);
+		return identifyPartitionOrThrowException(
+				theRequestDetails, RequestPartitionHeaderUtil::fromHeaderFirstPartitionOnly);
 	}
 
 	/**
@@ -74,16 +75,19 @@ public class RequestHeaderPartitionInterceptor {
 	 * and if the header is blank for a system request, it returns the default partition.
 	 * Otherwise, it uses the provided parsing function to interpret the header.
 	 */
-	private RequestPartitionId identifyPartitionOrThrowException(RequestDetails theRequestDetails, BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
+	private RequestPartitionId identifyPartitionOrThrowException(
+			RequestDetails theRequestDetails,
+			BiFunction<String, IDefaultPartitionSettings, RequestPartitionId> aHeaderParser) {
 		String partitionHeader = theRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
 
 		if (isBlank(partitionHeader)) {
 			if (theRequestDetails instanceof SystemRequestDetails) {
 				return myDefaultPartitionSettings.getDefaultRequestPartitionId();
 			}
-			throw new InvalidRequestException(Msg.code(2642) + String.format(
-				"%s header is missing or blank, it is required to identify the storage partition",
-				Constants.HEADER_X_REQUEST_PARTITION_IDS));
+			throw new InvalidRequestException(Msg.code(2642)
+					+ String.format(
+							"%s header is missing or blank, it is required to identify the storage partition",
+							Constants.HEADER_X_REQUEST_PARTITION_IDS));
 		}
 
 		return aHeaderParser.apply(partitionHeader, myDefaultPartitionSettings);
