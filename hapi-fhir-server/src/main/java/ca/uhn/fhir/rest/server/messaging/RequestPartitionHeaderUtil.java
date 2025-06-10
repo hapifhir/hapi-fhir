@@ -201,6 +201,7 @@ public final class RequestPartitionHeaderUtil {
 			@Nonnull IMessage<T> theMessage, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (theMessage.getPayload() instanceof BaseResourceMessage baseResourceMessage) {
 			if (baseResourceMessage.getPartitionId() != null) {
+				// TODO KHS suggestion from MB: if partitions are also set in the header, log a warning if they don't match.
 				return;
 			}
 
