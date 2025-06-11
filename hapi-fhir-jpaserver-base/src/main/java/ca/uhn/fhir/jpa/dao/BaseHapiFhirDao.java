@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -94,6 +95,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
@@ -141,6 +144,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.xml.stream.events.Characters;
@@ -1660,61 +1664,55 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			return;
 		}
 
-		Supplier<String> contentSupplier = () -> parseContentTextIntoWords(theContext, theResource);
-		Supplier<String> narrativeSupplier = () -> parseNarrativeTextIntoWords(theResource);
-
-		boolean shouldIndexFullText = false;
+		// This will get changed if we end up setting either
+		theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY);
 
 		if (myStorageSettings.isHibernateSearchIndexFullText()) {
-			IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-			FullTextExtractionResponse contentOutcome = null;
-			FullTextExtractionResponse narrativeOutcome = null;
-			if (compositeBroadcaster.hasHooks(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT)) {
+			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+			if (activeSearchParams.containsParamName(Constants.PARAM_CONTENT)) {
+				RuntimeSearchParam param = activeSearchParams.get(Constants.PARAM_CONTENT);
 
-				FullTextExtractionRequest contentRequest = new FullTextExtractionRequest(FullTextExtractionRequest.IndexTypeEnum.CONTENT, theEntity.getIdType(myContext), theResource, getResourceName(), contentSupplier);
-				HookParams contentParams = new HookParams()
-					.add(FullTextExtractionRequest.class, contentRequest);
-				Object tmp = compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, contentParams);
-				contentOutcome = (FullTextExtractionResponse) tmp;
-
-				FullTextExtractionRequest narrativeRequest = new FullTextExtractionRequest(FullTextExtractionRequest.IndexTypeEnum.TEXT, theEntity.getIdType(myContext), theResource, getResourceName(), narrativeSupplier);
-				HookParams narrativeParams = new HookParams()
-					.add(FullTextExtractionRequest.class, narrativeRequest);
-				narrativeOutcome = (FullTextExtractionResponse) compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, narrativeParams);
-
+				Supplier<String> contentSupplier = () -> parseContentTextIntoWords(theContext, theResource);
+				FullTextExtractionRequest.IndexTypeEnum contentIndexType = FullTextExtractionRequest.IndexTypeEnum.CONTENT;
+				Consumer<String> contentEntitySetter = theEntity::setContentText;
+				extractFullTextIndexData(theRequestDetails, theResource, theEntity, contentIndexType, contentSupplier, contentEntitySetter);
 			}
 
-			if (contentOutcome == null) {
-				theEntity.setContentText(contentSupplier.get());
-				shouldIndexFullText = true;
-			} else if (!contentOutcome.isDoNotIndex()) {
-				theEntity.setContentText(contentOutcome.getPayload());
-				shouldIndexFullText = true;
+			if (activeSearchParams.containsParamName(Constants.PARAM_TEXT)) {
+				Supplier<String> textSupplier = () -> parseNarrativeTextIntoWords(theResource);
+				FullTextExtractionRequest.IndexTypeEnum textIndexType = FullTextExtractionRequest.IndexTypeEnum.TEXT;
+				Consumer<String> textEntitySetter = theEntity::setNarrativeText;
+				extractFullTextIndexData(theRequestDetails, theResource, theEntity, textIndexType, textSupplier, textEntitySetter);
 			}
-
-			if (narrativeOutcome == null) {
-				theEntity.setNarrativeText(narrativeSupplier.get());
-				shouldIndexFullText = true;
-			} else if (!narrativeOutcome.isDoNotIndex()) {
-				theEntity.setNarrativeText(narrativeOutcome.getPayload());
-				shouldIndexFullText = true;
-			}
-
 		}
 
 		if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
 			ExtendedHSearchIndexData hSearchIndexData =
 					myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
 			theEntity.setLuceneIndexData(hSearchIndexData);
-			shouldIndexFullText = true;
+			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 		}
 
-		if (shouldIndexFullText) {
-			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
-		} else {
-			theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY);
-		}
+	}
+
+	private void extractFullTextIndexData(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, FullTextExtractionRequest.IndexTypeEnum theIndexType, Supplier<String> theContentSupplier, Consumer<String> theEntityIndexSetter) {
+			IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+			FullTextExtractionResponse contentOutcome = null;
+			if (compositeBroadcaster.hasHooks(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT)) {
+				FullTextExtractionRequest contentRequest = new FullTextExtractionRequest(theIndexType, theEntity.getIdType(myContext), theResource, getResourceName(), theContentSupplier);
+				HookParams contentParams = new HookParams()
+					.add(FullTextExtractionRequest.class, contentRequest);
+				contentOutcome = (FullTextExtractionResponse) compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, contentParams);
+			}
+
+			if (contentOutcome == null) {
+				theEntityIndexSetter.accept(theContentSupplier.get());
+				theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
+			} else if (!contentOutcome.isDoNotIndex()) {
+				theEntityIndexSetter.accept(contentOutcome.getPayload());
+				theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
+			}
 	}
 
 	@VisibleForTesting

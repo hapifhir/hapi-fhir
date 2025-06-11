@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
 
 import java.util.Set;
 
+// FIXME: finish and document
 @Interceptor
 public class FullTextSelectiveIndexingInterceptor {
 

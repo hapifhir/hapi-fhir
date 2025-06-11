@@ -7,11 +7,16 @@ import ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.hapi.fhir.docs.interceptor.FullTextSelectiveIndexingInterceptor;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -202,6 +207,14 @@ public class FhirResourceDaoR5SearchFtInterceptorTest extends BaseJpaR5Test {
         // Verify
         verify(myAnonymousInterceptor, times(2)).invoke(eq(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT), any());
     }
+
+	@Test
+	public void testDocumentationExample_SelectiveEnablingInterceptor() {
+		// Setup
+		registerInterceptor(new FullTextSelectiveIndexingInterceptor());
+
+		aaaaa
+	}
 
 
     @Interceptor
