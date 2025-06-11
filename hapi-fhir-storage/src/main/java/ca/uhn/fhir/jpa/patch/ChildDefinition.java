@@ -8,12 +8,10 @@ public class ChildDefinition {
 	private final BaseRuntimeChildDefinition myChildDef;
 	private final BaseRuntimeElementDefinition<?> myChildElement;
 
-	public ChildDefinition(
-		BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
+	public ChildDefinition(BaseRuntimeChildDefinition theChildDef, BaseRuntimeElementDefinition<?> theChildElement) {
 		this.myChildDef = theChildDef;
 		this.myChildElement = theChildElement;
 	}
-
 
 	public BaseRuntimeChildDefinition getUseableChildDef() {
 		return myChildDef;

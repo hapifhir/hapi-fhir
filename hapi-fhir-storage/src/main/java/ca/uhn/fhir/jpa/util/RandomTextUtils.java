@@ -54,7 +54,8 @@ public class RandomTextUtils {
 	 * -
 	 * If none found, it will return -1.
 	 */
-	public static int findMatchingClosingBrace(int theStartIndex, String theStr, char theOpenBrace, char theClosingBrace) {
+	public static int findMatchingClosingBrace(
+			int theStartIndex, String theStr, char theOpenBrace, char theClosingBrace) {
 		int len = theStr.length();
 		assert theStartIndex >= 0;
 		assert theStartIndex < len;

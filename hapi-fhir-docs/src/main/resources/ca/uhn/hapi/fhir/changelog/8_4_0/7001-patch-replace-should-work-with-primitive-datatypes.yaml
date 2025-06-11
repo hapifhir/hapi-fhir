@@ -1,6 +1,11 @@
 ---
 type: add
 issue: 7001
-title: "Fhir PATCH operations now support patching elements
-        that target primitive types (like string).
+title: "FhirPath PATCH operation has been updated to be spec complaint.
+        This means it will now allow matching/replacing fhir paths that
+        match to primitive values (String, int, datetime, etc).
+        It also means that fhirpath patch will only support fhirpaths
+        that match a singular element.
+        Ie, if multiple (or no) elements match the provided fhir path,
+        an error will result.
 "

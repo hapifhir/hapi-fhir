@@ -517,7 +517,8 @@ public class ParsedFhirPath {
 
 				// part3 - the part after the closing filter brace ]
 				if (isNotEmpty(part3)) {
-					throw new InvalidRequestException(Msg.code(2713) + " Unexpected path after filter: " + thePath.substring(closingFilter + 1));
+					throw new InvalidRequestException(
+							Msg.code(2713) + " Unexpected path after filter: " + thePath.substring(closingFilter + 1));
 				} else {
 					// the filter is the end node; nothing more to add
 					tail = filterNode;
@@ -534,8 +535,7 @@ public class ParsedFhirPath {
 			int closingIndex = RandomTextUtils.findMatchingClosingBrace(braceIndex, thePath);
 
 			if (closingIndex == -1) {
-				String msg = String.format("Path %s contains an unmatched brace at %d",
-					thePath, braceIndex);
+				String msg = String.format("Path %s contains an unmatched brace at %d", thePath, braceIndex);
 				ourLog.error(msg);
 
 				throw new InternalErrorException(Msg.code(2714) + " " + msg);

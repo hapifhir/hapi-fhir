@@ -65,8 +65,7 @@ public class ParsedPath {
 			endsWithAFilterOrIndex = true;
 			int filterArgsIndex = path.lastIndexOf('('); // Let's hope there aren't nested parentheses
 			int lastDotIndex = path.lastIndexOf(
-				'.',
-				filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
+					'.', filterArgsIndex); // There might be a dot inside the parentheses, so look to the left of that
 			int secondLastDotIndex = path.lastIndexOf('.', lastDotIndex - 1);
 			containingPath = path.substring(0, secondLastDotIndex);
 			elementName = path.substring(secondLastDotIndex + 1, lastDotIndex);

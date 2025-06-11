@@ -36,7 +36,6 @@ public class FhirPathUtils {
 		return path;
 	}
 
-
 	/**
 	 * Determines if the node is a subsetting node
 	 * as described by http://hl7.org/fhirpath/N1/#subsetting

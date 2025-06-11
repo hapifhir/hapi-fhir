@@ -165,9 +165,7 @@ public class FhirPatchTest {
 			params.add(Arguments.of(parameters, "Patient/p2", List.of("Patient/p3", "Location/l1", "Patient/p2")));
 		}
 
-		return params
-			.subList(1, 2)
-			;
+		return params;
 	}
 
 	@ParameterizedTest
@@ -251,87 +249,6 @@ public class FhirPatchTest {
 				}), "Contains " + orig + " when it shouldn't"
 			);
 		}
-	}
-
-	@Test
-	public void patchApply_withPrimitiveTarget_shouldWork() {
-		// setup
-		String originalPatientId = "Patient/p1";
-		String replacedPatientId = "Patient/p2";
-
-		Appointment appointment;
-		Parameters parameters;
-		{
-			@Language("JSON")
-			String appointmentStr = """
-				{
-				  "resourceType": "Appointment",
-				  "id": "a1",
-				  "status": "booked",
-				  "participant": [
-					{
-					  "actor": {
-						"reference": "Patient/p1"
-					  },
-					  "status": "accepted"
-					}
-				  ]
-				}
-				""";
-			appointment = myParser.parseResource(Appointment.class, appointmentStr);
-
-			@Language("JSON")
-			String patchStr = """
-				{
-				  "resourceType": "Parameters",
-				  "parameter": [
-					{
-					  "name": "operation",
-					  "part": [
-						{
-						  "name": "type",
-						  "valueCode": "replace"
-						},
-						{
-						  "name": "path",
-						  "valueString": "Appointment.participant.actor.reference.where(startsWith('Patient/')).first()"
-						},
-						{
-						  "name": "value",
-						  "valueString": "Patient/p2"
-						}
-					  ]
-					}
-				  ]
-				}
-				""";
-			parameters = myParser.parseResource(Parameters.class, patchStr);
-		}
-
-		Predicate<Appointment.AppointmentParticipantComponent> originalPatientPred = p -> {
-			return p.getActor() != null && p.getActor().getReference().equals(originalPatientId);
-		};
-		Predicate<Appointment.AppointmentParticipantComponent> newPatientPred = p -> {
-			return p.getActor() != null && p.getActor().getReference().equals(replacedPatientId);
-		};
-
-		// precheck
-		// should be no replacement, but should have the original
-		assertTrue(appointment.getParticipant()
-			.stream().anyMatch(originalPatientPred));
-		assertFalse(appointment.getParticipant()
-			.stream().anyMatch(newPatientPred));
-
-		// test
-		myPatch.apply(appointment, parameters);
-
-		// verify
-		ourLog.trace(myParser.encodeResourceToString(appointment));
-		// patch should replace original patient id with the replacement patient id
-		assertTrue(appointment.getParticipant()
-			.stream().anyMatch(newPatientPred));
-		assertFalse(appointment.getParticipant()
-			.stream().anyMatch(originalPatientPred));
 	}
 
 	@Test

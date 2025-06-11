@@ -162,8 +162,8 @@ public class FhirPatch {
 
 			IBase newValue = getNewValue(theParameters, childDefinition);
 
-			List<IBase> existingValues =
-					new ArrayList<>(childDefinition.getUseableChildDef().getAccessor().getValues(nextElement));
+			List<IBase> existingValues = new ArrayList<>(
+					childDefinition.getUseableChildDef().getAccessor().getValues(nextElement));
 			if (insertIndex == null || insertIndex < 0 || insertIndex > existingValues.size()) {
 				String msg = myContext
 						.getLocalizer()
@@ -208,8 +208,8 @@ public class FhirPatch {
 			String theElementToDeletePath) {
 		ChildDefinition childDefinition = findChildDefinition(theContainingElement, theListElementName);
 
-		List<IBase> existingValues =
-				new ArrayList<>(childDefinition.getUseableChildDef().getAccessor().getValues(theContainingElement));
+		List<IBase> existingValues = new ArrayList<>(
+				childDefinition.getUseableChildDef().getAccessor().getValues(theContainingElement));
 		List<IBase> elementsToRemove =
 				myContext.newFhirPath().evaluate(theResource, theElementToDeletePath, IBase.class);
 		existingValues.removeAll(elementsToRemove);
@@ -244,17 +244,17 @@ public class FhirPatch {
 	}
 
 	private void replaceValuesByPath(
-		FhirPathChildDefinition theChildDefinition,
-		IBase theParameters,
-		IFhirPath theFhirPath,
-		ParsedFhirPath theParsedFhirPath
-	) {
+			FhirPathChildDefinition theChildDefinition,
+			IBase theParameters,
+			IFhirPath theFhirPath,
+			ParsedFhirPath theParsedFhirPath) {
 		Optional<IBase> singleValuePart =
-			ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
+				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 		if (singleValuePart.isPresent()) {
 			IBase replacementValue = singleValuePart.get();
 
-			FhirPathChildDefinition childDefinitionToUse = findChildDefinitionByReplacementType(theChildDefinition, replacementValue);
+			FhirPathChildDefinition childDefinitionToUse =
+					findChildDefinitionByReplacementType(theChildDefinition, replacementValue);
 
 			// only a single replacement value (ie, not a replacement CompositeValue or anything)
 			replaceSingleValue(theFhirPath, theParsedFhirPath, childDefinitionToUse, replacementValue);
@@ -268,25 +268,25 @@ public class FhirPatch {
 
 			for (IBase nextValuePartPart : partParts) {
 				String name = myContext
-					.newTerser()
-					.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
-					.map(IPrimitiveType::getValueAsString)
-					.orElse(null);
+						.newTerser()
+						.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
+						.map(IPrimitiveType::getValueAsString)
+						.orElse(null);
 
 				if (StringUtils.isBlank(name)) {
 					continue;
 				}
 
 				Optional<IBase> optionalValue =
-					myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+						myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
 				if (optionalValue.isPresent()) {
-					FhirPathChildDefinition childDefinitionToUse = findChildDefinitionAtEndOfPath(theChildDefinition, nextValuePartPart);
+					FhirPathChildDefinition childDefinitionToUse =
+							findChildDefinitionAtEndOfPath(theChildDefinition, nextValuePartPart);
 
-					BaseRuntimeChildDefinition subChild = childDefinitionToUse.getElementDefinition()
-						.getChildByName(name);
+					BaseRuntimeChildDefinition subChild =
+							childDefinitionToUse.getElementDefinition().getChildByName(name);
 
-					subChild.getMutator()
-						.setValue(childDefinitionToUse.getBase(), optionalValue.get());
+					subChild.getMutator().setValue(childDefinitionToUse.getBase(), optionalValue.get());
 				}
 			}
 
@@ -297,7 +297,8 @@ public class FhirPatch {
 		throw new InvalidRequestException(Msg.code(2720) + " No valid replacement value for patch operation.");
 	}
 
-	private FhirPathChildDefinition findChildDefinitionByReplacementType(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
+	private FhirPathChildDefinition findChildDefinitionByReplacementType(
+			FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
 		boolean isPrimitive = replacementValue instanceof IPrimitiveType<?>;
 		Predicate<FhirPathChildDefinition> predicate = def -> {
 			if (isPrimitive) {
@@ -312,13 +313,15 @@ public class FhirPatch {
 		return findChildDefinition(theChildDefinition, predicate);
 	}
 
-	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
+	private FhirPathChildDefinition findChildDefinitionAtEndOfPath(
+			FhirPathChildDefinition theChildDefinition, IBase replacementValue) {
 		return findChildDefinition(theChildDefinition, childDefinition -> {
 			return childDefinition.getChild() == null;
 		});
 	}
 
-	private FhirPathChildDefinition findChildDefinition(FhirPathChildDefinition theChildDefinition, Predicate<FhirPathChildDefinition> thePredicate) {
+	private FhirPathChildDefinition findChildDefinition(
+			FhirPathChildDefinition theChildDefinition, Predicate<FhirPathChildDefinition> thePredicate) {
 		FhirPathChildDefinition childDefinitionToUse = theChildDefinition;
 		while (childDefinitionToUse != null) {
 			if (thePredicate.test(childDefinitionToUse)) {
@@ -331,14 +334,14 @@ public class FhirPatch {
 	}
 
 	private void replaceSingleValue(
-		IFhirPath theFhirPath,
-		ParsedFhirPath theParsedFhirPath,
-		FhirPathChildDefinition theTargetChildDefinition,
-		IBase theReplacementValue
-	) {
-		if (theTargetChildDefinition.getElementDefinition().getChildType() == BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE) {
+			IFhirPath theFhirPath,
+			ParsedFhirPath theParsedFhirPath,
+			FhirPathChildDefinition theTargetChildDefinition,
+			IBase theReplacementValue) {
+		if (theTargetChildDefinition.getElementDefinition().getChildType()
+				== BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE) {
 			if (theTargetChildDefinition.getBase() instanceof IPrimitiveType<?> target
-				&& theReplacementValue instanceof IPrimitiveType<?> source) {
+					&& theReplacementValue instanceof IPrimitiveType<?> source) {
 				target.setValueAsString(source.getValueAsString());
 			}
 			return;
@@ -352,16 +355,12 @@ public class FhirPatch {
 
 		if (runtimeDef.isMultipleCardinality()) {
 			// a list
-			List<IBase> existing = new ArrayList<>(
-				runtimeDef.getAccessor().getValues(
-					containingElement
-				)
-			);
+			List<IBase> existing = new ArrayList<>(runtimeDef.getAccessor().getValues(containingElement));
 			if (existing.isEmpty()) {
 				// no elements to replace - we shouldn't see this here though
 				String msg = myContext
-					.getLocalizer()
-					.getMessage(FhirPatch.class, "noMatchingElementForPath", theParsedFhirPath.getRawPath());
+						.getLocalizer()
+						.getMessage(FhirPatch.class, "noMatchingElementForPath", theParsedFhirPath.getRawPath());
 				throw new InvalidRequestException(Msg.code(2617) + msg);
 			}
 
@@ -381,19 +380,21 @@ public class FhirPatch {
 				AtomicReference<String> subpathRef = new AtomicReference<>();
 				subpathRef.set(subpath);
 				replaceables = existing.stream()
-					.filter(item -> {
-						Optional<IBase> matched = theFhirPath.evaluateFirst(item, subpathRef.get(), IBase.class);
-						return matched.isPresent();
-					}).toList();
+						.filter(item -> {
+							Optional<IBase> matched = theFhirPath.evaluateFirst(item, subpathRef.get(), IBase.class);
+							return matched.isPresent();
+						})
+						.toList();
 			}
 
 			if (replaceables.size() != 1) {
-				throw new InvalidRequestException(Msg.code(2715) + " Expected to find a single element, but provided FhirPath returned " + replaceables.size() + " elements.");
+				throw new InvalidRequestException(
+						Msg.code(2715) + " Expected to find a single element, but provided FhirPath returned "
+								+ replaceables.size() + " elements.");
 			}
 			IBase valueToReplace = replaceables.get(0);
 
-			BaseRuntimeChildDefinition.IMutator listMutator =
-				runtimeDef.getMutator();
+			BaseRuntimeChildDefinition.IMutator listMutator = runtimeDef.getMutator();
 			// clear the whole list first, then reconstruct it in the loop below replacing the values that need to be
 			// replaced
 			listMutator.setValue(containingElement, null);
@@ -406,14 +407,12 @@ public class FhirPatch {
 			}
 		} else {
 			// a single element
-			runtimeDef.getMutator().setValue(
-				containingElement,
-				theReplacementValue
-			);
+			runtimeDef.getMutator().setValue(containingElement, theReplacementValue);
 		}
 	}
 
-	private List<IBase> applySubsettingFilter(ParsedFhirPath theParsed, ParsedFhirPath.FhirPathNode tail, List<IBase> filtered) {
+	private List<IBase> applySubsettingFilter(
+			ParsedFhirPath theParsed, ParsedFhirPath.FhirPathNode tail, List<IBase> filtered) {
 		if (tail.getListIndex() >= 0) {
 			// specific index
 			if (tail.getListIndex() < filtered.size()) {
@@ -445,7 +444,8 @@ public class FhirPatch {
 				}
 				case "single" -> {
 					if (filtered.size() != 1) {
-						throw new InvalidRequestException(Msg.code(2710) + " List contains more than a single element.");
+						throw new InvalidRequestException(
+								Msg.code(2710) + " List contains more than a single element.");
 					}
 					// only one element
 					return filtered;
@@ -474,20 +474,21 @@ public class FhirPatch {
 							ourLog.error("{} is not a number", containedNum, ex);
 						}
 					}
-					throw new InvalidRequestException(Msg.code(2712) + " Invalid fhir path element encountered: " + theParsed.getRawPath());
+					throw new InvalidRequestException(
+							Msg.code(2712) + " Invalid fhir path element encountered: " + theParsed.getRawPath());
 				}
 				default -> {
 					// we shouldn't see this; it means we have not handled a filtering case
-					throw new InvalidRequestException(Msg.code(2711) + " Unrecognized filter of type " + tail.getValue());
+					throw new InvalidRequestException(
+							Msg.code(2711) + " Unrecognized filter of type " + tail.getValue());
 				}
 			}
 		}
 	}
 
 	private void throwNoElementsError(String theFullReplacePath) {
-		String msg = myContext
-			.getLocalizer()
-			.getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
+		String msg =
+				myContext.getLocalizer().getMessage(FhirPatch.class, "noMatchingElementForPath", theFullReplacePath);
 		throw new InvalidRequestException(Msg.code(2617) + msg);
 	}
 
@@ -509,8 +510,8 @@ public class FhirPatch {
 
 			ChildDefinition childDefinition = findChildDefinition(nextElement, elementName);
 
-			List<IBase> existingValues =
-					new ArrayList<>(childDefinition.getUseableChildDef().getAccessor().getValues(nextElement));
+			List<IBase> existingValues = new ArrayList<>(
+					childDefinition.getUseableChildDef().getAccessor().getValues(nextElement));
 			if (removeIndex == null || removeIndex < 0 || removeIndex >= existingValues.size()) {
 				String msg = myContext
 						.getLocalizer()
@@ -541,13 +542,12 @@ public class FhirPatch {
 	}
 
 	private FhirPathChildDefinition childDefinition(
-		FhirPathChildDefinition theParent,
-		List<String> theFhirPathParts,
-		IBase theBase,
-		IFhirPath theFhirPath,
-		ParsedFhirPath theParsedFhirPath,
-		String theOriginalPath
-	) {
+			FhirPathChildDefinition theParent,
+			List<String> theFhirPathParts,
+			IBase theBase,
+			IFhirPath theFhirPath,
+			ParsedFhirPath theParsedFhirPath,
+			String theOriginalPath) {
 		FhirPathChildDefinition definition = new FhirPathChildDefinition();
 		definition.setBase(theBase); // set this IBase value
 		BaseRuntimeElementDefinition<?> parentElementDefinition = myContext.getElementDefinition(theBase.getClass());
@@ -557,9 +557,7 @@ public class FhirPatch {
 		definition.setFhirPath(head);
 
 		if (theParent.getElementDefinition() != null) {
-			definition.setBaseRuntimeDefinition(
-				theParent.getElementDefinition().getChildByName(head)
-			);
+			definition.setBaseRuntimeDefinition(theParent.getElementDefinition().getChildByName(head));
 		}
 
 		String rawPath = theParsedFhirPath.getRawPath();
@@ -618,7 +616,8 @@ public class FhirPatch {
 				filterPath = filterPath.substring(newHead.getValue().length());
 				filterPath = FhirPathUtils.cleansePath(filterPath);
 
-				if (newPath.getHead().getNext() != null && FhirPathUtils.isSubsettingNode(newPath.getHead().getNext())) {
+				if (newPath.getHead().getNext() != null
+						&& FhirPathUtils.isSubsettingNode(newPath.getHead().getNext())) {
 					// yet another filter node
 					ParsedFhirPath.FhirPathNode filterNode = newPath.getHead().getNext();
 					filteringNodes.push(filterNode);
@@ -627,8 +626,7 @@ public class FhirPatch {
 					String updated = "";
 					if (filterNode.hasNext()) {
 						updated = newRaw.substring(
-							newRaw.indexOf(filterNode.getNext().getValue())
-						);
+								newRaw.indexOf(filterNode.getNext().getValue()));
 						updated = FhirPathUtils.cleansePath(updated);
 					}
 					filterPath = updated;
@@ -652,10 +650,11 @@ public class FhirPatch {
 					ref.set(filterPath);
 					if (allChildren.size() > 1) {
 						childs = allChildren.stream()
-							.filter(el -> {
-								Optional<IBase> match = theFhirPath.evaluateFirst(el, ref.get(), IBase.class);
-								return match.isPresent();
-							}).toList();
+								.filter(el -> {
+									Optional<IBase> match = theFhirPath.evaluateFirst(el, ref.get(), IBase.class);
+									return match.isPresent();
+								})
+								.toList();
 					} else {
 						// there is only 1 child (probably a top level element)
 						childs = allChildren;
@@ -675,18 +674,13 @@ public class FhirPatch {
 				if (childs.isEmpty()) {
 					throwNoElementsError(theOriginalPath);
 				}
-				throw new InvalidRequestException(Msg.code(2704) + " FhirPath returns more than 1 element. Patch cannot be done. " + theOriginalPath);
+				throw new InvalidRequestException(Msg.code(2704)
+						+ " FhirPath returns more than 1 element. Patch cannot be done. " + theOriginalPath);
 			}
 			IBase child = childs.get(0);
 
-			definition.setChild(childDefinition(
-				definition,
-				theFhirPathParts,
-				child,
-				theFhirPath,
-				newPath,
-				theOriginalPath
-			));
+			definition.setChild(
+					childDefinition(definition, theFhirPathParts, child, theFhirPath, newPath, theOriginalPath));
 		}
 
 		return definition;
@@ -702,7 +696,7 @@ public class FhirPatch {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
 			childElement = childDef.getChildByName(
-				childDef.getValidChildNames().iterator().next());
+					childDef.getValidChildNames().iterator().next());
 		} else {
 			childElement = childDef.getChildByName(childName);
 		}
