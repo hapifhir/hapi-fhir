@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -17,8 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
+
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -207,6 +214,71 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Invalid resource ID, ID must contain a history version");
 		}
+	}
+
+	@Test
+	void testHistoryRewriteDeletedVersion() {
+		String TEST_FAMILY_NAME_MODIFIED = "Jackson"; // This was refactored to a constant in another ticket
+		String TEST_GIVEN_NAME_MODIFIED = "Randy"; // This was refactored to a constant in another ticket
+
+		// setup
+		IIdType id = createPatientWithHistory(); // Name of this was changed to createPatientWithHistoryThreeVersions() in another ticket
+
+		// execute update
+		when(mySrd.isRewriteHistory()).thenReturn(true);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(TEST_FAMILY_NAME_MODIFIED).setGiven(List.of(new StringType(TEST_GIVEN_NAME_MODIFIED)));
+		p.setId("Patient/" + id.getIdPart() + "/_history/4");
+
+		myPatientDao.delete(id, mySrd);
+		int resourceVersionsSizeInit = myResourceHistoryTableDao.findAll().size();
+
+		Patient patientBeforeRewrite = myPatientDao.read(id.toUnqualifiedVersionless(), mySrd, true);
+		String versionBeforeUpdate = patientBeforeRewrite.getIdElement().getVersionIdPart();
+		Date lastUpdatedBeforeUpdate = patientBeforeRewrite.getMeta().getLastUpdated();
+
+		myPatientDao.update(p, mySrd);
+		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless(), mySrd, true).getIdElement().getVersionIdPart();
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
+
+		int resourceVersionsSizeAfterUpdate = myResourceHistoryTableDao.findAll().size();
+
+		Patient lPatient = myPatientDao.read(id.toVersionless(), mySrd, true);
+		assertEquals(TEST_FAMILY_NAME_MODIFIED, lPatient.getName().get(0).getFamily());
+		assertEquals(TEST_GIVEN_NAME_MODIFIED, lPatient.getName().get(0).getGiven().get(0).getValue());
+		assertEquals(resourceVersionsSizeInit, resourceVersionsSizeAfterUpdate);
+		assertThat(lPatient.getIdElement().toString()).endsWith("/_history/4");
+		assertFalse(lPatient.isDeleted());
+
+		assertTrue(lPatient.getMeta().getLastUpdated().after(lastUpdatedBeforeUpdate));
+
+		try {
+			// We initially created three versions (v1-v3)
+			// The logical (HTTP) delete will create a new version (v4)
+			// The update with history-rewrite on v4 should probably rewrite and undelete v4 (may require design)
+			myPatientDao.read(id.withVersion("5"), mySrd, true);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage()).contains("HAPI-0979: Version \"5\" is not valid for resource Patient");
+		}
+
+		//TODO - the actual version stored on the resource table is 5
+		// and there are only 4 entries on the history table
+		// they should _probably_ both be 4 (feels like update rewrite should update and undelete in place w/o version increment -
+		// but better to run this through design)
+		List<ResourceTable> allResources = myResourceTableDao.findAll();
+		assertThat(allResources).hasSize(1);
+		long versionOnResourceTable = allResources.get(0).getVersion();
+		assertThat(versionOnResourceTable).isEqualTo(4);
+
+		List<ResourceHistoryTable> allResourceHistories = myResourceHistoryTableDao.findAll();
+		assertThat(allResourceHistories).hasSize(4);
+		Optional<ResourceHistoryTable> mostRecentEntryInHistoryTable = allResourceHistories.stream().max(Comparator.comparing(ResourceHistoryTable::getVersion));
+		long mostRecentVersionInHistoryTable = mostRecentEntryInHistoryTable.get().getVersion();
+		assertThat(mostRecentVersionInHistoryTable).isEqualTo(4);
+		assertThat(versionOnResourceTable).isEqualTo(mostRecentVersionInHistoryTable);
 	}
 
 	@Nonnull
