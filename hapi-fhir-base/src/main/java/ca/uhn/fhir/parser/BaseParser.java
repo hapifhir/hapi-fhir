@@ -192,10 +192,7 @@ public abstract class BaseParser implements IParser {
 	 * preceded by an #) because otherwise later transactions cannot
 	 * process the resource (since the reference will not be set).
 	 */
-	private void setReference(
-		IBaseReference theReference,
-		String theText
-	) {
+	private void setReference(IBaseReference theReference, String theText) {
 		myContext.newTerser().setElement(theReference, "reference", theText);
 	}
 
