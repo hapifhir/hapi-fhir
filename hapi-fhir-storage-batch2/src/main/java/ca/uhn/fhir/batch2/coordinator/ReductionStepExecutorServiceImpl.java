@@ -369,6 +369,9 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			future.get();
 		} catch (Exception e) {
+			if (e.getCause() instanceof RuntimeException re) {
+				throw re;
+			}
 			throw new InternalErrorException(Msg.code(2721) + e.getMessage(), e);
 		}
 	}
