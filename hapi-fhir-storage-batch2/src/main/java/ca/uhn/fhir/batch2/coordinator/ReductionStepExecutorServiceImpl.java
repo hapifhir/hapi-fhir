@@ -349,6 +349,9 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
+/**
+ * We need to keep a long transaction here to keep our ResultSet Stream open for the duration.  But we don't want to expose this transaction to the user.  We use a null tx here to reset all our thread-locals so the actual chunk work runs cleanly.
+ */
 	private void executeInNoTransaction(Runnable theRunnable) {
 		myTransactionService
 				.withRequest(null)
