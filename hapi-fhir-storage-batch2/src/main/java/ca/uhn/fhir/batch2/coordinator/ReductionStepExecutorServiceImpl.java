@@ -36,6 +36,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -69,6 +70,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -85,6 +87,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final Map<String, JobWorkCursor> myInstanceIdToJobWorkCursor =
 			Collections.synchronizedMap(new LinkedHashMap<>());
 	private final ExecutorService myReducerExecutor;
+	private final ExecutorService myReducerChunkExecutor;
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
@@ -106,6 +109,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
+
+		// This is a single thread executor because there are no guarantees that the chunk
+		// processing is actually thread safe. Be careful if you think you want to add more
+		// threads here.
+		myReducerChunkExecutor =
+				Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer-chunk"));
 	}
 
 	@EventListener(ContextRefreshedEvent.class)
@@ -349,14 +358,19 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
-/**
- * We need to keep a long transaction here to keep our ResultSet Stream open for the duration.  But we don't want to expose this transaction to the user.  We use a null tx here to reset all our thread-locals so the actual chunk work runs cleanly.
- */
+	/**
+	 * We need to keep a long transaction here to keep our ResultSet Stream open for the duration.
+	 * But we don't want to expose this transaction to the user.  We use a new thread here so that
+	 * the individual chunks get processed in their own dedicated transactions separate from the
+	 * main chunk-loading transaction.
+	 */
 	private void executeInNoTransaction(Runnable theRunnable) {
-		myTransactionService
-				.withRequest(null)
-				.withPropagation(Propagation.NOT_SUPPORTED)
-				.execute(theRunnable);
+		Future<?> future = myReducerChunkExecutor.submit(theRunnable);
+		try {
+			future.get();
+		} catch (Exception e) {
+			throw new InternalErrorException(Msg.code(2721) + e.getMessage(), e);
+		}
 	}
 
 	private <T> T executeInTransactionWithSynchronization(Callable<T> runnable) {
