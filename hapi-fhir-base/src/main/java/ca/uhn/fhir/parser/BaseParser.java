@@ -839,6 +839,17 @@ public abstract class BaseParser implements IParser {
 							myContext.getElementDefinition(nextRef.getClass()).newInstance();
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
 					newRef.setReference(refText);
+
+					/*
+					 * We add the reference to the input resources to ensure it doesn't get
+					 * overwritten if it wasn't there.
+					 * The resource is being mutated anyways, so this is fine.
+					 *
+					 * We need to maintain the reference as an internal reference (ie,
+					 * preceded by an #) because otherwise later transactions cannot
+					 * process the resource (since the reference will not be set).
+					 */
+					myContext.newTerser().setElement(next, "reference", refText);
 					retVal.set(i, newRef);
 				}
 			}
