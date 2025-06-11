@@ -183,6 +183,22 @@ public abstract class BaseParser implements IParser {
 				});
 	}
 
+	/**
+	 * We add the reference to the input resources to ensure it doesn't get
+	 * overwritten if it wasn't there.
+	 * The resource is being mutated anyways, so this is fine.
+	 *
+	 * We need to maintain the reference as an internal reference (ie,
+	 * preceded by an #) because otherwise later transactions cannot
+	 * process the resource (since the reference will not be set).
+	 */
+	private void setReference(
+		IBaseReference theReference,
+		String theText
+	) {
+		myContext.newTerser().setElement(theReference, "reference", theText);
+	}
+
 	private String determineReferenceText(
 			IBaseReference theRef,
 			CompositeChildElement theCompositeChildElement,
@@ -200,10 +216,12 @@ public abstract class BaseParser implements IParser {
 						reference = containedId.getValue();
 					} else {
 						reference = "#" + containedId.getValue();
+						setReference(theRef, reference);
 					}
 				} else if (previouslyContainedId != null) {
 					reference = "#" + previouslyContainedId.getValue();
 					theContext.getContainedResources().addContained(previouslyContainedId, theRef.getResource());
+					setReference(theRef, reference);
 				} else {
 					IIdType refId = theRef.getResource().getIdElement();
 					if (refId != null) {
@@ -840,16 +858,6 @@ public abstract class BaseParser implements IParser {
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
 					newRef.setReference(refText);
 
-					/*
-					 * We add the reference to the input resources to ensure it doesn't get
-					 * overwritten if it wasn't there.
-					 * The resource is being mutated anyways, so this is fine.
-					 *
-					 * We need to maintain the reference as an internal reference (ie,
-					 * preceded by an #) because otherwise later transactions cannot
-					 * process the resource (since the reference will not be set).
-					 */
-					myContext.newTerser().setElement(next, "reference", refText);
 					retVal.set(i, newRef);
 				}
 			}
