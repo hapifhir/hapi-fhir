@@ -42,7 +42,7 @@ public class HapiFhirDerbyDialect extends DerbyDialect implements IHapiFhirDiale
 	 */
 	@Override
 	public boolean supportsColumnCheck() {
-		//Dummy commit to force a diff for PR purposes.
+		// Dummy commit to force a diff for PR purposes.
 		return false;
 	}
 
