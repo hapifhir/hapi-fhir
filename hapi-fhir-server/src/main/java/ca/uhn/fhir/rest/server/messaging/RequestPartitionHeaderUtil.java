@@ -42,13 +42,13 @@ public final class RequestPartitionHeaderUtil {
 	public static RequestPartitionId fromHeader(
 			@Nonnull String theSourceName,
 			@Nullable String thePartitionHeaderValue,
-			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(theSourceName, thePartitionHeaderValue, false, theDefaultPartitionSettings);
 	}
 
 	@Nullable
 	public static RequestPartitionId fromHeader(
-			@Nullable String thePartitionHeaderValue, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nullable String thePartitionHeaderValue, @Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(HTTP_HEADER_SOURCE_NAME, thePartitionHeaderValue, false, theDefaultPartitionSettings);
 	}
 
@@ -63,17 +63,18 @@ public final class RequestPartitionHeaderUtil {
 	 * @return A {@link RequestPartitionId} object representing the first partition specified in the header, or null if the header is null
 	 * @throws InvalidRequestException If the header value is invalid
 	 */
+	@SuppressWarnings("unused")
 	@Nullable
 	public static RequestPartitionId fromHeaderFirstPartitionOnly(
 			@Nonnull String theSourceName,
 			@Nullable String thePartitionHeaderValue,
-			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(theSourceName, thePartitionHeaderValue, true, theDefaultPartitionSettings);
 	}
 
 	@Nullable
 	public static RequestPartitionId fromHeaderFirstPartitionOnly(
-			@Nullable String thePartitionHeaderValue, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nullable String thePartitionHeaderValue, @Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromHeader(HTTP_HEADER_SOURCE_NAME, thePartitionHeaderValue, true, theDefaultPartitionSettings);
 	}
 
@@ -121,7 +122,7 @@ public final class RequestPartitionHeaderUtil {
 			@Nonnull String theSourceName,
 			@Nullable String thePartitionHeaderValue,
 			boolean theIncludeOnlyTheFirst,
-			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (thePartitionHeaderValue == null) {
 			return null;
 		}
@@ -172,12 +173,16 @@ public final class RequestPartitionHeaderUtil {
 	@Nullable
 	private static Integer getPartitionId(
 			@Nonnull String theSourceName,
-			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings,
+			@Nullable IDefaultPartitionSettings theDefaultPartitionSettings,
 			String trimmedPartitionId) {
 		Integer partitionId;
 
 		if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
-			partitionId = theDefaultPartitionSettings.getDefaultPartitionId();
+			if (theDefaultPartitionSettings == null) {
+				throw new InvalidRequestException(Msg.code(2722) + "Can only use DEFAULT partitionId in contexts where the default partition ID is defined.");
+			} else {
+				partitionId = theDefaultPartitionSettings.getDefaultPartitionId();
+			}
 		} else {
 			try {
 				partitionId = Integer.parseInt(trimmedPartitionId);
@@ -198,7 +203,7 @@ public final class RequestPartitionHeaderUtil {
 	 * @param theDefaultPartitionSettings Settings that provide the default partition ID
 	 */
 	public static <T> void setRequestPartitionIdFromHeaderIfNotAlreadySet(
-			@Nonnull IMessage<T> theMessage, @Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
+			@Nonnull IMessage<T> theMessage, @Nullable IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (theMessage.getPayload() instanceof BaseResourceMessage baseResourceMessage) {
 			if (baseResourceMessage.getPartitionId() != null) {
 				// TODO KHS suggestion from MB: if partitions are also set in the header, log a warning if they don't
