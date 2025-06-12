@@ -179,7 +179,8 @@ public final class RequestPartitionHeaderUtil {
 
 		if (trimmedPartitionId.equals(DEFAULT_PARTITION_NAME)) {
 			if (theDefaultPartitionSettings == null) {
-				throw new InvalidRequestException(Msg.code(2722) + "Can only use DEFAULT partitionId in contexts where the default partition ID is defined.");
+				throw new InvalidRequestException(Msg.code(2722)
+						+ "Can only use DEFAULT partitionId in contexts where the default partition ID is defined.");
 			} else {
 				partitionId = theDefaultPartitionSettings.getDefaultPartitionId();
 			}
