@@ -132,7 +132,7 @@ public class PartitionedStrictTransactionR4Test extends BasePartitioningR4Test {
 			.setValue(new StringType("Patient.active"));
 		operation
 			.addPart()
-			.setName("name")
+			.setName("value")
 			.setValue(new CodeType("false"));
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
