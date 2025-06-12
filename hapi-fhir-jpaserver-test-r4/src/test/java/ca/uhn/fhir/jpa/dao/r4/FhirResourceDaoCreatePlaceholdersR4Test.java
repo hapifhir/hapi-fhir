@@ -7,7 +7,9 @@ import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +44,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -858,6 +863,65 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		// verify links created to Patient placeholder from both Observations
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL), mySrd);
 		assertThat(outcome.getAllResources()).hasSize(3);
+	}
+
+	@Test
+	public void runBundleBatchInParallelThreads() throws Exception {
+		// setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		final IParser parser = myFhirContext.newJsonParser();
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		final Bundle searchParameters  = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/patient-identifier-unique-sp-bundle.json");
+		mySystemDao.transaction(requestDetails, searchParameters);
+		final Bundle patientBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/patient-with-conditional-update.json");
+		final Bundle observationBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/observation-with-conditional-update-and-inline-reference.json");
+		final ExecutorService executor = Executors.newFixedThreadPool(2);
+		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, withTransactionSemanticsHeader().toHeaderValue());
+		executor.submit(() -> {
+			ourLog.atInfo().setMessage("Thread 1...").log();
+			Bundle transaction = mySystemDao.transaction(requestDetails, patientBundle);
+			System.out.println(parser.encodeResourceToString(transaction));
+		});
+		executor.submit(() -> {
+			ourLog.atInfo().setMessage("Thread 2...").log();
+			Bundle transaction = mySystemDao.transaction(requestDetails, observationBundle);
+			System.out.println(parser.encodeResourceToString(transaction));
+		});
+		// execute
+		executor.shutdown();
+		// validate
+		while (!executor.isTerminated()) {
+			Thread.sleep(100);// Wait for tasks to complete
+			ourLog.atInfo().setMessage("Shutting down thread 1 and 2.... ").log();
+		}
+		final Integer patientResultCount = myPatientDao.search(withPatientIdentifierSp(), requestDetails).size();
+		assertThat(patientResultCount).isEqualTo(1);
+		final Integer observationResultCount = myObservationDao.search(withObservationCodeSp(), requestDetails).size();
+		assertThat(observationResultCount).isEqualTo(1);
+	}
+
+	private TransactionSemanticsHeader withTransactionSemanticsHeader() {
+		return TransactionSemanticsHeader.newBuilder()
+			.withTryBatchAsTransactionFirst(true)
+			.withRetryCount(3)
+			.withMinRetryDelay(100)
+			.withMaxRetryDelay(200)
+			.build();
+	}
+
+	private SearchParameterMap withPatientIdentifierSp() {
+		final SearchParameterMap searchParameterMap = new SearchParameterMap();
+		final TokenParam identifierSearchParameter = new TokenParam("http://some-system.com", "some-value");
+		searchParameterMap.add(Patient.SP_IDENTIFIER, identifierSearchParameter);
+		return searchParameterMap;
+	}
+
+	private SearchParameterMap withObservationCodeSp() {
+		final SearchParameterMap searchParameterMap = new SearchParameterMap();
+		final TokenParam codeSearchParameter = new TokenParam("http://hl7.org/fhir/sid/ndc", "0008-1222-30");
+		searchParameterMap.add(Observation.SP_CODE, codeSearchParameter);
+		return searchParameterMap;
 	}
 
 }
