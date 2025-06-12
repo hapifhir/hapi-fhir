@@ -89,6 +89,7 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -422,13 +423,20 @@ public abstract class BaseTransactionProcessor {
 
 		IBaseBundle response;
 		for (int i = 1; ; i++) {
+			// We're resetting the request here because processBatch/processTransaction mutates
+			// the original request, and it fails with InvalidRequestException on retry. Processing
+			// FHIR batch and transaction retry seems to follow different paths. FHIR transaction
+			// doesn't seem to use the header X-Transaction-Semantics for retries vs batch uses it.
+			// The deeper fix might be to actually reconcile how that's handled. Cloning is costly
+			// on performance.
+			final IBaseBundle request = TerserUtil.clone(myContext, theRequest);
 			try {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
-					BundleUtil.setBundleType(myContext, theRequest, "transaction");
-					response = processTransaction(theRequestDetails, theRequest, "Transaction", theNestedMode);
+					BundleUtil.setBundleType(myContext, request, "transaction");
+					response = processTransaction(theRequestDetails, request, "Transaction", theNestedMode);
 				} else {
-					BundleUtil.setBundleType(myContext, theRequest, "batch");
-					response = processBatch(theRequestDetails, theRequest, theNestedMode);
+					BundleUtil.setBundleType(myContext, request, "batch");
+					response = processBatch(theRequestDetails, request, theNestedMode);
 				}
 				break;
 			} catch (BaseServerResponseException e) {
