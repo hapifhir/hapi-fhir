@@ -1652,7 +1652,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myStorageSettings = theStorageSettings;
 	}
 
-	// FIXME: document and add comments
+	/**
+	 * If configured to do so, extracts the FullText indexes for the given
+	 * entity. The {@link ResourceTable#setIndexStatus(EntityIndexStatusEnum) Index Status}
+	 * is updated to reflect whether fulltext indexing is being used on this entity.
+	 */
 	private void populateFullTextFieldsAndSetEntityStatus(
 		RequestDetails theRequestDetails,
 			final FhirContext theContext,
@@ -1667,25 +1671,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// This will get changed if we end up setting either
 		theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_RDBMS_ONLY);
 
+		// Standard FullText indexing
 		if (myStorageSettings.isHibernateSearchIndexFullText()) {
-			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName(), ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
-			if (activeSearchParams.containsParamName(Constants.PARAM_CONTENT)) {
-				RuntimeSearchParam param = activeSearchParams.get(Constants.PARAM_CONTENT);
-
+				// _content
 				Supplier<String> contentSupplier = () -> parseContentTextIntoWords(theContext, theResource);
 				FullTextExtractionRequest.IndexTypeEnum contentIndexType = FullTextExtractionRequest.IndexTypeEnum.CONTENT;
 				Consumer<String> contentEntitySetter = theEntity::setContentText;
 				extractFullTextIndexData(theRequestDetails, theResource, theEntity, contentIndexType, contentSupplier, contentEntitySetter);
-			}
 
-			if (activeSearchParams.containsParamName(Constants.PARAM_TEXT)) {
+				// _text
 				Supplier<String> textSupplier = () -> parseNarrativeTextIntoWords(theResource);
 				FullTextExtractionRequest.IndexTypeEnum textIndexType = FullTextExtractionRequest.IndexTypeEnum.TEXT;
 				Consumer<String> textEntitySetter = theEntity::setNarrativeText;
 				extractFullTextIndexData(theRequestDetails, theResource, theEntity, textIndexType, textSupplier, textEntitySetter);
-			}
 		}
 
+		// Advanced indexing - Index standard search params in the FullText index
 		if (myStorageSettings.isHibernateSearchIndexSearchParams()) {
 			ExtendedHSearchIndexData hSearchIndexData =
 					myFulltextSearchSvc.extractLuceneIndexData(theResource, theEntity, theNewParams);
@@ -1706,7 +1707,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				contentOutcome = (FullTextExtractionResponse) compositeBroadcaster.callHooksAndReturnObject(Pointcut.JPA_INDEX_EXTRACT_FULLTEXT, contentParams);
 			}
 
-			if (contentOutcome == null) {
+			if (contentOutcome == null || contentOutcome.isIndexNormally()) {
 				theEntityIndexSetter.accept(theContentSupplier.get());
 				theEntity.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 			} else if (!contentOutcome.isDoNotIndex()) {

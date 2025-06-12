@@ -1,7 +1,11 @@
 # HAPI FHIR JPA Lucene/Elasticsearch Indexing
 
-The HAPI JPA Server supports optional indexing via Hibernate Search when configured to use Lucene or Elasticsearch.
-This is required to support the `_content`, or `_text` search parameters.
+HAPI FHIR supports additional indexing when an appropriate indexer is configured. There are two FullText indexers supported: Lucene, and ElasticSearch. These systems to not replace a relational database (RDBMS), which is always required in order to use HAPI FHIR JPA. Instead, they augment the relational database by enabling additional search functionality.
+
+With FullText Indexing enabled, the following Search Parameters may be used:
+
+* `_content` &ndash; Supports FullText searching across the textual components in a FHIR resource (i.e. the values of any **String** datatypes found within the resource).
+* `_text` &ndash; Supports FullText searching across the HTML narrative of the results.
 
 # Performing Fulltext Search in Lucene/Elasticsearch
 
@@ -50,6 +54,28 @@ GET [base]/Observation?_content:contains=[Moles/volume]
 ```
 
 Using `:contains` on the `_text` or `_content` modifies the search engine to perform a direct substring match anywhere within the field.
+
+
+<a name="customizing-fulltext"/>
+
+# Customizing Content and Text Indexing
+
+By default, HAPI FHIR JPA will index the two FullText parameters using the following algorithm. 
+
+* For all resources, the `_content` parameter is indexed by extracting all of the **string** content (i.e. the values of all string datatypes within the resource) and aggregating them into a single document which is passed to the indexer.
+* For all domain resources (all resources with a narrative), the `_text` parameter is indxed by aggregating all non-tag text in the resource narrative into a document which is passed to the indexer.
+
+Using an interceptor with the [JPA_INDEX_EXTRACT_FULLTEXT](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#JPA_INDEX_EXTRACT_FULLTEXT) pointcut, it is possible to customize the indexed documents, or to selectively disable indexing entirely.
+
+This pointcut uses an object of type [FullTextExtractionRequest](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionRequest.html) as input, and an object of type [FullTextExtractionResponse](/hapi-fhir/apidocs/hapi-fhir-jpaserver-searchparam/ca/uhn/fhir/jpa/searchparam/fulltext/FullTextExtractionResponse.html) as output.
+
+## Example
+
+The following example shows an interceptor which enables fulltext indexing only for specific resource types:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/FullTextSelectiveIndexingInterceptor.java|interceptor}}
+```
 
 
 # Experimental Extended Lucene/Elasticsearch Indexing
