@@ -1962,7 +1962,8 @@ public abstract class BaseTransactionProcessor {
 			if (!nextId.hasIdPart()) {
 				if (resourceReference.getResource() != null) {
 					IIdType targetId = resourceReference.getResource().getIdElement();
-					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
+					Boolean isContained = (Boolean)resourceReference.getResource().getUserData("IS_CONTAINED");
+					if (targetId.getValue() == null || isContained ) {
 						// This means it's a contained resource
 						continue;
 					} else if (theIdSubstitutions.containsTarget(targetId)) {
