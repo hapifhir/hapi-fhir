@@ -1009,6 +1009,7 @@
 	<properties>
 		<fhir_core_version>6.5.18</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
+		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 		<surefire_version>3.5.2</surefire_version>
 
@@ -2454,7 +2455,7 @@
 					<configuration>
 						<java>
 							<excludes>
-								<exclude>**/test/**/*.java</exclude>
+								<exclude>${spotless.exclude.pattern}</exclude>
 							</excludes>
 							<!--This does the actual code reformatting-->
 							<palantirJavaFormat/>
