@@ -213,7 +213,18 @@ public class FhirResourceDaoR5SearchFtInterceptorTest extends BaseJpaR5Test {
 		// Setup
 		registerInterceptor(new FullTextSelectiveIndexingInterceptor());
 
-		aaaaa
+		// Test
+		IIdType patientId = createPatient(withFamily("Simpson"), withNarrative("<div>hello</div>"));
+		IIdType observationId = createObservation(withObservationCode(null, null, "Simpson"), withNarrative("<div>hello</div>"));
+
+		// Verify
+		SearchParameterMap contentMap = SearchParameterMap.newSynchronous(PARAM_CONTENT, new StringParam("simpson"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(contentMap, mySrd))).containsExactly(patientId.getValue());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(contentMap, mySrd))).isEmpty();
+
+		SearchParameterMap textMap = SearchParameterMap.newSynchronous(PARAM_TEXT, new StringParam("hello"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(textMap, mySrd))).isEmpty();
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(textMap, mySrd))).containsExactly(observationId.getValue());
 	}
 
 

@@ -2604,8 +2604,8 @@ public enum Pointcut implements IPointcut {
 	 * @since 8.4.0
 	 */
 	JPA_INDEX_EXTRACT_FULLTEXT(
-		"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
-		"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionResponse",
+			"ca.uhn.fhir.jpa.searchparam.fulltext.FullTextExtractionRequest"),
 
 	/**
 	 * <b>JPA Hook:</b>
