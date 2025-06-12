@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.FhirPathUtils;
@@ -342,7 +343,27 @@ public class FhirPatch {
 				== BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE) {
 			if (theTargetChildDefinition.getBase() instanceof IPrimitiveType<?> target
 					&& theReplacementValue instanceof IPrimitiveType<?> source) {
-				target.setValueAsString(source.getValueAsString());
+				if (target.fhirType().equalsIgnoreCase(source.fhirType())) {
+					// same primitive type; or possibly replacing a string - just replace
+					target.setValueAsString(source.getValueAsString());
+				} else if (theTargetChildDefinition.getChild() != null) {
+					// there's subchildren (possibly we're setting an 'extension' value
+					FhirPathChildDefinition ct = findChildDefinitionAtEndOfPath(theTargetChildDefinition, theReplacementValue);
+					replaceSingleValue(theFhirPath, theParsedFhirPath, ct, theReplacementValue);
+				} else {
+					// the primitive can have multiple value types
+					BaseRuntimeElementDefinition<?> parentEl = theTargetChildDefinition.getParent()
+						.getElementDefinition();
+					String childFhirPath = theTargetChildDefinition.getFhirPath();
+
+					BaseRuntimeChildDefinition choiceTarget = parentEl.getChildByName(childFhirPath);
+					if (choiceTarget == null) {
+						// possibly a choice type
+						choiceTarget = parentEl.getChildByName(childFhirPath + "[x]");
+					}
+					choiceTarget.getMutator()
+						.setValue(theTargetChildDefinition.getParent().getBase(), theReplacementValue);
+				}
 			}
 			return;
 		}
@@ -657,7 +678,13 @@ public class FhirPatch {
 								.toList();
 					} else {
 						// there is only 1 child (probably a top level element)
-						childs = allChildren;
+						// we still filter own because child elements can have different child types (that might match multiple childs)
+						// eg: everything has "extension" on it
+						childs = allChildren
+							.stream().filter(el -> {
+								Optional<IBase> match = theFhirPath.evaluateFirst(el, ref.get(), IBase.class);
+								return match.isPresent();
+							}).findFirst().stream().toList();
 					}
 				}
 			} else {
