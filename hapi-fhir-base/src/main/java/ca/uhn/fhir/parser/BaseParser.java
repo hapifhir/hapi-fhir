@@ -193,7 +193,7 @@ public abstract class BaseParser implements IParser {
 	 * process the resource (since the reference will not be set).
 	 */
 	private void setReference(IBaseReference theReference, String theText) {
-		myContext.newTerser().setElement(theReference, "reference", theText);
+		theReference.setReference(theText);
 	}
 
 	private String determineReferenceText(
