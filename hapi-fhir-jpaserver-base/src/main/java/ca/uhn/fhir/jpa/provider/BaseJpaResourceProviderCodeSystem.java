@@ -166,8 +166,15 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				String code;
 				String display;
 
+				// The specification for $validate-code says that only one of these input-param combinations should be
+				// provided:
+				// 1.- code/codeSystem url
+				// 2.- coding (which wraps one code/codeSystem url combo)
+				// 3.- a codeableConcept (which wraps potentially many code/codeSystem url combos)
 				String url = getStringFromPrimitiveType(theUrl);
+
 				if (theCoding != null && isNotBlank(theCoding.getSystem())) {
+					// Coding case
 					if (url != null && !url.equalsIgnoreCase(theCoding.getSystem())) {
 						throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem()
 								+ "' does not equal param url '" + theUrl
@@ -179,9 +186,11 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 					result = validateCodeWithTerminologyService(url, code, display)
 							.orElseGet(supplyUnableToValidateResult(url, code));
 				} else if (theCodeableConcept != null && !theCodeableConcept.isEmpty()) {
+					// CodeableConcept case
 					result = new CodeValidationResult()
 							.setMessage("Terminology service does not yet support codeable concepts.");
 				} else {
+					// code/systemUrl combo case
 					code = getStringFromPrimitiveType(theCode);
 					display = getStringFromPrimitiveType(theDisplay);
 					if (Strings.isNullOrEmpty(code) || Strings.isNullOrEmpty(url)) {
