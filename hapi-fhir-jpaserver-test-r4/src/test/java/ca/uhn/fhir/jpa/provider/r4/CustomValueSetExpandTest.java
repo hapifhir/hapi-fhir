@@ -52,8 +52,8 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     // Verify loading success
     runInTransaction(() -> {
       TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
-      ourLog.debug("Loaded ICD-10-CM Version: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
-      ourLog.debug("Loaded concept count: " + myTermConceptDao.count());
+      ourLog.info("Loaded ICD-10-CM Version: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
+      ourLog.info("Loaded concept count: " + myTermConceptDao.count());
     });
 
 
@@ -62,17 +62,17 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, vsJson);
 
     // Check ValueSet composition
-    ourLog.debug("ValueSet URL: " + vs.getUrl());
-    ourLog.debug("ValueSet compose includes:");
+    ourLog.info("ValueSet URL: " + vs.getUrl());
+    ourLog.info("ValueSet compose includes:");
     vs.getCompose().getInclude().forEach(include -> {
-      ourLog.debug("  System: " + include.getSystem() + " Version: " + include.getVersion());
+      ourLog.info("  System: " + include.getSystem() + " Version: " + include.getVersion());
       if (include.hasFilter()) {
         include.getFilter().forEach(filter -> {
-          ourLog.debug("    Filter: " + filter.getProperty() + " " + filter.getOp() + " " + filter.getValue());
+          ourLog.info("    Filter: " + filter.getProperty() + " " + filter.getOp() + " " + filter.getValue());
         });
       }
       include.getConcept().forEach(concept -> {
-        ourLog.debug("    Code: " + concept.getCode() + " Display: " + concept.getDisplay());
+        ourLog.info("    Code: " + concept.getCode() + " Display: " + concept.getDisplay());
       });
     });
 
@@ -88,7 +88,7 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     
     while (expanded == null && currentRetry < maxRetries) {
       try {
-        ourLog.debug("Attempting to expand ValueSet (attempt " + (currentRetry + 1) + ")...");
+        ourLog.info("Attempting to expand ValueSet (attempt " + (currentRetry + 1) + ")...");
         expanded = myClient
             .operation()
             .onType(ValueSet.class)
@@ -96,15 +96,15 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
             .withParameters(inParams)
             .returnResourceType(ValueSet.class)
             .execute();
-        ourLog.debug("ValueSet expansion successful!");
+        ourLog.info("ValueSet expansion successful!");
       } catch (Exception e) {
         currentRetry++;
-        ourLog.debug("Expansion failed (attempt " + currentRetry + "): " + e.getMessage());
+        ourLog.info("Expansion failed (attempt " + currentRetry + "): " + e.getMessage());
         if (currentRetry < maxRetries) {
-          ourLog.debug("Waiting 5 seconds before retry...");
+          ourLog.info("Waiting 5 seconds before retry...");
           Thread.sleep(5000);
         } else {
-          ourLog.debug("All retries failed, throwing exception");
+          ourLog.error("All retries failed, throwing exception");
           throw e;
         }
       }
@@ -112,13 +112,13 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
 
     // 4. Print all contains
     expanded.getExpansion().getContains().forEach(c -> {
-      ourLog.debug(
+      ourLog.info(
           "system=" + c.getSystem() +
               " code=" + c.getCode() +
               " display=" + c.getDisplay());
     }); 
 
-    ourLog.debug("Expansion successful! Found " + expanded.getExpansion().getContains().size() + " concepts.");
+    ourLog.info("Expansion successful! Found " + expanded.getExpansion().getContains().size() + " concepts.");
 
   }
 }
