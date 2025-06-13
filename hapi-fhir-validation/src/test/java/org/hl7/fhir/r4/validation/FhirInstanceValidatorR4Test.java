@@ -25,6 +25,7 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirDefaultPolicyAdvisor;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,8 +66,12 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -1731,6 +1736,19 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(errors).isEmpty();
 	}
 
+	@Test
+	void testValidate_ResourceContainedSameResourceIsValid() throws IOException {
+		final String encoded = loadResource("medication-with-contained-medication-ingredient.json");
+
+//		var jsonParser = ourCtx.newJsonParser();
+//		var result = jsonParser.parseResource(encoded);
+//		assertThat(result).isInstanceOf(Medication.class);
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(errors.stream().noneMatch(e -> e.getSeverity() == ResultSeverityEnum.ERROR)).isTrue();
+	}
+
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
 		BundleBuilder bundleBuilder = new BundleBuilder(ourCtx);
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, loadResource("/r4/concurrent-bundle/patient.json"));
@@ -1759,9 +1777,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			new CommonCodeSystemsTerminologyService(ourCtx),
 			ourCtx.getValidationSupport(),
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx));
+			new SnapshotGeneratingValidationSupport(ourCtx)
+		);
 		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
+		myInstanceVal.setValidatorPolicyAdvisor(new CustomPolicyAdvisor());
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}
 
@@ -1786,4 +1806,21 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+	private class CustomPolicyAdvisor extends FhirDefaultPolicyAdvisor {
+
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(
+			IResourceValidator validator,
+			Object appContext,
+			org.hl7.fhir.r5.model.StructureDefinition structure,
+			ElementDefinition element,
+			String containerType,
+			String containerId,
+			Element.SpecialElement containingResourceType,
+			String path,
+			String url) {
+			return ContainedReferenceValidationPolicy.IGNORE;
+		}
+
+	}
 }

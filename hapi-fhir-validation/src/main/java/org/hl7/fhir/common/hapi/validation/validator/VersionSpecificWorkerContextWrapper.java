@@ -59,12 +59,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -91,15 +92,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final VersionCanonicalizer myVersionCanonicalizer;
-	private volatile List<StructureDefinition> myAllStructures;
+	private final Map<String, StructureDefinition> cachedCanonizedStructureDefinitionsWithSnapshots;
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 	private volatile FHIRPathEngine myFHIRPathEngine;
+	private final Object syncCanonizationAndSnapshotBuilding = new Object();
 
 	public VersionSpecificWorkerContextWrapper(
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
+		cachedCanonizedStructureDefinitionsWithSnapshots = Collections.synchronizedMap(new HashMap<>());
 
 		setValidationMessageLanguage(getLocale());
 	}
@@ -208,48 +211,58 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myExpansionProfile = expParameters;
 	}
 
-	private List<StructureDefinition> allStructureDefinitions() {
+	private Map<String, StructureDefinition> allStructureDefinitions() {
+		// The "hidden" initialization of cache and snapshot generation in this method
+		// do not respect the SRP principle.
+		// These actions belong to the factory method (newVersionSpecificWorkerContextWrapper)
+		// However, the implications of such a refactoring are not clear at the moment
+		if (cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty())
+			initializeStructureDefinitionsCache();
+		return cachedCanonizedStructureDefinitionsWithSnapshots;
+	}
 
-		List<StructureDefinition> retVal = myAllStructures;
-		if (retVal == null) {
-			List<IBaseResource> allStructureDefinitions =
-					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
-			assert allStructureDefinitions != null;
+	// Caution! Synchronized to avoid double cache initialization in multi-threading setting
+	private synchronized void initializeStructureDefinitionsCache() {
+		// Avoid double cache initialization if entered by multiple threads after waiting
+		if(!cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty())
+			return;
 
-			/*
-			 * This method (allStructureDefinitions()) gets called recursively - As we
-			 * try to return all StructureDefinitions, we want to generate snapshots for
-			 * any that don't already have a snapshot. But the snapshot generator in turn
-			 * also calls allStructureDefinitions() - That specific call doesn't require
-			 * that the returned SDs have snapshots generated though.
-			 *
-			 * So, we first just convert to canonical version and store a list containing
-			 * the canonical versions. That way any recursive calls will return the
-			 * stored list. But after that we'll generate all the snapshots and
-			 * store that list instead. If the canonicalization fails with an
-			 * unexpected exception, we wipe the stored list. This is probably an
-			 * unrecoverable failure since this method will probably always
-			 * fail if it fails once. But at least this way we're likley to
-			 * generate useful error messages for the user.
-			 */
-			retVal = allStructureDefinitions.stream()
-					.map(myVersionCanonicalizer::structureDefinitionToCanonical)
-					.collect(Collectors.toList());
-			myAllStructures = retVal;
 
-			try {
-				for (IBaseResource next : allStructureDefinitions) {
-					Resource converted = convertToCanonicalVersionAndGenerateSnapshot(next, false);
-					retVal.add((StructureDefinition) converted);
-				}
-				myAllStructures = retVal;
-			} catch (Exception e) {
-				ourLog.error("Failure during snapshot generation", e);
-				myAllStructures = null;
+		// The returned StructureDefinitions are potentially DSTU3 or R4 ones
+		// and need to be converted to a canonical form (R5) first required by InstanceValidator
+		List<IBaseResource> allStructureDefinitions =
+				myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions();
+		assert allStructureDefinitions != null;
+
+		/*
+		 * The calling method (allStructureDefinitions()) gets called recursively - As we
+		 * try to return all StructureDefinitions, we want to generate snapshots for
+		 * any that don't already have a snapshot. But the snapshot generator in turn
+		 * also calls allStructureDefinitions() - That specific call doesn't require
+		 * that the returned SDs have snapshots generated though.
+		 *
+		 * So, we first just convert to canonical version and store a list containing
+		 * the canonical versions. That way any recursive calls will return the
+		 * stored list. But after that we'll generate all the snapshots and
+		 * store that list instead. If the canonicalization fails with an
+		 * unexpected exception, we wipe the stored list. This is probably an
+		 * unrecoverable failure since this method will probably always
+		 * fail if it fails once. But at least this way we're likley to
+		 * generate useful error messages for the user.
+		 */
+		allStructureDefinitions.stream()
+			.map(myVersionCanonicalizer::structureDefinitionToCanonical)
+				.forEach(sd -> cachedCanonizedStructureDefinitionsWithSnapshots.put(sd.getUrl(), sd));
+
+		try {
+			for (IBaseResource next : allStructureDefinitions) {
+				StructureDefinition converted = (StructureDefinition) convertToCanonicalVersionAndGenerateSnapshot(next, false);
+				// Update the cache immediately as the result is required by subsequent SnapshotGenerator calls
+				cachedCanonizedStructureDefinitionsWithSnapshots.put(converted.getUrl(), converted);
 			}
+		} catch (Exception e) {
+			ourLog.error("Failure during snapshot generation", e);
 		}
-
-		return retVal;
 	}
 
 	@Override
@@ -577,7 +590,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions());
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions().values());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
 	}
@@ -596,7 +609,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		Set<String> retVal = myAllPrimitiveTypes;
 		if (retVal == null) {
 			// Collector may be changed to Collectors.toUnmodifiableSet() when switching to Android API level >= 33
-			retVal = allStructureDefinitions().stream()
+			retVal = allStructureDefinitions().values().stream()
 					.filter(structureDefinition ->
 							structureDefinition.getKind() == StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE)
 					.map(StructureDefinition::getName)
@@ -835,20 +848,31 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
 			*/
+			var newResult = new IValidationSupport.CodeValidationResult();
+			newResult.setCode(result.getCode());
+			newResult.setMessage(result.getMessage());
+			newResult.setSeverity(result.getSeverity());
+			newResult.setCodeSystemName(result.getCodeSystemName());
+			newResult.setCodeSystemVersion(result.getCodeSystemVersion());
+			newResult.setDisplay(result.getDisplay());
+			newResult.setIssues(result.getIssues());
+
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
+
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					issues from code system validation, they will only repeat what was already caught.
 					*/
 					if (!hasInvalidDisplayDetailCode(codeValidationIssue) || !valueSetResultContainsInvalidDisplay) {
-						result.addIssue(codeValidationIssue);
+						newResult.addIssue(codeValidationIssue);
 					}
 				}
 			}
+			result = newResult;
 		}
 		return result;
 	}
@@ -926,7 +950,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>) allStructureDefinitions();
+			return (List<T>)new ArrayList<>(allStructureDefinitions().values());
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
@@ -1071,6 +1095,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					.getFhirContext()
 					.getResourceDefinition(fetchResourceName)
 					.getImplementingClass();
+		}
+
+		// For StructureDefinitions look into the cache, which contains SDs in canonical form and with snapshots
+		if ("StructureDefinition".equals(fetchResourceName)) {
+			var cachedStructureDefinition = cachedCanonizedStructureDefinitionsWithSnapshots.get(theUrl);
+			if(cachedStructureDefinition != null) {
+				return cachedStructureDefinition;
+			}
 		}
 
 		IBaseResource fetched =
