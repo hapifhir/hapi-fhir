@@ -1768,7 +1768,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		);
 		myValidationSupport = chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
-		myInstanceVal.setValidatorPolicyAdvisor(new CustomPolicyAdvisor());
 		myFhirValidator.registerValidatorModule(myInstanceVal);
 	}
 
@@ -1791,23 +1790,5 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@AfterAll
 	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
 		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	private class CustomPolicyAdvisor extends FhirDefaultPolicyAdvisor {
-
-		@Override
-		public ContainedReferenceValidationPolicy policyForContained(
-			IResourceValidator validator,
-			Object appContext,
-			org.hl7.fhir.r5.model.StructureDefinition structure,
-			ElementDefinition element,
-			String containerType,
-			String containerId,
-			Element.SpecialElement containingResourceType,
-			String path,
-			String url) {
-			return ContainedReferenceValidationPolicy.IGNORE;
-		}
-
 	}
 }
