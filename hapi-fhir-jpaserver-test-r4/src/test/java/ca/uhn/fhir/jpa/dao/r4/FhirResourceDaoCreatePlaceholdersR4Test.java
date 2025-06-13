@@ -865,28 +865,31 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(outcome.getAllResources()).hasSize(3);
 	}
 
+	/**
+	 * This test is to replicate the behaviour where there are multiple threads trying FHIR bundle batch operation.
+	 * Both threads are trying to create the same resource in parallel with retry functionality.
+	 */
 	@Test
-	public void runBundleBatchInParallelThreads() throws Exception {
+	void runBundleBatchInParallelThreads() throws Exception {
 		// setup
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
-		final IParser parser = myFhirContext.newJsonParser();
-		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final Bundle searchParameters  = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/patient-identifier-unique-sp-bundle.json");
-		mySystemDao.transaction(requestDetails, searchParameters);
+		mySystemDao.transaction(new SystemRequestDetails(), searchParameters);
 		final Bundle patientBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/patient-with-conditional-update.json");
 		final Bundle observationBundle = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/observation-with-conditional-update-and-inline-reference.json");
 		final ExecutorService executor = Executors.newFixedThreadPool(2);
-		requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, withTransactionSemanticsHeader().toHeaderValue());
 		executor.submit(() -> {
 			ourLog.atInfo().setMessage("Thread 1...").log();
-			Bundle transaction = mySystemDao.transaction(requestDetails, patientBundle);
-			System.out.println(parser.encodeResourceToString(transaction));
+			final SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, withTransactionSemanticsHeader().toHeaderValue());
+			mySystemDao.transaction(requestDetails, patientBundle);
 		});
 		executor.submit(() -> {
 			ourLog.atInfo().setMessage("Thread 2...").log();
-			Bundle transaction = mySystemDao.transaction(requestDetails, observationBundle);
-			System.out.println(parser.encodeResourceToString(transaction));
+			final SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.addHeader(TransactionSemanticsHeader.HEADER_NAME, withTransactionSemanticsHeader().toHeaderValue());
+			mySystemDao.transaction(requestDetails, observationBundle);
 		});
 		// execute
 		executor.shutdown();
@@ -895,9 +898,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 			Thread.sleep(100);// Wait for tasks to complete
 			ourLog.atInfo().setMessage("Shutting down thread 1 and 2.... ").log();
 		}
-		final Integer patientResultCount = myPatientDao.search(withPatientIdentifierSp(), requestDetails).size();
+		final Integer patientResultCount = myPatientDao.search(withPatientIdentifierSp(),  new SystemRequestDetails()).size();
 		assertThat(patientResultCount).isEqualTo(1);
-		final Integer observationResultCount = myObservationDao.search(withObservationCodeSp(), requestDetails).size();
+		final Integer observationResultCount = myObservationDao.search(withObservationCodeSp(),  new SystemRequestDetails()).size();
 		assertThat(observationResultCount).isEqualTo(1);
 	}
 
