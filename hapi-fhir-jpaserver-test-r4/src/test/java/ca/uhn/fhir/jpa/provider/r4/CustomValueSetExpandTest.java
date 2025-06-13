@@ -22,9 +22,13 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
+
+  private static final Logger ourLog = LoggerFactory.getLogger(DiffProviderR4Test.class);
 
   @Autowired
   private FhirContext myFhirCtx;
@@ -48,8 +52,8 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     // Verify loading success
     runInTransaction(() -> {
       TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
-      System.out.println("Loaded ICD-10-CM Version: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
-      System.out.println("Loaded concept count: " + myTermConceptDao.count());
+      ourLog.debug("Loaded ICD-10-CM Version: " + codeSystem.getCurrentVersion().getCodeSystemVersionId());
+      ourLog.debug("Loaded concept count: " + myTermConceptDao.count());
     });
 
 
@@ -58,17 +62,17 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, vsJson);
 
     // Check ValueSet composition
-    System.out.println("ValueSet URL: " + vs.getUrl());
-    System.out.println("ValueSet compose includes:");
+    ourLog.debug("ValueSet URL: " + vs.getUrl());
+    ourLog.debug("ValueSet compose includes:");
     vs.getCompose().getInclude().forEach(include -> {
-      System.out.println("  System: " + include.getSystem() + " Version: " + include.getVersion());
+      ourLog.debug("  System: " + include.getSystem() + " Version: " + include.getVersion());
       if (include.hasFilter()) {
         include.getFilter().forEach(filter -> {
-          System.out.println("    Filter: " + filter.getProperty() + " " + filter.getOp() + " " + filter.getValue());
+          ourLog.debug("    Filter: " + filter.getProperty() + " " + filter.getOp() + " " + filter.getValue());
         });
       }
       include.getConcept().forEach(concept -> {
-        System.out.println("    Code: " + concept.getCode() + " Display: " + concept.getDisplay());
+        ourLog.debug("    Code: " + concept.getCode() + " Display: " + concept.getDisplay());
       });
     });
 
@@ -84,7 +88,7 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
     
     while (expanded == null && currentRetry < maxRetries) {
       try {
-        System.out.println("Attempting to expand ValueSet (attempt " + (currentRetry + 1) + ")...");
+        ourLog.debug("Attempting to expand ValueSet (attempt " + (currentRetry + 1) + ")...");
         expanded = myClient
             .operation()
             .onType(ValueSet.class)
@@ -92,15 +96,15 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
             .withParameters(inParams)
             .returnResourceType(ValueSet.class)
             .execute();
-        System.out.println("ValueSet expansion successful!");
+        ourLog.debug("ValueSet expansion successful!");
       } catch (Exception e) {
         currentRetry++;
-        System.out.println("Expansion failed (attempt " + currentRetry + "): " + e.getMessage());
+        ourLog.debug("Expansion failed (attempt " + currentRetry + "): " + e.getMessage());
         if (currentRetry < maxRetries) {
-          System.out.println("Waiting 5 seconds before retry...");
+          ourLog.debug("Waiting 5 seconds before retry...");
           Thread.sleep(5000);
         } else {
-          System.out.println("All retries failed, throwing exception");
+          ourLog.debug("All retries failed, throwing exception");
           throw e;
         }
       }
@@ -108,13 +112,13 @@ public class CustomValueSetExpandTest extends BaseResourceProviderR4Test {
 
     // 4. Print all contains
     expanded.getExpansion().getContains().forEach(c -> {
-      System.out.println(
+      ourLog.debug(
           "system=" + c.getSystem() +
               " code=" + c.getCode() +
               " display=" + c.getDisplay());
     }); 
 
-    System.out.println("Expansion successful! Found " + expanded.getExpansion().getContains().size() + " concepts.");
+    ourLog.debug("Expansion successful! Found " + expanded.getExpansion().getContains().size() + " concepts.");
 
   }
 }
