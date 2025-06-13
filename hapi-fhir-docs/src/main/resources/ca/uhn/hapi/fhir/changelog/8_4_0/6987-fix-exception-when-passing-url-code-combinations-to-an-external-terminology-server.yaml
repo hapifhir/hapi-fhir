@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6987
+title: "Previously, operation $validate-code would only support 
+  Coding and error out when issued with url/code or 
+  codeableConcept. Those issues are fixed."
