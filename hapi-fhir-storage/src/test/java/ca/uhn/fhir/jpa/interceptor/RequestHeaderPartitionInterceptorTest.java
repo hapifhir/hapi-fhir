@@ -25,7 +25,7 @@ public class RequestHeaderPartitionInterceptorTest {
     private final PartitionSettings myPartitionSettings = new PartitionSettings().setDefaultPartitionId(DEFAULT_PARTITION_ID);
     private final RequestDetails myRequestDetails = RequestDetailsHelper.newServletRequestDetails();
     private final SystemRequestDetails mySrd = new SystemRequestDetails();
-    private RequestHeaderPartitionInterceptor myInterceptor = new RequestHeaderPartitionInterceptor(myPartitionSettings);
+    private final RequestHeaderPartitionInterceptor myInterceptor = new RequestHeaderPartitionInterceptor(myPartitionSettings);
 
     @Test
     public void testIdentifyPartitionForCreate_WithValidHeader() {
