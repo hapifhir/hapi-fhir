@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -96,7 +95,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile Set<String> myAllPrimitiveTypes;
 	private Parameters myExpansionProfile;
 	private volatile FHIRPathEngine myFHIRPathEngine;
-	private final Object syncCanonizationAndSnapshotBuilding = new Object();
 
 	public VersionSpecificWorkerContextWrapper(
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
@@ -216,17 +214,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		// do not respect the SRP principle.
 		// These actions belong to the factory method (newVersionSpecificWorkerContextWrapper)
 		// However, the implications of such a refactoring are not clear at the moment
-		if (cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty())
-			initializeStructureDefinitionsCache();
+		if (cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty()) initializeStructureDefinitionsCache();
 		return cachedCanonizedStructureDefinitionsWithSnapshots;
 	}
 
 	// Caution! Synchronized to avoid double cache initialization in multi-threading setting
 	private synchronized void initializeStructureDefinitionsCache() {
 		// Avoid double cache initialization if entered by multiple threads after waiting
-		if(!cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty())
-			return;
-
+		if (!cachedCanonizedStructureDefinitionsWithSnapshots.isEmpty()) return;
 
 		// The returned StructureDefinitions are potentially DSTU3 or R4 ones
 		// and need to be converted to a canonical form (R5) first required by InstanceValidator
@@ -251,12 +246,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		 * generate useful error messages for the user.
 		 */
 		allStructureDefinitions.stream()
-			.map(myVersionCanonicalizer::structureDefinitionToCanonical)
+				.map(myVersionCanonicalizer::structureDefinitionToCanonical)
 				.forEach(sd -> cachedCanonizedStructureDefinitionsWithSnapshots.put(sd.getUrl(), sd));
 
 		try {
 			for (IBaseResource next : allStructureDefinitions) {
-				StructureDefinition converted = (StructureDefinition) convertToCanonicalVersionAndGenerateSnapshot(next, false);
+				StructureDefinition converted =
+						(StructureDefinition) convertToCanonicalVersionAndGenerateSnapshot(next, false);
 				// Update the cache immediately as the result is required by subsequent SnapshotGenerator calls
 				cachedCanonizedStructureDefinitionsWithSnapshots.put(converted.getUrl(), converted);
 			}
@@ -590,7 +586,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String theTypeName) {
-		List<StructureDefinition> allStructures = new ArrayList<>(allStructureDefinitions().values());
+		List<StructureDefinition> allStructures =
+				new ArrayList<>(allStructureDefinitions().values());
 		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(theTypeName));
 		return allStructures;
 	}
@@ -848,31 +845,20 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			might also be invalid in the code system, so we will check that as well and add those issues
 			to our result.
 			*/
-			var newResult = new IValidationSupport.CodeValidationResult();
-			newResult.setCode(result.getCode());
-			newResult.setMessage(result.getMessage());
-			newResult.setSeverity(result.getSeverity());
-			newResult.setCodeSystemName(result.getCodeSystemName());
-			newResult.setCodeSystemVersion(result.getCodeSystemVersion());
-			newResult.setDisplay(result.getDisplay());
-			newResult.setIssues(result.getIssues());
-
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(VersionSpecificWorkerContextWrapper::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
-
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					issues from code system validation, they will only repeat what was already caught.
 					*/
 					if (!hasInvalidDisplayDetailCode(codeValidationIssue) || !valueSetResultContainsInvalidDisplay) {
-						newResult.addIssue(codeValidationIssue);
+						result.addIssue(codeValidationIssue);
 					}
 				}
 			}
-			result = newResult;
 		}
 		return result;
 	}
@@ -950,7 +936,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
 		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>)new ArrayList<>(allStructureDefinitions().values());
+			return (List<T>) new ArrayList<>(allStructureDefinitions().values());
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
@@ -1100,7 +1086,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		// For StructureDefinitions look into the cache, which contains SDs in canonical form and with snapshots
 		if ("StructureDefinition".equals(fetchResourceName)) {
 			var cachedStructureDefinition = cachedCanonizedStructureDefinitionsWithSnapshots.get(theUrl);
-			if(cachedStructureDefinition != null) {
+			if (cachedStructureDefinition != null) {
 				return cachedStructureDefinition;
 			}
 		}

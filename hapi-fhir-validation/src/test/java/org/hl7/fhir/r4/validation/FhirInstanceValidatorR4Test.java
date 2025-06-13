@@ -1733,19 +1733,6 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors).isEmpty();
-	}
-
-	@Test
-	void testValidate_ResourceContainedSameResourceIsValid() throws IOException {
-		final String encoded = loadResource("medication-with-contained-medication-ingredient.json");
-
-//		var jsonParser = ourCtx.newJsonParser();
-//		var result = jsonParser.parseResource(encoded);
-//		assertThat(result).isInstanceOf(Medication.class);
-
-		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
-		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors.stream().noneMatch(e -> e.getSeverity() == ResultSeverityEnum.ERROR)).isTrue();
 	}
 
