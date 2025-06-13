@@ -1,15 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BundleBuilder;
+import com.apicatalog.jsonld.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Address.AddressUse;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -24,13 +28,17 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestIntent;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
-import org.hl7.fhir.r4.model.Specimen;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -119,11 +127,86 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
 
 	}
-	
-	
+	public static Stream<Arguments> generateTestCases() {
+		List<Boolean> bools = List.of(true, false);
+		return bools.stream().flatMap(shouldEncodeFirst -> bools.stream().flatMap(shouldSetById -> bools.stream().map(shouldAddToContainedList -> Arguments.of("37249829-08f1-47a6-a946-d74aa9134440", shouldEncodeFirst, shouldSetById, shouldAddToContainedList))));
+	}
+	public static Stream<Arguments> generateTestCases2() {
+		String uuid = UUID.randomUUID().toString();
+		return Stream.of(
+			Arguments.of(uuid, true, true, true, null),
+			Arguments.of(uuid, true, true, false, "There is a reference that begins with #, but no resource with this ID is contained"),
+			Arguments.of(uuid, true, false, true, null),
+			Arguments.of(uuid, true, false, false, null),
+			Arguments.of(uuid, false, true, true, null),
+			Arguments.of(uuid, false, true, false, "There is a reference that begins with #, but no resource with this ID is contained"),
+			Arguments.of(uuid, false, false, true, null),
+			Arguments.of(uuid, false, false, false, null)
+		);
+	}
+
+
+	@ParameterizedTest(name = "encode={1}, refByID={2}, addedToContainedList={3}, failureMsg={4}")
+	@MethodSource("generateTestCases2")
+	public void testJavaContainedBuildingCases(String theContainedId, boolean theShouldEncodeFirst, boolean theShouldSetReferenceById, boolean theShouldAddToContainedList, String theExceptionMessage) {
+		Patient p = new Patient();
+		Organization org = new Organization();
+		if (theShouldAddToContainedList) {
+			p.addContained(org);
+		}
+
+		if (theShouldSetReferenceById) {
+			org.setId(theContainedId);
+			p.setManagingOrganization(new Reference("#" + org.getId()));
+		} else {
+			p.setManagingOrganization(new Reference(org));
+			p.getManagingOrganization().setResource(org);
+		}
+
+		Bundle bundleBuilder = new BundleBuilder(myFhirContext).addTransactionCreateEntry(p).andThen().getBundleTyped();
+		try {
+
+			if (theShouldEncodeFirst) {
+				//When
+				String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundleBuilder);
+				ourLog.info("Encoded value is:\n***{}\n***", encoded);
+			}
+			//When
+			mySystemDao.transaction(new SystemRequestDetails(), bundleBuilder);
+
+			if (theExceptionMessage != null) {
+				fail("Expected message containing: " + theExceptionMessage);
+			}
+
+			//Then
+			assertPatientSuccesfullyContainedOrganization(theContainedId, theShouldSetReferenceById);
+		} catch (Exception e) {
+			//Then, if our test case expects an exception, assert on it.
+			if (!StringUtils.isBlank(theExceptionMessage)) {
+				assertThat(e.getMessage()).containsIgnoringCase(theExceptionMessage);
+			} else{ //Otherwise, our test case did not expect an exception, but we got one! rethrow it.
+				throw e;
+			}
+		}
+	}
+
+	void assertPatientSuccesfullyContainedOrganization(String theContainedId, boolean theShouldSetReferenceById) {
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		List<IBaseResource> allResources = search.getAllResources();
+		Patient pat = (Patient) allResources.get(0);
+		assertThat(pat.getContained()).hasSize(1);
+		Organization foundOrg = (Organization) pat.getContained().get(0);
+
+		if (theShouldSetReferenceById) {
+			assertThat(pat.getManagingOrganization().getReference()).isEqualTo("#" + theContainedId);
+		} else {
+			assertThat(pat.getManagingOrganization().getReference()).isEqualTo("#" + foundOrg.getId());
+			assertThat(foundOrg.getId()).hasSize(36); //uuid length.
+		}
+	}
+
 	@Test
 	public void testCreateMultipleContainedResourceIndex() {
-
 		Practitioner prac1 = new Practitioner();
 		prac1.setId("prac1");
 		prac1.setActive(true);
