@@ -24,9 +24,8 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
+import org.hl7.fhir.dstu2016may.utils.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 
 import java.util.ArrayList;
@@ -129,11 +128,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public IParser newXmlParser() {
 		throw new UnsupportedOperationException(Msg.code(476));
-	}
-
-	@Override
-	public INarrativeGenerator getNarrativeGenerator(String theS, String theS1) {
-		throw new UnsupportedOperationException(Msg.code(477));
 	}
 
 	@Override

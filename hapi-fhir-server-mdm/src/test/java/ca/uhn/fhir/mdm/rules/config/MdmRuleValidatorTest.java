@@ -76,7 +76,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		try {
 			setMdmRuleJson("bad-rules-bad-fhirpath.json");
 			fail();		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error @1, 1: The name blurst is not a valid function name");
+			assertThat(e.getMessage()).startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error @1, 27: The name blurst is not a valid function name");
 		}
 	}
 

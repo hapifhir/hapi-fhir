@@ -1249,7 +1249,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
+		verify(fetcher, times(2)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean(), anyList());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString(), any());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}

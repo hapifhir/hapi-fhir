@@ -11,6 +11,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.conformance.profile.BindingResolution;
 import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
 import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
 public class ProfileKnowledgeWorkerR5 implements ProfileKnowledgeProvider {
@@ -84,6 +85,11 @@ public class ProfileKnowledgeWorkerR5 implements ProfileKnowledgeProvider {
 
 	@Override
 	public String getCanonicalForDefaultContext() {
+		return null;
+	}
+
+	@Override
+	public String getDefinitionsName(Resource r) {
 		return null;
 	}
 }
