@@ -77,7 +77,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
 			Integer defaultPartitionId = getPartitionSettings().getDefaultPartitionId();
 			boolean defaultPartitionIsNull = defaultPartitionId == null;
-			if (theRequestPartitionId.isDefaultPartition(defaultPartitionId) && defaultPartitionIsNull) {
+			if (theRequestPartitionId.isPartition(defaultPartitionId) && defaultPartitionIsNull) {
 				condition = UnaryCondition.isNull(getPartitionIdColumn());
 			} else if (theRequestPartitionId.hasDefaultPartitionId(defaultPartitionId) && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
